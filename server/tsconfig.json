@@ -1,0 +1,35 @@
+// https://www.totaltypescript.com/tsconfig-cheat-sheet
+{
+  "compilerOptions": {
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "useUnknownInCatchVariables": false, // https://stackoverflow.com/a/69445095
+
+    /* Strictness */
+    "strict": false,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+
+    "module": "preserve",
+    "noEmit": true,
+
+    "lib": ["es2022"],
+
+    /* Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/db/*": ["db/*"],
+      "@/common/*": ["common/*"],
+      "@/config/*": ["config/*"],
+      "@/routes/*": ["routes/*"],
+      "@/*": ["src/*"]
+    }
+  }
+}

@@ -1,0 +1,33 @@
+# server-dev-CD.yml
+
+name: EC2 Dev Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy in EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.AWS_EC2_PRIVATE_KEY  }}
+          HOSTNAME: ${{ secrets.AWS_EC2_HOSTNAME  }}
+          USER: ${{ secrets.AWS_EC2_USER  }}
+
+        run: |
+          echo "$PRIVATE_KEY" > private_key.pem && chmod 600 private_key.pem
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOSTNAME} '
+
+            #Now we have got the access of EC2 and we will start the deploy .
+            cd ~/npo-template-merged/server &&
+            git checkout main &&
+            git stash &&
+            git pull origin main &&
+            yarn &&
+            pm2 restart app.js
+          '

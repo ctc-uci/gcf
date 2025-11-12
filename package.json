@@ -1,0 +1,46 @@
+{
+  "name": "npo-template-merged",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "repository": "git@github.com:ctc-uci/npo-template-merged.git",
+  "author": "CTC <ctc@uci.edu>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "yarn tsx concurrently.ts",
+    "start": "yarn tsx concurrently.ts",
+    "prepare": "husky install",
+    "lint": "eslint",
+    "format": "npx prettier --write .",
+    "test": "node test-runner.js",
+    "test:server": "yarn workspace server test",
+    "test:client": "yarn workspace client test"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": "yarn run eslint"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
+    "@types/lint-staged": "^13.3.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^9.9.0",
+    "globals": "^15.9.0",
+    "husky": "^9.0.11",
+    "prettier": "3.3.3",
+    "typescript-eslint": "^8.1.0"
+  },
+  "workspaces": {
+    "packages": [
+      "client",
+      "server"
+    ],
+    "nohoist": [
+      "**/firebase",
+      "**/firebase/**"
+    ]
+  },
+  "packageManager": "yarn@1.22.22",
+  "engines": {
+    "node": ">=18"
+  }
+}

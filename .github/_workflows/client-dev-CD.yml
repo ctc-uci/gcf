@@ -1,0 +1,55 @@
+# client-dev-CD.yml
+
+name: S3 Dev Deploy
+on:
+  push:
+    branches:
+      - main
+env:
+  NODE_ENV: ${{ secrets.NODE_ENV }}
+  VITE_FIREBASE_APIKEY: ${{ secrets.VITE_FIREBASE_APIKEY }}
+  VITE_FIREBASE_AUTHDOMAIN: ${{ secrets.VITE_FIREBASE_AUTHDOMAIN }}
+  VITE_FIREBASE_PROJECTID: ${{ secrets.VITE_FIREBASE_PROJECTID }}
+  VITE_FIREBASE_STORAGEBUCKET: ${{ secrets.VITE_FIREBASE_STORAGEBUCKET }}
+  VITE_FIREBASE_MESSAGINGSENDERID:
+    ${{ secrets.VITE_FIREBASE_MESSAGINGSENDERID }}
+  VITE_FIREBASE_APPID: ${{ secrets.VITE_FIREBASE_APPID }}
+  VITE_BACKEND_HOST: ${{ secrets.VITE_BACKEND_HOST }}
+  # …and any additional environment variables
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+
+      - name: Install dependencies
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install
+
+      - name: Build
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build
+          dir: client
+
+      - name: Deploy
+        uses: reggionick/s3-deploy@v4
+        with:
+          folder: client/dist
+          bucket: ${{ secrets.S3_BUCKET }}
+          bucket-region: ${{ secrets.S3_BUCKET_REGION }}
+          dist-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          invalidation: /
+          delete-removed: true
+          no-cache: true
+          private: true
+          files-to-include: ".*/*,*/*,**"

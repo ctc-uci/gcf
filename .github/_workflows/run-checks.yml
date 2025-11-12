@@ -1,0 +1,31 @@
+name: Run Checks
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  run-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "yarn"
+
+      - name: Install dependencies
+        run:
+          npm exec --workspaces -- npx rimraf node_modules && npx rimraf
+          node_modules && yarn install --frozen-lockfile
+
+      - name: Build React project
+        run: cd client && yarn run build
+
+      - name: Run linter
+        run: cd client && yarn run lint && cd ../ && cd server && yarn run lint
