@@ -1,6 +1,7 @@
-# NPO Template Merged
-
-A simple React, Vite, and Node.js monorepo built with Yarn workspaces. Uses Firebase for authentication, Chakra UI for components, and your choice of database (i.e. Postgres).
+# Global Creation Foundation  
+A platform for [Global Creation Foundation](https://www.globalcreationfoundation.org/) staff to track progress on global music education programs, as well as for administrators to view data.  
+  
+Project is based on a simple React, Vite, and Node.js monorepo built with Yarn workspaces. Uses Firebase for authentication, Chakra UI for components, and your choice of database (i.e. Postgres).
 
 ## Getting Started
 
