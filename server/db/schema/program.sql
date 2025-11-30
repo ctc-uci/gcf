@@ -14,15 +14,18 @@ CREATE TABLE dummy_partner_organization (
 
 CREATE TABLE program (
     id BIGSERIAL PRIMARY KEY UNIQUE NOT NULL,
-    created_by BIGSERIAL NOT NULL REFERENCES dummy_user(id),
+    created_by BIGINT NOT NULL,
+    CONSTRAINT fk_created_by FOREIGN KEY (created_by) REFERENCES dummy_user(id),
     name VARCHAR(70) NOT NULL,
     date_created TIMESTAMP NOT NULL,
-    country SERIAL NOT NULL REFERENCES dummy_country(id),
+    country INTEGER NOT NULL,
+    CONSTRAINT fk_country FOREIGN KEY (country) REFERENCES dummy_country(id),
     title VARCHAR(140) NOT NULL,
     description VARCHAR,
     primary_language VARCHAR,
     playlist_link VARCHAR,
-    partner_org BIGINT REFERENCES dummy_partner_organization(id) NOT NULL,
+    partner_org BIGINT NOT NULL,
+    CONSTRAINT fk_partner_org FOREIGN KEY (partner_org) REFERENCES dummy_partner_organization(id),
     status status_type NOT NULL,
     launch_date DATE NOT NULL
 );
