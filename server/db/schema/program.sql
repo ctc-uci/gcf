@@ -22,7 +22,7 @@ CREATE TABLE program (
     description VARCHAR,
     primary_language VARCHAR,
     playlist_link VARCHAR,
-    partner_org BIGSERIAL REFERENCES dummy_partner_organization(id) NOT NULL,
+    partner_org BIGINT REFERENCES dummy_partner_organization(id) NOT NULL,
     status status_type NOT NULL,
     launch_date DATE NOT NULL
 );
