@@ -1,4 +1,3 @@
-// for reference only
 import { keysToCamel } from "@/common/utils";
 import express from "express";
 import { db } from "../db/db-pgp";
@@ -8,7 +7,6 @@ countryRouter.use(express.json());
 
 countryRouter.get("/", async (req, res) => {
   try {
-    // Query database
     const data = await db.query(`SELECT * FROM country`);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
@@ -20,7 +18,6 @@ countryRouter.get("/", async (req, res) => {
 countryRouter.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    // rename entry to something relevant to the route
     const country = await db.query(
       `SELECT ALL * FROM country WHERE id = $1`,
       [id]
@@ -39,12 +36,12 @@ countryRouter.get("/:id", async (req, res) => {
 
 countryRouter.post("/", async (req, res) => {
   try {
-    const { id, region_id, name, last_modified } = req.body
+    const {region_id, name, last_modified } = req.body
     const newCountry = await db.query(
-      `INSERT INTO country (id, region_id, name, last_modified) 
-      VALUES ($1, $2, $3, $4) 
+      `INSERT INTO country (region_id, name, last_modified) 
+      VALUES ($1, $2, $3) 
       RETURNING *`,
-      [id, region_id, name, last_modified]
+      [region_id, name, last_modified]
     );
     res.status(201).json(keysToCamel(newCountry[0]));
   } catch (err) {

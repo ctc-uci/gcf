@@ -36,12 +36,12 @@ regionRouter.get("/:id", async (req, res) => {
 
 regionRouter.post("/", async (req, res) => {
   try {
-    const { id, name, last_modified } = req.body
+    const {name, last_modified } = req.body
     const newRegion = await db.query(
-      `INSERT INTO region (id, name, last_modified) 
-      VALUES ($1, $2, $3) 
+      `INSERT INTO region (name, last_modified) 
+      VALUES ($1, $2) 
       RETURNING *`,
-      [id, name, last_modified]
+      [name, last_modified]
     );
     res.status(201).json(keysToCamel(newRegion[0]));
   } catch (err) {
