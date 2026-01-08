@@ -18,7 +18,6 @@ programUpdateRouter.get("/", async (req, res) => {
 });
 
 // Reading a program update
-
 programUpdateRouter.get("/:id", async (req, res) => {
     try {
         const { id } = req.params
@@ -41,7 +40,6 @@ programUpdateRouter.get("/:id", async (req, res) => {
 });
 
 // Creating a program update
-
 programUpdateRouter.post("/", async (req, res) => {
     const {title, program_id, created_by, update_date, note} = req.body
     try {
@@ -60,7 +58,6 @@ programUpdateRouter.post("/", async (req, res) => {
 })
 
 // Updating a program update
-
 programUpdateRouter.put("/:id", async (req, res) => {
     try {
         const { id } = req.params
@@ -71,7 +68,7 @@ programUpdateRouter.put("/:id", async (req, res) => {
             title = COALESCE($1, title),
             program_id = COALESCE($2, program_id),
             created_by = COALESCE($3, created_by),
-            update_date = COALESCE($4, update_,date),
+            update_date = COALESCE($4, update_date),
             note = COALESCE($5, note)
             WHERE id = $6
             RETURNING *`,
@@ -91,7 +88,6 @@ programUpdateRouter.put("/:id", async (req, res) => {
 });
 
 // Deleting a program update
-
 programUpdateRouter.delete("/:id", async (req, res) => {
     try {
         const { id } = req.params
