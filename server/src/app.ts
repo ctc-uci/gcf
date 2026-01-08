@@ -1,15 +1,13 @@
 import { verifyToken } from "@/middleware";
-import { sampleRouter } from "@/routes/sample"; // TODO: delete sample router
 import { usersRouter } from "@/routes/users";
+import { directorRouter } from "@/routes/programDirector";
+import { programUpdateRouter } from '@/routes/programUpdate';
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import schedule from "node-schedule"; // TODO: Keep only if scheduling cronjobs
 
 dotenv.config();
-
-schedule.scheduleJob("0 0 0 0 0", () => console.info("Hello Cron Job!")); // TODO: delete sample cronjob
 
 const CLIENT_HOSTNAME =
   process.env.NODE_ENV === "development"
@@ -30,8 +28,9 @@ if (process.env.NODE_ENV === "production") {
   app.use(verifyToken);
 }
 
-app.use("/", sampleRouter); // TODO: delete sample endpoint
 app.use("/users", usersRouter);
+app.use("/program-directors", directorRouter)
+app.use('/program-updates', programUpdateRouter);
 
 // Listening is moved to server.ts to enable importing app in tests
 export default app;

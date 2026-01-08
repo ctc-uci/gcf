@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
-
-import { app } from "./app";
+import app from "./app";
 
 dotenv.config();
 
@@ -9,6 +8,6 @@ const SERVER_PORT =
     ? process.env.DEV_SERVER_PORT
     : process.env.PROD_SERVER_PORT;
 
-app.listen(SERVER_PORT, () => {
+app.listen(SERVER_PORT, "0.0.0.0", () => {
   console.info(`Server listening on ${SERVER_PORT}`);
 });
