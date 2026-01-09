@@ -6,18 +6,6 @@ import { Router } from "express";
 
 const directorRouter = Router();
 
-// foreign key bypass
-directorRouter.post("/dev/program", async (req, res) => {
-  const { name } = req.body;
-
-  const program = await db.query(
-    "INSERT INTO program (name) VALUES ($1) RETURNING *",
-    [name ?? "DEV PROGRAM"]
-  );
-
-  res.json(program.rows[0]);
-});
-
 // create program director
 directorRouter.post("/", async (req, res) => {
     try {
@@ -81,10 +69,10 @@ directorRouter.delete("/:userId", async (req, res) => {
     try {
         const { userId } = req.params;
 
-        await admin.auth().deleteUser(userId);
-        const director = await db.query("DELETE FROM program_director WHERE user_id = $1",
+        const director = await db.query("DELETE FROM program_director WHERE user_id = $1 RETURNING *",
             [userId]
         );
+        // await admin.auth().deleteUser(userId); if we want to delete user from database too
 
         res.status(200).json(keysToCamel(director));
     } catch (err) {
