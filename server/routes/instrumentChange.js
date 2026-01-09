@@ -8,14 +8,14 @@ instrumentChangeRouter.use(express.json());
 
 instrumentChangeRouter.post("/", async (req, res) => {
   try {
-    const { instrument_id, update_id, amount_changed } = req.body;
+    const { instrumentId, updateId, amountChanged } = req.body;
 
     const instrumentChangeEntry = await db.query(
       `INSERT INTO instrument_change 
         (instrument_id, update_id, amount_changed) 
         VALUES ($1, $2, $3) 
         RETURNING *`,
-      [instrument_id, update_id, amount_changed]
+      [instrumentId, updateId, amountChanged]
     );
 
     res.status(201).json(keysToCamel(instrumentChangeEntry[0]));
@@ -57,14 +57,14 @@ instrumentChangeRouter.get("/:id", async (req, res) => {
 instrumentChangeRouter.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { instrument_id, update_id, amount_changed } = req.body;
+    const { instrumentId, updateId, amountChanged } = req.body;
 
     const updatedInstrumentChange = await db.query(
       `UPDATE instrument_change 
              SET instrument_id = $1, update_id = $2, amount_changed = $3 
              WHERE id = $4 
              RETURNING *`,
-      [instrument_id, update_id, amount_changed, id]
+      [instrumentId, updateId, amountChanged, id]
     );
 
     if (updatedInstrumentChange.length === 0) {
