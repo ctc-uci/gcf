@@ -7,12 +7,12 @@ gcfUserRouter.use(express.json());
 
 gcfUserRouter.post("/", async (req, res) => {
   try {
-    const {id, role, email, first_name, last_name, date_created, created_by} = req.body
+    const {role, email, first_name, last_name, date_created, created_by} = req.body// is is auto generated
     const newGcfUser = await db.query(
-      `INSERT INTO gcf_user (id, role, email, first_name, last_name, date_created, created_by) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7) 
+      `INSERT INTO gcf_user (role, email, first_name, last_name, date_created, created_by) 
+      VALUES ($1, $2, $3, $4, $5, $6) 
       RETURNING *`,
-      [id, role, email, first_name, last_name, date_created, created_by]
+      [role, email, first_name, last_name, date_created, created_by]
     );
     res.status(201).json(keysToCamel(newGcfUser[0]));
   } catch (err) {
@@ -23,9 +23,8 @@ gcfUserRouter.post("/", async (req, res) => {
 
 gcfUserRouter.get("/", async (req, res) => {
   try {
-    // Query database
     const data = await db.query(`SELECT * FROM gcf_user`);
-    res.status(200).json(keysToCamel(data[0]));
+    res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
