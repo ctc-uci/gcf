@@ -1,4 +1,6 @@
 import { verifyToken } from "@/middleware";
+import { regionalDirectorRouter } from "@/routes/regionalDirector";
+import { gcfUserRouter } from "@/routes/gcfUser";
 import { usersRouter } from "@/routes/users";
 import { countryRouter } from "@/routes/country";
 import {regionRouter} from "@/routes/region";
@@ -30,6 +32,8 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.use("/users", usersRouter);
+app.use("/gcf-users", gcfUserRouter);
+app.use("/regional-directors", regionalDirectorRouter)
 app.use("/country", countryRouter);
 app.use("/region", regionRouter);
 
