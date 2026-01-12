@@ -2,12 +2,15 @@ import { verifyToken } from "@/middleware";
 import { regionalDirectorRouter } from "@/routes/regionalDirector";
 import { gcfUserRouter } from "@/routes/gcfUser";
 import { usersRouter } from "@/routes/users";
+import { countryRouter } from "@/routes/country";
+import {regionRouter} from "@/routes/region";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 
 dotenv.config();
+
 
 const CLIENT_HOSTNAME =
   process.env.NODE_ENV === "development"
@@ -31,5 +34,8 @@ if (process.env.NODE_ENV === "production") {
 app.use("/users", usersRouter);
 app.use("/gcf-users", gcfUserRouter);
 app.use("/regional-directors", regionalDirectorRouter)
+app.use("/country", countryRouter);
+app.use("/region", regionRouter);
+
 // Listening is moved to server.ts to enable importing app in tests
 export default app;
