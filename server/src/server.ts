@@ -8,6 +8,6 @@ const SERVER_PORT =
     ? process.env.DEV_SERVER_PORT
     : process.env.PROD_SERVER_PORT;
 
-app.listen(SERVER_PORT, "0.0.0.0", () => {
+app.listen(SERVER_PORT, () => {
   console.info(`Server listening on ${SERVER_PORT}`);
 });

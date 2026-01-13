@@ -72,7 +72,6 @@ directorRouter.delete("/:userId", async (req, res) => {
         const director = await db.query("DELETE FROM program_director WHERE user_id = $1 RETURNING *",
             [userId]
         );
-        // await admin.auth().deleteUser(userId); if we want to delete user from database too
 
         res.status(200).json(keysToCamel(director));
     } catch (err) {
