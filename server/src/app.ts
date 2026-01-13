@@ -2,6 +2,12 @@ import { verifyToken } from "@/middleware";
 import { usersRouter } from "@/routes/users";
 import { directorRouter } from "@/routes/programDirector";
 import { programUpdateRouter } from '@/routes/programUpdate';
+import { regionalDirectorRouter } from "@/routes/regionalDirector";
+import { gcfUserRouter } from "@/routes/gcfUser";
+import { instrumentRouter } from "@/routes/instrument"
+import { instrumentChangeRouter } from "@/routes/instrument-change"
+import { countryRouter } from "@/routes/country";
+import {regionRouter} from "@/routes/region";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -31,6 +37,12 @@ if (process.env.NODE_ENV === "production") {
 app.use("/users", usersRouter);
 app.use("/program-directors", directorRouter)
 app.use('/program-updates', programUpdateRouter);
+app.use("/instruments", instrumentRouter);
+app.use("/instrument-changes", instrumentChangeRouter);
+app.use("/gcf-users", gcfUserRouter);
+app.use("/regional-directors", regionalDirectorRouter)
+app.use("/country", countryRouter);
+app.use("/region", regionRouter);
 
 // Listening is moved to server.ts to enable importing app in tests
 export default app;
