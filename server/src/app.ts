@@ -1,5 +1,4 @@
 import { verifyToken } from "@/middleware";
-//import { sampleRouter } from "@/routes/sample"; // TODO: delete sample router
 import { usersRouter } from "@/routes/users";
 import { enrollmentChangeRouter } from "@/routes/enrollmentChange";
 import { mediaChangeRouter } from "@/routes/mediaChange";
@@ -32,7 +31,6 @@ if (process.env.NODE_ENV === "production") {
   app.use(verifyToken);
 }
 
-//app.use("/", sampleRouter); // TODO: delete sample endpoint
 app.use("/users", usersRouter);
 app.use("/enrollmentChange", enrollmentChangeRouter);
 app.use("/mediaChange", mediaChangeRouter);
