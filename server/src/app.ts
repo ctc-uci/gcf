@@ -1,17 +1,18 @@
 import { verifyToken } from "@/middleware";
-import { sampleRouter } from "@/routes/sample"; // TODO: delete sample router
+import { regionalDirectorRouter } from "@/routes/regionalDirector";
+import { gcfUserRouter } from "@/routes/gcfUser";
 import { usersRouter } from "@/routes/users";
 import { instrumentRouter } from "@/routes/instrument"
 import { instrumentChangeRouter } from "@/routes/instrument-change"
+import { countryRouter } from "@/routes/country";
+import {regionRouter} from "@/routes/region";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import schedule from "node-schedule"; // TODO: Keep only if scheduling cronjobs
 
 dotenv.config();
 
-schedule.scheduleJob("0 0 0 0 0", () => console.info("Hello Cron Job!")); // TODO: delete sample cronjob
 
 const CLIENT_HOSTNAME =
   process.env.NODE_ENV === "development"
@@ -35,6 +36,10 @@ if (process.env.NODE_ENV === "production") {
 app.use("/users", usersRouter);
 app.use("/instruments", instrumentRouter);
 app.use("/instrument-changes", instrumentChangeRouter);
+app.use("/gcf-users", gcfUserRouter);
+app.use("/regional-directors", regionalDirectorRouter)
+app.use("/country", countryRouter);
+app.use("/region", regionRouter);
 
 // Listening is moved to server.ts to enable importing app in tests
 export default app;
