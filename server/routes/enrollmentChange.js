@@ -1,4 +1,3 @@
-// for reference only
 import { keysToCamel } from "@/common/utils";
 import express from "express";
 import { db } from "../db/db-pgp";
@@ -8,7 +7,6 @@ enrollmentChangeRouter.use(express.json());
 
 enrollmentChangeRouter.get("/", async (req, res) => {
   try {
-    // Query database
     const data = await db.query(`SELECT * FROM enrollment_change`);
     res.status(200).json(keysToCamel(data[0]));
   } catch (err) {
@@ -38,7 +36,6 @@ enrollmentChangeRouter.get("/:id", async (req, res) => {
 
 enrollmentChangeRouter.post("/", async (req, res) => {
   try {
-    // Destructure req.body
     const { update_id, enrollment_change, graduated_change } = req.body;
     const newEnrollmentChange = await db.query(
       `INSERT INTO enrollment_change (update_id, enrollment_change, graduated_change) VALUES ($1, $2, $3) RETURNING *`,
