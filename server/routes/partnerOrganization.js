@@ -37,9 +37,7 @@ partnerOrganizationRouter.get("/:id", async (req, res) => {
 
 partnerOrganizationRouter.post("/", async (req, res) => {
   try {
-    const {
-      name
-    } = req.body;
+    const { name } = req.body;
 
     const newPartnerOrganization = await db.query(
       `
@@ -51,9 +49,7 @@ partnerOrganizationRouter.post("/", async (req, res) => {
       )
       RETURNING *;
       `,
-      [
-        name
-      ]
+      [name]
     );
 
     res.status(201).json(keysToCamel(newPartnerOrganization[0]));
@@ -66,9 +62,7 @@ partnerOrganizationRouter.post("/", async (req, res) => {
 partnerOrganizationRouter.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      name
-    } = req.body;
+    const { name } = req.body;
 
     const updatedPartnerOrganization = await db.query(
       `
@@ -77,10 +71,7 @@ partnerOrganizationRouter.put("/:id", async (req, res) => {
       WHERE id = $2
       RETURNING *;
       `,
-      [
-        name,
-        id,
-      ]
+      [name, id]
     );
 
     if (updatedPartnerOrganization.length === 0){
