@@ -2,6 +2,8 @@ import { verifyToken } from "@/middleware";
 import { regionalDirectorRouter } from "@/routes/regionalDirector";
 import { gcfUserRouter } from "@/routes/gcfUser";
 import { usersRouter } from "@/routes/users";
+import { instrumentRouter } from "@/routes/instrument"
+import { instrumentChangeRouter } from "@/routes/instrument-change"
 import { countryRouter } from "@/routes/country";
 import {regionRouter} from "@/routes/region";
 import cookieParser from "cookie-parser";
@@ -32,6 +34,8 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.use("/users", usersRouter);
+app.use("/instruments", instrumentRouter);
+app.use("/instrument-changes", instrumentChangeRouter);
 app.use("/gcf-users", gcfUserRouter);
 app.use("/regional-directors", regionalDirectorRouter)
 app.use("/country", countryRouter);
