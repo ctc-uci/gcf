@@ -2,6 +2,8 @@ import { verifyToken } from "@/middleware";
 import { regionalDirectorRouter } from "@/routes/regionalDirector";
 import { gcfUserRouter } from "@/routes/gcfUser";
 import { usersRouter } from "@/routes/users";
+import { enrollmentChangeRouter } from "@/routes/enrollmentChange";
+import { mediaChangeRouter } from "@/routes/mediaChange";
 import { instrumentRouter } from "@/routes/instrument"
 import { instrumentChangeRouter } from "@/routes/instrument-change"
 import { countryRouter } from "@/routes/country";
@@ -40,6 +42,8 @@ app.use("/gcf-users", gcfUserRouter);
 app.use("/regional-directors", regionalDirectorRouter)
 app.use("/country", countryRouter);
 app.use("/region", regionRouter);
+app.use("/enrollmentChange", enrollmentChangeRouter);
+app.use("/mediaChange", mediaChangeRouter);
 
 // Listening is moved to server.ts to enable importing app in tests
 export default app;
