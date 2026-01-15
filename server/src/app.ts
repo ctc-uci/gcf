@@ -1,4 +1,7 @@
 import { verifyToken } from "@/middleware";
+import { usersRouter } from "@/routes/users";
+import { directorRouter } from "@/routes/programDirector";
+import { programUpdateRouter } from '@/routes/programUpdate';
 import { regionalDirectorRouter } from "@/routes/regionalDirector";
 import { gcfUserRouter } from "@/routes/gcfUser";
 import { usersRouter } from "@/routes/users";
@@ -16,7 +19,6 @@ import { programRouter } from "@/routes/program";
 import { partnerOrganizationRouter } from "@/routes/partnerOrganization";
 
 dotenv.config();
-
 
 const CLIENT_HOSTNAME =
   process.env.NODE_ENV === "development"
@@ -38,6 +40,8 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.use("/users", usersRouter);
+app.use("/program-directors", directorRouter)
+app.use('/program-updates', programUpdateRouter);
 app.use("/instruments", instrumentRouter);
 app.use("/instrument-changes", instrumentChangeRouter);
 app.use("/gcf-users", gcfUserRouter);
