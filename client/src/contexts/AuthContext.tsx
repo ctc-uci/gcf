@@ -54,9 +54,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password
     );
 
-    await backend.post("/users/create", {
-      email: email,
-      firebaseUid: userCredential.user.uid,
+    await backend.post("/gcf-users/create", {
+      id: userCredential.user.uid,
+      role: 'Admin',
+      created_by: null,
     });
 
     return userCredential;
@@ -93,15 +94,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const result = await getRedirectResult(auth);
 
       if (result) {
-        const response = await backend.get(`/users/${result.user.uid}`);
+        const response = await backend.get(`/gcf-users/${result.user.uid}`);
         if (response.data.length === 0) {
           try {
-            await backend.post("/users/create", {
-              email: result.user.email,
+            await backend.post("/gcf-users/create", {
               firebaseUid: result.user.uid,
+              role: 'Admin',
+              created_by: null,
             });
           } catch (e) {
-            await backend.delete(`/users/${result.user.uid}`);
+            await backend.delete(`/gcf-users/${result.user.uid}`);
             toast({
               title: "An error occurred",
               description: `Account was not created: ${e.message}`,

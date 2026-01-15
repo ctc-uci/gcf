@@ -34,7 +34,7 @@ export const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await backend.get("/users");
+        const response = await backend.get("/gcf-users");
         setUsers(response.data);
       } catch (error) {
         console.error("Error fetching users:", error);

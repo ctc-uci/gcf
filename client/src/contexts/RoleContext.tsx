@@ -25,7 +25,7 @@ export const RoleProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       try {
         if (user) {
-          const response = await backend.get(`/users/${user.uid}`);
+          const response = await backend.get(`/gcf-users/${user.uid}`);
 
           setRole((response.data as User[]).at(0)?.role);
         } else {
