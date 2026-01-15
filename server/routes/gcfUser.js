@@ -6,7 +6,7 @@ const gcfUserRouter = express.Router();
 gcfUserRouter.use(express.json());
 gcfUserRouter.post("/", async (req, res) => {
   try {
-    const {id, role, first_name, last_name, date_created, created_by} = req.body
+    const {id, role, first_name, last_name, created_by} = req.body
 
     const newGcfUser = await db.query(
       `INSERT INTO gcf_user (id, role, first_name, last_name, created_by) 

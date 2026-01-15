@@ -54,10 +54,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password
     );
 
-    await backend.post("/gcf-users/create", {
+    await backend.post("/gcf-users/", {
       id: userCredential.user.uid,
       role: 'Admin',
       created_by: null,
+      first_name: 'John',
+      last_name: 'Doe'
     });
 
     return userCredential;
@@ -97,10 +99,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const response = await backend.get(`/gcf-users/${result.user.uid}`);
         if (response.data.length === 0) {
           try {
-            await backend.post("/gcf-users/create", {
+            await backend.post("/gcf-users/", {
               firebaseUid: result.user.uid,
               role: 'Admin',
               created_by: null,
+              first_name: 'John',
+              last_name: 'Doe',
             });
           } catch (e) {
             await backend.delete(`/gcf-users/${result.user.uid}`);
