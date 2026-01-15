@@ -4,7 +4,7 @@ import { directorRouter } from "@/routes/programDirector";
 import { programUpdateRouter } from '@/routes/programUpdate';
 import { regionalDirectorRouter } from "@/routes/regionalDirector";
 import { gcfUserRouter } from "@/routes/gcfUser";
-import { usersRouter } from "@/routes/users";
+// import { usersRouter } from "@/routes/users";
 import { enrollmentChangeRouter } from "@/routes/enrollmentChange";
 import { mediaChangeRouter } from "@/routes/mediaChange";
 import { instrumentRouter } from "@/routes/instrument"
@@ -39,7 +39,7 @@ if (process.env.NODE_ENV === "production") {
   app.use(verifyToken);
 }
 
-app.use("/users", usersRouter);
+// app.use("/users", usersRouter);
 app.use("/program-directors", directorRouter)
 app.use('/program-updates', programUpdateRouter);
 app.use("/instruments", instrumentRouter);

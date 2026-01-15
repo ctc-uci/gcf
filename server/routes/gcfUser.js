@@ -4,15 +4,15 @@ import { db } from "../db/db-pgp";
 
 const gcfUserRouter = express.Router();
 gcfUserRouter.use(express.json());
-
 gcfUserRouter.post("/", async (req, res) => {
   try {
-    const {role, email, first_name, last_name, date_created, created_by} = req.body// is is auto generated
+    const {id, role, first_name, last_name, created_by} = req.body
+
     const newGcfUser = await db.query(
-      `INSERT INTO gcf_user (role, email, first_name, last_name, date_created, created_by) 
-      VALUES ($1, $2, $3, $4, $5, $6) 
+      `INSERT INTO gcf_user (id, role, first_name, last_name, created_by) 
+      VALUES ($1, $2, $3, $4, $5) 
       RETURNING *`,
-      [role, email, first_name, last_name, date_created, created_by]
+      [id, role, first_name, last_name, created_by]
     );
     res.status(201).json(keysToCamel(newGcfUser[0]));
   } catch (err) {
@@ -53,18 +53,15 @@ gcfUserRouter.get("/:id", async (req, res) => {
 gcfUserRouter.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { role, email, first_name, last_name, date_created, created_by } = req.body;
+    const { role, first_name, last_name } = req.body;
     const updatedGcfUser = await db.query(
       `UPDATE gcf_user SET
         role = COALESCE($1, role),
-        email = COALESCE($2, email),
-        first_name = COALESCE($3, first_name),
-        last_name = COALESCE($4, last_name),
-        date_created = COALESCE($5, date_created),
-        created_by = COALESCE($6, created_by)        
-        WHERE id = $7
+        first_name = COALESCE($2, first_name),
+        last_name = COALESCE($3, last_name),     
+        WHERE id = $4
         RETURNING *;`,
-      [role, email, first_name, last_name, date_created, created_by, id]
+      [role, first_name, last_name, id]
     );
 
     if (updatedGcfUser.length === 0){
