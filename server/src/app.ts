@@ -12,6 +12,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import { programRouter } from "@/routes/program";
+import { partnerOrganizationRouter } from "@/routes/partnerOrganization";
 
 dotenv.config();
 
@@ -44,6 +46,8 @@ app.use("/country", countryRouter);
 app.use("/region", regionRouter);
 app.use("/enrollmentChange", enrollmentChangeRouter);
 app.use("/mediaChange", mediaChangeRouter);
+app.use("/program", programRouter);
+app.use("/partners", partnerOrganizationRouter);
 
 // Listening is moved to server.ts to enable importing app in tests
 export default app;
