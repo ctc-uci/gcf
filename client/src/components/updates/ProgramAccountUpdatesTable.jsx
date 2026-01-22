@@ -9,7 +9,7 @@ import {
   Tr,
 } from "@chakra-ui/react";
 
-export const ProgramAccountUpdatesTable = ({ programData }) => {
+export const ProgramAccountUpdatesTable = ({ data }) => {
   return (
     <>
       <Flex>

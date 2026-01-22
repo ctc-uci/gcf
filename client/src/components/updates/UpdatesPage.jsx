@@ -7,18 +7,51 @@ import { ProgramAccountUpdatesTable } from "./ProgramAccountUpdatesTable";
 import { ProgramUpdatesTable } from "./ProgramUpdatesTable";
 
 export const UpdatesPage = () => {
-  const [data, setData] = useState();
+  const [programUpdatesData, setProgramUpdatesData] = useState();
+  const [mediaUpdatesData, setMediaUpdatesData] = useState();
+  const [programData, setProgramData] = useState();
+  const [gcfUserData, setGcfUserData] = useState();
 
   useEffect(() => {
-    fetch("http://localhost:3001/program-updates")
-      .then((res) => res.json())
-      .then((data) => {
-        setData(data);
-      })
-      .catch((error) => {
-        console.error("Fetch error: ", error);
-      });
-  });
+    const loadData = async () => {
+      Promise.all([
+        fetch("http://localhost:3001/program-updates")
+          .then((res) => res.json())
+          .then((data) => {
+            setProgramUpdatesData(data);
+          })
+          .catch((error) => {
+            console.error("Fetch error: ", error);
+          }),
+        fetch("http://localhost:3001/media-change")
+          .then((res) => res.json())
+          .then((data) => {
+            setMediaUpdatesData(data);
+          })
+          .catch((error) => {
+            console.error("Fetch error: ", error);
+          }),
+        fetch("http://localhost:3001/program")
+          .then((res) => res.json())
+          .then((data) => {
+            setProgramData(data);
+          })
+          .catch((error) => {
+            console.error("Fetch error: ", error);
+          }),
+        fetch("http://localhost:3001/gcf-user")
+          .then((res) => res.json())
+          .then((data) => {
+            setGcfUserData(data);
+          })
+          .catch((error) => {
+            console.error("Fetch error: ", error);
+          }),
+      ]);
+    };
+
+    loadData();
+  }, []);
 
   return (
     <>
@@ -26,7 +59,10 @@ export const UpdatesPage = () => {
       <MediaUpdatesTable />
       <ProgramAccountUpdatesTable />
       <ProgramUpdatesTable />
-      <Text>{JSON.stringify(data)}</Text>
+      <Text>{JSON.stringify(programUpdatesData)}</Text>
+      <Text>{JSON.stringify(mediaUpdatesData)}</Text>
+      <Text>{JSON.stringify(programData)}</Text>
+      <Text>{JSON.stringify(gcfUserData)}</Text>
     </>
   );
 };

@@ -1,6 +1,7 @@
 import {
   Flex,
   Heading,
+  IconButton,
   Input,
   Table,
   TableContainer,
