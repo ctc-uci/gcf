@@ -4,15 +4,23 @@ import {
   Input,
   Table,
   Tbody,
+  Td,
   Th,
   Thead,
   Tr,
 } from "@chakra-ui/react";
 
-export const ProgramAccountUpdatesTable = ({ data }) => {
+export const ProgramAccountUpdatesTable = ({
+  programData = [],
+  gcfUserData = [],
+  program = [],
+}) => {
+  const usersById = Object.fromEntries(gcfUserData.map((u) => [u.id, u]));
+  const programsById = Object.fromEntries(program.map((p) => [p.id, p]));
+
   return (
     <>
-      <Flex>
+      <Flex gap={10}>
         <Heading>Program & Account Updates</Heading>
         <Input
           variant="flushed"
@@ -31,15 +39,18 @@ export const ProgramAccountUpdatesTable = ({ data }) => {
           </Tr>
         </Thead>
         <Tbody>
-          {/** {programData.map((row) => (
+          {programData.map((row) => (
             <Tr>
-              <Td>{row.time}</Td>
-              <Td>{row.notes}</Td>
-              <Td>{row.program}</Td>
-              <Td>{row.author}</Td>
-              <Td>{row.status}</Td>
+              <Td>{row.updateDate}</Td>
+              <Td>{row.note}</Td>
+              <Td>{programsById[row.programId]?.name}</Td>
+              <Td>
+                {usersById[row.createdBy]?.firstName}{" "}
+                {usersById[row.createdBy]?.lastName}
+              </Td>
+              <Td>{programsById[row.programId]?.status}</Td>
             </Tr>
-          ))}*/}
+          ))}
         </Tbody>
       </Table>
     </>
