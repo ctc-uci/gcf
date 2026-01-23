@@ -8,10 +8,12 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
 import { CookiesProvider } from "react-cookie";
+import { ProgramUpdateEditForm } from "@/components/updates/ProgramUpdateEditForm";
+
 import {
-  Navigate,
+Navigate,
   Route,
-  BrowserRouter as Router,
+  BrowserRouter as Router,  
   Routes,
 } from "react-router-dom";
 
@@ -56,6 +58,10 @@ const App = () => {
                 <Route
                   path="*"
                   element={<ProtectedRoute element={<CatchAll />} />}
+                />
+                <Route
+                  path = "/editform"
+                  element={<ProgramUpdateEditForm />}
                 />
               </Routes>
             </Router>
