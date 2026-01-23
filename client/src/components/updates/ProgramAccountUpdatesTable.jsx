@@ -1,4 +1,6 @@
+import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
 import {
+  Box,
   Flex,
   Heading,
   Input,
@@ -20,39 +22,62 @@ export const ProgramAccountUpdatesTable = ({
 
   return (
     <>
-      <Flex gap={10}>
-        <Heading>Program & Account Updates</Heading>
-        <Input
-          variant="flushed"
-          placeholder="Type to search"
-          width="auto"
-        />
-      </Flex>
-      <Table>
-        <Thead>
-          <Tr>
-            <Th>Time</Th>
-            <Th>Notes</Th>
-            <Th>Program</Th>
-            <Th>Author</Th>
-            <Th>Status</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {programData.map((row) => (
+      <Box
+        mt="30px"
+        ml="10px"
+      >
+        <Flex
+          gap={10}
+          mb="20px"
+        >
+          <Heading>Program & Account Updates</Heading>
+          <SearchIcon
+            mt="10px"
+            ml="10px"
+          />
+          <Input
+            placeholder="Type to search"
+            variant="flushed"
+            w="200px"
+          />
+          <HamburgerIcon mt="10px" />
+          <DownloadIcon mt="10px" />
+        </Flex>
+        <Table>
+          <Thead>
             <Tr>
-              <Td>{row.updateDate}</Td>
-              <Td>{row.note}</Td>
-              <Td>{programsById[row.programId]?.name}</Td>
-              <Td>
-                {usersById[row.createdBy]?.firstName}{" "}
-                {usersById[row.createdBy]?.lastName}
-              </Td>
-              <Td>{programsById[row.programId]?.status}</Td>
+              <Th>Time</Th>
+              <Th>Notes</Th>
+              <Th>Program</Th>
+              <Th>Author</Th>
+              <Th>Status</Th>
             </Tr>
-          ))}
-        </Tbody>
-      </Table>
+          </Thead>
+          <Tbody>
+            {programData.map((row) => (
+              <Tr>
+                <Td>{row.updateDate}</Td>
+                <Td>{row.note}</Td>
+                <Td>{programsById[row.programId]?.name}</Td>
+                <Td>
+                  {usersById[row.createdBy]?.firstName}{" "}
+                  {usersById[row.createdBy]?.lastName}
+                </Td>
+                <Box
+                  borderRadius="full"
+                  bg="gray.200"
+                  w="100px"
+                  h="40px"
+                  alignItems="center"
+                  pb="50px"
+                >
+                  <Td>{programsById[row.programId]?.status}</Td>
+                </Box>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </Box>
     </>
   );
 };

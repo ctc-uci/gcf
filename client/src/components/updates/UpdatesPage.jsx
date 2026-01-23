@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-import { Text } from "@chakra-ui/react";
-
 import { MediaUpdatesTable } from "./MediaUpdatesTable";
 import { ProgramAccountUpdatesTable } from "./ProgramAccountUpdatesTable";
 
@@ -53,7 +51,6 @@ export const UpdatesPage = () => {
         gcfUserData={gcfUserData}
         program={programData}
       ></ProgramAccountUpdatesTable>
-      <Text>{JSON.stringify(mediaUpdatesData)}</Text>
     </>
   );
 };
