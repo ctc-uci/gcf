@@ -7,39 +7,73 @@ import {
   VStack,
   Button,
 } from '@chakra-ui/react';
-import { MediaGrid } from './MediaGrid';
+import {MediaGrid} from './MediaGrid';
 
-interface MediaItem {
-  id: string;
-  s3_key: string;
-  file_name: string;
-  file_type: string;
-  is_thumbnail: boolean;
-}
 
 export const Media = () => {
-  const { userid } = useParams<{ userid: string }>();
-  const [media, setMedia] = useState<MediaItem[]>([]);
+  const { userId } = useParams();
+  
+  const [media, setMedia] = useState([]);
+  const [programData, setProgramData] = useState([]);
+  const [programUpdatesData, setProgramUpdatesData] = useState([]);
+  const [mediaChangesData, setMediaChangesData] = useState([]);
+  const [programDirectorsData, setProgramDirectorsData] = useState([]);
 
   useEffect(() => {
-    const fetchMediaData = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetch(`/api/media/user/${userid}`);
-        const data = await response.json();
-        setMedia(data.media || []);
-      } catch (err) {
-        console.error('Error fetching media:', err);
+        const [
+          programRes,
+          programUpdatesRes,
+          mediaChangesRes,
+          programDirectorsRes,
+        ] = await Promise.all([
+          fetch("http://localhost:3001/program").then((res) => res.json()),
+          fetch("http://localhost:3001/program-updates").then((res) => res.json()),
+          fetch("http://localhost:3001/mediaChange").then((res) => res.json()),
+          fetch("http://localhost:3001/program-directors").then((res) => res.json()),
+        ]);
+
+        setProgramData(programRes);
+        setProgramUpdatesData(programUpdatesRes);
+        setMediaChangesData(mediaChangesRes);
+        setProgramDirectorsData(programDirectorsRes);
+
+        //program dir to progrm
+        const userProgramIds = programDirectorsRes
+          .filter((director: any) => director.userId === userId)
+          .map((director: any) => director.programId);
+
+        //pgoram to programupdates
+        const userProgramUpdateIds = programUpdatesRes
+          .filter((update: any) => userProgramIds.includes(update.programId))
+          .map((update: any) => update.id);
+
+        //programupdates to mediachange
+        const filteredUserMedia = mediaChangesRes.filter((media: any) =>
+          userProgramUpdateIds.includes(media.updateId)
+        );
+
+        
+        const transformedMedia = filteredUserMedia.map((media: any) => ({
+          id: media.id,
+          s3_key: media.s3Key,
+          file_name: media.fileName,
+          file_type: media.fileType,
+          is_thumbnail: media.isThumbnail
+        }));
+
+        setMedia(transformedMedia);
+        
+      } catch (error) {
+        console.error("Fetch error:", error);
       }
     };
 
-    if (userid) {
-      fetchMediaData();
-    }
-  }, [userid]);
+    loadData();
+  }, [userId]);
 
-  const handleNewMedia = () => {
-    console.log('New media button clicked');
-  };
+
 
   return (
     <Box minH="100vh">
@@ -53,13 +87,13 @@ export const Media = () => {
               My Media
             </Heading>
             
+            {/* this button just here cuz it was on the lofi doesnt do anything */}
             <Button
               variant="outline"
               bg="white"
               borderColor="gray.800"
               color="gray.800"
               _hover={{ bg: 'gray.50' }}
-              onClick={handleNewMedia}
             >
               + New
             </Button>

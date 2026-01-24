@@ -8,7 +8,7 @@ mediaChangeRouter.use(express.json());
 mediaChangeRouter.get("/", async (req, res) => {
   try {
     const data = await db.query(`SELECT * FROM media_change`);
-    res.status(200).json(keysToCamel(data[0]));
+    res.status(200).json(keysToCamel(data)); //i think this should be changed form data[0]
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");

@@ -38,7 +38,7 @@ const App = () => {
                   element={<Account />}
                 />
                 <Route
-                  path = "/media"
+                  path = "/media/:userId"
                   element = {<Media />}
                 />
                 <Route

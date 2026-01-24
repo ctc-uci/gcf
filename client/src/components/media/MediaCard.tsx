@@ -1,4 +1,4 @@
-import { Box, Text, VStack } from '@chakra-ui/react';
+import { Box, Text } from '@chakra-ui/react';
 
 interface MediaCardProps {
   s3_key: string;
@@ -8,7 +8,6 @@ interface MediaCardProps {
 }
 
 export const MediaCard = ({ s3_key, file_name, file_type, is_thumbnail }: MediaCardProps) => {
-
   return (
     <Box
       h="200px"
@@ -17,6 +16,9 @@ export const MediaCard = ({ s3_key, file_name, file_type, is_thumbnail }: MediaC
       borderColor="gray.800"
       p={4}
     >
+      <Text>
+        {s3_key}
+      </Text>
     </Box>
   );
 };
