@@ -5,8 +5,9 @@ import { Box } from '@chakra-ui/react';
 export const Dummy = () => {
   return (
     <Box flexDirection="column">
-        <Navbar role="admin" />
-        <Sidebar role="project_director" />
+        {/* TODO: change placeholder role props */}
+        <Navbar role="regional_director" />
+        <Sidebar role="regional_director" />
     </Box>
   )
 }
