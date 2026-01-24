@@ -33,7 +33,7 @@ const App = () => {
                   element={<Signup />}
                 />
                 <Route
-                  path="/updates"
+                  path="/updates/:userId"
                   element={<UpdatesPage />}
                 />
                 <Route

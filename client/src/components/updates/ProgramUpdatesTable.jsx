@@ -13,8 +13,14 @@ import {
   Tr,
 } from "@chakra-ui/react";
 
-export const ProgramUpdatesTable = ({ programUpdatesData, gcfUserData }) => {
+export const ProgramUpdatesTable = ({
+  programUpdatesData,
+  gcfUserData,
+  programData,
+}) => {
   const usersById = Object.fromEntries(gcfUserData.map((u) => [u.id, u]));
+  const programById = Object.fromEntries(programData.map((p) => [p.id, p]));
+
   return (
     <>
       <Box
@@ -56,7 +62,7 @@ export const ProgramUpdatesTable = ({ programUpdatesData, gcfUserData }) => {
                   <Tr key={row.updateId}>
                     <Td>{row.updateDate}</Td>
                     <Td>{row.note}</Td>
-                    <Td>{programsById[row.programId]?.name}</Td>
+                    <Td>{programById[row.programId]?.name}</Td>
                     <Td>
                       {usersById[row.createdBy]?.firstName}{" "}
                       {usersById[row.createdBy]?.lastName}
@@ -69,7 +75,7 @@ export const ProgramUpdatesTable = ({ programUpdatesData, gcfUserData }) => {
                       alignItems="center"
                       pb="50px"
                     >
-                      <Td> {programsById[programId]?.status} </Td>
+                      <Td> {programById[row.programId]?.status} </Td>
                     </Box>
                   </Tr>
                 );

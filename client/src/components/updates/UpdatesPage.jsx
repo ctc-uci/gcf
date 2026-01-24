@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 
-import { getAuth } from "firebase/auth";
+// import { getAuth } from "firebase/auth";
+import { useParams } from "react-router-dom";
 
 import { MediaUpdatesTable } from "./MediaUpdatesTable";
 import { ProgramAccountUpdatesTable } from "./ProgramAccountUpdatesTable";
 import { ProgramUpdatesTable } from "./ProgramUpdatesTable";
 
 export const UpdatesPage = () => {
+  const { userId } = useParams();
+
   const [programUpdatesData, setProgramUpdatesData] = useState([]);
   const [mediaUpdatesData, setMediaUpdatesData] = useState([]);
   const [programData, setProgramData] = useState([]);
@@ -55,13 +58,11 @@ export const UpdatesPage = () => {
     loadData();
   }, []);
 
-  const auth = getAuth();
-  const currentUser = auth.currentUser;
+  const currentUser = gcfUserData[userId];
 
   let visibleMediaUpdates = [];
   let visibleProgramUpdates = [];
 
-  // const usersById = Object.fromEntries(gcfUserData.map((u) => [u.id, u]));
   const programUpdatesById = Object.fromEntries(
     programUpdatesData.map((p) => [p.id, p])
   );
@@ -72,7 +73,7 @@ export const UpdatesPage = () => {
     regionalDirectorsData.map((p) => [p.id, p])
   );
 
-  switch (user?.role) {
+  switch (currentUser?.role) {
     case "Admin":
       visibleMediaUpdates = mediaUpdatesData;
       visibleProgramUpdates = programUpdatesData;
@@ -94,7 +95,7 @@ export const UpdatesPage = () => {
       break;
     default: // Project Director
       visibleProgramUpdates = programUpdatesData.filter(
-        (row) => row.createdBy === currentUser.id
+        (row) => row.createdBy === userId
       );
   }
 
@@ -114,6 +115,7 @@ export const UpdatesPage = () => {
       <ProgramUpdatesTable
         programUpdatesData={visibleProgramUpdates}
         gcfUserData={gcfUserData}
+        programData={programData}
       />
     </>
   );
