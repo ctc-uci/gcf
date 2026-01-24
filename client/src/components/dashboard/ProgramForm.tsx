@@ -19,6 +19,7 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
+  Text,
 //   TagLeftIcon,
 //   TagRightIcon,
   TagCloseButton,
@@ -37,14 +38,17 @@ interface ProgramFormState {
     },
     language: string | null,
     programDirectors: string[],
-    curriculumLinks: string[],
+    curriculumLinks: {
+        [key: string]: string
+    }
     media: string[],
 }
 
 interface InstrumentFormProps {
+    formData: ProgramFormState;
     setFormData: React.Dispatch<React.SetStateAction<ProgramFormState>>;
 }
-const InstrumentForm = ( { setFormData } : InstrumentFormProps ) => {
+const InstrumentForm = ( { formData, setFormData } : InstrumentFormProps ) => {
     const [instrumentName, setInstrumentName] = useState<string | null>(null);
     const [quantity, setQuantity] = useState<number>(0);
 
@@ -56,33 +60,62 @@ const InstrumentForm = ( { setFormData } : InstrumentFormProps ) => {
                 [instrumentName as string]: quantity,
             }
         }));
+
+        setInstrumentName(null);
+        setQuantity(0);
+    }
+
+    function handleDelete(instrumentToDelete: string) {
+        setFormData((prevData: ProgramFormState) => {
+            const { [instrumentToDelete]: _, ...remainingInstruments } = prevData.instruments;
+            return {
+                ...prevData,
+                instruments: remainingInstruments
+            };
+        });
     }
 
 
     return (
-        <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
-            <Input placeholder = "Search" value={instrumentName || ''} onChange={(e) => setInstrumentName(e.target.value)} />
-            <NumberInput step={1} defaultValue={0} min={0} width="8em" value={quantity} onChange={(valueString) => setQuantity(Number(valueString))}>
+       <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
+            <Input 
+                placeholder="Search" 
+                value={instrumentName || ''} 
+                onChange={(e) => setInstrumentName(e.target.value)} 
+            />
+            <NumberInput 
+                step={1} 
+                defaultValue={0} 
+                min={0} 
+                width="8em" 
+                value={quantity} 
+                onChange={(valueString) => setQuantity(Number(valueString))}
+            >
                 <NumberInputField />
                 <NumberInputStepper>
                     <NumberIncrementStepper />
                     <NumberDecrementStepper />
                 </NumberInputStepper>
             </NumberInput>
-
             <Button onClick={handleSubmit}> + Add </Button>
         </HStack>
     )
 }
+interface ProgramDirectorForm {
+    setFormData: React.Dispatch<React.SetStateAction<ProgramFormState>>;
+}
 
-const ProgramDirectorForm = () => {
+const ProgramDirectorForm = ( { setFormData } : ProgramDirectorForm ) => {
 
-    // const [programDirectors, setProgramDirectors] = useState<string[]>([]);
+    const [programDirectors, setProgramDirectors] = useState<string[]>([]);
+    const [selectedDirector, setSelectedDirector] = useState<string>('');
 
     useEffect(() => {
         async function fetchProgramDirectors() {
-            const directors = await fetch("http://localhost:3001/api/program-directors");
-            console.log("directors from db:", directors);
+            const promise = await fetch("http://localhost:3001/program-directors");
+            const directors = await promise.json();
+            // filter for userId only
+            setProgramDirectors(directors.map((director: { userId: string, programId: string}) => director.userId));
         }
         // fetch all program directors from db
         fetchProgramDirectors();
@@ -91,35 +124,81 @@ const ProgramDirectorForm = () => {
 
 
 
-    // function handleSubmit() {
-    //     setFormData((prevData: ProgramFormState) => ({
-    //         ...prevData,
-    //         programDirectors: [...prevData.programDirectors, 
-    //             // add new director here
-    //         ],
-    //     }));
-    // }
+    function handleSubmit() {
+        if (!selectedDirector) return;
+        
+        setFormData((prevData: ProgramFormState) => ({
+            ...prevData,
+            programDirectors: [...prevData.programDirectors, selectedDirector],
+        }));
+
+         setSelectedDirector('');
+    }
 
 
     return (
+        <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
+            <Select 
+                placeholder="Select Program Director"
+                value = {selectedDirector}
+                onChange = {(e) => setSelectedDirector(e.target.value)}
+            >
+                {
+                    (programDirectors).map((director) => (
+                        <option value={director}>{director}</option>
+                    ))
+                }
+            </Select>
 
-        <>
-        </>
-
-        // <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
-        //     <Input placeholder = "Search" value={instrumentName || ''} onChange={(e) => setInstrumentName(e.target.value)} />
-        //     <NumberInput step={1} defaultValue={0} min={0} width="8em" value={quantity} onChange={(valueString) => setQuantity(Number(valueString))}>
-        //         <NumberInputField />
-        //         <NumberInputStepper>
-        //             <NumberIncrementStepper />
-        //             <NumberDecrementStepper />
-        //         </NumberInputStepper>
-        //     </NumberInput>
-
-        //     <Button onClick={handleSubmit}> + Add </Button>
-        // </HStack>
+            <Button onClick={handleSubmit}> + Add </Button>
+        </HStack>
     )
 }
+
+interface CurriculumLinkFormProps {
+    setFormData: React.Dispatch<React.SetStateAction<ProgramFormState>>;
+}
+
+const CurriculumLinkForm = ( { setFormData } : CurriculumLinkFormProps ) => {
+    const [link, setLink] = useState<string | null>(null);
+    const [display, setDisplay] = useState<string | null>(null);
+
+    function handleSubmit() {
+        if (!link || !display) return;
+        setFormData((prevData: ProgramFormState) => ({
+            ...prevData, 
+            curriculumLinks: {
+                ...prevData.curriculumLinks,
+                [link as string]: display as string
+            }
+        }));
+
+        setLink('');
+        setDisplay('');
+    };
+    
+         
+    return (
+        <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
+            <Input 
+                placeholder="Link" 
+                value={link || ''} 
+                onChange={(e) => setLink(e.target.value)} 
+            />
+
+            <Input 
+                placeholder="Display Name" 
+                value={display || ''} 
+                onChange={(e) => setDisplay(e.target.value)} 
+            />
+
+            <Button onClick={handleSubmit}> + Add </Button>
+        </HStack>
+    )
+}
+
+
+
 
 export const ProgramForm = () => {
     const { isOpen, onOpen, onClose } = useDisclosure()
@@ -132,12 +211,12 @@ export const ProgramForm = () => {
         region: null,
         students: 0,
         instruments: {
-            guitar: 10,
-            ukelele: 5,
          },
         language: null,
         programDirectors: [],
-        curriculumLinks: [],
+        curriculumLinks: {
+            "https://youtube.com": "YouTube Link",
+        },
         media: []
     });
 
@@ -226,7 +305,10 @@ export const ProgramForm = () => {
                         <h3> Instrument(s) & Quantity </h3>
                         <HStack wrap="wrap">
 
-                            <InstrumentForm setFormData={setFormState} />
+                            <InstrumentForm 
+                                formData={formState} 
+                                setFormData={setFormState} 
+                            />
 
                             {/* <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
                                 <Input placeholder = "Search" />
@@ -244,17 +326,17 @@ export const ProgramForm = () => {
 
 
 
-                            {
-                                Object.keys(formState.instruments).map((instrument) => (
-                                    <>
-                                        <Tag> 
-                                            <TagLabel>{instrument}: {formState.instruments[instrument]}</TagLabel>
-                                            <TagCloseButton />
-                                        </Tag>
-                                    </>
-                                ))
-                              
-                            }
+                            {Object.keys(formState.instruments).map((instrument) => (
+                                <Tag key={instrument}> 
+                                    <TagLabel>{instrument}: {formState.instruments[instrument]}</TagLabel>
+                                    <TagCloseButton onClick={() => {
+                                        setFormState((prevData) => {
+                                            const { [instrument]: _, ...remainingInstruments } = prevData.instruments;
+                                            return { ...prevData, instruments: remainingInstruments };
+                                        });
+                                    }} />
+                                </Tag>
+                            ))}
 
 
 
@@ -271,8 +353,42 @@ export const ProgramForm = () => {
                             <option value = "arabic">Arabic</option>
                             <option value = "mandarin">Mandarin</option>
                         </Select>
+                        <h3>Program Directors</h3>
+                        <HStack wrap = "wrap">
+                            <ProgramDirectorForm setFormData={setFormState}/>
+                            {formState.programDirectors.map((director) => (
+                                <Tag key={director}> 
+                                    <TagLabel>{director}</TagLabel>
+                                    <TagCloseButton onClick={() => {
+                                        setFormState((prevData) => ({
+                                            ...prevData,
+                                            programDirectors: prevData.programDirectors.filter(d => d !== director)
+                                        }));
+                                    }} />
+                                </Tag>
+                            ))}
+                        </HStack>
 
-                        <ProgramDirectorForm />
+                        <h3>Curriculum Links</h3>   
+                        <CurriculumLinkForm setFormData={setFormState} />
+
+                        <HStack wrap="wrap">
+                            {Object.entries(formState.curriculumLinks).map(([link, display]) => (
+                                <Tag key={link}>
+                                    <TagLabel>{display}</TagLabel>
+                                    <TagCloseButton onClick={() => {
+                                        setFormState((prevData) => {
+                                            const { [link]: _, ...remainingLinks } = prevData.curriculumLinks;
+                                            return {
+                                                ...prevData,
+                                                curriculumLinks: remainingLinks
+                                            };
+                                        });
+                                    }} />
+                                </Tag>
+                            ))}
+                        </HStack>
+                        
 
                     </VStack>
                 
