@@ -14,7 +14,7 @@ export const Navbar = ({role}) => {
                 <Text fontSize="2vh">
                     {role === "admin" ? "Admin Dashboard" : ""}
                     {role === "regional_director" ? "Regional Director Dashboard" : ""}
-                    {role === "project_director" ? `${project}` : ""}
+                    {role === "program_director" ? `${project}` : ""}
                     
                     {role === "regional_director" ? `: ${region}` : ""}
                 </Text>

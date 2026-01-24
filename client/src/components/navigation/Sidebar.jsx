@@ -12,7 +12,7 @@ export const Sidebar = ({role}) => {
             { name: 'Updates', icon: <Image src={bell} alt="Bell" boxSize="20px" />, path: "/updates" },
             { name: 'Accounts', icon: <Image src={guy} alt="Guy" boxSize="20px" />, path: "/accounts" },
         ];
-    } else if (role === "project_director") {
+    } else if (role === "program_director") {
         navItems = [
             { name: 'Programs', icon: <Image src={guitar} alt="Guitar" boxSize="20px" />, path: "/dashboard" },
             { name: 'Updates', icon: <Image src={bell} alt="Bell" boxSize="20px" />, path: "/updates" },
