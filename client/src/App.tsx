@@ -14,6 +14,8 @@ import {
   BrowserRouter as Router,
   Routes,
 } from "react-router-dom";
+import { Account } from "./components/accounts/Account";
+import { Media } from "./components/media/MediaPage"
 
 const App = () => {
   return (
@@ -30,6 +32,14 @@ const App = () => {
                 <Route
                   path="/signup"
                   element={<Signup />}
+                />
+                <Route
+                  path="/account"
+                  element={<Account />}
+                />
+                <Route
+                  path = "/media"
+                  element = {<Media />}
                 />
                 <Route
                   path="/dashboard"
