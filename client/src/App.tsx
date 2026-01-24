@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
 import { CookiesProvider } from "react-cookie";
+import { ProgramForm } from "@/components/dashboard/ProgramForm";
 import {
   Navigate,
   Route,
@@ -56,6 +57,10 @@ const App = () => {
                 <Route
                   path="*"
                   element={<ProtectedRoute element={<CatchAll />} />}
+                />
+                <Route
+                  path="/create-program-form-test"
+                  element={<ProgramForm />}
                 />
               </Routes>
             </Router>
