@@ -8,6 +8,9 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
 import { CookiesProvider } from "react-cookie";
+
+import { Dummy } from "@/components/dummy/Dummy.jsx";
+
 import {
   Navigate,
   Route,
@@ -35,6 +38,7 @@ const App = () => {
                   path="/dashboard"
                   element={<ProtectedRoute element={<Dashboard />} />}
                 />
+                
                 <Route
                   path="/admin"
                   element={
@@ -54,9 +58,27 @@ const App = () => {
                   }
                 />
                 <Route
+                  path="/dummy"
+                  element={<Dummy />}
+                />
+                <Route
                   path="*"
                   element={<ProtectedRoute element={<CatchAll />} />}
                 />
+                {/* Placeholder routes for navbar/sidebar components */}
+                <Route 
+                  path="/updates"
+                  element={<Login />}
+                />
+                <Route 
+                  path="/accounts"
+                  element={<Login />}
+                />
+                <Route 
+                  path="/media"
+                  element={<Login />}
+                />
+                
               </Routes>
             </Router>
           </RoleProvider>
