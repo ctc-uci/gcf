@@ -15,7 +15,7 @@ import {
   Routes,
 } from "react-router-dom";
 import { Account } from "./components/accounts/Account";
-import { Media } from "./components/media/MediaPage"
+import { Media } from "./components/media/Media"
 
 const App = () => {
   return (
