@@ -1,7 +1,6 @@
 import {
   Drawer,
   DrawerBody,
-//   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   DrawerContent,
@@ -19,11 +18,7 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-  Text,
-//   TagLeftIcon,
-//   TagRightIcon,
   TagCloseButton,
-//   Input,
 } from '@chakra-ui/react'
 import { useRef, useState, useEffect } from 'react'
 
@@ -44,11 +39,11 @@ interface ProgramFormState {
     media: string[],
 }
 
+// sub-component for adding instruments
 interface InstrumentFormProps {
-    formData: ProgramFormState;
     setFormData: React.Dispatch<React.SetStateAction<ProgramFormState>>;
 }
-const InstrumentForm = ( { formData, setFormData } : InstrumentFormProps ) => {
+const InstrumentForm = ( { setFormData } : InstrumentFormProps ) => {
     const [instrumentName, setInstrumentName] = useState<string | null>(null);
     const [quantity, setQuantity] = useState<number>(0);
 
@@ -64,17 +59,6 @@ const InstrumentForm = ( { formData, setFormData } : InstrumentFormProps ) => {
         setInstrumentName(null);
         setQuantity(0);
     }
-
-    function handleDelete(instrumentToDelete: string) {
-        setFormData((prevData: ProgramFormState) => {
-            const { [instrumentToDelete]: _, ...remainingInstruments } = prevData.instruments;
-            return {
-                ...prevData,
-                instruments: remainingInstruments
-            };
-        });
-    }
-
 
     return (
        <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
@@ -101,6 +85,7 @@ const InstrumentForm = ( { formData, setFormData } : InstrumentFormProps ) => {
         </HStack>
     )
 }
+// sub-component for adding program directors
 interface ProgramDirectorForm {
     setFormData: React.Dispatch<React.SetStateAction<ProgramFormState>>;
 }
@@ -145,7 +130,7 @@ const ProgramDirectorForm = ( { setFormData } : ProgramDirectorForm ) => {
             >
                 {
                     (programDirectors).map((director) => (
-                        <option value={director}>{director}</option>
+                        <option value={director} key={director}>{director}</option>
                     ))
                 }
             </Select>
@@ -155,6 +140,7 @@ const ProgramDirectorForm = ( { setFormData } : ProgramDirectorForm ) => {
     )
 }
 
+// sub-component for adding curriculum links
 interface CurriculumLinkFormProps {
     setFormData: React.Dispatch<React.SetStateAction<ProgramFormState>>;
 }
@@ -173,8 +159,8 @@ const CurriculumLinkForm = ( { setFormData } : CurriculumLinkFormProps ) => {
             }
         }));
 
-        setLink('');
-        setDisplay('');
+        setLink(null);
+        setDisplay(null);
     };
     
          
@@ -196,8 +182,6 @@ const CurriculumLinkForm = ( { setFormData } : CurriculumLinkFormProps ) => {
         </HStack>
     )
 }
-
-
 
 
 export const ProgramForm = () => {
@@ -245,12 +229,10 @@ export const ProgramForm = () => {
     }
     
 
+    // debug log to see how state changes as we edit the form
     useEffect(() => {
         console.log("Program status changed to:", formState);
     }, [formState])
-
-
-
 
     return (
         <>
@@ -264,8 +246,6 @@ export const ProgramForm = () => {
                 onClose={onClose}
                 finalFocusRef={btnRef}
                 size="lg"
-
-                // width={"40%"}
             >
             <DrawerOverlay />
             <DrawerContent>
@@ -276,8 +256,8 @@ export const ProgramForm = () => {
                     <VStack spacing={4} align="stretch">
                         <h3>Status</h3>
                         <HStack>
-                            <Button onClick={() => handleProgramStatusChange("Developing")}>Developing</Button>
-                            <Button onClick={() => handleProgramStatusChange("Launched")}>Launched</Button>
+                            <Button onClick={() => handleProgramStatusChange("Developing")} colorScheme={formState.status === "Developing" ? "teal" : undefined}>Developing</Button>
+                            <Button onClick={() => handleProgramStatusChange("Launched")} colorScheme={formState.status === "Launched" ? "teal" : undefined}>Launched</Button>
                         </HStack> 
                         <h3>Program Name</h3>
                         <Input placeholder = "Enter Program Name: " onChange={(e) => handleProgramNameChange(e.target.value)}/>
@@ -306,25 +286,8 @@ export const ProgramForm = () => {
                         <HStack wrap="wrap">
 
                             <InstrumentForm 
-                                formData={formState} 
                                 setFormData={setFormState} 
                             />
-
-                            {/* <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
-                                <Input placeholder = "Search" />
-                                <NumberInput step={1} defaultValue={0} min={0} width="8em">
-                                    <NumberInputField />
-                                    <NumberInputStepper>
-                                        <NumberIncrementStepper />
-                                        <NumberDecrementStepper />
-                                    </NumberInputStepper>
-                                </NumberInput>
-
-                                <Button> + Add </Button>
-
-                            </HStack> */}
-
-
 
                             {Object.keys(formState.instruments).map((instrument) => (
                                 <Tag key={instrument}> 
@@ -337,9 +300,6 @@ export const ProgramForm = () => {
                                     }} />
                                 </Tag>
                             ))}
-
-
-
                         </HStack>
                         <h3>Language</h3>
                         <Select 
@@ -388,23 +348,8 @@ export const ProgramForm = () => {
                                 </Tag>
                             ))}
                         </HStack>
-                        
-
                     </VStack>
-                
-                
-
-
-
-
                 </DrawerBody>
-{/* 
-                <DrawerFooter>
-                <Button variant='outline' mr={3} onClick={onClose}>
-                    Cancel
-                </Button>
-                <Button colorScheme='blue'>Save</Button>
-                </DrawerFooter> */}
             </DrawerContent>
             </Drawer>
         </>
