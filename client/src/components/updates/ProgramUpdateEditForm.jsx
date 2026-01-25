@@ -15,9 +15,57 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
+  Button,
+  HStack,
+  Spacer
 } from "@chakra-ui/react";
 
-export const ProgramUpdateEditForm = () => {
+import { useState, useEffect } from "react";
+
+
+/*import {
+    AddIcon
+} from "@chakra-ui/icons";*/
+
+export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
+    console.log(programUpdateId)
+
+    const [isAddingInstrument, setIsAddingInstrument] = useState(false)
+    const [isAddingLanguage, setIsAddingLanguage] = useState(false)
+    const [isAddingRegionalDirector, setIsAddingRegionalDirector] = useState(false)
+
+    const [form, setForm] = useState({
+        id: "",
+        created_by: "",
+        program_name: "",
+        date_created: "",
+        country: "",
+        title: "",
+        description: "",
+        primary_language: "",
+        playlist_link: "",
+        partner_org: "",
+        program_status: "",
+        launch_date: ""
+    });
+
+    useEffect(() => {
+        if (!programUpdateId) {
+            console.log("woof")
+            return;
+        }
+        const program_data = async () => {
+            const result = await fetch (
+                `http://localhost:3001/program-updates/${programUpdateId}`
+            );
+            const data = await result.json();
+
+            console.log(data);
+            console.log("meow");
+        };
+        program_data();
+    }, [programUpdateId]);
+
     return (
         <VStack p={8} width='35%' borderWidth="1px" borderColor="lightblue">
             <Heading size="md" textAlign="center">Program</Heading>
@@ -33,7 +81,7 @@ export const ProgramUpdateEditForm = () => {
                 </CardBody>
             </Card>
             <FormControl isRequired>
-                <FormLabel>Program Name</FormLabel>
+                <FormLabel size='sm'>Program Name</FormLabel>
                 <Input placeholder='Program Name'/>
             </FormControl>
             <FormControl>
@@ -42,7 +90,7 @@ export const ProgramUpdateEditForm = () => {
             </FormControl>
             <FormControl>
                 <FormLabel>Launch Date</FormLabel>
-                <Select placeholder='Select Date'/>
+                <Input type='date' placeholder='Select Date'/>
             </FormControl>
             <FormControl>
                 <FormLabel>Location</FormLabel>
@@ -58,6 +106,57 @@ export const ProgramUpdateEditForm = () => {
                     </NumberInputStepper>
                 </NumberInput>
             </FormControl>
+             <FormControl>
+                <FormLabel>Instruments & Quantity</FormLabel>
+                {!isAddingInstrument && <Button onClick={() => setIsAddingInstrument(true)}>+ Add</Button>}
+                {isAddingInstrument && 
+                <HStack>
+                    <Input placeholder="Instrument" />
+                    <NumberInput>
+                        <NumberInputField/>
+                        <NumberInputStepper>
+                            <NumberIncrementStepper/>
+                            <NumberDecrementStepper/>
+                        </NumberInputStepper>
+                    </NumberInput>
+                    <Button onClick={() => setIsAddingInstrument(false)}>
+                    + Add
+                    </Button>
+                </HStack>               
+                }
+            </FormControl>
+            <FormControl>
+                <FormLabel>Languages</FormLabel>
+                {!isAddingLanguage && <Button onClick={() => setIsAddingLanguage(true)}>+ Add</Button>}
+                {isAddingLanguage && 
+                <HStack>
+                    <Input placeholder="Language" />
+                    <Button onClick={() => setIsAddingLanguage(false)}>
+                    + Add
+                    </Button>
+                </HStack>               
+                }
+            </FormControl>
+            <FormControl>
+                <FormLabel>Regional Director(s)</FormLabel>
+                {!isAddingRegionalDirector && <Button onClick={() => setIsAddingRegionalDirector(true)}>+ Add</Button>}
+                {isAddingRegionalDirector && 
+                <HStack>
+                    <Input placeholder="Regional Director Name" />
+                    <Button onClick={() => isAddingRegionalDirector(false)}>
+                    + Add
+                    </Button>
+                </HStack>               
+                }
+            </FormControl>
+            <Divider w="110%"></Divider>
+            <HStack w="100%">
+                <Button>Delete</Button>
+                <Spacer/>
+                <Button>Cancel</Button>
+                <Button>Save Changes</Button>
+            </HStack>
         </VStack>
+        
     );
 };
