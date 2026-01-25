@@ -1,26 +1,9 @@
 import { SimpleGrid, Text, VStack } from "@chakra-ui/react";
-
 import { MediaCard } from "./MediaCard";
 
-interface MediaItem {
-  id: string;
-  s3_key: string;
-  file_name: string;
-  file_type: string;
-  is_thumbnail: boolean;
-}
-
-interface MediaGridProps {
-  mediaItems: MediaItem[];
-}
-
-export const MediaGrid = ({ mediaItems }: MediaGridProps) => {
+export const MediaGrid = ({ mediaItems }) => {
   return (
-    <VStack
-      align="start"
-      spacing={4}
-      w="full"
-    >
+    <VStack align="start" spacing={4} w="full">
       <Text
         fontSize="lg"
         fontWeight="semibold"
@@ -35,10 +18,7 @@ export const MediaGrid = ({ mediaItems }: MediaGridProps) => {
         w="full"
       >
         {mediaItems.map((item) => (
-          <MediaCard
-            key={item.id}
-            {...item}
-          />
+          <MediaCard key={item.id} {...item} />
         ))}
       </SimpleGrid>
     </VStack>

@@ -1,5 +1,4 @@
 import React from "react";
-
 import {
   Box,
   Button,
@@ -11,9 +10,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-
 import { FiArrowRight, FiPlus } from "react-icons/fi";
-
 import MediaItemCard from "./MediaItemCard";
 
 export const MediaPage = () => {
@@ -21,26 +18,10 @@ export const MediaPage = () => {
   const uploads = [1, 2, 3];
 
   return (
-    <Box
-      p={8}
-      bg="white"
-      minH="100vh"
-    >
-      <VStack
-        align="flex-start"
-        spacing={8}
-        maxW="1200px"
-        mx="auto"
-      >
-        {/* Header Section */}
-        <VStack
-          align="flex-start"
-          spacing={4}
-        >
-          <Heading
-            size="lg"
-            letterSpacing="tight"
-          >
+    <Box p={8} bg="white" minH="100vh">
+      <VStack align="flex-start" spacing={8} maxW="1200px" mx="auto">
+        <VStack align="flex-start" spacing={4}>
+          <Heading size="lg" letterSpacing="tight">
             My Media
           </Heading>
           <Button
@@ -55,23 +36,12 @@ export const MediaPage = () => {
           </Button>
         </VStack>
 
-        {/* Gallery Section */}
         <Box w="full">
-          <HStack
-            justify="space-between"
-            mb={6}
-          >
-            <Text
-              fontWeight="bold"
-              fontSize="lg"
-              color="gray.600"
-            >
+          <HStack justify="space-between" mb={6}>
+            <Text fontWeight="bold" fontSize="lg" color="gray.600">
               Uploads
             </Text>
-            <Link
-              color="blue.500"
-              fontWeight="medium"
-            >
+            <Link color="blue.500" fontWeight="medium">
               <HStack spacing={1}>
                 <Text>See all</Text>
                 <Icon as={FiArrowRight} />
@@ -79,11 +49,7 @@ export const MediaPage = () => {
             </Link>
           </HStack>
 
-          {/* Grid of Components */}
-          <SimpleGrid
-            columns={{ base: 1, sm: 2, md: 3, lg: 4 }}
-            spacing={8}
-          >
+          <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={8}>
             {uploads.map((item) => (
               <MediaItemCard key={item} />
             ))}

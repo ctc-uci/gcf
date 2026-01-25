@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
-
 import { Box, Button, Container, Heading, VStack } from "@chakra-ui/react";
-
 import { useParams } from "react-router-dom";
-
 import { MediaGrid } from "./MediaGrid";
 
 export const Media = () => {
@@ -39,22 +36,22 @@ export const Media = () => {
         setMediaChangesData(mediaChangesRes);
         setProgramDirectorsData(programDirectorsRes);
 
-        //program dir to progrm
+        // program dir to program
         const userProgramIds = programDirectorsRes
-          .filter((director: any) => director.userId === userId)
-          .map((director: any) => director.programId);
+          .filter((director) => director.userId === userId)
+          .map((director) => director.programId);
 
-        //pgoram to programupdates
+        // program to programupdates
         const userProgramUpdateIds = programUpdatesRes
-          .filter((update: any) => userProgramIds.includes(update.programId))
-          .map((update: any) => update.id);
+          .filter((update) => userProgramIds.includes(update.programId))
+          .map((update) => update.id);
 
-        //programupdates to mediachange
-        const filteredUserMedia = mediaChangesRes.filter((media: any) =>
+        // programupdates to mediachange
+        const filteredUserMedia = mediaChangesRes.filter((media) =>
           userProgramUpdateIds.includes(media.updateId)
         );
 
-        const transformedMedia = filteredUserMedia.map((media: any) => ({
+        const transformedMedia = filteredUserMedia.map((media) => ({
           id: media.id,
           s3_key: media.s3Key,
           file_name: media.fileName,
@@ -73,23 +70,10 @@ export const Media = () => {
 
   return (
     <Box minH="100vh">
-      <Container
-        maxW="container.xl"
-        py={8}
-      >
-        <Box
-          borderRadius="lg"
-          p={8}
-        >
-          <VStack
-            align="start"
-            spacing={6}
-            w="full"
-          >
-            <Heading
-              size="xl"
-              color="gray.800"
-            >
+      <Container maxW="container.xl" py={8}>
+        <Box borderRadius="lg" p={8}>
+          <VStack align="start" spacing={6} w="full">
+            <Heading size="xl" color="gray.800">
               My Media
             </Heading>
 

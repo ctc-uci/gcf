@@ -14,29 +14,14 @@ import {
   Tr,
   useColorModeValue,
 } from "@chakra-ui/react";
-
-import { GcfUserAccount } from "@/types/gcf-user";
 import { FiEdit2, FiEyeOff } from "react-icons/fi";
 
-export interface GcfUserTableData extends GcfUserAccount {
-  email: string;
-  password: string;
-  program?: string | null;
-}
-
-interface AccountsTableProps {
-  data: GcfUserTableData[];
-}
-
-export const AccountsTable = ({ data }: AccountsTableProps) => {
+export const AccountsTable = ({ data }) => {
   const hoverBg = useColorModeValue("gray.50", "gray.700");
 
   return (
     <TableContainer>
-      <Table
-        variant="simple"
-        size="md"
-      >
+      <Table variant="simple" size="md">
         <Thead>
           <Tr>
             <Th
@@ -100,11 +85,7 @@ export const AccountsTable = ({ data }: AccountsTableProps) => {
 
               <Td>
                 <HStack spacing={2}>
-                  <Text
-                    fontSize="lg"
-                    lineHeight="1"
-                    mt="6px"
-                  >
+                  <Text fontSize="lg" lineHeight="1" mt="6px">
                     ********
                   </Text>
                   <Icon
@@ -132,10 +113,7 @@ export const AccountsTable = ({ data }: AccountsTableProps) => {
 
               <Td>{user.program || "-"}</Td>
 
-              <Td
-                p={0}
-                textAlign="right"
-              >
+              <Td p={0} textAlign="right">
                 <Box
                   className="action-group"
                   opacity={0}

@@ -1,19 +1,15 @@
 import { useEffect, useState } from "react";
-
 import { Box, Center, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
-
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { GcfUserAccount } from "@/types/gcf-user";
 import { useParams } from "react-router-dom";
-
-import { AccountsTable, GcfUserTableData } from "./AccountsTable";
+import { AccountsTable } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
 
 export const Account = () => {
   const { userId } = useParams();
 
-  const [currentUser, setCurrentUser] = useState<GcfUserAccount | null>(null);
-  const [users, setUsers] = useState<GcfUserTableData[]>([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const { backend } = useBackendContext();
@@ -40,7 +36,7 @@ export const Account = () => {
           return;
         }
 
-        let fetchedData: GcfUserTableData[] = [];
+        let fetchedData = [];
 
         if (userData.role === "Admin") {
           const [pdResponse, rdResponse] = await Promise.all([
@@ -48,7 +44,7 @@ export const Account = () => {
             backend.get("/regional-directors/summary"),
           ]);
 
-          const pds = pdResponse.data.map((item: any) => ({
+          const pds = pdResponse.data.map((item) => ({
             id: item.id,
             firstName: item.firstName,
             lastName: item.lastName,
@@ -58,7 +54,7 @@ export const Account = () => {
             password: "-",
           }));
 
-          const rds = rdResponse.data.map((item: any) => ({
+          const rds = rdResponse.data.map((item) => ({
             id: item.id,
             firstName: item.firstName,
             lastName: item.lastName,
@@ -74,7 +70,7 @@ export const Account = () => {
             `/regional-directors/${userId}/program-directors`
           );
 
-          fetchedData = pdResponse.data.map((item: any) => ({
+          fetchedData = pdResponse.data.map((item) => ({
             id: item.id,
             firstName: item.firstName,
             lastName: item.lastName,
@@ -97,22 +93,14 @@ export const Account = () => {
   }, [backend, userId]);
 
   return (
-    <Box
-      p={8}
-      bg="white"
-      minH="100vh"
-    >
+    <Box p={8} bg="white" minH="100vh">
       <Flex
         mb={8}
         align="center"
         wrap={{ base: "wrap", md: "nowrap" }}
         gap={4}
       >
-        <Heading
-          as="h1"
-          size="lg"
-          fontWeight="500"
-        >
+        <Heading as="h1" size="lg" fontWeight="500">
           Accounts
         </Heading>
 
@@ -121,10 +109,7 @@ export const Account = () => {
 
       {isLoading ? (
         <Center py={10}>
-          <Spinner
-            size="xl"
-            color="gray.500"
-          />
+          <Spinner size="xl" color="gray.500" />
         </Center>
       ) : users.length === 0 ? (
         <Center py={10}>
