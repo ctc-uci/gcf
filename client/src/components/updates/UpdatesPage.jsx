@@ -93,7 +93,7 @@ export const UpdatesPage = () => {
           ] === regionalDirectorsById[currentUser.id].regionId
       );
       break;
-    default: // Project Director
+    default: // Project Director test
       visibleProgramUpdates = programUpdatesData.filter(
         (row) => row.createdBy === userId
       );
