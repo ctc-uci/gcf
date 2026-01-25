@@ -14,8 +14,9 @@ import {
   BrowserRouter as Router,
   Routes,
 } from "react-router-dom";
+
 import { Account } from "./components/accounts/Account";
-import { Media } from "./components/media/Media"
+import { Media } from "./components/media/Media";
 
 const App = () => {
   return (
@@ -34,12 +35,12 @@ const App = () => {
                   element={<Signup />}
                 />
                 <Route
-                  path="/account"
+                  path="/account/:userId"
                   element={<Account />}
                 />
                 <Route
-                  path = "/media/:userId"
-                  element = {<Media />}
+                  path="/media/:userId"
+                  element={<Media />}
                 />
                 <Route
                   path="/dashboard"

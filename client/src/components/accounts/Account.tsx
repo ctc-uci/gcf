@@ -3,37 +3,46 @@ import { useEffect, useState } from "react";
 import { Box, Center, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
 
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import { GcfUserAccount } from "@/types/gcf-user";
+import { useParams } from "react-router-dom";
 
 import { AccountsTable, GcfUserTableData } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
 
 export const Account = () => {
+  const { userId } = useParams();
+
+  const [currentUser, setCurrentUser] = useState<GcfUserAccount | null>(null);
   const [users, setUsers] = useState<GcfUserTableData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const { backend } = useBackendContext();
-  // const { role, loading: roleLoading } = useRoleContext();
-
-  // FOR TESTING PURPOSES ONLY - REMOVE ONCE ROLES ARE IMPLEMENTED
-  const role = "Admin";
-  const roleLoading = false;
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      if (roleLoading) return;
+    const fetchData = async () => {
+      setIsLoading(true);
 
-      if (!role) {
+      if (!userId) {
+        console.error("No userId found in params");
         setIsLoading(false);
         return;
       }
 
-      setIsLoading(true);
-
       try {
+        const currentUserResponse = await backend.get(`/gcf-users/${userId}`);
+        const userData = currentUserResponse.data;
+
+        setCurrentUser(userData);
+
+        if (!userData) {
+          console.error("Current user data is null");
+          setIsLoading(false);
+          return;
+        }
+
         let fetchedData: GcfUserTableData[] = [];
 
-        if (role === "Admin") {
+        if (userData.role === "Admin") {
           const [pdResponse, rdResponse] = await Promise.all([
             backend.get("/program-directors/summary"),
             backend.get("/regional-directors/summary"),
@@ -60,8 +69,10 @@ export const Account = () => {
           }));
 
           fetchedData = [...rds, ...pds];
-        } else if (role === "Regional Director") {
-          const pdResponse = await backend.get("/program-directors/summary");
+        } else if (userData.role === "Regional Director") {
+          const pdResponse = await backend.get(
+            `/regional-directors/${userId}/program-directors`
+          );
 
           fetchedData = pdResponse.data.map((item: any) => ({
             id: item.id,
@@ -74,18 +85,16 @@ export const Account = () => {
           }));
         }
 
-        console.log(fetchedData);
-
         setUsers(fetchedData);
       } catch (error) {
-        console.error("Error loading accounts:", error);
+        console.error("Error loading data:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchUsers();
-  }, [backend, role, roleLoading]);
+    fetchData();
+  }, [backend, userId]);
 
   return (
     <Box
@@ -110,7 +119,7 @@ export const Account = () => {
         <AccountToolbar />
       </Flex>
 
-      {isLoading || roleLoading ? (
+      {isLoading ? (
         <Center py={10}>
           <Spinner
             size="xl"
