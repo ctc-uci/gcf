@@ -34,6 +34,8 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
     const [isAddingLanguage, setIsAddingLanguage] = useState(false)
     const [isAddingRegionalDirector, setIsAddingRegionalDirector] = useState(false)
 
+    const [countries, setCountries] = useState([])
+
     const [form, setForm] = useState({
         id: "",
         created_by: "",
@@ -46,25 +48,66 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
         playlist_link: "",
         partner_org: "",
         program_status: "",
-        launch_date: ""
+        launch_date: "",
+        countries: "",
+        note: ""
     });
 
     useEffect(() => {
-        if (!programUpdateId) {
-            console.log("woof")
-            return;
-        }
         const program_data = async () => {
-            const result = await fetch (
-                `http://localhost:3001/program-updates/${programUpdateId}`
-            );
-            const data = await result.json();
+            const programUpdate = await fetch(
+                    `http://localhost:3001/program-updates/${programUpdateId}`
+                ).then((r) => r.json());
+            console.log(programUpdate)
+            const program_id = programUpdate.programId; 
 
-            console.log(data);
+            if (!program_id) {
+                console.log("No programid found on program update");
+                return;
+            }
+
+
+            const [
+                programResult,
+                countryResult,
+                programUpdateResult,
+            ] = await Promise.all([
+                fetch(`http://localhost:3001/program/${program_id}`).then(r => r.json()),
+                fetch(`http://localhost:3001/country`).then(r => r.json()),
+            ]);
+
+            setForm({
+                id: programResult.id ?? "",
+                created_by: programResult.createdBy ?? "",
+                program_name: programResult.name ?? "",
+                date_created: programResult.dateCreated
+                ? programResult.dateCreated.slice(0, 10)
+                : "",
+                country: programResult.country ?? "",
+                title: programResult.title ?? "",
+                description: programResult.description ?? "",
+                primary_language: programResult.primaryLanguage ?? "",
+                playlist_link: "",
+                partner_org: programResult.partnerOrg ?? "",
+                program_status: programResult.status ?? "",
+                launch_date: programResult.launchDate
+                ? programResult.launchDate.slice(0, 10)
+                : "",
+                note: programUpdateResult ?? "",
+                countries: countryResult ?? ""
+            });
+
+            setCountries(countryResult);
+
             console.log("meow");
         };
         program_data();
     }, [programUpdateId]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
+    };
 
     return (
         <VStack p={8} width='35%' borderWidth="1px" borderColor="lightblue">
@@ -75,30 +118,65 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                     <Heading size="sm">Update Notes</Heading>
                 </CardHeader>
                 <CardBody py={1}>
-                    <Text>
-                        Instrument number went down due to damage, waiting on replacement strings. Recruited John Doe as a program director as they've been getting more involved. Student number updated from 100 to 120.
+                    <Text placeholder = "None">
+                        {form.note}
                     </Text>
                 </CardBody>
             </Card>
             <FormControl isRequired>
                 <FormLabel size='sm'>Program Name</FormLabel>
-                <Input placeholder='Program Name'/>
+                <Input 
+                    name="program_name"
+                    placeholder='Program Name'
+                    value = {form.program_name}
+                    onChange={handleChange}
+                />
             </FormControl>
             <FormControl>
                 <FormLabel>Status</FormLabel>
-                <Select placeholder='Select Option'/>
+                <Select 
+                    name="program_status"
+                    value={form.program_status}
+                    onChange={handleChange}
+                    placeholder='Select Status'
+                >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </Select>
             </FormControl>
             <FormControl>
                 <FormLabel>Launch Date</FormLabel>
-                <Input type='date' placeholder='Select Date'/>
+                <Input
+                    name="program_launch_date"
+                    type='date' 
+                    placeholder='Select Date'
+                    value = {form.launch_date}
+                    onChange={handleChange}
+                    />
             </FormControl>
             <FormControl>
                 <FormLabel>Location</FormLabel>
-                <Select placeholder='Select Location'/>
+                <Select
+                    name="country"
+                    placeholder='Select Location'
+                    onChange={handleChange}
+                    value={form.country}
+                >
+                {countries.map((c) => (
+                    <option key={c.id} value={c.name}>
+                    {c.name}
+                    </option>
+                ))}
+                </Select>
             </FormControl>
             <FormControl>
                 <FormLabel>Students</FormLabel>
-                <NumberInput>
+                <NumberInput
+                    value={form.students}
+                    onChange={(new_students) =>
+                        setForm((prev) => ({ ...prev, students: new_students}))
+                    }    
+                >
                     <NumberInputField/>
                     <NumberInputStepper>
                         <NumberIncrementStepper/>
