@@ -1,7 +1,6 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-
 import { ArrowRightIcon } from '@chakra-ui/icons'
 
 import 
@@ -12,22 +11,59 @@ import
   Input,
   NumberInput,
   NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
   HStack,
   Select,
-  Box,
   Button,
+  Box,
   Textarea,
+  SlideFade,
+  useDisclosure
 } from '@chakra-ui/react'
 
 export const ProgramUpdateForm = () => {
-    // const [formData, setFormData] = useState({
-    //     date: '',
-    //     studentsEnrolled: 0,
-    //     instrument: '',
-    //     notes: '',
-    //     media: []
-    // });
+    const { isOpen, onToggle } = useDisclosure()
+    const [newInstrumentName, setNewInstrumentName] = useState('')
+    const [instruments, setInstruments] = useState([])
+
+    // fetch instruments when component loads
+    useEffect(() => {
+        const fetchInstruments = async () => {
+            try {
+                const response = await axios.get('http://localhost:3001/instruments');
+                setInstruments(response.data);
+            } catch (error) {
+                console.error('Error fetching instruments:', error);
+                // continue rendering even if fetch fails
+                setInstruments([]);
+            }
+        };
+        fetchInstruments();
+    }, []);
     
+    const handleAddInstrument = async () => {
+        if (!newInstrumentName.trim()) {
+            return;
+        }
+        // might want to check if instrument alr exists before adding
+        try {
+            await axios.post('http://localhost:3001/instruments', {
+                name: newInstrumentName
+            });
+
+            // refetch instruments after adding to update dropdown menu
+            const response = await axios.get('http://localhost:3001/instruments');
+            setInstruments(response.data);
+
+            setNewInstrumentName('');
+            onToggle();
+        } catch (error) {
+            console.error('Error adding instrument:', error);
+        }
+    };
+
     return (
         <VStack p={8} width='35%' borderWidth="1px" align="start" spacing={4}>
             <HStack>
@@ -50,31 +86,57 @@ export const ProgramUpdateForm = () => {
                     <NumberInputField bg="gray.100"></NumberInputField>
                 </NumberInput>
             </FormControl>
-            <FormControl>
-                <HStack>
-                    <Box width="40%">
+            <HStack width='100%'>
+                <Box>
+                    <FormControl>
                         <FormLabel fontWeight="normal" color="gray">
-                            Instrument Type
+                            Instruments
                         </FormLabel>
-                        <Select placeholder="Ukelele" bg="gray.100">
-
+                        <Select placeholder="Select Instrument" bg="gray.100">
+                            {instruments.map(instrument => (
+                                <option key={instrument.id} value={instrument.id}>
+                                    {instrument.name}
+                                </option>
+                            ))}
                         </Select>
-                    </Box>
-                    <Box width="20%">
-                        <FormLabel fontWeight="normal" color="gray">
-                            # Donated
-                        </FormLabel>
-                        <NumberInput bg="gray.100">
-                            <NumberInputField></NumberInputField>
-                        </NumberInput>
-                    </Box>
-                </HStack>
-            </FormControl>
-            <FormControl>
-                <Button borderWidth={1} borderColor="black" bg="white">
-                    + Add Instrument
+                    </FormControl>
+                </Box>
+                <Box>
+                    <FormLabel fontWeight="normal" color="gray">
+                            Quantity
+                    </FormLabel>
+                    <NumberInput maxW="80px">
+                        <NumberInputField />
+                        <NumberInputStepper>
+                            <NumberIncrementStepper/>
+                            <NumberDecrementStepper/>
+                        </NumberInputStepper>
+                    </NumberInput>
+                </Box>
+                <Button mt={33}>
+                    Confirm
                 </Button>
-            </FormControl>
+            </HStack>
+                <FormControl>
+                    <HStack>
+                        <Button onClick={onToggle} size='sm'borderWidth={1} borderColor="black" bg="white">
+                            + Add Instrument
+                        </Button>
+                        <SlideFade in={isOpen} offsetX="-100px" offsetY="0px">
+                            <HStack>
+                                <Input 
+                                    placeholder="New Instrument" 
+                                    bg="gray.100"
+                                    value={newInstrumentName}
+                                    onChange={(e) => setNewInstrumentName(e.target.value)}
+                                />
+                                <Button onClick={handleAddInstrument}>
+                                    OK
+                                </Button>
+                            </HStack>
+                        </SlideFade>
+                    </HStack>
+                </FormControl>
             <FormControl>
                 <FormLabel fontWeight="normal" color="gray">
                     Notes
