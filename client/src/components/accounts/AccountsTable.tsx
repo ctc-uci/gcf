@@ -1,24 +1,31 @@
-import { GcfUserAccount } from "@/types/gcf-user";
 import {
+  Badge,
   Box,
   Button,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
-  Badge,
-  Icon,
-  Text,
   HStack,
+  Icon,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { FiEyeOff, FiEdit2 } from "react-icons/fi";
+
+import { GcfUserAccount } from "@/types/gcf-user";
+import { FiEdit2, FiEyeOff } from "react-icons/fi";
+
+export interface GcfUserTableData extends GcfUserAccount {
+  email: string;
+  password: string;
+  program?: string | null;
+}
 
 interface AccountsTableProps {
-  data: GcfUserAccount[];
+  data: GcfUserTableData[];
 }
 
 export const AccountsTable = ({ data }: AccountsTableProps) => {
@@ -26,14 +33,52 @@ export const AccountsTable = ({ data }: AccountsTableProps) => {
 
   return (
     <TableContainer>
-      <Table variant="simple" size="md">
+      <Table
+        variant="simple"
+        size="md"
+      >
         <Thead>
           <Tr>
-            <Th color="black" fontSize="sm" textTransform="none" fontWeight="bold">Name</Th>
-            <Th color="black" fontSize="sm" textTransform="none" fontWeight="bold">Email</Th>
-            <Th color="black" fontSize="sm" textTransform="none" fontWeight="bold">Password</Th>
-            <Th color="black" fontSize="sm" textTransform="none" fontWeight="bold">Type</Th>
-            <Th color="black" fontSize="sm" textTransform="none" fontWeight="bold">Program(s)</Th>
+            <Th
+              color="black"
+              fontSize="sm"
+              textTransform="none"
+              fontWeight="bold"
+            >
+              Name
+            </Th>
+            <Th
+              color="black"
+              fontSize="sm"
+              textTransform="none"
+              fontWeight="bold"
+            >
+              Email
+            </Th>
+            <Th
+              color="black"
+              fontSize="sm"
+              textTransform="none"
+              fontWeight="bold"
+            >
+              Password
+            </Th>
+            <Th
+              color="black"
+              fontSize="sm"
+              textTransform="none"
+              fontWeight="bold"
+            >
+              Type
+            </Th>
+            <Th
+              color="black"
+              fontSize="sm"
+              textTransform="none"
+              fontWeight="bold"
+            >
+              Program(s)
+            </Th>
             <Th width="50px"></Th>
           </Tr>
         </Thead>
@@ -50,13 +95,23 @@ export const AccountsTable = ({ data }: AccountsTableProps) => {
               <Td fontWeight="medium">
                 {user.firstName} {user.lastName}
               </Td>
-              
+
               <Td>{user.email}</Td>
 
               <Td>
                 <HStack spacing={2}>
-                  <Text fontSize="lg" lineHeight="1" mt="6px">********</Text>
-                  <Icon as={FiEyeOff} color="gray.500" cursor="pointer" />
+                  <Text
+                    fontSize="lg"
+                    lineHeight="1"
+                    mt="6px"
+                  >
+                    ********
+                  </Text>
+                  <Icon
+                    as={FiEyeOff}
+                    color="gray.500"
+                    cursor="pointer"
+                  />
                 </HStack>
               </Td>
 
@@ -77,7 +132,10 @@ export const AccountsTable = ({ data }: AccountsTableProps) => {
 
               <Td>{user.program || "-"}</Td>
 
-              <Td p={0} textAlign="right">
+              <Td
+                p={0}
+                textAlign="right"
+              >
                 <Box
                   className="action-group"
                   opacity={0}

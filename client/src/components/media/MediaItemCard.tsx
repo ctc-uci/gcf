@@ -1,9 +1,14 @@
 import React from "react";
-import { Box, VStack, Skeleton, SkeletonText } from "@chakra-ui/react";
+
+import { Box, Skeleton, SkeletonText, VStack } from "@chakra-ui/react";
 
 const MediaItemCard = () => {
   return (
-    <VStack align="flex-start" spacing={3} w="full">
+    <VStack
+      align="flex-start"
+      spacing={3}
+      w="full"
+    >
       {/* Media Placeholder */}
       <Box
         w="full"
@@ -16,11 +21,18 @@ const MediaItemCard = () => {
         alignItems="center"
         justifyContent="center"
       />
-      
+
       {/* Metadata Placeholders */}
       <Box w="full">
-        <Skeleton height="12px" mb={2} width="80%" />
-        <Skeleton height="10px" width="40%" />
+        <Skeleton
+          height="12px"
+          mb={2}
+          width="80%"
+        />
+        <Skeleton
+          height="10px"
+          width="40%"
+        />
       </Box>
     </VStack>
   );

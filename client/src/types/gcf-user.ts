@@ -1,11 +1,9 @@
 export type GcfUserRole = 'Regional Director' | 'Program Director' | 'Admin';
 
 export interface GcfUserAccount {
-  id: number;
-  role: GcfUserRole;
-  email: string;
-  firstName: string;
-  lastName: string;
-  dateCreated: string;
-  createdBy?: number | null;
+    id: string;
+    role: GcfUserRole;
+    firstName: string;
+    lastName: string;
+    createdBy?: string | null;
 }
