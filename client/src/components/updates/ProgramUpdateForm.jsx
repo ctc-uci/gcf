@@ -20,13 +20,19 @@ import
   Box,
   Textarea,
   SlideFade,
-  useDisclosure
+  useDisclosure,
+  Tag,
+  TagLabel,
+  TagCloseButton
 } from '@chakra-ui/react'
 
 export const ProgramUpdateForm = () => {
     const { isOpen, onToggle } = useDisclosure()
     const [newInstrumentName, setNewInstrumentName] = useState('')
     const [instruments, setInstruments] = useState([])
+    const [selectedInstrument, setSelectedInstrument] = useState('')
+    const [quantity, setQuantity] = useState(0)
+    const [addedInstruments, setAddedInstruments] = useState({})
 
     // fetch instruments when component loads
     useEffect(() => {
@@ -42,8 +48,30 @@ export const ProgramUpdateForm = () => {
         };
         fetchInstruments();
     }, []);
+
+    const handleConfirm = () => {
+        if (!selectedInstrument || quantity === 0) {
+            return;
+        }
+                
+        setAddedInstruments(prev => ({
+            ...prev,
+            [selectedInstrument]: parseInt(quantity)
+        }));
+        
+        setSelectedInstrument('');
+        setQuantity(0);
+    };
+
+    const removeInstrument = (name) => {
+        setAddedInstruments(prev => {
+            const updated = { ...prev };
+            delete updated[name];
+            return updated;
+        });
+    };
     
-    const handleAddInstrument = async () => {
+    const addInstrument = async () => {
         if (!newInstrumentName.trim()) {
             return;
         }
@@ -76,25 +104,30 @@ export const ProgramUpdateForm = () => {
                 <FormLabel fontWeight="normal" color="gray">
                     Date
                 </FormLabel>
-                <Input placeholder="MM/DD/YYYY" bg="gray.100"/>
+                <Input type="date" placeholder="MM/DD/YYYY" bg="gray.100"/>
             </FormControl>
             <FormControl>
                 <FormLabel fontWeight="normal" color="gray">
                     # Students currently enrolled
                 </FormLabel>
-                <NumberInput>
+                <NumberInput width="30%">
                     <NumberInputField bg="gray.100"></NumberInputField>
                 </NumberInput>
             </FormControl>
-            <HStack width='100%'>
+            <HStack width="100%">
                 <Box>
                     <FormControl>
                         <FormLabel fontWeight="normal" color="gray">
                             Instruments
                         </FormLabel>
-                        <Select placeholder="Select Instrument" bg="gray.100">
+                        <Select 
+                            placeholder="Select Instrument" 
+                            bg="gray.100"
+                            value={selectedInstrument}
+                            onChange={(e) => setSelectedInstrument(e.target.value)}
+                        >
                             {instruments.map(instrument => (
-                                <option key={instrument.id} value={instrument.id}>
+                                <option key={instrument.id} value={instrument.name}>
                                     {instrument.name}
                                 </option>
                             ))}
@@ -105,7 +138,11 @@ export const ProgramUpdateForm = () => {
                     <FormLabel fontWeight="normal" color="gray">
                             Quantity
                     </FormLabel>
-                    <NumberInput maxW="80px">
+                    <NumberInput 
+                        maxW="80px"
+                        value={quantity}
+                        onChange={(value) => setQuantity(parseInt(value) || 0)}
+                    >
                         <NumberInputField />
                         <NumberInputStepper>
                             <NumberIncrementStepper/>
@@ -113,7 +150,7 @@ export const ProgramUpdateForm = () => {
                         </NumberInputStepper>
                     </NumberInput>
                 </Box>
-                <Button mt={33}>
+                <Button mt={33} onClick={handleConfirm}>
                     Confirm
                 </Button>
             </HStack>
@@ -130,13 +167,25 @@ export const ProgramUpdateForm = () => {
                                     value={newInstrumentName}
                                     onChange={(e) => setNewInstrumentName(e.target.value)}
                                 />
-                                <Button onClick={handleAddInstrument}>
+                                <Button onClick={addInstrument}>
                                     OK
                                 </Button>
                             </HStack>
                         </SlideFade>
                     </HStack>
                 </FormControl>
+                {
+                    Object.keys(addedInstruments).length > 0 && (
+                        <HStack width="100%" flexWrap="wrap" spacing={2}>
+                            {Object.entries(addedInstruments).map(([name, quantity]) => (
+                                <Tag key={name} size="lg" bg="gray.200">
+                                    <TagLabel>{name} - {quantity}</TagLabel>
+                                    <TagCloseButton onClick={() => removeInstrument(name)} />
+                                </Tag>
+                            ))}
+                        </HStack>
+                    )
+                }
             <FormControl>
                 <FormLabel fontWeight="normal" color="gray">
                     Notes
