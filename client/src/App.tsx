@@ -15,7 +15,13 @@ Navigate,
   Route,
   BrowserRouter as Router,  
   Routes,
+  useParams
 } from "react-router-dom";
+
+function ProgramUpdateEditRoute() {
+  const { program_update_id } = useParams();
+  return <ProgramUpdateEditForm programUpdateId={program_update_id} />;
+}
 
 const App = () => {
   return (
@@ -60,8 +66,8 @@ const App = () => {
                   element={<ProtectedRoute element={<CatchAll />} />}
                 />
                 <Route
-                  path = "/editform"
-                  element={<ProgramUpdateEditForm />}
+                  path = "/update-edit-form/:program_update_id"
+                  element={<ProgramUpdateEditRoute />}
                 />
               </Routes>
             </Router>
