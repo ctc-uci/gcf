@@ -40,6 +40,10 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
     const [quantity, setQuantity] = useState(0)
     const [addedInstruments, setAddedInstruments] = useState({})
     const [newInstrumentName, setNewInstrumentName] = useState('')
+    const [regionalDirectors, setRegionalDirectors] = useState([]);
+    const [selectedRegionalDirector, setSelectedRegionalDirector] = useState('');
+    const [addedRegionalDirectors, setAddedRegionalDirectors] = useState({})
+
 
 
     const [form, setForm] = useState({
@@ -60,7 +64,7 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
     });
 
     useEffect(() => {
-        let programUpdateResponse, programResponse, countryResponse, instrumentResponse, instrumentChangeResponse;
+        let programUpdateResponse, programResponse, countryResponse, instrumentResponse, instrumentChangeResponse, userResponse;
         const program_data = async () => {
             // fetching program update to get program id
             try {
@@ -101,10 +105,9 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                 ]);
             }
             catch (error){
-                console.error('Error fetching countries/program/instruments/instrument_change: ', error)
+                console.error('Error fetching countries/program/instruments/instrument_change: ', error);
                 return;
             }
-            console.log(instrumentChangeResponse);
 
             // need to get instrument changes with the update id
             // maybe should create route for selecting by update_id?
@@ -112,19 +115,18 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                 (row) => row.updateId === programUpdateId
             );
 
-            console.log(filteredInstrumentChange)
             const match = new Map(instrumentResponse.map((i) => [i.id, i.name]));
-            console.log(match)
             const existingInstruments = {};
 
             for (const row of filteredInstrumentChange) {
                 const name = match.get(row.instrumentId);
-                console.log(name)
                 // if there is a duplicate just add it on top otherwise make it
                 existingInstruments[name] = (existingInstruments[name] ?? 0) + row.amountChanged;
             }
-            console.log(existingInstruments)
             setAddedInstruments(existingInstruments);
+
+            // need to get regional directors
+            // maybe should create route for selecting by role_name and created_by id?
 
             setForm({
                 id: programResponse.id ?? "",
@@ -146,8 +148,36 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                 note: programUpdateResponse.note ?? "",
             });
 
+             //fetching gcf users to get regional directors
+            try {
+                userResponse = await fetch(
+                    `http://localhost:3001/gcf-users`
+                ).then((r) => {
+                    if (!r.ok) throw new Error(`User Error: ${r.status}`)
+                    return r.json()
+            });
+            } catch (error) {
+                console.error('Error fetching user: ', error)
+                return;
+            }
+            console.log(userResponse)
+
+            const filteredRegionalDirectors = userResponse.filter(
+                user => user.role === "Regional Director"
+            );
+            console.log(filteredRegionalDirectors);
+            console.log(addedInstruments);
+
+            setAddedRegionalDirectors(
+                Object.fromEntries(
+                    filteredRegionalDirectors.map((u) => [u.id, `${u.firstName} ${u.lastName}`])
+                )
+            );
+        
+            
+            setRegionalDirectors(filteredRegionalDirectors);
             setCountries(countryResponse);
-            setInstruments(instrumentResponse)
+            setInstruments(instrumentResponse);
         };
         program_data();
     }, [programUpdateId]);
@@ -159,9 +189,7 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
 
     const addInstrument = async () => {
         const name = newInstrumentName.trim()
-        if (!newInstrumentName.trim() || quantity <= 0) {
-            return;
-        }
+
         // might want to check if instrument alr exists before adding
         try {
             const postResponse = await fetch('http://localhost:3001/instruments', {
@@ -195,8 +223,10 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
 
     const handleAddInstrumentAndQuantity = async () => {
         const instrumentName = selectedInstrument || newInstrumentName.trim();
-
-        if (newInstrumentName) {
+        if (!instrumentName.trim() || quantity <= 0) {
+            return;
+        }
+        if (instrumentName) {
             const added = await addInstrument();
         }
         setAddedInstruments(prev => ({
@@ -208,6 +238,37 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
         setQuantity(0);
     }
 
+    const removeInstrument = (name) => {
+        setAddedInstruments(prev => {
+            const updated = { ...prev };
+            delete updated[name];
+            return updated;
+        });
+    };
+
+    const handleAddRegionalDirector = () => {
+        const directorId = selectedRegionalDirector;
+        if (!directorId) return;
+
+        const user = regionalDirectors.find((u) => String(u.id) === String(directorId));
+        if (!user) return; // still protects you if data isn't loaded
+
+        setAddedRegionalDirectors((prev) => ({
+            ...prev,
+            [directorId]: `${user.firstName} ${user.lastName}`,
+        }));
+
+        setSelectedRegionalDirector("");
+    };
+
+
+    const removeRegionalDirector = (id) => {
+        setAddedRegionalDirectors((prev) => {
+            const updated = { ...prev };
+            delete updated[id];
+            return updated;
+        });
+    };
 
     return (
         <VStack p={8} width='35%' borderWidth="1px" borderColor="lightblue">
@@ -314,7 +375,11 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                     />
                     <NumberInput
                         value={quantity}
-                        onChange={(value) => setQuantity(parseInt(value) || 0)}>
+                        min={0}
+                        onChange={(_, valueAsNumber) => {
+                        setQuantity(valueAsNumber || 0);
+                    }}
+                    >
                         <NumberInputField/>
                         <NumberInputStepper>
                             <NumberIncrementStepper/>
@@ -345,29 +410,55 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                 )
             }
             <FormControl>
-                <FormLabel>Languages</FormLabel>
-                {!isAddingLanguage && <Button onClick={() => setIsAddingLanguage(true)}>+ Add</Button>}
-                {isAddingLanguage && 
+                <FormLabel>Primary Language</FormLabel>
                 <HStack>
-                    <Input placeholder="Language" />
-                    <Button onClick={() => setIsAddingLanguage(false)}>
-                    + Add
-                    </Button>
+                    <Input 
+                        name="primary_language"
+                        placeholder='Language'
+                        value = {form.primary_language}
+                        onChange={handleChange}
+                    />
                 </HStack>               
-                }
             </FormControl>
             <FormControl>
                 <FormLabel>Regional Director(s)</FormLabel>
                 {!isAddingRegionalDirector && <Button onClick={() => setIsAddingRegionalDirector(true)}>+ Add</Button>}
                 {isAddingRegionalDirector && 
                 <HStack>
-                    <Input placeholder="Regional Director Name" />
-                    <Button onClick={() => isAddingRegionalDirector(false)}>
+                    <Select
+                        name="regional_director"
+                        placeholder='Select Regional Director(s)'
+                        onChange={(e) => setSelectedRegionalDirector(e.target.value)}
+                        value={selectedRegionalDirector}
+                    >
+                    {regionalDirectors.map(user => (
+                        <option key={user.id} value={user.id}>
+                            {user.firstName} {user.lastName}
+                        </option>
+                    ))}
+                    </Select>
+                    <Button 
+                            onClick={ () => {
+                            handleAddRegionalDirector();
+                            setIsAddingRegionalDirector(false);
+                    }}>
                     + Add
                     </Button>
                 </HStack>               
                 }
             </FormControl>
+            {
+                Object.keys(regionalDirectors).length > 0 && (
+                    <HStack width="100%" flexWrap="wrap" spacing={2}>
+                        {Object.entries(addedRegionalDirectors).map(([id, name]) => (
+                        <Tag key={id} size="lg" bg="gray.200">
+                            <TagLabel>{name}</TagLabel>
+                            <TagCloseButton onClick={() => removeRegionalDirector(id)} />
+                        </Tag>
+                        ))}
+                    </HStack>
+                )
+            }
             <Divider w="110%"></Divider>
             <HStack w="100%">
                 <Button>Delete</Button>
