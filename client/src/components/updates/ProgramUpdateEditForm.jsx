@@ -45,10 +45,10 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
     const [addedRegionalDirectors, setAddedRegionalDirectors] = useState({});
     const [enrollmentNumber, setEnrollmentNumber] = useState(null);
     const [graduatedNumber, setGraduatedNumber] = useState(null);
+    const [newInstruments, setNewInstruments] = useState([]);
+     const [existingInstruments, setExistingInstruments] = useState([])
     const [title, setTitle] = useState('')
-
-
-
+    const [date, setDate] = useState('')
 
 
     const [form, setForm] = useState({
@@ -84,7 +84,6 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                 return;
             }
             const program_id = programUpdateResponse.programId;
-            console.log(program_id)
 
             // fetching programs, countries, instruments
             try {
@@ -126,7 +125,6 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
             const filteredEnrollmentChange = enrollmentChangeResponse.filter(
                 (row) => row.updateId === programUpdateId
             );
-            console.log(filteredEnrollmentChange)
 
             const latestEnrollmentChange =
             filteredEnrollmentChange.length > 0
@@ -148,14 +146,14 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
             );
 
             const match = new Map(instrumentResponse.map((i) => [i.id, i.name]));
-            const existingInstruments = {};
+            const instruments = {};
 
             for (const row of filteredInstrumentChange) {
                 const name = match.get(row.instrumentId);
                 // if there is a duplicate just add it on top otherwise make it
-                existingInstruments[name] = (existingInstruments[name] ?? 0) + row.amountChanged;
+                instruments[name] = (instruments[name] ?? 0) + row.amountChanged;
             }
-            setAddedInstruments(existingInstruments);
+            setAddedInstruments(instruments);
 
             // need to get regional directors
             // maybe should create route for selecting by role_name and created_by id?
@@ -216,57 +214,42 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
         setForm((prev) => ({ ...prev, [name]: value }));
     };
 
-    const addInstrument = async () => {
-        const name = newInstrumentName.trim()
 
-        // might want to check if instrument alr exists before adding
-        try {
-            const postResponse = await fetch('http://localhost:3001/instruments', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({name}),
-            });
+    const validNewInstrument = () => {
+        return newInstrumentName.trim().length > 0 && 
+            !instruments.some(instr => instr.name.toLowerCase() === newInstrumentName.trim().toLowerCase());
+    }
 
-        // reftch for dropdown
-        if (!postResponse.ok) {
-            throw new Error(`POST instrument error: ${postResponse.status}`);
-            }
-
-            const getResponse = await fetch("http://localhost:3001/instruments");
-
-            if (!getResponse.ok) {
-            throw new Error(`GET instruments failed: ${getResponse.status}`);
-            }
-
-            const instrumentsData = await getResponse.json();
-            setInstruments(instrumentsData);
-
-            setNewInstrumentName("");
-            return name;
-        } catch (error) {
-            console.error('Error adding instrument:', error);
+    const handleNewInstrument = () => {
+        if (!validNewInstrument()) {
+            setNewInstrumentName('');
+            return;
         }
     };
 
-    const handleAddInstrumentAndQuantity = async () => {
+    const handleAddInstrumentAndQuantity = () => {
+        handleNewInstrument()
         const typed = newInstrumentName.trim();
-        const instrumentName = selectedInstrument || typed;
-        if (!instrumentName.trim() || quantity <= 0) {
-            return;
-        }
+        const chosen = selectedInstrument.trim();
+        const instrumentName = chosen || typed;
+
+        if (!instrumentName || quantity <= 0) return;
+
         if (typed) {
-            const added = await addInstrument();
+            setNewInstruments((prev) => [...prev, typed]);
         }
-        setAddedInstruments(prev => ({
+
+        setAddedInstruments((prev) => ({
             ...prev,
-            [instrumentName] : quantity
+            [instrumentName]: (prev[instrumentName] ?? 0) + quantity, 
         }));
+        
+
         setSelectedInstrument("");
         setNewInstrumentName("");
         setQuantity(0);
-    }
+    };
+
 
     const removeInstrument = (name) => {
         setAddedInstruments(prev => {
@@ -302,22 +285,88 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
 
 
     const handleSubmit = async () => {
-        const programData = {
-            name: form.program_name,
-            status: form.program_status,
-            launchDate: form.launch_date,
-            country: form.country,
-            primaryLanguage: form.primary_language,
-            partnerOrg: form.partner_org,
-            title: form.title,
-            //playlist_link: form.playlist_link,
-        }
-
-        const programUpdateData = {
-            title: form.title,
-            updateDate: new Date().toISOString().slice(0, 10),
-        }
         try {
+            const programData = {
+                name: form.program_name,
+                status: form.program_status,
+                launchDate: form.launch_date,
+                country: form.country,
+                primaryLanguage: form.primary_language,
+                partnerOrg: form.partner_org,
+                title: form.title,
+                //playlist_link: form.playlist_link,
+            }
+
+            const programUpdateData = {
+                title: form.title,
+                updateDate: new Date().toISOString().slice(0, 10),
+            }
+
+            console.log("New instruments to add:", newInstruments);
+
+            for (const instrumentName of newInstruments) {
+            try {
+                const res = await fetch("http://localhost:3001/instruments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: instrumentName }),
+                });
+
+                if (!res.ok) {
+                throw new Error(`POST /instruments failed: ${res.status}`);
+                }
+
+                console.log(`Added new instrument: ${instrumentName}`);
+            } catch (error) {
+                console.error(`Error adding instrument ${instrumentName}:`, error);
+            }
+            }
+
+            // refetch instruments to get their ids
+            const instrumentsRes = await fetch("http://localhost:3001/instruments");
+            if (!instrumentsRes.ok) {
+            throw new Error(`GET /instruments failed: ${instrumentsRes.status}`);
+            }
+            const instrumentsData = await instrumentsRes.json();
+            setExistingInstruments(instrumentsData);
+
+            console.log("Added Instruments:", addedInstruments);
+
+            // create instrument changes if any instruments were added
+            if (Object.keys(addedInstruments).length > 0) {
+            const instrumentChanges = Object.entries(addedInstruments).map(([name, qty]) => {
+                const instrument = instrumentsData.find((instr) => instr.name === name);
+                if (!instrument) {
+                throw new Error(`Instrument not found after refetch: ${name}`);
+                }
+
+                console.log("instrumentsData, update id, and qty", instrumentsData, programUpdateId, qty);
+
+                return {
+                instrument_id: instrument.id,
+                update_id: programUpdateId,
+                amount_changed: qty,
+                };
+            });
+
+            console.log("Sending instrument changes:", instrumentChanges[0]);
+
+            for (const change of instrumentChanges) {
+                const res = await fetch("http://localhost:3001/instrument-changes", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    instrumentId: change.instrument_id,
+                    updateId: change.update_id,
+                    amountChanged: change.amount_changed,
+                }),
+                });
+
+                if (!res.ok) {
+                throw new Error(`POST /instrument-changes failed: ${res.status}`);
+                }
+            }
+            }
             
             const programPutResponse = await fetch(`http://localhost:3001/program/${form.id}`, {
                     method: "PUT",
@@ -341,29 +390,6 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                 amountChanged: qty,
             }));
 
-            const existingUpdates = await fetch("http://localhost:3001/instrument-changes").then((r) => r.json());
-            const updatesToDelete = existingUpdates.filter (
-                (u) => (u.updateId) === programUpdateId
-            );
-
-            for (const u of updatesToDelete) {
-                const deleteResponse = await fetch(`http://localhost:3001/instrument-changes/${u.id}`, {
-                    method: "DELETE",
-                });
-                if (!deleteResponse.ok) throw new Error(`DELETE instrument_change failed: ${deleteResponse.status}`);
-            }
-
-            for (const row of rows) {
-                const postResponse = await fetch("http://localhost:3001/instrument-changes", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(row),
-                });
-                if (!postResponse.ok) throw new Error(`POST instrument_change failed: ${postResponse.status}`);
-                }
-                console.log("Instrument changes saved ");
-
-
             if (enrollmentNumber !== null && graduatedNumber !== null) {
                 console.log("Sending enrollment change:", {
                     update_id: programUpdateId,
@@ -386,17 +412,36 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                 console.log("Enrollment change saved");
             }
 
-            console.log('Sending program update data:', programUpdateId, enrollmentNumber, graduatedNumber);
 
-            // clear form if submission was successful
-            setTitle('');
-            setDate('');
-            setEnrollmentNumber(null);
-            setGraduatedNumber(null);
-            setNotes('');
-            setAddedInstruments({});
-            setNewInstruments([]);
+            const addInstrument = async () => {
+            const name = newInstrumentName.trim()
 
+            // might want to check if instrument alr exists before adding
+            const postResponse = await fetch('http://localhost:3001/instruments', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({name}),
+            });
+
+            // reftch for dropdown
+            if (!postResponse.ok) {
+                throw new Error(`POST instrument error: ${postResponse.status}`);
+                }
+
+                const getResponse = await fetch("http://localhost:3001/instruments");
+
+                if (!getResponse.ok) {
+                throw new Error(`GET instruments failed: ${getResponse.status}`);
+                }
+
+                const instrumentsData = await getResponse.json();
+                setInstruments(instrumentsData);
+
+                setNewInstrumentName("");
+                return name;
+            };
         } catch (err) {
             console.error("Save failed:", err);
         }
@@ -437,7 +482,7 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                     onChange={handleChange}
                 />
             </FormControl>
-            <FormControl>
+            <FormControl isRequired>
                 <FormLabel>Status</FormLabel>
                 <Select 
                     name="program_status"
@@ -449,7 +494,7 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                     <option value="Inactive">Inactive</option>
                 </Select>
             </FormControl>
-            <FormControl>
+            <FormControl isRequired>
                 <FormLabel>Launch Date</FormLabel>
                 <Input
                     name="launch_date"
@@ -459,7 +504,7 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                     onChange={handleChange}
                     />
             </FormControl>
-            <FormControl>
+            <FormControl isRequired>
                 <FormLabel>Location</FormLabel>
                 <Select
                     name="country"
@@ -486,7 +531,7 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                     <NumberInputField bg="gray.100"></NumberInputField>
                 </NumberInput>
             </FormControl>
-            <FormControl>
+            <FormControl >
                 <FormLabel fontWeight="normal" color="gray">
                     # Students graduated
                 </FormLabel>
@@ -540,8 +585,8 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                         </NumberInputStepper>
                     </NumberInput>
                     <Button
-                        onClick={async () => {
-                            await handleAddInstrumentAndQuantity();
+                        onClick={ () => {
+                             handleAddInstrumentAndQuantity();
                             setIsAddingInstrument(false);
                         }}
                     >

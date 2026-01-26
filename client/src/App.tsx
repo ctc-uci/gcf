@@ -8,7 +8,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
 import { CookiesProvider } from "react-cookie";
-import { ProgramUpdateEditForm } from "@/components/updates/ProgramUpdateEditForm";
 
 import {
 Navigate,
@@ -17,11 +16,6 @@ Navigate,
   Routes,
   useParams
 } from "react-router-dom";
-
-function ProgramUpdateEditRoute() {
-  const { program_update_id } = useParams();
-  return <ProgramUpdateEditForm programUpdateId={program_update_id} />;
-}
 
 const App = () => {
   return (
@@ -64,10 +58,6 @@ const App = () => {
                 <Route
                   path="*"
                   element={<ProtectedRoute element={<CatchAll />} />}
-                />
-                <Route
-                  path = "/update-edit-form/:program_update_id"
-                  element={<ProgramUpdateEditRoute />}
                 />
               </Routes>
             </Router>
