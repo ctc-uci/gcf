@@ -31,18 +31,23 @@ import { useState, useEffect } from "react";
 } from "@chakra-ui/icons";*/
 
 export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
-    const [isAddingInstrument, setIsAddingInstrument] = useState(false)
-    const [isAddingLanguage, setIsAddingLanguage] = useState(false)
-    const [isAddingRegionalDirector, setIsAddingRegionalDirector] = useState(false)
-    const [instruments, setInstruments] = useState([])
-    const [countries, setCountries] = useState([])
-    const [selectedInstrument, setSelectedInstrument] = useState('')
-    const [quantity, setQuantity] = useState(0)
-    const [addedInstruments, setAddedInstruments] = useState({})
-    const [newInstrumentName, setNewInstrumentName] = useState('')
+    const [isAddingInstrument, setIsAddingInstrument] = useState(false);
+    const [isAddingLanguage, setIsAddingLanguage] = useState(false);
+    const [isAddingRegionalDirector, setIsAddingRegionalDirector] = useState(false);
+    const [instruments, setInstruments] = useState([]);
+    const [countries, setCountries] = useState([]);
+    const [selectedInstrument, setSelectedInstrument] = useState('');
+    const [quantity, setQuantity] = useState(0);
+    const [addedInstruments, setAddedInstruments] = useState({});
+    const [newInstrumentName, setNewInstrumentName] = useState('');
     const [regionalDirectors, setRegionalDirectors] = useState([]);
     const [selectedRegionalDirector, setSelectedRegionalDirector] = useState('');
-    const [addedRegionalDirectors, setAddedRegionalDirectors] = useState({})
+    const [addedRegionalDirectors, setAddedRegionalDirectors] = useState({});
+    const [enrollmentNumber, setEnrollmentNumber] = useState(null);
+    const [graduatedNumber, setGraduatedNumber] = useState(null);
+    const [title, setTitle] = useState('')
+
+
 
 
 
@@ -64,7 +69,7 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
     });
 
     useEffect(() => {
-        let programUpdateResponse, programResponse, countryResponse, instrumentResponse, instrumentChangeResponse, userResponse;
+        let programUpdateResponse, programResponse, countryResponse, instrumentResponse, instrumentChangeResponse, userResponse, enrollmentChangeResponse;
         const program_data = async () => {
             // fetching program update to get program id
             try {
@@ -83,7 +88,7 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
 
             // fetching programs, countries, instruments
             try {
-                [programResponse, countryResponse, instrumentResponse, instrumentChangeResponse] = await Promise.all([
+                [programResponse, countryResponse, instrumentResponse, instrumentChangeResponse, enrollmentChangeResponse] = await Promise.all([
                     fetch(`http://localhost:3001/program/${program_id}`).then((r) => {
                     if (!r.ok) throw new Error(`Program Error: ${r.status}`);
                     return r.json();
@@ -101,12 +106,39 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                     ).then((r) => {
                     if (!r.ok) throw new Error(`Instrument Change Error: ${r.status}`)
                     return r.json();
+                    }),
+                    fetch(
+                    `http://localhost:3001/enrollmentChange/`
+                    ).then((r) => {
+                    if (!r.ok) throw new Error(`Enrollment Change Error: ${r.status}`)
+                    return r.json();
                     })
                 ]);
             }
             catch (error){
                 console.error('Error fetching countries/program/instruments/instrument_change: ', error);
                 return;
+            }
+
+            // same things with the update id 
+            // maybe add a route
+
+            const filteredEnrollmentChange = enrollmentChangeResponse.filter(
+                (row) => row.updateId === programUpdateId
+            );
+            console.log(filteredEnrollmentChange)
+
+            const latestEnrollmentChange =
+            filteredEnrollmentChange.length > 0
+                ? filteredEnrollmentChange[filteredEnrollmentChange.length - 1]
+                : null;
+
+            if (latestEnrollmentChange) {
+                setEnrollmentNumber(latestEnrollmentChange.enrollmentChange ?? null);
+                setGraduatedNumber(latestEnrollmentChange.graduatedChange ?? null);
+            } else {
+                setEnrollmentNumber(null);
+                setGraduatedNumber(null);
             }
 
             // need to get instrument changes with the update id
@@ -136,7 +168,7 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                 ? programResponse.dateCreated.slice(0, 10)
                 : "",
                 country: programResponse.country ?? "",
-                title: programResponse.title ?? "",
+                title: programUpdateResponse.title ?? "",
                 description: programResponse.description ?? "",
                 primary_language: programResponse.primaryLanguage ?? "",
                 playlist_link: "",
@@ -160,13 +192,10 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                 console.error('Error fetching user: ', error)
                 return;
             }
-            console.log(userResponse)
 
             const filteredRegionalDirectors = userResponse.filter(
                 user => user.role === "Regional Director"
             );
-            console.log(filteredRegionalDirectors);
-            console.log(addedInstruments);
 
             setAddedRegionalDirectors(
                 Object.fromEntries(
@@ -271,8 +300,9 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
         });
     };
 
+
     const handleSubmit = async () => {
-        /*const programData = {
+        const programData = {
             name: form.program_name,
             status: form.program_status,
             launchDate: form.launch_date,
@@ -280,44 +310,93 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
             primaryLanguage: form.primary_language,
             partnerOrg: form.partner_org,
             title: form.title,
-            students: form.students,
+            //playlist_link: form.playlist_link,
         }
 
-        const program_update_data = {
+        const programUpdateData = {
             title: form.title,
             updateDate: new Date().toISOString().slice(0, 10),
-        }*/
-        try {
-
-        const instrumentNameToId = new Map(instruments.map((i) => [i.name, i.id]));
-
-        const rows = Object.entries(addedInstruments).map(([name, qty]) => ({
-            instrumentId: instrumentNameToId.get(name),
-            updateId: programUpdateId,
-            amountChanged: qty,
-        }));
-
-        const existingUpdates = await fetch("http://localhost:3001/instrument-changes").then((r) => r.json());
-        const updatesToDelete = existingUpdates.filter (
-            (u) => (u.updateId) === programUpdateId
-        );
-
-        for (const u of updatesToDelete) {
-            const deleteResponse = await fetch(`http://localhost:3001/instrument-changes/${u.id}`, {
-                method: "DELETE",
-            });
-            if (!deleteResponse.ok) throw new Error(`DELETE instrument_change failed: ${deleteResponse.status}`);
         }
+        try {
+            
+            const programPutResponse = await fetch(`http://localhost:3001/program/${form.id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(programData),
+                });
+            if (!programPutResponse.ok) throw new Error(`PUT program failed: ${programPutResponse.status}`);
 
-        for (const row of rows) {
-            const postResponse = await fetch("http://localhost:3001/instrument-changes", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(row),
-            });
-            if (!postResponse.ok) throw new Error(`POST instrument_change failed: ${postResponse.status}`);
+            const programUpdatePutResponse = await fetch(`http://localhost:3001/program-updates/${programUpdateId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(programUpdateData),
+                });
+            if (!programUpdatePutResponse.ok) throw new Error(`PUT program failed: ${programUpdatePutResponse.status}`);
+
+            const instrumentNameToId = new Map(instruments.map((i) => [i.name, i.id]));
+
+            const rows = Object.entries(addedInstruments).map(([name, qty]) => ({
+                instrumentId: instrumentNameToId.get(name),
+                updateId: programUpdateId,
+                amountChanged: qty,
+            }));
+
+            const existingUpdates = await fetch("http://localhost:3001/instrument-changes").then((r) => r.json());
+            const updatesToDelete = existingUpdates.filter (
+                (u) => (u.updateId) === programUpdateId
+            );
+
+            for (const u of updatesToDelete) {
+                const deleteResponse = await fetch(`http://localhost:3001/instrument-changes/${u.id}`, {
+                    method: "DELETE",
+                });
+                if (!deleteResponse.ok) throw new Error(`DELETE instrument_change failed: ${deleteResponse.status}`);
             }
-            console.log("Instrument changes saved ");
+
+            for (const row of rows) {
+                const postResponse = await fetch("http://localhost:3001/instrument-changes", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(row),
+                });
+                if (!postResponse.ok) throw new Error(`POST instrument_change failed: ${postResponse.status}`);
+                }
+                console.log("Instrument changes saved ");
+
+
+            if (enrollmentNumber !== null && graduatedNumber !== null) {
+                console.log("Sending enrollment change:", {
+                    update_id: programUpdateId,
+                    enrollment_change: enrollmentNumber,
+                    graduated_change: graduatedNumber,
+                });
+
+                const enrollmentPostResponse = await fetch("http://localhost:3001/enrollmentChange", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                    update_id: programUpdateId,
+                    enrollment_change: enrollmentNumber,
+                    graduated_change: graduatedNumber,
+                    }),
+                });
+                if (!enrollmentPostResponse.ok) {
+                    throw new Error(`POST enrollmentChange failed: ${enrollmentPostResponse.status}`);
+                }
+                console.log("Enrollment change saved");
+            }
+
+            console.log('Sending program update data:', programUpdateId, enrollmentNumber, graduatedNumber);
+
+            // clear form if submission was successful
+            setTitle('');
+            setDate('');
+            setEnrollmentNumber(null);
+            setGraduatedNumber(null);
+            setNotes('');
+            setAddedInstruments({});
+            setNewInstruments([]);
+
         } catch (err) {
             console.error("Save failed:", err);
         }
@@ -336,6 +415,19 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                     </Text>
                 </CardBody>
             </Card>
+            <FormControl isRequired>
+                <FormLabel fontWeight="normal" color="gray">
+                    Title
+                </FormLabel>
+                <Input
+                    name="title"
+                    type="text"
+                    placeholder="Enter Title Here"
+                    bg="gray.100"
+                    value={form.title}
+                    onChange={handleChange}
+                />
+            </FormControl>
             <FormControl isRequired>
                 <FormLabel size='sm'>Program Name</FormLabel>
                 <Input 
@@ -376,25 +468,34 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                     value={form.country}
                 >
                 {countries.map((c) => (
-                    <option key={c.id} value={c.name}>
+                    <option key={c.id} value={c.id}>
                     {c.name}
                     </option>
                 ))}
                 </Select>
             </FormControl>
             <FormControl>
-                <FormLabel>Students</FormLabel>
-                <NumberInput
-                    value={form.students}
-                    onChange={(new_students) =>
-                        setForm((prev) => ({ ...prev, students: new_students}))
-                    }    
+                <FormLabel fontWeight="normal" color="gray">
+                    # Students currently enrolled
+                </FormLabel>
+                <NumberInput 
+                    width="30%" 
+                    value={enrollmentNumber ?? ""} 
+                    onChange={(value) => setEnrollmentNumber(value ? parseInt(value) : null)}
                 >
-                    <NumberInputField/>
-                    <NumberInputStepper>
-                        <NumberIncrementStepper/>
-                        <NumberDecrementStepper/>
-                    </NumberInputStepper>
+                    <NumberInputField bg="gray.100"></NumberInputField>
+                </NumberInput>
+            </FormControl>
+            <FormControl>
+                <FormLabel fontWeight="normal" color="gray">
+                    # Students graduated
+                </FormLabel>
+                <NumberInput 
+                    width="30%" 
+                    value={graduatedNumber ?? ""} 
+                    onChange={(value) => setGraduatedNumber(value ? parseInt(value) : null)}
+                >
+                    <NumberInputField bg="gray.100"></NumberInputField>
                 </NumberInput>
             </FormControl>
              <FormControl>
