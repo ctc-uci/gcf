@@ -8,7 +8,7 @@ enrollmentChangeRouter.use(express.json());
 enrollmentChangeRouter.get("/", async (req, res) => {
   try {
     const data = await db.query(`SELECT * FROM enrollment_change`);
-    res.status(200).json(keysToCamel(data[0]));
+    res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
