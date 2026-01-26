@@ -222,11 +222,12 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
     };
 
     const handleAddInstrumentAndQuantity = async () => {
-        const instrumentName = selectedInstrument || newInstrumentName.trim();
+        const typed = newInstrumentName.trim();
+        const instrumentName = selectedInstrument || typed;
         if (!instrumentName.trim() || quantity <= 0) {
             return;
         }
-        if (instrumentName) {
+        if (typed) {
             const added = await addInstrument();
         }
         setAddedInstruments(prev => ({
@@ -270,6 +271,57 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
         });
     };
 
+    const handleSubmit = async () => {
+        /*const programData = {
+            name: form.program_name,
+            status: form.program_status,
+            launchDate: form.launch_date,
+            country: form.country,
+            primaryLanguage: form.primary_language,
+            partnerOrg: form.partner_org,
+            title: form.title,
+            students: form.students,
+        }
+
+        const program_update_data = {
+            title: form.title,
+            updateDate: new Date().toISOString().slice(0, 10),
+        }*/
+        try {
+
+        const instrumentNameToId = new Map(instruments.map((i) => [i.name, i.id]));
+
+        const rows = Object.entries(addedInstruments).map(([name, qty]) => ({
+            instrumentId: instrumentNameToId.get(name),
+            updateId: programUpdateId,
+            amountChanged: qty,
+        }));
+
+        const existingUpdates = await fetch("http://localhost:3001/instrument-changes").then((r) => r.json());
+        const updatesToDelete = existingUpdates.filter (
+            (u) => (u.updateId) === programUpdateId
+        );
+
+        for (const u of updatesToDelete) {
+            const deleteResponse = await fetch(`http://localhost:3001/instrument-changes/${u.id}`, {
+                method: "DELETE",
+            });
+            if (!deleteResponse.ok) throw new Error(`DELETE instrument_change failed: ${deleteResponse.status}`);
+        }
+
+        for (const row of rows) {
+            const postResponse = await fetch("http://localhost:3001/instrument-changes", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(row),
+            });
+            if (!postResponse.ok) throw new Error(`POST instrument_change failed: ${postResponse.status}`);
+            }
+            console.log("Instrument changes saved ");
+        } catch (err) {
+            console.error("Save failed:", err);
+        }
+    };
     return (
         <VStack p={8} width='35%' borderWidth="1px" borderColor="lightblue">
             <Heading size="md" textAlign="center">Program</Heading>
@@ -464,7 +516,7 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                 <Button>Delete</Button>
                 <Spacer/>
                 <Button>Cancel</Button>
-                <Button>Save Changes</Button>
+                <Button onClick = {handleSubmit}>Save Changes</Button>
             </HStack>
         </VStack>
         
