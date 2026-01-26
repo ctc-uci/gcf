@@ -115,7 +115,6 @@ programRouter.put("/:id", async (req, res) => {
         title = COALESCE($3, title),
         description = COALESCE($4, description),
         primary_language = COALESCE($5, primary_language),
-        playlist_link = COALESCE($6, playlist_link),
         partner_org = COALESCE($7, partner_org),
         status = COALESCE($8, status),
         launch_date = COALESCE($9, launch_date)
