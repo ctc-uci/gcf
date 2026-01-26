@@ -8,9 +8,7 @@ function SearchBar({text, onChange}) {
     return (
         <InputGroup>
             <InputLeftElement>
-            
             </InputLeftElement>
-
             <Input
             placeholder="Type to Search"
             text={text}

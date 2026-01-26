@@ -10,14 +10,6 @@ import {
   Td,
 } from "@chakra-ui/react";
 
-/* IN MAIN PAGE
-import SearchBar from "@dashboard/SearchBar"
-
-const filterPrograms = programs.filter((p) =>
-    p.program.toLowerCase().includes(SearchBar.toLowerCase())
-);
-
-*/
 
 function rdProgramTable({programs}) {
     return (

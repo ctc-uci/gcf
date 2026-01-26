@@ -1,22 +1,24 @@
-import { Flex, Box, Text, Heading } from "@chakra-ui/react";
+import { Flex, Box } from "@chakra-ui/react";
+import AdminProgramTable from "./AdminProgramTable";
+import LessonVideos from "./lessonVideos";
 import StatisticsSummary from "./StatisticsSummary";
 
 const DashboardPage = () => {
+  const role: "admin" | "rd" | "pd" = "rd";
+
   return (
     <Flex
       direction="column"
-      align="center"
       minH="100vh"
       gap={6}
       as="main"
+      p={10}
     >
-      <StatisticsSummary />
+      <StatisticsSummary role={role} />
 
-      <Box as="section" p={4} textAlign="center">
-        <Heading as="h2" size="md" mb={2}>
-          Program Table
-        </Heading>
-        <Text>This is the program table component</Text>
+      <Box as="section">
+        {(role === "admin" || role === "rd") && <AdminProgramTable role={role as "admin" | "rd"} />}
+        {role === "pd" && <LessonVideos />}
       </Box>
     </Flex>
   );
