@@ -227,6 +227,11 @@ export const ProgramForm = () => {
     function handleLanguageChange(langChange: string) {
         setFormState({...formState, language: langChange})
     }
+
+    function handleSave() {
+        // implement save functionality later
+        onClose();
+    }
     
 
     // debug log to see how state changes as we edit the form
@@ -238,7 +243,7 @@ export const ProgramForm = () => {
         <>
 
             <Button ref={btnRef} colorScheme='teal' onClick={onOpen}>
-            Open
+                Open
             </Button>
             <Drawer
                 isOpen={isOpen}
@@ -249,11 +254,16 @@ export const ProgramForm = () => {
             >
             <DrawerOverlay />
             <DrawerContent>
-                <DrawerCloseButton />
-                <DrawerHeader>Program</DrawerHeader>
-
+                <HStack marginBottom="1em">
+                    <DrawerCloseButton left="4" right="auto"/>
+                    <Button colorScheme="teal" marginLeft="auto" marginRight="2em" width="5em" height="2em" top="2" fontSize="small" onClick={handleSave}> Save </Button>
+                </HStack>
+                
                 <DrawerBody>
-                    <VStack spacing={4} align="stretch">
+                    <VStack spacing={4} align="stretch" marginLeft="1em">
+                        <DrawerHeader padding="0 0">
+                            Program
+                        </DrawerHeader>
                         <h3>Status</h3>
                         <HStack>
                             <Button onClick={() => handleProgramStatusChange("Developing")} colorScheme={formState.status === "Developing" ? "teal" : undefined}>Developing</Button>
