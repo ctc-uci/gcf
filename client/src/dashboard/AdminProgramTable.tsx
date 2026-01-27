@@ -15,7 +15,7 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon } from "@chakra-ui/icons";
-
+import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2"; 
 
 interface Program {
   id: number;
@@ -132,7 +132,7 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
       <TableContainer>
         <HStack mb={4} justifyContent="space-between" w="100%">
           <HStack spacing={4}>
-            <Box fontSize="xl" fontWeight="semibold">All Students</Box>
+            <Box fontSize="xl" fontWeight="semibold">All Programs</Box>
             <HStack spacing={1}>
               <IconButton
                 aria-label="search"
@@ -152,7 +152,7 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
               />
               <IconButton
                 aria-label="filter"
-                icon={<Search2Icon />}
+                icon= {<HiOutlineAdjustmentsHorizontal />}
                 size="sm"
                 variant="ghost"
               />
@@ -168,7 +168,7 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
             <Divider orientation="vertical" h="20px" />
             <IconButton
               aria-label="search"
-              icon={<Search2Icon />}
+              icon={<HiOutlineSquares2X2 />}
               size="sm"
               variant="ghost"
             />
@@ -220,7 +220,7 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
       <TableContainer>
         <HStack mb={4} justifyContent="space-between" w="100%">
           <HStack spacing={4}>
-            <Box fontSize="xl" fontWeight="semibold">All Students</Box>
+            <Box fontSize="xl" fontWeight="semibold">All Programs</Box>
             <HStack spacing={1}>
               <IconButton
                 aria-label="search"
@@ -240,7 +240,7 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
               />
               <IconButton
                 aria-label="filter"
-                icon={<Search2Icon />}
+                icon={<HiOutlineAdjustmentsHorizontal />}
                 size="sm"
                 variant="ghost"
               />
@@ -256,7 +256,7 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
             <Divider orientation="vertical" h="20px" />
             <IconButton
               aria-label="search"
-              icon={<Search2Icon />}
+              icon={<HiOutlineSquares2X2 />}
               size="sm"
               variant="ghost"
             />
