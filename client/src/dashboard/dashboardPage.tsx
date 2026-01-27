@@ -4,7 +4,7 @@ import LessonVideos from "./lessonVideos";
 import StatisticsSummary from "./StatisticsSummary";
 
 const DashboardPage = () => {
-  const role = "admin" as "admin" | "rd" | "pd";
+  const role = "pd" as "admin" | "rd" | "pd";
 
   return (
     <Flex

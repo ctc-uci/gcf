@@ -117,15 +117,15 @@ const StatisticsSummary = ({ role = "admin" }: StatisticsSummaryProps) => {
           const programIds = regionPrograms.map((p: any) => p.id);
 
           const updateIds = programUpdates
-            .filter((pu: any) => programIds.includes(pu.programId))
+            .filter((pu: any) => programIds.includes(Number(pu.programId)))
             .map((pu: any) => pu.id);
 
           const totalPrograms = regionPrograms.length;
           const totalStudents = enrollmentData
-            .filter((e: any) => updateIds.includes(e.updateId))
+            .filter((e: any) => updateIds.includes(String(e.updateId)))
             .reduce((sum: number, e: any) => sum + (Number(e.enrollmentChange) || 0), 0);
           const totalInstruments = instrumentData
-            .filter((i: any) => updateIds.includes(i.updateId))
+            .filter((i: any) => updateIds.includes(String(i.updateId)))
             .reduce((sum: number, i: any) => sum + (Number(i.amountChanged) || 0), 0);
 
           setStats([
@@ -155,14 +155,14 @@ const StatisticsSummary = ({ role = "admin" }: StatisticsSummaryProps) => {
 
           const instrumentData = Array.isArray(instrumentRes.data) ? instrumentRes.data : [];
           const updateIds = programUpdates
-            .filter((pu: any) => pu.programId === programId)
+            .filter((pu: any) => Number(pu.programId) === programId)
             .map((pu: any) => pu.id);
 
           const totalStudents = enrollmentData
-            .filter((e: any) => updateIds.includes(e.updateId))
+            .filter((e: any) => updateIds.includes(String(e.updateId)))
             .reduce((sum: number, e: any) => sum + (Number(e.enrollmentChange) || 0), 0);
           const totalInstruments = instrumentData
-            .filter((i: any) => updateIds.includes(i.updateId))
+            .filter((i: any) => updateIds.includes(String(i.updateId)))
             .reduce((sum: number, i: any) => sum + (Number(i.amountChanged) || 0), 0);
 
           setStats([
