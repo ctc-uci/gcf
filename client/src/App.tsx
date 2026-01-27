@@ -25,16 +25,20 @@ const App = () => {
             <Router>
               <Routes>
                 <Route
-                  path="/dashboard/:userid"
-                  element={<DashboardPage />}
+                  path="/login"
+                  element={<Login />}
                 />
                 <Route
                   path="/signup"
                   element={<Signup />}
                 />
                 <Route
-                  path="/login"
+                  path="/dashboard"
                   element={<ProtectedRoute element={<Dashboard />} />}
+                />
+                <Route
+                  path="/dashboard/:userid"
+                  element={<DashboardPage />}
                 />
                 <Route
                   path="/admin"

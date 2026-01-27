@@ -51,7 +51,6 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
 
           const programsData = programsRes.data || [];
 
-          // Handle enrollmentRes - backend returns single object wrapped, need to extract array
           let enrollmentData = [];
           if (Array.isArray(enrollmentRes.data)) {
             enrollmentData = enrollmentRes.data;
@@ -100,7 +99,6 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
 
           const programsData = programsRes.data || [];
 
-          // Handle enrollmentRes - backend returns single object wrapped, need to extract array
           let enrollmentData = [];
           if (Array.isArray(enrollmentRes.data)) {
             enrollmentData = enrollmentRes.data;
