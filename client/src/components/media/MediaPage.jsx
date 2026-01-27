@@ -14,8 +14,6 @@ import { FiArrowRight, FiPlus } from "react-icons/fi";
 import MediaItemCard from "./MediaItemCard";
 
 export const MediaPage = () => {
-  // Mock data array to render multiple cards
-  const uploads = [1, 2, 3];
 
   return (
     <Box p={8} bg="white" minH="100vh">
