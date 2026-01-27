@@ -18,27 +18,11 @@ import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon } from "@chakra-ui/ic
 import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext"; 
 
-interface Program {
-  id: number;
-  title: string;
-  status: string;
-  launchDate: string;
-  country?: string;
-  region?: string;
-  students: number;
-  amountChanged?: number;
-  instruments?: number;
-  totalInstruments?: number;
-}
 
-interface AdminProgramTableProps {
-  role?: "admin" | "rd";
-}
-
-function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
+function AdminProgramTable({ role = "admin" }) {
   const { backend } = useBackendContext();
-  const [adminPrograms, setAdminPrograms] = useState<Program[]>([]);
-  const [rdPrograms, setRdPrograms] = useState<Program[]>([]);
+  const [adminPrograms, setAdminPrograms] = useState([]);
+  const [rdPrograms, setRdPrograms] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,7 +45,7 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
           const countryData = countryRes.data || [];
           const instrumentData = instrumentRes.data || [];
 
-          const enrollmentMap = enrollmentData.reduce((acc: any, e: any) => {
+          const enrollmentMap = enrollmentData.reduce((acc, e) => {
             if (!acc[e.programId]) {
               acc[e.programId] = 0;
             }
@@ -70,10 +54,10 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
           }, {});
 
           const countryMap = Object.fromEntries(
-            countryData.map((c: any) => [c.id, c.name])
+            countryData.map((c) => [c.id, c.name])
           );
 
-          const instrumentMap = instrumentData.reduce((acc: any, i: any) => {
+          const instrumentMap = instrumentData.reduce((acc, i) => {
             if (!acc[i.programId]) {
               acc[i.programId] = 0;
             }
@@ -81,7 +65,7 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
             return acc;
           }, {});
 
-          const merged = programsData.map((p: any) => ({
+          const merged = programsData.map((p) => ({
             ...p,
             students: enrollmentMap[p.id] || 0,
             country: countryMap[p.countryId] || "Unknown",
@@ -109,10 +93,10 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
           const regionData = regionRes.data || [];
 
           const regionPrograms = programsData.filter(
-            (p: any) => p.regionId === regionId
+            (p) => p.regionId === regionId
           );
 
-          const enrollmentMap = enrollmentData.reduce((acc: any, e: any) => {
+          const enrollmentMap = enrollmentData.reduce((acc, e) => {
             if (!acc[e.programId]) {
               acc[e.programId] = 0;
             }
@@ -121,10 +105,10 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
           }, {});
 
           const regionMap = Object.fromEntries(
-            regionData.map((r: any) => [r.id, r.name])
+            regionData.map((r) => [r.id, r.name])
           );
 
-          const merged = regionPrograms.map((p: any) => ({
+          const merged = regionPrograms.map((p) => ({
             ...p,
             students: enrollmentMap[p.id] || 0,
             region: regionMap[p.regionId] || "Unknown",

@@ -2,15 +2,11 @@ import { useEffect, useState } from "react";
 import { Box, Heading, AspectRatio, VStack } from "@chakra-ui/react";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
-interface Program {
-  id: number;
-  playlistLink: string;
-  title: string;
-}
+
 
 function LessonVideos() {
   const { backend } = useBackendContext();
-  const [pdPrograms, setPdPrograms] = useState<Program[]>([]);
+  const [pdPrograms, setPdPrograms] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {

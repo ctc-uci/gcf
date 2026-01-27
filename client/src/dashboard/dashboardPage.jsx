@@ -4,7 +4,7 @@ import LessonVideos from "./lessonVideos";
 import StatisticsSummary from "./StatisticsSummary";
 
 const DashboardPage = () => {
-  const role = "pd" as "admin" | "rd" | "pd";
+  const role = "admin";
 
   return (
     <Flex
@@ -17,7 +17,7 @@ const DashboardPage = () => {
       <StatisticsSummary role={role} />
 
       <Box as="section">
-        {(role === "admin" || role === "rd") && <AdminProgramTable role={role as "admin" | "rd"} />}
+        {(role === "admin" || role === "rd") && <AdminProgramTable role={role} />}
         {role === "pd" && <LessonVideos />}
       </Box>
     </Flex>
