@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box, Heading, AspectRatio, VStack } from "@chakra-ui/react";
+import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
 interface Program {
   id: number;
@@ -8,21 +9,23 @@ interface Program {
 }
 
 function LessonVideos() {
+  const { backend } = useBackendContext();
   const [pdPrograms, setPdPrograms] = useState<Program[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("http://localhost:3001/program");
-        const data = await res.json();
-        setPdPrograms(data);
+        const programId = 25;
+        const res = await backend.get(`/program/${programId}`);
+        const program = res.data;
+        setPdPrograms(program ? [program] : []);
       } catch (err) {
         console.error("Error fetching data:", err);
       }
     };
 
     fetchData();
-  }, []);
+  }, [backend]);
 
   return (
     <Box>

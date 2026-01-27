@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Box, Heading, HStack, IconButton, VStack } from "@chakra-ui/react";
 
 import { MdOutlineFileDownload } from "react-icons/md";
+import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
 const StatBox = ({ label, number }: { label: string; number: number }) => {
   return (
@@ -33,6 +34,7 @@ interface StatisticsSummaryProps {
 }
 
 const StatisticsSummary = ({ role = "admin" }: StatisticsSummaryProps) => {
+  const { backend } = useBackendContext();
   const [stats, setStats] = useState(
     role === "pd"
       ? [
@@ -49,34 +51,31 @@ const StatisticsSummary = ({ role = "admin" }: StatisticsSummaryProps) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchJson = async (url: string) => {
-          const res = await fetch(url);
-          const text = await res.text();
-          if (!text) return [];
-          try {
-            return JSON.parse(text);
-          } catch (err) {
-            console.error(`Invalid JSON from ${url}:`, text, err);
-            return [];
-          }
-        };
-
         if (role === "admin") {
-          const programsData = await fetchJson("http://localhost:3001/program");
-          const enrollmentData = await fetchJson(
-            "http://localhost:3001/enrollmentChange"
-          );
-          const instrumentData = await fetchJson(
-            "http://localhost:3001/instrument-change"
-          );
+          const [programsRes, enrollmentRes, instrumentRes] = await Promise.all([
+            backend.get("/program"),
+            backend.get("/enrollmentChange"),
+            backend.get("/instrument-changes")
+          ]);
+
+          const programsData = Array.isArray(programsRes.data) ? programsRes.data : [];
+
+          let enrollmentData = [];
+          if (Array.isArray(enrollmentRes.data)) {
+            enrollmentData = enrollmentRes.data;
+          } else if (enrollmentRes.data && typeof enrollmentRes.data === 'object') {
+            enrollmentData = [enrollmentRes.data];
+          }
+
+          const instrumentData = Array.isArray(instrumentRes.data) ? instrumentRes.data : [];
 
           const totalPrograms = programsData.length;
           const totalStudents = enrollmentData.reduce(
-            (sum: number, e: any) => sum + (e.enrollmentChange || 0),
+            (sum: number, e: any) => sum + (Number(e.enrollmentChange) || 0),
             0
           );
           const totalInstruments = instrumentData.reduce(
-            (sum: number, i: any) => sum + (i.amountChanged || 0),
+            (sum: number, i: any) => sum + (Number(i.amountChanged) || 0),
             0
           );
 
@@ -89,29 +88,45 @@ const StatisticsSummary = ({ role = "admin" }: StatisticsSummaryProps) => {
 
         if (role === "rd") {
           const regionId = 1;
-          const enrollmentData = await fetchJson(
-            "http://localhost:3001/enrollmentChange"
-          );
-          const instrumentData = await fetchJson(
-            "http://localhost:3001/instrument-change"
-          );
-          const regionData = await fetchJson("http://localhost:3001/region");
 
-          const regionPrograms = regionData.filter(
-            (r: any) => r.id === regionId
-          );
-          const programIds = regionPrograms.map((r: any) => r.id);
+          const [programRes, programUpdateRes, enrollmentRes, instrumentRes, countryRes] = await Promise.all([
+            backend.get("/program"),
+            backend.get("/program-updates"),
+            backend.get("/enrollmentChange"),
+            backend.get("/instrument-changes"),
+            backend.get("/country")
+          ]);
+
+          const programsData = Array.isArray(programRes.data) ? programRes.data : [];
+          const programUpdates = Array.isArray(programUpdateRes.data) ? programUpdateRes.data : [];
+
+          let enrollmentData = [];
+          if (Array.isArray(enrollmentRes.data)) {
+            enrollmentData = enrollmentRes.data;
+          } else if (enrollmentRes.data && typeof enrollmentRes.data === 'object') {
+            enrollmentData = [enrollmentRes.data];
+          }
+
+          const instrumentData = Array.isArray(instrumentRes.data) ? instrumentRes.data : [];
+          const countryData = Array.isArray(countryRes.data) ? countryRes.data : [];
+
+          const regionPrograms = programsData.filter((p: any) => {
+            const country = countryData.find((c: any) => c.id === p.country);
+            return country && country.regionId === regionId;
+          });
+          const programIds = regionPrograms.map((p: any) => p.id);
+
+          const updateIds = programUpdates
+            .filter((pu: any) => programIds.includes(pu.programId))
+            .map((pu: any) => pu.id);
 
           const totalPrograms = regionPrograms.length;
           const totalStudents = enrollmentData
-            .filter((e: any) => programIds.includes(e.programId))
-            .reduce(
-              (sum: number, e: any) => sum + (e.enrollmentChange || 0),
-              0
-            );
+            .filter((e: any) => updateIds.includes(e.updateId))
+            .reduce((sum: number, e: any) => sum + (Number(e.enrollmentChange) || 0), 0);
           const totalInstruments = instrumentData
-            .filter((i: any) => programIds.includes(i.programId))
-            .reduce((sum: number, i: any) => sum + (i.amountChanged || 0), 0);
+            .filter((i: any) => updateIds.includes(i.updateId))
+            .reduce((sum: number, i: any) => sum + (Number(i.amountChanged) || 0), 0);
 
           setStats([
             { label: "Programs", number: totalPrograms },
@@ -121,23 +136,34 @@ const StatisticsSummary = ({ role = "admin" }: StatisticsSummaryProps) => {
         }
 
         if (role === "pd") {
-          const programId = 1;
+          const programId = 25;
 
-          const enrollmentData = await fetchJson(
-            "http://localhost:3001/enrollmentChange"
-          );
-          const instrumentData = await fetchJson(
-            "http://localhost:3001/instrument-change"
-          );
+          const [programUpdateRes, enrollmentRes, instrumentRes] = await Promise.all([
+            backend.get("/program-updates"),
+            backend.get("/enrollmentChange"),
+            backend.get("/instrument-changes")
+          ]);
+
+          const programUpdates = Array.isArray(programUpdateRes.data) ? programUpdateRes.data : [];
+
+          let enrollmentData = [];
+          if (Array.isArray(enrollmentRes.data)) {
+            enrollmentData = enrollmentRes.data;
+          } else if (enrollmentRes.data && typeof enrollmentRes.data === 'object') {
+            enrollmentData = [enrollmentRes.data];
+          }
+
+          const instrumentData = Array.isArray(instrumentRes.data) ? instrumentRes.data : [];
+          const updateIds = programUpdates
+            .filter((pu: any) => pu.programId === programId)
+            .map((pu: any) => pu.id);
+
           const totalStudents = enrollmentData
-            .filter((e: any) => e.programId === programId)
-            .reduce(
-              (sum: number, e: any) => sum + (e.enrollmentChange || 0),
-              0
-            );
+            .filter((e: any) => updateIds.includes(e.updateId))
+            .reduce((sum: number, e: any) => sum + (Number(e.enrollmentChange) || 0), 0);
           const totalInstruments = instrumentData
-            .filter((i: any) => i.programId === programId)
-            .reduce((sum: number, i: any) => sum + (i.amountChanged || 0), 0);
+            .filter((i: any) => updateIds.includes(i.updateId))
+            .reduce((sum: number, i: any) => sum + (Number(i.amountChanged) || 0), 0);
 
           setStats([
             { label: "Current Enrollment", number: totalStudents },
@@ -150,7 +176,7 @@ const StatisticsSummary = ({ role = "admin" }: StatisticsSummaryProps) => {
     };
 
     fetchData();
-  }, [role]);
+  }, [role, backend]);
 
   return (
     <Box as="section">

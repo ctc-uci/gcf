@@ -15,7 +15,8 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon } from "@chakra-ui/icons";
-import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2"; 
+import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
+import { useBackendContext } from "@/contexts/hooks/useBackendContext"; 
 
 interface Program {
   id: number;
@@ -35,88 +36,101 @@ interface AdminProgramTableProps {
 }
 
 function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
+  const { backend } = useBackendContext();
   const [adminPrograms, setAdminPrograms] = useState<Program[]>([]);
   const [rdPrograms, setRdPrograms] = useState<Program[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchJson = async (url: string) => {
-          const res = await fetch(url);
-          const text = await res.text();
-          if (!text) return [];
-          try {
-            return JSON.parse(text);
-          } catch (err) {
-            console.error(`Invalid JSON from ${url}:`, text, err);
-            return [];
-          }
-        };
-
         if (role === "admin") {
-          const programsData = await fetchJson("http://localhost:3001/program");
-          const enrollmentData = await fetchJson(
-            "http://localhost:3001/enrollmentChange"
-          );
-          const countryData = await fetchJson("http://localhost:3001/country");
-          const instrumentData = await fetchJson(
-            "http://localhost:3001/instrument-change"
-          );
+          const programsRes = await backend.get("/program");
+          const enrollmentRes = await backend.get("/enrollmentChange");
+          const countryRes = await backend.get("/country");
+          const instrumentRes = await backend.get("/instrument-changes");
 
-          const enrollmentMap = Object.fromEntries(
-            enrollmentData.map((e: any) => [e.id, e])
-          );
+          const programsData = programsRes.data || [];
+
+          // Handle enrollmentRes - backend returns single object wrapped, need to extract array
+          let enrollmentData = [];
+          if (Array.isArray(enrollmentRes.data)) {
+            enrollmentData = enrollmentRes.data;
+          } else if (enrollmentRes.data && typeof enrollmentRes.data === 'object') {
+            enrollmentData = [enrollmentRes.data];
+          }
+
+          const countryData = countryRes.data || [];
+          const instrumentData = instrumentRes.data || [];
+
+          const enrollmentMap = enrollmentData.reduce((acc: any, e: any) => {
+            if (!acc[e.programId]) {
+              acc[e.programId] = 0;
+            }
+            acc[e.programId] += e.enrollmentChange || 0;
+            return acc;
+          }, {});
 
           const countryMap = Object.fromEntries(
-            countryData.map((c: any) => [c.id, c])
+            countryData.map((c: any) => [c.id, c.name])
           );
 
-          const instrumentMap = Object.fromEntries(
-            instrumentData.map((i: any) => [i.id, i])
-          );
+          const instrumentMap = instrumentData.reduce((acc: any, i: any) => {
+            if (!acc[i.programId]) {
+              acc[i.programId] = 0;
+            }
+            acc[i.programId] += i.amountChanged || 0;
+            return acc;
+          }, {});
 
-          const merged = programsData.map((p: any) => {
-            const enrollmentInfo = enrollmentMap[p.id] || {};
-            const countryInfo = countryMap[p.id] || {};
-            const instrumentInfo = instrumentMap[p.id] || {};
-
-            return {
-              ...p,
-              students: enrollmentInfo?.enrollmentChange ?? 0,
-              country: countryInfo?.name ?? "Unknown",
-              instruments: instrumentInfo?.amountChanged ?? 0,
-            };
-          });
+          const merged = programsData.map((p: any) => ({
+            ...p,
+            students: enrollmentMap[p.id] || 0,
+            country: countryMap[p.countryId] || "Unknown",
+            instruments: instrumentMap[p.id] || 0,
+            totalInstruments: instrumentMap[p.id] || 0,
+          }));
           setAdminPrograms(merged);
         }
 
         if (role === "rd") {
-          const programsData = await fetchJson("http://localhost:3001/program");
-          const enrollmentData = await fetchJson(
-            "http://localhost:3001/enrollmentChange"
+          const regionId = 1;
+          const programsRes = await backend.get("/program");
+          const enrollmentRes = await backend.get("/enrollmentChange");
+          const regionRes = await backend.get("/region");
+
+          const programsData = programsRes.data || [];
+
+          // Handle enrollmentRes - backend returns single object wrapped, need to extract array
+          let enrollmentData = [];
+          if (Array.isArray(enrollmentRes.data)) {
+            enrollmentData = enrollmentRes.data;
+          } else if (enrollmentRes.data && typeof enrollmentRes.data === 'object') {
+            enrollmentData = [enrollmentRes.data];
+          }
+
+          const regionData = regionRes.data || [];
+
+          const regionPrograms = programsData.filter(
+            (p: any) => p.regionId === regionId
           );
-          const regionData = await fetchJson("http://localhost:3001/region");
 
-          const enrollmentMap = Object.fromEntries(
-            enrollmentData.map((e: any) => [e.id, e])
+          const enrollmentMap = enrollmentData.reduce((acc: any, e: any) => {
+            if (!acc[e.programId]) {
+              acc[e.programId] = 0;
+            }
+            acc[e.programId] += e.enrollmentChange || 0;
+            return acc;
+          }, {});
+
+          const regionMap = Object.fromEntries(
+            regionData.map((r: any) => [r.id, r.name])
           );
 
-          const programsMap = Object.fromEntries(
-            programsData.map((p: any) => [p.id, p])
-          );
-
-          const merged = regionData.map((r: any) => {
-            const enrollmentInfo = enrollmentMap[r.id] || {};
-            const programInfo = programsMap[r.id] || {};
-
-            return {
-              ...r,
-              students: enrollmentInfo?.enrollmentChange ?? 0,
-              title: programInfo?.title ?? "Unknown",
-              launchDate: programInfo?.launchDate ?? 0,
-              status: programInfo?.status ?? "Unknown",
-            };
-          });
+          const merged = regionPrograms.map((p: any) => ({
+            ...p,
+            students: enrollmentMap[p.id] || 0,
+            region: regionMap[p.regionId] || "Unknown",
+          }));
           setRdPrograms(merged);
         }
       } catch (err) {
@@ -125,7 +139,7 @@ function AdminProgramTable({ role = "admin" }: AdminProgramTableProps) {
     };
 
     fetchData();
-  }, [role]);
+  }, [role, backend]);
 
   if (role === "admin") {
     return (
