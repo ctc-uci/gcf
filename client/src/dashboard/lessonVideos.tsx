@@ -34,7 +34,7 @@ function LessonVideos() {
       </Heading>
       <VStack spacing={4}>
         {pdPrograms?.map((p) => (
-          <AspectRatio key={p.id} ratio={16 / 9} width="100%">
+          <AspectRatio key={p.id} ratio={16 / 9} width="30%" ml={0} mr="auto">
             <iframe src={p.playlistLink} title={p.title} />
           </AspectRatio>
         ))}
