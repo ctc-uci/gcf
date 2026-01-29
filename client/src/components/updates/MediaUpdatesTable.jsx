@@ -51,7 +51,7 @@ export const MediaUpdatesTable = ({ data }) => {
               </Tr>
             </Thead>
             <Tbody>
-              {data.map((row) => {
+              {data.map((row) => (
                 <Tr key={row.row_id}>
                   <Td> {row.updateDate} </Td>
                   <Td> {row.note} </Td>
@@ -62,8 +62,8 @@ export const MediaUpdatesTable = ({ data }) => {
                   <Td>
                     <Badge> {row.status} </Badge>
                   </Td>
-                </Tr>;
-              })}
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         </TableContainer>
