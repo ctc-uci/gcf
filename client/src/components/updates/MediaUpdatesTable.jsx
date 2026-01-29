@@ -1,5 +1,3 @@
-// import { useEffect } from "react";
-
 import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
 import {
   Box,
@@ -13,6 +11,7 @@ import {
   Th,
   Thead,
   Tr,
+  Badge
 } from "@chakra-ui/react";
 
 export const MediaUpdatesTable = ({
@@ -67,23 +66,16 @@ export const MediaUpdatesTable = ({
                 const programId = programUpdatesById[row.updateId]?.programId;
                 const userId = programUpdatesById[row.updateId]?.createdBy;
                 return (
-                  <Tr key={row.updateId}>
+                  <Tr key={row.id}>
                     <Td> {programUpdatesById[row.updateId]?.updateDate} </Td>
                     <Td> {programUpdatesById[row.updateId]?.note} </Td>
                     <Td>{programsById[programId]?.title}</Td>
                     <Td>
                       {usersById[userId].firstName} {usersById[userId].lastName}
                     </Td>
-                    <Box
-                      borderRadius="full"
-                      bg="gray.200"
-                      w="100px"
-                      h="40px"
-                      alignItems="center"
-                      pb="50px"
-                    >
-                      <Td> {programsById[programId]?.status} </Td>
-                    </Box>
+                    <Td>
+                      <Badge> {programsById[programId]?.status} </Badge>
+                    </Td>
                   </Tr>
                 );
               })}

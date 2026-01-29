@@ -11,6 +11,7 @@ import {
   Th,
   Thead,
   Tr,
+  Badge
 } from "@chakra-ui/react";
 
 export const ProgramUpdatesTable = ({
@@ -67,16 +68,13 @@ export const ProgramUpdatesTable = ({
                       {usersById[row.createdBy]?.firstName}{" "}
                       {usersById[row.createdBy]?.lastName}
                     </Td>
-                    <Box
-                      borderRadius="full"
-                      bg="gray.200"
-                      w="100px"
-                      h="40px"
-                      alignItems="center"
-                      pb="50px"
-                    >
-                      <Td> {programById[row.programId]?.status} </Td>
-                    </Box>
+                    <Td>
+                    </Td>
+                    <Td>
+                      <Badge>
+                        {programById[row.programId]?.status}
+                      </Badge>
+                    </Td>
                   </Tr>
                 );
               })}

@@ -1,62 +1,44 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
-// import { getAuth } from "firebase/auth";
 import { useParams } from "react-router-dom";
 
-import { MediaUpdatesTable } from "./MediaUpdatesTable";
-import { ProgramAccountUpdatesTable } from "./ProgramAccountUpdatesTable";
-import { ProgramUpdatesTable } from "./ProgramUpdatesTable";
+// import { MediaUpdatesTable } from "./MediaUpdatesTable";
+// import { ProgramAccountUpdatesTable } from "./ProgramAccountUpdatesTable";
+// import { ProgramUpdatesTable } from "./ProgramUpdatesTable";
 
 export const UpdatesPage = () => {
   const { userId } = useParams();
 
-  const [programUpdatesData, setProgramUpdatesData] = useState([]);
+  const [programAccountUpdatesData, setProgramAccountUpdatesData] = useState([]);
   const [mediaUpdatesData, setMediaUpdatesData] = useState([]);
-  const [programData, setProgramData] = useState([]);
-  const [gcfUserData, setGcfUserData] = useState([]);
-  const [countryData, setCountryData] = useState([]);
-  const [regionData, setRegionData] = useState([]);
-  const [regionalDirectorsData, setRegionalDirectorsData] = useState([]);
+  const [programUpdatesData, setProgramUpdatesData] = useState([]);
+
+  const fetchData = async ( path ) => {
+    const response = await fetch(`http://localhost:3001/${path}`);
+    return response.json();
+  }
+
+  const memoizedData = useMemo(() => {
+    try {
+      return Promise.all([
+            fetchData(`/program-account/${userId}`),
+            fetchData(`/media-updates/${userId}`),
+            fetchData(`/program-updates/${userId}`),
+          ])
+    } catch (error) {
+      console.error("Fetch error:", error);
+    }
+  });
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [
-          programUpdatesRes,
-          mediaUpdatesRes,
-          programRes,
-          usersRes,
-          countryRes,
-          regionRes,
-          regionalDirectorRes,
-        ] = await Promise.all([
-          fetch("http://localhost:3001/program-updates").then((res) =>
-            res.json()
-          ),
-          fetch("http://localhost:3001/mediaChange").then((res) => res.json()),
-          fetch("http://localhost:3001/program").then((res) => res.json()),
-          fetch("http://localhost:3001/gcf-users").then((res) => res.json()),
-          fetch("http://localhost:3001/country").then((res) => res.json()),
-          fetch("http://localhost:3001/region").then((res) => res.json()),
-          fetch("http://localhost:3001/regional-directors").then((res) =>
-            res.json()
-          ),
-        ]);
+    memoizedData.then(([ programAccountUpdates, mediaUpdates, programUpdates ]) => {
+      setProgramUpdatesData(programAccountUpdates);
+      setMediaUpdatesData(mediaUpdates);
+      setProgramUpdatesData(programUpdates);
+    });
+  }, [memoizedData]);
 
-        setProgramUpdatesData(programUpdatesRes);
-        setMediaUpdatesData(mediaUpdatesRes);
-        setProgramData(programRes);
-        setGcfUserData(usersRes);
-        setCountryData(countryRes);
-        setRegionData(regionRes);
-        setRegionalDirectorsData(regionalDirectorRes);
-      } catch (error) {
-        console.error("Fetch error:", error);
-      }
-    };
 
-    loadData();
-  }, []);
 
   const currentUser = gcfUserData[userId];
 
@@ -101,7 +83,7 @@ export const UpdatesPage = () => {
 
   return (
     <>
-      <MediaUpdatesTable
+      {/* <MediaUpdatesTable
         mediaUpdatesData={visibleMediaUpdates}
         programUpdatesData={visibleProgramUpdates}
         programData={programData}
@@ -111,12 +93,12 @@ export const UpdatesPage = () => {
         programData={visibleProgramUpdates}
         gcfUserData={gcfUserData}
         program={programData}
-      />
-      <ProgramUpdatesTable
+      /> */}
+      {/* <ProgramUpdatesTable
         programUpdatesData={visibleProgramUpdates}
         gcfUserData={gcfUserData}
         programData={programData}
-      />
+      /> */}
     </>
   );
 };
