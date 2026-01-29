@@ -25,7 +25,7 @@ export const UpdatesPage = () => {
       const message = await response.text();
       console.error("Request failed:", response.status, message);
       return [];
-  }
+    }
     return response.json();
   };
 
@@ -64,7 +64,6 @@ export const UpdatesPage = () => {
           <ProgramUpdatesTable data={programUpdatesData} />
         </>
       )}
-      <p> {role} </p>
     </>
   );
 };
