@@ -1,5 +1,6 @@
 import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
 import {
+  Badge,
   Box,
   Flex,
   Heading,
@@ -11,21 +12,9 @@ import {
   Th,
   Thead,
   Tr,
-  Badge
 } from "@chakra-ui/react";
 
-export const MediaUpdatesTable = ({
-  mediaUpdatesData,
-  programUpdatesData,
-  programData,
-  gcfUserData,
-}) => {
-  const usersById = Object.fromEntries(gcfUserData.map((u) => [u.id, u]));
-  const programsById = Object.fromEntries(programData.map((p) => [p.id, p]));
-  const programUpdatesById = Object.fromEntries(
-    programUpdatesData.map((p) => [p.id, p])
-  );
-
+export const MediaUpdatesTable = ({ data }) => {
   return (
     <>
       <Box
@@ -62,22 +51,18 @@ export const MediaUpdatesTable = ({
               </Tr>
             </Thead>
             <Tbody>
-              {mediaUpdatesData.map((row) => {
-                const programId = programUpdatesById[row.updateId]?.programId;
-                const userId = programUpdatesById[row.updateId]?.createdBy;
-                return (
-                  <Tr key={row.id}>
-                    <Td> {programUpdatesById[row.updateId]?.updateDate} </Td>
-                    <Td> {programUpdatesById[row.updateId]?.note} </Td>
-                    <Td>{programsById[programId]?.title}</Td>
-                    <Td>
-                      {usersById[userId].firstName} {usersById[userId].lastName}
-                    </Td>
-                    <Td>
-                      <Badge> {programsById[programId]?.status} </Badge>
-                    </Td>
-                  </Tr>
-                );
+              {data.map((row) => {
+                <Tr key={row.row_id}>
+                  <Td> {row.updateDate} </Td>
+                  <Td> {row.note} </Td>
+                  <Td>{row.name}</Td>
+                  <Td>
+                    {row.firstName} {row.lastName}
+                  </Td>
+                  <Td>
+                    <Badge> {row.status} </Badge>
+                  </Td>
+                </Tr>;
               })}
             </Tbody>
           </Table>

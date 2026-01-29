@@ -1,5 +1,6 @@
 import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
 import {
+  Badge,
   Box,
   Flex,
   Heading,
@@ -10,17 +11,9 @@ import {
   Th,
   Thead,
   Tr,
-  Badge
 } from "@chakra-ui/react";
 
-export const ProgramAccountUpdatesTable = ({
-  programData = [],
-  gcfUserData = [],
-  program = [],
-}) => {
-  const usersById = Object.fromEntries(gcfUserData.map((u) => [u.id, u]));
-  const programsById = Object.fromEntries(program.map((p) => [p.id, p]));
-
+export const ProgramAccountUpdatesTable = ({ data }) => {
   return (
     <>
       <Box
@@ -55,17 +48,16 @@ export const ProgramAccountUpdatesTable = ({
             </Tr>
           </Thead>
           <Tbody>
-            {programData.map((row) => (
-              <Tr key={row}>
-                <Td>{row.updateDate}</Td>
-                <Td>{row.note}</Td>
-                <Td>{programsById[row.programId]?.name}</Td>
+            {data.map((row) => (
+              <Tr key={row.updateDate}>
+                <Td> {row.updateDate} </Td>
+                <Td> {row.note} </Td>
+                <Td>{row.name}</Td>
                 <Td>
-                  {usersById[row.createdBy]?.firstName}{" "}
-                  {usersById[row.createdBy]?.lastName}
+                  {row.firstName} {row.lastName}
                 </Td>
                 <Td>
-                  <Badge>{programsById[row.programId]?.status} </Badge>
+                  <Badge> {row.status} </Badge>
                 </Td>
               </Tr>
             ))}

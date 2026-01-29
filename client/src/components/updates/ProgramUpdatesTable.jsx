@@ -1,5 +1,6 @@
 import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
 import {
+  Badge,
   Box,
   Flex,
   Heading,
@@ -11,17 +12,9 @@ import {
   Th,
   Thead,
   Tr,
-  Badge
 } from "@chakra-ui/react";
 
-export const ProgramUpdatesTable = ({
-  programUpdatesData,
-  gcfUserData,
-  programData,
-}) => {
-  const usersById = Object.fromEntries(gcfUserData.map((u) => [u.id, u]));
-  const programById = Object.fromEntries(programData.map((p) => [p.id, p]));
-
+export const ProgramUpdatesTable = ({ data }) => {
   return (
     <>
       <Box
@@ -32,7 +25,7 @@ export const ProgramUpdatesTable = ({
           gap={10}
           mb="20px"
         >
-          <Heading> Updates</Heading>
+          <Heading> Program Updates </Heading>
           <SearchIcon
             mt="10px"
             ml="10px"
@@ -58,26 +51,19 @@ export const ProgramUpdatesTable = ({
               </Tr>
             </Thead>
             <Tbody>
-              {programUpdatesData.map((row) => {
-                return (
-                  <Tr key={row.updateId}>
-                    <Td>{row.updateDate}</Td>
-                    <Td>{row.note}</Td>
-                    <Td>{programById[row.programId]?.name}</Td>
-                    <Td>
-                      {usersById[row.createdBy]?.firstName}{" "}
-                      {usersById[row.createdBy]?.lastName}
-                    </Td>
-                    <Td>
-                    </Td>
-                    <Td>
-                      <Badge>
-                        {programById[row.programId]?.status}
-                      </Badge>
-                    </Td>
-                  </Tr>
-                );
-              })}
+              {data.map((row) => (
+                <Tr key={row.updateDate}>
+                  <Td> {row.updateDate} </Td>
+                  <Td> {row.note} </Td>
+                  <Td>{row.name}</Td>
+                  <Td>
+                    {row.firstName} {row.lastName}
+                  </Td>
+                  <Td>
+                    <Badge> {row.status} </Badge>
+                  </Td>
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         </TableContainer>
