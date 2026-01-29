@@ -48,7 +48,7 @@ export const UpdatesPage = () => {
         setProgramAccountUpdatesData(programAccountUpdates);
         setMediaUpdatesData(mediaUpdates);
         setProgramUpdatesData(programUpdates);
-        setRole(userRole);
+        setRole(userRole[0].role);
       }
     );
   }, [memoizedData]);
@@ -64,6 +64,7 @@ export const UpdatesPage = () => {
           <ProgramUpdatesTable data={programUpdatesData} />
         </>
       )}
+      <p> {role} </p>
     </>
   );
 };
