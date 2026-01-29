@@ -85,7 +85,7 @@ updatesPermissionsRouter.get("/role/:id", async (req, res) => {
     const { id } = req.params;
     const data = await db.query(
       `SELECT role FROM gcf_user
-      WHERE gcf_user.id = '1';`,
+      WHERE gcf_user.id = $1;`,
       [id]
     );
 
