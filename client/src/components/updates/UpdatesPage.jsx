@@ -1,0 +1,54 @@
+import { useEffect, useMemo, useState } from "react";
+
+import { useParams } from "react-router-dom";
+
+import { MediaUpdatesTable } from "./MediaUpdatesTable";
+import { ProgramAccountUpdatesTable } from "./ProgramAccountUpdatesTable";
+import { ProgramUpdatesTable } from "./ProgramUpdatesTable";
+
+export const UpdatesPage = () => {
+  const { userId } = useParams();
+
+  const [programAccountUpdatesData, setProgramAccountUpdatesData] = useState(
+    []
+  );
+  const [mediaUpdatesData, setMediaUpdatesData] = useState([]);
+  const [programUpdatesData, setProgramUpdatesData] = useState([]);
+
+  const fetchData = async (path) => {
+    const response = await fetch(
+      `http://localhost:3001/update-permissions/${path}`
+    );
+    return response.json();
+  };
+
+  const memoizedData = useMemo(() => {
+    try {
+      return Promise.all([
+        fetchData(`program-account/${userId}`),
+        fetchData(`media-updates/${userId}`),
+        fetchData(`program-updates/${userId}`),
+      ]);
+    } catch (error) {
+      console.error("Fetch error:", error);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    memoizedData.then(
+      ([programAccountUpdates, mediaUpdates, programUpdates]) => {
+        setProgramAccountUpdatesData(programAccountUpdates);
+        setMediaUpdatesData(mediaUpdates);
+        setProgramUpdatesData(programUpdates);
+      }
+    );
+  }, [memoizedData]);
+
+  return (
+    <>
+      <MediaUpdatesTable data={mediaUpdatesData} />
+      <ProgramAccountUpdatesTable data={programAccountUpdatesData} />
+      <ProgramUpdatesTable data={programUpdatesData} />
+    </>
+  );
+};
