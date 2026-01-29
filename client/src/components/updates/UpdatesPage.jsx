@@ -20,6 +20,12 @@ export const UpdatesPage = () => {
     const response = await fetch(
       `http://localhost:3001/update-permissions/${path}`
     );
+
+    if (!response.ok) {
+      const message = await response.text();
+      console.error("Request failed:", response.status, message);
+      return [];
+  }
     return response.json();
   };
 

@@ -6,6 +6,7 @@ import {
   Heading,
   Input,
   Table,
+  TableContainer,
   Tbody,
   Td,
   Th,
@@ -37,32 +38,34 @@ export const ProgramAccountUpdatesTable = ({ data }) => {
           <HamburgerIcon mt="10px" />
           <DownloadIcon mt="10px" />
         </Flex>
-        <Table>
-          <Thead>
-            <Tr>
-              <Th>Time</Th>
-              <Th>Notes</Th>
-              <Th>Program</Th>
-              <Th>Author</Th>
-              <Th>Status</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {data.map((row) => (
-              <Tr key={row.updateDate}>
-                <Td> {row.updateDate} </Td>
-                <Td> {row.note} </Td>
-                <Td>{row.name}</Td>
-                <Td>
-                  {row.firstName} {row.lastName}
-                </Td>
-                <Td>
-                  <Badge> {row.status} </Badge>
-                </Td>
+        <TableContainer overflowX="auto" maxW="100%">
+          <Table>
+            <Thead>
+              <Tr>
+                <Th>Time</Th>
+                <Th>Notes</Th>
+                <Th>Program</Th>
+                <Th>Author</Th>
+                <Th>Status</Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
+            </Thead>
+            <Tbody>
+              {data.map((row) => (
+                <Tr key={row.updateDate}>
+                  <Td> {row.updateDate} </Td>
+                  <Td> {row.note} </Td>
+                  <Td>{row.name}</Td>
+                  <Td>
+                    {row.firstName} {row.lastName}
+                  </Td>
+                  <Td>
+                    <Badge> {row.status} </Badge>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </TableContainer>
       </Box>
     </>
   );

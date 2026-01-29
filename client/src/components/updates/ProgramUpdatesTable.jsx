@@ -39,7 +39,7 @@ export const ProgramUpdatesTable = ({ data }) => {
           <DownloadIcon mt="10px" />
         </Flex>
 
-        <TableContainer>
+        <TableContainer overflowX="auto" maxW="100%">
           <Table variant="simple">
             <Thead>
               <Tr>
