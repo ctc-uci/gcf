@@ -5,7 +5,7 @@ import { Box, Heading, HStack, IconButton, VStack } from "@chakra-ui/react";
 import { MdOutlineFileDownload } from "react-icons/md";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
-const StatBox = ({ label, number }: { label: string; number: number }) => {
+const StatBox = ({ label, number }) => {
   return (
     <Box
       maxW="200px"
@@ -29,11 +29,7 @@ const StatBox = ({ label, number }: { label: string; number: number }) => {
   );
 };
 
-interface StatisticsSummaryProps {
-  role?: "admin" | "rd" | "pd";
-}
-
-const StatisticsSummary = ({ role = "admin" }: StatisticsSummaryProps) => {
+const StatisticsSummary = ({ role = "admin" }) => {
   const { backend } = useBackendContext();
   const [stats, setStats] = useState(
     role === "pd"
@@ -71,11 +67,11 @@ const StatisticsSummary = ({ role = "admin" }: StatisticsSummaryProps) => {
 
           const totalPrograms = programsData.length;
           const totalStudents = enrollmentData.reduce(
-            (sum: number, e: any) => sum + (Number(e.enrollmentChange) || 0),
+            (sum, e) => sum + (Number(e.enrollmentChange) || 0),
             0
           );
           const totalInstruments = instrumentData.reduce(
-            (sum: number, i: any) => sum + (Number(i.amountChanged) || 0),
+            (sum, i) => sum + (Number(i.amountChanged) || 0),
             0
           );
 
@@ -110,23 +106,23 @@ const StatisticsSummary = ({ role = "admin" }: StatisticsSummaryProps) => {
           const instrumentData = Array.isArray(instrumentRes.data) ? instrumentRes.data : [];
           const countryData = Array.isArray(countryRes.data) ? countryRes.data : [];
 
-          const regionPrograms = programsData.filter((p: any) => {
-            const country = countryData.find((c: any) => c.id === p.country);
+          const regionPrograms = programsData.filter((p) => {
+            const country = countryData.find((c) => c.id === p.country);
             return country && country.regionId === regionId;
           });
-          const programIds = regionPrograms.map((p: any) => p.id);
+          const programIds = regionPrograms.map((p) => p.id);
 
           const updateIds = programUpdates
-            .filter((pu: any) => programIds.includes(Number(pu.programId)))
-            .map((pu: any) => pu.id);
+            .filter((pu) => programIds.includes(Number(pu.programId)))
+            .map((pu) => pu.id);
 
           const totalPrograms = regionPrograms.length;
           const totalStudents = enrollmentData
-            .filter((e: any) => updateIds.includes(String(e.updateId)))
-            .reduce((sum: number, e: any) => sum + (Number(e.enrollmentChange) || 0), 0);
+            .filter((e) => updateIds.includes(String(e.updateId)))
+            .reduce((sum, e) => sum + (Number(e.enrollmentChange) || 0), 0);
           const totalInstruments = instrumentData
-            .filter((i: any) => updateIds.includes(String(i.updateId)))
-            .reduce((sum: number, i: any) => sum + (Number(i.amountChanged) || 0), 0);
+            .filter((i) => updateIds.includes(String(i.updateId)))
+            .reduce((sum, i) => sum + (Number(i.amountChanged) || 0), 0);
 
           setStats([
             { label: "Programs", number: totalPrograms },
@@ -155,15 +151,15 @@ const StatisticsSummary = ({ role = "admin" }: StatisticsSummaryProps) => {
 
           const instrumentData = Array.isArray(instrumentRes.data) ? instrumentRes.data : [];
           const updateIds = programUpdates
-            .filter((pu: any) => Number(pu.programId) === programId)
-            .map((pu: any) => pu.id);
+            .filter((pu) => Number(pu.programId) === programId)
+            .map((pu) => pu.id);
 
           const totalStudents = enrollmentData
-            .filter((e: any) => updateIds.includes(String(e.updateId)))
-            .reduce((sum: number, e: any) => sum + (Number(e.enrollmentChange) || 0), 0);
+            .filter((e) => updateIds.includes(String(e.updateId)))
+            .reduce((sum, e) => sum + (Number(e.enrollmentChange) || 0), 0);
           const totalInstruments = instrumentData
-            .filter((i: any) => updateIds.includes(String(i.updateId)))
-            .reduce((sum: number, i: any) => sum + (Number(i.amountChanged) || 0), 0);
+            .filter((i) => updateIds.includes(String(i.updateId)))
+            .reduce((sum, i) => sum + (Number(i.amountChanged) || 0), 0);
 
           setStats([
             { label: "Current Enrollment", number: totalStudents },
