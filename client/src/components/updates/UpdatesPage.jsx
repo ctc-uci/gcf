@@ -14,6 +14,7 @@ export const UpdatesPage = () => {
   );
   const [mediaUpdatesData, setMediaUpdatesData] = useState([]);
   const [programUpdatesData, setProgramUpdatesData] = useState([]);
+  const [role, setRole] = useState("");
 
   const fetchData = async (path) => {
     const response = await fetch(
@@ -28,6 +29,7 @@ export const UpdatesPage = () => {
         fetchData(`program-account/${userId}`),
         fetchData(`media-updates/${userId}`),
         fetchData(`program-updates/${userId}`),
+        fetchData(`role/${userId}`),
       ]);
     } catch (error) {
       console.error("Fetch error:", error);
@@ -36,19 +38,26 @@ export const UpdatesPage = () => {
 
   useEffect(() => {
     memoizedData.then(
-      ([programAccountUpdates, mediaUpdates, programUpdates]) => {
+      ([programAccountUpdates, mediaUpdates, programUpdates, userRole]) => {
         setProgramAccountUpdatesData(programAccountUpdates);
         setMediaUpdatesData(mediaUpdates);
         setProgramUpdatesData(programUpdates);
+        setRole(userRole);
       }
     );
   }, [memoizedData]);
 
   return (
     <>
-      <MediaUpdatesTable data={mediaUpdatesData} />
-      <ProgramAccountUpdatesTable data={programAccountUpdatesData} />
-      <ProgramUpdatesTable data={programUpdatesData} />
+      {role === "Program Director" ? (
+        <ProgramUpdatesTable data={programUpdatesData} />
+      ) : (
+        <>
+          <MediaUpdatesTable data={mediaUpdatesData} />
+          <ProgramAccountUpdatesTable data={programAccountUpdatesData} />
+          <ProgramUpdatesTable data={programUpdatesData} />
+        </>
+      )}
     </>
   );
 };
