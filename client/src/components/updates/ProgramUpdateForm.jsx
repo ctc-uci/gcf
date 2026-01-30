@@ -1,7 +1,8 @@
 
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
 import { ArrowRightIcon } from '@chakra-ui/icons'
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
 import 
 { VStack,
@@ -17,16 +18,13 @@ import
   HStack,
   Select,
   Button,
-  Box,
   Textarea,
-//   useDisclosure,
   Tag,
   TagLabel,
   TagCloseButton
 } from '@chakra-ui/react'
 
 export const ProgramUpdateForm = () => {
-    // const { isOpen, onToggle } = useDisclosure()
     const [isAddingInstrument, setIsAddingInstrument] = useState(false)
     
     const [title, setTitle] = useState('')
@@ -43,15 +41,15 @@ export const ProgramUpdateForm = () => {
     const [addedInstruments, setAddedInstruments] = useState({})
     const [newInstruments, setNewInstruments] = useState([])
 
-    // fetch instruments when form loads
+    const { backend } = useBackendContext();
+
     useEffect(() => {
         const fetchInstruments = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/instruments');
+                const response = await backend.get('http://localhost:3001/instruments');
                 setExistingInstruments(response.data);
             } catch (error) {
                 console.error('Error fetching instruments:', error);
-                // keep rendering if fetch fails
                 setExistingInstruments([]);
             }
         };
@@ -112,12 +110,10 @@ export const ProgramUpdateForm = () => {
 
     const handleSubmit = async () => {
         try {
-            // validate required fields
             if (!title.trim() || !date || !notes.trim()) {
                 console.error('Missing required fields.');
             }
             
-            // create program update
             const programUpdateData = {
                 title: title.trim(),
                 program_id: 26, // TODO: replace with actual program id
@@ -126,14 +122,13 @@ export const ProgramUpdateForm = () => {
                 note: notes.trim()
             };
             
-            const response = await axios.post('http://localhost:3001/program-updates', programUpdateData);
+            const response = await backend.post('http://localhost:3001/program-updates', programUpdateData);
             const programUpdateId = response.data.id;
 
-            // add new instruments to DB
             console.log('New instruments to add:', newInstruments);
             for (const instrumentName of newInstruments) {
                 try {
-                    await axios.post('http://localhost:3001/instruments', {
+                    await backend.post('http://localhost:3001/instruments', {
                         name: instrumentName
                     });
                     console.log(`Added new instrument: ${instrumentName}`);
@@ -142,12 +137,9 @@ export const ProgramUpdateForm = () => {
                 }
             }
 
-            // refetch instruments to get their ids
-            const instrumentsResponse = await axios.get('http://localhost:3001/instruments');
+            const instrumentsResponse = await backend.get('http://localhost:3001/instruments');
             setExistingInstruments(instrumentsResponse.data);
 
-            console.log('Added Instruments:', addedInstruments);
-            // create instrument changes if any instruments were added
             if (Object.keys(addedInstruments).length > 0) 
                 {
                 const instrumentChanges = Object.entries(addedInstruments).map(([name, qty]) => {
@@ -159,10 +151,9 @@ export const ProgramUpdateForm = () => {
                         amount_changed: qty
                     };
                 });
-                console.log('Sending instrument changes:', instrumentChanges[0]);
                 
                 for (const change of instrumentChanges) {
-                await axios.post(
+                await backend.post(
                     'http://localhost:3001/instrument-changes',
                     {
                         instrumentId: change.instrument_id,
@@ -173,10 +164,9 @@ export const ProgramUpdateForm = () => {
 }
             }
 
-            // create enrollment change entries if both enrollment # and graduated # are provided
             if (enrollmentNumber !== null && graduatedNumber !== null) {
                 console.log('Sending enrollment change:', { update_id: programUpdateId, enrollment_change: enrollmentNumber, graduated_change: graduatedNumber });
-                await axios.post('http://localhost:3001/enrollmentChange', {
+                await backend.post('http://localhost:3001/enrollmentChange', {
                     update_id: programUpdateId,
                     enrollment_change: enrollmentNumber,
                     graduated_change: graduatedNumber
@@ -185,7 +175,6 @@ export const ProgramUpdateForm = () => {
 
             console.log('Sending program update data:', programUpdateId, enrollmentNumber, graduatedNumber);
 
-            // clear form if submission was successful
             setTitle('');
             setDate('');
             setEnrollmentNumber(null);
