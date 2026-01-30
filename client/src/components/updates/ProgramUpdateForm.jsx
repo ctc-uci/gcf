@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-// import axios from 'axios';
 import { ArrowRightIcon } from '@chakra-ui/icons'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
@@ -24,7 +23,7 @@ import
   TagCloseButton
 } from '@chakra-ui/react'
 
-export const ProgramUpdateForm = () => {
+export const ProgramUpdateForm = ( {programId} ) => {
     const [isAddingInstrument, setIsAddingInstrument] = useState(false)
     
     const [title, setTitle] = useState('')
@@ -116,7 +115,7 @@ export const ProgramUpdateForm = () => {
             
             const programUpdateData = {
                 title: title.trim(),
-                program_id: 26, // TODO: replace with actual program id
+                program_id: programId,
                 created_by: 1, // TODO: replace with actual user id
                 update_date: date,
                 note: notes.trim()
