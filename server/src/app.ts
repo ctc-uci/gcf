@@ -19,6 +19,7 @@ import { programRouter } from "@/routes/program";
 import { partnerOrganizationRouter } from "@/routes/partnerOrganization";
 import { imagesRouter } from "@/routes/images";
 import { adminProgramTableRouter } from "@/routes/adminProgramTable";
+import { rdProgramTableRouter } from "@/routes/rdProgramTable";
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ if (process.env.NODE_ENV === "production") {
 
 // app.use("/users", usersRouter);
 app.use("/adminProgramTable", adminProgramTableRouter);
+app.use("/rdProgramTable", rdProgramTableRouter);
 app.use("/program-directors", directorRouter)
 app.use('/program-updates', programUpdateRouter);
 app.use("/instruments", instrumentRouter);
