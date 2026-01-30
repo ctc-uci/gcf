@@ -2,7 +2,11 @@ import { Flex, Text, Image, Button, Link } from '@chakra-ui/react'
 import logo from '/logo.png'
 import guy from '/public/guy.png'
 
-export const Navbar = ({role}) => {
+interface NavbarProps {
+    role: "admin" | "regional_director" | "program_director" | string;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ role }) => {
     const region = "North America"; // placeholder for region
     const project = "Royal Kids Family Camp"; // placeholder for project
     return (
@@ -22,7 +26,7 @@ export const Navbar = ({role}) => {
                 <Button
                     bg="white" 
                     as={Link} 
-                    to={"/profile"} 
+                    href="/profile"
                     leftIcon={<Image src={guy} alt="User Icon" boxSize="2.5vh"/>} 
                     _hover={ {variant: "outline" }}
                     >
