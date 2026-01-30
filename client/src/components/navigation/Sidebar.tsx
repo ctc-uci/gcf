@@ -4,8 +4,17 @@ import bell from '/bell.png'
 import guy from '/guy.png'
 import media from '/media.png'
 
-export const Sidebar = ({role}) => {
-    let navItems = [];
+interface SidebarProps {
+    role: "admin" | "regional_director" | "program_director";
+}
+
+export const Sidebar = ({role}: SidebarProps) => {
+    interface NavItem {
+        name: string;
+        icon: React.ReactElement;
+        path: string;
+    }
+    let navItems: NavItem[] = [];
     if (role === "admin" || role === "regional_director") {
         navItems = [
             { name: 'Programs', icon: <Image src={guitar} alt="Guitar" boxSize="20px" />, path: "/dashboard" },
