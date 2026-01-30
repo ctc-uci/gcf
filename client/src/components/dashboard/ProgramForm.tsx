@@ -21,6 +21,7 @@ import {
   TagCloseButton,
 } from '@chakra-ui/react'
 import { useRef, useState, useEffect } from 'react'
+import { useBackendContext } from '@/contexts/hooks/useBackendContext' 
 
 interface ProgramFormState {
     status: "Developing" | "Launched" | null,
@@ -95,17 +96,19 @@ const ProgramDirectorForm = ( { setFormData } : ProgramDirectorForm ) => {
     const [programDirectors, setProgramDirectors] = useState<string[]>([]);
     const [selectedDirector, setSelectedDirector] = useState<string>('');
 
+    const { backend }  = useBackendContext();
+
     useEffect(() => {
         async function fetchProgramDirectors() {
-            const promise = await fetch("http://localhost:3001/program-directors");
-            const directors = await promise.json();
+            const response = await backend.get("/program-directors");
+            const directors = response.data;
             // filter for userId only
             setProgramDirectors(directors.map((director: { userId: string, programId: string}) => director.userId));
         }
         // fetch all program directors from db
         fetchProgramDirectors();
         
-    }, []);
+    }, [backend]);
 
 
 
