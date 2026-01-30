@@ -14,6 +14,7 @@ import {
   Tr,
   useColorModeValue,
 } from "@chakra-ui/react";
+
 import { FiEdit2, FiEyeOff } from "react-icons/fi";
 
 export const AccountsTable = ({ data }) => {
@@ -21,7 +22,10 @@ export const AccountsTable = ({ data }) => {
 
   return (
     <TableContainer>
-      <Table variant="simple" size="md">
+      <Table
+        variant="simple"
+        size="md"
+      >
         <Thead>
           <Tr>
             <Th
@@ -85,7 +89,12 @@ export const AccountsTable = ({ data }) => {
 
               <Td>
                 <HStack spacing={2}>
-                  <Text fontSize="lg" lineHeight="1" mt="6px">
+                  {/* TODO: Update to utilize password field when data is available + hidden functionality */}
+                  <Text
+                    fontSize="lg"
+                    lineHeight="1"
+                    mt="6px"
+                  >
                     ********
                   </Text>
                   <Icon
@@ -111,9 +120,16 @@ export const AccountsTable = ({ data }) => {
                 </Badge>
               </Td>
 
-              <Td>{user.program || "-"}</Td>
+              <Td>
+                {Array.isArray(user.programs) && user.programs.length > 0
+                  ? user.programs.join(", ")
+                  : "-"}
+              </Td>
 
-              <Td p={0} textAlign="right">
+              <Td
+                p={0}
+                textAlign="right"
+              >
                 <Box
                   className="action-group"
                   opacity={0}

@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
+
 import { Box, Center, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
+
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useParams } from "react-router-dom";
+
 import { AccountsTable } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
 
 export const Account = () => {
+  // TODO: Get userId from auth context when auth flow is finalized
   const { userId } = useParams();
 
   const [currentUser, setCurrentUser] = useState(null);
@@ -32,6 +36,7 @@ export const Account = () => {
 
         if (!userData) {
           console.error("Current user data is null");
+
           setIsLoading(false);
           return;
         }
@@ -39,43 +44,42 @@ export const Account = () => {
         let fetchedData = [];
 
         if (userData.role === "Admin") {
-          const [pdResponse, rdResponse] = await Promise.all([
-            backend.get("/program-directors/summary"),
-            backend.get("/regional-directors/summary"),
-          ]);
+          const response = await backend.get(
+            `/gcf-users/${userData.id}/accounts`
+          );
 
-          const pds = pdResponse.data.map((item) => ({
-            id: item.id,
-            firstName: item.firstName,
-            lastName: item.lastName,
-            role: item.role,
-            program: item.programName,
-            email: "-",
-            password: "-",
-          }));
+          // TODO: Update email and password fields when data is available
+          fetchedData = response.data.map((item) => {
+            let programs = [];
 
-          const rds = rdResponse.data.map((item) => ({
-            id: item.id,
-            firstName: item.firstName,
-            lastName: item.lastName,
-            role: item.role,
-            program: "-",
-            email: "-",
-            password: "-",
-          }));
+            if (item.role === "Regional Director") {
+              programs = item.programs || [];
+            } else if (item.programName) {
+              programs = [item.programName];
+            }
 
-          fetchedData = [...rds, ...pds];
+            return {
+              id: item.id,
+              firstName: item.firstName,
+              lastName: item.lastName,
+              role: item.role,
+              programs: programs,
+              email: "-",
+              password: "-",
+            };
+          });
         } else if (userData.role === "Regional Director") {
-          const pdResponse = await backend.get(
+          const programDirectorResponse = await backend.get(
             `/regional-directors/${userId}/program-directors`
           );
 
-          fetchedData = pdResponse.data.map((item) => ({
+          // TODO: Update email and password fields when data is available
+          fetchedData = programDirectorResponse.data.map((item) => ({
             id: item.id,
             firstName: item.firstName,
             lastName: item.lastName,
             role: "Program Director",
-            program: item.programName,
+            programs: item.programName ? [item.programName] : [],
             email: "-",
             password: "-",
           }));
@@ -93,14 +97,22 @@ export const Account = () => {
   }, [backend, userId]);
 
   return (
-    <Box p={8} bg="white" minH="100vh">
+    <Box
+      p={8}
+      bg="white"
+      minH="100vh"
+    >
       <Flex
         mb={8}
         align="center"
         wrap={{ base: "wrap", md: "nowrap" }}
         gap={4}
       >
-        <Heading as="h1" size="lg" fontWeight="500">
+        <Heading
+          as="h1"
+          size="lg"
+          fontWeight="500"
+        >
           Accounts
         </Heading>
 
@@ -109,7 +121,10 @@ export const Account = () => {
 
       {isLoading ? (
         <Center py={10}>
-          <Spinner size="xl" color="gray.500" />
+          <Spinner
+            size="xl"
+            color="gray.500"
+          />
         </Center>
       ) : users.length === 0 ? (
         <Center py={10}>

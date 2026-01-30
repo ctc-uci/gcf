@@ -35,27 +35,6 @@ directorRouter.get("/", async (req, res) => {
   }
 });
 
-directorRouter.get("/summary", async (req, res) => {
-  try {
-    const directors = await db.query(`
-            SELECT 
-                u.id,
-                u.first_name,
-                u.last_name,
-                u.role,
-                p.name as program_name
-            FROM program_director pd
-            JOIN gcf_user u ON pd.user_id = u.id
-            LEFT JOIN program p ON pd.program_id = p.id
-            ORDER BY u.last_name ASC
-        `);
-
-    res.status(200).json(keysToCamel(directors));
-  } catch (err) {
-    res.status(400).send(err.message);
-  }
-});
-
 // read one program director
 directorRouter.get("/:userId", async (req, res) => {
   try {

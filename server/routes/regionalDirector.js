@@ -32,33 +32,12 @@ regionalDirectorRouter.get("/", async (req, res) => {
   }
 });
 
-regionalDirectorRouter.get("/summary", async (req, res) => {
-  try {
-    const data = await db.query(`
-            SELECT 
-                u.id,
-                u.first_name,
-                u.last_name,
-                u.role,
-                rd.region_id
-            FROM regional_director rd
-            JOIN gcf_user u ON rd.user_id = u.id
-            ORDER BY u.last_name ASC
-        `);
-
-    res.status(200).json(keysToCamel(data));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
 regionalDirectorRouter.get("/:user_id/program-directors", async (req, res) => {
   try {
     const { user_id } = req.params;
 
-    const data = await db.query(`
-      SELECT 
+    const data = await db.query(
+      `SELECT 
         u.id,
         u.first_name,
         u.last_name,
@@ -70,8 +49,9 @@ regionalDirectorRouter.get("/:user_id/program-directors", async (req, res) => {
       JOIN program_director pd ON p.id = pd.program_id
       JOIN gcf_user u ON pd.user_id = u.id
       WHERE rd.user_id = $1
-      ORDER BY u.last_name ASC
-    `, [user_id]);
+      ORDER BY u.last_name ASC`,
+      [user_id]
+    );
 
     res.status(200).json(keysToCamel(data));
   } catch (err) {
