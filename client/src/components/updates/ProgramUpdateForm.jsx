@@ -110,7 +110,7 @@ export const ProgramUpdateForm = ( {programId} ) => {
     const handleSubmit = async () => {
         try {
             if (!title.trim() || !date || !notes.trim()) {
-                console.error('Missing required fields.');
+                return;
             }
             
             const programUpdateData = {
@@ -124,13 +124,11 @@ export const ProgramUpdateForm = ( {programId} ) => {
             const response = await backend.post('http://localhost:3001/program-updates', programUpdateData);
             const programUpdateId = response.data.id;
 
-            console.log('New instruments to add:', newInstruments);
             for (const instrumentName of newInstruments) {
                 try {
                     await backend.post('http://localhost:3001/instruments', {
                         name: instrumentName
                     });
-                    console.log(`Added new instrument: ${instrumentName}`);
                 } catch (error) {
                     console.error(`Error adding instrument ${instrumentName}:`, error);
                 }
@@ -143,7 +141,6 @@ export const ProgramUpdateForm = ( {programId} ) => {
                 {
                 const instrumentChanges = Object.entries(addedInstruments).map(([name, qty]) => {
                     const instrument = instrumentsResponse.data.find(instr => instr.name === name);
-                    console.log('instrumentsResponse, update id, and qty', instrumentsResponse, programUpdateId, qty);
                     return {
                         instrument_id: instrument.id,
                         update_id: programUpdateId,
@@ -164,15 +161,12 @@ export const ProgramUpdateForm = ( {programId} ) => {
             }
 
             if (enrollmentNumber !== null && graduatedNumber !== null) {
-                console.log('Sending enrollment change:', { update_id: programUpdateId, enrollment_change: enrollmentNumber, graduated_change: graduatedNumber });
                 await backend.post('http://localhost:3001/enrollmentChange', {
                     update_id: programUpdateId,
                     enrollment_change: enrollmentNumber,
                     graduated_change: graduatedNumber
                 });
             }
-
-            console.log('Sending program update data:', programUpdateId, enrollmentNumber, graduatedNumber);
 
             setTitle('');
             setDate('');
