@@ -9,7 +9,7 @@ import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
 import { CookiesProvider } from "react-cookie";
 
-import Layout from "@/components/navigation/Layout";
+import { Layout } from "@/components/navigation/Layout";
 
 import {
   Navigate,
@@ -34,20 +34,27 @@ const App = () => {
                   path="/signup"
                   element={<Signup />}
                 />
+
                 <Route
-                  path="/dashboard"
-                  element={<ProtectedRoute element={<Dashboard />} />}
-                />
-                
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute
-                      element={<Admin />}
-                      allowedRoles={["admin"]}
-                    />
-                  }
-                />
+                  path="/"
+                  element={<ProtectedRoute element={<Layout />}/>}
+                >
+                  <Route
+                    path="/dashboard"
+                    element={<ProtectedRoute element={<Dashboard />} />}
+                  />
+                  
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute
+                        element={<Admin />}
+                        allowedRoles={["admin"]}
+                      />
+                    }
+                  />
+                </Route>
+
                 <Route
                   path="/"
                   element={

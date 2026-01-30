@@ -5,10 +5,10 @@ import guy from '/guy.png'
 import media from '/media.png'
 
 interface SidebarProps {
-    role: "admin" | "regional_director" | "program_director";
+    role: "admin" | "regional_director" | "program_director" | string;
 }
 
-export const Sidebar = ({role}: SidebarProps) => {
+export const Sidebar: React.FC<SidebarProps> = ({role}) => {
     interface NavItem {
         name: string;
         icon: React.ReactElement;
