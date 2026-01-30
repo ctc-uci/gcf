@@ -34,6 +34,7 @@ const App = () => {
                   path="/signup"
                   element={<Signup />}
                 />
+                {/* TODO: Change /account & /media route to protected when auth flow finalized */}
                 <Route
                   path="/account/:userId"
                   element={<Account />}
