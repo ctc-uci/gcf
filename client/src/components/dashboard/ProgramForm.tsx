@@ -202,7 +202,6 @@ export const ProgramForm = () => {
         language: null,
         programDirectors: [],
         curriculumLinks: {
-            "https://youtube.com": "YouTube Link",
         },
         media: []
     });
