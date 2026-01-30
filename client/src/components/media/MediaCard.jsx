@@ -1,11 +1,6 @@
 import { Box, Text } from "@chakra-ui/react";
 
-export const MediaCard = ({
-  s3_key,
-  file_name,
-  file_type,
-  is_thumbnail,
-}) => {
+export const MediaCard = ({ s3_key, file_name, file_type, is_thumbnail }) => {
   return (
     <Box
       h="200px"
