@@ -335,7 +335,7 @@ export const ProgramForm = () => {
                         <h3>Program Name</h3>
                         <Input placeholder = "Enter Program Name" onChange={(e) => handleProgramNameChange(e.target.value)}/>
                         <h3>Launch Date</h3>
-                        <Input placeholder = "MM/DD/YYYY" onChange={(e) => handleProgramLaunchDateChange(e.target.value)} />
+                        <Input type = "date" placeholder = "MM/DD/YYYY" onChange={(e) => handleProgramLaunchDateChange(e.target.value)} />
                         <h3>Region</h3>
                         <Select 
                             placeholder='Select region'
@@ -347,7 +347,13 @@ export const ProgramForm = () => {
                             ))}
                         </Select>
                         <h3>Students</h3>
-                        <Input placeholder = "Enter # of Students" onChange={(e) => handleStudentNumberChange(Number(e.target.value))}/>
+                        <NumberInput min = {0} onChange={(e) => handleStudentNumberChange(Number(e))}>
+                            <NumberInputField placeholder = "Enter # of Students"/>
+                            <NumberInputStepper>
+                                <NumberIncrementStepper />
+                                <NumberDecrementStepper />
+                            </NumberInputStepper>
+                        </NumberInput>
                         
                         <h3> Instrument(s) & Quantity </h3>
                         <HStack wrap="wrap">
