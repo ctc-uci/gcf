@@ -51,7 +51,15 @@ const InstrumentForm = ( { setFormData }) => {
             try {
                 const response = await backend.get('/instruments')
                 const instrument_names = response.data;
-                setInstruments(instrument_names);
+                
+                const instrumentMap = new Map();
+                instrument_names.forEach((instrument) => {
+                    if (!instrumentMap.has(instrument.name)) {
+                        instrumentMap.set(instrument.name, instrument)
+                    }
+                });
+                const unique_instruments = Array.from(instrumentMap.values());
+                setInstruments(unique_instruments);
             }
             catch (error) {
                 console.error("Error fetching instruments:", error);
