@@ -22,7 +22,7 @@ export const ProtectedRoute = ({
   ) : currentUser ? (
     <Navigate to={"dashboard"} />
   ) : (
-    <Navigate to={"/"} />
+    <Navigate to={"/login"} />
   );
 };
 
