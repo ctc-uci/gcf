@@ -33,7 +33,11 @@ interface ProgramFormState {
         [key: string]: number,
     },
     language: string | null,
-    programDirectors: string[],
+    programDirectors: {
+        userId: string, 
+        firstName: string,
+        lastName: string
+    }[],
     curriculumLinks: {
         [key: string]: string
     }
@@ -93,17 +97,20 @@ interface ProgramDirectorForm {
 
 const ProgramDirectorForm = ( { setFormData } : ProgramDirectorForm ) => {
 
-    const [programDirectors, setProgramDirectors] = useState<string[]>([]);
+    const [programDirectors, setProgramDirectors] = useState<{
+        userId: string,
+        firstName: string, 
+        lastName: string
+    }[]>([]);
     const [selectedDirector, setSelectedDirector] = useState<string>('');
 
     const { backend }  = useBackendContext();
 
     useEffect(() => {
         async function fetchProgramDirectors() {
-            const response = await backend.get("/program-directors");
+            const response = await backend.get("/program-directors/program-director-names");
             const directors = response.data;
-            // filter for userId only
-            setProgramDirectors(directors.map((director: { userId: string, programId: string}) => director.userId));
+            setProgramDirectors(directors);
         }
         // fetch all program directors from db
         fetchProgramDirectors();
@@ -115,9 +122,12 @@ const ProgramDirectorForm = ( { setFormData } : ProgramDirectorForm ) => {
     function handleSubmit() {
         if (!selectedDirector) return;
         
+        const directorObj = programDirectors.find((d) => d.userId === selectedDirector)
+        if (!directorObj) return;
+
         setFormData((prevData: ProgramFormState) => ({
             ...prevData,
-            programDirectors: [...prevData.programDirectors, selectedDirector],
+            programDirectors: [...prevData.programDirectors, directorObj],
         }));
 
          setSelectedDirector('');
@@ -133,7 +143,7 @@ const ProgramDirectorForm = ( { setFormData } : ProgramDirectorForm ) => {
             >
                 {
                     (programDirectors).map((director) => (
-                        <option value={director} key={director}>{director}</option>
+                        <option value={director.userId} key={director.userId}>{director.firstName} {director.lastName}</option>
                     ))
                 }
             </Select>
@@ -329,8 +339,8 @@ export const ProgramForm = () => {
                         <HStack wrap = "wrap">
                             <ProgramDirectorForm setFormData={setFormState}/>
                             {formState.programDirectors.map((director) => (
-                                <Tag key={director}> 
-                                    <TagLabel>{director}</TagLabel>
+                                <Tag key={director.userId}> 
+                                    <TagLabel>{`${director.firstName} ${director.lastName}`}</TagLabel>
                                     <TagCloseButton onClick={() => {
                                         setFormState((prevData) => ({
                                             ...prevData,
