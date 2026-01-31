@@ -18,47 +18,23 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-  TagCloseButton,
-  Link
+  TagCloseButton
 } from '@chakra-ui/react'
 import { useRef, useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext' 
 
-interface ProgramFormState {
-    status: "Developing" | "Launched" | null,
-    programName: string | null,
-    launchDate: string | null,
-    region: string | null,
-    students: number,
-    instruments: {
-        [key: string]: number,
-    },
-    language: string | null,
-    programDirectors: {
-        userId: string, 
-        firstName: string,
-        lastName: string
-    }[],
-    curriculumLinks: {
-        [key: string]: string
-    }
-    media: string[],
-}
 
 // sub-component for adding instruments
-interface InstrumentFormProps {
-    setFormData: React.Dispatch<React.SetStateAction<ProgramFormState>>;
-}
-const InstrumentForm = ( { setFormData } : InstrumentFormProps ) => {
-    const [instruments, setInstruments] = useState<{id: string, name: string}[]>([]);
-    const [quantity, setQuantity] = useState<number>(0);
-    const [selectedInstrument, setSelectedInstrument] = useState<string>('');
+const InstrumentForm = ( { setFormData }) => {
+    const [instruments, setInstruments] = useState([]);
+    const [quantity, setQuantity] = useState(0);
+    const [selectedInstrument, setSelectedInstrument] = useState('');
     const { backend } = useBackendContext();
 
     function handleSubmit() {
         if (!selectedInstrument || quantity === 0) return;
 
-        setFormData((prevData: ProgramFormState) => ({
+        setFormData((prevData) => ({
             ...prevData,
             instruments: {
                 ...prevData.instruments,
@@ -115,19 +91,11 @@ const InstrumentForm = ( { setFormData } : InstrumentFormProps ) => {
     )
 }
 // sub-component for adding program directors
-interface ProgramDirectorFormProps {
-    formState: ProgramFormState;
-    setFormData: React.Dispatch<React.SetStateAction<ProgramFormState>>;
-}
 
-const ProgramDirectorForm = ( { formState, setFormData } : ProgramDirectorFormProps ) => {
+const ProgramDirectorForm = ( { formState, setFormData }) => {
 
-    const [programDirectors, setProgramDirectors] = useState<{
-        userId: string,
-        firstName: string, 
-        lastName: string
-    }[]>([]);
-    const [selectedDirector, setSelectedDirector] = useState<string>('');
+    const [programDirectors, setProgramDirectors] = useState([]);
+    const [selectedDirector, setSelectedDirector] = useState('');
 
     const { backend }  = useBackendContext();
 
@@ -156,7 +124,7 @@ const ProgramDirectorForm = ( { formState, setFormData } : ProgramDirectorFormPr
         const directorObj = programDirectors.find((d) => d.userId === selectedDirector);
         if (!directorObj) return;
 
-        setFormData((prevData: ProgramFormState) => ({
+        setFormData((prevData) => ({
             ...prevData,
             programDirectors: [...prevData.programDirectors, directorObj],
         }));
@@ -185,13 +153,10 @@ const ProgramDirectorForm = ( { formState, setFormData } : ProgramDirectorFormPr
 }
 
 // sub-component for adding curriculum links
-interface CurriculumLinkFormProps {
-    setFormData: React.Dispatch<React.SetStateAction<ProgramFormState>>;
-}
 
-const CurriculumLinkForm = ( { setFormData } : CurriculumLinkFormProps ) => {
-    const [link, setLink] = useState<string | null>(null);
-    const [display, setDisplay] = useState<string | null>(null);
+const CurriculumLinkForm = ( { setFormData } ) => {
+    const [link, setLink] = useState(null);
+    const [display, setDisplay] = useState(null);
 
     function handleSubmit() {
         if (!link || !display) return;
@@ -200,11 +165,11 @@ const CurriculumLinkForm = ( { setFormData } : CurriculumLinkFormProps ) => {
         if (!link.startsWith('http://') && !link.startsWith('https://')) {
             validLink = 'https://' + link;
         }
-        setFormData((prevData: ProgramFormState) => ({
+        setFormData((prevData) => ({
             ...prevData, 
             curriculumLinks: {
                 ...prevData.curriculumLinks,
-                [validLink]: display as string
+                [validLink]: display 
             }
         }));
 
@@ -235,10 +200,10 @@ const CurriculumLinkForm = ( { setFormData } : CurriculumLinkFormProps ) => {
 
 export const ProgramForm = () => {
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const btnRef = useRef<HTMLButtonElement>(null);
+    const btnRef = useRef(null);
     const { backend } = useBackendContext();
-    const [regions, setRegions] = useState<string[]>([]);
-    const [formState, setFormState] = useState<ProgramFormState>({
+    const [regions, setRegions] = useState([]);
+    const [formState, setFormState] = useState({
         status: null,
         programName: null,
         launchDate: null,
@@ -253,27 +218,27 @@ export const ProgramForm = () => {
         media: []
     });
 
-    function handleProgramStatusChange(status: string) {
-        setFormState({ ...formState, status: status as "Developing" | "Launched" });
+    function handleProgramStatusChange(status) {
+        setFormState({ ...formState, status: status});
     }
 
-    function handleProgramNameChange(name: string) {
+    function handleProgramNameChange(name) {
         setFormState({ ...formState, programName: name });
     }
 
-    function handleProgramLaunchDateChange(date: string) {
+    function handleProgramLaunchDateChange(date) {
         setFormState({...formState, launchDate: date});
     }
 
-    function handleRegionChange(regionChange: string) {
+    function handleRegionChange(regionChange) {
         setFormState({...formState, region: regionChange});
     }
 
-    function handleStudentNumberChange(numStudents: number) {
+    function handleStudentNumberChange(numStudents) {
         setFormState({...formState, students: numStudents})
     }
     
-    function handleLanguageChange(langChange: string) {
+    function handleLanguageChange(langChange) {
         setFormState({...formState, language: langChange})
     }
 
@@ -292,8 +257,8 @@ export const ProgramForm = () => {
         async function getRegions() {
             try {
                 const response = await backend.get("/region");
-                const region_list = response.data.map((region: {id: string, name: string}) => region.name);
-                const filtered_list = [... new Set<string>(region_list)];
+                const region_list = response.data.map((region) => region.name);
+                const filtered_list = [... new Set(region_list)];
                 setRegions(filtered_list);
             } catch (error) {
                 console.error("Error fetching regions:", error);
