@@ -19,6 +19,7 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
   TagCloseButton,
+  Link
 } from '@chakra-ui/react'
 import { useRef, useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext' 
@@ -171,11 +172,16 @@ const CurriculumLinkForm = ( { setFormData } : CurriculumLinkFormProps ) => {
 
     function handleSubmit() {
         if (!link || !display) return;
+
+        let validLink = link
+        if (!link.startsWith('http://') && !link.startsWith('https://')) {
+            validLink = 'https://' + link;
+        }
         setFormData((prevData: ProgramFormState) => ({
             ...prevData, 
             curriculumLinks: {
                 ...prevData.curriculumLinks,
-                [link as string]: display as string
+                [validLink]: display as string
             }
         }));
 
@@ -207,7 +213,8 @@ const CurriculumLinkForm = ( { setFormData } : CurriculumLinkFormProps ) => {
 export const ProgramForm = () => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const btnRef = useRef<HTMLButtonElement>(null);
-
+    const { backend } = useBackendContext();
+    const [regions, setRegions] = useState<string[]>([]);
     const [formState, setFormState] = useState<ProgramFormState>({
         status: null,
         programName: null,
@@ -258,6 +265,20 @@ export const ProgramForm = () => {
         console.log("Program status changed to:", formState);
     }, [formState])
 
+    useEffect(() => {
+        async function getRegions() {
+            try {
+                const response = await backend.get("/region");
+                const region_list = response.data.map((region: {id: string, name: string}) => region.name);
+                const filtered_list = [... new Set<string>(region_list)];
+                setRegions(filtered_list);
+            } catch (error) {
+                console.error("Error fetching regions:", error);
+            }
+        }
+        getRegions();
+    }, [backend, setRegions]);
+
     return (
         <>
 
@@ -299,14 +320,9 @@ export const ProgramForm = () => {
                             onChange={(e) => handleRegionChange(e.target.value)}
                         > 
                             {/* hardcoded for now but can make a DB call to fetch later */}
-                            <option value='north-america'>North America</option>
-                            <option value='south-america'>South America</option>
-                            <option value='central-america'>Central America</option>
-                            <option value='europe'>Europe</option>
-                            <option value='asia'>Asia</option>
-                            <option value='africa'>Africa</option>
-                            <option value='middle-east'>Middle East</option>
-                            <option value='australia'>Australia</option>
+                            {regions.map((region) => (
+                                <option key = {region} value ={region}>{region}</option>
+                            ))}
                         </Select>
                         <h3>Students</h3>
                         <Input placeholder = "Enter # of Students" onChange={(e) => handleStudentNumberChange(Number(e.target.value))}/>
@@ -364,7 +380,14 @@ export const ProgramForm = () => {
                         <HStack wrap="wrap">
                             {Object.entries(formState.curriculumLinks).map(([link, display]) => (
                                 <Tag key={link}>
-                                    <TagLabel>{display}</TagLabel>
+                                    <TagLabel 
+                                        cursor="pointer" 
+                                        onClick={() => {
+                                            window.open(link, '_blank', 'noopener,noreferrer');
+                                        }}
+                                    >
+                                        {display}
+                                    </TagLabel>
                                     <TagCloseButton onClick={() => {
                                         setFormState((prevData) => {
                                             const { [link]: _, ...remainingLinks } = prevData.curriculumLinks;
