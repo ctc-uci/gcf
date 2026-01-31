@@ -282,7 +282,7 @@ export const ProgramForm = () => {
                             <Button onClick={() => handleProgramStatusChange("Launched")} colorScheme={formState.status === "Launched" ? "teal" : undefined}>Launched</Button>
                         </HStack> 
                         <h3>Program Name</h3>
-                        <Input placeholder = "Enter Program Name: " onChange={(e) => handleProgramNameChange(e.target.value)}/>
+                        <Input placeholder = "Enter Program Name" onChange={(e) => handleProgramNameChange(e.target.value)}/>
                         <h3>Launch Date</h3>
                         <Input placeholder = "MM/DD/YYYY" onChange={(e) => handleProgramLaunchDateChange(e.target.value)} />
                         <h3>Region</h3>
@@ -302,7 +302,7 @@ export const ProgramForm = () => {
                             <option value='australia'>Australia</option>
                         </Select>
                         <h3>Students</h3>
-                        <Input placeholder = "Enter # of Students: " onChange={(e) => handleStudentNumberChange(Number(e.target.value))}/>
+                        <Input placeholder = "Enter # of Students" onChange={(e) => handleStudentNumberChange(Number(e.target.value))}/>
                         
                         <h3> Instrument(s) & Quantity </h3>
                         <HStack wrap="wrap">
