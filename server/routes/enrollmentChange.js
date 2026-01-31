@@ -15,6 +15,25 @@ enrollmentChangeRouter.get("/", async (req, res) => {
   }
 });
 
+enrollmentChangeRouter.get("/update/:updateId", async (req, res) => {
+  try {
+    const { updateId } = req.params;
+    const enrollmentChange = await db.query(
+      `SELECT ALL * FROM enrollment_change WHERE update_id = $1`,
+      [updateId]
+    );
+
+    if (enrollmentChange.length === 0){
+      return res.status(404).send("Item not found");
+    }
+
+    res.status(200).json(keysToCamel(enrollmentChange));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 enrollmentChangeRouter.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -27,12 +46,13 @@ enrollmentChangeRouter.get("/:id", async (req, res) => {
       return res.status(404).send("Item not found");
     }
 
-    res.status(200).json(keysToCamel(enrollmentChange[0]));
+    res.status(200).json(keysToCamel(enrollmentChange));
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 enrollmentChangeRouter.post("/", async (req, res) => {
   try {

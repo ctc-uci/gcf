@@ -24,13 +24,12 @@ import {
 } from "@chakra-ui/react";
 
 import { useState, useEffect } from "react";
+import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
-
-/*import {
-    AddIcon
-} from "@chakra-ui/icons";*/
 
 export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
+      const { backend } = useBackendContext();
+
     const [isAddingInstrument, setIsAddingInstrument] = useState(false);
     const [isAddingLanguage, setIsAddingLanguage] = useState(false);
     const [isAddingRegionalDirector, setIsAddingRegionalDirector] = useState(false);
@@ -71,64 +70,34 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
     useEffect(() => {
         let programUpdateResponse, programResponse, countryResponse, instrumentResponse, instrumentChangeResponse, userResponse, enrollmentChangeResponse;
         const program_data = async () => {
-            // fetching program update to get program id
             try {
-                programUpdateResponse = await fetch(
-                    `http://localhost:3001/program-updates/${programUpdateId}`
-                ).then((r) => {
-                    if (!r.ok) throw new Error(`Program Update Error: ${r.status}`)
-                    return r.json()
-            });
+                programUpdateResponse = await backend
+                .get(`/program-updates/${programUpdateId}`)
+                .then((r) => r.data);
             } catch (error) {
                 console.error('Error fetching program update: ', error)
                 return;
             }
             const program_id = programUpdateResponse.programId;
 
-            // fetching programs, countries, instruments
             try {
                 [programResponse, countryResponse, instrumentResponse, instrumentChangeResponse, enrollmentChangeResponse] = await Promise.all([
-                    fetch(`http://localhost:3001/program/${program_id}`).then((r) => {
-                    if (!r.ok) throw new Error(`Program Error: ${r.status}`);
-                    return r.json();
-                    }),
-                    fetch(`http://localhost:3001/country`).then((r) => {
-                    if (!r.ok) throw new Error(`Country Error: ${r.status}`);
-                    return r.json();
-                    }),
-                    fetch(`http://localhost:3001/instruments`).then((r) => {
-                    if (!r.ok) throw new Error(`Country Error: ${r.status}`);
-                    return r.json();
-                    }),
-                    fetch(
-                    `http://localhost:3001/instrument-changes/`
-                    ).then((r) => {
-                    if (!r.ok) throw new Error(`Instrument Change Error: ${r.status}`)
-                    return r.json();
-                    }),
-                    fetch(
-                    `http://localhost:3001/enrollmentChange/`
-                    ).then((r) => {
-                    if (!r.ok) throw new Error(`Enrollment Change Error: ${r.status}`)
-                    return r.json();
-                    })
+                    backend.get(`/program/${program_id}`).then((r) => r.data),
+                    backend.get(`/country`).then((r) => r.data),
+                    backend.get(`/instruments`).then((r) => r.data),
+                    backend.get(`/instrument-changes/update/${programUpdateId}`).then((r) => r.data),
+                    backend.get(`/enrollmentChange/update/${programUpdateId}`).then((r) => r.data),
                 ]);
             }
             catch (error){
                 console.error('Error fetching countries/program/instruments/instrument_change: ', error);
                 return;
             }
-
-            // same things with the update id 
-            // maybe add a route
-
-            const filteredEnrollmentChange = enrollmentChangeResponse.filter(
-                (row) => row.updateId === programUpdateId
-            );
+            
 
             const latestEnrollmentChange =
-            filteredEnrollmentChange.length > 0
-                ? filteredEnrollmentChange[filteredEnrollmentChange.length - 1]
+            enrollmentChangeResponse.length > 0
+                ? enrollmentChangeResponse[enrollmentChangeResponse.length - 1]
                 : null;
 
             if (latestEnrollmentChange) {
@@ -139,24 +108,14 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                 setGraduatedNumber(null);
             }
 
-            // need to get instrument changes with the update id
-            // maybe should create route for selecting by update_id?
-            const filteredInstrumentChange = instrumentChangeResponse.filter(
-                (row) => row.updateId === programUpdateId
-            );
-
             const match = new Map(instrumentResponse.map((i) => [i.id, i.name]));
             const instruments = {};
 
-            for (const row of filteredInstrumentChange) {
+            for (const row of instrumentChangeResponse) {
                 const name = match.get(row.instrumentId);
-                // if there is a duplicate just add it on top otherwise make it
                 instruments[name] = (instruments[name] ?? 0) + row.amountChanged;
             }
             setAddedInstruments(instruments);
-
-            // need to get regional directors
-            // maybe should create route for selecting by role_name and created_by id?
 
             setForm({
                 id: programResponse.id ?? "",
@@ -178,31 +137,23 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                 note: programUpdateResponse.note ?? "",
             });
 
-             //fetching gcf users to get regional directors
             try {
-                userResponse = await fetch(
-                    `http://localhost:3001/gcf-users`
-                ).then((r) => {
-                    if (!r.ok) throw new Error(`User Error: ${r.status}`)
-                    return r.json()
-            });
+                userResponse = await backend.get(
+                    `/gcf-users/role/${encodeURIComponent("Regional Director")}`
+                ).then((r) => r.data);
             } catch (error) {
                 console.error('Error fetching user: ', error)
                 return;
             }
 
-            const filteredRegionalDirectors = userResponse.filter(
-                user => user.role === "Regional Director"
-            );
-
             setAddedRegionalDirectors(
                 Object.fromEntries(
-                    filteredRegionalDirectors.map((u) => [u.id, `${u.firstName} ${u.lastName}`])
+                    userResponse.map((u) => [u.id, `${u.firstName} ${u.lastName}`])
                 )
             );
         
             
-            setRegionalDirectors(filteredRegionalDirectors);
+            setRegionalDirectors(userResponse);
             setCountries(countryResponse);
             setInstruments(instrumentResponse);
         };
@@ -264,7 +215,7 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
         if (!directorId) return;
 
         const user = regionalDirectors.find((u) => String(u.id) === String(directorId));
-        if (!user) return; // still protects you if data isn't loaded
+        if (!user) return; 
 
         setAddedRegionalDirectors((prev) => ({
             ...prev,
@@ -303,84 +254,45 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
             }
 
             console.log("New instruments to add:", newInstruments);
+            try {
+                await backend.delete(`/instrument-changes/update/${programUpdateId}`);
+            } catch (error) {
+                console.error(`Error deleting instrument changes:`, error);
+            }
 
             for (const instrumentName of newInstruments) {
             try {
-                const res = await fetch("http://localhost:3001/instruments", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: instrumentName }),
-                });
-
-                if (!res.ok) {
-                throw new Error(`POST /instruments failed: ${res.status}`);
-                }
-
-                console.log(`Added new instrument: ${instrumentName}`);
+                await backend.post("/instruments", {name: instrumentName});
             } catch (error) {
                 console.error(`Error adding instrument ${instrumentName}:`, error);
             }
             }
 
-            // refetch instruments to get their ids
-            const instrumentsRes = await fetch("http://localhost:3001/instruments");
-            if (!instrumentsRes.ok) {
-            throw new Error(`GET /instruments failed: ${instrumentsRes.status}`);
-            }
-            const instrumentsData = await instrumentsRes.json();
+            const instrumentsRes = await backend.get("/instruments");
+            const instrumentsData = instrumentsRes.data;
             setExistingInstruments(instrumentsData);
 
-            console.log("Added Instruments:", addedInstruments);
-
-            // create instrument changes if any instruments were added
             if (Object.keys(addedInstruments).length > 0) {
-            const instrumentChanges = Object.entries(addedInstruments).map(([name, qty]) => {
-                const instrument = instrumentsData.find((instr) => instr.name === name);
-                if (!instrument) {
-                throw new Error(`Instrument not found after refetch: ${name}`);
-                }
+                const instrumentChanges = Object.entries(addedInstruments).map(([name, qty]) => {
+                    const instrument = instrumentsData.find((instr) => instr.name === name);
+                    if (!instrument) {
+                    throw new Error(`Instrument not found after refetch: ${name}`);
+                    }
 
-                console.log("instrumentsData, update id, and qty", instrumentsData, programUpdateId, qty);
+                    console.log("instrumentsData, update id, and qty", instrumentsData, programUpdateId, qty);
 
-                return {
-                instrument_id: instrument.id,
-                update_id: programUpdateId,
-                amount_changed: qty,
-                };
-            });
-
-            console.log("Sending instrument changes:", instrumentChanges[0]);
-
-            for (const change of instrumentChanges) {
-                const res = await fetch("http://localhost:3001/instrument-changes", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    instrumentId: change.instrument_id,
-                    updateId: change.update_id,
-                    amountChanged: change.amount_changed,
-                }),
+                    return {
+                    instrument_id: instrument.id,
+                    update_id: programUpdateId,
+                    amount_changed: qty,
+                    };
                 });
 
-                if (!res.ok) {
-                throw new Error(`POST /instrument-changes failed: ${res.status}`);
+                for (const change of instrumentChanges) {
+                    await backend.post("/instrument-changes", {instrumentId: change.instrument_id, updateId: change.update_id, amountChanged: change.amount_changed});
                 }
             }
-            }
-            
-            const programPutResponse = await fetch(`http://localhost:3001/program/${form.id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(programData),
-                });
-            if (!programPutResponse.ok) throw new Error(`PUT program failed: ${programPutResponse.status}`);
-
-            const programUpdatePutResponse = await fetch(`http://localhost:3001/program-updates/${programUpdateId}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(programUpdateData),
-                });
-            if (!programUpdatePutResponse.ok) throw new Error(`PUT program failed: ${programUpdatePutResponse.status}`);
+            await backend.put(`/program/${form.id}`,programData);
 
             const instrumentNameToId = new Map(instruments.map((i) => [i.name, i.id]));
 
@@ -397,52 +309,35 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
                     graduated_change: graduatedNumber,
                 });
 
-                const enrollmentPostResponse = await fetch("http://localhost:3001/enrollmentChange", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                    update_id: programUpdateId,
-                    enrollment_change: enrollmentNumber,
-                    graduated_change: graduatedNumber,
-                    }),
-                });
-                if (!enrollmentPostResponse.ok) {
-                    throw new Error(`POST enrollmentChange failed: ${enrollmentPostResponse.status}`);
+                try {
+                    await backend.post("/enrollmentChange", {
+                        update_id: programUpdateId,
+                        enrollment_change: enrollmentNumber,
+                        graduated_change: graduatedNumber,
+                    });
+                } catch (error) {
+                    console.error("POST /enrollmentChange failed:", error);
                 }
                 console.log("Enrollment change saved");
             }
 
-
             const addInstrument = async () => {
-            const name = newInstrumentName.trim()
+                const name = newInstrumentName.trim();
 
-            // might want to check if instrument alr exists before adding
-            const postResponse = await fetch('http://localhost:3001/instruments', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({name}),
-            });
+                try {
+                    await backend.post("/instruments", { name });
 
-            // reftch for dropdown
-            if (!postResponse.ok) {
-                throw new Error(`POST instrument error: ${postResponse.status}`);
+                    const instrumentsData = (await backend.get("/instruments")).data;
+                    setInstruments(instrumentsData);
+
+                    setNewInstrumentName("");
+                    return name;
+                } catch (error) {
+                    const status = error?.response?.status;
+                    throw new Error(`Instrument request failed: ${status ?? "network/unknown"}`);
                 }
-
-                const getResponse = await fetch("http://localhost:3001/instruments");
-
-                if (!getResponse.ok) {
-                throw new Error(`GET instruments failed: ${getResponse.status}`);
-                }
-
-                const instrumentsData = await getResponse.json();
-                setInstruments(instrumentsData);
-
-                setNewInstrumentName("");
-                return name;
-            };
-        } catch (err) {
+            }
+        } catch (err) { 
             console.error("Save failed:", err);
         }
     };
@@ -450,29 +345,33 @@ export const ProgramUpdateEditForm = ( {programUpdateId} ) => {
         <VStack p={8} width='35%' borderWidth="1px" borderColor="lightblue">
             <Heading size="md" textAlign="center">Program</Heading>
             <Divider w="110%" mb={4}></Divider>
-            <Card bg='gray.100'>
-                <CardHeader pt={6} pb={0}>
-                    <Heading size="sm">Update Notes</Heading>
-                </CardHeader>
-                <CardBody py={1}>
-                    <Text placeholder = "None">
-                        {form.note}
-                    </Text>
-                </CardBody>
-            </Card>
-            <FormControl isRequired>
-                <FormLabel fontWeight="normal" color="gray">
-                    Title
-                </FormLabel>
-                <Input
-                    name="title"
-                    type="text"
-                    placeholder="Enter Title Here"
-                    bg="gray.100"
-                    value={form.title}
-                    onChange={handleChange}
-                />
-            </FormControl>
+            {programUpdateId && (
+                <>
+                    <Card bg='gray.100'>
+                    <CardHeader pt={6} pb={0}>
+                        <Heading size="sm">Update Notes</Heading>
+                    </CardHeader>
+                    <CardBody py={1}>
+                        <Text placeholder = "None">
+                            {form.note}
+                        </Text>
+                    </CardBody>
+                </Card>
+                <FormControl isRequired>
+                    <FormLabel fontWeight="normal" color="gray">
+                        Title
+                    </FormLabel>
+                    <Input
+                        name="title"
+                        type="text"
+                        placeholder="Enter Title Here"
+                        bg="gray.100"
+                        value={form.title}
+                        onChange={handleChange}
+                    />
+                </FormControl>
+            </>
+            )}
             <FormControl isRequired>
                 <FormLabel size='sm'>Program Name</FormLabel>
                 <Input 
