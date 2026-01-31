@@ -255,7 +255,7 @@ export const ProgramForm = () => {
     }
 
     function handleSave() {
-        // implement save functionality later
+        // TODO: implement save functionality later
         onClose();
     }
     
@@ -318,8 +318,7 @@ export const ProgramForm = () => {
                             placeholder='Select region'
                             value = {formState.region || ''}
                             onChange={(e) => handleRegionChange(e.target.value)}
-                        > 
-                            {/* hardcoded for now but can make a DB call to fetch later */}
+                        >
                             {regions.map((region) => (
                                 <option key = {region} value ={region}>{region}</option>
                             ))}
@@ -400,6 +399,7 @@ export const ProgramForm = () => {
                                 </Tag>
                             ))}
                         </HStack>
+                        {/* TODO: Add media input */}
                     </VStack>
                 </DrawerBody>
             </DrawerContent>
@@ -407,6 +407,5 @@ export const ProgramForm = () => {
         </>
     )
 };
-
 
 
