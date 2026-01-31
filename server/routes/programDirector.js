@@ -41,7 +41,7 @@ directorRouter.get("/program-director-names", async (req, res) => {
             `SELECT pd.user_id, gu.first_name, gu.last_name
              FROM gcf_user as gu
                 INNER JOIN program_director AS pd ON pd.user_id = gu.id
-             ORDER BY first_name ASC, last_name ASC`)
+             ORDER BY gu.first_name ASC, gu.last_name ASC`)
 
             res.status(200).json(keysToCamel(director_names))
     }
