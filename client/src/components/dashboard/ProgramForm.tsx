@@ -50,29 +50,52 @@ interface InstrumentFormProps {
     setFormData: React.Dispatch<React.SetStateAction<ProgramFormState>>;
 }
 const InstrumentForm = ( { setFormData } : InstrumentFormProps ) => {
-    const [instrumentName, setInstrumentName] = useState<string | null>(null);
+    const [instruments, setInstruments] = useState<{id: string, name: string}[]>([]);
     const [quantity, setQuantity] = useState<number>(0);
+    const [selectedInstrument, setSelectedInstrument] = useState<string>('');
+    const { backend } = useBackendContext();
 
     function handleSubmit() {
+        if (!selectedInstrument || quantity === 0) return;
+
         setFormData((prevData: ProgramFormState) => ({
             ...prevData,
             instruments: {
                 ...prevData.instruments,
-                [instrumentName as string]: quantity,
+                [selectedInstrument]: quantity,
             }
         }));
 
-        setInstrumentName(null);
+        setSelectedInstrument('');
         setQuantity(0);
     }
 
+    useEffect(() => {
+        async function fetchInstruments() {
+            try {
+                const response = await backend.get('/instruments')
+                const instrument_names = response.data;
+                setInstruments(instrument_names);
+            }
+            catch (error) {
+                console.error("Error fetching instruments:", error);
+            }
+        }
+        fetchInstruments();
+    }, [backend]);
+
     return (
        <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
-            <Input 
-                placeholder="Search" 
-                value={instrumentName || ''} 
-                onChange={(e) => setInstrumentName(e.target.value)} 
-            />
+            <Select
+                placeholder="Select Instrument" 
+                value={selectedInstrument} 
+                onChange={(e) => setSelectedInstrument(e.target.value)}
+            >
+                {instruments.map((instrument) => {
+                    return <option key = {instrument.id} value = {instrument.name}>{instrument.name}</option>
+                })} 
+                
+            </Select>
             <NumberInput 
                 step={1} 
                 defaultValue={0} 
