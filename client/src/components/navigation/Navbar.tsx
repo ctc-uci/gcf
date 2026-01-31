@@ -1,6 +1,6 @@
-import { Flex, Text, Image, Button, Link } from '@chakra-ui/react'
+import { Flex, Text, Icon, Image, Button, Link } from '@chakra-ui/react'
 import logo from '/logo.png'
-import guy from '/public/guy.png'
+import { HiOutlineUser } from 'react-icons/hi'
 
 interface NavbarProps {
     role: "admin" | "regional_director" | "program_director" | string;
@@ -12,7 +12,7 @@ export const Navbar: React.FC<NavbarProps> = ({ role }) => {
     return (
         <Flex height={"6vh"} align="center" w="100vw" pl="1.4vw" borderBottom="1px solid #e2e8f0">
             
-            <Image src={logo} alt="Logo" width={"9vw"} maxH="6vh" objectFit="cover"/>
+            <Image src={logo} alt="Logo" width={"9vw"} maxH="10vh" objectFit="contain"/>
             
             <Flex justify="space-between" w="100%" px="2vw" align="center">
                 <Text fontSize="2vh">
@@ -27,7 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({ role }) => {
                     bg="white" 
                     as={Link} 
                     href="/profile"
-                    leftIcon={<Image src={guy} alt="User Icon" boxSize="2.5vh"/>} 
+                    leftIcon={<Icon as={HiOutlineUser} boxSize="2vh"/>} 
                     _hover={ {variant: "outline" }}
                     >
                     <Text fontSize="2vh">

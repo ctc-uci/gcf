@@ -1,8 +1,8 @@
-import { Button, Box, VStack, Link, Flex, Image } from '@chakra-ui/react'
-import guitar from '/guitar.png'
-import bell from '/bell.png'
-import guy from '/guy.png'
-import media from '/media.png'
+import { Button, Box, VStack, Link, Flex, Icon } from '@chakra-ui/react'
+import { MdOutlineNotifications, MdPermMedia } from 'react-icons/md'
+import { FaGuitar } from 'react-icons/fa'
+import { HiOutlineUser } from 'react-icons/hi'
+
 
 interface SidebarProps {
     role: "admin" | "regional_director" | "program_director" | string;
@@ -17,15 +17,15 @@ export const Sidebar: React.FC<SidebarProps> = ({role}) => {
     let navItems: NavItem[] = [];
     if (role === "admin" || role === "regional_director") {
         navItems = [
-            { name: 'Programs', icon: <Image src={guitar} alt="Guitar" boxSize="20px" />, path: "/dashboard" },
-            { name: 'Updates', icon: <Image src={bell} alt="Bell" boxSize="20px" />, path: "/updates" },
-            { name: 'Accounts', icon: <Image src={guy} alt="Guy" boxSize="20px" />, path: "/accounts" },
+            { name: 'Programs', icon: <Icon as={FaGuitar} boxSize="20px" />, path: "/dashboard"},
+            { name: 'Updates', icon: <Icon as={MdOutlineNotifications} boxSize="20px" />, path: "/updates" },
+            { name: 'Accounts', icon: <Icon as={HiOutlineUser} boxSize="20px" />, path: "/accounts" },
         ];
     } else if (role === "program_director") {
         navItems = [
-            { name: 'Programs', icon: <Image src={guitar} alt="Guitar" boxSize="20px" />, path: "/dashboard" },
-            { name: 'Updates', icon: <Image src={bell} alt="Bell" boxSize="20px" />, path: "/updates" },
-            { name: 'Media', icon: <Image src={media} alt="Media" boxSize="20px" />, path: "/media" },
+            { name: 'Programs', icon: <Icon as={FaGuitar} boxSize="20px" />, path: "/dashboard" },
+            { name: 'Updates', icon: <Icon as={MdOutlineNotifications} boxSize="20px" />, path: "/updates" },
+            { name: 'Media', icon: <Icon as={MdPermMedia} boxSize="20px" />, path: "/media" },
         ];
     }
     return (
@@ -41,6 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({role}) => {
                             leftIcon={item.icon} 
                             height="4.5vh"
                             justifyContent="left"
+                            _hover={{textDecoration: "none"}}
                             >
                             {item.name}
                         </Button>

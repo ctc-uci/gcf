@@ -9,7 +9,7 @@ export const Layout = () => {
     <>
       {/* TODO: input real roles as props */}
       <Navbar role={role || "program_director"} />
-      <Sidebar role={role || "program_director"} />
+      <Sidebar role={role || "admin"} />
       <main>
         <Outlet />
       </main>
