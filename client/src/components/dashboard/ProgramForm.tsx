@@ -91,11 +91,12 @@ const InstrumentForm = ( { setFormData } : InstrumentFormProps ) => {
     )
 }
 // sub-component for adding program directors
-interface ProgramDirectorForm {
+interface ProgramDirectorFormProps {
+    formState: ProgramFormState;
     setFormData: React.Dispatch<React.SetStateAction<ProgramFormState>>;
 }
 
-const ProgramDirectorForm = ( { setFormData } : ProgramDirectorForm ) => {
+const ProgramDirectorForm = ( { formState, setFormData } : ProgramDirectorFormProps ) => {
 
     const [programDirectors, setProgramDirectors] = useState<{
         userId: string,
@@ -121,8 +122,14 @@ const ProgramDirectorForm = ( { setFormData } : ProgramDirectorForm ) => {
 
     function handleSubmit() {
         if (!selectedDirector) return;
-        
-        const directorObj = programDirectors.find((d) => d.userId === selectedDirector)
+
+        const alreadyAdded = formState.programDirectors.find((d) => d.userId === selectedDirector);
+        if (alreadyAdded) {
+            alert("This director has already been added!");
+            return;
+        } 
+
+        const directorObj = programDirectors.find((d) => d.userId === selectedDirector);
         if (!directorObj) return;
 
         setFormData((prevData: ProgramFormState) => ({
@@ -337,7 +344,7 @@ export const ProgramForm = () => {
                         </Select>
                         <h3>Program Directors</h3>
                         <HStack wrap = "wrap">
-                            <ProgramDirectorForm setFormData={setFormState}/>
+                            <ProgramDirectorForm formState = {formState} setFormData={setFormState}/>
                             {formState.programDirectors.map((director) => (
                                 <Tag key={director.userId}> 
                                     <TagLabel>{`${director.firstName} ${director.lastName}`}</TagLabel>
