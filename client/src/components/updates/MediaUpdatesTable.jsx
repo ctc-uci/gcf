@@ -24,7 +24,7 @@ export const MediaUpdatesTable = ({ data }) => {
         gap={10}
         mb="20px"
       >
-        <Heading> Media Updates </Heading>
+        <Heading>Media Updates</Heading>
         <SearchIcon
           mt="10px"
           ml="10px"
@@ -45,18 +45,18 @@ export const MediaUpdatesTable = ({ data }) => {
         <Table variant="simple">
           <Thead>
             <Tr>
-              <Th> Time </Th>
-              <Th> Notes </Th>
-              <Th> Program </Th>
-              <Th> Author </Th>
-              <Th> Status </Th>
+              <Th>Time</Th>
+              <Th>Notes</Th>
+              <Th>Program</Th>
+              <Th>Author</Th>
+              <Th>Status</Th>
             </Tr>
           </Thead>
           <Tbody>
             {data.map((row) => (
               <Tr key={row.id}>
-                <Td> {row.updateDate} </Td>
-                <Td> {row.note} </Td>
+                <Td>{row.updateDate}</Td>
+                <Td>{row.note}</Td>
                 <Td>{row.name}</Td>
                 <Td>
                   {row.firstName} {row.lastName}
