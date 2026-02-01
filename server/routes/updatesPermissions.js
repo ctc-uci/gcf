@@ -10,14 +10,12 @@ updatesPermissionsRouter.get("/media-updates/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const data = await db.query(
-      `SELECT program_update.update_date, program_update.note, program.name, creator.first_name, creator.last_name, program.status
-                                  FROM media_change
-                                  INNER JOIN program_update ON media_change.update_id = program_update.id
-                                  INNER JOIN program ON program_update.program_id = program.id
-                                  INNER JOIN country ON country.id = program.country
-                                  INNER JOIN region ON country.region_id = region.id
-                                  INNER JOIN regional_director ON regional_director.region_id = region.id AND regional_director.user_id = $1
-                                  LEFT JOIN gcf_user as creator ON creator.id = program_update.created_by;`,
+      `SELECT ROW_NUMBER() OVER (ORDER BY program_update.update_date) AS id,
+      program_update.update_date, program_update.note, program.name, gcf_user.first_name, gcf_user.last_name, gcf_user.role, program.status
+      FROM media_change
+      INNER JOIN program_update ON media_change.update_id = program_update.id
+      INNER JOIN program ON program_update.program_id = program.id
+      INNER JOIN gcf_user ON gcf_user.id = program.created_by;`,
       [id]
     );
 
@@ -36,13 +34,14 @@ updatesPermissionsRouter.get("/program-account/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const data = await db.query(
-      `SELECT program_update.update_date, program_update.note, program.name, creator.first_name, creator.last_name, program.status
-                                  FROM program_update
-                                  INNER JOIN program ON program_update.program_id = program.id
-                                  INNER JOIN country ON country.id = program.country
-                                  INNER JOIN region ON country.region_id = region.id
-                                  INNER JOIN regional_director ON regional_director.region_id = region.id AND regional_director.user_id = $1
-                                  LEFT JOIN gcf_user as creator ON creator.id = program_update.created_by;`,
+      `SELECT ROW_NUMBER() OVER (ORDER BY program_update.update_date) AS id,
+      program_update.update_date, program_update.note, program.name, creator.first_name, creator.last_name, program.status
+      FROM program_update
+      INNER JOIN program ON program_update.program_id = program.id
+      INNER JOIN country ON country.id = program.country
+      INNER JOIN region ON country.region_id = region.id
+      INNER JOIN regional_director ON regional_director.region_id = region.id AND regional_director.user_id = $1
+      LEFT JOIN gcf_user as creator ON creator.id = program_update.created_by;`,
       [id]
     );
 
@@ -61,12 +60,13 @@ updatesPermissionsRouter.get("/program-updates/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const data = await db.query(
-      `SELECT program_update.update_date, program_update.note, program.name, gcf_user.first_name, gcf_user.last_name, gcf_user.role, program.status
-                                  FROM program_update
-                                  INNER JOIN program ON program_update.program_id = program.id
-                                  INNER JOIN gcf_user on gcf_user.id = program.created_by
-                                  LEFT JOIN program_director ON program_director.program_id = program.id AND program_director.user_id = gcf_user.id
-                                  WHERE gcf_user.id = $1;`,
+      `SELECT ROW_NUMBER() OVER (ORDER BY program_update.update_date) AS id,
+      program_update.update_date, program_update.note, program.name, gcf_user.first_name, gcf_user.last_name, gcf_user.role, program.status
+      FROM program_update
+      INNER JOIN program ON program_update.program_id = program.id
+      INNER JOIN gcf_user on gcf_user.id = program.created_by
+      LEFT JOIN program_director ON program_director.program_id = program.id AND program_director.user_id = gcf_user.id
+      WHERE gcf_user.id = $1;`,
       [id]
     );
 
