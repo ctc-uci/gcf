@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 import { useParams } from "react-router-dom";
 
+//import { BackendContext } from "../../../../server/routes/updatesPermissions";
 import { MediaUpdatesTable } from "./MediaUpdatesTable";
 import { ProgramAccountUpdatesTable } from "./ProgramAccountUpdatesTable";
 import { ProgramUpdatesTable } from "./ProgramUpdatesTable";
@@ -61,7 +62,6 @@ export const UpdatesPage = () => {
         <>
           <MediaUpdatesTable data={mediaUpdatesData} />
           <ProgramAccountUpdatesTable data={programAccountUpdatesData} />
-          <ProgramUpdatesTable data={programUpdatesData} />
         </>
       )}
     </>
