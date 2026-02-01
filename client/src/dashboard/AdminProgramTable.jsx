@@ -20,6 +20,7 @@ import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
 
 function AdminProgramTable({ role = "admin" }) {
+  // TODO: remove prop and use AuthContext
   const { backend } = useBackendContext();
   const [adminPrograms, setAdminPrograms] = useState([]);
   const [rdPrograms, setRdPrograms] = useState([]);
@@ -75,7 +76,7 @@ function AdminProgramTable({ role = "admin" }) {
           setAdminPrograms(merged);
         }
 
-        if (role === "rd") {
+        if (role === "regionalDirector") {
           const regionId = 1;
           const programsRes = await backend.get("/program");
           const enrollmentRes = await backend.get("/enrollmentChange");
@@ -211,7 +212,7 @@ function AdminProgramTable({ role = "admin" }) {
     );
   }
 
-  if (role === "rd") {
+  if (role === "regionalDirector") {
     return (
       <TableContainer>
         <HStack mb={4} justifyContent="space-between" w="100%">

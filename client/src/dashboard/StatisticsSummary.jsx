@@ -30,9 +30,10 @@ const StatBox = ({ label, number }) => {
 };
 
 const StatisticsSummary = ({ role = "admin" }) => {
+  // TODO: remove prop and use AuthContext
   const { backend } = useBackendContext();
   const [stats, setStats] = useState(
-    role === "pd"
+    role === "programDirector"
       ? [
           { label: "Current Enrollment", number: 0 },
           { label: "Instruments Donated", number: 0 },
@@ -82,7 +83,7 @@ const StatisticsSummary = ({ role = "admin" }) => {
           ]);
         }
 
-        if (role === "rd") {
+        if (role === "regionalDirector") {
           const regionId = 1;
 
           const [programRes, programUpdateRes, enrollmentRes, instrumentRes, countryRes] = await Promise.all([
@@ -131,7 +132,7 @@ const StatisticsSummary = ({ role = "admin" }) => {
           ]);
         }
 
-        if (role === "pd") {
+        if (role === "programDirector") {
           const programId = 25;
 
           const [programUpdateRes, enrollmentRes, instrumentRes] = await Promise.all([
