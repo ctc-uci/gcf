@@ -55,14 +55,14 @@ export const ProgramAccountUpdatesTable = ({ data }) => {
             <Tbody>
               {data.map((row) => (
                 <Tr key={row.id}>
-                  <Td> {row.updateDate} </Td>
-                  <Td> {row.note} </Td>
+                  <Td>{row.updateDate}</Td>
+                  <Td>{row.note}</Td>
                   <Td>{row.name}</Td>
                   <Td>
                     {row.firstName} {row.lastName}
                   </Td>
                   <Td>
-                    <Badge> {row.status} </Badge>
+                    <Badge>{row.status}</Badge>
                   </Td>
                 </Tr>
               ))}

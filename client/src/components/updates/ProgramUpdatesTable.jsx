@@ -25,7 +25,7 @@ export const ProgramUpdatesTable = ({ data }) => {
           gap={10}
           mb="20px"
         >
-          <Heading> Program Updates </Heading>
+          <Heading>Program Updates</Heading>
           <SearchIcon
             mt="10px"
             ml="10px"
@@ -56,14 +56,14 @@ export const ProgramUpdatesTable = ({ data }) => {
             <Tbody>
               {data.map((row) => (
                 <Tr key={row.id}>
-                  <Td> {row.updateDate} </Td>
-                  <Td> {row.note} </Td>
+                  <Td>{row.updateDate}</Td>
+                  <Td>{row.note}</Td>
                   <Td>{row.name}</Td>
                   <Td>
                     {row.firstName} {row.lastName}
                   </Td>
                   <Td>
-                    <Badge> {row.status} </Badge>
+                    <Badge>{row.status}</Badge>
                   </Td>
                 </Tr>
               ))}
