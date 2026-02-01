@@ -19,9 +19,7 @@ export const UpdatesPage = () => {
   const [role, setRole] = useState("");
 
   const fetchData = async (path) => {
-    const response = await fetch(
-      `http://localhost:3001/update-permissions/${path}`
-    );
+    const response = await backend.get(`/update-permissions/${path}`);
 
     if (!response.ok) {
       const message = await response.text();
@@ -51,7 +49,7 @@ export const UpdatesPage = () => {
       }
     };
     loadData();
-  }, [userId]);
+  }, [userId, backend]);
 
   return (
     <>
