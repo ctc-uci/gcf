@@ -19,14 +19,13 @@ export const UpdatesPage = () => {
   const [role, setRole] = useState("");
 
   const fetchData = async (path) => {
-    const response = await backend.get(`/update-permissions/${path}`);
-
-    if (!response.ok) {
-      const message = await response.text();
-      console.error("Request failed:", response.status, message);
+    try {
+      const response = await backend.get(`/update-permissions/${path}`);
+      return response.data;
+    } catch (error) {
+      console.error("Request failed:", error.response?.status, error.message);
       return [];
     }
-    return response.json();
   };
 
   useEffect(() => {
@@ -43,12 +42,14 @@ export const UpdatesPage = () => {
         setProgramAccountUpdatesData(programAccountUpdates);
         setMediaUpdatesData(mediaUpdates);
         setProgramUpdatesData(programUpdates);
-        setRole(userRole[0].role);
+        setRole(userRole.role);
       } catch (error) {
         console.error("Fetch error:", error);
       }
     };
-    loadData();
+    if (userId && backend) {
+      loadData();
+    }
   }, [userId, backend]);
 
   return (
