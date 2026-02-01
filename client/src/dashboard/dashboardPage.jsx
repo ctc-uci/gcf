@@ -1,6 +1,6 @@
 import { Flex, Box } from "@chakra-ui/react";
 import AdminProgramTable from "./AdminProgramTable";
-import LessonVideos from "./lessonVideos";
+import LessonVideos from "./LessonVideos";
 import StatisticsSummary from "./StatisticsSummary";
 
 const DashboardPage = () => {
