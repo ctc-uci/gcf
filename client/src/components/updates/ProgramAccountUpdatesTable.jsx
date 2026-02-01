@@ -38,7 +38,10 @@ export const ProgramAccountUpdatesTable = ({ data }) => {
           <HamburgerIcon mt="10px" />
           <DownloadIcon mt="10px" />
         </Flex>
-        <TableContainer overflowX="auto" maxW="100%">
+        <TableContainer
+          overflowX="auto"
+          maxW="100%"
+        >
           <Table>
             <Thead>
               <Tr>
@@ -51,7 +54,7 @@ export const ProgramAccountUpdatesTable = ({ data }) => {
             </Thead>
             <Tbody>
               {data.map((row) => (
-                <Tr key={row.updateDate}>
+                <Tr key={row.id}>
                   <Td> {row.updateDate} </Td>
                   <Td> {row.note} </Td>
                   <Td>{row.name}</Td>
