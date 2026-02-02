@@ -5,6 +5,7 @@ import { Login } from "@/components/login/Login";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import  DashboardPage from "@/dashboard/DashboardPage";
 import { Signup } from "@/components/signup/Signup";
+import { UpdatesPage } from "@/components/updates/UpdatesPage";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
@@ -77,6 +78,11 @@ const App = () => {
                     element={<ProgramForm />}
                   />
                   
+                  <Route
+                    path="/updates/:userId"
+                    element={<UpdatesPage />}
+                  />
+
                 </Route>
                 <Route
                   path="*"
