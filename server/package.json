@@ -43,7 +43,7 @@
     "@types/node-schedule": "^2.1.7",
     "@types/nodemailer": "^6.4.15",
     "@types/supertest": "^6.0.3",
-    "eslint": "^9.9.1",
+    "eslint": "^9.26.0",
     "eslint-config-prettier": "^8.3.0",
     "globals": "^15.9.0",
     "lint-staged": "^11.2.6",
