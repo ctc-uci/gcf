@@ -84,11 +84,29 @@ directorRouter.get("/", async (req, res) => {
       `SELECT * FROM program_director ORDER BY user_id ASC`
     );
 
-    res.status(200).json(keysToCamel(directors));
-  } catch (err) {
-    res.status(400).send(err.message);
-  }
+        res.status(200).json(keysToCamel(directors));
+    } catch (err) {
+        res.status(400).send(err.message)
+    }
 });
+
+// read names of all program directors
+
+directorRouter.get("/program-director-names", async (req, res) => {
+    try {
+        const director_names = await db.query(
+            `SELECT pd.user_id, gu.first_name, gu.last_name
+             FROM gcf_user as gu
+                INNER JOIN program_director AS pd ON pd.user_id = gu.id
+             ORDER BY gu.first_name ASC, gu.last_name ASC`)
+
+            res.status(200).json(keysToCamel(director_names))
+    }
+
+    catch (err) {
+        res.status(400).send(err.message)
+    }
+})
 
 // read one program director
 directorRouter.get("/:userId", async (req, res) => {
@@ -137,5 +155,6 @@ directorRouter.delete("/:userId", async (req, res) => {
     res.status(400).send(err.message);
   }
 });
+
 
 export { directorRouter };
