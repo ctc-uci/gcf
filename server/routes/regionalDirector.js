@@ -6,25 +6,22 @@ import { db } from "../db/db-pgp";
 const regionalDirectorRouter = express.Router();
 regionalDirectorRouter.use(express.json());
 
-regionalDirectorRouter.get("/me", async (req, res) => {
+regionalDirectorRouter.get("/me/:id", async (req, res) => {
   try {
-    const decodedToken = res.locals?.decodedToken ?? await admin.auth().verifyIdToken(req.cookies?.accessToken);
-    const users = await db.query("SELECT id FROM users WHERE firebase_uid = $1 LIMIT 1", [decodedToken.uid]);
-    if (!users?.length) return res.status(404).json({ error: "User not found" });
-    const director = await db.query("SELECT * FROM regional_director WHERE user_id = $1 LIMIT 1", [users[0].id]);
+    const { id } = req.params;
+    const director = await db.query("SELECT * FROM regional_director WHERE user_id = $1 LIMIT 1", [id]);
     if (!director?.length) return res.status(404).json({ error: "Regional director not found" });
     res.status(200).json(keysToCamel(director[0]));
   } catch (err) {
-    res.status(401).json({ error: "Unauthorized" });
+    console.error("Error in /me/:id:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-regionalDirectorRouter.get("/me/stats", async (req, res) => {
+regionalDirectorRouter.get("/me/:id/stats", async (req, res) => {
   try {
-    const decodedToken = res.locals?.decodedToken ?? await admin.auth().verifyIdToken(req.cookies?.accessToken);
-    const users = await db.query("SELECT id FROM users WHERE firebase_uid = $1 LIMIT 1", [decodedToken.uid]);
-    if (!users?.length) return res.status(404).json({ error: "User not found" });
-    const director = await db.query("SELECT region_id FROM regional_director WHERE user_id = $1 LIMIT 1", [users[0].id]);
+    const { id } = req.params;
+    const director = await db.query("SELECT region_id FROM regional_director WHERE user_id = $1 LIMIT 1", [id]);
     if (!director?.length) return res.status(404).json({ error: "Regional director not found" });
     const regionId = director[0].region_id;
     const stats = await db.query(
@@ -44,7 +41,8 @@ regionalDirectorRouter.get("/me/stats", async (req, res) => {
     );
     res.status(200).json(keysToCamel(stats[0]));
   } catch (err) {
-    res.status(401).json({ error: "Unauthorized" });
+    console.error("Error in /me/:id/stats:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

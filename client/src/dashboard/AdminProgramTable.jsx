@@ -18,9 +18,12 @@ import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon } from "@chakra-ui/ic
 import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
-const ROUTE_BY_ROLE = {
-  admin: "/admin/programs",
-  regionalDirector: "/rdProgramTable",
+const getRouteByRole = (role, userId) => {
+  const routes = {
+    admin: "/admin/programs",
+    regionalDirector: `/rdProgramTable/${userId}`,
+  };
+  return routes[role];
 };
 
 function mapAdminRow(row) {
@@ -54,13 +57,13 @@ const MAP_BY_ROLE = {
   regionalDirector: mapRdRow,
 };
 
-function AdminProgramTable({ role = "admin" }) {
+function AdminProgramTable({ role = "admin", userId }) {
   // TODO: remove prop and use AuthContext
   const { backend } = useBackendContext();
   const [programs, setPrograms] = useState([]);
 
   useEffect(() => {
-    const route = ROUTE_BY_ROLE[role];
+    const route = getRouteByRole(role, userId);
     const mapRow = MAP_BY_ROLE[role];
 
     if (!route || !mapRow) return;
@@ -76,9 +79,9 @@ function AdminProgramTable({ role = "admin" }) {
     };
 
     fetchData();
-  }, [role, backend]);
+  }, [role, userId, backend]);
 
-  if (!ROUTE_BY_ROLE[role]) return null;
+  if (!getRouteByRole(role, userId)) return null;
 
   return (
     <TableContainer>

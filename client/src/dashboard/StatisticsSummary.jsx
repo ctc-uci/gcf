@@ -29,10 +29,13 @@ const StatBox = ({ label, number }) => {
   );
 };
 
-const ROUTE_BY_ROLE = {
-  admin: "/admin/stats",
-  regionalDirector: "/regional-directors/me/stats",
-  programDirector: "/program-directors/me/stats",
+const getRouteByRole = (role, userId) => {
+  const routes = {
+    admin: "/admin/stats",
+    regionalDirector: `/regional-directors/me/${userId}/stats`,
+    programDirector: `/program-directors/me/${userId}/stats`,
+  };
+  return routes[role];
 };
 
 const STAT_LABELS_BY_ROLE = {
@@ -81,14 +84,14 @@ const STATS_FROM_RESPONSE = {
   programDirector: statsFromPdData,
 };
 
-const StatisticsSummary = ({ role = "admin" }) => {
+const StatisticsSummary = ({ role = "admin", userId }) => {
   // TODO: remove prop and use AuthContext
   const { backend } = useBackendContext();
   const initialStats = STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.admin;
   const [stats, setStats] = useState(initialStats);
 
   useEffect(() => {
-    const route = ROUTE_BY_ROLE[role];
+    const route = getRouteByRole(role, userId);
     const mapResponse = STATS_FROM_RESPONSE[role];
 
     if (!route || !mapResponse) return;
@@ -106,7 +109,7 @@ const StatisticsSummary = ({ role = "admin" }) => {
     };
 
     fetchData();
-  }, [role, backend]);
+  }, [role, userId, backend]);
 
   return (
     <Box as="section">
