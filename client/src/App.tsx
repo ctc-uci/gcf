@@ -3,6 +3,7 @@ import { CatchAll } from "@/components/CatchAll";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import { Login } from "@/components/login/Login";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import  DashboardPage from "@/dashboard/DashboardPage";
 import { Signup } from "@/components/signup/Signup";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BackendProvider } from "@/contexts/BackendContext";
@@ -34,6 +35,10 @@ const App = () => {
                 <Route
                   path="/dashboard"
                   element={<ProtectedRoute element={<Dashboard />} />}
+                />
+                <Route
+                  path="/dashboard/:userid"
+                  element={<DashboardPage />}
                 />
                 <Route
                   path="/admin"
