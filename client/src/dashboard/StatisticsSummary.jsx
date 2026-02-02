@@ -30,7 +30,7 @@ const StatBox = ({ label, number }) => {
 };
 
 const ROUTE_BY_ROLE = {
-  admin: "/adminProgramTable",
+  admin: "/admin/stats",
   regionalDirector: "/regional-directors/me/stats",
   programDirector: "/program-directors/me/stats",
 };
@@ -52,14 +52,11 @@ const STAT_LABELS_BY_ROLE = {
   ],
 };
 
-function statsFromAdminData(rows) {
-  const totalPrograms = rows.length;
-  const totalStudents = rows.reduce((sum, r) => sum + (Number(r.students) || 0), 0);
-  const totalInstruments = rows.reduce((sum, r) => sum + (Number(r.instruments) || 0), 0);
+function statsFromAdminData(data) {
   return [
-    { label: "Programs", number: totalPrograms },
-    { label: "Students", number: totalStudents },
-    { label: "Instruments", number: totalInstruments },
+    { label: "Programs", number: data?.totalPrograms ?? 0 },
+    { label: "Students", number: data?.totalStudents ?? 0 },
+    { label: "Instruments", number: data?.totalInstruments ?? 0 },
   ];
 }
 
@@ -101,11 +98,7 @@ const StatisticsSummary = ({ role = "admin" }) => {
     const fetchData = async () => {
       try {
         const res = await backend.get(route);
-        const data = res.data;
-        const nextStats =
-          role === "admin"
-            ? mapResponse(Array.isArray(data) ? data : [])
-            : mapResponse(data ?? {});
+        const nextStats = mapResponse(res.data ?? {});
         setStats(nextStats);
       } catch (err) {
         console.error("Error fetching statistics:", err);

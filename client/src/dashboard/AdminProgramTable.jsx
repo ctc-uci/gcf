@@ -19,7 +19,7 @@ import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
 const ROUTE_BY_ROLE = {
-  admin: "/adminProgramTable",
+  admin: "/admin/programs",
   regionalDirector: "/rdProgramTable",
 };
 
