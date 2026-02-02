@@ -11,8 +11,7 @@ function LessonVideos() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const programId = 25;
-        const res = await backend.get(`/program/${programId}`);
+        const res = await backend.get("/program-directors/me/program");
         const program = res.data;
         setPdPrograms(program ? [program] : []);
       } catch (err) {

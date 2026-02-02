@@ -44,7 +44,7 @@ async function getData() {
         p.name;`
     ;
 
-    const[newTable] = await db.query(allData);
+    const newTable = await db.query(allData);
     return newTable;
 
 }
@@ -52,7 +52,7 @@ async function getData() {
 rdProgramTableRouter.get("/", async (req, res) => {
   try {
     const data = await getData();
-    res.json(data);
+    res.json(keysToCamel(data));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

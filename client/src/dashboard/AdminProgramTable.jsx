@@ -16,106 +16,60 @@ import {
 } from "@chakra-ui/react";
 import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon } from "@chakra-ui/icons";
 import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext"; 
+import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
+const ROUTE_BY_ROLE = {
+  admin: "/adminProgramTable",
+  regionalDirector: "/rdProgramTable",
+};
+
+function mapAdminRow(row) {
+  return {
+    id: row.id,
+    title: row.title ?? row.name,
+    status: row.status,
+    launchDate: row.launchDate,
+    location: row.countryName ?? "",
+    students: row.students ?? 0,
+    instruments: row.instruments ?? 0,
+    totalInstruments: row.instruments ?? 0,
+  };
+}
+
+function mapRdRow(row) {
+  return {
+    id: row.programId,
+    title: row.programName,
+    status: row.programStatus,
+    launchDate: row.programLaunchDate,
+    location: row.programLocation ?? row.regionName ?? "",
+    students: row.totalStudents ?? 0,
+    instruments: row.totalInstruments ?? 0,
+    totalInstruments: row.totalInstruments ?? 0,
+  };
+}
+
+const MAP_BY_ROLE = {
+  admin: mapAdminRow,
+  regionalDirector: mapRdRow,
+};
 
 function AdminProgramTable({ role = "admin" }) {
   // TODO: remove prop and use AuthContext
   const { backend } = useBackendContext();
-  const [adminPrograms, setAdminPrograms] = useState([]);
-  const [rdPrograms, setRdPrograms] = useState([]);
+  const [programs, setPrograms] = useState([]);
 
   useEffect(() => {
+    const route = ROUTE_BY_ROLE[role];
+    const mapRow = MAP_BY_ROLE[role];
+
+    if (!route || !mapRow) return;
+
     const fetchData = async () => {
       try {
-        if (role === "admin") {
-          const programsRes = await backend.get("/program");
-          const enrollmentRes = await backend.get("/enrollmentChange");
-          const countryRes = await backend.get("/country");
-          const instrumentRes = await backend.get("/instrument-changes");
-
-          const programsData = programsRes.data || [];
-
-          let enrollmentData = [];
-          if (Array.isArray(enrollmentRes.data)) {
-            enrollmentData = enrollmentRes.data;
-          } else if (enrollmentRes.data && typeof enrollmentRes.data === 'object') {
-            enrollmentData = [enrollmentRes.data];
-          }
-
-          const countryData = countryRes.data || [];
-          const instrumentData = instrumentRes.data || [];
-
-          const enrollmentMap = enrollmentData.reduce((acc, e) => {
-            if (!acc[e.programId]) {
-              acc[e.programId] = 0;
-            }
-            acc[e.programId] += e.enrollmentChange || 0;
-            return acc;
-          }, {});
-
-          const countryMap = Object.fromEntries(
-            countryData.map((c) => [c.id, c.name])
-          );
-
-          const instrumentMap = instrumentData.reduce((acc, i) => {
-            if (!acc[i.programId]) {
-              acc[i.programId] = 0;
-            }
-            acc[i.programId] += i.amountChanged || 0;
-            return acc;
-          }, {});
-
-          const merged = programsData.map((p) => ({
-            ...p,
-            students: enrollmentMap[p.id] || 0,
-            country: countryMap[p.countryId] || "Unknown",
-            instruments: instrumentMap[p.id] || 0,
-            totalInstruments: instrumentMap[p.id] || 0,
-          }));
-          setAdminPrograms(merged);
-        }
-
-        if (role === "regionalDirector") {
-          const regionId = 1;
-          const programsRes = await backend.get("/program");
-          const enrollmentRes = await backend.get("/enrollmentChange");
-          const regionRes = await backend.get("/region");
-
-          const programsData = programsRes.data || [];
-
-          let enrollmentData = [];
-          if (Array.isArray(enrollmentRes.data)) {
-            enrollmentData = enrollmentRes.data;
-          } else if (enrollmentRes.data && typeof enrollmentRes.data === 'object') {
-            enrollmentData = [enrollmentRes.data];
-          }
-
-          const regionData = regionRes.data || [];
-
-          const regionPrograms = programsData.filter(
-            (p) => p.regionId === regionId
-          );
-
-          const enrollmentMap = enrollmentData.reduce((acc, e) => {
-            if (!acc[e.programId]) {
-              acc[e.programId] = 0;
-            }
-            acc[e.programId] += e.enrollmentChange || 0;
-            return acc;
-          }, {});
-
-          const regionMap = Object.fromEntries(
-            regionData.map((r) => [r.id, r.name])
-          );
-
-          const merged = regionPrograms.map((p) => ({
-            ...p,
-            students: enrollmentMap[p.id] || 0,
-            region: regionMap[p.regionId] || "Unknown",
-          }));
-          setRdPrograms(merged);
-        }
+        const res = await backend.get(route);
+        const rows = Array.isArray(res.data) ? res.data : [];
+        setPrograms(rows.map(mapRow));
       } catch (err) {
         console.error("Error fetching data:", err);
       }
@@ -124,183 +78,93 @@ function AdminProgramTable({ role = "admin" }) {
     fetchData();
   }, [role, backend]);
 
-  if (role === "admin") {
-    return (
-      <TableContainer>
-        <HStack mb={4} justifyContent="space-between" w="100%">
-          <HStack spacing={4}>
-            <Box fontSize="xl" fontWeight="semibold">All Programs</Box>
-            <HStack spacing={1}>
-              <IconButton
-                aria-label="search"
-                icon={<Search2Icon />}
-                size="sm"
-                variant="ghost"
-              />
-              <Input
-                w="120px"
-                size="xs"
-                placeholder="Type to search"
-                variant="unstyled"
-                borderBottom="1px solid"
-                borderColor="gray.300"
-                borderRadius="0"
-                px={1}
-              />
-              <IconButton
-                aria-label="filter"
-                icon= {<HiOutlineAdjustmentsHorizontal />}
-                size="sm"
-                variant="ghost"
-              />
-            </HStack>
-          </HStack>
+  if (!ROUTE_BY_ROLE[role]) return null;
+
+  return (
+    <TableContainer>
+      <HStack mb={4} justifyContent="space-between" w="100%">
+        <HStack spacing={4}>
+          <Box fontSize="xl" fontWeight="semibold">All Programs</Box>
           <HStack spacing={1}>
             <IconButton
-              aria-label="menu"
-              icon={<HamburgerIcon />}
-              size="sm"
-              variant="ghost"
-            />
-            <Divider orientation="vertical" h="20px" />
-            <IconButton
               aria-label="search"
-              icon={<HiOutlineSquares2X2 />}
+              icon={<Search2Icon />}
               size="sm"
               variant="ghost"
+            />
+            <Input
+              w="120px"
+              size="xs"
+              placeholder="Type to search"
+              variant="unstyled"
+              borderBottom="1px solid"
+              borderColor="gray.300"
+              borderRadius="0"
+              px={1}
             />
             <IconButton
-              aria-label="download"
-              icon={<DownloadIcon />}
+              aria-label="filter"
+              icon={<HiOutlineAdjustmentsHorizontal />}
               size="sm"
               variant="ghost"
-              ml={2}
             />
-            <Button size="sm" rightIcon={<AddIcon />}>
-              New
-            </Button>
           </HStack>
         </HStack>
-
-        <Table variant="simple">
-          <Thead>
-            <Tr>
-              <Th>Program</Th>
-              <Th>Status</Th>
-              <Th>Launch Date</Th>
-              <Th>Location</Th>
-              <Th>Students</Th>
-              <Th>Instruments</Th>
-              <Th>Total Instruments</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {adminPrograms?.map((p) => (
-              <Tr key={p.id}>
-                <Td>{p.title}</Td>
-                <Td>{p.status}</Td>
-                <Td>{p.launchDate}</Td>
-                <Td>{p.country}</Td>
-                <Td>{p.students}</Td>
-                <Td>{p.amountChanged}</Td>
-                <Td>{p.totalInstruments}</Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
-    );
-  }
-
-  if (role === "regionalDirector") {
-    return (
-      <TableContainer>
-        <HStack mb={4} justifyContent="space-between" w="100%">
-          <HStack spacing={4}>
-            <Box fontSize="xl" fontWeight="semibold">All Programs</Box>
-            <HStack spacing={1}>
-              <IconButton
-                aria-label="search"
-                icon={<Search2Icon />}
-                size="sm"
-                variant="ghost"
-              />
-              <Input
-                w="120px"
-                size="xs"
-                placeholder="Type to search"
-                variant="unstyled"
-                borderBottom="1px solid"
-                borderColor="gray.300"
-                borderRadius="0"
-                px={1}
-              />
-              <IconButton
-                aria-label="filter"
-                icon={<HiOutlineAdjustmentsHorizontal />}
-                size="sm"
-                variant="ghost"
-              />
-            </HStack>
-          </HStack>
-          <HStack spacing={1}>
-            <IconButton
-              aria-label="menu"
-              icon={<HamburgerIcon />}
-              size="sm"
-              variant="ghost"
-            />
-            <Divider orientation="vertical" h="20px" />
-            <IconButton
-              aria-label="search"
-              icon={<HiOutlineSquares2X2 />}
-              size="sm"
-              variant="ghost"
-            />
-            <IconButton
-              aria-label="download"
-              icon={<DownloadIcon />}
-              size="sm"
-              variant="ghost"
-              ml={2}
-            />
-            <Button size="sm" rightIcon={<AddIcon />}>
-              New
-            </Button>
-          </HStack>
+        <HStack spacing={1}>
+          <IconButton
+            aria-label="menu"
+            icon={<HamburgerIcon />}
+            size="sm"
+            variant="ghost"
+          />
+          <Divider orientation="vertical" h="20px" />
+          <IconButton
+            aria-label="search"
+            icon={<HiOutlineSquares2X2 />}
+            size="sm"
+            variant="ghost"
+          />
+          <IconButton
+            aria-label="download"
+            icon={<DownloadIcon />}
+            size="sm"
+            variant="ghost"
+            ml={2}
+          />
+          <Button size="sm" rightIcon={<AddIcon />}>
+            New
+          </Button>
         </HStack>
+      </HStack>
 
-        <Table variant="simple">
-          <Thead>
-            <Tr>
-              <Th>Program</Th>
-              <Th>Status</Th>
-              <Th>Launch Date</Th>
-              <Th>Location</Th>
-              <Th>Students</Th>
-              <Th>Instruments</Th>
-              <Th>Total Instruments</Th>
+      <Table variant="simple">
+        <Thead>
+          <Tr>
+            <Th>Program</Th>
+            <Th>Status</Th>
+            <Th>Launch Date</Th>
+            <Th>Location</Th>
+            <Th>Students</Th>
+            <Th>Instruments</Th>
+            <Th>Total Instruments</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {programs.map((p) => (
+            <Tr key={p.id}>
+              <Td>{p.title}</Td>
+              <Td>{p.status}</Td>
+              <Td>{p.launchDate}</Td>
+              <Td>{p.location}</Td>
+              <Td>{p.students}</Td>
+              <Td>{p.instruments}</Td>
+              <Td>{p.totalInstruments}</Td>
             </Tr>
-          </Thead>
-          <Tbody>
-            {rdPrograms?.map((r) => (
-              <Tr key={r.id}>
-                <Td>{r.title}</Td>
-                <Td>{r.status}</Td>
-                <Td>{r.launchDate}</Td>
-                <Td>{r.region}</Td>
-                <Td>{r.students}</Td>
-                <Td>{r.instruments}</Td>
-                <Td>{r.totalInstruments}</Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
-    );
-  }
-
-  return null;
+          ))}
+        </Tbody>
+      </Table>
+    </TableContainer>
+  );
 }
 
 export default AdminProgramTable;

@@ -1,9 +1,52 @@
 import { keysToCamel } from "@/common/utils";
+import { admin } from "@/config/firebase";
 import express from "express";
 import { db } from "../db/db-pgp";
 
 const regionalDirectorRouter = express.Router();
 regionalDirectorRouter.use(express.json());
+
+regionalDirectorRouter.get("/me", async (req, res) => {
+  try {
+    const decodedToken = res.locals?.decodedToken ?? await admin.auth().verifyIdToken(req.cookies?.accessToken);
+    const users = await db.query("SELECT id FROM users WHERE firebase_uid = $1 LIMIT 1", [decodedToken.uid]);
+    if (!users?.length) return res.status(404).json({ error: "User not found" });
+    const director = await db.query("SELECT * FROM regional_director WHERE user_id = $1 LIMIT 1", [users[0].id]);
+    if (!director?.length) return res.status(404).json({ error: "Regional director not found" });
+    res.status(200).json(keysToCamel(director[0]));
+  } catch (err) {
+    res.status(401).json({ error: "Unauthorized" });
+  }
+});
+
+regionalDirectorRouter.get("/me/stats", async (req, res) => {
+  try {
+    const decodedToken = res.locals?.decodedToken ?? await admin.auth().verifyIdToken(req.cookies?.accessToken);
+    const users = await db.query("SELECT id FROM users WHERE firebase_uid = $1 LIMIT 1", [decodedToken.uid]);
+    if (!users?.length) return res.status(404).json({ error: "User not found" });
+    const director = await db.query("SELECT region_id FROM regional_director WHERE user_id = $1 LIMIT 1", [users[0].id]);
+    if (!director?.length) return res.status(404).json({ error: "Regional director not found" });
+    const regionId = director[0].region_id;
+    const stats = await db.query(
+      `SELECT
+          (SELECT COUNT(DISTINCT p.id) FROM program p JOIN country c ON c.id = p.country WHERE c.region_id = $1) AS total_programs,
+          (SELECT COALESCE(SUM(ec.enrollment_change), 0) FROM enrollment_change ec
+           JOIN program_update pu ON pu.id = ec.update_id
+           JOIN program p ON p.id = pu.program_id
+           JOIN country c ON c.id = p.country
+           WHERE c.region_id = $1) AS total_students,
+          (SELECT COALESCE(SUM(ic.amount_changed), 0) FROM instrument_change ic
+           JOIN program_update pu ON pu.id = ic.update_id
+           JOIN program p ON p.id = pu.program_id
+           JOIN country c ON c.id = p.country
+           WHERE c.region_id = $1) AS total_instruments`,
+      [regionId]
+    );
+    res.status(200).json(keysToCamel(stats[0]));
+  } catch (err) {
+    res.status(401).json({ error: "Unauthorized" });
+  }
+});
 
 regionalDirectorRouter.post("/", async (req, res) => {
     try {
