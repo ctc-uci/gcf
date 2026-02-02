@@ -16,6 +16,9 @@ import {
   Routes,
 } from "react-router-dom";
 
+import { Account } from "./components/accounts/Account";
+import { Media } from "./components/media/Media";
+
 const App = () => {
   return (
     <CookiesProvider>
@@ -31,6 +34,15 @@ const App = () => {
                 <Route
                   path="/signup"
                   element={<Signup />}
+                />
+                {/* TODO: Change /account & /media route to protected when auth flow finalized */}
+                <Route
+                  path="/account/:userId"
+                  element={<Account />}
+                />
+                <Route
+                  path="/media/:userId"
+                  element={<Media />}
                 />
                 <Route
                   path="/dashboard"
