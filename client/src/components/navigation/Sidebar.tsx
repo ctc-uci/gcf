@@ -1,7 +1,9 @@
+import { Link as RouterLink } from 'react-router-dom'
 import { Button, Box, VStack, Link, Flex, Icon } from '@chakra-ui/react'
 import { MdOutlineNotifications, MdPermMedia } from 'react-icons/md'
 import { FaGuitar } from 'react-icons/fa'
 import { HiOutlineUser } from 'react-icons/hi'
+import { NAVBAR_HEIGHT, SIDEBAR_WIDTH } from './layoutConstants'
 
 
 interface SidebarProps {
@@ -29,22 +31,43 @@ export const Sidebar: React.FC<SidebarProps> = ({role}) => {
         ];
     }
     return (
-        <Box borderRight="1px solid #e2e8f0" height="100vh" pos="fixed" left={0} pt={"21px"} >
+        <Box
+            position="fixed"
+            top={NAVBAR_HEIGHT}
+            left={0}
+            width={SIDEBAR_WIDTH}
+            height={`calc(100vh - ${NAVBAR_HEIGHT})`}
+            borderRight="1px solid #e2e8f0"
+            bg="white"
+            pt="18px"
+            zIndex={9}
+        >
             <VStack>
-                <Flex direction="column" gap={5}>
+                <Flex direction="column" gap={3}>
                     {navItems.map((item) => (
-                        <Button 
+                        <Link
                             key={item.name}
-                            bg="white" 
-                            href={item.path} 
-                            as={Link}
-                            leftIcon={item.icon} 
-                            height="4.5vh"
-                            justifyContent="left"
-                            _hover={{textDecoration: "none"}}
+                            as={RouterLink}
+                            to={item.path}
+                            textDecoration="none"
+                            _hover={{ textDecoration: "none" }}
+                            _focus={{ textDecoration: "none" }}
+                            _active={{ textDecoration: "none" }}
+                            display="block"
+                        >
+                            <Button
+                                bg="white"
+                                leftIcon={item.icon}
+                                height="4.5vh"
+                                justifyContent="left"
+                                width="100%"
+                                px={6}
+                                py={5}
+                                _hover={{ bg: "gray.100" }}
                             >
-                            {item.name}
-                        </Button>
+                                {item.name}
+                            </Button>
+                        </Link>
                     ))
                     }
                 </Flex>

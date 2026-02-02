@@ -1,6 +1,7 @@
 import { Flex, Text, Icon, Image, Button, Link } from '@chakra-ui/react'
 import logo from '/logo.png'
 import { HiOutlineUser } from 'react-icons/hi'
+import { NAVBAR_HEIGHT } from './layoutConstants'
 
 interface NavbarProps {
     role: "admin" | "regional_director" | "program_director" | string;
@@ -10,7 +11,19 @@ export const Navbar: React.FC<NavbarProps> = ({ role }) => {
     const region = "North America"; // placeholder for region
     const project = "Royal Kids Family Camp"; // placeholder for project
     return (
-        <Flex height={"6vh"} align="center" w="100vw" pl="1.4vw" borderBottom="1px solid #e2e8f0">
+        <Flex
+            position="fixed"
+            top={0}
+            left={0}
+            right={0}
+            zIndex={10}
+            height={NAVBAR_HEIGHT}
+            align="center"
+            w="100%"
+            pl="1.4vw"
+            borderBottom="1px solid #e2e8f0"
+            bg="white"
+        >
             
             <Image src={logo} alt="Logo" width={"9vw"} maxH="10vh" objectFit="contain"/>
             
