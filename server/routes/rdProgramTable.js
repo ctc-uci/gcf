@@ -20,11 +20,11 @@ async function getData() {
 
         COALESCE(SUM(ec.enrollment_change), 0) AS total_students,
         COALESCE(SUM(ic.amount_changed), 0) AS total_instruments
-    FROM region r
+    FROM program p
     LEFT JOIN country c
-        ON c.region_id = r.id
-    LEFT JOIN program p
-        ON p.country = c.id
+        ON c.id = p.country
+    LEFT JOIN region r
+        ON r.id = c.region_id
     LEFT JOIN program_update pu
         ON pu.program_id = p.id
     LEFT JOIN enrollment_change ec
@@ -43,7 +43,7 @@ async function getData() {
         r.name,
         p.name;`
     ;
-
+    
     const newTable = await db.query(allData);
     return newTable;
 
