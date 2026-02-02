@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { Box, Heading, AspectRatio, VStack } from "@chakra-ui/react";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
-
-
 function LessonVideos() {
   const { backend } = useBackendContext();
   const [pdPrograms, setPdPrograms] = useState([]);
