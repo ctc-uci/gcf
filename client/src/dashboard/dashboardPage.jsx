@@ -6,7 +6,7 @@ import StatisticsSummary from "./StatisticsSummary";
 
 const DashboardPage = () => {
   const { userid } = useParams();
-  const role = "regionalDirector";
+  const role = "programDirector";
   // TODO: remove prop and use AuthContext
   return (
     <Flex
@@ -20,7 +20,7 @@ const DashboardPage = () => {
 
       <Box as="section">
         {(role === "admin" || role === "regionalDirector") && <AdminProgramTable role={role} userId={userid} />}
-        {role === "programDirector" && <LessonVideos />}
+        {role === "programDirector" && <LessonVideos userId={userid} />}
       </Box>
     </Flex>
   );

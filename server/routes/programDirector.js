@@ -1,31 +1,27 @@
 import { keysToCamel } from "@/common/utils";
-import { admin } from "@/config/firebase";
 import { db } from "@/db/db-pgp"; // TODO: replace this db with
 import { Router } from "express";
 
 const directorRouter = Router();
 
-directorRouter.get("/me/program", async (req, res) => {
+directorRouter.get("/me/:userId/program", async (req, res) => {
     try {
-        const decodedToken = res.locals?.decodedToken ?? await admin.auth().verifyIdToken(req.cookies?.accessToken);
-        const users = await db.query("SELECT id FROM users WHERE firebase_uid = $1 LIMIT 1", [decodedToken.uid]);
-        if (!users?.length) return res.status(404).json({ error: "User not found" });
-        const director = await db.query("SELECT program_id FROM program_director WHERE user_id = $1 LIMIT 1", [users[0].id]);
+        const { userId } = req.params;
+        const director = await db.query("SELECT program_id FROM program_director WHERE user_id = $1 LIMIT 1", [userId]);
         if (!director?.length) return res.status(404).json({ error: "Program director not found" });
         const program = await db.query("SELECT * FROM program WHERE id = $1", [director[0].program_id]);
         if (!program?.length) return res.status(404).json({ error: "Program not found" });
         res.status(200).json(keysToCamel(program[0]));
     } catch (err) {
-        res.status(401).json({ error: "Unauthorized" });
+        console.error("Error in /me/:userId/program:", err);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 
-directorRouter.get("/me/stats", async (req, res) => {
+directorRouter.get("/me/:userId/stats", async (req, res) => {
     try {
-        const decodedToken = res.locals?.decodedToken ?? await admin.auth().verifyIdToken(req.cookies?.accessToken);
-        const users = await db.query("SELECT id FROM users WHERE firebase_uid = $1 LIMIT 1", [decodedToken.uid]);
-        if (!users?.length) return res.status(404).json({ error: "User not found" });
-        const director = await db.query("SELECT program_id FROM program_director WHERE user_id = $1 LIMIT 1", [users[0].id]);
+        const { userId } = req.params;
+        const director = await db.query("SELECT program_id FROM program_director WHERE user_id = $1 LIMIT 1", [userId]);
         if (!director?.length) return res.status(404).json({ error: "Program director not found" });
         const programId = director[0].program_id;
         const stats = await db.query(
@@ -39,7 +35,29 @@ directorRouter.get("/me/stats", async (req, res) => {
         const row = stats[0];
         res.status(200).json(keysToCamel(row));
     } catch (err) {
-        res.status(401).json({ error: "Unauthorized" });
+        console.error("Error in /me/:userId/stats:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+directorRouter.get("/me/:userId/media", async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const director = await db.query("SELECT program_id FROM program_director WHERE user_id = $1 LIMIT 1", [userId]);
+        if (!director?.length) return res.status(404).json({ error: "Program director not found" });
+        const programId = director[0].program_id;
+        const media = await db.query(
+            `SELECT mc.* 
+             FROM media_change mc
+             JOIN program_update pu ON pu.id = mc.update_id
+             WHERE pu.program_id = $1
+             ORDER BY mc.id DESC`,
+            [programId]
+        );
+        res.status(200).json(keysToCamel(media));
+    } catch (err) {
+        console.error("Error in /me/:userId/media:", err);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 
