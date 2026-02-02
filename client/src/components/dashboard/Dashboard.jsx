@@ -1,10 +1,10 @@
 import { Flex, Box } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
-import AdminProgramTable from "./AdminProgramTable";
+import ProgramTable from "./ProgramTable";
 import LessonVideos from "./LessonVideos";
 import StatisticsSummary from "./StatisticsSummary";
 
-const DashboardPage = () => {
+const Dashboard = () => {
   const { userid } = useParams();
   const role = "programDirector";
   // TODO: remove prop and use AuthContext
@@ -19,11 +19,11 @@ const DashboardPage = () => {
       <StatisticsSummary role={role} userId={userid} />
 
       <Box as="section">
-        {(role === "admin" || role === "regionalDirector") && <AdminProgramTable role={role} userId={userid} />}
+        {(role === "admin" || role === "regionalDirector") && <ProgramTable role={role} userId={userid} />}
         {role === "programDirector" && <LessonVideos userId={userid} />}
       </Box>
     </Flex>
   );
 };
 
-export default DashboardPage;
+export default Dashboard;

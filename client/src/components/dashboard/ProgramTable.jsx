@@ -57,7 +57,7 @@ const MAP_BY_ROLE = {
   regionalDirector: mapRdRow,
 };
 
-function AdminProgramTable({ role = "admin", userId }) {
+function ProgramTable({ role = "admin", userId }) {
   // TODO: remove prop and use AuthContext
   const { backend } = useBackendContext();
   const [programs, setPrograms] = useState([]);
@@ -170,4 +170,4 @@ function AdminProgramTable({ role = "admin", userId }) {
   );
 }
 
-export default AdminProgramTable;
+export default ProgramTable;
