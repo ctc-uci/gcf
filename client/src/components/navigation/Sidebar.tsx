@@ -10,6 +10,7 @@ interface SidebarProps {
     role: "admin" | "regional_director" | "program_director" | string;
 }
 
+// TODO(login): Replace role prop with useRoleContext() or AuthContext; remove SidebarProps.role.
 export const Sidebar: React.FC<SidebarProps> = ({role}) => {
     interface NavItem {
         name: string;

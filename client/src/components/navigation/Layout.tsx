@@ -9,7 +9,7 @@ export const Layout = () => {
   const { role } = useRoleContext();
   return (
     <>
-      {/* TODO: input real roles as props */}
+      {/* TODO(login): Remove role prop; have Navbar/Sidebar read from useRoleContext (or AuthContext) instead. */}
       <Navbar role={role || "program_director"} />
       <Sidebar role={role || "admin"} />
       <Box

@@ -50,7 +50,7 @@ const App = () => {
                         allowedRoles={["admin"]} />}
                     />
 
-                  {/* TODO: Change /account & /media route to protected when auth flow finalized */}
+                  {/* TODO(login): Change /account & /media route to protected when auth flow finalized; consider dropping :userId and using AuthContext (currentUser.uid) for current user. */}
                   <Route
                     path="account/:userId"
                     element={<Account />}
@@ -72,6 +72,7 @@ const App = () => {
                     element={<ProgramForm />}
                   />
                   
+                  {/* TODO(login): Consider route without :userId; use AuthContext (currentUser.uid) in UpdatesPage. */}
                   <Route
                     path="/updates/:userId"
                     element={<UpdatesPage />}

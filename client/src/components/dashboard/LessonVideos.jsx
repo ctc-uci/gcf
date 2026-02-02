@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Box, Heading, AspectRatio, Text, Image, SimpleGrid } from "@chakra-ui/react";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
+// TODO(login): Replace userId prop with AuthContext (currentUser?.uid), or have parent pass it from AuthContext.
 function LessonVideos({ userId }) {
   const { backend } = useBackendContext();
   const [media, setMedia] = useState([]);

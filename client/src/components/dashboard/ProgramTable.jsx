@@ -57,8 +57,8 @@ const MAP_BY_ROLE = {
   regionalDirector: mapRdRow,
 };
 
+// TODO(login): Replace role prop with useRoleContext() or AuthContext; replace userId prop with AuthContext (currentUser?.uid).
 function ProgramTable({ role = "admin", userId }) {
-  // TODO: remove prop and use AuthContext
   const { backend } = useBackendContext();
   const [programs, setPrograms] = useState([]);
 

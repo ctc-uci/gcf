@@ -8,6 +8,7 @@ import { ProgramAccountUpdatesTable } from "./ProgramAccountUpdatesTable";
 import { ProgramUpdatesTable } from "./ProgramUpdatesTable";
 
 export const UpdatesPage = () => {
+  // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid).
   const { userId } = useParams();
   const { backend } = useBackendContext();
 
@@ -16,6 +17,7 @@ export const UpdatesPage = () => {
   );
   const [mediaUpdatesData, setMediaUpdatesData] = useState([]);
   const [programUpdatesData, setProgramUpdatesData] = useState([]);
+  // TODO(login): Replace with useRoleContext() or AuthContext instead of fetching role/${userId}.
   const [role, setRole] = useState("");
 
   const fetchData = async (path) => {

@@ -84,8 +84,8 @@ const STATS_FROM_RESPONSE = {
   programDirector: statsFromPdData,
 };
 
+// TODO(login): Replace role prop with useRoleContext() or AuthContext; replace userId prop with AuthContext (currentUser?.uid).
 const StatisticsSummary = ({ role = "admin", userId }) => {
-  // TODO: remove prop and use AuthContext
   const { backend } = useBackendContext();
   const initialStats = STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.admin;
   const [stats, setStats] = useState(initialStats);

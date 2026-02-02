@@ -9,6 +9,7 @@ interface NavbarProps {
     role: "admin" | "regional_director" | "program_director" | string;
 }
 
+// TODO(login): Replace role prop with useRoleContext() or AuthContext; remove NavbarProps.role.
 export const Navbar: React.FC<NavbarProps> = ({ role }) => {
     const region = "North America"; // placeholder for region
     const project = "Royal Kids Family Camp"; // placeholder for project

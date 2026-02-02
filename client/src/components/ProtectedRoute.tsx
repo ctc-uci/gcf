@@ -8,6 +8,7 @@ interface ProtectedRouteProps {
   allowedRoles?: string | string[];
 }
 
+// TODO(login): Already uses useRoleContext for role; ensure role is set from auth/login flow so this stays the source of truth.
 export const ProtectedRoute = ({
   element,
   allowedRoles = [],
