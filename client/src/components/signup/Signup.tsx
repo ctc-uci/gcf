@@ -9,6 +9,7 @@ import {
   FormHelperText,
   Heading,
   Input,
+  Select,
   Stack,
   useToast,
   VStack,
@@ -16,7 +17,7 @@ import {
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { FaGoogle } from "react-icons/fa6";
+// import { FaGoogle } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
@@ -27,6 +28,9 @@ import { authenticateGoogleUser } from "@/utils/auth/providers";
 const signupSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
+  role: z.enum(["Regional Director", "Program Director", "Admin"], {
+    required_error: "Please select a role",
+  }),
 });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
@@ -51,6 +55,7 @@ export const Signup = () => {
       const user = await signup({
         email: data.email,
         password: data.password,
+        role: data.role
       });
 
       if (user) {
@@ -122,6 +127,26 @@ export const Signup = () => {
             <FormErrorMessage>
               {errors.password?.message?.toString()}
             </FormErrorMessage>
+          </FormControl>
+
+          <FormControl isInvalid={!!errors.role}>
+            <Center>
+              <Select
+                placeholder="Select role"
+                size={"lg"}
+                {...register("role")}
+                name="role"
+                isRequired
+              >
+                <option value="Admin">Admin</option>
+                <option value="Regional Director">Regional Director</option>
+                <option value="Program Director">Program Director</option>
+
+              </Select>
+            </Center>
+            <FormErrorMessage>
+              {errors.role?.message?.toString()}
+            </FormErrorMessage>
             <ChakraLink
               as={Link}
               to="/login"
@@ -141,7 +166,7 @@ export const Signup = () => {
         </Stack>
       </form>
 
-      <Button
+      {/* <Button
         leftIcon={<FaGoogle />}
         variant={"solid"}
         size={"lg"}
@@ -149,7 +174,7 @@ export const Signup = () => {
         sx={{ width: "100%" }}
       >
         Signup with Google
-      </Button>
+      </Button> */}
     </VStack>
   );
 };
