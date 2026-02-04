@@ -4,7 +4,9 @@ import { MdOutlineNotifications, MdPermMedia } from 'react-icons/md'
 import { FaGuitar } from 'react-icons/fa'
 import { HiOutlineUser } from 'react-icons/hi'
 import { NAVBAR_HEIGHT, SIDEBAR_WIDTH } from './layoutConstants'
+import { useDevRoleContext } from '@/contexts/hooks/useDevRoleContext'
 
+const FALLBACK_USER_IDS = { admin: '1', regional_director: '4', program_director: '14' } as const
 
 interface SidebarProps {
     role: "admin" | "regional_director" | "program_director" | string;
@@ -12,6 +14,10 @@ interface SidebarProps {
 
 // TODO(login): Replace role prop with useRoleContext() or AuthContext; remove SidebarProps.role.
 export const Sidebar: React.FC<SidebarProps> = ({role}) => {
+    const { devUserId } = useDevRoleContext()
+    const adminOrRdUserId = devUserId ?? (role === "regional_director" ? FALLBACK_USER_IDS.regional_director : FALLBACK_USER_IDS.admin)
+    const programDirectorUserId = devUserId ?? FALLBACK_USER_IDS.program_director
+
     interface NavItem {
         name: string;
         icon: React.ReactElement;
@@ -20,15 +26,15 @@ export const Sidebar: React.FC<SidebarProps> = ({role}) => {
     let navItems: NavItem[] = [];
     if (role === "admin" || role === "regional_director") {
         navItems = [
-            { name: 'Programs', icon: <Icon as={FaGuitar} boxSize="20px" />, path: "/dashboard/1"},
-            { name: 'Updates', icon: <Icon as={MdOutlineNotifications} boxSize="20px" />, path: "/updates/1" },
-            { name: 'Accounts', icon: <Icon as={HiOutlineUser} boxSize="20px" />, path: "/account/1" },
+            { name: 'Programs', icon: <Icon as={FaGuitar} boxSize="20px" />, path: `/dashboard/${adminOrRdUserId}` },
+            { name: 'Updates', icon: <Icon as={MdOutlineNotifications} boxSize="20px" />, path: `/updates/${adminOrRdUserId}` },
+            { name: 'Accounts', icon: <Icon as={HiOutlineUser} boxSize="20px" />, path: `/account/${adminOrRdUserId}` },
         ];
     } else if (role === "program_director") {
         navItems = [
-            { name: 'Programs', icon: <Icon as={FaGuitar} boxSize="20px" />, path: "/dashboard" },
-            { name: 'Updates', icon: <Icon as={MdOutlineNotifications} boxSize="20px" />, path: "/updates" },
-            { name: 'Media', icon: <Icon as={MdPermMedia} boxSize="20px" />, path: "/media" },
+            { name: 'Programs', icon: <Icon as={FaGuitar} boxSize="20px" />, path: `/dashboard/${programDirectorUserId}` },
+            { name: 'Updates', icon: <Icon as={MdOutlineNotifications} boxSize="20px" />, path: `/updates/${programDirectorUserId}` },
+            { name: 'Media', icon: <Icon as={MdPermMedia} boxSize="20px" />, path: `/media/${programDirectorUserId}` },
         ];
     }
     return (

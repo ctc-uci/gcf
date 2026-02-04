@@ -8,6 +8,7 @@ import { UpdatesPage } from "@/components/updates/UpdatesPage";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
+import { DevRoleProvider } from "@/contexts/DevRoleContext";
 import { CookiesProvider } from "react-cookie";
 import { Layout } from "@/components/navigation/Layout";
 import { ProgramForm } from "@/components/dashboard/ProgramForm";
@@ -27,6 +28,7 @@ const App = () => {
         <AuthProvider>
           <RoleProvider>
             <Router>
+              <DevRoleProvider>
               <Routes>
                 <Route
                   path="/login"
@@ -85,6 +87,7 @@ const App = () => {
                 />
                 
               </Routes>
+              </DevRoleProvider>
             </Router>
           </RoleProvider>
         </AuthProvider>

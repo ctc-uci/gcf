@@ -29,7 +29,7 @@ function LessonVideos({ userId }) {
   return (
     <Box>
       <Heading size="md" mb={4}>
-        Program Media
+        Lesson Videos
       </Heading>
       {media.length === 0 && <Text color="gray.500">No media available</Text>}
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
