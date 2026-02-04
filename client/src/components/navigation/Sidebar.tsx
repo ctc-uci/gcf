@@ -20,9 +20,9 @@ export const Sidebar: React.FC<SidebarProps> = ({role}) => {
     let navItems: NavItem[] = [];
     if (role === "admin" || role === "regional_director") {
         navItems = [
-            { name: 'Programs', icon: <Icon as={FaGuitar} boxSize="20px" />, path: "/dashboard"},
-            { name: 'Updates', icon: <Icon as={MdOutlineNotifications} boxSize="20px" />, path: "/updates" },
-            { name: 'Accounts', icon: <Icon as={HiOutlineUser} boxSize="20px" />, path: "/accounts" },
+            { name: 'Programs', icon: <Icon as={FaGuitar} boxSize="20px" />, path: "/dashboard/1"},
+            { name: 'Updates', icon: <Icon as={MdOutlineNotifications} boxSize="20px" />, path: "/updates/1" },
+            { name: 'Accounts', icon: <Icon as={HiOutlineUser} boxSize="20px" />, path: "/account/1" },
         ];
     } else if (role === "program_director") {
         navItems = [
