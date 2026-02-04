@@ -31,8 +31,8 @@ updatesPermissionsRouter.get("/media-updates/:id", async (req, res) => {
     }
 
     const finalQuery = `
-      SELECT DISTINCT ON (program_update.id)
-          program_update.id AS update_id,
+      SELECT DISTINCT
+          program_update.id AS id,
           program_update.update_date,
           program_update.note,
           program.name AS program_name,
@@ -45,7 +45,7 @@ updatesPermissionsRouter.get("/media-updates/:id", async (req, res) => {
       INNER JOIN program ON program_update.program_id = program.id
       INNER JOIN gcf_user ON gcf_user.id = program.created_by
       ${filterJoin}
-      ORDER BY program_update.id, program_update.update_date DESC;
+      ORDER BY program_update.update_date DESC;
     `;
     const data = await db.query(finalQuery, [id]);
     res.status(200).json(keysToCamel(data));
@@ -90,8 +90,8 @@ updatesPermissionsRouter.get("/program-updates/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const data = await db.query(
-      `SELECT 
-          ROW_NUMBER() OVER (ORDER BY program_update.update_date) AS id,
+      `SELECT DISTINCT
+          program_update.id,
           program_update.update_date, 
           program_update.note, 
           program.name, 
@@ -103,7 +103,8 @@ updatesPermissionsRouter.get("/program-updates/:id", async (req, res) => {
       INNER JOIN program ON program_update.program_id = program.id
       INNER JOIN gcf_user on gcf_user.id = program.created_by
       LEFT JOIN program_director ON program_director.program_id = program.id AND program_director.user_id = gcf_user.id
-      WHERE gcf_user.id = $1;`,
+      WHERE gcf_user.id = $1
+      ORDER BY program_update.update_date DESC;`,
       [id]
     );
 
