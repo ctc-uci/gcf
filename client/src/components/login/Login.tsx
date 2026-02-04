@@ -212,7 +212,7 @@ export const Login = () => {
                       {errors.password?.message?.toString()}
                     </FormErrorMessage>
                     <Flex
-                      gap="180px"
+                      gap="300px"
                       mt="10px"
                     >
                       <ChakraLink
