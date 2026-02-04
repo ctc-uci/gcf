@@ -61,6 +61,23 @@ directorRouter.get("/me/:userId/media", async (req, res) => {
     }
 });
 
+directorRouter.get("/me/:userId/playlist", async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const director = await db.query("SELECT program_id FROM program_director WHERE user_id = $1 LIMIT 1", [userId]);
+        if (!director?.length) return res.status(404).json({ error: "Program director not found" });
+        const programId = director[0].program_id;
+        const playlists = await db.query(
+            `SELECT * FROM playlist WHERE program_id = $1 ORDER BY name ASC`,
+            [programId]
+        );
+        res.status(200).json(keysToCamel(playlists));
+    } catch (err) {
+        console.error("Error in /me/:userId/playlist:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 // create program director
 directorRouter.post("/", async (req, res) => {
   try {
