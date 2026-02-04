@@ -1,5 +1,6 @@
 import { keysToCamel } from "@/common/utils";
 import express from "express";
+
 import { db } from "../db/db-pgp";
 
 const mediaChangeRouter = express.Router();
@@ -8,7 +9,7 @@ mediaChangeRouter.use(express.json());
 mediaChangeRouter.get("/", async (req, res) => {
   try {
     const data = await db.query(`SELECT * FROM media_change`);
-    res.status(200).json(keysToCamel(data[0]));
+    res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
@@ -23,7 +24,7 @@ mediaChangeRouter.get("/:id", async (req, res) => {
       [id]
     );
 
-    if (mediaChange.length === 0){
+    if (mediaChange.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -65,7 +66,7 @@ mediaChangeRouter.put("/:id", async (req, res) => {
       [update_id, s3_key, file_name, file_type, is_thumbnail, id]
     );
 
-    if (updatedMediaChange.length === 0){
+    if (updatedMediaChange.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -84,11 +85,47 @@ mediaChangeRouter.delete("/:id", async (req, res) => {
       [id]
     );
 
-    if (deletedMediaChange.length === 0){
+    if (deletedMediaChange.length === 0) {
       return res.status(404).send("Item not found");
     }
 
     res.status(200).json(keysToCamel(deletedMediaChange[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+//this route gets all the media associated with a given program director
+//also gets program name given the program director
+mediaChangeRouter.get("/:userId/media", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await db.query(`
+      SELECT 
+        mc.id,
+        mc.s3_key,
+        mc.file_name,
+        mc.file_type,
+        mc.is_thumbnail,
+        p.name as program_name
+      FROM program_director pd
+      JOIN program p ON pd.program_id = p.id
+      LEFT JOIN program_update pu ON pu.program_id = pd.program_id
+      LEFT JOIN media_change mc ON mc.update_id = pu.id
+      WHERE pd.user_id = $1
+      ORDER BY mc.id DESC NULLS LAST
+    `, [userId]);
+
+    //in the case theres no media we still want to get the program name
+    //so this filters out null results
+    const programName = result[0].program_name;
+    const mediaItems = result.filter(row => row.id !== null);
+
+    res.status(200).json({
+      media: keysToCamel(mediaItems),
+      programName: programName
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");

@@ -3,5 +3,9 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.vite.json" }
-  ]
+  ],
+  "compilerOptions": {
+    "checkJs": false,
+    "allowJs": true,
+  }
 }
