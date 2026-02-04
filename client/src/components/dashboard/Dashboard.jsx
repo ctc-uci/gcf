@@ -1,7 +1,7 @@
 import { Flex, Box } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import ProgramTable from "./ProgramTable";
-import LessonVideos from "./LessonVideos";
+import LessonVideos from "./lessonVideos";
 import StatisticsSummary from "./StatisticsSummary";
 import { useDevRoleContext } from "@/contexts/hooks/useDevRoleContext";
 

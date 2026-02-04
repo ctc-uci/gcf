@@ -1,4 +1,4 @@
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useLocation } from 'react-router-dom'
 import { Button, Box, VStack, Link, Flex, Icon } from '@chakra-ui/react'
 import { MdOutlineNotifications, MdPermMedia } from 'react-icons/md'
 import { FaGuitar } from 'react-icons/fa'
@@ -24,6 +24,7 @@ export const Sidebar: React.FC<SidebarProps> = ({role}) => {
         path: string;
     }
     let navItems: NavItem[] = [];
+    // TODO(login): update the paths here to use AuthContext (currentUser?.uid) instead of hardcoded 1.
     if (role === "admin" || role === "regional_director") {
         navItems = [
             { name: 'Programs', icon: <Icon as={FaGuitar} boxSize="20px" />, path: `/dashboard/${adminOrRdUserId}` },
@@ -51,7 +52,9 @@ export const Sidebar: React.FC<SidebarProps> = ({role}) => {
         >
             <VStack>
                 <Flex direction="column" gap={3}>
-                    {navItems.map((item) => (
+                    {navItems.map((item) => {
+                        const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path + '/'));
+                        return (
                         <Link
                             key={item.name}
                             as={RouterLink}
@@ -63,20 +66,20 @@ export const Sidebar: React.FC<SidebarProps> = ({role}) => {
                             display="block"
                         >
                             <Button
-                                bg="white"
+                                bg={isActive ? "blue.50" : "white"}
+                                color={isActive ? "blue.700" : undefined}
                                 leftIcon={item.icon}
                                 height="4.5vh"
                                 justifyContent="left"
                                 width="100%"
                                 px={6}
                                 py={5}
-                                _hover={{ bg: "gray.100" }}
+                                _hover={{ bg: isActive ? "blue.100" : "gray.100" }}
                             >
                                 {item.name}
                             </Button>
                         </Link>
-                    ))
-                    }
+                    );})}
                 </Flex>
             </VStack>
         </Box>
