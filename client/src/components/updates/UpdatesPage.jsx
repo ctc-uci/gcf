@@ -19,6 +19,7 @@ export const UpdatesPage = () => {
   const [programUpdatesData, setProgramUpdatesData] = useState([]);
   // TODO(login): Replace with useRoleContext() or AuthContext instead of fetching role/${userId}.
   const [role, setRole] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async (path) => {
     try {
@@ -31,7 +32,12 @@ export const UpdatesPage = () => {
   };
 
   useEffect(() => {
+    if (!userId || !backend) {
+      setIsLoading(false);
+      return;
+    }
     const loadData = async () => {
+      setIsLoading(true);
       try {
         const [programAccountUpdates, mediaUpdates, programUpdates, userRole] =
           await Promise.all([
@@ -47,21 +53,21 @@ export const UpdatesPage = () => {
         setRole(userRole.role);
       } catch (error) {
         console.error("Fetch error:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    if (userId && backend) {
-      loadData();
-    }
+    loadData();
   }, [userId, backend]);
 
   return (
     <>
       {role === "Program Director" ? (
-        <ProgramUpdatesTable data={programUpdatesData} />
+        <ProgramUpdatesTable data={programUpdatesData} isLoading={isLoading} />
       ) : (
         <>
-          <MediaUpdatesTable data={mediaUpdatesData} />
-          <ProgramAccountUpdatesTable data={programAccountUpdatesData} />
+          <MediaUpdatesTable data={mediaUpdatesData} isLoading={isLoading} />
+          <ProgramAccountUpdatesTable data={programAccountUpdatesData} isLoading={isLoading} />
         </>
       )}
     </>

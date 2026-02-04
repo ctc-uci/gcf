@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Box, Heading, HStack, IconButton, VStack } from "@chakra-ui/react";
+import { Box, Center, Heading, HStack, IconButton, Spinner, VStack } from "@chakra-ui/react";
 
 import { MdOutlineFileDownload } from "react-icons/md";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
@@ -89,6 +89,7 @@ const StatisticsSummary = ({ role = "admin", userId }) => {
   const { backend } = useBackendContext();
   const initialStats = STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.admin;
   const [stats, setStats] = useState(initialStats);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const route = getRouteByRole(role, userId);
@@ -99,12 +100,15 @@ const StatisticsSummary = ({ role = "admin", userId }) => {
     setStats(STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.admin);
 
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const res = await backend.get(route);
         const nextStats = mapResponse(res.data ?? {});
         setStats(nextStats);
       } catch (err) {
         console.error("Error fetching statistics:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -128,13 +132,19 @@ const StatisticsSummary = ({ role = "admin", userId }) => {
         </HStack>
 
         <HStack spacing={6}>
-          {stats.map((stat) => (
-            <StatBox
-              key={stat.label}
-              label={stat.label}
-              number={stat.number}
-            />
-          ))}
+          {isLoading ? (
+            <Center py={8} minH="120px">
+              <Spinner size="lg" />
+            </Center>
+          ) : (
+            stats.map((stat) => (
+              <StatBox
+                key={stat.label}
+                label={stat.label}
+                number={stat.number}
+              />
+            ))
+          )}
         </HStack>
       </VStack>
     </Box>
