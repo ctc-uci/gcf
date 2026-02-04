@@ -14,6 +14,7 @@ interface SidebarProps {
 
 // TODO(login): Replace role prop with useRoleContext() or AuthContext; remove SidebarProps.role.
 export const Sidebar: React.FC<SidebarProps> = ({role}) => {
+    const location = useLocation()
     const { devUserId } = useDevRoleContext()
     const adminOrRdUserId = devUserId ?? (role === "regional_director" ? FALLBACK_USER_IDS.regional_director : FALLBACK_USER_IDS.admin)
     const programDirectorUserId = devUserId ?? FALLBACK_USER_IDS.program_director
