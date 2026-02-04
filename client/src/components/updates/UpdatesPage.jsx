@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useParams } from "react-router-dom";
-
+import { Center, Spinner } from "@chakra-ui/react";
 import { MediaUpdatesTable } from "./MediaUpdatesTable";
 import { ProgramAccountUpdatesTable } from "./ProgramAccountUpdatesTable";
 import { ProgramUpdatesTable } from "./ProgramUpdatesTable";
@@ -26,7 +26,7 @@ export const UpdatesPage = () => {
       const response = await backend.get(`/update-permissions/${path}`);
       return response.data;
     } catch (error) {
-      console.error("Request failed:", error.response?.status, error.message);
+      console.error("Request failed:", path, error.response?.status, error.message);
       return [];
     }
   };
@@ -50,7 +50,7 @@ export const UpdatesPage = () => {
         setProgramAccountUpdatesData(programAccountUpdates);
         setMediaUpdatesData(mediaUpdates);
         setProgramUpdatesData(programUpdates);
-        setRole(userRole.role);
+        setRole(userRole[0]['role']);
       } catch (error) {
         console.error("Fetch error:", error);
       } finally {
@@ -59,6 +59,15 @@ export const UpdatesPage = () => {
     };
     loadData();
   }, [userId, backend]);
+
+  if (isLoading) {
+    return <Center py={10}>
+          <Spinner
+            size="xl"
+            color="gray.500"
+          />
+        </Center>; 
+  } 
 
   return (
     <>
