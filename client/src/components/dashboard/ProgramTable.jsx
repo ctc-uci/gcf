@@ -19,6 +19,7 @@ import {
 import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon } from "@chakra-ui/icons";
 import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { ProgramForm } from "./ProgramForm";
 
 const getRouteByRole = (role, userId) => {
   const routes = {
@@ -64,6 +65,7 @@ function ProgramTable({ role = "admin", userId }) {
   const { backend } = useBackendContext();
   const [programs, setPrograms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   useEffect(() => {
     const route = getRouteByRole(role, userId);
@@ -90,6 +92,12 @@ function ProgramTable({ role = "admin", userId }) {
   if (!getRouteByRole(role, userId)) return null;
 
   return (
+    <>
+    <ProgramForm
+      isOpen={isFormOpen}
+      onOpen={() => setIsFormOpen(true)}
+      onClose={() => setIsFormOpen(false)}
+    />
     <TableContainer>
       <HStack mb={4} justifyContent="space-between" w="100%">
         <HStack spacing={4}>
@@ -140,7 +148,7 @@ function ProgramTable({ role = "admin", userId }) {
             variant="ghost"
             ml={2}
           />
-          <Button size="sm" rightIcon={<AddIcon />}>
+          <Button size="sm" rightIcon={<AddIcon />} onClick={() => setIsFormOpen(true)}>
             New
           </Button>
         </HStack>
@@ -183,6 +191,7 @@ function ProgramTable({ role = "admin", userId }) {
         </Tbody>
       </Table>
     </TableContainer>
+    </>
   );
 }
 

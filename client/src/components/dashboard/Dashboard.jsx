@@ -7,7 +7,7 @@ import StatisticsSummary from "./StatisticsSummary";
 const Dashboard = () => {
   // TODO(login): Replace useParams userid with AuthContext (currentUser?.uid); then stop passing userId to children.
   const { userid } = useParams();
-  const role = "programDirector"; // TODO(login): Replace with useRoleContext() or AuthContext; then stop passing role to children.
+  const role = "admin"; // TODO(login): Replace with useRoleContext() or AuthContext; then stop passing role to children.
   return (
     <Flex
       direction="column"
