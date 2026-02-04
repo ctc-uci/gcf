@@ -2,9 +2,11 @@ import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
 import {
   Badge,
   Box,
+  Center,
   Flex,
   Heading,
   Input,
+  Spinner,
   Table,
   TableContainer,
   Tbody,
@@ -14,7 +16,7 @@ import {
   Tr,
 } from "@chakra-ui/react";
 
-export const ProgramAccountUpdatesTable = ({ data }) => {
+export const ProgramAccountUpdatesTable = ({ data, isLoading }) => {
   return (
     <>
       <Box
@@ -53,19 +55,29 @@ export const ProgramAccountUpdatesTable = ({ data }) => {
               </Tr>
             </Thead>
             <Tbody>
-              {data.map((row) => (
-                <Tr key={row.id}>
-                  <Td>{row.updateDate}</Td>
-                  <Td>{row.note}</Td>
-                  <Td>{row.name}</Td>
-                  <Td>
-                    {row.firstName} {row.lastName}
-                  </Td>
-                  <Td>
-                    <Badge>{row.status}</Badge>
+              {isLoading ? (
+                <Tr>
+                  <Td colSpan={5}>
+                    <Center py={8}>
+                      <Spinner size="lg" />
+                    </Center>
                   </Td>
                 </Tr>
-              ))}
+              ) : (
+                data.map((row) => (
+                  <Tr key={row.id}>
+                    <Td>{row.updateDate}</Td>
+                    <Td>{row.note}</Td>
+                    <Td>{row.name}</Td>
+                    <Td>
+                      {row.firstName} {row.lastName}
+                    </Td>
+                    <Td>
+                      <Badge>{row.status}</Badge>
+                    </Td>
+                  </Tr>
+                ))
+              )}
             </Tbody>
           </Table>
         </TableContainer>
