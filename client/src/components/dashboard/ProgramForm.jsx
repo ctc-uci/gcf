@@ -206,8 +206,11 @@ const CurriculumLinkForm = ( { setFormData } ) => {
 }
 
 
-export const ProgramForm = () => {
-    const { isOpen, onOpen, onClose } = useDisclosure()
+export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: onCloseProp}) => {
+    const disclosure = useDisclosure();
+    const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
+    const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
+    const onClose = isControlled ? onCloseProp : disclosure.onClose;
     const btnRef = useRef(null);
     const { backend } = useBackendContext();
     const [regions, setRegions] = useState([]);
@@ -277,10 +280,6 @@ export const ProgramForm = () => {
 
     return (
         <>
-
-            <Button ref={btnRef} colorScheme='teal' onClick={onOpen}>
-                Open
-            </Button>
             <Drawer
                 isOpen={isOpen}
                 placement='right'
