@@ -66,7 +66,7 @@ export const Login = () => {
         password: data.password,
       });
 
-      navigate("/dashboard");
+      navigate("/dashboard/1");
     } catch (err) {
       const errorCode = err.code;
       const firebaseErrorMsg = err.message;
@@ -170,7 +170,7 @@ export const Login = () => {
           </Button>
         </Stack>
       </form>
-
+{/* 
       <Button
         leftIcon={<FaGoogle />}
         variant={"solid"}
@@ -179,7 +179,7 @@ export const Login = () => {
         sx={{ width: "100%" }}
       >
         Login with Google
-      </Button>
+      </Button> */}
     </VStack>
   );
 };
