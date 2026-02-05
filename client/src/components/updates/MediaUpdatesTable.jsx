@@ -1,4 +1,5 @@
 import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
+import { useEffect, useState } from "react";
 import {
   Badge,
   Box,
@@ -17,6 +18,43 @@ import {
 } from "@chakra-ui/react";
 
 export const MediaUpdatesTable = ({ data, isLoading }) => {
+    const [searchQuery, setSearchQuery] = useState("");
+    const [unorderedUpdates, setUnorderedUpdates] = useState([]);
+  
+    const handleSearch = event => {
+      setSearchQuery(event.target.value);
+   };
+   //setUnorderedUpdates(data.map((row) => row))
+   useEffect(() => {
+    setUnorderedUpdates(data);
+   }, [searchQuery, data]);
+  
+    useEffect(() => {
+       function filterUpdates(search) {
+         // filter by search query
+         console.log(unorderedUpdates);
+         const filtered = unorderedUpdates.filter(update => 
+           // if no search then show everything
+           update.updateDate.toLowerCase().includes(search.toLowerCase()) ||
+           update.note.toLowerCase().includes(search.toLowerCase()) ||
+           update.name.toLowerCase().includes(search.toLowerCase()) ||
+           update.firstName.toLowerCase().includes(search.toLowerCase()) ||
+           update.lastName.includes(search.toLowerCase()) ||
+           update.status.includes(search.toLowerCase())
+         );
+         if (search === '') {
+           //setUpdates(unorderedUpdates);
+           data = unorderedUpdates;
+         } else {
+           //setUpdates(filtered);
+           data = filtered;
+         }
+       }
+   
+     filterUpdates(searchQuery);
+   
+     }, [searchQuery, unorderedUpdates]);
+
   return (
     <Box
       mt="30px"
@@ -35,6 +73,8 @@ export const MediaUpdatesTable = ({ data, isLoading }) => {
           placeholder="Type to search"
           variant="flushed"
           w="200px"
+          value={searchQuery}
+          onChange={handleSearch}
         />
         <HamburgerIcon mt="10px" />
         <DownloadIcon mt="10px" />
