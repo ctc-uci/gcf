@@ -60,12 +60,127 @@ const MAP_BY_ROLE = {
   regionalDirector: mapRdRow,
 };
 
+const sortCycle = {
+  "ASCENDING": "DESCENDING",
+  "DESCENDING": "UNSORTED",
+  "UNSORTED": "ASCENDING",
+}
+
 // TODO(login): Replace role prop with useRoleContext() or AuthContext; replace userId prop with AuthContext (currentUser?.uid).
 function ProgramTable({ role = "admin", userId }) {
   const { backend } = useBackendContext();
   const [programs, setPrograms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [unorderedPrograms, setUnorderedPrograms] = useState([]); // store a copy of the original unorderd programs 
+  const [sortOrder, setSortOrder] = useState({ "currentSortColumn": null, "prevSortColumn": {} });
+  //const [filteredData, setFilteredData] = useState(programs);
+  const [searchQuery, setSearchQuery] = useState("");
+  /*
+  {
+    currentSortColumn: 'title' | 'status' | 'launchDate' | 'location' | 'students' | 'instruments' | 'totalInstruments',
+    prevSortColumn: {
+      "program": "asc" | "desc",
+      "status": "asc" | "desc",
+  
+  }
+
+
+  */
+
+useEffect(() => {
+  setUnorderedPrograms(programs)
+}, [])
+
+
+// set search query as value entered in search bar
+ const handleSearch = event => {
+    setSearchQuery(event.target.value);
+    //filterPrograms(searchQuery);
+ };
+
+ useEffect(() => {
+  function filterPrograms(search) {
+ // filter by search query
+  console.log(unorderedPrograms);
+  const filtered = unorderedPrograms.filter(program => 
+    // if no search then show everything
+    program.title.toLowerCase().includes(search.toLowerCase()) ||
+    program.status.toLowerCase().includes(search.toLowerCase()) ||
+    program.launchDate.toLowerCase().includes(search.toLowerCase()) ||
+    program.location.toLowerCase().includes(search.toLowerCase()) ||
+    program.students.includes(search.toLowerCase()) ||
+    program.instruments.includes(search.toLowerCase()) ||
+    program.totalInstruments.includes(search.toLowerCase())
+ );
+  if (search === '') {
+    setPrograms(unorderedPrograms);
+  }
+  else {
+  setPrograms(filtered);
+  }
+ }
+  filterPrograms(searchQuery);
+  }, [searchQuery, unorderedPrograms]);
+
+  /*
+ function filterPrograms(search) {
+ // filter by search query
+  console.log(unorderedPrograms);
+  const filtered = unorderedPrograms.filter(program => 
+    // if no search then show everything
+    program.title.toLowerCase().includes(search.toLowerCase()) ||
+    program.status.toLowerCase().includes(search.toLowerCase()) ||
+    program.launchDate.toLowerCase().includes(search.toLowerCase()) ||
+    program.location.toLowerCase().includes(search.toLowerCase()) ||
+    program.students.includes(search.toLowerCase()) ||
+    program.instruments.includes(search.toLowerCase()) ||
+    program.totalInstruments.includes(search.toLowerCase())
+ );
+  if (search === '') {
+    setPrograms(unorderedPrograms);
+  }
+  else {
+  setPrograms(filtered); // ISSUE: modifying original programs, making it difficult to reset filter
+  }
+ }
+*/
+  function updatePrevSortColumn(sortOrderCopy, column) {
+    // toggle between asc and desc when sorting by a specific column
+    if (Object.hasOwn(sortOrderCopy["prevSortColumn"], column)) {
+      const newSortOrder = sortCycle[sortOrderCopy["prevSortColumn"][column]];
+      sortOrderCopy["prevSortColumn"][column] = newSortOrder;
+      return newSortOrder;
+    } else {
+      sortOrderCopy["prevSortColumn"][column] = sortCycle["ASCENDING"];
+      return sortCycle["ASCENDING"];
+    }
+  }
+
+  function handleSort(column) {
+    console.log("programs: ", programs);
+    const sortOrderCopy = { ...sortOrder };
+    sortOrderCopy["currentSortColumn"] = column;
+    const newSortOrder = updatePrevSortColumn(sortOrderCopy, column);
+    setSortOrder(sortOrderCopy);
+
+    if (newSortOrder === sortCycle["UNSORTED"]) {
+      console.log('setting programs to unordered: ', unorderedPrograms);
+      setPrograms(unorderedPrograms);
+      return;
+    }
+
+    // sort programs array
+    const sortedPrograms = [...programs].sort((a, b) => {
+      if (sortOrderCopy["prevSortColumn"][column] === "asc") {
+        return a[column].localeCompare(b[column]); 
+      } else {
+        return b[column].localeCompare(a[column]);
+      }
+    })
+
+    setPrograms(sortedPrograms);
+  }
 
   useEffect(() => {
     const route = getRouteByRole(role, userId);
@@ -78,7 +193,9 @@ function ProgramTable({ role = "admin", userId }) {
       try {
         const res = await backend.get(route);
         const rows = Array.isArray(res.data) ? res.data : [];
+        console.log("rows: ", rows);
         setPrograms(rows.map(mapRow));
+        setUnorderedPrograms(rows.map(mapRow)); //
       } catch (err) {
         console.error("Error fetching data:", err);
       } finally {
@@ -108,6 +225,7 @@ function ProgramTable({ role = "admin", userId }) {
               icon={<Search2Icon />}
               size="sm"
               variant="ghost"
+              //onClick={() => filterPrograms(searchQuery)}
             />
             <Input
               w="120px"
@@ -118,6 +236,9 @@ function ProgramTable({ role = "admin", userId }) {
               borderColor="gray.300"
               borderRadius="0"
               px={1}
+              value={searchQuery}
+              onChange={handleSearch}
+              //onChange={() => filterPrograms(searchQuery)}
             />
             <IconButton
               aria-label="filter"
@@ -157,13 +278,13 @@ function ProgramTable({ role = "admin", userId }) {
       <Table variant="simple">
         <Thead>
           <Tr>
-            <Th>Program</Th>
-            <Th>Status</Th>
-            <Th>Launch Date</Th>
-            <Th>Location</Th>
-            <Th>Students</Th>
-            <Th>Instruments</Th>
-            <Th>Total Instruments</Th>
+            <Th><Button variant="ghost" onClick={() => handleSort("title")}>Program</Button></Th>
+            <Th><Button variant="ghost" onClick={() => handleSort("status")}>Status</Button></Th>
+            <Th><Button variant="ghost" onClick={() => handleSort("launchDate")}>Launch Date</Button></Th>
+            <Th><Button variant="ghost" onClick={() => handleSort("location")}>Location</Button></Th>
+            <Th><Button variant="ghost" onClick={() => handleSort("students")}>Students</Button></Th>
+            <Th><Button variant="ghost" onClick={() => handleSort("instruments")}>Instruments</Button></Th>
+            <Th><Button variant="ghost" onClick={() => handleSort("totalInstruments")}>Total Instruments</Button></Th>
           </Tr>
         </Thead>
         <Tbody>
