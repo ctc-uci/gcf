@@ -60,11 +60,12 @@ const MAP_BY_ROLE = {
   regionalDirector: mapRdRow,
 };
 
-const sortCycle = {
+// enum and map for sorting cycles 
+const sortCycle = Object.freeze({
   "ASCENDING": "DESCENDING",
   "DESCENDING": "UNSORTED",
   "UNSORTED": "ASCENDING",
-}
+});
 
 // TODO(login): Replace role prop with useRoleContext() or AuthContext; replace userId prop with AuthContext (currentUser?.uid).
 function ProgramTable({ role = "admin", userId }) {
@@ -73,25 +74,21 @@ function ProgramTable({ role = "admin", userId }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [unorderedPrograms, setUnorderedPrograms] = useState([]); // store a copy of the original unorderd programs 
-  const [sortOrder, setSortOrder] = useState({ "currentSortColumn": null, "prevSortColumn": {} });
+  const [sortOrder, setSortOrder] = useState({ "currentSortColumn": null, "prevSortColumn": {} }); 
+  // tracks current and previous sort orders for each column
+  // need to track previous sort order for each column to implement sort cycle correctly
+    /* sortOrder structure:
+      {
+        currentSortColumn: 'title' | 'status' | 'launchDate' | 'location' | 'students' | 'instruments' | 'totalInstruments',
+        prevSortColumn: {
+          "program": sortCycle.ASCENDING | sortCycle.DESCENDING | sortCycle.UNSORTED,
+          "status": sortCycle.ASCENDING | sortCycle.DESCENDING | sortCycle.UNSORTED,
+          ...
+        }
+      }
+    */
   //const [filteredData, setFilteredData] = useState(programs);
-  const [searchQuery, setSearchQuery] = useState("");
-  /*
-  {
-    currentSortColumn: 'title' | 'status' | 'launchDate' | 'location' | 'students' | 'instruments' | 'totalInstruments',
-    prevSortColumn: {
-      "program": "asc" | "desc",
-      "status": "asc" | "desc",
-  
-  }
-
-
-  */
-
-useEffect(() => {
-  setUnorderedPrograms(programs)
-}, [])
-
+  const [searchQuery, setSearchQuery] = useState("");  
 
 // set search query as value entered in search bar
  const handleSearch = event => {
@@ -100,84 +97,62 @@ useEffect(() => {
  };
 
  useEffect(() => {
-  function filterPrograms(search) {
- // filter by search query
-  console.log(unorderedPrograms);
-  const filtered = unorderedPrograms.filter(program => 
-    // if no search then show everything
-    program.title.toLowerCase().includes(search.toLowerCase()) ||
-    program.status.toLowerCase().includes(search.toLowerCase()) ||
-    program.launchDate.toLowerCase().includes(search.toLowerCase()) ||
-    program.location.toLowerCase().includes(search.toLowerCase()) ||
-    program.students.includes(search.toLowerCase()) ||
-    program.instruments.includes(search.toLowerCase()) ||
-    program.totalInstruments.includes(search.toLowerCase())
- );
-  if (search === '') {
-    setPrograms(unorderedPrograms);
-  }
-  else {
-  setPrograms(filtered);
-  }
- }
+    function filterPrograms(search) {
+      // filter by search query
+      console.log(unorderedPrograms);
+      const filtered = unorderedPrograms.filter(program => 
+        // if no search then show everything
+        program.title.toLowerCase().includes(search.toLowerCase()) ||
+        program.status.toLowerCase().includes(search.toLowerCase()) ||
+        program.launchDate.toLowerCase().includes(search.toLowerCase()) ||
+        program.location.toLowerCase().includes(search.toLowerCase()) ||
+        program.students.includes(search.toLowerCase()) ||
+        program.instruments.includes(search.toLowerCase()) ||
+        program.totalInstruments.includes(search.toLowerCase())
+      );
+      if (search === '') {
+        setPrograms(unorderedPrograms);
+      } else {
+        setPrograms(filtered);
+      }
+    }
+
   filterPrograms(searchQuery);
+
   }, [searchQuery, unorderedPrograms]);
 
-  /*
- function filterPrograms(search) {
- // filter by search query
-  console.log(unorderedPrograms);
-  const filtered = unorderedPrograms.filter(program => 
-    // if no search then show everything
-    program.title.toLowerCase().includes(search.toLowerCase()) ||
-    program.status.toLowerCase().includes(search.toLowerCase()) ||
-    program.launchDate.toLowerCase().includes(search.toLowerCase()) ||
-    program.location.toLowerCase().includes(search.toLowerCase()) ||
-    program.students.includes(search.toLowerCase()) ||
-    program.instruments.includes(search.toLowerCase()) ||
-    program.totalInstruments.includes(search.toLowerCase())
- );
-  if (search === '') {
-    setPrograms(unorderedPrograms);
-  }
-  else {
-  setPrograms(filtered); // ISSUE: modifying original programs, making it difficult to reset filter
-  }
- }
-*/
   function updatePrevSortColumn(sortOrderCopy, column) {
     // toggle between asc and desc when sorting by a specific column
+    // prevSortColumn object doesn't have the keys of all headers initially so need to check if it exists
     if (Object.hasOwn(sortOrderCopy["prevSortColumn"], column)) {
       const newSortOrder = sortCycle[sortOrderCopy["prevSortColumn"][column]];
       sortOrderCopy["prevSortColumn"][column] = newSortOrder;
       return newSortOrder;
     } else {
-      sortOrderCopy["prevSortColumn"][column] = sortCycle["ASCENDING"];
-      return sortCycle["ASCENDING"];
+      sortOrderCopy["prevSortColumn"][column] = sortCycle.ASCENDING; // default is ASCENDING
+      return sortCycle.ASCENDING;
     }
   }
 
   function handleSort(column) {
-    console.log("programs: ", programs);
     const sortOrderCopy = { ...sortOrder };
     sortOrderCopy["currentSortColumn"] = column;
     const newSortOrder = updatePrevSortColumn(sortOrderCopy, column);
     setSortOrder(sortOrderCopy);
 
-    if (newSortOrder === sortCycle["UNSORTED"]) {
-      console.log('setting programs to unordered: ', unorderedPrograms);
+    if (newSortOrder === sortCycle.UNSORTED) {
       setPrograms(unorderedPrograms);
       return;
     }
 
     // sort programs array
     const sortedPrograms = [...programs].sort((a, b) => {
-      if (sortOrderCopy["prevSortColumn"][column] === "asc") {
+      if (sortOrderCopy["prevSortColumn"][column] === sortCycle.ASCENDING) {
         return a[column].localeCompare(b[column]); 
       } else {
         return b[column].localeCompare(a[column]);
       }
-    })
+    }) 
 
     setPrograms(sortedPrograms);
   }
@@ -225,7 +200,6 @@ useEffect(() => {
               icon={<Search2Icon />}
               size="sm"
               variant="ghost"
-              //onClick={() => filterPrograms(searchQuery)}
             />
             <Input
               w="120px"
@@ -238,7 +212,6 @@ useEffect(() => {
               px={1}
               value={searchQuery}
               onChange={handleSearch}
-              //onChange={() => filterPrograms(searchQuery)}
             />
             <IconButton
               aria-label="filter"
