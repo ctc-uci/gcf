@@ -11,13 +11,15 @@ import {
   Select,
   Button,
   VStack,
+  Tag, 
+  HStack,
   Heading,
   useDisclosure
 } from "@chakra-ui/react";
 import { useRef, useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext' 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext"
-import { useParams } from "react-router-dom"
+import { Form, useParams } from "react-router-dom"
 
 
 export const AccountForm = () => {
@@ -27,6 +29,7 @@ export const AccountForm = () => {
     const [currentDbUser, setCurrentDbUser] = useState(null)
     const { backend } = useBackendContext();
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const [currentPrograms, setCurrentPrograms] = useState(null) 
     const btnRef = useRef();
 
     const userId = currentUser.uid;
@@ -61,6 +64,7 @@ export const AccountForm = () => {
             try {
                 const targetUserResponse = await backend.get(`/gcf-users/${targetUserId}`);
                 const targetUserData = targetUserResponse.data;
+                console.log('test target')
                 console.log(targetUserData);
                 setTargetUser(targetUserData);
             }   
@@ -83,12 +87,63 @@ export const AccountForm = () => {
         });
     }, [targetUser]);
 
+    useEffect(() => {
+        async function fetchPrograms() {
+            try {
+               const response = await backend.get("/program");
+                const program_list = response.data;
+                setCurrentPrograms(program_list); 
+            }
+            catch (error) {
+                console.error("Error fetching programs")
+            }
+        }
+        fetchPrograms();
+    }, [backend]);
+
+    useEffect(() => {
+        console.log("🔍 Programs fetch check:", { 
+            targetUserId, 
+            targetUser, 
+            role: targetUser?.role 
+        });
+    
+        if (!targetUserId || !targetUser) return;
+        
+    
+        if (targetUser.role !== 'Program Director') return;
+        
+    
+        const fetchUserPrograms = async () => {
+            try {
+                const response = await backend.get(`/program-directors/me/${targetUserId}/program`);
+                const program = response.data;
+                
+                setFormData((prev) => ({
+                    ...prev,
+                    programs: [program]
+                }));
+            } catch (error) {
+                console.error("Error fetching user's programs:", error);
+            }
+        };
+    
+        fetchUserPrograms();
+    },  [backend, targetUserId, targetUser]);
+
     if (!currentUser) return <div>Please sign in</div>;
+    
+    if (currentDbUser && currentDbUser.role === "Admin") {
+        return <div>Access denied. Admins only.</div>;
+    }
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({...prev, [name]: value}))
     };
+
+    console.log("Current Programs:", currentPrograms);
+    console.log("Selected Programs:", formData.programs);
 
     return (
         <> 
@@ -155,7 +210,25 @@ export const AccountForm = () => {
                                     onChange={handleChange}
                                     value={formData.role}
                                 >
+                                    <option value = "admin">Admin</option>
+                                    <option value = "regional_director">Regional Director</option>
+                                    <option value = "program_director">Program Director</option>
                                 </Select>
+                            </FormControl>
+
+                            <FormControl>
+                                <FormLabel>Program(s)</FormLabel>
+                                <Button size="sm" onClick={() => console.log("Add clicked!")}>
+                                    + Add
+                                </Button>
+                                    {/* Selected programs displayed as chips */}
+                                <HStack spacing={2} mt={2}>
+                                    {formData.programs.map((program) => (
+                                    <Tag key={program.id} colorScheme="blue">
+                                        {program.name}
+                                    </Tag>
+                                    ))}
+                                </HStack>
                             </FormControl>
                             <Button colorScheme="blue" width="100%">
                                 Save
