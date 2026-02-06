@@ -20,16 +20,17 @@ import { useRef, useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext' 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext"
 import { Form, useParams } from "react-router-dom"
-
+import { createUserWithEmailAndPassword, updateEmail, updatePassword } from "firebase/auth";
+import { auth } from "@/utils/auth/firebase";
 
 export const AccountForm = () => {
     const { targetUserId } = useParams();
     const [targetUser, setTargetUser] = useState(null);
     const { currentUser } = useAuthContext();
-    const [currentDbUser, setCurrentDbUser] = useState(null)
+    const [currentDbUser, setCurrentDbUser] = useState(null);
     const { backend } = useBackendContext();
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [currentPrograms, setCurrentPrograms] = useState(null) 
+    const [currentPrograms, setCurrentPrograms] = useState(null);
     const btnRef = useRef();
 
     const userId = currentUser.uid;
@@ -42,10 +43,12 @@ export const AccountForm = () => {
         password: '',
         programs: []
     });
+
+    const [isLoading, setIsLoading] = useState(null);
     
     useEffect(() => {
         if (!userId) return;
-        // fetch current users data to see role and what peromissions they have
+        // fetch current users data to see role and what permissions they have
         const fetchData = async () => {
             try {
                 const currentUserResponse = await backend.get(`/gcf-users/${userId}`);
@@ -149,6 +152,30 @@ export const AccountForm = () => {
         const { name, value } = e.target;
         setFormData((prev) => ({...prev, [name]: value}))
     };
+
+    const handleSubmit = async () => {
+        setIsLoading(true);
+
+        try {
+            if (!targetUserId) {
+                console.log("Creating new user with data: ", formData)
+                await handleCreateUser();
+            }
+
+            else {
+                console.log("Updating user: ", targetUserId, "with data: ", formData)
+                await handleUpdateUser();
+            }
+
+            alert("User saved successfully!");
+            onClose();
+
+        }
+        catch (error) {
+            console.error("Error fetching user: ", error)
+            alert(`Error message: ${error}`)
+        }
+    }   
 
     console.log("Current Programs:", currentPrograms);
     console.log("Selected Programs:", formData.programs);
@@ -259,7 +286,7 @@ export const AccountForm = () => {
                                     </HStack>
                                 </FormControl>
                             )}
-                            <Button colorScheme="teal" width="100%">
+                            <Button colorScheme="teal" width="100%" onClick = {handleSubmit} isLoading = {isLoading}>
                                 Save
                             </Button>
                         </VStack>
