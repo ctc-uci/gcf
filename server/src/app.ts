@@ -4,7 +4,7 @@ import { directorRouter } from "@/routes/programDirector";
 import { programUpdateRouter } from '@/routes/programUpdate';
 import { regionalDirectorRouter } from "@/routes/regionalDirector";
 import { gcfUserRouter } from "@/routes/gcfUser";
-// import { usersRouter } from "@/routes/users";
+import { updatesPermissionsRouter } from "@/routes/updatesPermissions";
 import { enrollmentChangeRouter } from "@/routes/enrollmentChange";
 import { mediaChangeRouter } from "@/routes/mediaChange";
 import { instrumentRouter } from "@/routes/instrument"
@@ -18,6 +18,8 @@ import express from "express";
 import { programRouter } from "@/routes/program";
 import { partnerOrganizationRouter } from "@/routes/partnerOrganization";
 import { imagesRouter } from "@/routes/images";
+import { adminRouter } from "@/routes/admin";
+import { rdProgramTableRouter } from "@/routes/rdProgramTable";
 
 dotenv.config();
 
@@ -41,11 +43,14 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // app.use("/users", usersRouter);
+app.use("/admin", adminRouter);
+app.use("/rdProgramTable", rdProgramTableRouter);
 app.use("/program-directors", directorRouter)
 app.use('/program-updates', programUpdateRouter);
 app.use("/instruments", instrumentRouter);
 app.use("/instrument-changes", instrumentChangeRouter);
 app.use("/gcf-users", gcfUserRouter);
+app.use("/update-permissions", updatesPermissionsRouter);
 app.use("/regional-directors", regionalDirectorRouter)
 app.use("/country", countryRouter);
 app.use("/region", regionRouter);
