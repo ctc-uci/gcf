@@ -133,7 +133,15 @@ export const AccountForm = () => {
 
     if (!currentUser) return <div>Please sign in</div>;
     
-    if (currentDbUser && currentDbUser.role === "Admin") {
+    if (!currentDbUser) {
+        return <div>Loading...</div>;
+    }
+
+    if (!currentDbUser.role) {
+        return <div>Your account is not set up in the database. Please contact an administrator.</div>;
+    }
+
+    if (currentDbUser && currentDbUser.role !== "Admin") {
         return <div>Access denied. Admins only.</div>;
     }
 
@@ -144,6 +152,7 @@ export const AccountForm = () => {
 
     console.log("Current Programs:", currentPrograms);
     console.log("Selected Programs:", formData.programs);
+    console.log("current role: ", currentDbUser.role)
 
     return (
         <> 
@@ -210,27 +219,47 @@ export const AccountForm = () => {
                                     onChange={handleChange}
                                     value={formData.role}
                                 >
-                                    <option value = "admin">Admin</option>
-                                    <option value = "regional_director">Regional Director</option>
-                                    <option value = "program_director">Program Director</option>
+                                    <option value = "Admin">Admin</option>
+                                    <option value = "Regional Director">Regional Director</option>
+                                    <option value = "Program Director">Program Director</option>
                                 </Select>
                             </FormControl>
+                            {formData.role === 'Program Director' && (
+                                <FormControl>
+                                    <FormLabel>Program(s)</FormLabel>
+                                    <Select
+                                        placeholder = "Select a program"
+                                        onChange={(e) => {
+                                            const selectedProgramId = e.target.value;
+                                            if (!selectedProgramId) return;
 
-                            <FormControl>
-                                <FormLabel>Program(s)</FormLabel>
-                                <Button size="sm" onClick={() => console.log("Add clicked!")}>
-                                    + Add
-                                </Button>
-                                    {/* Selected programs displayed as chips */}
-                                <HStack spacing={2} mt={2}>
-                                    {formData.programs.map((program) => (
-                                    <Tag key={program.id} colorScheme="blue">
-                                        {program.name}
-                                    </Tag>
-                                    ))}
-                                </HStack>
-                            </FormControl>
-                            <Button colorScheme="blue" width="100%">
+                                            const selectedProgram = currentPrograms.find(
+                                                p => p.id === selectedProgramId
+                                            );
+
+                                            if (selectedProgram) {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    programs: [selectedProgram]
+                                                }));
+                                            }
+                                        }}
+                                    >
+                                        {currentPrograms && currentPrograms.map((program) => {
+                                            return <option key={program.id} value={program.id}>{program.name}</option>
+                                        })}
+                                    </Select>
+
+                                    <HStack spacing={2} mt={2}>
+                                        {formData.programs.map((program) => (
+                                        <Tag key={program.id} colorScheme="teal">
+                                            {program.name}
+                                        </Tag>
+                                        ))}
+                                    </HStack>
+                                </FormControl>
+                            )}
+                            <Button colorScheme="teal" width="100%">
                                 Save
                             </Button>
                         </VStack>
