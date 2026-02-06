@@ -7,6 +7,7 @@ import {
   Container,
   Heading,
   Spinner,
+  useDisclosure,
   VStack,
 } from "@chakra-ui/react";
 
@@ -14,11 +15,14 @@ import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useParams } from "react-router-dom";
 
 import { MediaGrid } from "./MediaGrid";
+import { MediaUploadModal } from "./MediaUploadModal";
 
 export const Media = () => {
   // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid) when auth flow is finalized.
   const { userId } = useParams();
   const { backend } = useBackendContext();
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [media, setMedia] = useState([]);
   const [programName, setProgramName] = useState("");
@@ -87,13 +91,13 @@ export const Media = () => {
               {programName} Media
             </Heading>
 
-            {/* TODO: Implement functionality for button */}
             <Button
               variant="outline"
               bg="white"
               borderColor="gray.800"
               color="gray.800"
               _hover={{ bg: "gray.50" }}
+              onClick={onOpen}
             >
               + New
             </Button>
@@ -105,6 +109,14 @@ export const Media = () => {
           </VStack>
         </Box>
       </Container>
+      <MediaUploadModal
+        isOpen={isOpen}
+        onClose={onClose}
+        onUploadComplete={() => {
+          fetchMedia();
+          onClose();
+        }}
+      />
     </Box>
   );
 };
