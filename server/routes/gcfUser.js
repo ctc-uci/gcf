@@ -1,6 +1,6 @@
 import { keysToCamel } from "@/common/utils";
 import express from "express";
-
+import { admin } from "../config/firebase";
 import { db } from "../db/db-pgp";
 
 const gcfUserRouter = express.Router();
@@ -19,6 +19,46 @@ gcfUserRouter.post("/", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
+  }
+});
+
+
+gcfUserRouter.post("/admin/create-user", async (req, res) => {
+  try {
+    const { email, password, firstName, lastName, role, currentUserId, programId } = req.body;
+
+    const userRecord = await admin.auth().createUser({
+      email: email,
+      password: password,
+      displayName: `${firstName} ${lastName}`
+    });
+
+    const firebaseUid = userRecord.uid;
+
+    const newGcfUser = await db.query(
+      `INSERT INTO gcf_user (id, role, first_name, last_name, created_by) 
+      VALUES ($1, $2, $3, $4, $5) 
+      RETURNING *`,
+      [firebaseUid, role, firstName, lastName, currentUserId]
+    );
+
+    if (role === 'Program Director' && programId) {
+      await db.query(
+        `INSERT INTO program_director (user_id, program_id) 
+        VALUES ($1, $2)`,
+        [firebaseUid, programId]
+      );
+    }
+
+    res.status(201).json({ 
+      uid: firebaseUid, 
+      user: keysToCamel(newGcfUser[0]),
+      message: 'User created successfully' 
+    });
+
+  } catch (err) {
+    console.error("Error creating user:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -128,5 +168,9 @@ gcfUserRouter.delete("/:id", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+
+
+
 
 export { gcfUserRouter };
