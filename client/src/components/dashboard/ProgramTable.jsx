@@ -15,8 +15,11 @@ import {
   Divider,
   Spinner,
   Center,
+  Collapse,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon } from "@chakra-ui/icons";
+
+import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon, EditIcon } from "@chakra-ui/icons";
 import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { ProgramForm } from "./ProgramForm";
@@ -39,6 +42,12 @@ function mapAdminRow(row) {
     students: row.students ?? 0,
     instruments: row.instruments ?? 0,
     totalInstruments: row.instruments ?? 0,
+
+    programDirectors: row.programDirectors,
+    regionalDirectors: row.regionalDirectors,
+
+    playlists: row.playlists,
+    primaryLanguage: row.primaryLanguage,
   };
 }
 
@@ -52,6 +61,11 @@ function mapRdRow(row) {
     students: row.totalStudents ?? 0,
     instruments: row.totalInstruments ?? 0,
     totalInstruments: row.totalInstruments ?? 0,
+    programDirectors: row.programDirectors,
+    regionalDirectors: row.regionalDirectors,
+
+    playlists: row.playlists,
+    primaryLanguage: row.primaryLanguage,
   };
 }
 
@@ -60,12 +74,81 @@ const MAP_BY_ROLE = {
   regionalDirector: mapRdRow,
 };
 
+function ExpandableRow({ p, onEdit }) {
+  const { isOpen, onToggle } = useDisclosure();
+  console.log(p);
+  return (
+<>
+    <Tr onClick={onToggle} cursor="pointer">
+      <Td>{p.title}</Td>
+      <Td>{p.status}</Td>
+      <Td>{p.launchDate}</Td>
+      <Td>{p.location}</Td>
+      <Td>{p.students}</Td>
+      <Td>{p.instruments}</Td>
+      <Td>{p.totalInstruments}</Td>
+    </Tr>
+    <Tr>
+      <Td colSpan={7}>
+        <Collapse in={isOpen}>
+        <HStack align="start">
+          <Box flex="1" display="grid">
+            <Box fontsize="sm" fontWeight="semibold">Language</Box>
+            <Box>{p.primaryLanguage ?? "-"}</Box>
+          </Box>
+          <Box flex="1" display="grid">
+            <Box fontsize="sm" fontWeight="semibold">Regional Director(s)</Box>
+          <Box>
+            {Array.isArray(p.regionalDirectors) ? p.regionalDirectors.map((d)=> {
+              return <Box>{d}</Box>
+            }) : null}
+            </Box>
+          </Box>
+          <Box flex="1" display="grid">
+            <Box fontsize="sm" fontWeight="semibold">Program Director(s)</Box>
+            <Box>
+              {Array.isArray(p.programDirectors) ? p.programDirectors.map((d)=> {
+              return <Box>{d}</Box>
+            }) : null}
+            </Box>
+          </Box>
+          <Box flex="1" display="grid">
+            <Th>Curriculum Link(s)</Th>
+            <Box>
+              <Box fontsize="sm" fontWeight="semibold">Playlists</Box>
+              {Array.isArray(p.playlists) ? p.playlists.map((l)=> {
+              return <Box>{l.link}</Box>
+            }) : null}
+            </Box>
+          </Box>
+          <EditIcon/>
+          <Button size="xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(p);
+              }
+          }>Update</Button>
+        </HStack>
+        </Collapse>
+    </Td>
+    </Tr>
+  </>
+  )
+}
+
 // TODO(login): Replace role prop with useRoleContext() or AuthContext; replace userId prop with AuthContext (currentUser?.uid).
 function ProgramTable({ role = "admin", userId }) {
   const { backend } = useBackendContext();
   const [programs, setPrograms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState(null);
+
+  const openEditForm = (program) => {
+    setSelectedProgram(program);
+    setIsFormOpen(true);
+  }
+
 
   useEffect(() => {
     const route = getRouteByRole(role, userId);
@@ -78,7 +161,28 @@ function ProgramTable({ role = "admin", userId }) {
       try {
         const res = await backend.get(route);
         const rows = Array.isArray(res.data) ? res.data : [];
-        setPrograms(rows.map(mapRow));
+
+        // fetches the rds, pds, curriculum(playlists) per program
+        const programDetails = await Promise.all(
+          rows.map(async (row) => {
+            const [ playlists, programDirectors, regionalDirectors] = await Promise.all([
+              backend.get(`/program/${row.id}/playlists`),
+              backend.get(`/program/${row.id}/program-directors`).catch(() => ({ data: [] })),
+              backend.get(`/program/${row.id}/regional-directors`).catch(() => ({ data: [] })),
+
+            ]);
+            
+            return {
+              ...row,
+              playlists: playlists.data,
+              programDirectors: programDirectors?.data || [],
+              regionalDirectors: regionalDirectors?.data || [],
+            }; 
+          })
+        );
+
+        
+        setPrograms(programDetails.map(mapRow));
       } catch (err) {
         console.error("Error fetching data:", err);
       } finally {
@@ -96,8 +200,12 @@ function ProgramTable({ role = "admin", userId }) {
     <ProgramForm
       isOpen={isFormOpen}
       onOpen={() => setIsFormOpen(true)}
-      onClose={() => setIsFormOpen(false)}
+      onClose={() => {
+        setIsFormOpen(false);
+        setSelectedProgram(null);
+      }}
     />
+    program={selectedProgram}
     <TableContainer>
       <HStack mb={4} justifyContent="space-between" w="100%">
         <HStack spacing={4}>
@@ -154,7 +262,7 @@ function ProgramTable({ role = "admin", userId }) {
         </HStack>
       </HStack>
 
-      <Table variant="simple">
+      <Table variant="simple" aria-label="collapsible-table">
         <Thead>
           <Tr>
             <Th>Program</Th>
@@ -177,17 +285,12 @@ function ProgramTable({ role = "admin", userId }) {
             </Tr>
           ) : (
             programs.map((p) => (
-              <Tr key={p.id}>
-                <Td>{p.title}</Td>
-                <Td>{p.status}</Td>
-                <Td>{p.launchDate}</Td>
-                <Td>{p.location}</Td>
-                <Td>{p.students}</Td>
-                <Td>{p.instruments}</Td>
-                <Td>{p.totalInstruments}</Td>
-              </Tr>
+              <ExpandableRow key={p.id} p={p} onEdit={openEditForm}/>
             ))
           )}
+          <Tr>
+
+          </Tr>
         </Tbody>
       </Table>
     </TableContainer>

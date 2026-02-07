@@ -206,7 +206,7 @@ const CurriculumLinkForm = ( { setFormData } ) => {
 }
 
 
-export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: onCloseProp}) => {
+export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: onCloseProp, program}) => {
     const disclosure = useDisclosure();
     const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
     const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
@@ -228,6 +228,23 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         },
         media: []
     });
+
+    useEffect(() => {
+        if (program) {
+            setFormState({
+                status: program.status ?? null,
+                programName: program.title ?? '',
+                launchDate: program.launchDate ?? '',
+                region: program.location ?? '',
+                students: program.students ?? 0,
+                instruments: program.instruments ?? {},
+                language: program.primaryLanguage ?? null,
+                programDirectors: program.programDirectors ?? [],
+                curriculumLinks: {},
+                media: program.media ?? []
+            });
+        }
+    }, [program])
 
     function handleProgramStatusChange(status) {
         setFormState({ ...formState, status: status});
@@ -253,9 +270,36 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         setFormState({...formState, language: langChange})
     }
 
-    function handleSave() {
-        // TODO: implement save functionality later
-        onClose();
+    async function handleSave() {
+        try {
+            const data = {
+                id: formState.id,
+                title: formState.title ?? formState.name,
+                status: formState.status,
+                launchDate: formState.launchDate,
+                location: formState.countryName ?? "",
+                students: formState.students ?? 0,
+                instruments: formState.instruments ?? 0,
+                totalInstruments: formState.instruments ?? 0,
+                playlists: Object.entries(formState.curriculumLinks || {}).map(([link, display]) => ({
+                    link, display
+                })),
+                primaryLanguage: formState.primaryLanguage,
+                programDirectors: Array.isArray(formState.programDirectors)
+        ? formState.programDirectors.map((d) => d.userId ?? d) : [],
+                media: formState.media || []
+            };
+
+            if (program) {
+                await backend.put(`/program/${program.id}`, data);
+            } else {
+                await backend.post(`/program`, data);
+            }
+
+            onClose();
+        } catch (err) {
+            console.error("Error saving program:", err);
+        }
     }
     
 
@@ -305,9 +349,9 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                             <Button onClick={() => handleProgramStatusChange("Launched")} colorScheme={formState.status === "Launched" ? "teal" : undefined}>Launched</Button>
                         </HStack> 
                         <h3>Program Name</h3>
-                        <Input placeholder = "Enter Program Name" onChange={(e) => handleProgramNameChange(e.target.value)}/>
+                        <Input placeholder = "Enter Program Name" value={formState.programName || ''} onChange={(e) => handleProgramNameChange(e.target.value)}/>
                         <h3>Launch Date</h3>
-                        <Input type = "date" placeholder = "MM/DD/YYYY" onChange={(e) => handleProgramLaunchDateChange(e.target.value)} />
+                        <Input type = "date" placeholder = "MM/DD/YYYY" value={formState.launchDate || ''} onChange={(e) => handleProgramLaunchDateChange(e.target.value)} />
                         <h3>Region</h3>
                         <Select 
                             placeholder='Select region'
@@ -319,7 +363,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                             ))}
                         </Select>
                         <h3>Students</h3>
-                        <NumberInput min = {0} onChange={(e) => handleStudentNumberChange(Number(e))}>
+                        <NumberInput min = {0} value={formState.students} onChange={(e) => handleStudentNumberChange(Number(e))}>
                             <NumberInputField placeholder = "Enter # of Students"/>
                             <NumberInputStepper>
                                 <NumberIncrementStepper />

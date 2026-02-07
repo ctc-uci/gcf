@@ -92,6 +92,8 @@ programRouter.post("/", async (req, res) => {
 });
 
 programRouter.put("/:id", async (req, res) => {
+
+  console.log("here");
   try {
     const { id } = req.params;
     const {
@@ -165,5 +167,87 @@ programRouter.delete("/:id", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+
+// DELETE THIS COMMENT new routes I added
+
+
+//regional director names for programs
+programRouter.get("/:id/regional-directors", async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const result = await db.query(
+      `
+      SELECT 
+        u.first_name,
+        u.last_name
+      FROM program p
+      JOIN country c ON p.country = c.id
+      JOIN regional_director rd ON c.region_id = rd.region_id
+      JOIN gcf_user u ON rd.user_id = u.id
+      WHERE p.id = $1
+      `,
+      [id]
+    );
+
+    if (result.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    const names = result.map(row => `${row.first_name} ${row.last_name}`);
+
+    res.status(200).json(names);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+
+//playlists for a program
+programRouter.get("/:id/playlists", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const playlists = await db.query(
+      `SELECT * FROM playlist WHERE program_id = $1`,
+      [id]
+    );
+
+    res.status(200).json(keysToCamel(playlists));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+//program directors names for program
+programRouter.get("/:id/program-directors", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await db.query(
+      `
+      SELECT 
+        u.first_name,
+        u.last_name
+      FROM program_director pd
+      JOIN gcf_user u ON pd.user_id = u.id
+      WHERE pd.program_id = $1
+      `,
+      [id]
+    );
+
+    const names = result.map(row => `${row.first_name} ${row.last_name}`);
+
+    res.status(200).json(names);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+
 
 export { programRouter };
