@@ -20,8 +20,6 @@ import { useRef, useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext' 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext"
 import { Form, useParams } from "react-router-dom"
-import { createUserWithEmailAndPassword, updateEmail, updatePassword } from "firebase/auth";
-import { auth } from "@/utils/auth/firebase";
 
 export const AccountForm = () => {
     const { targetUserId } = useParams();
@@ -174,7 +172,17 @@ export const AccountForm = () => {
         }
         catch (error) {
             console.error("Error fetching user: ", error)
-            alert(`Error message: ${error}`)
+            
+            const errorMessage = error.response?.data?.error || error.message;
+        
+            if (errorMessage.includes('email-already-exists') || errorMessage.includes('email address is already in use')) {
+                alert("This email is already registered. Please use a different email address.");
+            } else {
+                alert(`Error: ${errorMessage}`);
+            }
+        }
+        finally {
+            setIsLoading(false);
         }
     }
 
@@ -183,38 +191,20 @@ export const AccountForm = () => {
             throw new Error("Please fill in all fields on the form.");
         }
 
-        console.log("🔥 Creating Firebase user...");
-        const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            formData.email,
-            formData.password
-        );
-
-        const firebaseUid = userCredential.user.uid;
-        console.log("✅ Firebase user created with UID:", firebaseUid);
-
-        console.log("💾 Creating database record...");
-        const gcfUserData = {
-            id: firebaseUid,
-            first_name: formData.first_name,
-            last_name: formData.last_name, 
+        const userData = {
+            email: formData.email,
+            password: formData.password,
+            firstName: formData.first_name,
+            lastName: formData.last_name,
             role: formData.role,
-            created_by: currentDbUser.id
-        };
-
-        await backend.post("/gcf-users", gcfUserData);
-        console.log("✅ Database record created");
-
-        if (formData.role === "Program Director" && formData.programs.length > 0) {
-            console.log("👔 Creating program director assignment...");
-            const programDirectorData = {
-                id: firebaseUid,
-                program_id: formData.programs[0].id
-            }
-
-            await backend.post("/program-directors", programDirectorData);
-            console.log("✅ Program director assignment created");
+            currentUserId: currentDbUser.id,
+            programId: formData.programs.length > 0 ? formData.programs[0].id : null
         }
+
+        await backend.post("/gcf-users/admin/create-user", userData);
+
+        const response = await backend.post('/gcf-users/admin/create-user', userData);
+        console.log("✅ User created successfully!", response.data);
     };
 
     console.log("Current Programs:", currentPrograms);
