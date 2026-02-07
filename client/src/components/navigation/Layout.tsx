@@ -1,17 +1,17 @@
-import { Outlet } from "react-router-dom";
 import { Box } from "@chakra-ui/react";
+
+import { Outlet } from "react-router-dom";
+
+import { NAVBAR_HEIGHT, SIDEBAR_WIDTH } from "./layoutConstants";
 import { Navbar } from "./Navbar";
 import { Sidebar } from "./Sidebar";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
-import { NAVBAR_HEIGHT, SIDEBAR_WIDTH } from "./layoutConstants";
 
 export const Layout = () => {
-  const { role } = useRoleContext();
   return (
     <>
       {/* TODO(login): Remove role prop; have Navbar/Sidebar read from useRoleContext (or AuthContext) instead. */}
-      <Navbar role={role || "program_director"} />
-      <Sidebar role={role || "admin"} />
+      <Navbar />
+      <Sidebar />
       <Box
         as="main"
         marginLeft={SIDEBAR_WIDTH}
@@ -24,4 +24,3 @@ export const Layout = () => {
     </>
   );
 };
-

@@ -26,8 +26,7 @@ export const RoleProvider = ({ children }: { children: ReactNode }) => {
       try {
         if (user) {
           const response = await backend.get(`/gcf-users/${user.uid}`);
-
-          setRole((response.data as User[]).at(0)?.role);
+          setRole((response.data as User)?.role);
         } else {
           setRole(undefined);
         }
@@ -44,7 +43,7 @@ export const RoleProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <RoleContext.Provider value={{ role, loading }}>
-      {loading ? <Spinner /> : children}
+      {children}
     </RoleContext.Provider>
   );
 };

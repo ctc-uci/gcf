@@ -1,13 +1,29 @@
-import { Flex, Box } from "@chakra-ui/react";
-import { useParams } from "react-router-dom";
-import ProgramTable from "./ProgramTable";
+import { Box, Flex } from "@chakra-ui/react";
+
+import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+
 import LessonVideos from "./lessonVideos";
+import ProgramTable from "./ProgramTable";
 import StatisticsSummary from "./StatisticsSummary";
+
+function keysToCamel(data) {
+  if (data === "Admin") {
+    return "admin";
+  } else if (data === "Regional Director") {
+    return "regionalDirector";
+  } else if (data === "Program Director") {
+    return "programDirector";
+  }
+}
 
 const Dashboard = () => {
   // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid); then stop passing userId to children.
-  const { userId } = useParams();
-  const role = "admin"; // TODO(login): Replace with useRoleContext() or AuthContext; then stop passing role to children.
+  // userId is not used if not passing to children
+
+  // TODO(login): Replace with useRoleContext() or AuthContext; then stop passing role to children.
+  const { role } = useRoleContext();
+  const camelRole = keysToCamel(role);
+
   return (
     <Flex
       direction="column"
@@ -16,11 +32,13 @@ const Dashboard = () => {
       as="main"
       p={10}
     >
-      <StatisticsSummary role={role} userId={userId} />
+      <StatisticsSummary />
 
       <Box as="section">
-        {(role === "admin" || role === "regionalDirector") && <ProgramTable role={role} userId={userId} />}
-        {role === "programDirector" && <LessonVideos userId={userId} />}
+        {(camelRole === "admin" || camelRole === "regionalDirector") && (
+          <ProgramTable />
+        )}
+        {camelRole === "programDirector" && <LessonVideos />}
       </Box>
     </Flex>
   );

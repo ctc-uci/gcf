@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
 
-import { Box, Center, Heading, HStack, IconButton, Spinner, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  Heading,
+  HStack,
+  IconButton,
+  Spinner,
+  VStack,
+} from "@chakra-ui/react";
 
-import { MdOutlineFileDownload } from "react-icons/md";
+import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import { MdOutlineFileDownload } from "react-icons/md";
 
 const StatBox = ({ label, number }) => {
   return (
@@ -78,6 +88,16 @@ function statsFromPdData(data) {
   ];
 }
 
+function keysToCamel(data) {
+  if (data === "Admin") {
+    return "admin";
+  } else if (data === "Regional Director") {
+    return "regionalDirector";
+  } else if (data === "Program Director") {
+    return "programDirector";
+  }
+}
+
 const STATS_FROM_RESPONSE = {
   admin: statsFromAdminData,
   regionalDirector: statsFromRdData,
@@ -85,17 +105,26 @@ const STATS_FROM_RESPONSE = {
 };
 
 // TODO(login): Replace role prop with useRoleContext() or AuthContext; replace userId prop with AuthContext (currentUser?.uid).
-const StatisticsSummary = ({ role = "admin", userId }) => {
+const StatisticsSummary = () => {
+  const { currentUser } = useAuthContext();
+  const userId = currentUser?.uid;
+  const { role: realRole, loading: roleLoading } = useRoleContext();
+  const role = keysToCamel(realRole);
   const { backend } = useBackendContext();
   const initialStats = STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.admin;
   const [stats, setStats] = useState(initialStats);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (roleLoading) return;
+
     const route = getRouteByRole(role, userId);
     const mapResponse = STATS_FROM_RESPONSE[role];
 
-    if (!route || !mapResponse) return;
+    if (!route || !mapResponse) {
+      setIsLoading(false);
+      return;
+    }
 
     setStats(STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.admin);
 
@@ -113,7 +142,7 @@ const StatisticsSummary = ({ role = "admin", userId }) => {
     };
 
     fetchData();
-  }, [role, userId, backend]);
+  }, [role, roleLoading, userId, backend]);
 
   return (
     <Box as="section">
@@ -133,7 +162,10 @@ const StatisticsSummary = ({ role = "admin", userId }) => {
 
         <HStack spacing={6}>
           {isLoading ? (
-            <Center py={8} minH="120px">
+            <Center
+              py={8}
+              minH="120px"
+            >
               <Spinner size="lg" />
             </Center>
           ) : (

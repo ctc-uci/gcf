@@ -2,17 +2,17 @@ import { useEffect, useState } from "react";
 
 import { Box, Center, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
 
+import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useParams } from "react-router-dom";
 
 import { AccountsTable } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
 
 export const Account = () => {
   // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid) when auth flow is finalized.
-  const { userId } = useParams();
+  const { currentUser } = useAuthContext();
+  const userId = currentUser?.uid;
 
-  const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 

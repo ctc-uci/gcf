@@ -1,24 +1,37 @@
 import { useEffect, useState } from "react";
+
 import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Input,
-  TableContainer,
-  IconButton,
-  HStack,
+  AddIcon,
+  DownloadIcon,
+  HamburgerIcon,
+  Search2Icon,
+} from "@chakra-ui/icons";
+import {
   Box,
   Button,
-  Divider,
-  Spinner,
   Center,
+  Divider,
+  HStack,
+  IconButton,
+  Input,
+  Spinner,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
 } from "@chakra-ui/react";
-import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon } from "@chakra-ui/icons";
-import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
+
+import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import {
+  HiOutlineAdjustmentsHorizontal,
+  HiOutlineSquares2X2,
+} from "react-icons/hi2";
+
 import { ProgramForm } from "./ProgramForm";
 
 const getRouteByRole = (role, userId) => {
@@ -60,18 +73,45 @@ const MAP_BY_ROLE = {
   regionalDirector: mapRdRow,
 };
 
+function keysToCamel(data) {
+  if (data === "Admin") {
+    return "admin";
+  } else if (data === "Regional Director") {
+    return "regionalDirector";
+  } else if (data === "Program Director") {
+    return "programDirector";
+  }
+}
+
 // TODO(login): Replace role prop with useRoleContext() or AuthContext; replace userId prop with AuthContext (currentUser?.uid).
-function ProgramTable({ role = "admin", userId }) {
+function ProgramTable() {
+  const { currentUser } = useAuthContext();
+  const userId = currentUser?.uid;
+  const { role: realRole, loading: roleLoading } = useRoleContext();
+  const role = keysToCamel(realRole);
+
+  console.log("Component rendering");
+  console.log("Real Role:", realRole);
+  console.log("Converted Role:", role);
+  console.log("Role Loading:", roleLoading);
+  console.log("User ID:", userId);
+  console.log("Route would be:", getRouteByRole(role, userId));
+
   const { backend } = useBackendContext();
   const [programs, setPrograms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   useEffect(() => {
+    if (roleLoading) return;
+
     const route = getRouteByRole(role, userId);
     const mapRow = MAP_BY_ROLE[role];
 
-    if (!route || !mapRow) return;
+    if (!route || !mapRow) {
+      setIsLoading(false);
+      return;
+    }
 
     const fetchData = async () => {
       setIsLoading(true);
@@ -87,110 +127,128 @@ function ProgramTable({ role = "admin", userId }) {
     };
 
     fetchData();
-  }, [role, userId, backend]);
+  }, [role, roleLoading, userId, backend]);
 
-  if (!getRouteByRole(role, userId)) return null;
+  if (!getRouteByRole(role, userId) && !roleLoading) {
+    return null;
+  }
 
   return (
     <>
-    <ProgramForm
-      isOpen={isFormOpen}
-      onOpen={() => setIsFormOpen(true)}
-      onClose={() => setIsFormOpen(false)}
-    />
-    <TableContainer>
-      <HStack mb={4} justifyContent="space-between" w="100%">
-        <HStack spacing={4}>
-          <Box fontSize="xl" fontWeight="semibold">All Programs</Box>
+      <ProgramForm
+        isOpen={isFormOpen}
+        onOpen={() => setIsFormOpen(true)}
+        onClose={() => setIsFormOpen(false)}
+      />
+      <TableContainer>
+        <HStack
+          mb={4}
+          justifyContent="space-between"
+          w="100%"
+        >
+          <HStack spacing={4}>
+            <Box
+              fontSize="xl"
+              fontWeight="semibold"
+            >
+              All Programs
+            </Box>
+            <HStack spacing={1}>
+              <IconButton
+                aria-label="search"
+                icon={<Search2Icon />}
+                size="sm"
+                variant="ghost"
+              />
+              <Input
+                w="120px"
+                size="xs"
+                placeholder="Type to search"
+                variant="unstyled"
+                borderBottom="1px solid"
+                borderColor="gray.300"
+                borderRadius="0"
+                px={1}
+              />
+              <IconButton
+                aria-label="filter"
+                icon={<HiOutlineAdjustmentsHorizontal />}
+                size="sm"
+                variant="ghost"
+              />
+            </HStack>
+          </HStack>
           <HStack spacing={1}>
             <IconButton
-              aria-label="search"
-              icon={<Search2Icon />}
+              aria-label="menu"
+              icon={<HamburgerIcon />}
               size="sm"
               variant="ghost"
             />
-            <Input
-              w="120px"
-              size="xs"
-              placeholder="Type to search"
-              variant="unstyled"
-              borderBottom="1px solid"
-              borderColor="gray.300"
-              borderRadius="0"
-              px={1}
+            <Divider
+              orientation="vertical"
+              h="20px"
             />
             <IconButton
-              aria-label="filter"
-              icon={<HiOutlineAdjustmentsHorizontal />}
+              aria-label="search"
+              icon={<HiOutlineSquares2X2 />}
               size="sm"
               variant="ghost"
             />
+            <IconButton
+              aria-label="download"
+              icon={<DownloadIcon />}
+              size="sm"
+              variant="ghost"
+              ml={2}
+            />
+            <Button
+              size="sm"
+              rightIcon={<AddIcon />}
+              onClick={() => setIsFormOpen(true)}
+            >
+              New
+            </Button>
           </HStack>
         </HStack>
-        <HStack spacing={1}>
-          <IconButton
-            aria-label="menu"
-            icon={<HamburgerIcon />}
-            size="sm"
-            variant="ghost"
-          />
-          <Divider orientation="vertical" h="20px" />
-          <IconButton
-            aria-label="search"
-            icon={<HiOutlineSquares2X2 />}
-            size="sm"
-            variant="ghost"
-          />
-          <IconButton
-            aria-label="download"
-            icon={<DownloadIcon />}
-            size="sm"
-            variant="ghost"
-            ml={2}
-          />
-          <Button size="sm" rightIcon={<AddIcon />} onClick={() => setIsFormOpen(true)}>
-            New
-          </Button>
-        </HStack>
-      </HStack>
 
-      <Table variant="simple">
-        <Thead>
-          <Tr>
-            <Th>Program</Th>
-            <Th>Status</Th>
-            <Th>Launch Date</Th>
-            <Th>Location</Th>
-            <Th>Students</Th>
-            <Th>Instruments</Th>
-            <Th>Total Instruments</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {isLoading ? (
+        <Table variant="simple">
+          <Thead>
             <Tr>
-              <Td colSpan={7}>
-                <Center py={8}>
-                  <Spinner size="lg" />
-                </Center>
-              </Td>
+              <Th>Program</Th>
+              <Th>Status</Th>
+              <Th>Launch Date</Th>
+              <Th>Location</Th>
+              <Th>Students</Th>
+              <Th>Instruments</Th>
+              <Th>Total Instruments</Th>
             </Tr>
-          ) : (
-            programs.map((p) => (
-              <Tr key={p.id}>
-                <Td>{p.title}</Td>
-                <Td>{p.status}</Td>
-                <Td>{p.launchDate}</Td>
-                <Td>{p.location}</Td>
-                <Td>{p.students}</Td>
-                <Td>{p.instruments}</Td>
-                <Td>{p.totalInstruments}</Td>
+          </Thead>
+          <Tbody>
+            {isLoading ? (
+              <Tr>
+                <Td colSpan={7}>
+                  <Center py={8}>
+                    <Spinner size="lg" />
+                  </Center>
+                </Td>
               </Tr>
-            ))
-          )}
-        </Tbody>
-      </Table>
-    </TableContainer>
+            ) : (
+              programs.map((p) => (
+                <Tr key={p.id}>
+                  <Td>{p.title}</Td>
+                  <Td>{p.status}</Td>
+                  <Td>{p.launchDate}</Td>
+                  <Td>{p.location}</Td>
+                  <Td>{p.students}</Td>
+                  <Td>{p.instruments}</Td>
+                  <Td>{p.totalInstruments}</Td>
+                </Tr>
+              ))
+            )}
+          </Tbody>
+        </Table>
+      </TableContainer>
     </>
   );
 }
