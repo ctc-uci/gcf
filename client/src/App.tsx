@@ -10,6 +10,7 @@ import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
 import { CookiesProvider } from "react-cookie";
 import { ProgramForm } from "@/components/dashboard/ProgramForm";
+import { AccountForm } from "@/components/accounts/AccountForm"
 import {
   Navigate,
   Route,
@@ -52,6 +53,14 @@ const App = () => {
                 <Route
                   path="/dashboard/:userid"
                   element={<DashboardPage />}
+                />
+                <Route 
+                  path= "/account-form-test" 
+                  element = {<AccountForm />}
+                />
+                <Route 
+                  path= "/account-form-test/:targetUserId" 
+                  element = {<AccountForm />}
                 />
                 <Route
                   path="/admin"
