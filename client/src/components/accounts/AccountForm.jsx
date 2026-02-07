@@ -134,6 +134,7 @@ export const AccountForm = () => {
         fetchUserPrograms();
     },  [backend, targetUserId, targetUser]);
 
+
     if (!currentUser) return <div>Please sign in</div>;
     
     if (!currentDbUser) {
@@ -175,7 +176,46 @@ export const AccountForm = () => {
             console.error("Error fetching user: ", error)
             alert(`Error message: ${error}`)
         }
-    }   
+    }
+
+    const handleCreateUser = async () => {
+        if (!formData.first_name || !formData.last_name || !formData.role || !formData.email || !formData.password) {
+            throw new Error("Please fill in all fields on the form.");
+        }
+
+        console.log("🔥 Creating Firebase user...");
+        const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            formData.email,
+            formData.password
+        );
+
+        const firebaseUid = userCredential.user.uid;
+        console.log("✅ Firebase user created with UID:", firebaseUid);
+
+        console.log("💾 Creating database record...");
+        const gcfUserData = {
+            id: firebaseUid,
+            first_name: formData.first_name,
+            last_name: formData.last_name, 
+            role: formData.role,
+            created_by: currentDbUser.id
+        };
+
+        await backend.post("/gcf-users", gcfUserData);
+        console.log("✅ Database record created");
+
+        if (formData.role === "Program Director" && formData.programs.length > 0) {
+            console.log("👔 Creating program director assignment...");
+            const programDirectorData = {
+                id: firebaseUid,
+                program_id: formData.programs[0].id
+            }
+
+            await backend.post("/program-directors", programDirectorData);
+            console.log("✅ Program director assignment created");
+        }
+    };
 
     console.log("Current Programs:", currentPrograms);
     console.log("Selected Programs:", formData.programs);
