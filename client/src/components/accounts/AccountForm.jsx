@@ -31,7 +31,7 @@ export const AccountForm = () => {
     const [currentPrograms, setCurrentPrograms] = useState(null);
     const btnRef = useRef();
 
-    const userId = currentUser.uid;
+    const userId = currentUser?.uid;
 
     const [ formData, setFormData ] = useState({
         first_name: '',
@@ -204,9 +204,30 @@ export const AccountForm = () => {
         console.log("✅ User created successfully!", response.data);
     };
 
-    console.log("Current Programs:", currentPrograms);
-    console.log("Selected Programs:", formData.programs);
-    console.log("current role: ", currentDbUser.role)
+    const handleUpdateUser = async () => {
+        if (!formData.first_name || !formData.last_name || !formData.role || !formData.email || !formData.password) {
+            throw new Error("Please fill in all fields on the form.");
+        }
+        console.log("updatign");
+        const userData = {
+            email: formData.email,
+            password: formData.password,
+            firstName: formData.first_name,
+            lastName: formData.last_name,
+            role: formData.role,
+            currentUserId: currentDbUser.id,
+            targetId: targetUserId,
+            programId: formData.programs.length > 0 ? formData.programs[0].id : null
+        }
+        console.log("here")
+        const response = await backend.put('/gcf-users/admin/update-user', userData);
+        console.log("✅ User updated successfully!", response.data);
+
+    }
+
+    //console.log("Current Programs:", currentPrograms);
+    //console.log("Selected Programs:", formData.programs);
+    //console.log("current role: ", currentDbUser.role)
 
     return (
         <> 
