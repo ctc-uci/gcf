@@ -234,13 +234,20 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
             setFormState({
                 status: program.status ?? null,
                 programName: program.title ?? '',
-                launchDate: program.launchDate ?? '',
+                launchDate: program.launchDate ? program.launchDate.split('T')[0] : '', // Convert to yyyy-MM-dd
                 region: program.location ?? '',
                 students: program.students ?? 0,
                 instruments: {},
                 language: program.primaryLanguage ?? null,
                 programDirectors: program.programDirectors ?? [],
-                curriculumLinks: {},
+                curriculumLinks: Array.isArray(program.playlists)
+                    ? program.playlists.reduce((acc, playlist) => {
+                        if (playlist.link) {
+                            acc[playlist.link] = playlist.name || 'Playlist';
+                        }
+                        return acc;
+                        }, {})
+                    : {},
                 media: program.media ?? []
             });
         }
