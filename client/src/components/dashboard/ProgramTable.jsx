@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Table,
+  Tag,
   Thead,
   Tbody,
   Tr,
@@ -10,6 +11,7 @@ import {
   TableContainer,
   IconButton,
   HStack,
+  Badge,
   Box,
   Button,
   Divider,
@@ -17,6 +19,8 @@ import {
   Center,
   Collapse,
   useDisclosure,
+  VStack,
+  Link
 } from "@chakra-ui/react";
 
 import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon, EditIcon } from "@chakra-ui/icons";
@@ -90,44 +94,62 @@ function ExpandableRow({ p, onEdit }) {
     <Tr>
       <Td colSpan={7}>
         <Collapse in={isOpen}>
-        <HStack align="start">
-          <Box flex="1" display="grid">
-            <Box fontsize="sm" fontWeight="semibold">Language</Box>
-            <Box>{p.primaryLanguage ?? "-"}</Box>
-          </Box>
-          <Box flex="1" display="grid">
-            <Box fontsize="sm" fontWeight="semibold">Regional Director(s)</Box>
-          <Box>
-            {Array.isArray(p.regionalDirectors) ? p.regionalDirectors.map((d)=> {
-              return <Box key = {d.userId}>{d.firstName} {d.lastName}</Box>
-            }) : null}
+        <Box position="relative">
+          <HStack align="start">
+            <Box flex="1" display="grid">
+              <Box fontsize="sm" fontWeight="semibold" pb="2">Language:</Box>
+              <Box>{p.primaryLanguage ?? "-"}</Box>
             </Box>
-          </Box>
-          <Box flex="1" display="grid">
-            <Box fontsize="sm" fontWeight="semibold">Program Director(s)</Box>
+            <Box flex="1" display="grid">
+              <Box fontsize="sm" fontWeight="semibold" pb="2">Regional Director(s)</Box>
             <Box>
-              {Array.isArray(p.programDirectors) ? p.programDirectors.map((d)=> {
-              return <Box key = {d.userId}>{d.firstName} {d.lastName}</Box>
-            }) : null}
+              <VStack align="start" spacing={2}>
+                {Array.isArray(p.regionalDirectors) ? p.regionalDirectors.map((d)=> {
+                  return <Box key = {d.userId}
+                      bg="gray.200"
+                      px={3}
+                      py={1}
+                      borderRadius="full">{d.firstName} {d.lastName}</Box>
+                }) : null}
+              </VStack>
+              </Box>
             </Box>
-          </Box>
-          <Box flex="1" display="grid">
-            <Th>Curriculum Link(s)</Th>
-            <Box>
-              <Box fontsize="sm" fontWeight="semibold">Playlists</Box>
-              {Array.isArray(p.playlists) ? p.playlists.map((l)=> {
-              return <Box>{l.link}</Box>
-            }) : null}
+            <Box flex="1" display="grid">
+              <Box fontsize="sm" fontWeight="semibold" pb="2">Program Director(s)</Box>
+              <Box>
+                <VStack align="start" spacing={2}>
+                  {Array.isArray(p.programDirectors) ? p.programDirectors.map((d)=> {
+                  return <Box key = {d.userId}
+                      bg="gray.200"
+                      px={3}
+                      py={1}
+                      borderRadius="full">{d.firstName} {d.lastName}</Box>
+                }) : null}
+              </VStack>
+              </Box>
+            </Box> 
+            <Box flex="1" display="grid">
+              <Box fontsize="sm" fontWeight="semibold" pb="2">Curriculum Link(s)</Box>
+              <Box>
+                {Array.isArray(p.playlists) ? p.playlists.map((l)=> {
+                return <Box><Link href={l.link} color="blue">Instrument | {p.primaryLanguage ?? "-"}</Link></Box>
+              }) : null}
+              </Box>
             </Box>
-          </Box>
-          <EditIcon/>
+            </HStack>
           <Button size="xs"
+              position="absolute"
+              bottom="8px"
+              right="8px"
+              border="1px solid"
+              bg="white"
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit?.(p);
-              }
-          }>Update</Button>
-        </HStack>
+              }}
+              leftIcon={<EditIcon />}
+          >Update</Button>
+        </Box>
         </Collapse>
     </Td>
     </Tr>
