@@ -129,12 +129,7 @@ export const Account = () => {
             color="gray.500"
           />
         </Center>
-      ) //: 
-      // users.length === 0 ? (
-      //   <Center py={10}>
-      //     <Text color="gray.500">No accounts found.</Text>
-      //   </Center>
-      // ) 
+      ) 
       : (
         <AccountsTable data={users} setData={setUsers} originalData={originalUsers} searchQuery={searchQuery}/>
       )}

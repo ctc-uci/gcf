@@ -2,6 +2,7 @@ import {
   Badge,
   Box,
   Button,
+  Center,
   HStack,
   Icon,
   Table,
@@ -22,6 +23,7 @@ import { useTableSort } from "../../contexts/hooks/TableSort";
 export const AccountsTable = ({ data, setData, originalData, searchQuery }) => {
   const hoverBg = useColorModeValue("gray.50", "gray.700");
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
+  console.log("accounts table data: ", data);
 
   useEffect(() => {
     function filterUpdates(search) {
@@ -104,6 +106,14 @@ export const AccountsTable = ({ data, setData, originalData, searchQuery }) => {
           </Tr>
         </Thead>
         <Tbody>
+          { 
+            !data || data.length === 0 && (
+              <Center py={10}>
+               <Text color="gray.500">No accounts found.</Text>
+              </Center>
+            )
+          }
+
           {data.map((user) => (
             <Tr
               key={user.id}
