@@ -16,9 +16,31 @@ import {
 } from "@chakra-ui/react";
 
 import { FiEdit2, FiEyeOff } from "react-icons/fi";
+import { useEffect } from "react";
+import { useTableSort } from "../../contexts/hooks/TableSort";
 
-export const AccountsTable = ({ data }) => {
+export const AccountsTable = ({ data, setData, originalData, searchQuery }) => {
   const hoverBg = useColorModeValue("gray.50", "gray.700");
+  const { sortOrder, handleSort } = useTableSort(originalData, setData);
+
+  useEffect(() => {
+    function filterUpdates(search) {
+      if (search === '') {
+        setData(originalData);
+        return;
+      }
+      // filter by search query
+      const filtered = originalData.filter(update => 
+        // if no search then show everything
+        update.email.toLowerCase().includes(search.toLowerCase()) ||
+        update.firstName.toLowerCase().includes(search.toLowerCase()) || 
+        update.programs.some(program => program.toLowerCase().includes(search.toLowerCase()))
+      );
+      setData(filtered);
+    }
+
+  filterUpdates(searchQuery);
+  }, [searchQuery, originalData]);
 
   return (
     <TableContainer>
@@ -29,6 +51,8 @@ export const AccountsTable = ({ data }) => {
         <Thead>
           <Tr>
             <Th
+              onClick={() => handleSort("firstName")}
+              cursor="pointer"
               color="black"
               fontSize="sm"
               textTransform="none"
@@ -37,6 +61,8 @@ export const AccountsTable = ({ data }) => {
               Name
             </Th>
             <Th
+              onClick={() => handleSort("email")}
+              cursor="pointer"
               color="black"
               fontSize="sm"
               textTransform="none"
@@ -45,6 +71,8 @@ export const AccountsTable = ({ data }) => {
               Email
             </Th>
             <Th
+              onClick={() => handleSort("password")}
+              cursor="pointer"
               color="black"
               fontSize="sm"
               textTransform="none"
@@ -53,6 +81,8 @@ export const AccountsTable = ({ data }) => {
               Password
             </Th>
             <Th
+              onClick={() => handleSort("role")}
+              cursor="pointer"
               color="black"
               fontSize="sm"
               textTransform="none"
@@ -61,6 +91,8 @@ export const AccountsTable = ({ data }) => {
               Type
             </Th>
             <Th
+              onClick={() => handleSort("programs")}
+              cursor="pointer"
               color="black"
               fontSize="sm"
               textTransform="none"

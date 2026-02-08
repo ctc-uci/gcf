@@ -16,10 +16,12 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
+import { useTableSort } from "../../contexts/hooks/TableSort";
 
-export const ProgramUpdatesTable = ({ data, isLoading }) => {
+export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [unorderedUpdates, setUnorderedUpdates] = useState([]);
+  const { sortOrder, handleSort } = useTableSort(originalData, setData);
   
   const handleSearch = event => {
       setSearchQuery(event.target.value);
@@ -31,6 +33,10 @@ export const ProgramUpdatesTable = ({ data, isLoading }) => {
   
     useEffect(() => {
        function filterUpdates(search) {
+        if (search === '') {
+          setData(originalData);
+          return;
+        } 
          // filter by search query
          console.log(unorderedUpdates);
          const filtered = unorderedUpdates.filter(update => 
@@ -39,16 +45,11 @@ export const ProgramUpdatesTable = ({ data, isLoading }) => {
            update.note.toLowerCase().includes(search.toLowerCase()) ||
            update.name.toLowerCase().includes(search.toLowerCase()) ||
            update.firstName.toLowerCase().includes(search.toLowerCase()) ||
-           update.lastName.includes(search.toLowerCase()) ||
            update.status.includes(search.toLowerCase())
          );
-         if (search === '') {
-           //setUpdates(unorderedUpdates);
-           data = unorderedUpdates;
-         } else {
-           //setUpdates(filtered);
-           data = filtered;
-         }
+         
+        setData(filtered);
+        
        }
    
      filterUpdates(searchQuery);
@@ -87,12 +88,13 @@ export const ProgramUpdatesTable = ({ data, isLoading }) => {
         >
           <Table variant="simple">
             <Thead>
+              {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
               <Tr>
-                <Th>Time</Th>
-                <Th>Notes</Th>
-                <Th>Program</Th>
-                <Th>Author</Th>
-                <Th>Status</Th>
+                <Th onClick={() => handleSort('updateDate')} cursor="pointer">Time</Th>
+                <Th onClick={() => handleSort('note')} cursor="pointer">Notes</Th>
+                <Th onClick={() => handleSort('name')} cursor="pointer">Program</Th>
+                <Th onClick={() => handleSort('firstName')} cursor="pointer">Author</Th>
+                <Th onClick={() => handleSort('status')} cursor="pointer">Status</Th>
               </Tr>
             </Thead>
             <Tbody>
