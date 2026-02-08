@@ -11,8 +11,6 @@ import { ProgramAccountUpdatesTable } from "./ProgramAccountUpdatesTable";
 import { ProgramUpdatesTable } from "./ProgramUpdatesTable";
 
 export const UpdatesPage = () => {
-  // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid).
-  // TODO(login): Replace with useRoleContext() or AuthContext instead of fetching role/${userId}.
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { role } = useRoleContext();

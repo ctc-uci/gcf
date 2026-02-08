@@ -17,10 +17,6 @@ function keysToCamel(data) {
 }
 
 const Dashboard = () => {
-  // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid); then stop passing userId to children.
-  // userId is not used if not passing to children
-
-  // TODO(login): Replace with useRoleContext() or AuthContext; then stop passing role to children.
   const { role } = useRoleContext();
   const camelRole = keysToCamel(role);
 

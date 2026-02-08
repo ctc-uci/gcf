@@ -16,7 +16,6 @@ import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { MediaGrid } from "./MediaGrid";
 
 export const Media = () => {
-  // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid) when auth flow is finalized.
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { backend } = useBackendContext();

@@ -83,19 +83,11 @@ function keysToCamel(data) {
   }
 }
 
-// TODO(login): Replace role prop with useRoleContext() or AuthContext; replace userId prop with AuthContext (currentUser?.uid).
 function ProgramTable() {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { role: realRole, loading: roleLoading } = useRoleContext();
   const role = keysToCamel(realRole);
-
-  console.log("Component rendering");
-  console.log("Real Role:", realRole);
-  console.log("Converted Role:", role);
-  console.log("Role Loading:", roleLoading);
-  console.log("User ID:", userId);
-  console.log("Route would be:", getRouteByRole(role, userId));
 
   const { backend } = useBackendContext();
   const [programs, setPrograms] = useState([]);

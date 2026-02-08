@@ -104,7 +104,6 @@ const STATS_FROM_RESPONSE = {
   programDirector: statsFromPdData,
 };
 
-// TODO(login): Replace role prop with useRoleContext() or AuthContext; replace userId prop with AuthContext (currentUser?.uid).
 const StatisticsSummary = () => {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;

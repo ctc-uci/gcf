@@ -22,7 +22,6 @@ function keysToCamel(data) {
   }
 }
 
-// TODO(login): Replace role prop with useRoleContext() or AuthContext; remove NavbarProps.role.
 export const Navbar = () => {
   const { role } = useRoleContext();
   const camelRole = keysToCamel(role);

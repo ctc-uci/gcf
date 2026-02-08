@@ -47,7 +47,6 @@ const App = () => {
                     }
                   />
 
-                  {/* TODO(login): Change /account & /media route to protected when auth flow finalized; consider dropping :userId and using AuthContext (currentUser.uid) for current user. */}
                   <Route
                     path={"/account"}
                     element={
@@ -59,7 +58,7 @@ const App = () => {
                   />
 
                   <Route
-                    path={"/media"}
+                    path={"media"}
                     element={
                       <ProtectedRoute
                         element={<Media />}
@@ -69,18 +68,17 @@ const App = () => {
                   />
 
                   <Route
-                    path={"/dashboard"}
+                    path={"dashboard"}
                     element={<Dashboard />}
                   />
 
                   <Route
-                    path="/create-program-form-test"
+                    path="create-program-form-test"
                     element={<ProgramForm />}
                   />
 
-                  {/* TODO(login): Consider route without :userId; use AuthContext (currentUser.uid) in UpdatesPage. */}
                   <Route
-                    path={"/updates"}
+                    path={"updates"}
                     element={<UpdatesPage />}
                   />
                 </Route>

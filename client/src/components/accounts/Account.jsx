@@ -9,7 +9,6 @@ import { AccountsTable } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
 
 export const Account = () => {
-  // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid) when auth flow is finalized.
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
 
@@ -31,8 +30,6 @@ export const Account = () => {
       try {
         const currentUserResponse = await backend.get(`/gcf-users/${userId}`);
         const userData = currentUserResponse.data;
-
-        setCurrentUser(userData);
 
         if (!userData) {
           console.error("Current user data is null");

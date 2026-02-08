@@ -125,6 +125,7 @@ export const Login = () => {
         h="100px"
         left="0"
         top="-6"
+        draggable="false"
       />
 
       <Grid
@@ -153,6 +154,7 @@ export const Login = () => {
               alt="GCF Globe"
               opacity="30%"
               h="95%"
+              draggable="false"
             />
           </Box>
         </GridItem>
@@ -241,7 +243,6 @@ export const Login = () => {
                     <Button
                       type="submit"
                       size={"lg"}
-                      // sx={{ width: "100%" }}
                       isDisabled={Object.keys(errors).length > 0}
                       bg="black"
                       color="white"
@@ -255,16 +256,6 @@ export const Login = () => {
               </form>
             </Center>
           </Box>
-          {/* 
-          <Button
-            leftIcon={<FaGoogle />}
-            variant={"solid"}
-            size={"lg"}
-            onClick={handleGoogleLogin}
-            sx={{ width: "100%" }}
-          >
-            Login with Google
-          </Button> */}
         </GridItem>
       </Grid>
     </Center>

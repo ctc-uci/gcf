@@ -5,7 +5,6 @@ import { AspectRatio, Box, Heading, SimpleGrid, Text } from "@chakra-ui/react";
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
-// TODO(login): Replace userId prop with AuthContext (currentUser?.uid), or have parent pass it from AuthContext.
 function LessonVideos() {
   const { currentUser } = useAuthContext();
   const { userId } = currentUser.uid;

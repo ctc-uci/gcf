@@ -1,6 +1,5 @@
 import { Box, Button, Flex, Icon, Link, VStack } from "@chakra-ui/react";
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useRoleContext } from "@/contexts/hooks/useRoleContext";
 import { FaGuitar } from "react-icons/fa";
 import { HiOutlineUser } from "react-icons/hi";
@@ -9,11 +8,8 @@ import { Link as RouterLink, useLocation } from "react-router-dom";
 
 import { NAVBAR_HEIGHT, SIDEBAR_WIDTH } from "./layoutConstants";
 
-// TODO(login): Replace role prop with useRoleContext() or AuthContext; remove SidebarProps.role.
 export const Sidebar = () => {
   const { role } = useRoleContext();
-  const { currentUser } = useAuthContext();
-  const userId = currentUser?.uid;
   const location = useLocation();
   interface NavItem {
     name: string;
@@ -21,7 +17,6 @@ export const Sidebar = () => {
     path: string;
   }
   let navItems: NavItem[] = [];
-  // TODO(login): update the paths here to use AuthContext (currentUser?.uid) instead of hardcoded 1.
   if (role === "Admin" || role === "Regional Director") {
     navItems = [
       {

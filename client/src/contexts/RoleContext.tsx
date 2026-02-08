@@ -43,7 +43,7 @@ export const RoleProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <RoleContext.Provider value={{ role, loading }}>
-      {children}
+      {loading ? <Spinner /> : children}
     </RoleContext.Provider>
   );
 };

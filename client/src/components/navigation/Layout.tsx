@@ -9,7 +9,6 @@ import { Sidebar } from "./Sidebar";
 export const Layout = () => {
   return (
     <>
-      {/* TODO(login): Remove role prop; have Navbar/Sidebar read from useRoleContext (or AuthContext) instead. */}
       <Navbar />
       <Sidebar />
       <Box
