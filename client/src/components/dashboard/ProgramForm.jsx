@@ -277,7 +277,8 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         setFormState({...formState, language: langChange})
     }
     async function handleSave() {
-        try {
+        //[TODO for me and angelina] : figure out the country, partnerorg, created_by, and program directors for form
+        try { 
             const data = {
                 name: formState.programName,
                 title: formState.programName,
