@@ -195,9 +195,13 @@ programRouter.get("/:id/regional-directors", async (req, res) => {
       return res.status(200).json([]);
     }
 
-    const names = result.map(row => `${row.first_name} ${row.last_name}`);
+    const regional_directors = result.map(row => ({
+      userId: row.user_id,
+      firstName: row.first_name,
+      lastName: row.last_name
+    }));
 
-    res.status(200).json(names);
+    res.status(200).json(regional_directors);
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
@@ -239,9 +243,13 @@ programRouter.get("/:id/program-directors", async (req, res) => {
       [id]
     );
 
-    const names = result.map(row => `${row.first_name} ${row.last_name}`);
+    const directors = result.map(row => ({
+      userId: row.user_id,
+      firstName: row.first_name,
+      lastName: row.last_name
+    }));
 
-    res.status(200).json(names);
+    res.status(200).json(directors);
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");

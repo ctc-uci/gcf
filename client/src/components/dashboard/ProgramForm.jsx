@@ -237,7 +237,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 launchDate: program.launchDate ?? '',
                 region: program.location ?? '',
                 students: program.students ?? 0,
-                instruments: program.instruments ?? {},
+                instruments: {},
                 language: program.primaryLanguage ?? null,
                 programDirectors: program.programDirectors ?? [],
                 curriculumLinks: {},

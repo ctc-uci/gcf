@@ -76,7 +76,6 @@ const MAP_BY_ROLE = {
 
 function ExpandableRow({ p, onEdit }) {
   const { isOpen, onToggle } = useDisclosure();
-  console.log(p);
   return (
 <>
     <Tr onClick={onToggle} cursor="pointer">
@@ -100,7 +99,7 @@ function ExpandableRow({ p, onEdit }) {
             <Box fontsize="sm" fontWeight="semibold">Regional Director(s)</Box>
           <Box>
             {Array.isArray(p.regionalDirectors) ? p.regionalDirectors.map((d)=> {
-              return <Box>{d}</Box>
+              return <Box key = {d.userId}>{d.firstName} {d.lastName}</Box>
             }) : null}
             </Box>
           </Box>
@@ -108,7 +107,7 @@ function ExpandableRow({ p, onEdit }) {
             <Box fontsize="sm" fontWeight="semibold">Program Director(s)</Box>
             <Box>
               {Array.isArray(p.programDirectors) ? p.programDirectors.map((d)=> {
-              return <Box>{d}</Box>
+              return <Box key = {d.userId}>{d.firstName} {d.lastName}</Box>
             }) : null}
             </Box>
           </Box>
@@ -204,8 +203,9 @@ function ProgramTable({ role = "admin", userId }) {
         setIsFormOpen(false);
         setSelectedProgram(null);
       }}
+      program={selectedProgram}
+
     />
-    program={selectedProgram}
     <TableContainer>
       <HStack mb={4} justifyContent="space-between" w="100%">
         <HStack spacing={4}>
@@ -256,7 +256,12 @@ function ProgramTable({ role = "admin", userId }) {
             variant="ghost"
             ml={2}
           />
-          <Button size="sm" rightIcon={<AddIcon />} onClick={() => setIsFormOpen(true)}>
+          <Button size="sm" rightIcon={<AddIcon />} onClick={() => {
+            setSelectedProgram(null);
+            setIsFormOpen(true);
+
+          }}>
+          
             New
           </Button>
         </HStack>
