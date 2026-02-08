@@ -22,6 +22,20 @@ gcfUserRouter.post("/", async (req, res) => {
   }
 });
 
+gcfUserRouter.get("/admin/get-user/:targetUserId", async (req, res) => {
+  try {
+    const {targetUserId} = req.params;
+    const user = await admin.auth().getUser(targetUserId);
+    res.status(200).json(
+      {
+        email: user.email
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 gcfUserRouter.post("/admin/create-user", async (req, res) => {
   try {
@@ -54,6 +68,76 @@ gcfUserRouter.post("/admin/create-user", async (req, res) => {
       uid: firebaseUid, 
       user: keysToCamel(newGcfUser[0]),
       message: 'User created successfully' 
+    });
+
+  } catch (err) {
+    console.error("Error creating user:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+gcfUserRouter.put("/admin/update-user", async (req, res) => {
+  try {
+    const { email, password, firstName, lastName, role, currentUserId, targetId, programId } = req.body;
+
+    const userRecord = await admin.auth().updateUser(targetId, {
+      email: email,
+      password: password,
+      displayName: `${firstName} ${lastName}`
+    });
+
+    const oldRoleResponse = await db.query(
+      `SELECT role FROM gcf_user WHERE id = $1`,
+      [targetId]
+    );
+    
+    const oldRole = oldRoleResponse[0].role;
+    
+    const updatedGcfUser = await db.query(
+      `UPDATE gcf_user SET 
+        role =  COALESCE($1, role),
+        first_name = COALESCE($2, first_name),
+        last_name = COALESCE($3, last_name)
+        WHERE id = $4
+        RETURNING *;`,
+        [role, firstName, lastName, targetId]
+    );
+
+    
+    if (role != oldRole) {
+      if (oldRole == 'Program Director') {
+        const deletedResponse = await db.query(
+          `DELETE FROM program_director WHERE user_id = $1 RETURNING *`,
+          [targetId]
+        )
+      }
+      if (oldRole == 'Regional Director') {
+        const deletedResponse = await db.query(
+          `DELETE FROM regional_director WHERE user_id = $1 RETURNING *`,
+          [targetId]
+        )
+      }
+      
+      if (role == 'Program Director') {
+        const insertResponse = await db.query(
+          `INSERT INTO program_director (user_id, program_id) 
+          VALUES ($1, $2)`,
+          [targetId, programId]
+        )
+      }
+      if (role == 'Program Director') {
+        const insertResponse = await db.query(
+          `INSERT INTO program_director (user_id, program_id) 
+          VALUES ($1, $2)`,
+          [targetId, programId]
+        )
+      }
+      
+    }
+    res.status(201).json({ 
+      uid: targetId, 
+      user: keysToCamel(updatedGcfUser[0]),
+      message: 'User updated successfully' 
     });
 
   } catch (err) {
@@ -133,7 +217,7 @@ gcfUserRouter.put("/:id", async (req, res) => {
       `UPDATE gcf_user SET
         role = COALESCE($1, role),
         first_name = COALESCE($2, first_name),
-        last_name = COALESCE($3, last_name),     
+        last_name = COALESCE($3, last_name)    
         WHERE id = $4
         RETURNING *;`,
       [role, first_name, last_name, id]
@@ -168,9 +252,5 @@ gcfUserRouter.delete("/:id", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
-
-
-
 
 export { gcfUserRouter };

@@ -65,8 +65,6 @@ export const AccountForm = () => {
             try {
                 const targetUserResponse = await backend.get(`/gcf-users/${targetUserId}`);
                 const targetUserData = targetUserResponse.data;
-                console.log('test target')
-                console.log(targetUserData);
                 setTargetUser(targetUserData);
             }   
             catch (error){
@@ -82,11 +80,29 @@ export const AccountForm = () => {
             first_name: targetUser.firstName ?? "",
             last_name: targetUser.lastName ?? "",
             role: targetUser.role ?? "",
-            email: '',
             password: '',
             programs: []
         });
     }, [targetUser]);
+
+    useEffect(() => {
+        if (!targetUserId) return;
+        const fetchEmail = async () => {
+            try {
+                const targetUserResponse = await backend.get(`/gcf-users/admin/get-user/${targetUserId}`);
+                const { email } = targetUserResponse.data;
+                console.log(email);
+
+                setFormData(prev => ({
+                    ...prev,
+                    email: email ?? "",
+                }));
+            } catch (error) {
+                console.error("Error loading target user email", error);
+            }
+        }
+        fetchEmail();
+    }, [backend, targetUserId]);
 
     useEffect(() => {
         async function fetchPrograms() {
@@ -205,13 +221,11 @@ export const AccountForm = () => {
     };
 
     const handleUpdateUser = async () => {
-        if (!formData.first_name || !formData.last_name || !formData.role || !formData.email || !formData.password) {
+        if (!formData.first_name || !formData.last_name || !formData.role || !formData.email) {
             throw new Error("Please fill in all fields on the form.");
         }
-        console.log("updatign");
         const userData = {
             email: formData.email,
-            password: formData.password,
             firstName: formData.first_name,
             lastName: formData.last_name,
             role: formData.role,
@@ -219,7 +233,10 @@ export const AccountForm = () => {
             targetId: targetUserId,
             programId: formData.programs.length > 0 ? formData.programs[0].id : null
         }
-        console.log("here")
+
+        if (formData.password && formData.password.trim().length > 0) {
+            userData.password = formData.password;
+        }
         const response = await backend.put('/gcf-users/admin/update-user', userData);
         console.log("✅ User updated successfully!", response.data);
 
