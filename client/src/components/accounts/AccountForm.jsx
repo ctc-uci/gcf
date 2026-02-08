@@ -200,9 +200,6 @@ export const AccountForm = () => {
             currentUserId: currentDbUser.id,
             programId: formData.programs.length > 0 ? formData.programs[0].id : null
         }
-
-        await backend.post("/gcf-users/admin/create-user", userData);
-
         const response = await backend.post('/gcf-users/admin/create-user', userData);
         console.log("✅ User created successfully!", response.data);
     };
