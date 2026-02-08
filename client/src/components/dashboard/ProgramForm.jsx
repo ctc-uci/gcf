@@ -276,33 +276,27 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     function handleLanguageChange(langChange) {
         setFormState({...formState, language: langChange})
     }
-
     async function handleSave() {
         try {
             const data = {
-                id: formState.id,
-                title: formState.title ?? formState.name,
+                name: formState.programName,
+                title: formState.programName,
                 status: formState.status,
                 launchDate: formState.launchDate,
-                location: formState.countryName ?? "",
+                country: 1, //[HARDCODED] The form currently only takes in region, but how do we get the specific country for it?
                 students: formState.students ?? 0,
-                instruments: formState.instruments ?? 0,
-                totalInstruments: formState.instruments ?? 0,
-                playlists: Object.entries(formState.curriculumLinks || {}).map(([link, display]) => ({
-                    link, display
-                })),
-                primaryLanguage: formState.primaryLanguage,
-                programDirectors: Array.isArray(formState.programDirectors)
-        ? formState.programDirectors.map((d) => d.userId ?? d) : [],
-                media: formState.media || []
+                primaryLanguage: formState.language,
+                partnerOrg: 1, // [HARDCODED]
+                createdBy: 1, // authcontext
+                description: '', // need to add this field to the form
             };
-
+    
             if (program) {
                 await backend.put(`/program/${program.id}`, data);
             } else {
                 await backend.post(`/program`, data);
             }
-
+    
             onClose();
         } catch (err) {
             console.error("Error saving program:", err);
@@ -352,8 +346,9 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                         </DrawerHeader>
                         <h3>Status</h3>
                         <HStack>
-                            <Button onClick={() => handleProgramStatusChange("Developing")} colorScheme={formState.status === "Developing" ? "teal" : undefined}>Developing</Button>
-                            <Button onClick={() => handleProgramStatusChange("Launched")} colorScheme={formState.status === "Launched" ? "teal" : undefined}>Launched</Button>
+                            {/* changed developing => inactive, launched => active to match the enum values in the database schema for program */}
+                            <Button onClick={() => handleProgramStatusChange("Inactive")} colorScheme={formState.status === "Inactive" ? "teal" : undefined}>Inactive</Button> 
+                            <Button onClick={() => handleProgramStatusChange("Active")} colorScheme={formState.status === "Active" ? "teal" : undefined}>Active</Button>
                         </HStack> 
                         <h3>Program Name</h3>
                         <Input placeholder = "Enter Program Name" value={formState.programName || ''} onChange={(e) => handleProgramNameChange(e.target.value)}/>

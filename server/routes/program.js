@@ -35,6 +35,8 @@ programRouter.get("/:id", async (req, res) => {
   }
 });
 
+
+//[PLAYLIST LINK COL DOESNT EXIST IN THE SCHEMA]
 programRouter.post("/", async (req, res) => {
   try {
     const {
@@ -44,7 +46,7 @@ programRouter.post("/", async (req, res) => {
       title,
       description,
       primaryLanguage,
-      playlistLink,
+      //playlistLink,
       partnerOrg,
       status,
       launchDate,
@@ -60,13 +62,13 @@ programRouter.post("/", async (req, res) => {
         title,
         description,
         primary_language,
-        playlist_link,
+        
         partner_org,
         status,
         launch_date
       )
       VALUES (
-        $1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10
+        $1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9
       )
       RETURNING *;
       `,
@@ -77,7 +79,7 @@ programRouter.post("/", async (req, res) => {
         title,
         description ?? null,
         primaryLanguage ?? null,
-        playlistLink ?? null,
+        //playlistLink ?? null,
         partnerOrg,
         status,
         launchDate,
@@ -92,8 +94,6 @@ programRouter.post("/", async (req, res) => {
 });
 
 programRouter.put("/:id", async (req, res) => {
-
-  console.log("here");
   try {
     const { id } = req.params;
     const {
