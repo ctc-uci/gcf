@@ -298,6 +298,7 @@ export const AccountForm = () => {
                                 <Input
                                     name="password"
                                     type="password"
+                                    placeholder = {targetUserId ? "Leave blank to keep currrent" : "Password"}
                                     value={formData.password}
                                     onChange={handleChange}
                                 />
@@ -321,6 +322,7 @@ export const AccountForm = () => {
                                     <FormLabel>Program(s)</FormLabel>
                                     <Select
                                         placeholder = "Select a program"
+                                        value={formData.programs.length > 0 ? formData.programs[0].id : ""}
                                         onChange={(e) => {
                                             const selectedProgramId = e.target.value;
                                             if (!selectedProgramId) return;
@@ -341,14 +343,6 @@ export const AccountForm = () => {
                                             return <option key={program.id} value={program.id}>{program.name}</option>
                                         })}
                                     </Select>
-
-                                    <HStack spacing={2} mt={2}>
-                                        {formData.programs.map((program) => (
-                                        <Tag key={program.id} colorScheme="teal">
-                                            {program.name}
-                                        </Tag>
-                                        ))}
-                                    </HStack>
                                 </FormControl>
                             )}
                             <Button colorScheme="teal" width="100%" onClick = {handleSubmit} isLoading = {isLoading}>
