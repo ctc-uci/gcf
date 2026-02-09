@@ -1,6 +1,5 @@
 CREATE TYPE status_type AS ENUM ('Active', 'Inactive');
 
--- there is not a playlist link column here, even though it exists in the figma and the routes 
 CREATE TABLE program (
     id BIGSERIAL PRIMARY KEY,
     created_by BIGINT NOT NULL,

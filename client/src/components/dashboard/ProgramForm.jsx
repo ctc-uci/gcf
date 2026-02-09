@@ -240,7 +240,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
             setFormState({
                 status: program.status ?? null,
                 programName: program.title ?? '',
-                launchDate: program.launchDate ? program.launchDate.split('T')[0] : '', // Convert to yyyy-MM-dd
+                launchDate: program.launchDate ? program.launchDate.split('T')[0] : '', 
                 regionId: program.regionId ?? null,
                 students: program.students ?? 0,
                 instruments: {},
@@ -304,9 +304,9 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 country: formState.country,
                 students: formState.students ?? 0,
                 primaryLanguage: formState.language,
-                partnerOrg: 1, // [HARDCODED]
+                partnerOrg: 1, // this field doesnt exist in the form
                 createdBy: currentUser?.uid || currentUser?.id, 
-                description: '', // TODO: need to add this field to the form
+                description: '', // this field doesnt exist in the form
             };
 
             let programId;
@@ -314,8 +314,8 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 await backend.put(`/program/${program.id}`, data);
                 programId = program.id
             } else {
-                await backend.post(`/program`, data);
-                programId = program.id
+                const response = await backend.post(`/program`, data);
+                programId = response.data.id
 
             }
 
@@ -326,7 +326,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 for (const director of formState.programDirectors) {
                     
 
-                    // prev existing directors for the program dont get userId only new ones
+                    // only post new program directors 
                     if (director.userId){
                     
                         await backend.post(`/program-directors`, {

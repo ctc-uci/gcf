@@ -36,7 +36,6 @@ programRouter.get("/:id", async (req, res) => {
 });
 
 
-//[PLAYLIST LINK COL DOESNT EXIST IN THE SCHEMA]
 programRouter.post("/", async (req, res) => {
   try {
     const {
@@ -46,7 +45,6 @@ programRouter.post("/", async (req, res) => {
       title,
       description,
       primaryLanguage,
-      //playlistLink,
       partnerOrg,
       status,
       launchDate,
@@ -62,7 +60,6 @@ programRouter.post("/", async (req, res) => {
         title,
         description,
         primary_language,
-        
         partner_org,
         status,
         launch_date
@@ -79,7 +76,6 @@ programRouter.post("/", async (req, res) => {
         title,
         description ?? null,
         primaryLanguage ?? null,
-        //playlistLink ?? null,
         partnerOrg,
         status,
         launchDate,
@@ -166,8 +162,6 @@ programRouter.delete("/:id", async (req, res) => {
   }
 });
 
-
-// DELETE THIS COMMENT new routes I added
 
 
 //regional director names for programs
