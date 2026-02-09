@@ -91,7 +91,6 @@ export const AccountForm = () => {
             try {
                 const targetUserResponse = await backend.get(`/gcf-users/admin/get-user/${targetUserId}`);
                 const { email } = targetUserResponse.data;
-                console.log(email);
 
                 setFormData(prev => ({
                     ...prev,
@@ -119,11 +118,6 @@ export const AccountForm = () => {
     }, [backend]);
 
     useEffect(() => {
-        console.log("🔍 Programs fetch check:", { 
-            targetUserId, 
-            targetUser, 
-            role: targetUser?.role 
-        });
     
         if (!targetUserId || !targetUser) return;
         
@@ -173,12 +167,10 @@ export const AccountForm = () => {
 
         try {
             if (!targetUserId) {
-                console.log("Creating new user with data: ", formData)
                 await handleCreateUser();
             }
 
             else {
-                console.log("Updating user: ", targetUserId, "with data: ", formData)
                 await handleUpdateUser();
             }
 
@@ -216,8 +208,7 @@ export const AccountForm = () => {
             currentUserId: currentDbUser.id,
             programId: formData.programs.length > 0 ? formData.programs[0].id : null
         }
-        const response = await backend.post('/gcf-users/admin/create-user', userData);
-        console.log("✅ User created successfully!", response.data);
+        await backend.post('/gcf-users/admin/create-user', userData);
     };
 
     const handleUpdateUser = async () => {
@@ -237,14 +228,9 @@ export const AccountForm = () => {
         if (formData.password && formData.password.trim().length > 0) {
             userData.password = formData.password;
         }
-        const response = await backend.put('/gcf-users/admin/update-user', userData);
-        console.log("✅ User updated successfully!", response.data);
+        await backend.put('/gcf-users/admin/update-user', userData);
 
     }
-
-    //console.log("Current Programs:", currentPrograms);
-    //console.log("Selected Programs:", formData.programs);
-    //console.log("current role: ", currentDbUser.role)
 
     return (
         <> 
