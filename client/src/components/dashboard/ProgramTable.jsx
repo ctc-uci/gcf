@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   Table,
-  Tag,
   Thead,
   Tbody,
   Tr,
@@ -11,7 +10,6 @@ import {
   TableContainer,
   IconButton,
   HStack,
-  Badge,
   Box,
   Button,
   Divider,
@@ -97,11 +95,11 @@ function ExpandableRow({ p, onEdit }) {
         <Box position="relative">
           <HStack align="start">
             <Box flex="1" display="grid">
-              <Box fontsize="sm" fontWeight="semibold" pb="2">Language:</Box>
+              <Box fontSize="sm" fontWeight="semibold" pb="2">Language:</Box>
               <Box>{p.primaryLanguage ?? "-"}</Box>
             </Box>
             <Box flex="1" display="grid">
-              <Box fontsize="sm" fontWeight="semibold" pb="2">Regional Director(s)</Box>
+              <Box fontSize="sm" fontWeight="semibold" pb="2">Regional Director(s)</Box>
             <Box>
               <VStack align="start" spacing={2}>
                 {Array.isArray(p.regionalDirectors) ? p.regionalDirectors.map((d)=> {
@@ -115,7 +113,7 @@ function ExpandableRow({ p, onEdit }) {
               </Box>
             </Box>
             <Box flex="1" display="grid">
-              <Box fontsize="sm" fontWeight="semibold" pb="2">Program Director(s)</Box>
+              <Box fontSize="sm" fontWeight="semibold" pb="2">Program Director(s)</Box>
               <Box>
                 <VStack align="start" spacing={2}>
                   {Array.isArray(p.programDirectors) ? p.programDirectors.map((d)=> {
@@ -129,7 +127,7 @@ function ExpandableRow({ p, onEdit }) {
               </Box>
             </Box> 
             <Box flex="1" display="grid">
-              <Box fontsize="sm" fontWeight="semibold" pb="2">Curriculum Link(s)</Box>
+              <Box fontSize="sm" fontWeight="semibold" pb="2">Curriculum Link(s)</Box>
               <Box>
                 {Array.isArray(p.playlists) ? p.playlists.map((l)=> {
                 return <Box><Link href={l.link} color="blue">Instrument | {p.primaryLanguage ?? "-"}</Link></Box>

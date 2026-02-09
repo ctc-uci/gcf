@@ -245,7 +245,14 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 students: program.students ?? 0,
                 instruments: {},
                 language: program.primaryLanguage ?? null,
-                programDirectors: program.programDirectors ?? [],
+
+
+            programDirectors: (program.programDirectors ?? []).map(d => ({
+                userId: d.userId ?? d.id ?? d.user_id,
+                firstName: d.firstName,
+                lastName: d.lastName,
+            })),
+
                 curriculumLinks: Array.isArray(program.playlists)
                     ? program.playlists.reduce((acc, playlist) => {
                         if (playlist.link) {
@@ -287,7 +294,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         setFormState({...formState, language: langChange})
     }
     async function handleSave() {
-        //[TODO for me and angelina] : figure out program directors, students, and instruments 
+        //[TODO] : UPDATE STUDENTS, TOTAL INSTRUMENTS, INSTRUMENTS, PARTNERORG
         try { 
             const data = {
                 name: formState.programName,
@@ -298,18 +305,40 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 students: formState.students ?? 0,
                 primaryLanguage: formState.language,
                 partnerOrg: 1, // [HARDCODED]
-                createdBy: currentUser?.uid || currentUser?.id, // authcontext
+                createdBy: currentUser?.uid || currentUser?.id, 
                 description: '', // TODO: need to add this field to the form
             };
-    
+
+            let programId;
             if (program) {
                 await backend.put(`/program/${program.id}`, data);
+                programId = program.id
             } else {
                 await backend.post(`/program`, data);
+                programId = program.id
+
+            }
+
+            //need to handle program directors seperatly
+            //this is because a program needs to exists before we can add pds
+        
+            if (formState.programDirectors.length > 0) {
+                for (const director of formState.programDirectors) {
+                    
+
+                    // prev existing directors for the program dont get userId only new ones
+                    if (director.userId){
+                    
+                        await backend.post(`/program-directors`, {
+                            userId: director.userId,
+                            programId
+                        });
+                    }
+                }
             }
     
             onClose();
-            window.location.reload(); //auto refreshes page to see updates
+            window.location.reload();
         } catch (err) {
             console.error("Error saving program:", err);
         }
