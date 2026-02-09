@@ -22,6 +22,7 @@ import {
 } from '@chakra-ui/react'
 import { useRef, useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext' 
+import { useAuthContext } from '@/contexts/hooks/useAuthContext'; 
 
 
 // sub-component for adding instruments
@@ -215,6 +216,9 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     const { backend } = useBackendContext();
     const [regions, setRegions] = useState([]);
     const [countries, setCountries] = useState([]);
+    const { currentUser } = useAuthContext(); 
+
+
     const [formState, setFormState] = useState({
         status: null,
         programName: null,
@@ -283,19 +287,19 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         setFormState({...formState, language: langChange})
     }
     async function handleSave() {
-        //[TODO for me and angelina] : figure out the country, partnerorg, created_by, and program directors for form
+        //[TODO for me and angelina] : figure out program directors, students, and instruments 
         try { 
             const data = {
                 name: formState.programName,
                 title: formState.programName,
                 status: formState.status,
                 launchDate: formState.launchDate,
-                country: formState.country, //[HARDCODED] The form currently only takes in region, but how do we get the specific country for it?
+                country: formState.country,
                 students: formState.students ?? 0,
                 primaryLanguage: formState.language,
                 partnerOrg: 1, // [HARDCODED]
-                createdBy: 1, // authcontext
-                description: '', // need to add this field to the form
+                createdBy: currentUser?.uid || currentUser?.id, // authcontext
+                description: '', // TODO: need to add this field to the form
             };
     
             if (program) {
@@ -371,8 +375,8 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                         <h3>Status</h3>
                         <HStack>
                             {/* changed developing => inactive, launched => active to match the enum values in the database schema for program */}
-                            <Button onClick={() => handleProgramStatusChange("Inactive")} colorScheme={formState.status === "Inactive" ? "teal" : undefined}>Inactive</Button> 
-                            <Button onClick={() => handleProgramStatusChange("Active")} colorScheme={formState.status === "Active" ? "teal" : undefined}>Active</Button>
+                            <Button onClick={() => handleProgramStatusChange("Inactive")} colorScheme={formState.status === "Inactive" ? "teal" : undefined}>Developing</Button> 
+                            <Button onClick={() => handleProgramStatusChange("Active")} colorScheme={formState.status === "Active" ? "teal" : undefined}>Launched</Button>
                         </HStack> 
                         <h3>Program Name</h3>
                         <Input placeholder = "Enter Program Name" value={formState.programName || ''} onChange={(e) => handleProgramNameChange(e.target.value)}/>

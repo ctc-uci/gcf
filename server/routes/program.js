@@ -102,7 +102,6 @@ programRouter.put("/:id", async (req, res) => {
       title,
       description,
       primaryLanguage,
-      playlistLink,
       partnerOrg,
       status,
       launchDate
@@ -117,10 +116,10 @@ programRouter.put("/:id", async (req, res) => {
         title = COALESCE($3, title),
         description = COALESCE($4, description),
         primary_language = COALESCE($5, primary_language),
-        partner_org = COALESCE($7, partner_org),
-        status = COALESCE($8, status),
-        launch_date = COALESCE($9, launch_date)
-      WHERE id = $10
+        partner_org = COALESCE($6, partner_org),
+        status = COALESCE($7, status),
+        launch_date = COALESCE($8, launch_date)
+      WHERE id = $9
       RETURNING *;
       `,
       [
@@ -129,7 +128,6 @@ programRouter.put("/:id", async (req, res) => {
         title,
         description,
         primaryLanguage,
-        playlistLink,
         partnerOrg,
         status,
         launchDate,
