@@ -9,7 +9,7 @@ import { AccountsTable } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
 
 export const Account = () => {
-  // TODO: Get userId from auth context when auth flow is finalized
+  // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid) when auth flow is finalized.
   const { userId } = useParams();
 
   const [currentUser, setCurrentUser] = useState(null);

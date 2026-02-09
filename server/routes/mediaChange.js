@@ -1,5 +1,6 @@
 import { keysToCamel } from "@/common/utils";
 import express from "express";
+
 import { db } from "../db/db-pgp";
 
 const mediaChangeRouter = express.Router();
@@ -23,7 +24,7 @@ mediaChangeRouter.get("/:id", async (req, res) => {
       [id]
     );
 
-    if (mediaChange.length === 0){
+    if (mediaChange.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -65,7 +66,7 @@ mediaChangeRouter.put("/:id", async (req, res) => {
       [update_id, s3_key, file_name, file_type, is_thumbnail, id]
     );
 
-    if (updatedMediaChange.length === 0){
+    if (updatedMediaChange.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -84,7 +85,7 @@ mediaChangeRouter.delete("/:id", async (req, res) => {
       [id]
     );
 
-    if (deletedMediaChange.length === 0){
+    if (deletedMediaChange.length === 0) {
       return res.status(404).send("Item not found");
     }
 

@@ -16,7 +16,7 @@ import { useParams } from "react-router-dom";
 import { MediaGrid } from "./MediaGrid";
 
 export const Media = () => {
-  // TODO: Get userId from auth context when auth flow is finalized
+  // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid) when auth flow is finalized.
   const { userId } = useParams();
   const { backend } = useBackendContext();
 

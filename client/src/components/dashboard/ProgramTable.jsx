@@ -13,10 +13,13 @@ import {
   Box,
   Button,
   Divider,
+  Spinner,
+  Center,
 } from "@chakra-ui/react";
 import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon } from "@chakra-ui/icons";
 import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { ProgramForm } from "./ProgramForm";
 
 const getRouteByRole = (role, userId) => {
   const routes = {
@@ -57,10 +60,12 @@ const MAP_BY_ROLE = {
   regionalDirector: mapRdRow,
 };
 
-function AdminProgramTable({ role = "admin", userId }) {
-  // TODO: remove prop and use AuthContext
+// TODO(login): Replace role prop with useRoleContext() or AuthContext; replace userId prop with AuthContext (currentUser?.uid).
+function ProgramTable({ role = "admin", userId }) {
   const { backend } = useBackendContext();
   const [programs, setPrograms] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   useEffect(() => {
     const route = getRouteByRole(role, userId);
@@ -69,12 +74,15 @@ function AdminProgramTable({ role = "admin", userId }) {
     if (!route || !mapRow) return;
 
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const res = await backend.get(route);
         const rows = Array.isArray(res.data) ? res.data : [];
         setPrograms(rows.map(mapRow));
       } catch (err) {
         console.error("Error fetching data:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -84,6 +92,12 @@ function AdminProgramTable({ role = "admin", userId }) {
   if (!getRouteByRole(role, userId)) return null;
 
   return (
+    <>
+    <ProgramForm
+      isOpen={isFormOpen}
+      onOpen={() => setIsFormOpen(true)}
+      onClose={() => setIsFormOpen(false)}
+    />
     <TableContainer>
       <HStack mb={4} justifyContent="space-between" w="100%">
         <HStack spacing={4}>
@@ -134,7 +148,7 @@ function AdminProgramTable({ role = "admin", userId }) {
             variant="ghost"
             ml={2}
           />
-          <Button size="sm" rightIcon={<AddIcon />}>
+          <Button size="sm" rightIcon={<AddIcon />} onClick={() => setIsFormOpen(true)}>
             New
           </Button>
         </HStack>
@@ -153,21 +167,32 @@ function AdminProgramTable({ role = "admin", userId }) {
           </Tr>
         </Thead>
         <Tbody>
-          {programs.map((p) => (
-            <Tr key={p.id}>
-              <Td>{p.title}</Td>
-              <Td>{p.status}</Td>
-              <Td>{p.launchDate}</Td>
-              <Td>{p.location}</Td>
-              <Td>{p.students}</Td>
-              <Td>{p.instruments}</Td>
-              <Td>{p.totalInstruments}</Td>
+          {isLoading ? (
+            <Tr>
+              <Td colSpan={7}>
+                <Center py={8}>
+                  <Spinner size="lg" />
+                </Center>
+              </Td>
             </Tr>
-          ))}
+          ) : (
+            programs.map((p) => (
+              <Tr key={p.id}>
+                <Td>{p.title}</Td>
+                <Td>{p.status}</Td>
+                <Td>{p.launchDate}</Td>
+                <Td>{p.location}</Td>
+                <Td>{p.students}</Td>
+                <Td>{p.instruments}</Td>
+                <Td>{p.totalInstruments}</Td>
+              </Tr>
+            ))
+          )}
         </Tbody>
       </Table>
     </TableContainer>
+    </>
   );
 }
 
-export default AdminProgramTable;
+export default ProgramTable;

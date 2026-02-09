@@ -4,7 +4,7 @@ import { directorRouter } from "@/routes/programDirector";
 import { programUpdateRouter } from '@/routes/programUpdate';
 import { regionalDirectorRouter } from "@/routes/regionalDirector";
 import { gcfUserRouter } from "@/routes/gcfUser";
-// import { usersRouter } from "@/routes/users";
+import { updatesPermissionsRouter } from "@/routes/updatesPermissions";
 import { enrollmentChangeRouter } from "@/routes/enrollmentChange";
 import { mediaChangeRouter } from "@/routes/mediaChange";
 import { instrumentRouter } from "@/routes/instrument"
@@ -50,6 +50,7 @@ app.use('/program-updates', programUpdateRouter);
 app.use("/instruments", instrumentRouter);
 app.use("/instrument-changes", instrumentChangeRouter);
 app.use("/gcf-users", gcfUserRouter);
+app.use("/update-permissions", updatesPermissionsRouter);
 app.use("/regional-directors", regionalDirectorRouter)
 app.use("/country", countryRouter);
 app.use("/region", regionRouter);
