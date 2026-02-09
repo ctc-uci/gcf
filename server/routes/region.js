@@ -93,4 +93,21 @@ regionRouter.delete("/:id", async (req, res) => {
   }
 });
 
+// countries for region_id
+regionRouter.get("/:id/countries", async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const countries = await db.query(
+      `SELECT * FROM country WHERE region_id = $1`,
+      [id]
+    );
+
+    res.status(200).json(keysToCamel(countries));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 export { regionRouter };

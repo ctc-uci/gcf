@@ -214,11 +214,13 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     const btnRef = useRef(null);
     const { backend } = useBackendContext();
     const [regions, setRegions] = useState([]);
+    const [countries, setCountries] = useState([]);
     const [formState, setFormState] = useState({
         status: null,
         programName: null,
         launchDate: null,
-        region: null,
+        regionId: null,
+        country: null,
         students: 0,
         instruments: {
          },
@@ -235,7 +237,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 status: program.status ?? null,
                 programName: program.title ?? '',
                 launchDate: program.launchDate ? program.launchDate.split('T')[0] : '', // Convert to yyyy-MM-dd
-                region: program.location ?? '',
+                regionId: program.regionId ?? null,
                 students: program.students ?? 0,
                 instruments: {},
                 language: program.primaryLanguage ?? null,
@@ -265,8 +267,12 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         setFormState({...formState, launchDate: date});
     }
 
-    function handleRegionChange(regionChange) {
-        setFormState({...formState, region: regionChange});
+    function handleRegionChange(regionId) {
+        setFormState({...formState, regionId: Number(regionId), country: null});
+    }
+
+    function handleCountryChange(countryId){
+        setFormState({...formState, country: Number(countryId)});
     }
 
     function handleStudentNumberChange(numStudents) {
@@ -284,7 +290,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 title: formState.programName,
                 status: formState.status,
                 launchDate: formState.launchDate,
-                country: 1, //[HARDCODED] The form currently only takes in region, but how do we get the specific country for it?
+                country: formState.country, //[HARDCODED] The form currently only takes in region, but how do we get the specific country for it?
                 students: formState.students ?? 0,
                 primaryLanguage: formState.language,
                 partnerOrg: 1, // [HARDCODED]
@@ -299,6 +305,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
             }
     
             onClose();
+            window.location.reload(); //auto refreshes page to see updates
         } catch (err) {
             console.error("Error saving program:", err);
         }
@@ -314,15 +321,31 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         async function getRegions() {
             try {
                 const response = await backend.get("/region");
-                const region_list = response.data.map((region) => region.name);
-                const filtered_list = [... new Set(region_list)];
-                setRegions(filtered_list);
+                setRegions(response.data);
             } catch (error) {
                 console.error("Error fetching regions:", error);
             }
         }
         getRegions();
-    }, [backend, setRegions]);
+    }, [formState.regionId, backend]);
+
+    useEffect(() => {
+        async function getCountriesForRegion() {
+            if (!formState.regionId) {
+                setCountries([]);
+                return;
+            }
+
+            try{
+                const response = await backend.get(`/region/${formState.regionId}/countries`);
+                setCountries(response.data);
+            } catch (error) {
+                console.error("Error fetching countries:", error);
+                setCountries([]);
+            }
+        }
+        getCountriesForRegion();
+    }, [formState.regionId, backend]);
 
     return (
         <>
@@ -358,13 +381,30 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                         <h3>Region</h3>
                         <Select 
                             placeholder='Select region'
-                            value = {formState.region || ''}
+                            value = {formState.regionId || ''}
                             onChange={(e) => handleRegionChange(e.target.value)}
                         >
                             {regions.map((region) => (
-                                <option key = {region} value ={region}>{region}</option>
+                                <option key = {region.id} value ={region.id}>{region.name}</option>
                             ))}
                         </Select>
+                        {/* countries dropdown after the region is selected */}
+                        {formState.regionId && (
+                            <>
+                                <h3>Country</h3>
+                                <Select
+                                    placeholder = 'Select Country'
+                                    value = {formState.country || ''}
+                                    onChange={(e) => handleCountryChange(e.target.value)}
+                                >
+                                    {countries.map((country) => (
+                                        <option key = {country.id} value = {country.id}>
+                                            {country.name}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </>
+                        )}
                         <h3>Students</h3>
                         <NumberInput min = {0} value={formState.students} onChange={(e) => handleStudentNumberChange(Number(e))}>
                             <NumberInputField placeholder = "Enter # of Students"/>
