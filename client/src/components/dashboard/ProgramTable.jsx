@@ -88,7 +88,7 @@ function ExpandableRow({ p, onEdit }) {
   const { isOpen, onToggle } = useDisclosure();
   return (
 <>
-    <Tr onClick={onToggle} cursor="pointer">
+    <Tr onClick={onToggle} cursor="pointer" sx={{ td: { borderBottom: isOpen ? "none" : undefined } }}>
       <Td>{p.title}</Td>
       <Td>{p.status}</Td>
       <Td>{p.launchDate}</Td>
@@ -98,7 +98,7 @@ function ExpandableRow({ p, onEdit }) {
       <Td>{p.totalInstruments}</Td>
     </Tr>
     <Tr>
-      <Td colSpan={7}>
+      <Td colSpan={7} borderBottom={isOpen ? "1px solid" : "none"} borderColor="gray.200" p={isOpen ? undefined : 0}>
         <Collapse in={isOpen}>
         <Box position="relative">
           <HStack align="start">
