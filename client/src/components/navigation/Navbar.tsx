@@ -12,19 +12,8 @@ interface NavbarProps {
   role: "admin" | "regional_director" | "program_director" | string;
 }
 
-function keysToCamel(data) {
-  if (data === "Admin") {
-    return "admin";
-  } else if (data === "Regional Director") {
-    return "regionalDirector";
-  } else if (data === "Program Director") {
-    return "programDirector";
-  }
-}
-
 export const Navbar = () => {
   const { role } = useRoleContext();
-  const camelRole = keysToCamel(role);
   const region = "North America"; // placeholder for region
   const project = "Royal Kids Family Camp"; // placeholder for project
   const { logout } = useAuthContext();
@@ -64,13 +53,13 @@ export const Navbar = () => {
         align="center"
       >
         <Text fontSize="2vh">
-          {camelRole === "admin" ? "Admin Dashboard" : ""}
-          {camelRole === "regionalDirector"
+          {role === "Admin" ? "Admin Dashboard" : ""}
+          {role === "Regional Director"
             ? "Regional Director Dashboard"
             : ""}
-          {camelRole === "programDirector" ? `${project}` : ""}
+          {role === "Program Director" ? `${project}` : ""}
 
-          {camelRole === "regionalDirector" ? `: ${region}` : ""}
+          {role === "Regional Director" ? `: ${region}` : ""}
         </Text>
 
         <Flex

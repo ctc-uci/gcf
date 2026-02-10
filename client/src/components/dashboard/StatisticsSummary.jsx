@@ -88,16 +88,6 @@ function statsFromPdData(data) {
   ];
 }
 
-function keysToCamel(data) {
-  if (data === "Admin") {
-    return "admin";
-  } else if (data === "Regional Director") {
-    return "regionalDirector";
-  } else if (data === "Program Director") {
-    return "programDirector";
-  }
-}
-
 const STATS_FROM_RESPONSE = {
   admin: statsFromAdminData,
   regionalDirector: statsFromRdData,
@@ -107,8 +97,7 @@ const STATS_FROM_RESPONSE = {
 const StatisticsSummary = () => {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
-  const { role: realRole, loading: roleLoading } = useRoleContext();
-  const role = keysToCamel(realRole);
+  const { role: role, loading: roleLoading } = useRoleContext();
   const { backend } = useBackendContext();
   const initialStats = STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.admin;
   const [stats, setStats] = useState(initialStats);

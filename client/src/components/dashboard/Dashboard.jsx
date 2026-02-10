@@ -6,20 +6,8 @@ import LessonVideos from "./lessonVideos";
 import ProgramTable from "./ProgramTable";
 import StatisticsSummary from "./StatisticsSummary";
 
-function keysToCamel(data) {
-  if (data === "Admin") {
-    return "admin";
-  } else if (data === "Regional Director") {
-    return "regionalDirector";
-  } else if (data === "Program Director") {
-    return "programDirector";
-  }
-}
-
 const Dashboard = () => {
   const { role } = useRoleContext();
-  const camelRole = keysToCamel(role);
-
   return (
     <Flex
       direction="column"
@@ -31,10 +19,10 @@ const Dashboard = () => {
       <StatisticsSummary />
 
       <Box as="section">
-        {(camelRole === "admin" || camelRole === "regionalDirector") && (
+        {(role === "Admin" || role === "Regional Director") && (
           <ProgramTable />
         )}
-        {camelRole === "programDirector" && <LessonVideos />}
+        {role === "Program Director" && <LessonVideos />}
       </Box>
     </Flex>
   );
