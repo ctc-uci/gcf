@@ -40,7 +40,11 @@ function mapAdminRow(row) {
     title: row.title ?? row.name,
     status: row.status,
     launchDate: row.launchDate,
+
     location: row.countryName ?? "",
+    country: row.country,
+
+
     students: row.students ?? 0,
     instruments: row.instruments ?? 0,
     totalInstruments: row.instruments ?? 0,
@@ -59,7 +63,11 @@ function mapRdRow(row) {
     title: row.programName,
     status: row.programStatus,
     launchDate: row.programLaunchDate,
+
     location: row.programLocation ?? row.regionName ?? "",
+    countryId: row.countryId,
+    regionId: row.regionId,
+
     students: row.totalStudents ?? 0,
     instruments: row.totalInstruments ?? 0,
     totalInstruments: row.totalInstruments ?? 0,
@@ -191,6 +199,7 @@ function ProgramTable({ role = "admin", userId }) {
 
             ]);
             
+            //console.log("[RAW ROW],", row);
             return {
               ...row,
               playlists: playlists.data,

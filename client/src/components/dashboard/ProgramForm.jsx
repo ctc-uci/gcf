@@ -239,22 +239,56 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     });
 
     useEffect(() => {
-        if (program) {
+
+        async function loadProgramRegionData(){
+            if(!program){ //reset form data on new country
+                setFormState({
+                    status: null,
+                    programName: null,
+                    launchDate: null,
+                    regionId: null,
+                    country: null,
+                    students: 0,
+                    instruments: {},
+                    language: null,
+                    programDirectors: [],
+                    curriculumLinks: {},
+                    media: []
+                  });
+                return;
+            }
+
+            let regionId = null;
+
+            if (program.country) {
+                try {
+                    const countryResponse = await backend(`/country/${program.country}`);
+                    regionId = countryResponse.data.regionId;
+                } catch (error) {
+                    console.error("error fetching country/region",error);
+                }
+            }
+        
+
+
+
+            
             setFormState({
                 status: program.status ?? null,
                 programName: program.title ?? '',
                 launchDate: program.launchDate ? program.launchDate.split('T')[0] : '', 
-                regionId: program.regionId ?? null,
+                regionId: regionId,
+                country: program.country ?? null,
                 students: program.students ?? 0,
                 instruments: {},
-                language: program.primaryLanguage ?? null,
+                language: program.primaryLanguage?.toLowerCase() ?? null,
 
 
-            programDirectors: (program.programDirectors ?? []).map(d => ({
-                userId: d.userId ?? d.id ?? d.user_id,
-                firstName: d.firstName,
-                lastName: d.lastName,
-            })),
+                programDirectors: (program.programDirectors ?? []).map(d => ({
+                    userId: d.userId ?? d.id ?? d.user_id,
+                    firstName: d.firstName,
+                    lastName: d.lastName,
+                })),
 
                 curriculumLinks: Array.isArray(program.playlists)
                     ? program.playlists.reduce((acc, playlist) => {
@@ -262,12 +296,16 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                             acc[playlist.link] = playlist.name || 'Playlist';
                         }
                         return acc;
-                        }, {})
+                    }, {})
                     : {},
                 media: program.media ?? []
             });
+            regionId = null;
+
         }
-    }, [program])
+        loadProgramRegionData();
+        
+    }, [program, backend])
 
     function handleProgramStatusChange(status) {
         setFormState({ ...formState, status: status});
@@ -297,7 +335,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         setFormState({...formState, language: langChange})
     }
     async function handleSave() {
-        //[TODO] : UPDATE STUDENTS, TOTAL INSTRUMENTS, INSTRUMENTS, PARTNERORG
+        //[TODO] : TOTAL INSTRUMENTS, INSTRUMENTS, PARTNERORG
         try { 
             const data = {
                 name: formState.programName,
