@@ -17,7 +17,7 @@ export function MediaUpload({ fileInputRef, onFileSelect }) {
         hidden
         ref={fileInputRef}
         onChange={handleFileChange}
-        accept="image/*,video/*"
+        accept=".jpg,.jpeg,.png,.mp4"
       />
       <Button
         variant="outline"
