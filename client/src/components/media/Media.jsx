@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import {
   Box,
@@ -28,32 +28,31 @@ export const Media = () => {
   const [programName, setProgramName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await backend.get(`/mediaChange/${userId}/media`);
 
-      try {
-        const response = await backend.get(`/mediaChange/${userId}/media`);
+      const transformedMedia = response.data.media.map((media) => ({
+        id: media.id,
+        s3_key: media.s3Key,
+        file_name: media.fileName,
+        file_type: media.fileType,
+        is_thumbnail: media.isThumbnail,
+      }));
 
-        const transformedMedia = response.data.media.map((media) => ({
-          id: media.id,
-          s3_key: media.s3Key,
-          file_name: media.fileName,
-          file_type: media.fileType,
-          is_thumbnail: media.isThumbnail,
-        }));
-
-        setMedia(transformedMedia);
-        setProgramName(response.data.programName);
-      } catch (error) {
-        console.error("Error loading media data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+      setMedia(transformedMedia);
+      setProgramName(response.data.programName);
+    } catch (error) {
+      console.error("Error loading media data:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [backend, userId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (isLoading) {
     return (
@@ -113,7 +112,7 @@ export const Media = () => {
         isOpen={isOpen}
         onClose={onClose}
         onUploadComplete={() => {
-          fetchMedia();
+          fetchData();
           onClose();
         }}
       />
