@@ -1,6 +1,7 @@
 import { keysToCamel } from "@/common/utils";
 import { admin } from "@/config/firebase";
 import express from "express";
+
 import { db } from "../db/db-pgp";
 
 const regionalDirectorRouter = express.Router();
@@ -47,91 +48,118 @@ regionalDirectorRouter.get("/me/:id/stats", async (req, res) => {
 });
 
 regionalDirectorRouter.post("/", async (req, res) => {
-    try {
-      const { user_id, region_id } = req.body
-      const newRegionalDirector = await db.query(
-        `INSERT INTO regional_director (user_id, region_id) 
+  try {
+    const { user_id, region_id } = req.body;
+    const newRegionalDirector = await db.query(
+      `INSERT INTO regional_director (user_id, region_id) 
         VALUES ($1, $2) 
         RETURNING *`,
-        [user_id, region_id]
-      );
-      res.status(201).json(keysToCamel(newRegionalDirector[0]));
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
-    }
-  });
-
-regionalDirectorRouter.get("/", async (req, res) => {
-    try {
-        const data = await db.query(`SELECT * FROM regional_director`);
-        res.status(200).json(keysToCamel(data));
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Internal Server Error");
-    }
+      [user_id, region_id]
+    );
+    res.status(201).json(keysToCamel(newRegionalDirector[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
+regionalDirectorRouter.get("/", async (req, res) => {
+  try {
+    const data = await db.query(`SELECT * FROM regional_director`);
+    res.status(200).json(keysToCamel(data));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+regionalDirectorRouter.get("/:user_id/program-directors", async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    const data = await db.query(
+      `SELECT 
+        u.id,
+        u.first_name,
+        u.last_name,
+        u.role,
+        p.name as program_name
+      FROM regional_director rd
+      JOIN country c ON rd.region_id = c.region_id
+      JOIN program p ON c.id = p.country
+      JOIN program_director pd ON p.id = pd.program_id
+      JOIN gcf_user u ON pd.user_id = u.id
+      WHERE rd.user_id = $1
+      ORDER BY u.last_name ASC`,
+      [user_id]
+    );
+
+    res.status(200).json(keysToCamel(data));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 regionalDirectorRouter.get("/:user_id", async (req, res) => {
-    try {
-      const { user_id } = req.params;
-      const regionalDirector = await db.query(
-        `SELECT ALL * FROM regional_director WHERE user_id = $1`,
-        [user_id]
-      );
-  
-      if (regionalDirector.length === 0){
-        return res.status(404).send("Item not found");
-      }
-  
-      res.status(200).json(keysToCamel(regionalDirector[0]));
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
-    }
-  });
+  try {
+    const { user_id } = req.params;
+    const regionalDirector = await db.query(
+      `SELECT ALL * FROM regional_director WHERE user_id = $1`,
+      [user_id]
+    );
 
-  regionalDirectorRouter.put("/:id", async (req, res) => {
-    try {
-      const { user_id } = req.params;
-      const { region_id } = req.body;
-      const updatedRegionalDirector = await db.query(
-        `UPDATE regional_director SET
+    if (regionalDirector.length === 0) {
+      return res.status(404).send("Item not found");
+    }
+
+    res.status(200).json(keysToCamel(regionalDirector[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+regionalDirectorRouter.put("/:id", async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const { region_id } = req.body;
+    const updatedRegionalDirector = await db.query(
+      `UPDATE regional_director SET
           region_id = COALESCE($1, region_id)
           WHERE user_id = $2
           RETURNING *;`,
-        [region_id, user_id]
-      );
-  
-      if (updatedRegionalDirector.length === 0){
-        return res.status(404).send("Item not found");
-      }
-  
-      res.status(200).json(keysToCamel(updatedRegionalDirector[0]));
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
-    }
-  });
-  
-  regionalDirectorRouter.delete("/:id", async (req, res) => {
-    try {
-      const { user_id } = req.params;
-      const deletedRegionalDirector = await db.query(
-        `DELETE FROM regional_director WHERE user_id = $1 RETURNING *`,
-        [user_id]
-      );
-  
-      if (deletedRegionalDirector.length === 0){
-        return res.status(404).send("Item not found");
-      }
-  
-      res.status(200).json(keysToCamel(deletedRegionalDirector[0]));
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
-    }
-  });
+      [region_id, user_id]
+    );
 
-  export { regionalDirectorRouter };
+    if (updatedRegionalDirector.length === 0) {
+      return res.status(404).send("Item not found");
+    }
+
+    res.status(200).json(keysToCamel(updatedRegionalDirector[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+regionalDirectorRouter.delete("/:id", async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const deletedRegionalDirector = await db.query(
+      `DELETE FROM regional_director WHERE user_id = $1 RETURNING *`,
+      [user_id]
+    );
+
+    if (deletedRegionalDirector.length === 0) {
+      return res.status(404).send("Item not found");
+    }
+
+    res.status(200).json(keysToCamel(deletedRegionalDirector[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+export { regionalDirectorRouter };

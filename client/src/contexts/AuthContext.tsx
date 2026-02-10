@@ -19,7 +19,7 @@ import { useBackendContext } from "./hooks/useBackendContext";
 
 interface AuthContextProps {
   currentUser: User | null;
-  signup: ({ email, password }: EmailPassword) => Promise<UserCredential>;
+  signup: ({ email, password, role }: EmailPasswordRole) => Promise<UserCredential>;
   login: ({ email, password }: EmailPassword) => Promise<UserCredential>;
   logout: () => Promise<void>;
   resetPassword: ({ email }: Pick<EmailPassword, "email">) => Promise<void>;
@@ -37,13 +37,19 @@ interface EmailPassword {
   password: string;
 }
 
+interface EmailPasswordRole {
+  email: string;
+  password: string;
+  role: string;
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { backend } = useBackendContext();
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const signup = async ({ email, password }: EmailPassword) => {
+  const signup = async ({ email, password, role }: EmailPasswordRole) => {
     if (currentUser) {
       signOut(auth);
     }
@@ -56,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     await backend.post("/gcf-users/", {
       id: userCredential.user.uid,
-      role: 'Admin',
+      role: role,
       created_by: null,
       first_name: 'John',
       last_name: 'Doe'
