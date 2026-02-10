@@ -5,6 +5,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Dashboard from "@/components/dashboard/Dashboard";
 import { Signup } from "@/components/signup/Signup";
 import { UpdatesPage } from "@/components/updates/UpdatesPage";
+import { Profile } from "@/components/profile/Profile";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
@@ -49,6 +50,11 @@ const App = () => {
                         element={<Admin />}
                         allowedRoles={["admin"]} />}
                     />
+
+                  <Route
+                    path="profile"
+                    element={<ProtectedRoute element={<Profile />} />}
+                  />
 
                   {/* TODO(login): Change /account & /media route to protected when auth flow finalized; consider dropping :userId and using AuthContext (currentUser.uid) for current user. */}
                   <Route
