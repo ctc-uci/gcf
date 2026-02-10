@@ -218,6 +218,9 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     const [countries, setCountries] = useState([]);
     const { currentUser } = useAuthContext(); 
 
+    const [enrollmentChange, setEnrollmentChnage] = useState(0);
+    const [updateNote, setUpdateNote] = useState('');
+
 
     const [formState, setFormState] = useState({
         status: null,
@@ -310,6 +313,9 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
             };
 
             let programId;
+            const oldStudentCount = program?.students || 0;
+
+
             if (program) {
                 await backend.put(`/program/${program.id}`, data);
                 programId = program.id
@@ -319,9 +325,8 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
 
             }
 
-            //need to handle program directors seperatly
-            //this is because a program needs to exists before we can add pds
-        
+            //need to handle program directors, enrollments, instruments seperattly
+
             if (formState.programDirectors.length > 0) {
                 for (const director of formState.programDirectors) {
                     
@@ -336,6 +341,28 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                     }
                 }
             }
+
+            const studentCountChange = formState.students - oldStudentCount;
+            if( studentCountChange !== 0){
+                const updateResponse = await backend.post(`/program-updates`, {
+                    title: 'update student count',
+                    program_id: programId,
+                    created_by: currentUser?.uid || currentUser?.id,
+                    update_date: new Date().toISOString(),
+                    note: ''
+                });
+                
+
+                await backend.post(`/enrollmentChange`, {
+                    update_id: updateResponse.data.id,
+                    enrollment_change: studentCountChange,
+                    graduated_change: 0
+                });
+                
+            }
+
+
+
     
             onClose();
             window.location.reload();
