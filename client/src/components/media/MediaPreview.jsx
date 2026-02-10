@@ -12,12 +12,14 @@ import {
   Text,
   Textarea,
   VStack,
+  useToast
 } from "@chakra-ui/react";
 
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
 export function MediaPreview({ file, onComplete }) {
   const { backend } = useBackendContext();
+  const toast = useToast();
 
   const [title, setTitle] = useState(file.name);
   const [description, setDescription] = useState("");
@@ -44,6 +46,15 @@ export function MediaPreview({ file, onComplete }) {
         headers: { "Content-Type": file.type },
       });
 
+      toast({
+        title: "Upload successful.",
+        description: `${file.name} has been uploaded to the server.`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-right",
+      });
+
       onComplete({
         s3_key: s3Data.key,
         file_name: file.name,
@@ -52,6 +63,15 @@ export function MediaPreview({ file, onComplete }) {
       });
     } catch (error) {
       console.error("Upload failed:", error);
+
+      toast({
+        title: "Upload failed.",
+        description: error.message || "There was an error uploading your file.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-right",
+      });
     } finally {
       setIsUploading(false);
     }
