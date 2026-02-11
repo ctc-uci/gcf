@@ -38,7 +38,6 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
           return;
         } 
          // filter by search query
-         console.log(unorderedUpdates);
          const filtered = unorderedUpdates.filter(update => 
            // if no search then show everything
            update.updateDate.toLowerCase().includes(search.toLowerCase()) ||

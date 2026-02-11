@@ -23,7 +23,6 @@ import { useTableSort } from "../../contexts/hooks/TableSort";
 export const AccountsTable = ({ data, setData, originalData, searchQuery }) => {
   const hoverBg = useColorModeValue("gray.50", "gray.700");
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
-  console.log("accounts table data: ", data);
 
   useEffect(() => {
     function filterUpdates(search) {
