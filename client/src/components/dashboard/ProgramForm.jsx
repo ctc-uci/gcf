@@ -280,10 +280,6 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
 
     return (
         <>
-
-            <Button ref={btnRef} colorScheme='teal' onClick={onOpen}>
-                Open
-            </Button>
             <Drawer
                 isOpen={isOpen}
                 placement='right'
