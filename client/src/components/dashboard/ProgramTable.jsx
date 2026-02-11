@@ -108,30 +108,42 @@ function ExpandableRow({ p, onEdit }) {
             </Box>
             <Box flex="1" display="grid">
               <Box fontSize="sm" fontWeight="semibold" pb="2">Regional Director(s)</Box>
-            <Box>
-              <VStack align="start" spacing={2}>
-                {Array.isArray(p.regionalDirectors) ? p.regionalDirectors.map((d)=> {
-                  return <Box key = {d.userId}
-                      bg="gray.200"
-                      px={3}
-                      py={1}
-                      borderRadius="full">{d.firstName} {d.lastName}</Box>
-                }) : null}
-              </VStack>
+              <Box>
+                <VStack align="start" spacing={2}>
+                  {Array.isArray(p.regionalDirectors)
+                    ? p.regionalDirectors.map((d, idx) => (
+                        <Box
+                          key={d.userId ?? `${d.firstName}-${d.lastName}-${idx}`}
+                          bg="gray.200"
+                          px={3}
+                          py={1}
+                          borderRadius="full"
+                        >
+                          {d.firstName} {d.lastName}
+                        </Box>
+                      ))
+                    : null}
+                </VStack>
               </Box>
             </Box>
             <Box flex="1" display="grid">
               <Box fontSize="sm" fontWeight="semibold" pb="2">Program Director(s)</Box>
               <Box>
                 <VStack align="start" spacing={2}>
-                  {Array.isArray(p.programDirectors) ? p.programDirectors.map((d)=> {
-                  return <Box key = {d.userId}
-                      bg="gray.200"
-                      px={3}
-                      py={1}
-                      borderRadius="full">{d.firstName} {d.lastName}</Box>
-                }) : null}
-              </VStack>
+                  {Array.isArray(p.programDirectors)
+                    ? p.programDirectors.map((d, idx) => (
+                        <Box
+                          key={d.userId ?? `${d.firstName}-${d.lastName}-${idx}`}
+                          bg="gray.200"
+                          px={3}
+                          py={1}
+                          borderRadius="full"
+                        >
+                          {d.firstName} {d.lastName}
+                        </Box>
+                      ))
+                    : null}
+                </VStack>
               </Box>
             </Box> 
             <Box flex="1" display="grid">

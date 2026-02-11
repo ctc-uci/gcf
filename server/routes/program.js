@@ -172,6 +172,7 @@ programRouter.get("/:id/regional-directors", async (req, res) => {
     const result = await db.query(
       `
       SELECT 
+        u.id AS user_id,
         u.first_name,
         u.last_name
       FROM program p
@@ -190,7 +191,7 @@ programRouter.get("/:id/regional-directors", async (req, res) => {
     const regional_directors = result.map(row => ({
       userId: row.user_id,
       firstName: row.first_name,
-      lastName: row.last_name
+      lastName: row.last_name,
     }));
 
     res.status(200).json(regional_directors);
@@ -218,6 +219,35 @@ programRouter.get("/:id/playlists", async (req, res) => {
   }
 });
 
+// aggregated instruments (by instrument) for a program
+programRouter.get("/:id/instruments", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const rows = await db.query(
+      `
+      SELECT
+        i.id AS instrument_id,
+        i.name,
+        COALESCE(SUM(ic.amount_changed), 0) AS quantity
+      FROM program p
+      JOIN program_update pu ON pu.program_id = p.id
+      JOIN instrument_change ic ON ic.update_id = pu.id
+      JOIN instrument i ON i.id = ic.instrument_id
+      WHERE p.id = $1
+      GROUP BY i.id, i.name
+      ORDER BY i.name ASC;
+      `,
+      [id]
+    );
+
+    res.status(200).json(keysToCamel(rows));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 //program directors names for program
 programRouter.get("/:id/program-directors", async (req, res) => {
   try {
@@ -226,6 +256,7 @@ programRouter.get("/:id/program-directors", async (req, res) => {
     const result = await db.query(
       `
       SELECT 
+        u.id AS user_id,
         u.first_name,
         u.last_name
       FROM program_director pd
@@ -238,7 +269,7 @@ programRouter.get("/:id/program-directors", async (req, res) => {
     const directors = result.map(row => ({
       userId: row.user_id,
       firstName: row.first_name,
-      lastName: row.last_name
+      lastName: row.last_name,
     }));
 
     res.status(200).json(directors);

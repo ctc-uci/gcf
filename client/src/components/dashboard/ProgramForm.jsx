@@ -26,24 +26,33 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 
 
 // sub-component for adding instruments
-const InstrumentForm = ( { setFormData }) => {
+const InstrumentForm = ({ setFormData }) => {
     const [instruments, setInstruments] = useState([]);
     const [quantity, setQuantity] = useState(0);
-    const [selectedInstrument, setSelectedInstrument] = useState('');
+    const [selectedInstrumentId, setSelectedInstrumentId] = useState('');
     const { backend } = useBackendContext();
 
     function handleSubmit() {
-        if (!selectedInstrument || quantity === 0) return;
+        if (!selectedInstrumentId || quantity === 0) return;
+
+        const instrumentObj = instruments.find(
+            (instrument) => String(instrument.id) === String(selectedInstrumentId)
+        );
+        if (!instrumentObj) return;
 
         setFormData((prevData) => ({
             ...prevData,
             instruments: {
                 ...prevData.instruments,
-                [selectedInstrument]: quantity,
-            }
+                [selectedInstrumentId]: {
+                    id: Number(selectedInstrumentId),
+                    name: instrumentObj.name,
+                    quantity,
+                },
+            },
         }));
 
-        setSelectedInstrument('');
+        setSelectedInstrumentId('');
         setQuantity(0);
     }
 
@@ -73,13 +82,14 @@ const InstrumentForm = ( { setFormData }) => {
        <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
             <Select
                 placeholder="Select Instrument" 
-                value={selectedInstrument} 
-                onChange={(e) => setSelectedInstrument(e.target.value)}
+                value={selectedInstrumentId} 
+                onChange={(e) => setSelectedInstrumentId(e.target.value)}
             >
-                {instruments.map((instrument) => {
-                    return <option key = {instrument.id} value = {instrument.name}>{instrument.name}</option>
-                })} 
-                
+                {instruments.map((instrument) => (
+                    <option key={instrument.id} value={instrument.id}>
+                        {instrument.name}
+                    </option>
+                ))}
             </Select>
             <NumberInput 
                 step={1} 
@@ -112,7 +122,13 @@ const ProgramDirectorForm = ( { formState, setFormData }) => {
         async function fetchProgramDirectors() {
             const response = await backend.get("/program-directors/program-director-names");
             const directors = response.data;
-            setProgramDirectors(directors);
+            
+            //avoid dup key error
+            const uniqueDirectors = Array.from(
+                new Map((directors || []).map((d) => [d.userId, d])).values()
+            );
+
+            setProgramDirectors(uniqueDirectors);
         }
         // fetch all program directors from db
         fetchProgramDirectors();
@@ -218,8 +234,8 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     const [countries, setCountries] = useState([]);
     const { currentUser } = useAuthContext(); 
 
-    const [enrollmentChange, setEnrollmentChnage] = useState(0);
-    const [updateNote, setUpdateNote] = useState('');
+    const [initialProgramDirectorIds, setInitialProgramDirectorIds] = useState([]);
+    const [initialInstrumentQuantities, setInitialInstrumentQuantities] = useState({});
 
 
     const [formState, setFormState] = useState({
@@ -230,7 +246,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         country: null,
         students: 0,
         instruments: {
-         },
+        },
         language: null,
         programDirectors: [],
         curriculumLinks: {
@@ -241,7 +257,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     useEffect(() => {
 
         async function loadProgramRegionData(){
-            if(!program){ //reset form data on new country
+            if(!program){ //reset form data on new program
                 setFormState({
                     status: null,
                     programName: null,
@@ -255,6 +271,8 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                     curriculumLinks: {},
                     media: []
                   });
+                setInitialProgramDirectorIds([]);
+                setInitialInstrumentQuantities({});
                 return;
             }
 
@@ -273,6 +291,33 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
 
 
             
+            const mappedProgramDirectors = (program.programDirectors ?? []).map(d => ({
+                userId: d.userId ?? d.id ?? d.user_id,
+                firstName: d.firstName,
+                lastName: d.lastName,
+            }));
+
+            // Fetch aggregated instruments for this program so we can show
+            // current instrument quantities and compute changes on save.
+            let instrumentMap = {};
+            let initialInstrumentMap = {};
+            try {
+                const instrumentsResponse = await backend.get(`/program/${program.id}/instruments`);
+                const instruments = instrumentsResponse.data || [];
+                instruments.forEach((inst) => {
+                    const id = inst.instrumentId ?? inst.id;
+                    if (!id) return;
+                    instrumentMap[id] = {
+                        id,
+                        name: inst.name,
+                        quantity: inst.quantity ?? 0,
+                    };
+                    initialInstrumentMap[id] = inst.quantity ?? 0;
+                });
+            } catch (err) {
+                console.error("Error fetching program instruments:", err);
+            }
+
             setFormState({
                 status: program.status ?? null,
                 programName: program.title ?? '',
@@ -280,15 +325,11 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 regionId: regionId,
                 country: program.country ?? null,
                 students: program.students ?? 0,
-                instruments: {},
+                instruments: instrumentMap,
                 language: program.primaryLanguage?.toLowerCase() ?? null,
 
 
-                programDirectors: (program.programDirectors ?? []).map(d => ({
-                    userId: d.userId ?? d.id ?? d.user_id,
-                    firstName: d.firstName,
-                    lastName: d.lastName,
-                })),
+                programDirectors: mappedProgramDirectors,
 
                 curriculumLinks: Array.isArray(program.playlists)
                     ? program.playlists.reduce((acc, playlist) => {
@@ -300,6 +341,10 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                     : {},
                 media: program.media ?? []
             });
+            setInitialProgramDirectorIds(
+                mappedProgramDirectors.map(d => d.userId).filter(Boolean)
+            );
+            setInitialInstrumentQuantities(initialInstrumentMap);
             regionId = null;
 
         }
@@ -363,15 +408,15 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
 
             }
 
-            //need to handle program directors, enrollments, instruments seperattly
-
+            // need to handle program directors, enrollments, instruments separately
+            // Only POST newly added directors; skip the ones that were already linked
+            // when the form initially loaded, to avoid duplicate-key errors.
             if (formState.programDirectors.length > 0) {
                 for (const director of formState.programDirectors) {
-                    
-
-                    // only post new program directors 
-                    if (director.userId){
-                    
+                    if (
+                        director.userId &&
+                        !initialProgramDirectorIds.includes(director.userId)
+                    ) {
                         await backend.post(`/program-directors`, {
                             userId: director.userId,
                             programId
@@ -380,23 +425,60 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 }
             }
 
+            // Compute student enrollment change
             const studentCountChange = formState.students - oldStudentCount;
-            if( studentCountChange !== 0){
+
+            // Compute per-instrument changes relative to initial quantities
+            const instrumentChanges = [];
+            const allInstrumentIds = new Set([
+                ...Object.keys(initialInstrumentQuantities || {}),
+                ...Object.keys(formState.instruments || {}),
+            ]);
+
+            for (const id of allInstrumentIds) {
+                const newQty = formState.instruments?.[id]?.quantity ?? 0;
+                const oldQty = initialInstrumentQuantities?.[id] ?? 0;
+                const instrumentDiff = newQty - oldQty;
+                if (instrumentDiff !== 0) {
+                    instrumentChanges.push({
+                        instrumentId: Number(id),
+                        amountChanged: instrumentDiff,
+                    });
+                }
+            }
+
+            const hasStudentChange = studentCountChange !== 0;
+            const hasInstrumentChange = instrumentChanges.length > 0;
+
+            // If nothing changed in students or instruments, skip creating a program update
+            if (hasStudentChange || hasInstrumentChange) {
                 const updateResponse = await backend.post(`/program-updates`, {
-                    title: 'update student count',
+                    title: 'update program stats',
                     program_id: programId,
                     created_by: currentUser?.uid || currentUser?.id,
                     update_date: new Date().toISOString(),
-                    note: ''
+                    note: '',
                 });
-                
 
-                await backend.post(`/enrollmentChange`, {
-                    update_id: updateResponse.data.id,
-                    enrollment_change: studentCountChange,
-                    graduated_change: 0
-                });
-                
+                const updateId = updateResponse.data.id;
+
+                if (hasStudentChange) {
+                    await backend.post(`/enrollmentChange`, {
+                        update_id: updateId,
+                        enrollment_change: studentCountChange,
+                        graduated_change: 0
+                    });
+                }
+
+                if (hasInstrumentChange) {
+                    for (const instrumentChange of instrumentChanges) {
+                        await backend.post(`/instrument-changes`, {
+                            instrumentId: instrumentChange.instrumentId,
+                            updateId,
+                            amountChanged: instrumentChange.amountChanged,
+                        });
+                    }
+                }
             }
 
 
@@ -519,17 +601,29 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                                 setFormData={setFormState} 
                             />
 
-                            {Object.keys(formState.instruments).map((instrument) => (
-                                <Tag key={instrument}> 
-                                    <TagLabel>{instrument}: {formState.instruments[instrument]}</TagLabel>
-                                    <TagCloseButton onClick={() => {
-                                        setFormState((prevData) => {
-                                            const { [instrument]: _, ...remainingInstruments } = prevData.instruments;
-                                            return { ...prevData, instruments: remainingInstruments };
-                                        });
-                                    }} />
-                                </Tag>
-                            ))}
+                            {Object.entries(formState.instruments || {}).map(
+                                ([instrumentId, instrumentData]) => (
+                                    <Tag key={instrumentId}>
+                                        <TagLabel>
+                                            {instrumentData.name}: {instrumentData.quantity}
+                                        </TagLabel>
+                                        <TagCloseButton
+                                            onClick={() => {
+                                                setFormState((prevData) => {
+                                                    const {
+                                                        [instrumentId]: _,
+                                                        ...remainingInstruments
+                                                    } = prevData.instruments;
+                                                    return {
+                                                        ...prevData,
+                                                        instruments: remainingInstruments,
+                                                    };
+                                                });
+                                            }}
+                                        />
+                                    </Tag>
+                                )
+                            )}
                         </HStack>
                         <h3>Language</h3>
                         <Select 
