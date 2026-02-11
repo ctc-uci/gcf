@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Box, Center, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
+import { Box, Center, Flex, Heading, Spinner } from "@chakra-ui/react";
 
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useParams } from "react-router-dom";
@@ -12,14 +12,13 @@ export const Account = () => {
   // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid) when auth flow is finalized.
   const { userId } = useParams();
 
-  const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [originalUsers, setOriginalUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   const { backend } = useBackendContext();
-
+  // TODO: potentially create toggleable view for ALL accounts vs. only accounts created by the current user
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -31,61 +30,18 @@ export const Account = () => {
       }
 
       try {
-        const currentUserResponse = await backend.get(`/gcf-users/${userId}`);
-        const userData = currentUserResponse.data;
+        const response = await backend.get(`/gcf-users/${userId}/accounts`);
 
-        setCurrentUser(userData);
-
-        if (!userData) {
-          console.error("Current user data is null");
-
-          setIsLoading(false);
-          return;
-        }
-
-        let fetchedData = [];
-
-        if (userData.role === "Admin") {
-          const response = await backend.get(
-            `/gcf-users/${userData.id}/accounts`
-          );
-
-          // TODO: Update email and password fields when data is available
-          fetchedData = response.data.map((item) => {
-            let programs = [];
-
-            if (item.role === "Regional Director") {
-              programs = item.programs || [];
-            } else if (item.programName) {
-              programs = [item.programName];
-            }
-
-            return {
-              id: item.id,
-              firstName: item.firstName,
-              lastName: item.lastName,
-              role: item.role,
-              programs: programs,
-              email: "-",
-              password: "-",
-            };
-          });
-        } else if (userData.role === "Regional Director") {
-          const programDirectorResponse = await backend.get(
-            `/regional-directors/${userId}/program-directors`
-          );
-
-          // TODO: Update email and password fields when data is available
-          fetchedData = programDirectorResponse.data.map((item) => ({
-            id: item.id,
-            firstName: item.firstName,
-            lastName: item.lastName,
-            role: "Program Director",
-            programs: item.programName ? [item.programName] : [],
-            email: "-",
-            password: "-",
-          }));
-        }
+        // TODO: Update email and password fields when data is available
+        const fetchedData = (response.data || []).map((item) => ({
+          id: item.id,
+          firstName: item.firstName,
+          lastName: item.lastName,
+          role: item.role,
+          programs: Array.isArray(item.programs) ? item.programs : [],
+          email: "-",
+          password: "-",
+        }));
 
         setUsers(fetchedData);
         setOriginalUsers(fetchedData);
