@@ -135,7 +135,7 @@ export const Login = () => {
         <GridItem>
           <Box
             borderRight="3px solid"
-            h="100%"
+            h="100vh"
           >
             <AbsoluteCenter left="25%">
               <Text

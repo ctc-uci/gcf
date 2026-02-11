@@ -1,5 +1,6 @@
 import { keysToCamel } from "@/common/utils";
 import express from "express";
+
 import { db } from "../db/db-pgp";
 
 const programRouter = express.Router();
@@ -19,12 +20,28 @@ programRouter.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const program = await db.query(
-      `SELECT * FROM program WHERE id = $1`,
-      [id]
-    );
+    const program = await db.query(`SELECT * FROM program WHERE id = $1`, [id]);
 
-    if (program.length === 0){
+    if (program.length === 0) {
+      return res.status(404).send("Item not found");
+    }
+
+    res.status(200).json(keysToCamel(program[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+programRouter.get("/get-name/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const program = await db.query(`SELECT name FROM program WHERE id = $1`, [
+      id,
+    ]);
+
+    if (program.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -49,7 +66,7 @@ programRouter.post("/", async (req, res) => {
       status,
       launchDate,
     } = req.body;
-    
+
     const newProgram = await db.query(
       `
       INSERT INTO program (
@@ -103,7 +120,7 @@ programRouter.put("/:id", async (req, res) => {
       playlistLink,
       partnerOrg,
       status,
-      launchDate
+      launchDate,
     } = req.body;
 
     const updatedProgram = await db.query(
@@ -131,11 +148,11 @@ programRouter.put("/:id", async (req, res) => {
         partnerOrg,
         status,
         launchDate,
-        id
+        id,
       ]
     );
 
-    if (updatedProgram.length === 0){
+    if (updatedProgram.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -155,7 +172,7 @@ programRouter.delete("/:id", async (req, res) => {
       [id]
     );
 
-    if (deletedProgram.length === 0){
+    if (deletedProgram.length === 0) {
       return res.status(404).send("Item not found");
     }
 

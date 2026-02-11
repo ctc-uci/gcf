@@ -1,5 +1,6 @@
 import { keysToCamel } from "@/common/utils";
 import express from "express";
+
 import { db } from "../db/db-pgp";
 
 const regionRouter = express.Router();
@@ -18,12 +19,29 @@ regionRouter.get("/", async (req, res) => {
 regionRouter.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const region = await db.query(
-      `SELECT ALL * FROM region WHERE id = $1`,
-      [id]
-    );
+    const region = await db.query(`SELECT ALL * FROM region WHERE id = $1`, [
+      id,
+    ]);
 
-    if (region.length === 0){
+    if (region.length === 0) {
+      return res.status(404).send("Item not found");
+    }
+
+    res.status(200).json(keysToCamel(region[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+regionRouter.get("get-region/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const region = await db.query(`SELECT name FROM region WHERE id = $1`, [
+      id,
+    ]);
+
+    if (region.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -36,7 +54,7 @@ regionRouter.get("/:id", async (req, res) => {
 
 regionRouter.post("/", async (req, res) => {
   try {
-    const {name, last_modified } = req.body
+    const { name, last_modified } = req.body;
     const newRegion = await db.query(
       `INSERT INTO region (name, last_modified) 
       VALUES ($1, $2) 
@@ -63,7 +81,7 @@ regionRouter.put("/:id", async (req, res) => {
       [name, last_modified, id]
     );
 
-    if (updatedRegion.length === 0){
+    if (updatedRegion.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -77,12 +95,12 @@ regionRouter.put("/:id", async (req, res) => {
 regionRouter.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedRegion= await db.query(
+    const deletedRegion = await db.query(
       `DELETE FROM region WHERE id = $1 RETURNING *`,
       [id]
     );
 
-    if (deletedRegion.length === 0){
+    if (deletedRegion.length === 0) {
       return res.status(404).send("Item not found");
     }
 

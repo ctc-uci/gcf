@@ -1,6 +1,9 @@
+import { useEffect, useState } from "react";
+
 import { Button, Flex, Icon, Image, Link, Text } from "@chakra-ui/react";
 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
+import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useRoleContext } from "@/contexts/hooks/useRoleContext";
 import { HiOutlineLogout, HiOutlineUser } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
@@ -14,15 +17,50 @@ interface NavbarProps {
 
 export const Navbar = () => {
   const { role } = useRoleContext();
-  const region = "North America"; // placeholder for region
-  const project = "Royal Kids Family Camp"; // placeholder for project
   const { logout } = useAuthContext();
+  const { currentUser } = useAuthContext();
+  const { backend } = useBackendContext();
+  const userId = currentUser?.uid;
+  const [region, setRegion] = useState(""); // placeholder for region
+  const [project, setProject] = useState(""); // placeholder for project
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
     navigate("/login");
   };
+
+  const fetchData = async (table, path) => {
+    try {
+      const response = await backend.get(`/${table}/${path}`);
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Request failed:",
+        path,
+        error.response?.status,
+        error.message
+      );
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [regionData, projectData] = await Promise.all([
+          fetchData("region", `get-region/${userId}`),
+          fetchData("program", `get-program/${userId}`),
+        ]);
+
+        setRegion(regionData);
+        setProject(projectData);
+      } catch (error) {
+        console.error("Fetch error:", error);
+      }
+    };
+    loadData();
+  }, [userId, backend]);
 
   return (
     <Flex
@@ -54,9 +92,7 @@ export const Navbar = () => {
       >
         <Text fontSize="2vh">
           {role === "Admin" ? "Admin Dashboard" : ""}
-          {role === "Regional Director"
-            ? "Regional Director Dashboard"
-            : ""}
+          {role === "Regional Director" ? "Regional Director Dashboard" : ""}
           {role === "Program Director" ? `${project}` : ""}
 
           {role === "Regional Director" ? `: ${region}` : ""}
