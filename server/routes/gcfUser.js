@@ -90,7 +90,7 @@ gcfUserRouter.get("/:id/accounts", async (req, res) => {
       );
     }
     // Regional Director: only program directors in their region with their programs
-    else if (role === "regionalDirector") {
+    else if (role === "Regional Director") {
       accounts = await db.query(
         `SELECT 
           u.id,
