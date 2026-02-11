@@ -11,8 +11,8 @@ import {
   Spinner,
   Text,
   Textarea,
+  useToast,
   VStack,
-  useToast
 } from "@chakra-ui/react";
 
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
@@ -21,7 +21,9 @@ export function MediaPreview({ file, onComplete }) {
   const { backend } = useBackendContext();
   const toast = useToast();
 
-  const [title, setTitle] = useState(file.name);
+  const [title, setTitle] = useState(() => {
+    return file.name.replace(/\.[^/.]+$/, "");
+  });
   const [description, setDescription] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
@@ -33,8 +35,14 @@ export function MediaPreview({ file, onComplete }) {
     setIsUploading(true);
 
     try {
+      const extension = file.name.includes(".")
+        ? file.name.slice(file.name.lastIndexOf("."))
+        : "";
+
+      const keyFileName = `${title.trim()}${extension}`;
+
       const { data: s3Data } = await backend.post("/images/upload-url", {
-        fileName: file.name,
+        fileName: keyFileName,
         contentType: file.type,
       });
 
@@ -46,6 +54,13 @@ export function MediaPreview({ file, onComplete }) {
         headers: { "Content-Type": file.type },
       });
 
+      onComplete({
+        s3_key: s3Data.key,
+        file_name: file.name,
+        title: title,
+        description: description,
+      });
+
       toast({
         title: "Upload successful.",
         description: `${file.name} has been uploaded to the server.`,
@@ -54,19 +69,12 @@ export function MediaPreview({ file, onComplete }) {
         isClosable: true,
         position: "bottom-right",
       });
-
-      onComplete({
-        s3_key: s3Data.key,
-        file_name: file.name,
-        title: title,
-        description: description,
-      });
     } catch (error) {
       console.error("Upload failed:", error);
 
       toast({
         title: "Upload failed.",
-        description: error.message || "There was an error uploading your file.",
+        description: "There was an error uploading your file.",
         status: "error",
         duration: 5000,
         isClosable: true,
