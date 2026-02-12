@@ -10,13 +10,14 @@ import {
   TableContainer,
   IconButton,
   HStack,
+  VStack,
   Box,
   Button,
   Divider,
   Spinner,
   Center,
 } from "@chakra-ui/react";
-import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon } from "@chakra-ui/icons";
+import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon, ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useTableSort } from "../../contexts/hooks/TableSort";
@@ -60,6 +61,22 @@ const MAP_BY_ROLE = {
   admin: mapAdminRow,
   regionalDirector: mapRdRow,
 };
+
+const SORT_ARROW_OPACITY_FADED = 0.35;
+
+function SortArrows({ columnKey, sortOrder }) {
+  const { currentSortColumn, prevSortColumn } = sortOrder;
+  const isActive = currentSortColumn === columnKey;
+  const stored = prevSortColumn[columnKey];
+  const upHighlight = isActive && stored === "DESCENDING";
+  const downHighlight = isActive && stored === "UNSORTED";
+  return (
+    <VStack as="span" spacing={0} ml={1} display="inline-flex" verticalAlign="middle">
+      <Box as={ChevronUpIcon} boxSize={3} opacity={upHighlight ? 1 : SORT_ARROW_OPACITY_FADED} aria-hidden />
+      <Box as={ChevronDownIcon} boxSize={3} mt={-1} opacity={downHighlight ? 1 : SORT_ARROW_OPACITY_FADED} aria-hidden />
+    </VStack>
+  );
+}
 
 function ProgramDisplay({ data, setData, originalData, searchQuery, setSearchQuery, isLoading }) {
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
@@ -150,13 +167,13 @@ function ProgramDisplay({ data, setData, originalData, searchQuery, setSearchQue
         <Table variant="simple">
           <Thead>
             <Tr>
-              <Th onClick={() => handleSort("title")} cursor="pointer">Program</Th>
-              <Th onClick={() => handleSort("status")} cursor="pointer">Status</Th>
-              <Th onClick={() => handleSort("launchDate")} cursor="pointer">Launch Date</Th>
-              <Th onClick={() => handleSort("location")} cursor="pointer">Location</Th>
-              <Th onClick={() => handleSort("students")} cursor="pointer">Students</Th>
-              <Th onClick={() => handleSort("instruments")} cursor="pointer">Instruments</Th>
-              <Th onClick={() => handleSort("totalInstruments")} cursor="pointer">Total Instruments</Th>
+              <Th onClick={() => handleSort("title")} cursor="pointer">Program <SortArrows columnKey="title" sortOrder={sortOrder} /></Th>
+              <Th onClick={() => handleSort("status")} cursor="pointer">Status <SortArrows columnKey="status" sortOrder={sortOrder} /></Th>
+              <Th onClick={() => handleSort("launchDate")} cursor="pointer">Launch Date <SortArrows columnKey="launchDate" sortOrder={sortOrder} /></Th>
+              <Th onClick={() => handleSort("location")} cursor="pointer">Location <SortArrows columnKey="location" sortOrder={sortOrder} /></Th>
+              <Th onClick={() => handleSort("students")} cursor="pointer">Students <SortArrows columnKey="students" sortOrder={sortOrder} /></Th>
+              <Th onClick={() => handleSort("instruments")} cursor="pointer">Instruments <SortArrows columnKey="instruments" sortOrder={sortOrder} /></Th>
+              <Th onClick={() => handleSort("totalInstruments")} cursor="pointer">Total Instruments <SortArrows columnKey="totalInstruments" sortOrder={sortOrder} /></Th>
             </Tr>
           </Thead>
           <Tbody>
