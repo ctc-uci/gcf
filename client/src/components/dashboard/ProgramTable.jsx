@@ -17,11 +17,12 @@ import {
   Spinner,
   Center,
 } from "@chakra-ui/react";
-import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon, ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon } from "@chakra-ui/icons";
 import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useTableSort } from "../../contexts/hooks/TableSort";
 import { ProgramForm } from "./ProgramForm";
+import { SortArrows } from "../tables/SortArrows"
 
 const getRouteByRole = (role, userId) => {
   const routes = {
@@ -62,21 +63,6 @@ const MAP_BY_ROLE = {
   regionalDirector: mapRdRow,
 };
 
-const SORT_ARROW_OPACITY_FADED = 0.35;
-
-function SortArrows({ columnKey, sortOrder }) {
-  const { currentSortColumn, prevSortColumn } = sortOrder;
-  const isActive = currentSortColumn === columnKey;
-  const stored = prevSortColumn[columnKey];
-  const upHighlight = isActive && stored === "DESCENDING";
-  const downHighlight = isActive && stored === "UNSORTED";
-  return (
-    <VStack as="span" spacing={0} ml={1} display="inline-flex" verticalAlign="middle">
-      <Box as={ChevronUpIcon} boxSize={3} opacity={upHighlight ? 1 : SORT_ARROW_OPACITY_FADED} aria-hidden />
-      <Box as={ChevronDownIcon} boxSize={3} mt={-1} opacity={downHighlight ? 1 : SORT_ARROW_OPACITY_FADED} aria-hidden />
-    </VStack>
-  );
-}
 
 function ProgramDisplay({ data, setData, originalData, searchQuery, setSearchQuery, isLoading }) {
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
