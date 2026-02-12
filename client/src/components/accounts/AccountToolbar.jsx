@@ -13,7 +13,7 @@ import {
 
 import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from "react-icons/fi";
 
-export const AccountToolbar = () => {
+export const AccountToolbar = ( {onNew} ) => {
   // TODO: Implement functionality for search, filter, view toggle, download, and new account
   return (
     <Flex
@@ -90,6 +90,7 @@ export const AccountToolbar = () => {
             +
           </Text>
         }
+        onClick = {onNew}
       >
         New
       </Button>

@@ -11,27 +11,17 @@ import {
   Select,
   Button,
   VStack,
-  Tag, 
-  HStack,
-  Heading,
-  useDisclosure
 } from "@chakra-ui/react";
-import { useRef, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext' 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext"
-import { Form, useParams } from "react-router-dom"
 
-export const AccountForm = () => {
-    const { targetUserId } = useParams();
-    const [targetUser, setTargetUser] = useState(null);
+export const AccountForm = ({ targetUser, isOpen, onClose }) => {
     const { currentUser } = useAuthContext();
-    const [currentDbUser, setCurrentDbUser] = useState(null);
     const { backend } = useBackendContext();
-    const { isOpen, onOpen, onClose } = useDisclosure();
     const [currentPrograms, setCurrentPrograms] = useState(null);
-    const btnRef = useRef();
-
     const userId = currentUser?.uid;
+    const targetUserId = targetUser?.id; 
 
     const [ formData, setFormData ] = useState({
         first_name: '',
@@ -43,47 +33,45 @@ export const AccountForm = () => {
     });
 
     const [isLoading, setIsLoading] = useState(null);
-    
-    useEffect(() => {
-        if (!userId) return;
-        // fetch current users data to see role and what permissions they have
-        const fetchData = async () => {
-            try {
-                const currentUserResponse = await backend.get(`/gcf-users/${userId}`);
-                const currentUserData = currentUserResponse.data;
-                setCurrentDbUser(currentUserData);
-            } catch (error) {
-                console.error("Error loading current user:", error)
-            }
-        };
-        fetchData();
-    }, [backend, userId]);
 
     useEffect(() => {
-        if (!targetUserId) return;
-        const fetchData = async () => {
-            try {
-                const targetUserResponse = await backend.get(`/gcf-users/${targetUserId}`);
-                const targetUserData = targetUserResponse.data;
-                setTargetUser(targetUserData);
-            }   
-            catch (error){
-                console.error("Error loading target user: ", error)
-            }
-        };
-        fetchData();
-    }, [backend, targetUserId]);
+        if (!targetUser) {
+            setFormData({
+                first_name: '',
+                last_name: '',
+                role: '',
+                email: '',
+                password: '',
+                programs: []
+            });
+        } else {
+            setFormData({
+                first_name: targetUser.firstName ?? "",
+                last_name: targetUser.lastName ?? "",
+                role: targetUser.role ?? "",
+                email: targetUser.email ?? "",  
+                password: '',
+                programs: []
+            });
 
-    useEffect(() => {
-        if (!targetUser) return;
-        setFormData({
-            first_name: targetUser.firstName ?? "",
-            last_name: targetUser.lastName ?? "",
-            role: targetUser.role ?? "",
-            password: '',
-            programs: []
-        });
-    }, [targetUser]);
+            // Fetches email if not in prop
+            if (!targetUser.email && targetUserId) {
+                const fetchEmail = async () => {
+                    try {
+                        const response = await backend.get(`/gcf-users/admin/get-user/${targetUserId}`);
+                        setFormData(prev => ({
+                            ...prev,
+                            email: response.data.email ?? ""
+                        }));
+                    } catch (error) {
+                        console.error("Error loading target user email", error);
+                    }
+                };
+                fetchEmail();
+            }
+        }
+    }, [targetUser, targetUserId, backend]);
+
 
     useEffect(() => {
         if (!targetUserId) return;
@@ -142,21 +130,6 @@ export const AccountForm = () => {
         fetchUserPrograms();
     },  [backend, targetUserId, targetUser]);
 
-
-    if (!currentUser) return <div>Please sign in</div>;
-    
-    if (!currentDbUser) {
-        return <div>Loading...</div>;
-    }
-
-    if (!currentDbUser.role) {
-        return <div>Your account is not set up in the database. Please contact an administrator.</div>;
-    }
-
-    if (currentDbUser && currentDbUser.role !== "Admin") {
-        return <div>Access denied. Admins only.</div>;
-    }
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({...prev, [name]: value}))
@@ -205,7 +178,7 @@ export const AccountForm = () => {
             firstName: formData.first_name,
             lastName: formData.last_name,
             role: formData.role,
-            currentUserId: currentDbUser.id,
+            currentUserId: userId,
             programId: formData.programs.length > 0 ? formData.programs[0].id : null
         }
         await backend.post('/gcf-users/admin/create-user', userData);
@@ -220,7 +193,7 @@ export const AccountForm = () => {
             firstName: formData.first_name,
             lastName: formData.last_name,
             role: formData.role,
-            currentUserId: currentDbUser.id,
+            currentUserId: userId,
             targetId: targetUserId,
             programId: formData.programs.length > 0 ? formData.programs[0].id : null
         }
@@ -233,13 +206,12 @@ export const AccountForm = () => {
     }
 
     return (
-        <> 
-            <Button ref = { btnRef } colorScheme='teal' onClick={onOpen}>Update</Button>
+        <>
             <Drawer 
                 isOpen={isOpen}
                 placement='right'
                 onClose={onClose}
-                finalFocusRef={btnRef}>
+            >
                 <DrawerOverlay />
                 <DrawerContent>
                     <DrawerCloseButton />

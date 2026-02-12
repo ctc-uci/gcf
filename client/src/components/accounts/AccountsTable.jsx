@@ -1,4 +1,4 @@
-import {
+ import {
   Badge,
   Box,
   Button,
@@ -17,7 +17,7 @@ import {
 
 import { FiEdit2, FiEyeOff } from "react-icons/fi";
 
-export const AccountsTable = ({ data }) => {
+export const AccountsTable = ({ data, onUpdate}) => {
   const hoverBg = useColorModeValue("gray.50", "gray.700");
 
   return (
@@ -143,6 +143,7 @@ export const AccountsTable = ({ data }) => {
                     leftIcon={<FiEdit2 />}
                     colorScheme="gray"
                     bg="white"
+                    onClick={() => onUpdate(user)}
                   >
                     Update
                   </Button>

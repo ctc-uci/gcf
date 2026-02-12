@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 
 import { AccountsTable } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
+import { AccountForm } from "./AccountForm";
 
 export const Account = () => {
   // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid) when auth flow is finalized.
@@ -15,6 +16,8 @@ export const Account = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false); 
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const { backend } = useBackendContext();
 
@@ -116,7 +119,10 @@ export const Account = () => {
           Accounts
         </Heading>
 
-        <AccountToolbar />
+        <AccountToolbar onNew = {() => {
+          setIsDrawerOpen(true);
+          setSelectedUser(null)
+        }}/>
       </Flex>
 
       {isLoading ? (
@@ -131,8 +137,12 @@ export const Account = () => {
           <Text color="gray.500">No accounts found.</Text>
         </Center>
       ) : (
-        <AccountsTable data={users} />
+        <AccountsTable data={users} onUpdate = {(user) => {
+          setSelectedUser(user)
+          setIsDrawerOpen(true)
+        }}/>
       )}
+      <AccountForm targetUser = {selectedUser} isOpen = { isDrawerOpen } onClose = {() => setIsDrawerOpen(false)}></AccountForm>
     </Box>
   );
 };
