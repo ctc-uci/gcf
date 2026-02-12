@@ -150,13 +150,13 @@ function ProgramDisplay({ data, setData, originalData, searchQuery, setSearchQue
         <Table variant="simple">
           <Thead>
             <Tr>
-              <Th><Button variant="ghost" onClick={() => handleSort("title")}>Program</Button></Th>
-              <Th><Button variant="ghost" onClick={() => handleSort("status")}>Status</Button></Th>
-              <Th><Button variant="ghost" onClick={() => handleSort("launchDate")}>Launch Date</Button></Th>
-              <Th><Button variant="ghost" onClick={() => handleSort("location")}>Location</Button></Th>
-              <Th><Button variant="ghost" onClick={() => handleSort("students")}>Students</Button></Th>
-              <Th><Button variant="ghost" onClick={() => handleSort("instruments")}>Instruments</Button></Th>
-              <Th><Button variant="ghost" onClick={() => handleSort("totalInstruments")}>Total Instruments</Button></Th>
+              <Th onClick={() => handleSort("title")} cursor="pointer">Program</Th>
+              <Th onClick={() => handleSort("status")} cursor="pointer">Status</Th>
+              <Th onClick={() => handleSort("launchDate")} cursor="pointer">Launch Date</Th>
+              <Th onClick={() => handleSort("location")} cursor="pointer">Location</Th>
+              <Th onClick={() => handleSort("students")} cursor="pointer">Students</Th>
+              <Th onClick={() => handleSort("instruments")} cursor="pointer">Instruments</Th>
+              <Th onClick={() => handleSort("totalInstruments")} cursor="pointer">Total Instruments</Th>
             </Tr>
           </Thead>
           <Tbody>
