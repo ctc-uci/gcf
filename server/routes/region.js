@@ -34,12 +34,17 @@ regionRouter.get("/:id", async (req, res) => {
   }
 });
 
-regionRouter.get("get-region/:id", async (req, res) => {
+regionRouter.get("/get-region-name/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const region = await db.query(`SELECT name FROM region WHERE id = $1`, [
-      id,
-    ]);
+    const region = await db.query(
+      `SELECT name
+      FROM region
+      INNER JOIN regional_director ON region.id = regional_director.region_id
+      INNER JOIN gcf_user ON regional_director.user_id = gcf_user.id
+      WHERE gcf_user.id = $1`,
+      [id]
+    );
 
     if (region.length === 0) {
       return res.status(404).send("Item not found");

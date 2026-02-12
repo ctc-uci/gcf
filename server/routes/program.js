@@ -33,13 +33,17 @@ programRouter.get("/:id", async (req, res) => {
   }
 });
 
-programRouter.get("/get-name/:id", async (req, res) => {
+programRouter.get("/get-program-name/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const program = await db.query(`SELECT name FROM program WHERE id = $1`, [
-      id,
-    ]);
+    const program = await db.query(
+      `SELECT name
+      FROM program
+      INNER JOIN program_director ON program_director.user_id = $1
+      WHERE program.id = program_director.program_id`,
+      [id]
+    );
 
     if (program.length === 0) {
       return res.status(404).send("Item not found");

@@ -36,8 +36,8 @@ import { ProgramForm } from "./ProgramForm";
 
 const getRouteByRole = (role, userId) => {
   const routes = {
-    admin: "/admin/programs",
-    regionalDirector: `/rdProgramTable/${userId}`,
+    Admin: "/admin/programs",
+    "Regional Director": `/rdProgramTable/${userId}`,
   };
   return routes[role];
 };
@@ -69,25 +69,14 @@ function mapRdRow(row) {
 }
 
 const MAP_BY_ROLE = {
-  admin: mapAdminRow,
-  regionalDirector: mapRdRow,
+  Admin: mapAdminRow,
+  "Regional Director": mapRdRow,
 };
-
-function keysToCamel(data) {
-  if (data === "Admin") {
-    return "admin";
-  } else if (data === "Regional Director") {
-    return "regionalDirector";
-  } else if (data === "Program Director") {
-    return "programDirector";
-  }
-}
 
 function ProgramTable() {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
-  const { role: realRole, loading: roleLoading } = useRoleContext();
-  const role = keysToCamel(realRole);
+  const { role, loading: roleLoading } = useRoleContext();
 
   const { backend } = useBackendContext();
   const [programs, setPrograms] = useState([]);
@@ -99,6 +88,8 @@ function ProgramTable() {
 
     const route = getRouteByRole(role, userId);
     const mapRow = MAP_BY_ROLE[role];
+
+    console.log(route, mapRow);
 
     if (!route || !mapRow) {
       setIsLoading(false);

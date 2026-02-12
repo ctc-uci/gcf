@@ -49,12 +49,12 @@ export const Navbar = () => {
     const loadData = async () => {
       try {
         const [regionData, projectData] = await Promise.all([
-          fetchData("region", `get-region/${userId}`),
-          fetchData("program", `get-program/${userId}`),
+          fetchData("region", `/get-region-name/${userId}`),
+          fetchData("program", `/get-program-name/${userId}`),
         ]);
 
-        setRegion(regionData);
-        setProject(projectData);
+        setRegion(regionData.name);
+        setProject(projectData.name);
       } catch (error) {
         console.error("Fetch error:", error);
       }
