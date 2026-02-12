@@ -42,12 +42,20 @@ export function useTableSort(originalData, setData) {
 
     setData((prevData) =>
       [...prevData].sort((a, b) => {
+        let first = a[column];
+        let second = b[column];
+
+        if (Array.isArray(first) && Array.isArray(second)) {
+          first = first.join(" ");
+          second = second.join(" ");
+        }
+        
         if (
           sortOrderCopy["prevSortColumn"][column] === sortCycle.ASCENDING
         ) {
-          return a[column].localeCompare(b[column]);
+          return first.localeCompare(second);
         } else {
-          return b[column].localeCompare(a[column]);
+          return second.localeCompare(first);
         }
       })
     );
