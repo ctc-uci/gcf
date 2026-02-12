@@ -48,7 +48,6 @@ export const Navbar: React.FC<NavbarProps> = ({ role }) => {
                 </Text>
                 
                 <Flex gap={2} align="center">
-                    {/* TODO: Add profile page */}
                     <Button
                         bg="white"
                         as={Link}
