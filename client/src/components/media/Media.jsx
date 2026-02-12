@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import {
   Box,
@@ -7,6 +7,7 @@ import {
   Container,
   Heading,
   Spinner,
+  useDisclosure,
   VStack,
 } from "@chakra-ui/react";
 
@@ -14,42 +15,44 @@ import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useParams } from "react-router-dom";
 
 import { MediaGrid } from "./MediaGrid";
+import { MediaUploadModal } from "./MediaUploadModal";
 
 export const Media = () => {
   // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid) when auth flow is finalized.
   const { userId } = useParams();
   const { backend } = useBackendContext();
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const [media, setMedia] = useState([]);
   const [programName, setProgramName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await backend.get(`/mediaChange/${userId}/media`);
 
-      try {
-        const response = await backend.get(`/mediaChange/${userId}/media`);
+      const transformedMedia = response.data.media.map((media) => ({
+        id: media.id,
+        s3_key: media.s3Key,
+        file_name: media.fileName,
+        file_type: media.fileType,
+        is_thumbnail: media.isThumbnail,
+      }));
 
-        const transformedMedia = response.data.media.map((media) => ({
-          id: media.id,
-          s3_key: media.s3Key,
-          file_name: media.fileName,
-          file_type: media.fileType,
-          is_thumbnail: media.isThumbnail,
-        }));
-
-        setMedia(transformedMedia);
-        setProgramName(response.data.programName);
-      } catch (error) {
-        console.error("Error loading media data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+      setMedia(transformedMedia);
+      setProgramName(response.data.programName);
+    } catch (error) {
+      console.error("Error loading media data:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [backend, userId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (isLoading) {
     return (
@@ -87,13 +90,13 @@ export const Media = () => {
               {programName} Media
             </Heading>
 
-            {/* TODO: Implement functionality for button */}
             <Button
               variant="outline"
               bg="white"
               borderColor="gray.800"
               color="gray.800"
               _hover={{ bg: "gray.50" }}
+              onClick={onOpen}
             >
               + New
             </Button>
@@ -105,6 +108,14 @@ export const Media = () => {
           </VStack>
         </Box>
       </Container>
+      <MediaUploadModal
+        isOpen={isOpen}
+        onClose={onClose}
+        onUploadComplete={() => {
+          fetchData();
+          onClose();
+        }}
+      />
     </Box>
   );
 };
