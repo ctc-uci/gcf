@@ -39,7 +39,7 @@ gcfUserRouter.get("/admin/get-user/:targetUserId", async (req, res) => {
 
 gcfUserRouter.post("/admin/create-user", async (req, res) => {
   try {
-    const { email, password, firstName, lastName, role, currentUserId, programId } = req.body;
+    const { email, password, firstName, lastName, role, currentUserId, programId, regionId } = req.body;
 
     const userRecord = await admin.auth().createUser({
       email: email,
@@ -64,6 +64,14 @@ gcfUserRouter.post("/admin/create-user", async (req, res) => {
       );
     }
 
+    if (role === 'Regional Director' && regionId) {
+      await db.query(
+        `INSERT INTO regional_director (user_id, region_id) 
+        VALUES ($1, $2)`,
+        [firebaseUid, regionId]
+      );
+    }
+
     res.status(201).json({ 
       uid: firebaseUid, 
       user: keysToCamel(newGcfUser[0]),
@@ -78,9 +86,9 @@ gcfUserRouter.post("/admin/create-user", async (req, res) => {
 
 gcfUserRouter.put("/admin/update-user", async (req, res) => {
   try {
-    const { email, password, firstName, lastName, role, currentUserId, targetId, programId } = req.body;
+    const { email, password, firstName, lastName, role, targetId, programId, regionId } = req.body;
 
-    const userRecord = await admin.auth().updateUser(targetId, {
+    await admin.auth().updateUser(targetId, {
       email: email,
       password: password,
       displayName: `${firstName} ${lastName}`
@@ -104,36 +112,50 @@ gcfUserRouter.put("/admin/update-user", async (req, res) => {
     );
 
     
-    if (role != oldRole) {
-      if (oldRole == 'Program Director') {
-        const deletedResponse = await db.query(
+    if (role !== oldRole) {
+      if (oldRole === 'Program Director') {
+        await db.query(
           `DELETE FROM program_director WHERE user_id = $1 RETURNING *`,
           [targetId]
         )
       }
-      if (oldRole == 'Regional Director') {
-        const deletedResponse = await db.query(
+      if (oldRole === 'Regional Director') {
+        await db.query(
           `DELETE FROM regional_director WHERE user_id = $1 RETURNING *`,
           [targetId]
         )
       }
       
-      if (role == 'Program Director') {
-        const insertResponse = await db.query(
+      if (role === 'Program Director' && programId) {
+        await db.query(
           `INSERT INTO program_director (user_id, program_id) 
           VALUES ($1, $2)`,
           [targetId, programId]
         )
       }
-      if (role == 'Program Director') {
-        const insertResponse = await db.query(
-          `INSERT INTO program_director (user_id, program_id) 
+      if (role === 'Regional Director' && regionId) {
+        await db.query(
+          `INSERT INTO regional_director (user_id, region_id) 
           VALUES ($1, $2)`,
-          [targetId, programId]
+          [targetId, regionId]
         )
       }
-      
+    } else {
+      // Update existing assignments if role hasn't changed
+      if (role === 'Program Director' && programId) {
+        await db.query(
+          `UPDATE program_director SET program_id = $1 WHERE user_id = $2`,
+          [programId, targetId]
+        )
+      }
+      if (role === 'Regional Director' && regionId) {
+        await db.query(
+          `UPDATE regional_director SET region_id = $1 WHERE user_id = $2`,
+          [regionId, targetId]
+        )
+      }
     }
+    
     res.status(201).json({ 
       uid: targetId, 
       user: keysToCamel(updatedGcfUser[0]),

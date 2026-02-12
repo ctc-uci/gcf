@@ -20,6 +20,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     const { currentUser } = useAuthContext();
     const { backend } = useBackendContext();
     const [currentPrograms, setCurrentPrograms] = useState(null);
+    const [currentRegions, setCurrentRegions] = useState(null);
     const userId = currentUser?.uid;
     const targetUserId = targetUser?.id; 
 
@@ -29,7 +30,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         role: '',
         email: '',
         password: '',
-        programs: []
+        programs: [],
+        regions: []
     });
 
     const [isLoading, setIsLoading] = useState(null);
@@ -42,7 +44,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 role: '',
                 email: '',
                 password: '',
-                programs: []
+                programs: [],
+                regions: []
             });
         } else {
             setFormData({
@@ -51,7 +54,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 role: targetUser.role ?? "",
                 email: targetUser.email ?? "",  
                 password: '',
-                programs: []
+                programs: [],
+                regions: []
             });
 
             if (!targetUser.email && targetUserId) {
@@ -82,7 +86,20 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 console.error("Error fetching programs", error);
             }
         }
+        
+        async function fetchRegions() {
+            try {
+                const response = await backend.get("/region");
+                const region_list = response.data;
+                setCurrentRegions(region_list);
+            }
+            catch (error) {
+                console.error("Error fetching regions", error);
+            }
+        }
+        
         fetchPrograms();
+        fetchRegions();
     }, [backend]);
 
     useEffect(() => {
@@ -90,25 +107,43 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         if (!targetUserId || !targetUser) return;
         
     
-        if (targetUser.role !== 'Program Director') return;
+        if (targetUser.role === 'Program Director') {
+            const fetchUserPrograms = async () => {
+                try {
+                    const response = await backend.get(`/program-directors/me/${targetUserId}/program`);
+                    const program = response.data;
+                    
+                    setFormData((prev) => ({
+                        ...prev,
+                        programs: [program]
+                    }));
+                } catch (error) {
+                    console.error("Error fetching user's programs:", error);
+                }
+            };
+            fetchUserPrograms();
+        }
         
-    
-        const fetchUserPrograms = async () => {
-            try {
-                const response = await backend.get(`/program-directors/me/${targetUserId}/program`);
-                const program = response.data;
-                
-                setFormData((prev) => ({
-                    ...prev,
-                    programs: [program]
-                }));
-            } catch (error) {
-                console.error("Error fetching user's programs:", error);
-            }
-        };
-    
-        fetchUserPrograms();
-    },  [backend, targetUserId, targetUser]);
+        if (targetUser.role === 'Regional Director') {
+            const fetchUserRegion = async () => {
+                try {
+                    const response = await backend.get(`/regional-directors/me/${targetUserId}`);
+                    const regionId = response.data.regionId;
+                    
+                    if (regionId && currentRegions) {
+                        const region = currentRegions.find(r => r.id === regionId);
+                        setFormData((prev) => ({
+                            ...prev,
+                            regions: region ? [region] : []
+                        }));
+                    }
+                } catch (error) {
+                    console.error("Error fetching user's region:", error);
+                }
+            };
+            fetchUserRegion();
+        }
+    },  [backend, targetUserId, targetUser, currentRegions]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -160,7 +195,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
             lastName: formData.last_name,
             role: formData.role,
             currentUserId: userId,
-            programId: formData.programs.length > 0 ? formData.programs[0].id : null
+            programId: formData.programs.length > 0 ? formData.programs[0].id : null,
+            regionId: formData.regions.length > 0 ? formData.regions[0].id : null
         }
         await backend.post('/gcf-users/admin/create-user', userData);
     };
@@ -176,7 +212,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
             role: formData.role,
             currentUserId: userId,
             targetId: targetUserId,
-            programId: formData.programs.length > 0 ? formData.programs[0].id : null
+            programId: formData.programs.length > 0 ? formData.programs[0].id : null,
+            regionId: formData.regions.length > 0 ? formData.regions[0].id : null
         }
 
         if (formData.password && formData.password.trim().length > 0) {
@@ -267,7 +304,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                                             if (!selectedProgramId) return;
 
                                             const selectedProgram = currentPrograms.find(
-                                                p => p.id === selectedProgramId
+                                                p => p.id == selectedProgramId
                                             );
 
                                             if (selectedProgram) {
@@ -280,6 +317,34 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                                     >
                                         {currentPrograms && currentPrograms.map((program) => {
                                             return <option key={program.id} value={program.id}>{program.name}</option>
+                                        })}
+                                    </Select>
+                                </FormControl>
+                            )}
+                            {formData.role === 'Regional Director' && (
+                                <FormControl>
+                                    <FormLabel>Region</FormLabel>
+                                    <Select
+                                        placeholder = "Select a region"
+                                        value={formData.regions.length > 0 ? formData.regions[0].id : ""}
+                                        onChange={(e) => {
+                                            const selectedRegionId = e.target.value;
+                                            if (!selectedRegionId) return;
+
+                                            const selectedRegion = currentRegions.find(
+                                                r => r.id == selectedRegionId
+                                            );
+
+                                            if (selectedRegion) {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    regions: [selectedRegion]
+                                                }));
+                                            }
+                                        }}
+                                    >
+                                        {currentRegions && currentRegions.map((region) => {
+                                            return <option key={region.id} value={region.id}>{region.name}</option>
                                         })}
                                     </Select>
                                 </FormControl>

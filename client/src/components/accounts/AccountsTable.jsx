@@ -42,7 +42,7 @@ export const AccountsTable = ({ data, setData, originalData, searchQuery, onUpda
     }
 
   filterUpdates(searchQuery);
-  }, [searchQuery, originalData]);
+  }, [searchQuery, originalData, setData]);
 
   return (
     <TableContainer>
