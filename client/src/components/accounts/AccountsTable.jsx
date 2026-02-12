@@ -17,6 +17,7 @@ import {
 } from "@chakra-ui/react";
 
 import { FiEdit2, FiEyeOff } from "react-icons/fi";
+import { SortArrows } from "../tables/SortArrows";
 import { useEffect } from "react";
 import { useTableSort } from "../../contexts/hooks/TableSort";
 
@@ -60,6 +61,7 @@ export const AccountsTable = ({ data, setData, originalData, searchQuery }) => {
               fontWeight="bold"
             >
               Name
+              <SortArrows columnKey="firstName" sortOrder={sortOrder} />
             </Th>
             <Th
               onClick={() => handleSort("email")}
@@ -70,6 +72,7 @@ export const AccountsTable = ({ data, setData, originalData, searchQuery }) => {
               fontWeight="bold"
             >
               Email
+              <SortArrows columnKey="email" sortOrder={sortOrder} />
             </Th>
             <Th
               onClick={() => handleSort("password")}
@@ -80,6 +83,7 @@ export const AccountsTable = ({ data, setData, originalData, searchQuery }) => {
               fontWeight="bold"
             >
               Password
+              <SortArrows columnKey="passsword" sortOrder={sortOrder} />
             </Th>
             <Th
               onClick={() => handleSort("role")}
@@ -90,6 +94,7 @@ export const AccountsTable = ({ data, setData, originalData, searchQuery }) => {
               fontWeight="bold"
             >
               Type
+              <SortArrows columnKey="role" sortOrder={sortOrder} />
             </Th>
             <Th
               onClick={() => handleSort("programs")}
@@ -100,6 +105,7 @@ export const AccountsTable = ({ data, setData, originalData, searchQuery }) => {
               fontWeight="bold"
             >
               Program(s)
+              <SortArrows columnKey="programs" sortOrder={sortOrder} />
             </Th>
             <Th width="50px"></Th>
           </Tr>

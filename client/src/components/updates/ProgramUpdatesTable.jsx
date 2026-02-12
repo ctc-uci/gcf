@@ -16,6 +16,7 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
+import { SortArrows } from "../tables/SortArrows";
 import { useTableSort } from "../../contexts/hooks/TableSort";
 
 export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) => {
@@ -89,11 +90,11 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
             <Thead>
               {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
               <Tr>
-                <Th onClick={() => handleSort('updateDate')} cursor="pointer">Time</Th>
-                <Th onClick={() => handleSort('note')} cursor="pointer">Notes</Th>
-                <Th onClick={() => handleSort('name')} cursor="pointer">Program</Th>
-                <Th onClick={() => handleSort('firstName')} cursor="pointer">Author</Th>
-                <Th onClick={() => handleSort('status')} cursor="pointer">Status</Th>
+                <Th onClick={() => handleSort('updateDate')} cursor="pointer">Time <SortArrows columnKey={"updateDate"} sortOrder={sortOrder}/></Th>
+                <Th onClick={() => handleSort('note')} cursor="pointer">Notes <SortArrows columnKey={"note"} sortOrder={sortOrder}/></Th>
+                <Th onClick={() => handleSort('name')} cursor="pointer">Program <SortArrows columnKey={"name"} sortOrder={sortOrder}/></Th>
+                <Th onClick={() => handleSort('firstName')} cursor="pointer">Author <SortArrows columnKey={"firstName"} sortOrder={sortOrder}/></Th>
+                <Th onClick={() => handleSort('status')} cursor="pointer">Status <SortArrows columnKey={"status"} sortOrder={sortOrder}/></Th>
               </Tr>
             </Thead>
             <Tbody>
