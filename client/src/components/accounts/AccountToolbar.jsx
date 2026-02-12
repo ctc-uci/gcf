@@ -13,7 +13,7 @@ import {
 
 import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from "react-icons/fi";
 
-export const AccountToolbar = ({ searchQuery, setSearchQuery }) => {
+export const AccountToolbar = ({ searchQuery, setSearchQuery, onNew }) => {
   // TODO: Implement functionality for search, filter, view toggle, download, and new account
   function handleSearchChange(event) {
     setSearchQuery(event.target.value);
@@ -95,6 +95,7 @@ export const AccountToolbar = ({ searchQuery, setSearchQuery }) => {
             +
           </Text>
         }
+        onClick = {onNew}
       >
         New
       </Button>

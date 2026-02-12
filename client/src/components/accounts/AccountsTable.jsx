@@ -1,4 +1,4 @@
-import {
+ import {
   Badge,
   Box,
   Button,
@@ -21,7 +21,7 @@ import { SortArrows } from "../tables/SortArrows";
 import { useEffect } from "react";
 import { useTableSort } from "../../contexts/hooks/TableSort";
 
-export const AccountsTable = ({ data, setData, originalData, searchQuery }) => {
+export const AccountsTable = ({ data, setData, originalData, searchQuery, onUpdate}) => {
   const hoverBg = useColorModeValue("gray.50", "gray.700");
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
 
@@ -42,7 +42,7 @@ export const AccountsTable = ({ data, setData, originalData, searchQuery }) => {
     }
 
   filterUpdates(searchQuery);
-  }, [searchQuery, originalData]);
+  }, [searchQuery, originalData, setData]);
 
   return (
     <TableContainer>
@@ -190,6 +190,7 @@ export const AccountsTable = ({ data, setData, originalData, searchQuery }) => {
                     leftIcon={<FiEdit2 />}
                     colorScheme="gray"
                     bg="white"
+                    onClick={() => onUpdate(user)}
                   >
                     Update
                   </Button>
