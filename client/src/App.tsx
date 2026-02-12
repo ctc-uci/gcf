@@ -2,7 +2,7 @@ import { Admin } from "@/components/admin/Admin";
 import { CatchAll } from "@/components/CatchAll";
 import { Login } from "@/components/login/Login";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import Dashboard from "@/components/dashboard/Dashboard";
+import Dashboard from "@/components/dashboard/Dashboard.jsx";
 import { Signup } from "@/components/signup/Signup";
 import { UpdatesPage } from "@/components/updates/UpdatesPage";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -11,7 +11,6 @@ import { RoleProvider } from "@/contexts/RoleContext";
 import { CookiesProvider } from "react-cookie";
 import { Layout } from "@/components/navigation/Layout";
 import { ProgramForm } from "@/components/dashboard/ProgramForm";
-import { AccountForm } from "@/components/accounts/AccountForm";
 import {
   Route,
   BrowserRouter as Router,  
@@ -29,99 +28,19 @@ const App = () => {
           <RoleProvider>
             <Router>
               <Routes>
-                <Route
-                  path="/login"
-                  element={<Login />}
-                />
-                <Route
-                  path="/signup"
-                  element={<Signup />}
-                />
-                {/* TODO: Change /account & /media route to protected when auth flow finalized */}
-                <Route
-                  path="/account/:userId"
-                  element={<Account />}
-                />
-                <Route
-                  path="/media/:userId"
-                  element={<Media />}
-                />
-                <Route
-                  path="/dashboard"
-                  element={<ProtectedRoute element={<Dashboard />} />}
-                />
-                <Route
-                  path="/dashboard/:userid"
-                  element={<DashboardPage />}
-                />
-                <Route 
-                  path= "/account-form-test" 
-                  element = {<AccountForm />}
-                />
-                <Route 
-                  path= "/account-form-test/:targetUserId" 
-                  element = {<AccountForm />}
-                />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute
-                      element={<Admin />}
-                      allowedRoles={["admin"]}
-                    />
-                  }
-                />
-                <Route
-                  path="/create-program-form-test"
-                  element={<ProgramForm />}
-                />
-                <Route
-                  path="/"
-                  element={<ProtectedRoute element={<Layout />}/>}
-                >
-                  
-                  <Route
-                    path="admin"
-                    element={
-                      <ProtectedRoute
-                        element={<Admin />}
-                        allowedRoles={["admin"]} />}
-                    />
-
-                  {/* TODO(login): Change /account & /media route to protected when auth flow finalized; consider dropping :userId and using AuthContext (currentUser.uid) for current user. */}
-                  <Route
-                    path="account/:userId"
-                    element={<Account />}
-                  />
-                  
-                  <Route
-                    path="media/:userId"
-                    element={<Media />}
-                  />
-                  
-                  <Route
-                    path="dashboard/:userId"
-                    element={<Dashboard />}
-                  />
-                  
-                  
-                  <Route
-                    path="create-program-form-test"
-                    element={<ProgramForm />}
-                  />
-                  
-                  {/* TODO(login): Consider route without :userId; use AuthContext (currentUser.uid) in UpdatesPage. */}
-                  <Route
-                    path="/updates/:userId"
-                    element={<UpdatesPage />}
-                  />
-
-                </Route>
-                <Route
-                  path="*"
-                  element={<ProtectedRoute element={<CatchAll />} />}
-                />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
                 
+                <Route path="/" element={<ProtectedRoute element={<Layout />}/>}>
+                  <Route path="admin" element={<ProtectedRoute element={<Admin />} allowedRoles={["admin"]} />} />
+                  <Route path="account/:userId" element={<Account />} />
+                  <Route path="media/:userId" element={<Media />} />
+                  <Route path="dashboard/:userId" element={<Dashboard />} />
+                  <Route path="create-program-form-test" element={<ProgramForm />} />
+                  <Route path="updates/:userId" element={<UpdatesPage />} />
+                </Route>
+                
+                <Route path="*" element={<ProtectedRoute element={<CatchAll />} />} />
               </Routes>
             </Router>
           </RoleProvider>
