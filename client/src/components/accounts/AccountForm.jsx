@@ -16,7 +16,7 @@ import { useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext' 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext"
 
-export const AccountForm = ({ targetUser, isOpen, onClose }) => {
+export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     const { currentUser } = useAuthContext();
     const { backend } = useBackendContext();
     const [currentPrograms, setCurrentPrograms] = useState(null);
@@ -148,6 +148,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose }) => {
             }
 
             alert("User saved successfully!");
+            onSave();
             onClose();
 
         }

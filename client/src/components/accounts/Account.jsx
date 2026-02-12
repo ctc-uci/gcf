@@ -21,81 +21,81 @@ export const Account = () => {
 
   const { backend } = useBackendContext();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
+  const fetchData = async () => {
+    setIsLoading(true);
 
-      if (!userId) {
-        console.error("No userId found in params");
+    if (!userId) {
+      console.error("No userId found in params");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const currentUserResponse = await backend.get(`/gcf-users/${userId}`);
+      const userData = currentUserResponse.data;
+
+      setCurrentUser(userData);
+
+      if (!userData) {
+        console.error("Current user data is null");
+
         setIsLoading(false);
         return;
       }
 
-      try {
-        const currentUserResponse = await backend.get(`/gcf-users/${userId}`);
-        const userData = currentUserResponse.data;
+      let fetchedData = [];
 
-        setCurrentUser(userData);
+      if (userData.role === "Admin") {
+        const response = await backend.get(
+          `/gcf-users/${userData.id}/accounts`
+        );
 
-        if (!userData) {
-          console.error("Current user data is null");
+        // TODO: Update email and password fields when data is available
+        fetchedData = response.data.map((item) => {
+          let programs = [];
 
-          setIsLoading(false);
-          return;
-        }
+          if (item.role === "Regional Director") {
+            programs = item.programs || [];
+          } else if (item.programName) {
+            programs = [item.programName];
+          }
 
-        let fetchedData = [];
-
-        if (userData.role === "Admin") {
-          const response = await backend.get(
-            `/gcf-users/${userData.id}/accounts`
-          );
-
-          // TODO: Update email and password fields when data is available
-          fetchedData = response.data.map((item) => {
-            let programs = [];
-
-            if (item.role === "Regional Director") {
-              programs = item.programs || [];
-            } else if (item.programName) {
-              programs = [item.programName];
-            }
-
-            return {
-              id: item.id,
-              firstName: item.firstName,
-              lastName: item.lastName,
-              role: item.role,
-              programs: programs,
-              email: "-",
-              password: "-",
-            };
-          });
-        } else if (userData.role === "Regional Director") {
-          const programDirectorResponse = await backend.get(
-            `/regional-directors/${userId}/program-directors`
-          );
-
-          // TODO: Update email and password fields when data is available
-          fetchedData = programDirectorResponse.data.map((item) => ({
+          return {
             id: item.id,
             firstName: item.firstName,
             lastName: item.lastName,
-            role: "Program Director",
-            programs: item.programName ? [item.programName] : [],
+            role: item.role,
+            programs: programs,
             email: "-",
             password: "-",
-          }));
-        }
+          };
+        });
+      } else if (userData.role === "Regional Director") {
+        const programDirectorResponse = await backend.get(
+          `/regional-directors/${userId}/program-directors`
+        );
 
-        setUsers(fetchedData);
-      } catch (error) {
-        console.error("Error loading data:", error);
-      } finally {
-        setIsLoading(false);
+        // TODO: Update email and password fields when data is available
+        fetchedData = programDirectorResponse.data.map((item) => ({
+          id: item.id,
+          firstName: item.firstName,
+          lastName: item.lastName,
+          role: "Program Director",
+          programs: item.programName ? [item.programName] : [],
+          email: "-",
+          password: "-",
+        }));
       }
-    };
 
+      setUsers(fetchedData);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [backend, userId]);
 
@@ -142,7 +142,7 @@ export const Account = () => {
           setIsDrawerOpen(true)
         }}/>
       )}
-      <AccountForm targetUser = {selectedUser} isOpen = { isDrawerOpen } onClose = {() => setIsDrawerOpen(false)}></AccountForm>
+      <AccountForm targetUser = {selectedUser} isOpen = { isDrawerOpen } onClose = {() => setIsDrawerOpen(false)} onSave = {() => fetchData()}></AccountForm>
     </Box>
   );
 };
