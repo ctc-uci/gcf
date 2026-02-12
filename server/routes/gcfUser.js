@@ -236,6 +236,26 @@ gcfUserRouter.get("/:id/accounts", async (req, res) => {
         [id]
       );
     }
+
+    // Fetch emails for each user in one batch (faster than N client requests)
+    if (accounts?.length > 0) {
+      const auth = admin.auth();
+      const identifiers = accounts.map((row) => ({ uid: row.id }));
+      const batchSize = 100; // Firebase getUsers limit
+      const emailByUid = {};
+      for (let i = 0; i < identifiers.length; i += batchSize) {
+        const chunk = identifiers.slice(i, i + batchSize);
+        const result = await auth.getUsers(chunk);
+        for (const user of result.users) {
+          emailByUid[user.uid] = user.email ?? null;
+        }
+      }
+      accounts = accounts.map((row) => ({
+        ...row,
+        email: emailByUid[row.id] ?? null,
+      }));
+    }
+
     res.status(200).json(keysToCamel(accounts));
   } catch (err) {
     console.error(err);

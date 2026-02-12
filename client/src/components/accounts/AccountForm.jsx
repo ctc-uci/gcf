@@ -54,7 +54,6 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 programs: []
             });
 
-            // Fetches email if not in prop
             if (!targetUser.email && targetUserId) {
                 const fetchEmail = async () => {
                     try {
@@ -72,25 +71,6 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         }
     }, [targetUser, targetUserId, backend]);
 
-
-    useEffect(() => {
-        if (!targetUserId) return;
-        const fetchEmail = async () => {
-            try {
-                const targetUserResponse = await backend.get(`/gcf-users/admin/get-user/${targetUserId}`);
-                const { email } = targetUserResponse.data;
-
-                setFormData(prev => ({
-                    ...prev,
-                    email: email ?? "",
-                }));
-            } catch (error) {
-                console.error("Error loading target user email", error);
-            }
-        }
-        fetchEmail();
-    }, [backend, targetUserId]);
-
     useEffect(() => {
         async function fetchPrograms() {
             try {
@@ -99,7 +79,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 setCurrentPrograms(program_list); 
             }
             catch (error) {
-                console.error("Error fetching programs")
+                console.error("Error fetching programs", error);
             }
         }
         fetchPrograms();

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Box, Center, Flex, Heading, Spinner } from "@chakra-ui/react";
 
@@ -31,43 +31,39 @@ export const Account = () => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const { backend } = useBackendContext();
-  // TODO: potentially create toggleable view for ALL accounts vs. only accounts created by the current user
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
 
-      const route = getAccountsRoute(role, userId);
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    const route = getAccountsRoute(role, userId);
+    if (!route) {
+      console.error("No valid route for accounts. Missing userId or role.");
+      setIsLoading(false);
+      return;
+    }
+    try {
+      const response = await backend.get(route);
+      const fetchedData = (response.data || []).map((item) => ({
+        id: item.id,
+        firstName: item.firstName,
+        lastName: item.lastName,
+        role: item.role,
+        programs: Array.isArray(item.programs) ? item.programs : [],
+        email: item.email ?? "-",
+        password: "-",
+      }));
 
-      if (!route) {
-        console.error("No valid route for accounts. Missing userId or role.");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await backend.get(route);
-
-        // TODO: Update email and password fields when data is available
-        const fetchedData = (response.data || []).map((item) => ({
-          id: item.id,
-          firstName: item.firstName,
-          lastName: item.lastName,
-          role: item.role,
-          programs: Array.isArray(item.programs) ? item.programs : [],
-          email: item.email ?? "-",
-          password: "-",
-        }));
-
-        setUsers(fetchedData);
-        setOriginalUsers(fetchedData);
-      } catch (error) {
-        console.error("Error loading data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
+      setUsers(fetchedData);
+      setOriginalUsers(fetchedData);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [backend, role, userId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   return (
     <Box
