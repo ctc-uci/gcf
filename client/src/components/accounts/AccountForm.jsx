@@ -15,10 +15,12 @@ import {
 import { useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext' 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext"
+import { useRoleContext } from '@/contexts/hooks/useRoleContext'
 
 export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     const { currentUser } = useAuthContext();
     const { backend } = useBackendContext();
+    const { role } = useRoleContext();
     const [currentPrograms, setCurrentPrograms] = useState(null);
     const [currentRegions, setCurrentRegions] = useState(null);
     const userId = currentUser?.uid;
@@ -78,7 +80,12 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     useEffect(() => {
         async function fetchPrograms() {
             try {
-               const response = await backend.get("/program");
+                let response;
+                if (role === 'Regional Director') {
+                    response = await backend.get(`/regional-directors/me/${userId}/programs`);
+                } else {
+                    response = await backend.get("/program");
+                }
                 const program_list = response.data;
                 setCurrentPrograms(program_list); 
             }
@@ -98,9 +105,11 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
             }
         }
         
-        fetchPrograms();
-        fetchRegions();
-    }, [backend]);
+        if (role && userId) {
+            fetchPrograms();
+            fetchRegions();
+        }
+    }, [backend, role, userId]);
 
     useEffect(() => {
     
@@ -288,8 +297,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                                     onChange={handleChange}
                                     value={formData.role}
                                 >
-                                    <option value = "Admin">Admin</option>
-                                    <option value = "Regional Director">Regional Director</option>
+                                    {role === 'Admin' && <option value = "Admin">Admin</option>}
+                                    {role === 'Admin' && <option value = "Regional Director">Regional Director</option>}
                                     <option value = "Program Director">Program Director</option>
                                 </Select>
                             </FormControl>
