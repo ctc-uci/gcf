@@ -41,25 +41,25 @@ const StatBox = ({ label, number }) => {
 
 const getRouteByRole = (role, userId) => {
   const routes = {
-    admin: "/admin/stats",
-    regionalDirector: `/regional-directors/me/${userId}/stats`,
-    programDirector: `/program-directors/me/${userId}/stats`,
+    "Admin": "/admin/stats",
+    "Regional Director": `/regional-directors/me/${userId}/stats`,
+    "Program Director": `/program-directors/me/${userId}/stats`,
   };
   return routes[role];
 };
 
 const STAT_LABELS_BY_ROLE = {
-  admin: [
+  "Admin": [
     { label: "Programs", number: 0 },
     { label: "Students", number: 0 },
     { label: "Instruments", number: 0 },
   ],
-  regionalDirector: [
+  "Regional Director": [
     { label: "Programs", number: 0 },
     { label: "Students", number: 0 },
     { label: "Instruments", number: 0 },
   ],
-  programDirector: [
+  "Program Director": [
     { label: "Current Enrollment", number: 0 },
     { label: "Instruments Donated", number: 0 },
   ],
@@ -89,9 +89,9 @@ function statsFromPdData(data) {
 }
 
 const STATS_FROM_RESPONSE = {
-  admin: statsFromAdminData,
-  regionalDirector: statsFromRdData,
-  programDirector: statsFromPdData,
+  "Admin": statsFromAdminData,
+  "Regional Director": statsFromRdData,
+  "Program Director": statsFromPdData,
 };
 
 const StatisticsSummary = () => {
@@ -99,7 +99,7 @@ const StatisticsSummary = () => {
   const userId = currentUser?.uid;
   const { role: role, loading: roleLoading } = useRoleContext();
   const { backend } = useBackendContext();
-  const initialStats = STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.admin;
+  const initialStats = STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.Admin;
   const [stats, setStats] = useState(initialStats);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -114,7 +114,7 @@ const StatisticsSummary = () => {
       return;
     }
 
-    setStats(STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.admin);
+    setStats(STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.Admin);
 
     const fetchData = async () => {
       setIsLoading(true);
