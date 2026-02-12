@@ -13,8 +13,11 @@ import {
 
 import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from "react-icons/fi";
 
-export const AccountToolbar = ( {onNew} ) => {
+export const AccountToolbar = ({ searchQuery, setSearchQuery, onNew }) => {
   // TODO: Implement functionality for search, filter, view toggle, download, and new account
+  function handleSearchChange(event) {
+    setSearchQuery(event.target.value);
+  }
   return (
     <Flex
       width="100%"
@@ -44,6 +47,8 @@ export const AccountToolbar = ( {onNew} ) => {
           _focus={{ borderColor: "black" }}
           px={0}
           pl={10}
+          value={searchQuery}
+          onChange={handleSearchChange}
         />
       </InputGroup>
 

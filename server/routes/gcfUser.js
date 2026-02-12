@@ -178,31 +178,64 @@ gcfUserRouter.get("/role/:role", async (req, res) => {
 gcfUserRouter.get("/:id/accounts", async (req, res) => {
   try {
     const { id } = req.params;
+    const { role } = req.query;
 
-    const accounts = await db.query(
-      `SELECT 
-        u.id,
-        u.first_name,
-        u.last_name,
-        u.role,
-        rd.region_id,
-        COALESCE(
-          array_agg(p_rd.name) FILTER (WHERE p_rd.id IS NOT NULL), 
-          '{}'
-        ) as programs,
-        p_pd.name as program_name
-      FROM gcf_user u
-      LEFT JOIN regional_director rd ON u.id = rd.user_id
-      LEFT JOIN country c ON rd.region_id = c.region_id
-      LEFT JOIN program p_rd ON c.id = p_rd.country
-      LEFT JOIN program_director pd ON u.id = pd.user_id
-      LEFT JOIN program p_pd ON pd.program_id = p_pd.id
-      WHERE u.created_by = $1
-      GROUP BY u.id, u.first_name, u.last_name, u.role, rd.region_id, p_pd.name
-      ORDER BY u.last_name ASC`,
-      [id]
-    );
+    let accounts;
 
+    // Admin: all users (admins, RDs, PDs, etc.) with their associated programs
+    if (role === "Admin") {
+      accounts = await db.query(
+        `SELECT 
+          u.id,
+          u.first_name,
+          u.last_name,
+          u.role,
+          COALESCE(
+            array_cat(
+              COALESCE(
+                array_agg(DISTINCT p_rd.name) FILTER (WHERE p_rd.id IS NOT NULL),
+                '{}'
+              ),
+              COALESCE(
+                array_agg(DISTINCT p_pd.name) FILTER (WHERE p_pd.id IS NOT NULL),
+                '{}'
+              )
+            ),
+            '{}'
+          ) AS programs
+        FROM gcf_user u
+        LEFT JOIN regional_director rd ON u.id = rd.user_id
+        LEFT JOIN country c ON rd.region_id = c.region_id
+        LEFT JOIN program p_rd ON c.id = p_rd.country
+        LEFT JOIN program_director pd ON u.id = pd.user_id
+        LEFT JOIN program p_pd ON pd.program_id = p_pd.id
+        GROUP BY u.id, u.first_name, u.last_name, u.role
+        ORDER BY u.last_name ASC`
+      );
+    }
+    // Regional Director: only program directors in their region with their programs
+    else if (role === "Regional Director") {
+      accounts = await db.query(
+        `SELECT 
+          u.id,
+          u.first_name,
+          u.last_name,
+          u.role,
+          COALESCE(
+            array_agg(DISTINCT p.name) FILTER (WHERE p.id IS NOT NULL),
+            '{}'
+          ) AS programs
+        FROM regional_director rd
+        JOIN country c ON rd.region_id = c.region_id
+        JOIN program p ON c.id = p.country
+        JOIN program_director pd ON p.id = pd.program_id
+        JOIN gcf_user u ON pd.user_id = u.id
+        WHERE rd.user_id = $1
+        GROUP BY u.id, u.first_name, u.last_name, u.role
+        ORDER BY u.last_name ASC`,
+        [id]
+      );
+    }
     res.status(200).json(keysToCamel(accounts));
   } catch (err) {
     console.error(err);

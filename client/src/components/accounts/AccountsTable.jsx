@@ -2,6 +2,7 @@
   Badge,
   Box,
   Button,
+  Center,
   HStack,
   Icon,
   Table,
@@ -16,9 +17,32 @@
 } from "@chakra-ui/react";
 
 import { FiEdit2, FiEyeOff } from "react-icons/fi";
+import { SortArrows } from "../tables/SortArrows";
+import { useEffect } from "react";
+import { useTableSort } from "../../contexts/hooks/TableSort";
 
-export const AccountsTable = ({ data, onUpdate}) => {
+export const AccountsTable = ({ data, setData, originalData, searchQuery, onUpdate}) => {
   const hoverBg = useColorModeValue("gray.50", "gray.700");
+  const { sortOrder, handleSort } = useTableSort(originalData, setData);
+
+  useEffect(() => {
+    function filterUpdates(search) {
+      if (search === '') {
+        setData(originalData);
+        return;
+      }
+      // filter by search query
+      const filtered = originalData.filter(update => 
+        // if no search then show everything
+        update.email.toLowerCase().includes(search.toLowerCase()) ||
+        update.firstName.toLowerCase().includes(search.toLowerCase()) || 
+        update.programs.some(program => program.toLowerCase().includes(search.toLowerCase()))
+      );
+      setData(filtered);
+    }
+
+  filterUpdates(searchQuery);
+  }, [searchQuery, originalData]);
 
   return (
     <TableContainer>
@@ -29,49 +53,72 @@ export const AccountsTable = ({ data, onUpdate}) => {
         <Thead>
           <Tr>
             <Th
+              onClick={() => handleSort("firstName")}
+              cursor="pointer"
               color="black"
               fontSize="sm"
               textTransform="none"
               fontWeight="bold"
             >
               Name
+              <SortArrows columnKey="firstName" sortOrder={sortOrder} />
             </Th>
             <Th
+              onClick={() => handleSort("email")}
+              cursor="pointer"
               color="black"
               fontSize="sm"
               textTransform="none"
               fontWeight="bold"
             >
               Email
+              <SortArrows columnKey="email" sortOrder={sortOrder} />
             </Th>
             <Th
+              onClick={() => handleSort("password")}
+              cursor="pointer"
               color="black"
               fontSize="sm"
               textTransform="none"
               fontWeight="bold"
             >
               Password
+              <SortArrows columnKey="passsword" sortOrder={sortOrder} />
             </Th>
             <Th
+              onClick={() => handleSort("role")}
+              cursor="pointer"
               color="black"
               fontSize="sm"
               textTransform="none"
               fontWeight="bold"
             >
               Type
+              <SortArrows columnKey="role" sortOrder={sortOrder} />
             </Th>
             <Th
+              onClick={() => handleSort("programs")}
+              cursor="pointer"
               color="black"
               fontSize="sm"
               textTransform="none"
               fontWeight="bold"
             >
               Program(s)
+              <SortArrows columnKey="programs" sortOrder={sortOrder} />
             </Th>
             <Th width="50px"></Th>
           </Tr>
         </Thead>
         <Tbody>
+          { 
+            !data || data.length === 0 && (
+              <Center py={10}>
+               <Text color="gray.500">No accounts found.</Text>
+              </Center>
+            )
+          }
+
           {data.map((user) => (
             <Tr
               key={user.id}

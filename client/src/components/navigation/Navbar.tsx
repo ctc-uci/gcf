@@ -40,11 +40,11 @@ export const Navbar: React.FC<NavbarProps> = ({ role }) => {
             
             <Flex justify="space-between" w="100%" px="2vw" align="center">
                 <Text fontSize="2vh">
-                    {role === "admin" ? "Admin Dashboard" : ""}
-                    {role === "regional_director" ? "Regional Director Dashboard" : ""}
-                    {role === "program_director" ? `${project}` : ""}
+                    {role === "Admin" ? "Admin Dashboard" : ""}
+                    {role === "Regional Director" ? "Regional Director Dashboard" : ""}
+                    {role === "Program Director" ? `${project}` : ""}
                     
-                    {role === "regional_director" ? `: ${region}` : ""}
+                    {role === "Program Director" ? `: ${region}` : ""}
                 </Text>
                 
                 <Flex gap={2} align="center">

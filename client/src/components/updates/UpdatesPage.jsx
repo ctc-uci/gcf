@@ -15,8 +15,11 @@ export const UpdatesPage = () => {
   const [programAccountUpdatesData, setProgramAccountUpdatesData] = useState(
     []
   );
+  const [originalProgramAccountUpdatesData, setOriginalProgramAccountUpdatesData] = useState([]);
   const [mediaUpdatesData, setMediaUpdatesData] = useState([]);
+  const [originalMediaUpdatesData, setOriginalMediaUpdatesData] = useState([]);
   const [programUpdatesData, setProgramUpdatesData] = useState([]);
+  const [originalProgramUpdatesData, setOriginalProgramUpdatesData] = useState([]);
   // TODO(login): Replace with useRoleContext() or AuthContext instead of fetching role/${userId}.
   const [role, setRole] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -48,8 +51,11 @@ export const UpdatesPage = () => {
           ]);
 
         setProgramAccountUpdatesData(programAccountUpdates);
+        setOriginalProgramAccountUpdatesData(programAccountUpdates);
+        setOriginalMediaUpdatesData(mediaUpdates);
         setMediaUpdatesData(mediaUpdates);
         setProgramUpdatesData(programUpdates);
+        setOriginalProgramUpdatesData(programUpdates);
         setRole(userRole[0]['role']);
       } catch (error) {
         console.error("Fetch error:", error);
@@ -72,11 +78,11 @@ export const UpdatesPage = () => {
   return (
     <>
       {role === "Program Director" ? (
-        <ProgramUpdatesTable data={programUpdatesData} isLoading={isLoading} />
+        <ProgramUpdatesTable data={programUpdatesData} setData={setProgramUpdatesData} originalData={originalProgramUpdatesData} isLoading={isLoading} />
       ) : (
         <>
-          <MediaUpdatesTable data={mediaUpdatesData} isLoading={isLoading} />
-          <ProgramAccountUpdatesTable data={programAccountUpdatesData} isLoading={isLoading} />
+          <MediaUpdatesTable data={mediaUpdatesData} setData={setMediaUpdatesData} originalData={originalMediaUpdatesData} isLoading={isLoading} />
+          <ProgramAccountUpdatesTable data={programAccountUpdatesData} setData={setProgramAccountUpdatesData} originalData={originalProgramAccountUpdatesData} isLoading={isLoading} />
         </>
       )}
     </>

@@ -14,7 +14,7 @@ const Dashboard = () => {
       minH="100vh"
       gap={6}
       as="main"
-      p={10}
+      p={10}w
     >
       <StatisticsSummary role={role} userId={userId} />
 

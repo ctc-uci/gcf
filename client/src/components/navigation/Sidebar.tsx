@@ -20,7 +20,7 @@ export const Sidebar: React.FC<SidebarProps> = ({role}) => {
     }
     let navItems: NavItem[] = [];
     // TODO(login): update the paths here to use AuthContext (currentUser?.uid) instead of hardcoded 1.
-    if (role === "admin" || role === "regional_director") {
+    if (role === "Admin" || role === "Regional Director") {
         navItems = [
             { name: 'Programs', icon: <Icon as={FaGuitar} boxSize="20px" />, path: "/dashboard/1"},
             { name: 'Updates', icon: <Icon as={MdOutlineNotifications} boxSize="20px" />, path: "/updates/1" },
