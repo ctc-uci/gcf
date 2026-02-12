@@ -56,14 +56,14 @@ export function MediaPreview({ file, onComplete }) {
 
       onComplete({
         s3_key: s3Data.key,
-        file_name: file.name,
+        file_name: keyFileName,
         title: title,
         description: description,
       });
 
       toast({
         title: "Upload successful.",
-        description: `${file.name} has been uploaded to the server.`,
+        description: `${keyFileName} has been uploaded to the server.`,
         status: "success",
         duration: 5000,
         isClosable: true,
