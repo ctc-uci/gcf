@@ -7,7 +7,7 @@ import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
 function LessonVideos() {
   const { currentUser } = useAuthContext();
-  const { userId } = currentUser.uid;
+  const userId = currentUser.uid;
 
   const { backend } = useBackendContext();
   const [playlists, setPlaylists] = useState([]);
