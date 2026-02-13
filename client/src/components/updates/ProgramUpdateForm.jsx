@@ -22,15 +22,15 @@ import
   Box
 } from '@chakra-ui/react'
 
-export const ProgramUpdateForm = ( {programUpdateId} ) => {
+export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
     const [isLoading, setIsLoading] = useState(false)
-    const [programId, setProgramId] = useState(null) //TODO: Get Program Id for Program Update
+    const [programId, setProgramId] = useState(program_id) //TODO: Get Program Id for Program Update
     
     const [title, setTitle] = useState('')
     const [date, setDate] = useState('')
     const [enrollmentNumber, setEnrollmentNumber] = useState(null)
     const [graduatedNumber, setGraduatedNumber] = useState(null)
-    const [enrollmentChangeId, setEnrollmentChangeId] = useState(null) // Track the enrollment change record ID
+    const [enrollmentChangeId, setEnrollmentChangeId] = useState(null) 
     const [notes, setNotes] = useState('')
     
     const [selectedInstrument, setSelectedInstrument] = useState('')
@@ -39,9 +39,9 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
     
     const [existingInstruments, setExistingInstruments] = useState([])
     const [addedInstruments, setAddedInstruments] = useState({})
-    const [originalInstruments, setOriginalInstruments] = useState({})  // Track original state
+    const [originalInstruments, setOriginalInstruments] = useState({}) 
     const [newInstruments, setNewInstruments] = useState([])
-    const [instrumentChangeMap, setInstrumentChangeMap] = useState({}); // Map instrument name to changeId and instrumentId for easy updates/deletes
+    const [instrumentChangeMap, setInstrumentChangeMap] = useState({}); 
 
     const { backend } = useBackendContext();
 
@@ -73,22 +73,19 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                 setDate(data.updateDate.split('T')[0] || '');
                 setNotes(data.note || '');
                 setProgramId(parseInt(data.programId, 10));
-                
-                // Fetch enrollment and graduation changes if they exist
+
                 try {
                     const enrollmentResponse = await backend.get(`http://localhost:3001/enrollmentChange/update/${programUpdateId}`);
                     if (enrollmentResponse.data && enrollmentResponse.data.length > 0) {
-                        // Take the last record (most recent) to avoid duplicates
                         const enrollmentData = enrollmentResponse.data[enrollmentResponse.data.length - 1];
-                        setEnrollmentChangeId(enrollmentData.id); // Store the ID for later updates
+                        setEnrollmentChangeId(enrollmentData.id);
                         setEnrollmentNumber(enrollmentData.enrollmentChange || null);
                         setGraduatedNumber(enrollmentData.graduatedChange || null);
                     }
                 } catch (error) {
                     console.error('Error fetching enrollment changes:', error);
                 }
-                
-                // Fetch instrument changes if they exist
+
                 try {
                     const instrumentChangesResponse = await backend.get(`http://localhost:3001/instrument-changes/update/${programUpdateId}`);
                     if (instrumentChangesResponse.data && instrumentChangesResponse.data.length > 0) {
@@ -102,7 +99,7 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                                 }
                             }
                             setAddedInstruments(instrumentsMap);
-                            setOriginalInstruments(JSON.parse(JSON.stringify(instrumentsMap))); // Deep copy to track original
+                            setOriginalInstruments(JSON.parse(JSON.stringify(instrumentsMap))); 
                             setInstrumentChangeMap(changeMeta);
                         }
                 } catch (error) {
@@ -124,8 +121,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
             delete updated[name];
             return updated;
         });
-
-        // If this instrument was added during this session, remove it from newInstruments
         setNewInstruments(prev => prev.filter(n => n !== name));
     };
 
@@ -188,8 +183,7 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
             };
             
             let updatedProgramUpdateId = programUpdateId;
-            
-            // Use PUT if updating, POST if creating
+
             if (programUpdateId) {
                 await backend.put(`http://localhost:3001/program-updates/${programUpdateId}`, programUpdateData);
             } else {
@@ -210,7 +204,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
             const instrumentsResponse = await backend.get('http://localhost:3001/instruments');
             setExistingInstruments(instrumentsResponse.data);
 
-            // Delete instruments that were removed (use changeId)
             const deletedInstruments = Object.keys(originalInstruments).filter(name => !addedInstruments[name]);
             console.log('deletedInstruments to remove:', deletedInstruments);
             
@@ -223,7 +216,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                         const delRes = await backend.delete(`http://localhost:3001/instrument-changes/${changeMeta.changeId}`);
                         console.log(`Successfully deleted instrument change for ${deletedName}:`, delRes && delRes.data ? delRes.data : delRes);
 
-                        // remove mapping and original snapshot to avoid re-processing or accidental re-creation
                         setInstrumentChangeMap(prev => {
                             const p = { ...prev };
                             delete p[deletedName];
@@ -243,15 +235,12 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                 }
             }
 
-            // Add new instrument changes or update changed quantities
             if (Object.keys(addedInstruments).length > 0) {
                 for (const [name, qty] of Object.entries(addedInstruments)) {
                     const meta = instrumentChangeMap[name];
                     if (meta && meta.changeId) {
-                        // existed before
                         const originalQty = originalInstruments[name];
                         if (originalQty !== qty) {
-                            // update the existing change
                             try {
                                 await backend.put(`http://localhost:3001/instrument-changes/${meta.changeId}`, {
                                     instrumentId: meta.instrumentId,
@@ -264,7 +253,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                             }
                         }
                     } else {
-                        // new change -> find instrument id and post
                         const instrument = instrumentsResponse.data.find(instr => instr.name === name);
                         if (instrument) {
                             try {
@@ -284,7 +272,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
 
             if (enrollmentNumber !== null) {
                 if (enrollmentChangeId) {
-                    // Update existing enrollment change
                     await backend.put(`http://localhost:3001/enrollmentChange/${enrollmentChangeId}`, {
                         update_id: updatedProgramUpdateId,
                         enrollment_change: enrollmentNumber,
@@ -292,22 +279,19 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                     });
                     console.log('Updated existing enrollment change');
                 } else {
-                    // Create new enrollment change
                     const enrollmentResponse = await backend.post('http://localhost:3001/enrollmentChange', {
                         update_id: updatedProgramUpdateId,
                         enrollment_change: enrollmentNumber,
                         graduated_change: graduatedNumber || 0
                     });
-                    setEnrollmentChangeId(enrollmentResponse.data.id); // Store the ID for future updates
+                    setEnrollmentChangeId(enrollmentResponse.data.id); 
                     console.log('Created new enrollment change');
                 }
             }
 
-            // Refetch enrollment changes to sync UI with server state
             try {
                 const finalEnrollmentResponse = await backend.get(`http://localhost:3001/enrollmentChange/update/${updatedProgramUpdateId}`);
                 if (finalEnrollmentResponse.data && finalEnrollmentResponse.data.length > 0) {
-                    // Take the last record (most recent)
                     const enrollmentData = finalEnrollmentResponse.data[finalEnrollmentResponse.data.length - 1];
 
                     setEnrollmentChangeId(enrollmentData.id);
@@ -315,7 +299,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                     setGraduatedNumber(enrollmentData.graduatedChange || null);
                     console.log('Synced enrollment with server state:', enrollmentData);
                 } else {
-                    // No enrollment changes
                     setEnrollmentChangeId(null);
                     setEnrollmentNumber(null);
                     setGraduatedNumber(null);
@@ -324,7 +307,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                 console.error('Error refetching enrollment changes after submit:', error);
             }
 
-            // Refetch instrument-changes to sync UI with server state
             try {
                 const finalInstrumentChangesResponse = await backend.get(`http://localhost:3001/instrument-changes/update/${updatedProgramUpdateId}`);
                 if (finalInstrumentChangesResponse.data && finalInstrumentChangesResponse.data.length > 0) {
@@ -342,14 +324,12 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                     setInstrumentChangeMap(changeMeta);
                     console.log('Synced addedInstruments with server state:', instrumentsMap);
                 } else {
-                    // No changes left
                     setAddedInstruments({});
                     setOriginalInstruments({});
                     setInstrumentChangeMap({});
                 }
             } catch (error) {
                 console.error('Error refetching instrument changes after submit:', error);
-                // Fallback: clear local state if refetch fails
                 setAddedInstruments({});
             }
 
@@ -389,7 +369,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                 />
             </Box>
 
-            {/* Header */}
             <HStack w="90%">
                 <ArrowRightIcon color="gray"></ArrowRightIcon>
                 <Heading size="md">
@@ -423,7 +402,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                 />
             </FormControl>
 
-            {/* Enrollment and Graduated Fields */}
             <HStack width="100%" spacing={4}>
                 <FormControl flex={1}>
                     <FormLabel fontWeight="normal" color="gray">
@@ -449,7 +427,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                 </FormControl>
             </HStack>
 
-            {/* Instrument Type and Quantity */}
             <HStack width="100%" spacing={4}>
                 <FormControl flex={1}>
                     <FormLabel fontWeight="normal" color="gray">
@@ -484,7 +461,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                 </FormControl>
             </HStack>
 
-            {/* Add Instrument Button */}
             <Button 
                 size="sm"
                 variant="outline"
@@ -496,7 +472,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                 + Add instrument
             </Button>
 
-            {/* Instrument Tags */}
             {Object.keys(addedInstruments).length > 0 && (
                 <HStack width="100%" flexWrap="wrap" spacing={2}>
                     {Object.entries(addedInstruments).map(([name, quantity]) => (
@@ -508,7 +483,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                 </HStack>
             )}
 
-            {/* Notes Field */}
             <FormControl>
                 <FormLabel fontWeight="normal" color="gray">
                     Notes
@@ -524,7 +498,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                 </Textarea>
             </FormControl>
 
-            {/* Add Media Button */}
             <Button 
                 variant="outline"
                 size="sm"
@@ -535,7 +508,6 @@ export const ProgramUpdateForm = ( {programUpdateId} ) => {
                 + Add media
             </Button>
 
-            {/* Submit/Update Button */}
             <Button 
                 position
                 width="50%" 
