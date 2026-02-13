@@ -1,24 +1,24 @@
 import {
-  Drawer,
-  DrawerBody,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
-  useDisclosure,
-  Button,
-  VStack,
-  HStack,
-  Input,
-  Select,
-  Tag,
-  TagLabel,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  TagCloseButton
+    Drawer,
+    DrawerBody,
+    DrawerHeader,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
+    useDisclosure,
+    Button,
+    VStack,
+    HStack,
+    Input,
+    Select,
+    Tag,
+    TagLabel,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    NumberIncrementStepper,
+    NumberDecrementStepper,
+    TagCloseButton
 } from '@chakra-ui/react'
 import { useRef, useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext'
@@ -61,7 +61,7 @@ const InstrumentForm = ({ setFormData }) => {
             try {
                 const response = await backend.get('/instruments')
                 const instrument_names = response.data;
-                
+
                 const instrumentMap = new Map();
                 instrument_names.forEach((instrument) => {
                     if (!instrumentMap.has(instrument.name)) {
@@ -79,10 +79,10 @@ const InstrumentForm = ({ setFormData }) => {
     }, [backend]);
 
     return (
-       <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
+        <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
             <Select
-                placeholder="Select Instrument" 
-                value={selectedInstrumentId} 
+                placeholder="Select Instrument"
+                value={selectedInstrumentId}
                 onChange={(e) => setSelectedInstrumentId(e.target.value)}
             >
                 {instruments.map((instrument) => (
@@ -91,12 +91,12 @@ const InstrumentForm = ({ setFormData }) => {
                     </option>
                 ))}
             </Select>
-            <NumberInput 
-                step={1} 
+            <NumberInput
+                step={1}
                 defaultValue={0}
-                min={0} 
-                width="8em" 
-                value={quantity} 
+                min={0}
+                width="8em"
+                value={quantity}
                 onChange={(valueString) => setQuantity(Number(valueString))}
             >
                 <NumberInputField />
@@ -109,20 +109,17 @@ const InstrumentForm = ({ setFormData }) => {
         </HStack>
     )
 }
-// sub-component for adding program directors
 
-const ProgramDirectorForm = ( { formState, setFormData }) => {
-
+const ProgramDirectorForm = ({ formState, setFormData }) => {
     const [programDirectors, setProgramDirectors] = useState([]);
     const [selectedDirector, setSelectedDirector] = useState('');
-
-    const { backend }  = useBackendContext();
+    const { backend } = useBackendContext();
 
     useEffect(() => {
         async function fetchProgramDirectors() {
             const response = await backend.get("/program-directors/program-director-names");
             const directors = response.data;
-            
+
             //avoid dup key error
             const uniqueDirectors = Array.from(
                 new Map((directors || []).map((d) => [d.userId, d])).values()
@@ -132,7 +129,7 @@ const ProgramDirectorForm = ( { formState, setFormData }) => {
         }
         // fetch all program directors from db
         fetchProgramDirectors();
-        
+
     }, [backend]);
 
 
@@ -144,7 +141,7 @@ const ProgramDirectorForm = ( { formState, setFormData }) => {
         if (alreadyAdded) {
             alert("This director has already been added!");
             return;
-        } 
+        }
 
         const directorObj = programDirectors.find((d) => d.userId === selectedDirector);
         if (!directorObj) return;
@@ -154,16 +151,16 @@ const ProgramDirectorForm = ( { formState, setFormData }) => {
             programDirectors: [...prevData.programDirectors, directorObj],
         }));
 
-         setSelectedDirector('');
+        setSelectedDirector('');
     }
 
 
     return (
         <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
-            <Select 
+            <Select
                 placeholder="Select Program Director"
-                value = {selectedDirector}
-                onChange = {(e) => setSelectedDirector(e.target.value)}
+                value={selectedDirector}
+                onChange={(e) => setSelectedDirector(e.target.value)}
             >
                 {
                     (programDirectors).map((director) => (
@@ -177,9 +174,7 @@ const ProgramDirectorForm = ( { formState, setFormData }) => {
     )
 }
 
-// sub-component for adding curriculum links
-
-const CurriculumLinkForm = ( { setFormData } ) => {
+const CurriculumLinkForm = ({ setFormData }) => {
     const [link, setLink] = useState(null);
     const [display, setDisplay] = useState(null);
 
@@ -191,30 +186,30 @@ const CurriculumLinkForm = ( { setFormData } ) => {
             validLink = 'https://' + link;
         }
         setFormData((prevData) => ({
-            ...prevData, 
+            ...prevData,
             curriculumLinks: {
                 ...prevData.curriculumLinks,
-                [validLink]: display 
+                [validLink]: display
             }
         }));
 
         setLink(null);
         setDisplay(null);
     };
-    
-         
+
+
     return (
         <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
-            <Input 
-                placeholder="Link" 
-                value={link || ''} 
-                onChange={(e) => setLink(e.target.value)} 
+            <Input
+                placeholder="Link"
+                value={link || ''}
+                onChange={(e) => setLink(e.target.value)}
             />
 
-            <Input 
-                placeholder="Display Name" 
-                value={display || ''} 
-                onChange={(e) => setDisplay(e.target.value)} 
+            <Input
+                placeholder="Display Name"
+                value={display || ''}
+                onChange={(e) => setDisplay(e.target.value)}
             />
 
             <Button onClick={handleSubmit}> + Add </Button>
@@ -223,7 +218,7 @@ const CurriculumLinkForm = ( { setFormData } ) => {
 }
 
 
-export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: onCloseProp, program}) => {
+export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: onCloseProp, program }) => {
     const disclosure = useDisclosure();
     const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
     const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
@@ -232,7 +227,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     const { backend } = useBackendContext();
     const [regions, setRegions] = useState([]);
     const [countries, setCountries] = useState([]);
-    const { currentUser } = useAuthContext(); 
+    const { currentUser } = useAuthContext();
 
     const [initialProgramDirectorIds, setInitialProgramDirectorIds] = useState([]);
     const [initialInstrumentQuantities, setInitialInstrumentQuantities] = useState({});
@@ -256,8 +251,8 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
 
     useEffect(() => {
 
-        async function loadProgramRegionData(){
-            if(!program){ //reset form data on new program
+        async function loadProgramRegionData() {
+            if (!program) {
                 setFormState({
                     status: null,
                     programName: null,
@@ -270,7 +265,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                     programDirectors: [],
                     curriculumLinks: {},
                     media: []
-                  });
+                });
                 setInitialProgramDirectorIds([]);
                 setInitialInstrumentQuantities({});
                 return;
@@ -283,22 +278,16 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                     const countryResponse = await backend(`/country/${program.country}`);
                     regionId = countryResponse.data.regionId;
                 } catch (error) {
-                    console.error("error fetching country/region",error);
+                    console.error("error fetching country/region", error);
                 }
             }
-        
 
-
-
-            
             const mappedProgramDirectors = (program.programDirectors ?? []).map(d => ({
                 userId: d.userId ?? d.id ?? d.user_id,
                 firstName: d.firstName,
                 lastName: d.lastName,
             }));
 
-            // Fetch aggregated instruments for this program so we can show
-            // current instrument quantities and compute changes on save.
             let instrumentMap = {};
             let initialInstrumentMap = {};
             try {
@@ -321,7 +310,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
             setFormState({
                 status: program.status ?? null,
                 programName: program.title ?? '',
-                launchDate: program.launchDate ? program.launchDate.split('T')[0] : '', 
+                launchDate: program.launchDate ? program.launchDate.split('T')[0] : '',
                 regionId: regionId,
                 country: program.country ?? null,
                 students: program.students ?? 0,
@@ -349,11 +338,11 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
 
         }
         loadProgramRegionData();
-        
+
     }, [program, backend])
 
     function handleProgramStatusChange(status) {
-        setFormState({ ...formState, status: status});
+        setFormState({ ...formState, status: status });
     }
 
     function handleProgramNameChange(name) {
@@ -361,27 +350,27 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     }
 
     function handleProgramLaunchDateChange(date) {
-        setFormState({...formState, launchDate: date});
+        setFormState({ ...formState, launchDate: date });
     }
 
     function handleRegionChange(regionId) {
-        setFormState({...formState, regionId: Number(regionId), country: null});
+        setFormState({ ...formState, regionId: Number(regionId), country: null });
     }
 
-    function handleCountryChange(countryId){
-        setFormState({...formState, country: Number(countryId)});
+    function handleCountryChange(countryId) {
+        setFormState({ ...formState, country: Number(countryId) });
     }
 
     function handleStudentNumberChange(numStudents) {
-        setFormState({...formState, students: numStudents})
+        setFormState({ ...formState, students: numStudents })
     }
-    
+
     function handleLanguageChange(langChange) {
-        setFormState({...formState, language: langChange})
+        setFormState({ ...formState, language: langChange })
     }
     async function handleSave() {
         //[TODO] : TOTAL INSTRUMENTS, INSTRUMENTS, PARTNERORG
-        try { 
+        try {
             const data = {
                 name: formState.programName,
                 title: formState.programName,
@@ -390,9 +379,9 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 country: formState.country,
                 students: formState.students ?? 0,
                 primaryLanguage: formState.language,
-                partnerOrg: 1, // this field doesnt exist in the form
-                createdBy: currentUser?.uid || currentUser?.id, 
-                description: '', // this field doesnt exist in the form
+                partnerOrg: 1, // TODO: this field doesnt exist in the form
+                createdBy: currentUser?.uid || currentUser?.id,
+                description: '', // TODO: this field doesnt exist in the form
             };
 
             let programId;
@@ -487,9 +476,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
             console.error("Error saving program:", err);
         }
     }
-    
 
-    // debug log to see how state changes as we edit the form
     useEffect(() => {
         console.log("Program status changed to:", formState);
     }, [formState])
@@ -513,7 +500,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 return;
             }
 
-            try{
+            try {
                 const response = await backend.get(`/region/${formState.regionId}/countries`);
                 setCountries(response.data);
             } catch (error) {
@@ -533,152 +520,153 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 finalFocusRef={btnRef}
                 size="lg"
             >
-            <DrawerOverlay />
-            <DrawerContent>
-                <HStack marginBottom="1em">
-                    <DrawerCloseButton left="4" right="auto"/>
-                    <Button colorScheme="teal" marginLeft="auto" marginRight="2em" width="5em" height="2em" top="2" fontSize="small" onClick={handleSave}> Save </Button>
-                </HStack>
-                
-                <DrawerBody>
-                    <VStack spacing={4} align="stretch" marginLeft="1em">
-                        <DrawerHeader padding="0 0">
-                            Program
-                        </DrawerHeader>
-                        <h3>Status</h3>
-                        <HStack>
-                            {/* changed developing => inactive, launched => active to match the enum values in the database schema for program */}
-                            <Button onClick={() => handleProgramStatusChange("Inactive")} colorScheme={formState.status === "Inactive" ? "teal" : undefined}>Developing</Button> 
-                            <Button onClick={() => handleProgramStatusChange("Active")} colorScheme={formState.status === "Active" ? "teal" : undefined}>Launched</Button>
-                        </HStack> 
-                        <h3>Program Name</h3>
-                        <Input placeholder = "Enter Program Name" value={formState.programName || ''} onChange={(e) => handleProgramNameChange(e.target.value)}/>
-                        <h3>Launch Date</h3>
-                        <Input type = "date" placeholder = "MM/DD/YYYY" value={formState.launchDate || ''} onChange={(e) => handleProgramLaunchDateChange(e.target.value)} />
-                        <h3>Region</h3>
-                        <Select 
-                            placeholder='Select region'
-                            value = {formState.regionId || ''}
-                            onChange={(e) => handleRegionChange(e.target.value)}
-                        >
-                            {regions.map((region) => (
-                                <option key = {region.id} value ={region.id}>{region.name}</option>
-                            ))}
-                        </Select>
-                        {formState.regionId && (
-                            <>
-                                <h3>Country</h3>
-                                <Select
-                                    placeholder = 'Select Country'
-                                    value = {formState.country || ''}
-                                    onChange={(e) => handleCountryChange(e.target.value)}
-                                >
-                                    {countries.map((country) => (
-                                        <option key = {country.id} value = {country.id}>
-                                            {country.name}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </>
-                        )}
-                        <h3>Students</h3>
-                        <NumberInput min = {0} value={formState.students} onChange={(e) => handleStudentNumberChange(Number(e))}>
-                            <NumberInputField placeholder = "Enter # of Students"/>
-                            <NumberInputStepper>
-                                <NumberIncrementStepper />
-                                <NumberDecrementStepper />
-                            </NumberInputStepper>
-                        </NumberInput>
-                        
-                        <h3> Instrument(s) & Quantity </h3>
-                        <HStack wrap="wrap">
+                <DrawerOverlay />
+                <DrawerContent>
+                    <HStack marginBottom="1em">
+                        <DrawerCloseButton left="4" right="auto" />
+                        <Button colorScheme="teal" marginLeft="auto" marginRight="2em" width="5em" height="2em" top="2" fontSize="small" onClick={handleSave}> Save </Button>
+                    </HStack>
 
-                            <InstrumentForm 
-                                setFormData={setFormState} 
-                            />
-
-                            {Object.entries(formState.instruments || {}).map(
-                                ([instrumentId, instrumentData]) => (
-                                    <Tag key={instrumentId}>
-                                        <TagLabel>
-                                            {instrumentData.name}: {instrumentData.quantity}
-                                        </TagLabel>
-                                        <TagCloseButton
-                                            onClick={() => {
-                                                setFormState((prevData) => {
-                                                    const {
-                                                        [instrumentId]: _,
-                                                        ...remainingInstruments
-                                                    } = prevData.instruments;
-                                                    return {
-                                                        ...prevData,
-                                                        instruments: remainingInstruments,
-                                                    };
-                                                });
-                                            }}
-                                        />
-                                    </Tag>
-                                )
-                            )}
-                        </HStack>
-                        <h3>Language</h3>
-                        <Select 
-                            placeholder = "Language"
-                            value = {formState.language || ''}
-                            onChange={(e) => handleLanguageChange(e.target.value)}
-                        >
-                            <option value = "english">English</option>
-                            <option value = "spanish">Spanish</option>
-                            <option value = "french">French</option>
-                            <option value = "arabic">Arabic</option>
-                            <option value = "mandarin">Mandarin</option>
-                        </Select>
-                        <h3>Program Directors</h3>
-                        <HStack wrap = "wrap">
-                            <ProgramDirectorForm formState = {formState} setFormData={setFormState}/>
-                            {formState.programDirectors.map((director) => (
-                                <Tag key={director.userId}> 
-                                    <TagLabel>{`${director.firstName} ${director.lastName}`}</TagLabel>
-                                    <TagCloseButton onClick={() => {
-                                        setFormState((prevData) => ({
-                                            ...prevData,
-                                            programDirectors: prevData.programDirectors.filter(d => d !== director)
-                                        }));
-                                    }} />
-                                </Tag>
-                            ))}
-                        </HStack>
-
-                        <h3>Curriculum Links</h3>   
-                        <CurriculumLinkForm setFormData={setFormState} />
-
-                        <HStack wrap="wrap">
-                            {Object.entries(formState.curriculumLinks).map(([link, display]) => (
-                                <Tag key={link}>
-                                    <TagLabel 
-                                        cursor="pointer" 
-                                        onClick={() => {
-                                            window.open(link, '_blank', 'noopener,noreferrer');
-                                        }}
+                    <DrawerBody>
+                        <VStack spacing={4} align="stretch" marginLeft="1em">
+                            <DrawerHeader padding="0 0">
+                                Program
+                            </DrawerHeader>
+                            <h3>Status</h3>
+                            <HStack>
+                                {/* changed developing => inactive, launched => active to match the enum values in the database schema for program */}
+                                <Button onClick={() => handleProgramStatusChange("Inactive")} colorScheme={formState.status === "Inactive" ? "teal" : undefined}>Developing</Button>
+                                <Button onClick={() => handleProgramStatusChange("Active")} colorScheme={formState.status === "Active" ? "teal" : undefined}>Launched</Button>
+                            </HStack>
+                            <h3>Program Name</h3>
+                            <Input placeholder="Enter Program Name" value={formState.programName || ''} onChange={(e) => handleProgramNameChange(e.target.value)} />
+                            <h3>Launch Date</h3>
+                            <Input type="date" placeholder="MM/DD/YYYY" value={formState.launchDate || ''} onChange={(e) => handleProgramLaunchDateChange(e.target.value)} />
+                            <h3>Region</h3>
+                            <Select
+                                placeholder='Select region'
+                                value={formState.regionId || ''}
+                                onChange={(e) => handleRegionChange(e.target.value)}
+                            >
+                                {regions.map((region) => (
+                                    <option key={region.id} value={region.id}>{region.name}</option>
+                                ))}
+                            </Select>
+                            {formState.regionId && (
+                                <>
+                                    <h3>Country</h3>
+                                    <Select
+                                        placeholder='Select Country'
+                                        value={formState.country || ''}
+                                        onChange={(e) => handleCountryChange(e.target.value)}
                                     >
-                                        {display}
-                                    </TagLabel>
-                                    <TagCloseButton onClick={() => {
-                                        setFormState((prevData) => {
-                                            const { [link]: _, ...remainingLinks } = prevData.curriculumLinks;
-                                            return {
+                                        {countries.map((country) => (
+                                            <option key={country.id} value={country.id}>
+                                                {country.name}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                </>
+                            )}
+                            <h3>Students</h3>
+                            <NumberInput min={0} value={formState.students} onChange={(e) => handleStudentNumberChange(Number(e))}>
+                                <NumberInputField placeholder="Enter # of Students" />
+                                <NumberInputStepper>
+                                    <NumberIncrementStepper />
+                                    <NumberDecrementStepper />
+                                </NumberInputStepper>
+                            </NumberInput>
+
+                            <h3> Instrument(s) & Quantity </h3>
+                            <HStack wrap="wrap">
+
+                                <InstrumentForm
+                                    setFormData={setFormState}
+                                />
+
+                                {Object.entries(formState.instruments || {}).map(
+                                    ([instrumentId, instrumentData]) => (
+                                        <Tag key={instrumentId}>
+                                            <TagLabel>
+                                                {instrumentData.name}: {instrumentData.quantity}
+                                            </TagLabel>
+                                            <TagCloseButton
+                                                onClick={() => {
+                                                    setFormState((prevData) => {
+                                                        const {
+                                                            [instrumentId]: _,
+                                                            ...remainingInstruments
+                                                        } = prevData.instruments;
+                                                        return {
+                                                            ...prevData,
+                                                            instruments: remainingInstruments,
+                                                        };
+                                                    });
+                                                }}
+                                            />
+                                        </Tag>
+                                    )
+                                )}
+                            </HStack>
+                            <h3>Language</h3>
+                            <Select
+                                placeholder="Language"
+                                value={formState.language || ''}
+                                onChange={(e) => handleLanguageChange(e.target.value)}
+                            >
+                                {/* TODO: Language DB Table */}
+                                <option value="english">English</option>
+                                <option value="spanish">Spanish</option>
+                                <option value="french">French</option>
+                                <option value="arabic">Arabic</option>
+                                <option value="mandarin">Mandarin</option>
+                            </Select>
+                            <h3>Program Directors</h3>
+                            <HStack wrap="wrap">
+                                <ProgramDirectorForm formState={formState} setFormData={setFormState} />
+                                {formState.programDirectors.map((director) => (
+                                    <Tag key={director.userId}>
+                                        <TagLabel>{`${director.firstName} ${director.lastName}`}</TagLabel>
+                                        <TagCloseButton onClick={() => {
+                                            setFormState((prevData) => ({
                                                 ...prevData,
-                                                curriculumLinks: remainingLinks
-                                            };
-                                        });
-                                    }} />
-                                </Tag>
-                            ))}
-                        </HStack>
-                        {/* TODO: Add media input */}
-                    </VStack>
-                </DrawerBody>
-            </DrawerContent>
+                                                programDirectors: prevData.programDirectors.filter(d => d !== director)
+                                            }));
+                                        }} />
+                                    </Tag>
+                                ))}
+                            </HStack>
+
+                            <h3>Curriculum Links</h3>
+                            <CurriculumLinkForm setFormData={setFormState} />
+
+                            <HStack wrap="wrap">
+                                {Object.entries(formState.curriculumLinks).map(([link, display]) => (
+                                    <Tag key={link}>
+                                        <TagLabel
+                                            cursor="pointer"
+                                            onClick={() => {
+                                                window.open(link, '_blank', 'noopener,noreferrer');
+                                            }}
+                                        >
+                                            {display}
+                                        </TagLabel>
+                                        <TagCloseButton onClick={() => {
+                                            setFormState((prevData) => {
+                                                const { [link]: _, ...remainingLinks } = prevData.curriculumLinks;
+                                                return {
+                                                    ...prevData,
+                                                    curriculumLinks: remainingLinks
+                                                };
+                                            });
+                                        }} />
+                                    </Tag>
+                                ))}
+                            </HStack>
+                            {/* TODO: Add media input */}
+                        </VStack>
+                    </DrawerBody>
+                </DrawerContent>
             </Drawer>
         </>
     )

@@ -87,91 +87,91 @@ const MAP_BY_ROLE = {
 function ExpandableRow({ p, onEdit }) {
   const { isOpen, onToggle } = useDisclosure();
   return (
-<>
-    <Tr onClick={onToggle} cursor="pointer" sx={{ td: { borderBottom: isOpen ? "none" : undefined } }}>
-      <Td>{p.title}</Td>
-      <Td>{p.status}</Td>
-      <Td>{p.launchDate}</Td>
-      <Td>{p.location}</Td>
-      <Td>{p.students}</Td>
-      <Td>{p.instruments}</Td>
-      <Td>{p.totalInstruments}</Td>
-    </Tr>
-    <Tr>
-      <Td colSpan={7} borderBottom={isOpen ? "1px solid" : "none"} borderColor="gray.200" p={isOpen ? undefined : 0}>
-        <Collapse in={isOpen}>
-        <Box position="relative">
-          <HStack align="start">
-            <Box flex="1" display="grid">
-              <Box fontSize="sm" fontWeight="semibold" pb="2">Language:</Box>
-              <Box>{p.primaryLanguage ?? "-"}</Box>
+    <>
+      <Tr onClick={onToggle} cursor="pointer" sx={{ td: { borderBottom: isOpen ? "none" : undefined } }}>
+        <Td>{p.title}</Td>
+        <Td>{p.status}</Td>
+        <Td>{p.launchDate}</Td>
+        <Td>{p.location}</Td>
+        <Td>{p.students}</Td>
+        <Td>{p.instruments}</Td>
+        <Td>{p.totalInstruments}</Td>
+      </Tr>
+      <Tr>
+        <Td colSpan={7} borderBottom={isOpen ? "1px solid" : "none"} borderColor="gray.200" p={isOpen ? undefined : 0}>
+          <Collapse in={isOpen}>
+            <Box position="relative">
+              <HStack align="start">
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">Language:</Box>
+                  <Box>{p.primaryLanguage ?? "-"}</Box>
+                </Box>
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">Regional Director(s)</Box>
+                  <Box>
+                    <VStack align="start" spacing={2}>
+                      {Array.isArray(p.regionalDirectors)
+                        ? p.regionalDirectors.map((d, idx) => (
+                          <Box
+                            key={d.userId ?? `${d.firstName}-${d.lastName}-${idx}`}
+                            bg="gray.200"
+                            px={3}
+                            py={1}
+                            borderRadius="full"
+                          >
+                            {d.firstName} {d.lastName}
+                          </Box>
+                        ))
+                        : null}
+                    </VStack>
+                  </Box>
+                </Box>
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">Program Director(s)</Box>
+                  <Box>
+                    <VStack align="start" spacing={2}>
+                      {Array.isArray(p.programDirectors)
+                        ? p.programDirectors.map((d, idx) => (
+                          <Box
+                            key={d.userId ?? `${d.firstName}-${d.lastName}-${idx}`}
+                            bg="gray.200"
+                            px={3}
+                            py={1}
+                            borderRadius="full"
+                          >
+                            {d.firstName} {d.lastName}
+                          </Box>
+                        ))
+                        : null}
+                    </VStack>
+                  </Box>
+                </Box>
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">Curriculum Link(s)</Box>
+                  <Box>
+                    {Array.isArray(p.playlists) ? p.playlists.map((l) => {
+                      return <Box key={l.link}><Link href={l.link} color="blue">{l.name}</Link></Box>
+                    }) : null}
+                  </Box>
+                </Box>
+              </HStack>
+              <Button size="xs"
+                position="absolute"
+                bottom="8px"
+                right="8px"
+                border="1px solid"
+                bg="white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.(p);
+                }}
+                leftIcon={<EditIcon />}
+              >Update</Button>
             </Box>
-            <Box flex="1" display="grid">
-              <Box fontSize="sm" fontWeight="semibold" pb="2">Regional Director(s)</Box>
-              <Box>
-                <VStack align="start" spacing={2}>
-                  {Array.isArray(p.regionalDirectors)
-                    ? p.regionalDirectors.map((d, idx) => (
-                        <Box
-                          key={d.userId ?? `${d.firstName}-${d.lastName}-${idx}`}
-                          bg="gray.200"
-                          px={3}
-                          py={1}
-                          borderRadius="full"
-                        >
-                          {d.firstName} {d.lastName}
-                        </Box>
-                      ))
-                    : null}
-                </VStack>
-              </Box>
-            </Box>
-            <Box flex="1" display="grid">
-              <Box fontSize="sm" fontWeight="semibold" pb="2">Program Director(s)</Box>
-              <Box>
-                <VStack align="start" spacing={2}>
-                  {Array.isArray(p.programDirectors)
-                    ? p.programDirectors.map((d, idx) => (
-                        <Box
-                          key={d.userId ?? `${d.firstName}-${d.lastName}-${idx}`}
-                          bg="gray.200"
-                          px={3}
-                          py={1}
-                          borderRadius="full"
-                        >
-                          {d.firstName} {d.lastName}
-                        </Box>
-                      ))
-                    : null}
-                </VStack>
-              </Box>
-            </Box> 
-            <Box flex="1" display="grid">
-              <Box fontSize="sm" fontWeight="semibold" pb="2">Curriculum Link(s)</Box>
-              <Box>
-                {Array.isArray(p.playlists) ? p.playlists.map((l)=> {
-                return <Box key={l.link}><Link href={l.link} color="blue">{l.name}</Link></Box>
-              }) : null}
-              </Box>
-            </Box>
-            </HStack>
-          <Button size="xs"
-              position="absolute"
-              bottom="8px"
-              right="8px"
-              border="1px solid"
-              bg="white"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit?.(p);
-              }}
-              leftIcon={<EditIcon />}
-          >Update</Button>
-        </Box>
-        </Collapse>
-    </Td>
-    </Tr>
-  </>
+          </Collapse>
+        </Td>
+      </Tr>
+    </>
   )
 }
 
@@ -188,7 +188,6 @@ function ProgramTable({ role = "admin", userId }) {
     setIsFormOpen(true);
   }
 
-
   useEffect(() => {
     const route = getRouteByRole(role, userId);
     const mapRow = MAP_BY_ROLE[role];
@@ -201,27 +200,24 @@ function ProgramTable({ role = "admin", userId }) {
         const res = await backend.get(route);
         const rows = Array.isArray(res.data) ? res.data : [];
 
-        // fetches the rds, pds, curriculum(playlists) per program
         const programDetails = await Promise.all(
-          rows.map(async (row) => {
-            const [ playlists, programDirectors, regionalDirectors] = await Promise.all([
+          rows.map(async (row) => { //TODO: make this more efficient with lazy loading
+            const [playlists, programDirectors, regionalDirectors] = await Promise.all([
               backend.get(`/program/${row.id}/playlists`),
               backend.get(`/program/${row.id}/program-directors`).catch(() => ({ data: [] })),
               backend.get(`/program/${row.id}/regional-directors`).catch(() => ({ data: [] })),
 
             ]);
-            
-            //console.log("[RAW ROW],", row);
+
             return {
               ...row,
               playlists: playlists.data,
               programDirectors: programDirectors?.data || [],
               regionalDirectors: regionalDirectors?.data || [],
-            }; 
+            };
           })
         );
 
-        
         setPrograms(programDetails.map(mapRow));
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -237,106 +233,106 @@ function ProgramTable({ role = "admin", userId }) {
 
   return (
     <>
-    <ProgramForm
-      isOpen={isFormOpen}
-      onOpen={() => setIsFormOpen(true)}
-      onClose={() => {
-        setIsFormOpen(false);
-        setSelectedProgram(null);
-      }}
-      program={selectedProgram}
+      <ProgramForm
+        isOpen={isFormOpen}
+        onOpen={() => setIsFormOpen(true)}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedProgram(null);
+        }}
+        program={selectedProgram}
 
-    />
-    <TableContainer>
-      <HStack mb={4} justifyContent="space-between" w="100%">
-        <HStack spacing={4}>
-          <Box fontSize="xl" fontWeight="semibold">All Programs</Box>
+      />
+      <TableContainer>
+        <HStack mb={4} justifyContent="space-between" w="100%">
+          <HStack spacing={4}>
+            <Box fontSize="xl" fontWeight="semibold">All Programs</Box>
+            <HStack spacing={1}>
+              <IconButton
+                aria-label="search"
+                icon={<Search2Icon />}
+                size="sm"
+                variant="ghost"
+              />
+              <Input
+                w="120px"
+                size="xs"
+                placeholder="Type to search"
+                variant="unstyled"
+                borderBottom="1px solid"
+                borderColor="gray.300"
+                borderRadius="0"
+                px={1}
+              />
+              <IconButton
+                aria-label="filter"
+                icon={<HiOutlineAdjustmentsHorizontal />}
+                size="sm"
+                variant="ghost"
+              />
+            </HStack>
+          </HStack>
           <HStack spacing={1}>
             <IconButton
-              aria-label="search"
-              icon={<Search2Icon />}
+              aria-label="menu"
+              icon={<HamburgerIcon />}
               size="sm"
               variant="ghost"
             />
-            <Input
-              w="120px"
-              size="xs"
-              placeholder="Type to search"
-              variant="unstyled"
-              borderBottom="1px solid"
-              borderColor="gray.300"
-              borderRadius="0"
-              px={1}
+            <Divider orientation="vertical" h="20px" />
+            <IconButton
+              aria-label="search"
+              icon={<HiOutlineSquares2X2 />}
+              size="sm"
+              variant="ghost"
             />
             <IconButton
-              aria-label="filter"
-              icon={<HiOutlineAdjustmentsHorizontal />}
+              aria-label="download"
+              icon={<DownloadIcon />}
               size="sm"
               variant="ghost"
+              ml={2}
             />
+            <Button size="sm" rightIcon={<AddIcon />} onClick={() => {
+              setSelectedProgram(null);
+              setIsFormOpen(true);
+
+            }}>
+
+              New
+            </Button>
           </HStack>
         </HStack>
-        <HStack spacing={1}>
-          <IconButton
-            aria-label="menu"
-            icon={<HamburgerIcon />}
-            size="sm"
-            variant="ghost"
-          />
-          <Divider orientation="vertical" h="20px" />
-          <IconButton
-            aria-label="search"
-            icon={<HiOutlineSquares2X2 />}
-            size="sm"
-            variant="ghost"
-          />
-          <IconButton
-            aria-label="download"
-            icon={<DownloadIcon />}
-            size="sm"
-            variant="ghost"
-            ml={2}
-          />
-          <Button size="sm" rightIcon={<AddIcon />} onClick={() => {
-            setSelectedProgram(null);
-            setIsFormOpen(true);
 
-          }}>
-          
-            New
-          </Button>
-        </HStack>
-      </HStack>
-
-      <Table variant="simple" aria-label="collapsible-table">
-        <Thead>
-          <Tr>
-            <Th>Program</Th>
-            <Th>Status</Th>
-            <Th>Launch Date</Th>
-            <Th>Location</Th>
-            <Th>Students</Th>
-            <Th>Instruments</Th>
-            <Th>Total Instruments</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {isLoading ? (
+        <Table variant="simple" aria-label="collapsible-table">
+          <Thead>
             <Tr>
-              <Td colSpan={7}>
-                <Center py={8}>
-                  <Spinner size="lg" />
-                </Center>
-              </Td>
+              <Th>Program</Th>
+              <Th>Status</Th>
+              <Th>Launch Date</Th>
+              <Th>Location</Th>
+              <Th>Students</Th>
+              <Th>Instruments</Th>
+              <Th>Total Instruments</Th>
             </Tr>
-          ) : (
-            programs.map((p) => (
-              <ExpandableRow key={p.id} p={p} onEdit={openEditForm}/>
-            ))
-          )}
-        </Tbody>
-      </Table>
-    </TableContainer>
+          </Thead>
+          <Tbody>
+            {isLoading ? (
+              <Tr>
+                <Td colSpan={7}>
+                  <Center py={8}>
+                    <Spinner size="lg" />
+                  </Center>
+                </Td>
+              </Tr>
+            ) : (
+              programs.map((p) => (
+                <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
+              ))
+            )}
+          </Tbody>
+        </Table>
+      </TableContainer>
     </>
   );
 }
