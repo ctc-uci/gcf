@@ -4,6 +4,7 @@ import { Box, Center, Flex, Heading, Spinner } from "@chakra-ui/react";
 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useRoleContext } from "@/contexts/hooks/useRoleContext";
 
 import { AccountsTable } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
@@ -20,6 +21,7 @@ const getAccountsRoute = (role, userId) => {
 
 export const Account = () => {
   const { currentUser } = useAuthContext();
+  const { role } = useRoleContext();
   const userId = currentUser?.uid;
 
   const [users, setUsers] = useState([]);
