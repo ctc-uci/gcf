@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
-
 import {
-  AddIcon,
-  DownloadIcon,
-  HamburgerIcon,
-  Search2Icon,
-} from "@chakra-ui/icons";
-import {
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Input,
+  TableContainer,
+  IconButton,
+  HStack,
   Box,
   Button,
-  Center,
   Divider,
-  HStack,
-  IconButton,
-  Input,
   Spinner,
   Center,
   Collapse,
@@ -25,20 +24,12 @@ import {
 import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon, EditIcon } from "@chakra-ui/icons";
 import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
-import {
-  HiOutlineAdjustmentsHorizontal,
-  HiOutlineSquares2X2,
-} from "react-icons/hi2";
-
-import { useTableSort } from "../../contexts/hooks/TableSort";
-import { SortArrows } from "../tables/SortArrows";
 import { ProgramForm } from "./ProgramForm";
 
 const getRouteByRole = (role, userId) => {
   const routes = {
-    Admin: "/admin/programs",
-    "Regional Director": `/rdProgramTable/${userId}`,
+    admin: "/admin/programs",
+    regionalDirector: `/rdProgramTable/${userId}`,
   };
   return routes[role];
 };
@@ -89,8 +80,8 @@ function mapRdRow(row) {
 }
 
 const MAP_BY_ROLE = {
-  Admin: mapAdminRow,
-  "Regional Director": mapRdRow,
+  admin: mapAdminRow,
+  regionalDirector: mapRdRow,
 };
 
 function ExpandableRow({ p, onEdit }) {
@@ -198,15 +189,19 @@ function ProgramTable({ role = "admin", userId }) {
   }
 
 
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
-  };
+  useEffect(() => {
+    const route = getRouteByRole(role, userId);
+    const mapRow = MAP_BY_ROLE[role];
+
+    if (!route || !mapRow) return;
 
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const res = await backend.get(route);
         const rows = Array.isArray(res.data) ? res.data : [];
+
+        // fetches the rds, pds, curriculum(playlists) per program
         const programDetails = await Promise.all(
           rows.map(async (row) => {
             const [ playlists, programDirectors, regionalDirectors] = await Promise.all([
@@ -235,29 +230,10 @@ function ProgramTable({ role = "admin", userId }) {
       }
     };
 
-    if (searchQuery === "") {
-      setData(originalData);
-      return;
-    }
+    fetchData();
+  }, [role, userId, backend]);
 
-    const filtered = originalData.filter(
-      (program) =>
-        program.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.launchDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(program.students)
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        String(program.instruments)
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        String(program.totalInstruments)
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-    );
-    setData(filtered);
-  }, [searchQuery, originalData]);
+  if (!getRouteByRole(role, userId)) return null;
 
   return (
     <>
@@ -272,18 +248,9 @@ function ProgramTable({ role = "admin", userId }) {
 
     />
     <TableContainer>
-      <HStack
-        mb={4}
-        justifyContent="space-between"
-        w="100%"
-      >
+      <HStack mb={4} justifyContent="space-between" w="100%">
         <HStack spacing={4}>
-          <Box
-            fontSize="xl"
-            fontWeight="semibold"
-          >
-            All Programs
-          </Box>
+          <Box fontSize="xl" fontWeight="semibold">All Programs</Box>
           <HStack spacing={1}>
             <IconButton
               aria-label="search"
@@ -300,8 +267,6 @@ function ProgramTable({ role = "admin", userId }) {
               borderColor="gray.300"
               borderRadius="0"
               px={1}
-              value={searchQuery}
-              onChange={handleSearch}
             />
             <IconButton
               aria-label="filter"
@@ -318,10 +283,7 @@ function ProgramTable({ role = "admin", userId }) {
             size="sm"
             variant="ghost"
           />
-          <Divider
-            orientation="vertical"
-            h="20px"
-          />
+          <Divider orientation="vertical" h="20px" />
           <IconButton
             aria-label="search"
             icon={<HiOutlineSquares2X2 />}
@@ -349,76 +311,13 @@ function ProgramTable({ role = "admin", userId }) {
       <Table variant="simple" aria-label="collapsible-table">
         <Thead>
           <Tr>
-            <Th
-              onClick={() => handleSort("title")}
-              cursor="pointer"
-            >
-              Program{" "}
-              <SortArrows
-                columnKey="title"
-                sortOrder={sortOrder}
-              />
-            </Th>
-            <Th
-              onClick={() => handleSort("status")}
-              cursor="pointer"
-            >
-              Status{" "}
-              <SortArrows
-                columnKey="status"
-                sortOrder={sortOrder}
-              />
-            </Th>
-            <Th
-              onClick={() => handleSort("launchDate")}
-              cursor="pointer"
-            >
-              Launch Date{" "}
-              <SortArrows
-                columnKey="launchDate"
-                sortOrder={sortOrder}
-              />
-            </Th>
-            <Th
-              onClick={() => handleSort("location")}
-              cursor="pointer"
-            >
-              Location{" "}
-              <SortArrows
-                columnKey="location"
-                sortOrder={sortOrder}
-              />
-            </Th>
-            <Th
-              onClick={() => handleSort("students")}
-              cursor="pointer"
-            >
-              Students{" "}
-              <SortArrows
-                columnKey="students"
-                sortOrder={sortOrder}
-              />
-            </Th>
-            <Th
-              onClick={() => handleSort("instruments")}
-              cursor="pointer"
-            >
-              Instruments{" "}
-              <SortArrows
-                columnKey="instruments"
-                sortOrder={sortOrder}
-              />
-            </Th>
-            <Th
-              onClick={() => handleSort("totalInstruments")}
-              cursor="pointer"
-            >
-              Total Instruments{" "}
-              <SortArrows
-                columnKey="totalInstruments"
-                sortOrder={sortOrder}
-              />
-            </Th>
+            <Th>Program</Th>
+            <Th>Status</Th>
+            <Th>Launch Date</Th>
+            <Th>Location</Th>
+            <Th>Students</Th>
+            <Th>Instruments</Th>
+            <Th>Total Instruments</Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -438,6 +337,7 @@ function ProgramTable({ role = "admin", userId }) {
         </Tbody>
       </Table>
     </TableContainer>
+    </>
   );
 }
 
