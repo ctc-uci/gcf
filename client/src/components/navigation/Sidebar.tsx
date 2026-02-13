@@ -28,7 +28,7 @@ export const Sidebar = () => {
             boxSize="20px"
           />
         ),
-        path: "/dashboard/",
+        path: "/dashboard",
       },
       {
         name: "Updates",
@@ -38,7 +38,7 @@ export const Sidebar = () => {
             boxSize="20px"
           />
         ),
-        path: "/updates/",
+        path: "/updates",
       },
       {
         name: "Accounts",
