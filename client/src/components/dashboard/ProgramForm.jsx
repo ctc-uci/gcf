@@ -565,7 +565,6 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                                 <option key = {region.id} value ={region.id}>{region.name}</option>
                             ))}
                         </Select>
-                        {/* countries dropdown after the region is selected */}
                         {formState.regionId && (
                             <>
                                 <h3>Country</h3>

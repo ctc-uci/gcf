@@ -200,8 +200,6 @@ function ProgramTable({ role = "admin", userId }) {
       try {
         const res = await backend.get(route);
         const rows = Array.isArray(res.data) ? res.data : [];
-
-        // fetches the rds, pds, curriculum(playlists) per program
         const programDetails = await Promise.all(
           rows.map(async (row) => {
             const [ playlists, programDirectors, regionalDirectors] = await Promise.all([
@@ -334,9 +332,6 @@ function ProgramTable({ role = "admin", userId }) {
               <ExpandableRow key={p.id} p={p} onEdit={openEditForm}/>
             ))
           )}
-          <Tr>
-
-          </Tr>
         </Tbody>
       </Table>
     </TableContainer>

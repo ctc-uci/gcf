@@ -93,7 +93,6 @@ regionRouter.delete("/:id", async (req, res) => {
   }
 });
 
-// countries for region_id
 regionRouter.get("/:id/countries", async (req, res) => {
   try {
     const { id } = req.params;

@@ -162,9 +162,6 @@ programRouter.delete("/:id", async (req, res) => {
   }
 });
 
-
-
-//regional director names for programs
 programRouter.get("/:id/regional-directors", async (req, res) => {
   try {
     const { id } = req.params;
@@ -201,8 +198,6 @@ programRouter.get("/:id/regional-directors", async (req, res) => {
   }
 });
 
-
-//playlists for a program
 programRouter.get("/:id/playlists", async (req, res) => {
   try {
     const { id } = req.params;
@@ -248,7 +243,6 @@ programRouter.get("/:id/instruments", async (req, res) => {
   }
 });
 
-//program directors names for program
 programRouter.get("/:id/program-directors", async (req, res) => {
   try {
     const { id } = req.params;
