@@ -26,27 +26,29 @@ export const Navbar = () => {
     navigate("/login");
   };
 
-  const fetchData = async (table: string, path: string) => {
-    try {
-      const response = await backend.get(`/${table}/${path}`);
-      return response.data;
-    } catch (error) {
-      console.error(
-        "Request failed:",
-        path,
-        error.response?.status,
-        error.message
-      );
-      return [];
-    }
-  };
+
 
   useEffect(() => {
+    const fetchData = async (table: string, path: string) => {
+      try {
+        const response = await backend.get(`/${table}/${path}`);
+        return response.data;
+      } catch (error) {
+        console.error(
+          "Request failed:",
+          path,
+          error.response?.status,
+          error.message
+        );
+        return [];
+      }
+    };
+
     const loadData = async () => {
       try {
         const [regionData, projectData] = await Promise.all([
-          fetchData("region", `/get-region-name/${userId}`),
-          fetchData("program", `/get-program-name/${userId}`),
+          fetchData("region", `get-region-name/${userId}`),
+          fetchData("program", `get-program-name/${userId}`),
         ]);
 
         setRegion(regionData.name);
