@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
-import { Box, Heading, AspectRatio, Text, SimpleGrid } from "@chakra-ui/react";
+
+import { AspectRatio, Box, Heading, SimpleGrid, Text } from "@chakra-ui/react";
+
+import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
-// TODO(login): Replace userId prop with AuthContext (currentUser?.uid), or have parent pass it from AuthContext.
-function LessonVideos({ userId }) {
+function LessonVideos() {
+  const { currentUser } = useAuthContext();
+  const { userId } = currentUser.uid;
+
   const { backend } = useBackendContext();
   const [playlists, setPlaylists] = useState([]);
 
@@ -12,7 +17,9 @@ function LessonVideos({ userId }) {
 
     const fetchData = async () => {
       try {
-        const res = await backend.get(`/program-directors/me/${userId}/playlist`);
+        const res = await backend.get(
+          `/program-directors/me/${userId}/playlist`
+        );
         const playlistList = Array.isArray(res.data) ? res.data : [];
         setPlaylists(playlistList);
       } catch (err) {
@@ -26,20 +33,20 @@ function LessonVideos({ userId }) {
   // Extract YouTube video ID from various URL formats
   const getYouTubeVideoId = (url) => {
     if (!url) return null;
-    
+
     // Handle different YouTube URL formats
     const patterns = [
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
       /youtube\.com\/watch\?.*v=([^&\n?#]+)/,
     ];
-    
+
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match && match[1]) {
         return match[1];
       }
     }
-    
+
     return null;
   };
 
@@ -52,17 +59,30 @@ function LessonVideos({ userId }) {
 
   return (
     <Box>
-      <Heading size="md" mb={4}>
+      <Heading
+        size="md"
+        mb={4}
+      >
         Lesson Videos
       </Heading>
-      {playlists.length === 0 && <Text color="gray.500">No lesson videos available</Text>}
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
+      {playlists.length === 0 && (
+        <Text color="gray.500">No lesson videos available</Text>
+      )}
+      <SimpleGrid
+        columns={{ base: 1, md: 2, lg: 4 }}
+        spacing={4}
+      >
         {playlists.map((playlist, index) => {
           const embedUrl = getYouTubeEmbedUrl(playlist.link);
           if (!embedUrl) return null;
-          
+
           return (
-            <Box key={`${playlist.programId}-${playlist.link}-${index}`} borderWidth="1px" borderRadius="md" overflow="hidden">
+            <Box
+              key={`${playlist.programId}-${playlist.link}-${index}`}
+              borderWidth="1px"
+              borderRadius="md"
+              overflow="hidden"
+            >
               <AspectRatio ratio={16 / 9}>
                 <iframe
                   src={embedUrl}
@@ -73,7 +93,11 @@ function LessonVideos({ userId }) {
                 />
               </AspectRatio>
               <Box p={2}>
-                <Text fontSize="sm" fontWeight="medium" noOfLines={2}>
+                <Text
+                  fontSize="sm"
+                  fontWeight="medium"
+                  noOfLines={2}
+                >
                   {playlist.name}
                 </Text>
               </Box>

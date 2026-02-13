@@ -1,4 +1,5 @@
 import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
+import { useEffect, useState } from "react";
 import {
   Badge,
   Box,
@@ -15,8 +16,46 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
+import { SortArrows } from "../tables/SortArrows";
+import { useTableSort } from "../../contexts/hooks/TableSort";
 
-export const ProgramUpdatesTable = ({ data, isLoading }) => {
+export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [unorderedUpdates, setUnorderedUpdates] = useState([]);
+  const { sortOrder, handleSort } = useTableSort(originalData, setData);
+  
+  const handleSearch = event => {
+      setSearchQuery(event.target.value);
+   };
+   //setUnorderedUpdates(data.map((row) => row))
+   useEffect(() => {
+    setUnorderedUpdates(data);
+   }, [searchQuery, data]);
+  
+    useEffect(() => {
+       function filterUpdates(search) {
+        if (search === '') {
+          setData(originalData);
+          return;
+        } 
+         // filter by search query
+         const filtered = unorderedUpdates.filter(update => 
+           // if no search then show everything
+           update.updateDate.toLowerCase().includes(search.toLowerCase()) ||
+           update.note.toLowerCase().includes(search.toLowerCase()) ||
+           update.name.toLowerCase().includes(search.toLowerCase()) ||
+           update.firstName.toLowerCase().includes(search.toLowerCase()) ||
+           update.status.includes(search.toLowerCase())
+         );
+         
+        setData(filtered);
+        
+       }
+   
+     filterUpdates(searchQuery);
+   
+     }, [searchQuery, unorderedUpdates]);
+
   return (
     <>
       <Box
@@ -36,6 +75,8 @@ export const ProgramUpdatesTable = ({ data, isLoading }) => {
             placeholder="Type to search"
             variant="flushed"
             w="200px"
+            value={searchQuery}
+            onChange={handleSearch}
           />
           <HamburgerIcon mt="10px" />
           <DownloadIcon mt="10px" />
@@ -47,12 +88,13 @@ export const ProgramUpdatesTable = ({ data, isLoading }) => {
         >
           <Table variant="simple">
             <Thead>
+              {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
               <Tr>
-                <Th>Time</Th>
-                <Th>Notes</Th>
-                <Th>Program</Th>
-                <Th>Author</Th>
-                <Th>Status</Th>
+                <Th onClick={() => handleSort('updateDate')} cursor="pointer">Time <SortArrows columnKey={"updateDate"} sortOrder={sortOrder}/></Th>
+                <Th onClick={() => handleSort('note')} cursor="pointer">Notes <SortArrows columnKey={"note"} sortOrder={sortOrder}/></Th>
+                <Th onClick={() => handleSort('name')} cursor="pointer">Program <SortArrows columnKey={"name"} sortOrder={sortOrder}/></Th>
+                <Th onClick={() => handleSort('firstName')} cursor="pointer">Author <SortArrows columnKey={"firstName"} sortOrder={sortOrder}/></Th>
+                <Th onClick={() => handleSort('status')} cursor="pointer">Status <SortArrows columnKey={"status"} sortOrder={sortOrder}/></Th>
               </Tr>
             </Thead>
             <Tbody>

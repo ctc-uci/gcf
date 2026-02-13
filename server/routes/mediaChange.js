@@ -117,6 +117,13 @@ mediaChangeRouter.get("/:userId/media", async (req, res) => {
       ORDER BY mc.id DESC NULLS LAST
     `, [userId]);
 
+    if (!result || result.length === 0) {
+      return res.status(200).json({ 
+        media: [],
+        programName: null 
+      });
+    }
+
     //in the case theres no media we still want to get the program name
     //so this filters out null results
     const programName = result[0].program_name;

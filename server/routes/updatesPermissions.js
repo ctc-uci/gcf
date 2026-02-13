@@ -101,12 +101,14 @@ updatesPermissionsRouter.get("/program-updates/:id", async (req, res) => {
           program.status
       FROM program_update
       INNER JOIN program ON program_update.program_id = program.id
-      INNER JOIN gcf_user on gcf_user.id = program.created_by
-      LEFT JOIN program_director ON program_director.program_id = program.id AND program_director.user_id = gcf_user.id
+      INNER JOIN program_director ON program_director.program_id = program.id
+      INNER JOIN gcf_user ON gcf_user.id = program_director.user_id
       WHERE gcf_user.id = $1
       ORDER BY program_update.update_date DESC;`,
       [id]
     );
+
+    
 
     if (data.length === 0) {
       return res.status(404).send("Item not found");
