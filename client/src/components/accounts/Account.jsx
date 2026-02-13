@@ -2,9 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Box, Center, Flex, Heading, Spinner } from "@chakra-ui/react";
 
+import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
-import { useParams } from "react-router-dom";
 
 import { AccountsTable } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
@@ -20,9 +19,9 @@ const getAccountsRoute = (role, userId) => {
 
 
 export const Account = () => {
-  // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid) when auth flow is finalized.
-  const { userId } = useParams();
-  const { role } = useRoleContext();
+  const { currentUser } = useAuthContext();
+  const userId = currentUser?.uid;
+
   const [users, setUsers] = useState([]);
   const [originalUsers, setOriginalUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +41,8 @@ export const Account = () => {
     }
     try {
       const response = await backend.get(route);
-      const fetchedData = (response.data || []).map((item) => ({
+      const rawData = response.data || []
+      const fetchedData = (rawData).map((item) => ({
         id: item.id,
         firstName: item.firstName,
         lastName: item.lastName,

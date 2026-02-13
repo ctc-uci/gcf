@@ -11,15 +11,15 @@ import {
   VStack,
 } from "@chakra-ui/react";
 
+import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useParams } from "react-router-dom";
 
 import { MediaGrid } from "./MediaGrid";
 import { MediaUploadModal } from "./MediaUploadModal";
 
 export const Media = () => {
-  // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid) when auth flow is finalized.
-  const { userId } = useParams();
+  const { currentUser } = useAuthContext();
+  const userId = currentUser?.uid;
   const { backend } = useBackendContext();
 
   const { isOpen, onOpen, onClose } = useDisclosure();

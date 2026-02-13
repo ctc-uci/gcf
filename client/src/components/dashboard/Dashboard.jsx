@@ -1,13 +1,13 @@
-import { Flex, Box } from "@chakra-ui/react";
-import { useParams } from "react-router-dom";
-import ProgramTable from "./ProgramTable";
+import { Box, Flex } from "@chakra-ui/react";
+
+import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+
 import LessonVideos from "./lessonVideos";
+import ProgramTable from "./ProgramTable";
 import StatisticsSummary from "./StatisticsSummary";
 
 const Dashboard = () => {
-  // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid); then stop passing userId to children.
-  const { userId } = useParams();
-  const role = "admin"; // TODO(login): Replace with useRoleContext() or AuthContext; then stop passing role to children.
+  const { role } = useRoleContext();
   return (
     <Flex
       direction="column"
@@ -16,11 +16,13 @@ const Dashboard = () => {
       as="main"
       p={10}w
     >
-      <StatisticsSummary role={role} userId={userId} />
+      <StatisticsSummary />
 
       <Box as="section">
-        {(role === "admin" || role === "regionalDirector") && <ProgramTable role={role} userId={userId} />}
-        {role === "programDirector" && <LessonVideos userId={userId} />}
+        {(role === "Admin" || role === "Regional Director") && (
+          <ProgramTable />
+        )}
+        {role === "Program Director" && <LessonVideos />}
       </Box>
     </Flex>
   );
