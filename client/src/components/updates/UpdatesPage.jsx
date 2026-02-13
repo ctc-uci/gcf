@@ -7,7 +7,6 @@ import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useRoleContext } from "@/contexts/hooks/useRoleContext";
 
 import { MediaUpdatesTable } from "./MediaUpdatesTable";
-import { ProgramAccountUpdatesTable } from "./ProgramAccountUpdatesTable";
 import { ProgramUpdatesTable } from "./ProgramUpdatesTable";
 
 export const UpdatesPage = () => {
@@ -16,19 +15,10 @@ export const UpdatesPage = () => {
   const { role } = useRoleContext();
   const { backend } = useBackendContext();
 
-  const [programAccountUpdatesData, setProgramAccountUpdatesData] = useState(
-    []
-  );
-  const [
-    originalProgramAccountUpdatesData,
-    setOriginalProgramAccountUpdatesData,
-  ] = useState([]);
   const [mediaUpdatesData, setMediaUpdatesData] = useState([]);
   const [originalMediaUpdatesData, setOriginalMediaUpdatesData] = useState([]);
   const [programUpdatesData, setProgramUpdatesData] = useState([]);
-  const [originalProgramUpdatesData, setOriginalProgramUpdatesData] = useState(
-    []
-  );
+  const [originalProgramUpdatesData, setOriginalProgramUpdatesData] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -55,15 +45,11 @@ export const UpdatesPage = () => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [programAccountUpdates, mediaUpdates, programUpdates] =
+        const [mediaUpdates, programUpdates] =
           await Promise.all([
-            fetchData(`program-account/${userId}`),
             fetchData(`media-updates/${userId}`),
             fetchData(`program-updates/${userId}`),
           ]);
-
-        setProgramAccountUpdatesData(programAccountUpdates);
-        setOriginalProgramAccountUpdatesData(programAccountUpdates);
         setOriginalMediaUpdatesData(mediaUpdates);
         setMediaUpdatesData(mediaUpdates);
         setProgramUpdatesData(programUpdates);
@@ -88,6 +74,7 @@ export const UpdatesPage = () => {
     );
   }
 
+
   return (
     <>
       {role === "Program Director" ? (
@@ -105,10 +92,10 @@ export const UpdatesPage = () => {
             originalData={originalMediaUpdatesData}
             isLoading={isLoading}
           />
-          <ProgramAccountUpdatesTable
-            data={programAccountUpdatesData}
-            setData={setProgramAccountUpdatesData}
-            originalData={originalProgramAccountUpdatesData}
+          <ProgramUpdatesTable
+            data={programUpdatesData}
+            setData={setProgramUpdatesData}
+            originalData={originalProgramUpdatesData}
             isLoading={isLoading}
           />
         </>
