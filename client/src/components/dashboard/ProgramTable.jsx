@@ -150,7 +150,7 @@ function ExpandableRow({ p, onEdit }) {
               <Box fontSize="sm" fontWeight="semibold" pb="2">Curriculum Link(s)</Box>
               <Box>
                 {Array.isArray(p.playlists) ? p.playlists.map((l)=> {
-                return <Box><Link href={l.link} color="blue">Instrument | {p.primaryLanguage ?? "-"}</Link></Box>
+                return <Box key={l.link}><Link href={l.link} color="blue">{l.name}</Link></Box>
               }) : null}
               </Box>
             </Box>

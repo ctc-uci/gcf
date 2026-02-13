@@ -21,8 +21,8 @@ import {
   TagCloseButton
 } from '@chakra-ui/react'
 import { useRef, useState, useEffect } from 'react'
-import { useBackendContext } from '@/contexts/hooks/useBackendContext' 
-import { useAuthContext } from '@/contexts/hooks/useAuthContext'; 
+import { useBackendContext } from '@/contexts/hooks/useBackendContext'
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 
 
 // sub-component for adding instruments
@@ -93,7 +93,7 @@ const InstrumentForm = ({ setFormData }) => {
             </Select>
             <NumberInput 
                 step={1} 
-                defaultValue={0} 
+                defaultValue={0}
                 min={0} 
                 width="8em" 
                 value={quantity} 
@@ -457,7 +457,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                     program_id: programId,
                     created_by: currentUser?.uid || currentUser?.id,
                     update_date: new Date().toISOString(),
-                    note: '',
+                    note: 'Program update',
                 });
 
                 const updateId = updateResponse.data.id;
@@ -481,9 +481,6 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 }
             }
 
-
-
-    
             onClose();
             window.location.reload();
         } catch (err) {
