@@ -401,9 +401,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
 
             }
 
-            // need to handle program directors, enrollments, instruments separately
-            // Only POST newly added directors; skip the ones that were already linked
-            // when the form initially loaded, to avoid duplicate-key errors.
+
             if (formState.programDirectors.length > 0) {
                 for (const director of formState.programDirectors) {
                     if (
@@ -436,10 +434,9 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 }
             }
 
-            // Compute student enrollment change
             const studentCountChange = formState.students - oldStudentCount;
 
-            // Compute per-instrument changes relative to initial quantities
+
             const instrumentChanges = [];
             const allInstrumentIds = new Set([
                 ...Object.keys(initialInstrumentQuantities || {}),
@@ -461,7 +458,6 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
             const hasStudentChange = studentCountChange !== 0;
             const hasInstrumentChange = instrumentChanges.length > 0;
 
-            // If nothing changed in students or instruments, skip creating a program update
             if (hasStudentChange || hasInstrumentChange) {
                 const updateResponse = await backend.post(`/program-updates`, {
                     title: 'update program stats',
