@@ -655,7 +655,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                                 ))}
                             </HStack>
 
-                            <h3>Curriculum Links (playlists)</h3>
+                            <h3>Curriculum Links</h3>
                             <CurriculumLinkForm formState={formState} setFormData={setFormState} />
                             <HStack wrap="wrap">
                                 {(formState.curriculumLinks ?? []).map((playlist) => (
