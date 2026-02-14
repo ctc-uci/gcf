@@ -174,29 +174,34 @@ const ProgramDirectorForm = ({ formState, setFormData }) => {
     )
 }
 
-const CurriculumLinkForm = ({ setFormData }) => {
-    const [link, setLink] = useState(null);
-    const [display, setDisplay] = useState(null);
+const CurriculumLinkForm = ({ formState, setFormData }) => {
+    const [link, setLink] = useState('');
+    const [display, setDisplay] = useState('');
 
     function handleSubmit() {
-        if (!link || !display) return;
+        if (!link?.trim()) return;
 
-        let validLink = link
-        if (!link.startsWith('http://') && !link.startsWith('https://')) {
-            validLink = 'https://' + link;
+        let validLink = link.trim();
+        if (!validLink.startsWith('http://') && !validLink.startsWith('https://')) {
+            validLink = 'https://' + validLink;
         }
+
+        const alreadyAdded = (formState.curriculumLinks ?? []).some(
+            (p) => p.link === validLink
+        );
+        if (alreadyAdded) return;
+
         setFormData((prevData) => ({
             ...prevData,
-            curriculumLinks: {
-                ...prevData.curriculumLinks,
-                [validLink]: display
-            }
+            curriculumLinks: [
+                ...(prevData.curriculumLinks ?? []),
+                { link: validLink, name: (display || 'Playlist').trim() || 'Playlist' }
+            ]
         }));
 
-        setLink(null);
-        setDisplay(null);
-    };
-
+        setLink('');
+        setDisplay('');
+    }
 
     return (
         <HStack border="1px" borderColor="gray.200" padding="1" borderRadius="md" spacing={2}>
@@ -205,14 +210,12 @@ const CurriculumLinkForm = ({ setFormData }) => {
                 value={link || ''}
                 onChange={(e) => setLink(e.target.value)}
             />
-
             <Input
                 placeholder="Display Name"
                 value={display || ''}
                 onChange={(e) => setDisplay(e.target.value)}
             />
-
-            <Button onClick={handleSubmit}> + Add </Button>
+            <Button onClick={handleSubmit}>+ Add</Button>
         </HStack>
     )
 }
@@ -231,6 +234,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
 
     const [initialProgramDirectorIds, setInitialProgramDirectorIds] = useState([]);
     const [initialInstrumentQuantities, setInitialInstrumentQuantities] = useState({});
+    const [initialCurriculumLinks, setInitialCurriculumLinks] = useState([]);
 
 
     const [formState, setFormState] = useState({
@@ -244,8 +248,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         },
         language: null,
         programDirectors: [],
-        curriculumLinks: {
-        },
+        curriculumLinks: [],
         media: []
     });
 
@@ -263,11 +266,12 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                     instruments: {},
                     language: null,
                     programDirectors: [],
-                    curriculumLinks: {},
+                    curriculumLinks: [],
                     media: []
                 });
                 setInitialProgramDirectorIds([]);
                 setInitialInstrumentQuantities({});
+                setInitialCurriculumLinks([]);
                 return;
             }
 
@@ -321,19 +325,19 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 programDirectors: mappedProgramDirectors,
 
                 curriculumLinks: Array.isArray(program.playlists)
-                    ? program.playlists.reduce((acc, playlist) => {
-                        if (playlist.link) {
-                            acc[playlist.link] = playlist.name || 'Playlist';
-                        }
-                        return acc;
-                    }, {})
-                    : {},
+                    ? program.playlists
+                        .filter((p) => p.link)
+                        .map((p) => ({ link: p.link, name: p.name || 'Playlist' }))
+                    : [],
                 media: program.media ?? []
             });
             setInitialProgramDirectorIds(
                 mappedProgramDirectors.map(d => d.userId).filter(Boolean)
             );
             setInitialInstrumentQuantities(initialInstrumentMap);
+            setInitialCurriculumLinks(
+                (program.playlists ?? []).filter((p) => p.link).map((p) => p.link)
+            );
             regionId = null;
 
         }
@@ -411,6 +415,24 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                             programId
                         });
                     }
+                }
+            }
+
+            //curriclum links / playlists
+            const currentLinks = (formState.curriculumLinks ?? []).map((p) => p.link);
+            for (const playlist of formState.curriculumLinks ?? []) {
+                if (!initialCurriculumLinks.includes(playlist.link)) {
+                    await backend.post(`/program/${programId}/playlists`, {
+                        link: playlist.link,
+                        name: playlist.name || 'Playlist'
+                    });
+                }
+            }
+            for (const oldLink of initialCurriculumLinks) {
+                if (!currentLinks.includes(oldLink)) {
+                    await backend.delete(`/program/${programId}/playlists`, {
+                        data: { link: oldLink }
+                    });
                 }
             }
 
@@ -637,29 +659,29 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                                 ))}
                             </HStack>
 
-                            <h3>Curriculum Links</h3>
-                            <CurriculumLinkForm setFormData={setFormState} />
-
+                            <h3>Curriculum Links (playlists)</h3>
+                            <CurriculumLinkForm formState={formState} setFormData={setFormState} />
                             <HStack wrap="wrap">
-                                {Object.entries(formState.curriculumLinks).map(([link, display]) => (
-                                    <Tag key={link}>
+                                {(formState.curriculumLinks ?? []).map((playlist) => (
+                                    <Tag key={playlist.link}>
                                         <TagLabel
                                             cursor="pointer"
                                             onClick={() => {
-                                                window.open(link, '_blank', 'noopener,noreferrer');
+                                                window.open(playlist.link, '_blank', 'noopener,noreferrer');
                                             }}
                                         >
-                                            {display}
+                                            {playlist.name}
                                         </TagLabel>
-                                        <TagCloseButton onClick={() => {
-                                            setFormState((prevData) => {
-                                                const { [link]: _, ...remainingLinks } = prevData.curriculumLinks;
-                                                return {
-                                                    ...prevData,
-                                                    curriculumLinks: remainingLinks
-                                                };
-                                            });
-                                        }} />
+                                        <TagCloseButton
+                                            onClick={() => {
+                                                setFormState((prev) => ({
+                                                    ...prev,
+                                                    curriculumLinks: prev.curriculumLinks.filter(
+                                                        (p) => p.link !== playlist.link
+                                                    )
+                                                }));
+                                            }}
+                                        />
                                     </Tag>
                                 ))}
                             </HStack>

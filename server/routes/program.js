@@ -214,6 +214,60 @@ programRouter.get("/:id/playlists", async (req, res) => {
   }
 });
 
+programRouter.post("/:id/playlists", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { link, name } = req.body;
+
+    if (!link || !name) {
+      return res.status(400).json({ error: "link and name are required" });
+    }
+
+    const normalizedLink = link.startsWith("http://") || link.startsWith("https://")
+      ? link
+      : `https://${link}`;
+
+    await db.query(
+      `INSERT INTO playlist (program_id, link, name) VALUES ($1, $2, $3)
+       ON CONFLICT (program_id, link) DO UPDATE SET name = EXCLUDED.name`,
+      [id, normalizedLink, name]
+    );
+
+    const [inserted] = await db.query(
+      `SELECT * FROM playlist WHERE program_id = $1 AND link = $2`,
+      [id, normalizedLink]
+    );
+    res.status(201).json(keysToCamel(inserted[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+programRouter.delete("/:id/playlists", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { link } = req.body;
+
+    if (!link) {
+      return res.status(400).json({ error: "link is required" });
+    }
+
+    const result = await db.query(
+      `DELETE FROM playlist WHERE program_id = $1 AND link = $2 RETURNING *`,
+      [id, link]
+    );
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Playlist not found" });
+    }
+    res.status(200).json(keysToCamel(result[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 // aggregated instruments (by instrument) for a program
 programRouter.get("/:id/instruments", async (req, res) => {
   try {
