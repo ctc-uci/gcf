@@ -56,7 +56,7 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
     useEffect(() => {
         const fetchInstruments = async () => {
             try {
-                const response = await backend.get('http://localhost:3001/instruments');
+                const response = await backend.get('/instruments');
                 setExistingInstruments(response.data);
             } catch (error) {
                 console.error('Error fetching instruments:', error);
@@ -74,7 +74,7 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
             
             setIsLoading(true);
             try {
-                const response = await backend.get(`http://localhost:3001/program-updates/${programUpdateId}`);
+                const response = await backend.get(`/program-updates/${programUpdateId}`);
                 const data = response.data;
                 
                 setTitle(data.title || '');
@@ -83,7 +83,7 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
                 setProgramId(parseInt(data.programId, 10));
 
                 try {
-                    const enrollmentResponse = await backend.get(`http://localhost:3001/enrollmentChange/update/${programUpdateId}`);
+                    const enrollmentResponse = await backend.get(`/enrollmentChange/update/${programUpdateId}`);
                     if (enrollmentResponse.data && enrollmentResponse.data.length > 0) {
                         const enrollmentData = enrollmentResponse.data[enrollmentResponse.data.length - 1];
                         setEnrollmentChangeId(enrollmentData.id);
@@ -95,7 +95,7 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
                 }
 
                 try {
-                    const instrumentChangesResponse = await backend.get(`http://localhost:3001/instrument-changes/update/${programUpdateId}`);
+                    const instrumentChangesResponse = await backend.get(`/instrument-changes/update/${programUpdateId}`);
                     if (instrumentChangesResponse.data && instrumentChangesResponse.data.length > 0) {
                             const instrumentsMap = {};
                             const changeMeta = {};
@@ -215,15 +215,15 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
             let updatedProgramUpdateId = programUpdateId;
 
             if (programUpdateId) {
-                await backend.put(`http://localhost:3001/program-updates/${programUpdateId}`, programUpdateData);
+                await backend.put(`/program-updates/${programUpdateId}`, programUpdateData);
             } else {
-                const response = await backend.post('http://localhost:3001/program-updates', programUpdateData);
+                const response = await backend.post('/program-updates', programUpdateData);
                 updatedProgramUpdateId = response.data.id;
             }
 
             for (const instrumentName of newInstruments) {
                 try {
-                    await backend.post('http://localhost:3001/instruments', {
+                    await backend.post('/instruments', {
                         name: instrumentName
                     });
                 } catch (error) {
@@ -231,7 +231,7 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
                 }
             }
 
-            const instrumentsResponse = await backend.get('http://localhost:3001/instruments');
+            const instrumentsResponse = await backend.get('/instruments');
             setExistingInstruments(instrumentsResponse.data);
 
             const deletedInstruments = Object.keys(originalInstruments).filter(name => !addedInstruments[name]);
@@ -243,7 +243,7 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
                     console.log(`Deleting ${deletedName}, changeMeta:`, changeMeta);
                     
                     if (changeMeta && changeMeta.changeId) {
-                        const delRes = await backend.delete(`http://localhost:3001/instrument-changes/${changeMeta.changeId}`);
+                        const delRes = await backend.delete(`/instrument-changes/${changeMeta.changeId}`);
                         console.log(`Successfully deleted instrument change for ${deletedName}:`, delRes && delRes.data ? delRes.data : delRes);
 
                         setInstrumentChangeMap(prev => {
@@ -272,7 +272,7 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
                         const originalQty = originalInstruments[name];
                         if (originalQty !== qty) {
                             try {
-                                await backend.put(`http://localhost:3001/instrument-changes/${meta.changeId}`, {
+                                await backend.put(`/instrument-changes/${meta.changeId}`, {
                                     instrumentId: meta.instrumentId,
                                     updateId: updatedProgramUpdateId,
                                     amountChanged: qty
@@ -286,7 +286,7 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
                         const instrument = instrumentsResponse.data.find(instr => instr.name === name);
                         if (instrument) {
                             try {
-                                await backend.post('http://localhost:3001/instrument-changes', {
+                                await backend.post('/instrument-changes', {
                                     instrumentId: instrument.id,
                                     updateId: updatedProgramUpdateId,
                                     amountChanged: qty
@@ -302,14 +302,14 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
 
             if (enrollmentNumber !== null) {
                 if (enrollmentChangeId) {
-                    await backend.put(`http://localhost:3001/enrollmentChange/${enrollmentChangeId}`, {
+                    await backend.put(`/enrollmentChange/${enrollmentChangeId}`, {
                         update_id: updatedProgramUpdateId,
                         enrollment_change: enrollmentNumber,
                         graduated_change: graduatedNumber || 0
                     });
                     console.log('Updated existing enrollment change');
                 } else {
-                    const enrollmentResponse = await backend.post('http://localhost:3001/enrollmentChange', {
+                    const enrollmentResponse = await backend.post('/enrollmentChange', {
                         update_id: updatedProgramUpdateId,
                         enrollment_change: enrollmentNumber,
                         graduated_change: graduatedNumber || 0
@@ -320,7 +320,7 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
             }
 
             try {
-                const finalEnrollmentResponse = await backend.get(`http://localhost:3001/enrollmentChange/update/${updatedProgramUpdateId}`);
+                const finalEnrollmentResponse = await backend.get(`/enrollmentChange/update/${updatedProgramUpdateId}`);
                 if (finalEnrollmentResponse.data && finalEnrollmentResponse.data.length > 0) {
                     const enrollmentData = finalEnrollmentResponse.data[finalEnrollmentResponse.data.length - 1];
 
@@ -338,7 +338,7 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
             }
 
             try {
-                const finalInstrumentChangesResponse = await backend.get(`http://localhost:3001/instrument-changes/update/${updatedProgramUpdateId}`);
+                const finalInstrumentChangesResponse = await backend.get(`/instrument-changes/update/${updatedProgramUpdateId}`);
                 if (finalInstrumentChangesResponse.data && finalInstrumentChangesResponse.data.length > 0) {
                     const instrumentsMap = {};
                     const changeMeta = {};
