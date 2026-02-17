@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { ArrowRightIcon, CloseIcon } from '@chakra-ui/icons'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import 
 { VStack,
   Heading,
@@ -23,10 +24,13 @@ import
   useToast
 } from '@chakra-ui/react'
 
-export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
+export const ProgramUpdateForm = ( {programUpdateId=null} ) => {
     const [isLoading, setIsLoading] = useState(false)
-    const [programId, setProgramId] = useState(program_id) //TODO: Get Program Id for Program Update
-    
+    const [programId, setProgramId] = useState('')
+    const [availablePrograms, setAvailablePrograms] = useState([])
+    const {currentUser} = useAuthContext();
+    const { role } = useRoleContext();
+
     const [title, setTitle] = useState('')
     const [date, setDate] = useState('')
     const [enrollmentNumber, setEnrollmentNumber] = useState(null)
@@ -43,15 +47,10 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
     const [originalInstruments, setOriginalInstruments] = useState({}) 
     const [newInstruments, setNewInstruments] = useState([])
     const [instrumentChangeMap, setInstrumentChangeMap] = useState({}); 
-
+    
     const { backend } = useBackendContext();
     const toast = useToast();
 
-    useEffect(() => {
-        if (!programUpdateId) {
-            setProgramId(program_id);
-        }
-    }, [program_id, programUpdateId]);
 
     useEffect(() => {
         const fetchInstruments = async () => {
@@ -67,8 +66,55 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
     }, [backend]);
 
     useEffect(() => {
+        const fetchPrograms = async () => {
+            try {
+                let programs = [];
+                if (role === "Program Director") {
+                    const response = await backend.get(`/program-directors/me/${currentUser?.uid}/program`);
+                    programs = response.data ? [response.data] : [];
+                } else if (role === "Regional Director") {
+                    const response = await backend.get(`/regional-directors/${currentUser?.uid}/programs`);
+                    programs = response.data || [];
+                } else if (role === "Admin") {
+                    const response = await backend.get(`/program`);
+                    programs = response.data || [];
+                } else {
+                    toast({
+                        title: 'Authorization error',
+                        description: 'You are not authorized to create a program update.',
+                        status: 'error',
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                    return;
+                }
+                setAvailablePrograms(programs);
+
+                if (programs.length === 1 && programUpdateId === null) {
+                    setProgramId(programs[0].id);
+                }
+            } catch (error) {
+                console.error('Error fetching programs:', error);
+                toast({
+                    title: 'Error',
+                    description: 'Failed to load programs.',
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        };
+        
+        if (programUpdateId === null && currentUser?.uid && role) {
+            fetchPrograms();
+        }
+
+        
+    }, [role, currentUser, backend, programUpdateId, toast]);
+
+    useEffect(() => {
         const fetchProgramUpdate = async () => {
-            if (!programUpdateId) {
+            if (programUpdateId === null) {
                 return;
             }
             
@@ -78,10 +124,9 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
                 const data = response.data;
                 
                 setTitle(data.title || '');
-                setDate(data.updateDate.split('T')[0] || '');
+                setDate(data.updateDate?.split('T')[0] || '');
                 setNotes(data.note || '');
                 setProgramId(parseInt(data.programId, 10));
-
                 try {
                     const enrollmentResponse = await backend.get(`/enrollmentChange/update/${programUpdateId}`);
                     if (enrollmentResponse.data && enrollmentResponse.data.length > 0) {
@@ -122,10 +167,6 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
         
         fetchProgramUpdate();
     }, [programUpdateId, existingInstruments, backend]);
-
-    useEffect(() => {
-        if (!programUpdateId) setProgramId(program_id);
-    }, [programUpdateId, program_id]);
 
     const removeInstrument = (name) => {
         setAddedInstruments(prev => {
@@ -207,7 +248,7 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
             const programUpdateData = {
                 title: title ? String(title).trim() : null,
                 program_id: parseInt(programId, 10) || null,
-                created_by: '1', // TODO: replace with actual user id
+                created_by: currentUser?.uid,
                 update_date: date ? String(date) : null,
                 note: notes ? String(notes).trim() : null
             };
@@ -370,8 +411,13 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
             setGraduatedNumber(null);
             setEnrollmentChangeId(null);
             setNotes('');
-            setProgramId(program_id);
             setSelectedInstrument('');
+            if (programUpdateId === null) {
+                setAddedInstruments({});
+                setOriginalInstruments({});
+                setInstrumentChangeMap({});
+            }
+            
 
             toast({
                 title: programUpdateId ? 'Update saved' : 'Update created',
@@ -436,6 +482,26 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
                     onChange={(e) => setTitle(e.target.value)}
                 />
             </FormControl>
+            
+            <FormControl isRequired>
+                <FormLabel fontWeight="normal" color="gray">
+                    Program
+                </FormLabel>
+                <Select 
+                    placeholder="Select Program" 
+                    bg="#EBEAEA"
+                    value={programId}
+                    onChange={(e) => setProgramId(e.target.value)}
+                    isDisabled={programUpdateId !== null || availablePrograms.length === 1}
+                >
+                    {availablePrograms.map(program => (
+                        <option key={program.id} value={program.id}>
+                            {program.name}
+                        </option>
+                    ))}
+                </Select>
+            </FormControl>
+
             <FormControl >
                 <FormLabel fontWeight="normal" color="gray">
                     Date
@@ -558,7 +624,6 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
             </Button>
 
             <Button 
-                position
                 width="50%" 
                 justifyContent="center"
                 alignItems="center"
