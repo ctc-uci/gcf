@@ -19,7 +19,8 @@ import
   TagLabel,
   TagCloseButton,
   IconButton,
-  Box
+  Box,
+  useToast
 } from '@chakra-ui/react'
 
 export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
@@ -44,6 +45,13 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
     const [instrumentChangeMap, setInstrumentChangeMap] = useState({}); 
 
     const { backend } = useBackendContext();
+    const toast = useToast();
+
+    useEffect(() => {
+        if (!programUpdateId) {
+            setProgramId(program_id);
+        }
+    }, [program_id, programUpdateId]);
 
     useEffect(() => {
         const fetchInstruments = async () => {
@@ -115,6 +123,10 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
         fetchProgramUpdate();
     }, [programUpdateId, existingInstruments, backend]);
 
+    useEffect(() => {
+        if (!programUpdateId) setProgramId(program_id);
+    }, [programUpdateId, program_id]);
+
     const removeInstrument = (name) => {
         setAddedInstruments(prev => {
             const updated = { ...prev };
@@ -169,10 +181,28 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
     };
 
     const handleSubmit = async () => {
+        if (!title.trim() || !date || !notes.trim()) {
+            toast({
+                title: 'Validation error',
+                description: 'Please fill in title, date, and notes.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+        if (!programUpdateId && (programId === null || programId === undefined || programId === '')) {
+            toast({
+                title: 'Validation error',
+                description: 'A program must be selected to create an update.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+        setIsLoading(true);
         try {
-            if (!title.trim() || !date || !notes.trim()) {
-                return;
-            }
 
             const programUpdateData = {
                 title: title ? String(title).trim() : null,
@@ -340,12 +370,31 @@ export const ProgramUpdateForm = ( {programUpdateId, program_id=null} ) => {
             setGraduatedNumber(null);
             setEnrollmentChangeId(null);
             setNotes('');
-            setProgramId(null);
+            setProgramId(program_id);
             setSelectedInstrument('');
 
-            console.log('Program update submitted successfully');
+            toast({
+                title: programUpdateId ? 'Update saved' : 'Update created',
+                description: programUpdateId
+                    ? 'Program update was updated successfully.'
+                    : 'Program update was created successfully.',
+                status: 'success',
+                duration: 5000,
+                isClosable: true,
+            });
         } catch (error) {
             console.error('Error submitting program update:', error);
+            const message = error?.response?.data?.message ?? error?.message ?? 'Something went wrong. Please try again.';
+            const statusCode = error?.response?.status;
+            toast({
+                title: 'Failed to save',
+                description: statusCode ? `${message} (${statusCode})` : message,
+                status: 'error',
+                duration: 7000,
+                isClosable: true,
+            });
+        } finally {
+            setIsLoading(false);
         }
     }
 
