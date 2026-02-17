@@ -122,6 +122,27 @@ regionalDirectorRouter.get("/:user_id/program-directors", async (req, res) => {
   }
 });
 
+regionalDirectorRouter.get("/:user_id/programs", async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    const data = await db.query(
+      `SELECT 
+        program.*
+      FROM program
+      INNER JOIN country ON country.id = program.country
+      INNER JOIN region ON region.id = country.region_id
+      INNER JOIN regional_director ON regional_director.region_id = region.id AND regional_director.user_id = $1`,
+      [user_id]
+    );
+
+    res.status(200).json(keysToCamel(data));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 regionalDirectorRouter.get("/:user_id", async (req, res) => {
   try {
     const { user_id } = req.params;

@@ -7,6 +7,7 @@ import { Layout } from "@/components/navigation/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Signup } from "@/components/signup/Signup";
 import { UpdatesPage } from "@/components/updates/UpdatesPage";
+import { Profile } from "@/components/profile/Profile";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
@@ -45,6 +46,11 @@ const App = () => {
                         allowedRoles={["Admin"]}
                       />
                     }
+                  />
+
+                  <Route
+                    path="profile"
+                    element={<ProtectedRoute element={<Profile />} />}
                   />
 
                   <Route
