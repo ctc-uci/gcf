@@ -2,5 +2,5 @@ export type User = {
   id: number;
   email: string;
   firebaseUid: string;
-  role: "user" | "admin";
+  role: "Regional Director" | "Program Director" | "Admin";
 };
