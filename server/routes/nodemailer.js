@@ -1,11 +1,8 @@
-import { keysToCamel } from "@/common/utils";
 import express from "express";
-
-import { db } from "../db/db-pgp";
-
+import nodemailer from "nodemailer";
 
 const nodeMailerRouter = express.Router();
-nodeMailerRouterRouter.use(express.json());
+nodeMailerRouter.use(express.json());
 
 
 nodeMailerRouter.post("/", async (req, res) => {
@@ -55,4 +52,4 @@ Password: ${password}`
   }
 });
 
-export default {nodeMailerRouter};
+export { nodeMailerRouter };

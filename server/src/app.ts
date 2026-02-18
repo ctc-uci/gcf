@@ -7,7 +7,7 @@ import { gcfUserRouter } from "@/routes/gcfUser";
 import { updatesPermissionsRouter } from "@/routes/updatesPermissions";
 import { enrollmentChangeRouter } from "@/routes/enrollmentChange";
 import { mediaChangeRouter } from "@/routes/mediaChange";
-import { nodeMailerRouter } from "@/routes/nodeMailer";
+import { nodeMailerRouter } from "@/routes/nodemailer";
 import { instrumentRouter } from "@/routes/instrument"
 import { instrumentChangeRouter } from "@/routes/instrument-change"
 import { countryRouter } from "@/routes/country";
@@ -57,7 +57,7 @@ app.use("/country", countryRouter);
 app.use("/region", regionRouter);
 app.use("/enrollmentChange", enrollmentChangeRouter);
 app.use("/mediaChange", mediaChangeRouter);
-app.use("/nodeMailer", nodeMailerRouter);
+app.use("/nodemailer", nodeMailerRouter);
 app.use("/program", programRouter);
 app.use("/partners", partnerOrganizationRouter);
 app.use("/images", imagesRouter);
