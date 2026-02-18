@@ -232,7 +232,7 @@ function ProgramDisplay({
     );
     setData(filtered);
   }, [searchQuery, originalData]);
-
+  
   if (!getRouteByRole(role, userId)) return null;
 
   return (
@@ -259,7 +259,7 @@ function ProgramDisplay({
           >
             All Programs
           </Box>
-                    <HStack spacing={1}>
+          <HStack spacing={1}>
             <IconButton
               aria-label="search"
               icon={<Search2Icon />}
@@ -459,8 +459,24 @@ function ProgramTable() {
         console.log(res.data);
         const rows = Array.isArray(res.data) ? res.data : [];
         const mapped = rows.map(mapRow);
-        setOriginalPrograms(mapped);
-        setPrograms(mapped);
+        const programDetails = await Promise.all(
+          rows.map(async (row) => { //TODO: make this more efficient with lazy loading
+            const [playlists, programDirectors, regionalDirectors] = await Promise.all([
+              backend.get(`/program/${row.id}/playlists`),
+              backend.get(`/program/${row.id}/program-directors`).catch(() => ({ data: [] })),
+              backend.get(`/program/${row.id}/regional-directors`).catch(() => ({ data: [] })),
+            ]);
+
+            return {
+              ...row,
+              playlists: playlists.data,
+              programDirectors: programDirectors?.data || [],
+              regionalDirectors: regionalDirectors?.data || [],
+            };
+          })
+        );
+        setOriginalPrograms(programDetails);
+        setPrograms(programDetails);
       } catch (err) {
         console.error("Error fetching data:", err);
       } finally {
