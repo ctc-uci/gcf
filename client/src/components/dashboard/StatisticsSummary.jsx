@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
 
-import { Box, Center, Heading, HStack, IconButton, Spinner, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  Heading,
+  HStack,
+  IconButton,
+  Spinner,
+  VStack,
+} from "@chakra-ui/react";
 
-import { MdOutlineFileDownload } from "react-icons/md";
+import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import { MdOutlineFileDownload } from "react-icons/md";
 
 const StatBox = ({ label, number }) => {
   return (
@@ -31,25 +41,25 @@ const StatBox = ({ label, number }) => {
 
 const getRouteByRole = (role, userId) => {
   const routes = {
-    admin: "/admin/stats",
-    regionalDirector: `/regional-directors/me/${userId}/stats`,
-    programDirector: `/program-directors/me/${userId}/stats`,
+    "Admin": "/admin/stats",
+    "Regional Director": `/regional-directors/me/${userId}/stats`,
+    "Program Director": `/program-directors/me/${userId}/stats`,
   };
   return routes[role];
 };
 
 const STAT_LABELS_BY_ROLE = {
-  admin: [
+  "Admin": [
     { label: "Programs", number: 0 },
     { label: "Students", number: 0 },
     { label: "Instruments", number: 0 },
   ],
-  regionalDirector: [
+  "Regional Director": [
     { label: "Programs", number: 0 },
     { label: "Students", number: 0 },
     { label: "Instruments", number: 0 },
   ],
-  programDirector: [
+  "Program Director": [
     { label: "Current Enrollment", number: 0 },
     { label: "Instruments Donated", number: 0 },
   ],
@@ -79,25 +89,32 @@ function statsFromPdData(data) {
 }
 
 const STATS_FROM_RESPONSE = {
-  admin: statsFromAdminData,
-  regionalDirector: statsFromRdData,
-  programDirector: statsFromPdData,
+  "Admin": statsFromAdminData,
+  "Regional Director": statsFromRdData,
+  "Program Director": statsFromPdData,
 };
 
-// TODO(login): Replace role prop with useRoleContext() or AuthContext; replace userId prop with AuthContext (currentUser?.uid).
-const StatisticsSummary = ({ role = "admin", userId }) => {
+const StatisticsSummary = () => {
+  const { currentUser } = useAuthContext();
+  const userId = currentUser?.uid;
+  const { role: role, loading: roleLoading } = useRoleContext();
   const { backend } = useBackendContext();
-  const initialStats = STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.admin;
+  const initialStats = STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.Admin;
   const [stats, setStats] = useState(initialStats);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (roleLoading) return;
+
     const route = getRouteByRole(role, userId);
     const mapResponse = STATS_FROM_RESPONSE[role];
 
-    if (!route || !mapResponse) return;
+    if (!route || !mapResponse) {
+      setIsLoading(false);
+      return;
+    }
 
-    setStats(STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.admin);
+    setStats(STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.Admin);
 
     const fetchData = async () => {
       setIsLoading(true);
@@ -113,7 +130,7 @@ const StatisticsSummary = ({ role = "admin", userId }) => {
     };
 
     fetchData();
-  }, [role, userId, backend]);
+  }, [role, roleLoading, userId, backend]);
 
   return (
     <Box as="section">
@@ -133,7 +150,10 @@ const StatisticsSummary = ({ role = "admin", userId }) => {
 
         <HStack spacing={6}>
           {isLoading ? (
-            <Center py={8} minH="120px">
+            <Center
+              py={8}
+              minH="120px"
+            >
               <Spinner size="lg" />
             </Center>
           ) : (

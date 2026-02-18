@@ -1,24 +1,25 @@
 import { useEffect, useState } from "react";
 
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useParams } from "react-router-dom";
 import { Center, Spinner } from "@chakra-ui/react";
+
+import { useAuthContext } from "@/contexts/hooks/useAuthContext";
+import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+
 import { MediaUpdatesTable } from "./MediaUpdatesTable";
-import { ProgramAccountUpdatesTable } from "./ProgramAccountUpdatesTable";
 import { ProgramUpdatesTable } from "./ProgramUpdatesTable";
 
 export const UpdatesPage = () => {
-  // TODO(login): Replace useParams userId with AuthContext (currentUser?.uid).
-  const { userId } = useParams();
+  const { currentUser } = useAuthContext();
+  const userId = currentUser?.uid;
+  const { role } = useRoleContext();
   const { backend } = useBackendContext();
 
-  const [programAccountUpdatesData, setProgramAccountUpdatesData] = useState(
-    []
-  );
   const [mediaUpdatesData, setMediaUpdatesData] = useState([]);
+  const [originalMediaUpdatesData, setOriginalMediaUpdatesData] = useState([]);
   const [programUpdatesData, setProgramUpdatesData] = useState([]);
-  // TODO(login): Replace with useRoleContext() or AuthContext instead of fetching role/${userId}.
-  const [role, setRole] = useState("");
+  const [originalProgramUpdatesData, setOriginalProgramUpdatesData] = useState([]);
+
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async (path) => {
@@ -26,7 +27,12 @@ export const UpdatesPage = () => {
       const response = await backend.get(`/update-permissions/${path}`);
       return response.data;
     } catch (error) {
-      console.error("Request failed:", path, error.response?.status, error.message);
+      console.error(
+        "Request failed:",
+        path,
+        error.response?.status,
+        error.message
+      );
       return [];
     }
   };
@@ -39,18 +45,15 @@ export const UpdatesPage = () => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [programAccountUpdates, mediaUpdates, programUpdates, userRole] =
+        const [mediaUpdates, programUpdates] =
           await Promise.all([
-            fetchData(`program-account/${userId}`),
             fetchData(`media-updates/${userId}`),
             fetchData(`program-updates/${userId}`),
-            fetchData(`role/${userId}`),
           ]);
-
-        setProgramAccountUpdatesData(programAccountUpdates);
+        setOriginalMediaUpdatesData(mediaUpdates);
         setMediaUpdatesData(mediaUpdates);
         setProgramUpdatesData(programUpdates);
-        setRole(userRole[0]['role']);
+        setOriginalProgramUpdatesData(programUpdates);
       } catch (error) {
         console.error("Fetch error:", error);
       } finally {
@@ -61,22 +64,40 @@ export const UpdatesPage = () => {
   }, [userId, backend]);
 
   if (isLoading) {
-    return <Center py={10}>
-          <Spinner
-            size="xl"
-            color="gray.500"
-          />
-        </Center>; 
-  } 
+    return (
+      <Center py={10}>
+        <Spinner
+          size="xl"
+          color="gray.500"
+        />
+      </Center>
+    );
+  }
+
 
   return (
     <>
       {role === "Program Director" ? (
-        <ProgramUpdatesTable data={programUpdatesData} isLoading={isLoading} />
+        <ProgramUpdatesTable
+          data={programUpdatesData}
+          setData={setProgramUpdatesData}
+          originalData={originalProgramUpdatesData}
+          isLoading={isLoading}
+        />
       ) : (
         <>
-          <MediaUpdatesTable data={mediaUpdatesData} isLoading={isLoading} />
-          <ProgramAccountUpdatesTable data={programAccountUpdatesData} isLoading={isLoading} />
+          <MediaUpdatesTable
+            data={mediaUpdatesData}
+            setData={setMediaUpdatesData}
+            originalData={originalMediaUpdatesData}
+            isLoading={isLoading}
+          />
+          <ProgramUpdatesTable
+            data={programUpdatesData}
+            setData={setProgramUpdatesData}
+            originalData={originalProgramUpdatesData}
+            isLoading={isLoading}
+          />
         </>
       )}
     </>

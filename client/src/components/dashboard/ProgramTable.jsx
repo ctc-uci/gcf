@@ -1,35 +1,43 @@
 import { useEffect, useState } from "react";
 import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Input,
-  TableContainer,
-  IconButton,
-  HStack,
+  AddIcon,
+  DownloadIcon,
+  HamburgerIcon,
+  Search2Icon,
+} from "@chakra-ui/icons";
+import {
   Box,
   Button,
-  Divider,
-  Spinner,
   Center,
   Collapse,
   useDisclosure,
   VStack,
-  Link
+  Link,
+  Divider,
+  HStack,
+  IconButton,
+  Input,
+  Spinner,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
 } from "@chakra-ui/react";
-
-import { Search2Icon, HamburgerIcon, DownloadIcon, AddIcon, EditIcon } from "@chakra-ui/icons";
 import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
+import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import { useTableSort } from "../../contexts/hooks/TableSort";
+import { SortArrows } from "../tables/SortArrows";
 import { ProgramForm } from "./ProgramForm";
 
 const getRouteByRole = (role, userId) => {
   const routes = {
-    admin: "/admin/programs",
-    regionalDirector: `/rdProgramTable/${userId}`,
+    Admin: "/admin/programs",
+    "Regional Director": `/rdProgramTable/${userId}`,
   };
   return routes[role];
 };
@@ -80,8 +88,8 @@ function mapRdRow(row) {
 }
 
 const MAP_BY_ROLE = {
-  admin: mapAdminRow,
-  regionalDirector: mapRdRow,
+  Admin: mapAdminRow,
+  "Regional Director": mapRdRow,
 };
 
 function ExpandableRow({ p, onEdit }) {
@@ -175,25 +183,52 @@ function ExpandableRow({ p, onEdit }) {
   )
 }
 
-// TODO(login): Replace role prop with useRoleContext() or AuthContext; replace userId prop with AuthContext (currentUser?.uid).
-function ProgramTable({ role = "admin", userId }) {
-  const { backend } = useBackendContext();
-  const [programs, setPrograms] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedProgram, setSelectedProgram] = useState(null);
 
-  const openEditForm = (program) => {
-    setSelectedProgram(program);
-    setIsFormOpen(true);
-  }
+function ProgramDisplay({
+  data,
+  setData,
+  originalData,
+  searchQuery,
+  setSearchQuery,
+  isLoading,
+  role,
+  userId
+}) {
+  const { backend } = useBackendContext();
+  const { sortOrder, handleSort } = useTableSort(originalData, setData);
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
 
   useEffect(() => {
-    const route = getRouteByRole(role, userId);
-    const mapRow = MAP_BY_ROLE[role];
+    if (!originalData || originalData.length === 0) return;
 
-    if (!route || !mapRow) return;
+    if (searchQuery === "") {
+      setData(originalData);
+      return;
+    }
 
+    const filtered = originalData.filter(
+      (program) =>
+        program.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        program.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        program.launchDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        program.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(program.students)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        String(program.instruments)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        String(program.totalInstruments)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+    );
+    setData(filtered);
+  }, [searchQuery, originalData]);
+
+  useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
@@ -206,7 +241,6 @@ function ProgramTable({ role = "admin", userId }) {
               backend.get(`/program/${row.id}/playlists`),
               backend.get(`/program/${row.id}/program-directors`).catch(() => ({ data: [] })),
               backend.get(`/program/${row.id}/regional-directors`).catch(() => ({ data: [] })),
-
             ]);
 
             return {
@@ -233,45 +267,55 @@ function ProgramTable({ role = "admin", userId }) {
 
   return (
     <>
-      <ProgramForm
-        isOpen={isFormOpen}
-        onOpen={() => setIsFormOpen(true)}
-        onClose={() => {
-          setIsFormOpen(false);
-          setSelectedProgram(null);
-        }}
-        program={selectedProgram}
-
-      />
-      <TableContainer>
-        <HStack mb={4} justifyContent="space-between" w="100%">
-          <HStack spacing={4}>
-            <Box fontSize="xl" fontWeight="semibold">All Programs</Box>
-            <HStack spacing={1}>
-              <IconButton
-                aria-label="search"
-                icon={<Search2Icon />}
-                size="sm"
-                variant="ghost"
-              />
-              <Input
-                w="120px"
-                size="xs"
-                placeholder="Type to search"
-                variant="unstyled"
-                borderBottom="1px solid"
-                borderColor="gray.300"
-                borderRadius="0"
-                px={1}
-              />
-              <IconButton
-                aria-label="filter"
-                icon={<HiOutlineAdjustmentsHorizontal />}
-                size="sm"
-                variant="ghost"
-              />
-            </HStack>
+    <ProgramForm
+      isOpen={isFormOpen}
+      onOpen={() => setIsFormOpen(true)}
+      onClose={() => {
+        setIsFormOpen(false);
+        setSelectedProgram(null);
+      }}
+      program={selectedProgram}
+    />
+    <TableContainer>
+      <HStack
+        mb={4}
+        justifyContent="space-between"
+        w="100%"
+      >
+        <HStack spacing={4}>
+          <Box
+            fontSize="xl"
+            fontWeight="semibold"
+          >
+            All Programs
+          </Box>
+                    <HStack spacing={1}>
+            <IconButton
+              aria-label="search"
+              icon={<Search2Icon />}
+              size="sm"
+              variant="ghost"
+            />
+            <Input
+              w="120px"
+              size="xs"
+              placeholder="Type to search"
+              variant="unstyled"
+              borderBottom="1px solid"
+              borderColor="gray.300"
+              borderRadius="0"
+              px={1}
+              value={searchQuery}
+              onChange={handleSearch}
+            />
+            <IconButton
+              aria-label="filter"
+              icon={<HiOutlineAdjustmentsHorizontal />}
+              size="sm"
+              variant="ghost"
+            />
           </HStack>
+        </HStack>
           <HStack spacing={1}>
             <IconButton
               aria-label="menu"
@@ -285,6 +329,12 @@ function ProgramTable({ role = "admin", userId }) {
               icon={<HiOutlineSquares2X2 />}
               size="sm"
               variant="ghost"
+           />
+            <IconButton
+              aria-label="filter"
+              icon={<HiOutlineAdjustmentsHorizontal />}
+              size="sm"
+              variant="ghost"
             />
             <IconButton
               aria-label="download"
@@ -296,44 +346,175 @@ function ProgramTable({ role = "admin", userId }) {
             <Button size="sm" rightIcon={<AddIcon />} onClick={() => {
               setSelectedProgram(null);
               setIsFormOpen(true);
-
             }}>
-
               New
             </Button>
           </HStack>
         </HStack>
 
-        <Table variant="simple" aria-label="collapsible-table">
-          <Thead>
+
+      <Table variant="simple" aria-label="collapsible-table">
+        <Thead>
+          <Tr>
+            <Th
+              onClick={() => handleSort("title")}
+              cursor="pointer"
+            >
+              Program{" "}
+              <SortArrows
+                columnKey="title"
+                sortOrder={sortOrder}
+              />
+            </Th>
+            <Th
+              onClick={() => handleSort("status")}
+              cursor="pointer"
+            >
+              Status{" "}
+              <SortArrows
+                columnKey="status"
+                sortOrder={sortOrder}
+              />
+            </Th>
+            <Th
+              onClick={() => handleSort("launchDate")}
+              cursor="pointer"
+            >
+              Launch Date{" "}
+              <SortArrows
+                columnKey="launchDate"
+                sortOrder={sortOrder}
+              />
+            </Th>
+            <Th
+              onClick={() => handleSort("location")}
+              cursor="pointer"
+            >
+              Location{" "}
+              <SortArrows
+                columnKey="location"
+                sortOrder={sortOrder}
+              />
+            </Th>
+            <Th
+              onClick={() => handleSort("students")}
+              cursor="pointer"
+            >
+              Students{" "}
+              <SortArrows
+                columnKey="students"
+                sortOrder={sortOrder}
+              />
+            </Th>
+            <Th
+              onClick={() => handleSort("instruments")}
+              cursor="pointer"
+            >
+              Instruments{" "}
+              <SortArrows
+                columnKey="instruments"
+                sortOrder={sortOrder}
+              />
+            </Th>
+            <Th
+              onClick={() => handleSort("totalInstruments")}
+              cursor="pointer"
+            >
+              Total Instruments{" "}
+              <SortArrows
+                columnKey="totalInstruments"
+                sortOrder={sortOrder}
+              />
+            </Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {isLoading ? (
             <Tr>
-              <Th>Program</Th>
-              <Th>Status</Th>
-              <Th>Launch Date</Th>
-              <Th>Location</Th>
-              <Th>Students</Th>
-              <Th>Instruments</Th>
-              <Th>Total Instruments</Th>
+              <Td colSpan={7}>
+                <Center py={8}>
+                  <Spinner size="lg" />
+                </Center>
+              </Td>
             </Tr>
-          </Thead>
-          <Tbody>
-            {isLoading ? (
-              <Tr>
-                <Td colSpan={7}>
-                  <Center py={8}>
-                    <Spinner size="lg" />
-                  </Center>
-                </Td>
-              </Tr>
-            ) : (
-              programs.map((p) => (
-                <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
-              ))
-            )}
-          </Tbody>
-        </Table>
-      </TableContainer>
+          ) : (
+            data.map((p) => (
+              <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
+            ))
+          )}
+        </Tbody>
+      </Table>
+    </TableContainer>
     </>
+  );
+}
+
+
+
+
+function ProgramTable() {
+  const { currentUser } = useAuthContext();
+  const userId = currentUser?.uid;
+  const { role, loading: roleLoading } = useRoleContext();
+
+  const { backend } = useBackendContext();
+  const [programs, setPrograms] = useState([]);
+  const [originalPrograms, setOriginalPrograms] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProgram, setSelectedProgram] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const openEditForm = (program) => {
+    setSelectedProgram(program);
+    setIsFormOpen(true);
+  }
+
+  useEffect(() => {
+    if (roleLoading) return;
+
+    const route = getRouteByRole(role, userId);
+    const mapRow = MAP_BY_ROLE[role];
+
+    console.log(route, mapRow);
+
+    if (!route || !mapRow) {
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const res = await backend.get(route);
+        const rows = Array.isArray(res.data) ? res.data : [];
+        const mapped = rows.map(mapRow);
+        setOriginalPrograms(mapped);
+        setPrograms(mapped);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [role, roleLoading, userId, backend]);
+
+  if (!getRouteByRole(role, userId) && !roleLoading) {
+    return null;
+  }
+
+  return (
+    <ProgramDisplay
+      data={programs}
+      setData={setPrograms}
+      originalData={originalPrograms}
+      searchQuery={searchQuery}
+      setSearchQuery={setSearchQuery}
+      isLoading={isLoading}
+      role={role}
+      userId={userId}
+    />
   );
 }
 
