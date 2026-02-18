@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   AddIcon,
   DownloadIcon,
+  EditIcon,
   HamburgerIcon,
   Search2Icon,
 } from "@chakra-ui/icons";
@@ -192,9 +193,13 @@ function ProgramDisplay({
   setSearchQuery,
   isLoading,
   role,
-  userId
+  userId,
+  openEditForm,
+  isFormOpen,
+  setIsFormOpen,
+  selectedProgram,
+  setSelectedProgram
 }) {
-  const { backend } = useBackendContext();
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
 
   const handleSearch = (event) => {
@@ -227,41 +232,6 @@ function ProgramDisplay({
     );
     setData(filtered);
   }, [searchQuery, originalData]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const res = await backend.get(route);
-        const rows = Array.isArray(res.data) ? res.data : [];
-
-        const programDetails = await Promise.all(
-          rows.map(async (row) => { //TODO: make this more efficient with lazy loading
-            const [playlists, programDirectors, regionalDirectors] = await Promise.all([
-              backend.get(`/program/${row.id}/playlists`),
-              backend.get(`/program/${row.id}/program-directors`).catch(() => ({ data: [] })),
-              backend.get(`/program/${row.id}/regional-directors`).catch(() => ({ data: [] })),
-            ]);
-
-            return {
-              ...row,
-              playlists: playlists.data,
-              programDirectors: programDirectors?.data || [],
-              regionalDirectors: regionalDirectors?.data || [],
-            };
-          })
-        );
-
-        setPrograms(programDetails.map(mapRow));
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [role, userId, backend]);
 
   if (!getRouteByRole(role, userId)) return null;
 
@@ -486,6 +456,7 @@ function ProgramTable() {
       setIsLoading(true);
       try {
         const res = await backend.get(route);
+        console.log(res.data);
         const rows = Array.isArray(res.data) ? res.data : [];
         const mapped = rows.map(mapRow);
         setOriginalPrograms(mapped);
@@ -514,6 +485,11 @@ function ProgramTable() {
       isLoading={isLoading}
       role={role}
       userId={userId}
+      openEditForm={openEditForm}
+      isFormOpen={isFormOpen}
+      setIsFormOpen={setIsFormOpen}
+      selectedProgram={selectedProgram}
+      setSelectedProgram={setSelectedProgram}
     />
   );
 }
