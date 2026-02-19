@@ -297,7 +297,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                                     onChange={handleChange}
                                     value={formData.role}
                                 >
-                                    {role === 'Admin' && <option value = "Admin">Admin</option>}
+                                    {role === 'Super Admin' && <option value = "Admin">Admin</option>}
                                     {role === 'Admin' && <option value = "Regional Director">Regional Director</option>}
                                     <option value = "Program Director">Program Director</option>
                                 </Select>
