@@ -445,8 +445,6 @@ function ProgramTable() {
     const route = getRouteByRole(role, userId);
     const mapRow = MAP_BY_ROLE[role];
 
-    console.log(route, mapRow);
-
     if (!route || !mapRow) {
       setIsLoading(false);
       return;
@@ -456,15 +454,14 @@ function ProgramTable() {
       setIsLoading(true);
       try {
         const res = await backend.get(route);
-        console.log(res.data);
         const rows = Array.isArray(res.data) ? res.data : [];
-        const mapped = rows.map(mapRow);
         const programDetails = await Promise.all(
           rows.map(async (row) => { //TODO: make this more efficient with lazy loading
+            const programId = row.id ?? row.programId;
             const [playlists, programDirectors, regionalDirectors] = await Promise.all([
-              backend.get(`/program/${row.id}/playlists`),
-              backend.get(`/program/${row.id}/program-directors`).catch(() => ({ data: [] })),
-              backend.get(`/program/${row.id}/regional-directors`).catch(() => ({ data: [] })),
+              backend.get(`/program/${programId}/playlists`),
+              backend.get(`/program/${programId}/program-directors`).catch(() => ({ data: [] })),
+              backend.get(`/program/${programId}/regional-directors`).catch(() => ({ data: [] })),
             ]);
 
             return {
@@ -475,8 +472,9 @@ function ProgramTable() {
             };
           })
         );
-        setOriginalPrograms(programDetails);
-        setPrograms(programDetails);
+        const mappedPrograms = programDetails.map(mapRow);
+        setOriginalPrograms(mappedPrograms);
+        setPrograms(mappedPrograms);
       } catch (err) {
         console.error("Error fetching data:", err);
       } finally {
