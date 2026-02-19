@@ -208,7 +208,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
             regionId: formData.regions.length > 0 ? formData.regions[0].id : null
         }
         await backend.post('/gcf-users/admin/create-user', userData);
-        await backend.post('/nodeMailer', {
+        await backend.post('/nodemailer', {
             email: formData.email,
             password: formData.password,
             firstName: formData.first_name,
@@ -237,16 +237,14 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
             userData.password = formData.password;
         }
         await backend.put('/gcf-users/admin/update-user', userData);
-        if (formData.password && formData.password.trim().length > 0) {
-            await backend.post('/api/nodemailer', {
-                email: formData.email,
-                password: formData.password,
-                firstName: formData.first_name,
-                lastName: formData.last_name,
-                role: formData.role,
-                isNewAccount: false
-    });
-}
+        await backend.post('/nodemailer', {
+            email: formData.email,
+            password: formData.password || null,
+            firstName: formData.first_name,
+            lastName: formData.last_name,
+            role: formData.role,
+            isNewAccount: false
+        });
 
     }
 
