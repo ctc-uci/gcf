@@ -12,6 +12,8 @@ import {
   Button,
   VStack,
 } from "@chakra-ui/react";
+import { useFullscreenFlyout } from '../useFullScreenFlyout.js';
+import { FullscreenFlyoutButton } from '../FullscreenFlyoutButton';
 import { useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext' 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext"
@@ -25,7 +27,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     const [currentRegions, setCurrentRegions] = useState(null);
     const userId = currentUser?.uid;
     const targetUserId = targetUser?.id; 
-
+    const [isFullScreen, toggleFullScreen] = useFullscreenFlyout();
     const [ formData, setFormData ] = useState({
         first_name: '',
         last_name: '',
@@ -240,8 +242,9 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 onClose={onClose}
             >
                 <DrawerOverlay />
-                <DrawerContent>
+                <DrawerContent width="20%" maxWidth={isFullScreen ? "100%" : "20%"}>
                     <DrawerCloseButton />
+                    <FullscreenFlyoutButton isFullScreen={isFullScreen} toggleFullScreen={toggleFullScreen} width="5em" height="2em" marginLeft="1em" marginTop="0.7em"/>
                     <DrawerHeader>
                         {targetUserId ? 'Edit Account' : 'Create Account'}
                     </DrawerHeader>
