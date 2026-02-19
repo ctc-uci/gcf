@@ -38,10 +38,10 @@ mediaChangeRouter.get("/:id", async (req, res) => {
 mediaChangeRouter.post("/", async (req, res) => {
   try {
     console.log("Req Body: ", req.body);
-    const { update_id, s3_key, file_name, file_type, is_thumbnail } = req.body;
+    const { update_id, s3_key, file_name, file_type, is_thumbnail, status } = req.body;
     const newMediaChange = await db.query(
-      `INSERT INTO media_change (update_id, s3_key, file_name, file_type, is_thumbnail) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [update_id, s3_key, file_name, file_type, is_thumbnail]
+      `INSERT INTO media_change (update_id, s3_key, file_name, file_type, is_thumbnail, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [update_id, s3_key, file_name, file_type, is_thumbnail, status]
     );
     res.status(201).json(keysToCamel(newMediaChange[0]));
   } catch (err) {
@@ -72,6 +72,48 @@ mediaChangeRouter.put("/:id", async (req, res) => {
 
     res.status(200).json(keysToCamel(updatedMediaChange[0]));
   } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+mediaChangeRouter.put("/:updateId/approve", async (req, res) => {
+  try {
+    const { updateId } = req.params;
+    const updated = await db.query(`
+        UPDATE media_change SET status = 'approved' WHERE update_id = $1 RETURNING *
+      `, [updateId]);
+    res.status(200).json(keysToCamel(updated))
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+mediaChangeRouter.put("/:updateId/archive", async (req, res) => {
+  try {
+    const { updateId } = req.params;
+    const updated = await db.query(`
+        UPDATE media_change SET status = 'denied' WHERE update_id = $1 RETURNING *
+      `, [updateId]);
+    res.status(200).json(keysToCamel(updated))
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+mediaChangeRouter.delete("/:updateId/deny", async (req, res) => {
+  try {
+    const { updateId } = req.params;
+    const updated = await db.query(`
+        DELETE FROM media_change WHERE update_id = $1 RETURNING *
+      `, [updateId]);
+    res.status(200).json(keysToCamel(updated))
+  }
+  catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
   }

@@ -18,12 +18,14 @@ import {
 } from "@chakra-ui/react";
 import { SortArrows } from "../tables/SortArrows"
 import { useTableSort } from "../../contexts/hooks/TableSort";
+import { ReviewMediaUpdate } from "./ReviewMediaUpdate";
 
 export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [unorderedUpdates, setUnorderedUpdates] = useState([]);
     const { sortOrder, handleSort } = useTableSort(originalData, setData);
-  
+    const [selectedUpdate, setSelectedUpdate] = useState(null);
+
     const handleSearch = event => {
       setSearchQuery(event.target.value);
    };
@@ -102,8 +104,9 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
                 </Td>
               </Tr>
             ) : (
-              data.map((row) => (
-                <Tr key={row.id}>
+              data.map((row) => {
+                console.log(row)
+                return <Tr key={row.id}>
                   <Td>{row.updateDate}</Td>
                   <Td>{row.note}</Td>
                   <Td>{row.programName}</Td>
@@ -111,14 +114,23 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
                     {row.firstName} {row.lastName}
                   </Td>
                   <Td>
-                    <Badge> {row.status} </Badge>
+                    <Badge cursor="pointer" onClick={() => setSelectedUpdate(row)}>
+  {                   row.status ?? "Unread"}
+                    </Badge>
                   </Td>
                 </Tr>
-              ))
+              })
             )}
           </Tbody>
         </Table>
       </TableContainer>
+      {selectedUpdate && (
+        <ReviewMediaUpdate
+          update={selectedUpdate}
+          onClose={() => setSelectedUpdate(null)}
+          onUpdate={setData}
+        />
+      )}
     </Box>
   );
 };
