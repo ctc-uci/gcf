@@ -204,7 +204,39 @@ gcfUserRouter.get("/:id/accounts", async (req, res) => {
 
     let accounts;
 
-    // Admin: RDs and PDs with their associated programs; can no longer view other Admins
+    // Super Admin: view and edit all users and their associated information (including admins)
+    if (role === "Super Admin") {
+      accounts = await db.query(
+        `SELECT 
+          u.id,
+          u.first_name,
+          u.last_name,
+          u.role,
+          COALESCE(
+            array_cat(
+              COALESCE(
+                array_agg(DISTINCT p_rd.name) FILTER (WHERE p_rd.id IS NOT NULL),
+                '{}'
+              ),
+              COALESCE(
+                array_agg(DISTINCT p_pd.name) FILTER (WHERE p_pd.id IS NOT NULL),
+                '{}'
+              )
+            ),
+            '{}'
+          ) AS programs
+        FROM gcf_user u
+        LEFT JOIN regional_director rd ON u.id = rd.user_id
+        LEFT JOIN country c ON rd.region_id = c.region_id
+        LEFT JOIN program p_rd ON c.id = p_rd.country
+        LEFT JOIN program_director pd ON u.id = pd.user_id
+        LEFT JOIN program p_pd ON pd.program_id = p_pd.id
+        GROUP BY u.id, u.first_name, u.last_name, u.role
+        ORDER BY u.last_name ASC`
+      );
+    }
+
+    // Admin: RDs and PDs with their associated programs; CANNOT view or edit other Admins
     if (role === "Admin") {
       accounts = await db.query(
         `SELECT 
