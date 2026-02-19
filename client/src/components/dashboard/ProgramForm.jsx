@@ -20,6 +20,8 @@ import {
     NumberDecrementStepper,
     TagCloseButton
 } from '@chakra-ui/react'
+import { useFullscreenFlyout } from '../useFullScreenFlyout.js';
+import { FullscreenFlyoutButton } from '../FullscreenFlyoutButton';
 import { useRef, useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext'
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
@@ -235,7 +237,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     const [initialProgramDirectorIds, setInitialProgramDirectorIds] = useState([]);
     const [initialInstrumentQuantities, setInitialInstrumentQuantities] = useState({});
     const [initialCurriculumLinks, setInitialCurriculumLinks] = useState([]);
-
+    const [isFullScreen, toggleFullScreen] = useFullscreenFlyout();
 
     const [formState, setFormState] = useState({
         status: null,
@@ -539,9 +541,10 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 size="lg"
             >
                 <DrawerOverlay />
-                <DrawerContent>
+                <DrawerContent width="50%" maxWidth={isFullScreen ? "100%" : "50%"}>
                     <HStack marginBottom="1em">
                         <DrawerCloseButton left="4" right="auto" />
+                        <FullscreenFlyoutButton isFullScreen={isFullScreen} toggleFullScreen={toggleFullScreen} width="5em" height="2em" marginLeft="4em" marginTop="0.7em"/>
                         <Button colorScheme="teal" marginLeft="auto" marginRight="2em" width="5em" height="2em" top="2" fontSize="small" onClick={handleSave}> Save </Button>
                     </HStack>
 
