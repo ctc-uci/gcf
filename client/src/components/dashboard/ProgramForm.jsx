@@ -25,6 +25,33 @@ import {
 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+    Drawer,
+    DrawerBody,
+    DrawerHeader,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
+    useDisclosure,
+    Button,
+    VStack,
+    HStack,
+    Input,
+    Select,
+    Tag,
+    TagLabel,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    NumberIncrementStepper,
+    NumberDecrementStepper,
+    TagCloseButton
+} from '@chakra-ui/react'
+import { useFullscreenFlyout } from '../useFullScreenFlyout.js';
+import { FullscreenFlyoutButton } from '../FullscreenFlyoutButton';
+import { useRef, useState, useEffect } from 'react'
+import { useBackendContext } from '@/contexts/hooks/useBackendContext'
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+
 
 // sub-component for adding instruments
 const InstrumentForm = ({ setFormData }) => {
@@ -268,6 +295,10 @@ export const ProgramForm = ({
   const [initialInstrumentQuantities, setInitialInstrumentQuantities] =
     useState({});
   const [initialCurriculumLinks, setInitialCurriculumLinks] = useState([]);
+    const [initialProgramDirectorIds, setInitialProgramDirectorIds] = useState([]);
+    const [initialInstrumentQuantities, setInitialInstrumentQuantities] = useState({});
+    const [initialCurriculumLinks, setInitialCurriculumLinks] = useState([]);
+    const [isFullScreen, toggleFullScreen] = useFullscreenFlyout();
 
   const [formState, setFormState] = useState({
     status: null,
@@ -559,36 +590,22 @@ export const ProgramForm = ({
     getCountriesForRegion();
   }, [formState.regionId, backend]);
 
-  return (
-    <>
-      <Drawer
-        isOpen={isOpen}
-        placement="right"
-        onClose={onClose}
-        finalFocusRef={btnRef}
-        size="lg"
-      >
-        <DrawerOverlay />
-        <DrawerContent>
-          <HStack marginBottom="1em">
-            <DrawerCloseButton
-              left="4"
-              right="auto"
-            />
-            <Button
-              colorScheme="teal"
-              marginLeft="auto"
-              marginRight="2em"
-              width="5em"
-              height="2em"
-              top="2"
-              fontSize="small"
-              onClick={handleSave}
+    return (
+        <>
+            <Drawer
+                isOpen={isOpen}
+                placement='right'
+                onClose={onClose}
+                finalFocusRef={btnRef}
+                size="lg"
             >
-              {" "}
-              Save{" "}
-            </Button>
-          </HStack>
+                <DrawerOverlay />
+                <DrawerContent width="50%" maxWidth={isFullScreen ? "100%" : "50%"}>
+                    <HStack marginBottom="1em">
+                        <DrawerCloseButton left="4" right="auto" />
+                        <FullscreenFlyoutButton isFullScreen={isFullScreen} toggleFullScreen={toggleFullScreen} width="5em" height="2em" marginLeft="4em" marginTop="0.7em"/>
+                        <Button colorScheme="teal" marginLeft="auto" marginRight="2em" width="5em" height="2em" top="2" fontSize="small" onClick={handleSave}> Save </Button>
+                    </HStack>
 
           <DrawerBody>
             <VStack
