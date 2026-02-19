@@ -204,7 +204,7 @@ gcfUserRouter.get("/:id/accounts", async (req, res) => {
 
     let accounts;
 
-    // Admin: all users (admins, RDs, PDs, etc.) with their associated programs
+    // Admin: RDs and PDs with their associated programs; can no longer view other Admins
     if (role === "Admin") {
       accounts = await db.query(
         `SELECT 
@@ -231,6 +231,7 @@ gcfUserRouter.get("/:id/accounts", async (req, res) => {
         LEFT JOIN program p_rd ON c.id = p_rd.country
         LEFT JOIN program_director pd ON u.id = pd.user_id
         LEFT JOIN program p_pd ON pd.program_id = p_pd.id
+        WHERE u.role == 'RD' OR u.role == 'PD'
         GROUP BY u.id, u.first_name, u.last_name, u.role
         ORDER BY u.last_name ASC`
       );
