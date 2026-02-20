@@ -14,7 +14,7 @@ const getAccountsRoute = (role, userId) => {
   if (!userId) return null;
 
   return role
-    ? `/gcf-users/${userId}/accounts?`
+    ? `/gcf-users/${userId}/accounts?role=${role}`
     : `/gcf-users/${userId}/accounts`;
 };
 
@@ -42,6 +42,7 @@ export const Account = () => {
       return;
     }
     try {
+      console.log(route);
       const response = await backend.get(route);
       const rawData = response.data || []
       const fetchedData = (rawData).map((item) => ({

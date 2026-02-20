@@ -199,6 +199,7 @@ gcfUserRouter.get("/role/:role", async (req, res) => {
 
 gcfUserRouter.get("/:id/accounts", async (req, res) => {
   try {
+    console.log("GET ACCOUNTS ROUTE HIT");
     const { id } = req.params;
     const { role } = req.query;
 
@@ -263,7 +264,7 @@ gcfUserRouter.get("/:id/accounts", async (req, res) => {
         LEFT JOIN program p_rd ON c.id = p_rd.country
         LEFT JOIN program_director pd ON u.id = pd.user_id
         LEFT JOIN program p_pd ON pd.program_id = p_pd.id
-        WHERE u.role == 'RD' OR u.role == 'PD'
+        WHERE u.role = 'Regional Director' OR u.role = 'Program Director'
         GROUP BY u.id, u.first_name, u.last_name, u.role
         ORDER BY u.last_name ASC`
       );
