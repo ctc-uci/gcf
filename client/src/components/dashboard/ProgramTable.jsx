@@ -26,7 +26,14 @@ import {
   Th,
   Thead,
   Tr,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverArrow,
+  PopoverCloseButton,
+  PopoverBody,
 } from "@chakra-ui/react";
+
 import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from "react-icons/hi2";
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
@@ -34,6 +41,7 @@ import { useRoleContext } from "@/contexts/hooks/useRoleContext";
 import { useTableSort } from "../../contexts/hooks/TableSort";
 import { SortArrows } from "../tables/SortArrows";
 import { ProgramForm } from "./ProgramForm";
+import { FilterComponent } from "../common/FilterComponent";
 
 const getRouteByRole = (role, userId) => {
   const routes = {
@@ -200,6 +208,36 @@ function ProgramDisplay({
   selectedProgram,
   setSelectedProgram
 }) {
+  const columns = [
+    {
+      "key": "title",
+      "type": "text"
+    },
+     {
+      "key": "status",
+      "type": "select",
+      "options": ["Active", "Inactive"]
+     }, 
+     {
+      "key": "launchDate",
+      "type": "date"
+     },
+     {
+      "key": "location",
+      "type": "text"
+    },
+    {
+      "key": "students",
+      "type": "number"
+    }, 
+    {
+      "key": "instruments",
+      "type": "number" 
+    },
+    {
+      "key": "totalInstruments",
+      "type": "number"
+    }]
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
 
   const handleSearch = (event) => {
@@ -278,12 +316,20 @@ function ProgramDisplay({
               value={searchQuery}
               onChange={handleSearch}
             />
-            <IconButton
-              aria-label="filter"
-              icon={<HiOutlineAdjustmentsHorizontal />}
-              size="sm"
-              variant="ghost"
-            />
+            <Popover>
+              <PopoverTrigger>
+                <IconButton
+                aria-label="filter"
+                icon={<HiOutlineAdjustmentsHorizontal />}
+                size="sm"
+                variant="ghost"
+                />
+              </PopoverTrigger>
+              <PopoverContent>
+                <FilterComponent>
+                </FilterComponent>
+              </PopoverContent>
+            </Popover>
           </HStack>
         </HStack>
           <HStack spacing={1}>
@@ -301,10 +347,10 @@ function ProgramDisplay({
               variant="ghost"
            />
             <IconButton
-              aria-label="filter"
-              icon={<HiOutlineAdjustmentsHorizontal />}
-              size="sm"
-              variant="ghost"
+            aria-label="filter"
+            icon={<HiOutlineAdjustmentsHorizontal />}
+            size="sm"
+            variant="ghost"
             />
             <IconButton
               aria-label="download"
