@@ -65,7 +65,9 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete, formOrigin
 
         <ModalBody>
           <MediaUpload
-                onFileSelect={(files) => setSelectedFiles((prev) => [...(prev || []), ...files])} // append instead of replace upon another upload
+                onFileSelect={(files) =>
+                  formOrigin === "profile" ? setSelectedFiles(files.slice(0,1)) :
+                  setSelectedFiles((prev) => [...(prev || []), ...files])} // append instead of replace upon another upload, unless profile
                 formOrigin={formOrigin}
               />
             {console.log(selectedFiles)}
