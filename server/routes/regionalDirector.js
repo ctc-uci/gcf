@@ -28,7 +28,7 @@ regionalDirectorRouter.get("/me/:id/stats", async (req, res) => {
     const stats = await db.query(
       `SELECT
           (SELECT COUNT(DISTINCT p.id) FROM program p JOIN country c ON c.id = p.country WHERE c.region_id = $1) AS total_programs,
-          (SELECT COALESCE(SUM(ec.enrollment_change), 0) FROM enrollment_change ec
+          (SELECT COALESCE(SUM(ec.enrollment_change), 0) - COALESCE(SUM(ec.graduated_change), 0) FROM enrollment_change ec
            JOIN program_update pu ON pu.id = ec.update_id
            JOIN program p ON p.id = pu.program_id
            JOIN country c ON c.id = p.country
@@ -43,6 +43,27 @@ regionalDirectorRouter.get("/me/:id/stats", async (req, res) => {
     res.status(200).json(keysToCamel(stats[0]));
   } catch (err) {
     console.error("Error in /me/:id/stats:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+regionalDirectorRouter.get("/me/:id/programs", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const director = await db.query("SELECT region_id FROM regional_director WHERE user_id = $1 LIMIT 1", [id]);
+    if (!director?.length) return res.status(404).json({ error: "Regional director not found" });
+    const regionId = director[0].region_id;
+    const programs = await db.query(
+      `SELECT p.id, p.name
+       FROM program p
+       JOIN country c ON c.id = p.country
+       WHERE c.region_id = $1
+       ORDER BY p.name ASC`,
+      [regionId]
+    );
+    res.status(200).json(keysToCamel(programs));
+  } catch (err) {
+    console.error("Error in /me/:id/programs:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -91,6 +112,27 @@ regionalDirectorRouter.get("/:user_id/program-directors", async (req, res) => {
       JOIN gcf_user u ON pd.user_id = u.id
       WHERE rd.user_id = $1
       ORDER BY u.last_name ASC`,
+      [user_id]
+    );
+
+    res.status(200).json(keysToCamel(data));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+regionalDirectorRouter.get("/:user_id/programs", async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    const data = await db.query(
+      `SELECT 
+        program.*
+      FROM program
+      INNER JOIN country ON country.id = program.country
+      INNER JOIN region ON region.id = country.region_id
+      INNER JOIN regional_director ON regional_director.region_id = region.id AND regional_director.user_id = $1`,
       [user_id]
     );
 

@@ -18,7 +18,7 @@ async function getDataByUserId(userId) {
 
             c.name AS program_location,
 
-            COALESCE(SUM(ec.enrollment_change), 0) AS total_students,
+            COALESCE(SUM(ec.enrollment_change), 0) - COALESCE(SUM(ec.graduated_change), 0) AS total_students,
             COALESCE(SUM(ic.amount_changed), 0) AS total_instruments
         FROM program p
         LEFT JOIN country c

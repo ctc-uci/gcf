@@ -9,7 +9,7 @@ export const MediaCard = ({ s3_key, file_name, file_type, is_thumbnail }) => {
       borderColor="gray.800"
       p={4}
     >
-      <Text>{s3_key}</Text>
+      <Text>{s3_key}</Text> {/* TODO: render the image */}
     </Box>
   );
 };
