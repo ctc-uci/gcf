@@ -28,7 +28,8 @@ import {
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
-
+import { useTableSort } from "../../contexts/hooks/TableSort";
+import { SortArrows } from "../tables/SortArrows";
 import { FiEdit2, FiEyeOff } from "react-icons/fi";
 
 const escapeCsvValue = (val) => {
@@ -62,7 +63,7 @@ export function downloadAccountsAsCsv(data) {
   URL.revokeObjectURL(url);
 }
 
-export const AccountsTable = ({ data, setData, originalData, searchQuery, onUpdate}) => {
+export const AccountsTable = ({ data, setData, originalData, searchQuery, isCardView, onUpdate}) => {
   const hoverBg = useColorModeValue("gray.50", "gray.700");
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
 
