@@ -326,7 +326,7 @@ function ProgramDisplay({
                 />
               </PopoverTrigger>
               <PopoverContent>
-                <FilterComponent>
+                <FilterComponent columns={columns}>
                 </FilterComponent>
               </PopoverContent>
             </Popover>

@@ -1,13 +1,16 @@
-import { Card, CardBody } from "@chakra-ui/react";
+import {VStack, Text, HStack} from "@chakra-ui/react";
 
-function FilterComponent() {
+function FilterComponent({columns}) {
+    console.log(columns);
     return (
-        <Card>
-            <CardBody>
-                Meow
-            </CardBody>
-        </Card>
-    )
+        <VStack alignItems="flex-start">
+            <Text>In this view, show records</Text>
+            <HStack>
+                <Text>Where</Text>
+                <Text>Add form inputs here using map prolly</Text>
+            </HStack>
+        </VStack>
+    );
 }
 
 export { FilterComponent };
