@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { EditIcon, EmailIcon } from "@chakra-ui/icons";
 import {
@@ -29,6 +29,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 
+import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { FiEdit2, FiEyeOff } from "react-icons/fi";
 
 import { useTableSort } from "../../contexts/hooks/TableSort";
@@ -45,6 +46,21 @@ export const AccountsTable = ({
 }) => {
   const hoverBg = useColorModeValue("gray.50", "gray.700");
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
+  const { backend } = useBackendContext();
+
+  const RegionText = ({ id }) => {
+    const [region, setRegion] = useState("");
+
+    const fetch = async () => {
+      const res = await backend.get(
+        `/regional-directors/regional-director-region/${id}`
+      );
+      setRegion(res.data[0]?.name);
+    };
+
+    fetch();
+    return <Text fontSize="sm">{region}</Text>;
+  };
 
   useEffect(() => {
     function filterUpdates(search) {
@@ -307,9 +323,11 @@ export const AccountsTable = ({
                         gap={3}
                         flexWrap="wrap"
                       >
-                        {a.programs.map((p) => (
-                          <Text fontSize="sm">{p}</Text>
-                        ))}
+                        {a.role === "Regional Director" ? (
+                          <RegionText id={a.id} />
+                        ) : (
+                          a.programs.map((p) => <Text fontSize="sm">{p}</Text>)
+                        )}
                       </Flex>
                     </VStack>
                   </VStack>
