@@ -44,6 +44,7 @@ import {
 } from "react-icons/hi2";
 
 import { useTableSort } from "../../contexts/hooks/TableSort";
+import { useTableFilter } from "../../contexts/hooks/TableFilter"
 import { FilterComponent } from "../common/FilterComponent";
 import { SortArrows } from "../tables/SortArrows";
 import { ProgramForm } from "./ProgramForm";
@@ -315,7 +316,14 @@ function ProgramDisplay({
       type: "number",
     },
   ];
-  const { sortOrder, handleSort } = useTableSort(originalData, setData);
+  const  [activeFilters, setActiveFilters] = useState([]);
+  const filteredData = useTableFilter(activeFilters, originalData);
+  const { sortOrder, handleSort } = useTableSort(filteredData, setData);
+  
+  useEffect(() => {
+    setData(filteredData);
+  }, [filteredData, setData]);
+
 
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
@@ -411,7 +419,7 @@ function ProgramDisplay({
                     columns={columns}
                     onFilterChange={(filters) => {
                       // You can handle the filter logic here later
-
+                      setActiveFilters(filters);
                       console.log(filters);
                     }}
                   />

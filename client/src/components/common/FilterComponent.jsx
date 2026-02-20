@@ -32,38 +32,38 @@ const OPERATIONS = {
     { label: "after", value: "after" },
   ],
   select: [
-    { label: "is", value: "is" },
+    { label: "is", value: "equals" },
     { label: "is not", value: "is_not" },
   ],
 };
 
-function FilterComponent({ columns = [], onFilterChange }) {
-  const createDefaultFilter = () => {
-    const defaultCol = columns[0];
-    const defaultOps = defaultCol
-      ? OPERATIONS[defaultCol.type] || OPERATIONS.text
-      : OPERATIONS.text;
+  function FilterComponent({ columns = [], onFilterChange }) {
+    const createDefaultFilter = () => {
+      const defaultCol = columns[0];
+      const defaultOps = defaultCol
+        ? OPERATIONS[defaultCol.type] || OPERATIONS.text
+        : OPERATIONS.text;
 
-    return {
-      id: crypto.randomUUID(),
-      logic: "and", // Used for rows > 0
-      column: defaultCol?.key || "",
-      operation: defaultOps[0]?.value || "",
-      value: "",
+      return {
+        id: crypto.randomUUID(),
+        logic: "and", // Used for rows > 0
+        column: defaultCol?.key || "",
+        operation: defaultOps[0]?.value || "",
+        value: "",
+      };
     };
-  };
 
-  const [filters, setFilters] = useState([createDefaultFilter()]);
+    const [filters, setFilters] = useState([createDefaultFilter()]);
 
-  useEffect(() => {
-    if (onFilterChange) {
-      onFilterChange(filters);
-    }
-  }, [filters, onFilterChange]);
+    useEffect(() => {
+      if (onFilterChange) {
+        onFilterChange(filters);
+      }
+    }, [filters, onFilterChange]);
 
-  const addFilter = () => {
-    setFilters([...filters, createDefaultFilter()]);
-  };
+    const addFilter = () => {
+      setFilters([...filters, createDefaultFilter()]);
+    };
 
   const removeFilter = (id) => {
     setFilters(filters.filter((f) => f.id !== id));
