@@ -1,5 +1,4 @@
-import React, { useRef, useState } from "react";
-
+import React, { useState } from "react";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import {
   IconButton,
@@ -14,12 +13,11 @@ import {
 import { MediaPreview } from "./MediaPreview";
 import { MediaUpload } from "./MediaUpload";
 
-export function MediaUploadModal({ isOpen, onClose, onUploadComplete }) {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const fileInputRef = useRef(null);
-
+export function MediaUploadModal({ isOpen, onClose, onUploadComplete, formOrigin }) {
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  
   const handleClose = () => {
-    setSelectedFile(null);
+    setSelectedFiles(null);
     onClose();
   };
 
@@ -35,7 +33,7 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete }) {
         borderRadius="md"
         pb={6}
       >
-        {selectedFile && (
+        {selectedFiles && (
           <IconButton
             icon={
               <ChevronLeftIcon
@@ -47,7 +45,7 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete }) {
             position="absolute"
             left="15px"
             top="15px"
-            onClick={() => setSelectedFile(null)}
+            onClick={() => setSelectedFiles(null)}
             aria-label="Back"
           />
         )}
@@ -66,17 +64,24 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete }) {
         </ModalHeader>
 
         <ModalBody>
-          {!selectedFile ? (
-            <MediaUpload
-              fileInputRef={fileInputRef}
-              onFileSelect={(file) => setSelectedFile(file)}
-            />
-          ) : (
-            <MediaPreview
-              file={selectedFile}
-              onComplete={onUploadComplete}
-            />
-          )}
+          <MediaUpload
+                onFileSelect={(files) => setSelectedFiles(files)}
+                formOrigin={formOrigin}
+              />
+                
+          {/* {selectedFiles.length > 0 ?
+            (<>
+              {selectedFiles.map((file) => {
+                return ( */}
+                <MediaPreview
+                  files={selectedFiles}
+                  onComplete={onUploadComplete}
+                />
+              {/* )
+              }
+              )}
+            </>) : ""
+          } */}
         </ModalBody>
       </ModalContent>
     </Modal>
