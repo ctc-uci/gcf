@@ -14,7 +14,7 @@ const getAccountsRoute = (role, userId) => {
   if (!userId) return null;
 
   return role
-    ? `/gcf-users/${userId}/accounts?role=${role}`
+    ? `/gcf-users/${userId}/accounts?`
     : `/gcf-users/${userId}/accounts`;
 };
 
