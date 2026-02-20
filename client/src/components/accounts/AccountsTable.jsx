@@ -257,6 +257,7 @@ export const AccountsTable = ({
                     top={2}
                     right={2}
                   >
+                    {/* TODO: add ability to open the account edit form onClick */}
                     <IconButton
                       aria-label="search"
                       icon={<EditIcon />}
@@ -283,7 +284,7 @@ export const AccountsTable = ({
                     <Image
                       src={GcfGlobe}
                       opacity="30%"
-                      h="95%"
+                      h={300}
                       position="absolute"
                       draggable="false"
                       alt="GCF Globe"
@@ -294,7 +295,8 @@ export const AccountsTable = ({
                 <CardFooter
                   bg="gray.200"
                   w="100%"
-                  h="20%"
+                  h="auto"
+                  minh="20%"
                 >
                   <VStack align="left">
                     <Text>

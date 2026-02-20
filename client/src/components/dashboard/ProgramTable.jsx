@@ -558,7 +558,7 @@ function ProgramDisplay({
                       <Image
                         src={GcfGlobe}
                         opacity="30%"
-                        h="95%"
+                        h={300}
                         position="absolute"
                         draggable="false"
                         alt="GCF Globe"
@@ -582,11 +582,15 @@ function ProgramDisplay({
                   <CardFooter
                     bg="gray.200"
                     w="100%"
-                    h="20%"
+                    h="auto"
+                    minh="20%"
                   >
                     <VStack align="left">
                       <Text> {p.title} </Text>
-                      <Flex gap={3}>
+                      <Flex
+                        gap={3}
+                        flexWrap="wrap"
+                      >
                         {p.programDirectors.map((d) => (
                           <Text
                             key={d.userId}
