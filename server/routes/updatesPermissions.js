@@ -26,7 +26,7 @@ updatesPermissionsRouter.get("/media-updates/:id", async (req, res) => {
         INNER JOIN regional_director ON regional_director.region_id = region.id AND regional_director.user_id = $1`;
     } else if (role === "Program Director") {
       filterJoin = `INNER JOIN program_director ON program_director.program_id = program.id AND program_director.user_id = $1`;
-    } else if (role !== "Admin") {
+    } else if (role !== "Admin" && role !== "Super Admin") {
       return res.status(403).send("Access denied");
     }
 
@@ -75,7 +75,7 @@ updatesPermissionsRouter.get("/program-updates/:id", async (req, res) => {
         INNER JOIN regional_director ON regional_director.region_id = region.id AND regional_director.user_id = $1`;
     } else if (role === "Program Director") {
       filterJoin = `INNER JOIN program_director ON program_director.program_id = program.id AND program_director.user_id = $1`;
-    } else if (role !== "Admin") {
+    } else if (role !== "Admin" && role !== "Super Admin") {
       return res.status(403).send("Access denied");
     }
 

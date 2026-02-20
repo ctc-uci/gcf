@@ -1,7 +1,7 @@
 import { Admin } from "@/components/admin/Admin";
 import { CatchAll } from "@/components/CatchAll";
 import Dashboard from "@/components/dashboard/Dashboard";
-import { ProgramForm } from "@/components/dashboard/ProgramForm";
+// import { ProgramForm } from "@/components/dashboard/ProgramForm";
 import { Login } from "@/components/login/Login";
 import { Layout } from "@/components/navigation/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -58,7 +58,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         element={<Account />}
-                        allowedRoles={["Admin", "Regional Director"]}
+                        allowedRoles={["Super Admin", "Admin", "Regional Director"]}
                       />
                     }
                   />

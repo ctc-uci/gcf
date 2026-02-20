@@ -37,6 +37,7 @@ import { ProgramForm } from "./ProgramForm";
 
 const getRouteByRole = (role, userId) => {
   const routes = {
+    "Super Admin": "/admin/programs",
     Admin: "/admin/programs",
     "Regional Director": `/rdProgramTable/${userId}`,
   };
@@ -89,6 +90,7 @@ function mapRdRow(row) {
 }
 
 const MAP_BY_ROLE = {
+  "Super Admin": mapAdminRow,
   Admin: mapAdminRow,
   "Regional Director": mapRdRow,
 };
@@ -234,7 +236,6 @@ function ProgramDisplay({
   }, [searchQuery, originalData]);
   
   if (!getRouteByRole(role, userId)) return null;
-
   return (
     <>
     <ProgramForm
