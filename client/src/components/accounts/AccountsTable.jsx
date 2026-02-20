@@ -34,7 +34,7 @@ import { FiEdit2, FiEyeOff } from "react-icons/fi";
 
 import { useTableSort } from "../../contexts/hooks/TableSort";
 import { SortArrows } from "../tables/SortArrows";
-import { FiEdit2, FiEyeOff } from "react-icons/fi";
+import GcfGlobe from "/gcf_globe.png";
 
 const escapeCsvValue = (val) => {
   if (val == null) return "";
@@ -57,7 +57,9 @@ export function downloadAccountsAsCsv(data) {
       Array.isArray(user.programs) ? user.programs.join("; ") : ""
     ),
   ]);
-  const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+  const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join(
+    "\n"
+  );
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -67,7 +69,14 @@ export function downloadAccountsAsCsv(data) {
   URL.revokeObjectURL(url);
 }
 
-export const AccountsTable = ({ data, setData, originalData, searchQuery, isCardView, onUpdate}) => {
+export const AccountsTable = ({
+  data,
+  setData,
+  originalData,
+  searchQuery,
+  isCardView,
+  onUpdate,
+}) => {
   const hoverBg = useColorModeValue("gray.50", "gray.700");
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
   const { backend } = useBackendContext();

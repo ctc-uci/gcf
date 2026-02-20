@@ -1,4 +1,3 @@
-
 import {
   Button,
   Flex,
@@ -14,7 +13,13 @@ import {
 
 import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from "react-icons/fi";
 
-export const AccountToolbar = ({ searchQuery, setSearchQuery, onNew, onDownload }) => {
+export const AccountToolbar = ({
+  searchQuery,
+  setSearchQuery,
+  setIsCardView,
+  onNew,
+  onDownload,
+}) => {
   // TODO: Implement functionality for search, filter, view toggle, download, and new account
   function handleSearchChange(event) {
     setSearchQuery(event.target.value);
