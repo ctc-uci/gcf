@@ -23,6 +23,7 @@ import {
   GridItem,
   HStack,
   IconButton,
+  Image,
   Input,
   Link,
   Spinner,
@@ -49,6 +50,7 @@ import {
 import { useTableSort } from "../../contexts/hooks/TableSort";
 import { SortArrows } from "../tables/SortArrows";
 import { ProgramForm } from "./ProgramForm";
+import GcfGlobe from "/gcf_globe.png";
 
 const getRouteByRole = (role, userId) => {
   const routes = {
@@ -518,14 +520,6 @@ function ProgramDisplay({
               )}
             </Tbody>
           </Table>
-        ) : isLoading ? (
-          <Tr>
-            <Td colSpan={7}>
-              <Center py={8}>
-                <Spinner size="lg" />
-              </Center>
-            </Td>
-          </Tr>
         ) : (
           <Grid
             templateColumns="repeat(3, 1fr)"
@@ -552,11 +546,24 @@ function ProgramDisplay({
                         size="sm"
                         variant="ghost"
                         onClick={() => openEditForm(p)}
+                        bg="#808080"
+                        borderRadius="full"
+                        color="white"
                       />
                     </Box>
                   </CardHeader>
-                  {/*(found: object with keys {id, title, status, launchDate, location, country, students, instruments, totalInstruments, programDirectors, regionalDirectors, playlists, primaryLanguage}) */}
                   <CardBody position="relative">
+                    <Center mt={10}>
+                      {/* TODO: replace GCF Globe with an image associated with the program */}
+                      <Image
+                        src={GcfGlobe}
+                        opacity="30%"
+                        h="95%"
+                        position="absolute"
+                        draggable="false"
+                        alt="GCF Globe"
+                      />
+                    </Center>
                     <Box
                       position="absolute"
                       bottom={15}
@@ -564,7 +571,7 @@ function ProgramDisplay({
                     >
                       <Badge
                         p={2}
-                        br={20}
+                        borderRadius="full"
                         bg="#808080"
                         color="white"
                       >
