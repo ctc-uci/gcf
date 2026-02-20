@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import {
   Box,
@@ -17,21 +17,28 @@ import {
 
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
-export function MediaPreview({ file, onComplete }) {
+export function MediaPreview({ files, onComplete }) {
   const { backend } = useBackendContext();
   const toast = useToast();
 
-  const [title, setTitle] = useState(() => {
-    return file.name.replace(/\.[^/.]+$/, "");
-  });
+  const [titles, setTitles] = useState(new Map());
+  const [urls, setUrls] = useState(new Map());
+
+  useEffect(() => {
+    files.map((file) => {
+      titles[file] = file.name.replace(/\.[^/.]+$/, "");
+      urls[file] = URL.createObjectURL(file);
+    })
+    setTitles(titles);
+    setUrls(urls);
+  }, [files, titles, urls]);
+
+  console.log(urls);
+
   const [description, setDescription] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
-  const previewUrl = useMemo(() => {
-    return URL.createObjectURL(file);
-  }, [file]);
-
-  const handleFullUploadProcess = async () => {
+  const handleFullUploadProcess = async (file) => {
     setIsUploading(true);
 
     try {
@@ -39,7 +46,7 @@ export function MediaPreview({ file, onComplete }) {
         ? file.name.slice(file.name.lastIndexOf("."))
         : "";
 
-      const keyFileName = `${title.trim()}${extension}`;
+      const keyFileName = `${titles[file].trim()}${extension}`;
 
       const { data: s3Data } = await backend.post("/images/upload-url", {
         fileName: keyFileName,
@@ -57,7 +64,7 @@ export function MediaPreview({ file, onComplete }) {
       onComplete({
         s3_key: s3Data.key,
         file_name: keyFileName,
-        title: title,
+        title: title[file],
         description: description,
       });
 
@@ -85,80 +92,87 @@ export function MediaPreview({ file, onComplete }) {
     }
   };
 
+
+
   return (
-    <VStack
-      spacing={4}
-      align="stretch"
-    >
-      <VStack spacing={2}>
-        <Text fontSize="md">Preview</Text>
-        <Box
-          border="1px solid black"
-          w="100%"
-          h="250px"
-          overflow="hidden"
-          borderRadius="md"
-        >
-          {file.type.startsWith("video") ? (
-            <video
-              src={previewUrl}
-              controls
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
-            />
-          ) : (
-            <Image
-              src={previewUrl}
-              alt="Preview"
-              w="100%"
-              h="100%"
-              objectFit="contain"
-              onLoad={() => console.log("Image loaded successfully")}
-              fallback={
-                <Center h="100%">
-                  <Spinner size="lg" />
-                </Center>
-              }
-            />
-          )}
-        </Box>
+    <>
+    {files.map((file) => {
+        return (
+              <VStack
+        spacing={4}
+        align="stretch"
+      >
+        <VStack spacing={2}>
+          <Text fontSize="md">Preview</Text>
+          <Box
+            border="1px solid black"
+            w="100%"
+            h="250px"
+            overflow="hidden"
+            borderRadius="md"
+          >
+            {file.type.startsWith("video") ? (
+              <video
+                src={urls[file]}
+                controls
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            ) : (
+              <Image
+                src={urls[file]}
+                alt="Preview"
+                w="100%"
+                h="100%"
+                objectFit="contain"
+                onLoad={() => console.log("Image loaded successfully")}
+                fallback={
+                  <Center h="100%">
+                    <Spinner size="lg" />
+                  </Center>
+                }
+              />
+            )}
+          </Box>
+        </VStack>
+
+        <FormControl>
+          <FormLabel
+            color="gray.500"
+            fontWeight="normal"
+            mb={1}
+          >
+            Title:
+          </FormLabel>
+          <Input
+            bg="gray.100"
+            border="none"
+            borderRadius="full"
+            value={titles[file]}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel
+            color="gray.500"
+            fontWeight="normal"
+            mb={1}
+          >
+            Description:
+          </FormLabel>
+          <Textarea
+            bg="gray.100"
+            border="none"
+            borderRadius="xl"
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </FormControl>
       </VStack>
-
-      <FormControl>
-        <FormLabel
-          color="gray.500"
-          fontWeight="normal"
-          mb={1}
-        >
-          Title:
-        </FormLabel>
-        <Input
-          bg="gray.100"
-          border="none"
-          borderRadius="full"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </FormControl>
-
-      <FormControl>
-        <FormLabel
-          color="gray.500"
-          fontWeight="normal"
-          mb={1}
-        >
-          Description:
-        </FormLabel>
-        <Textarea
-          bg="gray.100"
-          border="none"
-          borderRadius="xl"
-          rows={3}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </FormControl>
-
-      <Center pt={4}>
+      )
+    })}
+    <Center pt={4}>
         <Button
           variant="outline"
           borderColor="black"
@@ -168,11 +182,15 @@ export function MediaPreview({ file, onComplete }) {
           fontWeight="normal"
           isLoading={isUploading}
           loadingText="Uploading..."
-          onClick={handleFullUploadProcess}
+          onClick={() => {
+            files.map((file) => {
+              return handleFullUploadProcess(file, titles[file]);
+            })
+        }}
         >
           Upload
         </Button>
       </Center>
-    </VStack>
+  </>
   );
 }
