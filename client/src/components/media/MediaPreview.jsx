@@ -17,88 +17,17 @@ import {
 
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
-export function MediaPreview({ files, onComplete }) {
-  const { backend } = useBackendContext();
-  const toast = useToast();
-
-  const [titles, setTitles] = useState(new Map());
-  const [urls, setUrls] = useState(new Map());
+export function MediaPreview({ file, title, onTitleChange }) {
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
-    files.map((file) => {
-      titles[file] = file.name.replace(/\.[^/.]+$/, "");
-      urls[file] = URL.createObjectURL(file);
-    })
-    setTitles(titles);
-    setUrls(urls);
-  }, [files, titles, urls]);
-
-  console.log(urls);
-
-  const [description, setDescription] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
-
-  const handleFullUploadProcess = async (file) => {
-    setIsUploading(true);
-
-    try {
-      const extension = file.name.includes(".")
-        ? file.name.slice(file.name.lastIndexOf("."))
-        : "";
-
-      const keyFileName = `${titles[file].trim()}${extension}`;
-
-      const { data: s3Data } = await backend.post("/images/upload-url", {
-        fileName: keyFileName,
-        contentType: file.type,
-      });
-
-      if (!s3Data.uploadUrl || !s3Data.key) {
-        throw new Error("Failed to get upload URL");
-      }
-
-      await backend.put(s3Data.uploadUrl, file, {
-        headers: { "Content-Type": file.type },
-      });
-
-      onComplete({
-        s3_key: s3Data.key,
-        file_name: keyFileName,
-        title: title[file],
-        description: description,
-      });
-
-      toast({
-        title: "Upload successful.",
-        description: `${keyFileName} has been uploaded to the server.`,
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom-right",
-      });
-    } catch (error) {
-      console.error("Upload failed:", error);
-
-      toast({
-        title: "Upload failed.",
-        description: "There was an error uploading your file.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom-right",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
 
   return (
-    <>
-    {files.map((file) => {
-        return (
-              <VStack
+    <VStack
         spacing={4}
         align="stretch"
       >
@@ -113,13 +42,13 @@ export function MediaPreview({ files, onComplete }) {
           >
             {file.type.startsWith("video") ? (
               <video
-                src={urls[file]}
+                src={previewUrl}
                 controls
                 style={{ width: "100%", height: "100%", objectFit: "contain" }}
               />
             ) : (
               <Image
-                src={urls[file]}
+                src={previewUrl}
                 alt="Preview"
                 w="100%"
                 h="100%"
@@ -147,50 +76,10 @@ export function MediaPreview({ files, onComplete }) {
             bg="gray.100"
             border="none"
             borderRadius="full"
-            value={titles[file]}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </FormControl>
-
-        <FormControl>
-          <FormLabel
-            color="gray.500"
-            fontWeight="normal"
-            mb={1}
-          >
-            Description:
-          </FormLabel>
-          <Textarea
-            bg="gray.100"
-            border="none"
-            borderRadius="xl"
-            rows={3}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={title}
+            onChange={(e) => onTitleChange(e.target.value)}
           />
         </FormControl>
       </VStack>
-      )
-    })}
-    <Center pt={4}>
-        <Button
-          variant="outline"
-          borderColor="black"
-          borderRadius="xl"
-          px={16}
-          bg="gray.50"
-          fontWeight="normal"
-          isLoading={isUploading}
-          loadingText="Uploading..."
-          onClick={() => {
-            files.map((file) => {
-              return handleFullUploadProcess(file, titles[file]);
-            })
-        }}
-        >
-          Upload
-        </Button>
-      </Center>
-  </>
   );
 }

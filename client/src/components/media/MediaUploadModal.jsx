@@ -10,14 +10,14 @@ import {
   ModalOverlay,
 } from "@chakra-ui/react";
 
-import { MediaPreview } from "./MediaPreview";
 import { MediaUpload } from "./MediaUpload";
+import { MediaPreviewList } from "./MediaPreviewList";
 
 export function MediaUploadModal({ isOpen, onClose, onUploadComplete, formOrigin }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   
   const handleClose = () => {
-    setSelectedFiles(null);
+    setSelectedFiles([]);
     onClose();
   };
 
@@ -45,7 +45,7 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete, formOrigin
             position="absolute"
             left="15px"
             top="15px"
-            onClick={() => setSelectedFiles(null)}
+            onClick={() => setSelectedFiles([])}
             aria-label="Back"
           />
         )}
@@ -65,23 +65,16 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete, formOrigin
 
         <ModalBody>
           <MediaUpload
-                onFileSelect={(files) => setSelectedFiles(files)}
+                onFileSelect={(files) => setSelectedFiles((prev) => [...(prev || []), ...files])} // append instead of replace upon another upload
                 formOrigin={formOrigin}
               />
-                
-          {/* {selectedFiles.length > 0 ?
-            (<>
-              {selectedFiles.map((file) => {
-                return ( */}
-                <MediaPreview
-                  files={selectedFiles}
-                  onComplete={onUploadComplete}
-                />
-              {/* )
-              }
-              )}
-            </>) : ""
-          } */}
+            {console.log(selectedFiles)}
+            {selectedFiles?.length > 0 && (
+              <MediaPreviewList
+                files={selectedFiles}
+                onComplete={onUploadComplete}
+              />
+            )}
         </ModalBody>
       </ModalContent>
     </Modal>
