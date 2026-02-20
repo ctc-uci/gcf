@@ -7,7 +7,7 @@ import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useRoleContext } from "@/contexts/hooks/useRoleContext";
 
 import { AccountForm } from "./AccountForm";
-import { AccountsTable } from "./AccountsTable";
+import { AccountsTable, downloadAccountsAsCsv } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
 
 const getAccountsRoute = (role, userId) => {
@@ -95,6 +95,7 @@ export const Account = () => {
             setIsDrawerOpen(true);
             setSelectedUser(null);
           }}
+          onDownload={() => downloadAccountsAsCsv(users)}
         />
       </Flex>
 

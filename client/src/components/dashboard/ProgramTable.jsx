@@ -292,6 +292,63 @@ function ProgramDisplay({
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
   const [isCardView, setIsCardView] = useState(false);
 
+  const escapeCsvValue = (val) => {
+    if (val == null) return "";
+    const s = String(val);
+    if (s.includes(",") || s.includes('"') || s.includes("\n")) {
+      return `"${s.replace(/"/g, '""')}"`;
+    }
+    return s;
+  };
+
+  const downloadDataAsCsv = () => {
+    if (!data || data.length === 0) return;
+    const headers = [
+      "Program",
+      "Status",
+      "Launch Date",
+      "Location",
+      "Students",
+      "Instruments",
+      "Total Instruments",
+      "Primary Language",
+      "Regional Directors",
+      "Program Directors",
+      "Curriculum Links",
+    ];
+    const rows = data.map((p) => [
+      escapeCsvValue(p.title),
+      escapeCsvValue(p.status),
+      escapeCsvValue(p.launchDate),
+      escapeCsvValue(p.location),
+      escapeCsvValue(p.students),
+      escapeCsvValue(p.instruments),
+      escapeCsvValue(p.totalInstruments),
+      escapeCsvValue(p.primaryLanguage),
+      escapeCsvValue(
+        Array.isArray(p.regionalDirectors)
+          ? p.regionalDirectors.map((d) => `${d.firstName} ${d.lastName}`).join("; ")
+          : ""
+      ),
+      escapeCsvValue(
+        Array.isArray(p.programDirectors)
+          ? p.programDirectors.map((d) => `${d.firstName} ${d.lastName}`).join("; ")
+          : ""
+      ),
+      escapeCsvValue(
+        Array.isArray(p.playlists) ? p.playlists.map((l) => l.link ?? l.name).join("; ") : ""
+      ),
+    ]);
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `programs-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
   };
@@ -407,6 +464,7 @@ function ProgramDisplay({
               size="sm"
               variant="ghost"
               ml={2}
+              onClick={downloadDataAsCsv}
             />
             <Button
               size="sm"
