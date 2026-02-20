@@ -23,6 +23,7 @@ import {
 import { useRef, useState, useEffect } from 'react'
 import { useBackendContext } from '@/contexts/hooks/useBackendContext'
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { MediaUploadModal } from "../media/MediaUploadModal";
 
 
 // sub-component for adding instruments
@@ -132,8 +133,6 @@ const ProgramDirectorForm = ({ formState, setFormData }) => {
 
     }, [backend]);
 
-
-
     function handleSubmit() {
         if (!selectedDirector) return;
 
@@ -220,9 +219,26 @@ const CurriculumLinkForm = ({ formState, setFormData }) => {
     )
 }
 
+const MediaUploadForm = () => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
+    return (
+        <>
+            <Button onClick={onOpen}> + Add </Button>
+            <MediaUploadModal
+                isOpen={isOpen}
+                onClose={onClose}
+                onUploadComplete={() => {
+                }}
+                formOrigin={"program"}
+            />
+        </>
+    )
+}
 
 export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: onCloseProp, program }) => {
     const disclosure = useDisclosure();
+
     const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
     const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
     const onClose = isControlled ? onCloseProp : disclosure.onClose;
@@ -528,7 +544,6 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         }
         getCountriesForRegion();
     }, [formState.regionId, backend]);
-
     return (
         <>
             <Drawer
@@ -682,6 +697,9 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                                 ))}
                             </HStack>
                             {/* TODO: Add media input */}
+                            <h4>Media</h4>
+                            <MediaUploadForm />
+
                         </VStack>
                     </DrawerBody>
                 </DrawerContent>

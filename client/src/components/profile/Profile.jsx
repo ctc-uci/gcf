@@ -7,11 +7,13 @@ import {
   Spinner,
   Text,
   VStack,
+  useDisclosure
 } from "@chakra-ui/react";
 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
+import { MediaUploadModal } from "../media/MediaUploadModal";
 const DEFAULT_PROFILE_IMAGE = "/default-profile.png";
 
 const fetchProgramData = async (backend, userId) => {
@@ -41,6 +43,10 @@ const fetchRegionData = async (backend, userId) => {
 export const Profile = () => {
   const { currentUser } = useAuthContext();
   const { backend } = useBackendContext();
+
+  // disclosure for MediaUploadModal 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
 
   const [gcfUser, setGcfUser] = useState(null);
   const [roleSpecificData, setRoleSpecificData] = useState(null);
@@ -93,6 +99,7 @@ export const Profile = () => {
     gcfUser.picture && gcfUser.picture.trim() !== ""
       ? gcfUser.picture
       : DEFAULT_PROFILE_IMAGE;
+
   const fullName =
     `${gcfUser.firstName || ""} ${gcfUser.lastName || ""}`.trim() || "User";
   const email = currentUser?.email || "";
@@ -119,6 +126,7 @@ export const Profile = () => {
             borderRadius="full"
             fit="cover"
             alt="Profile"
+            onClick={onOpen}
           />
           <Text fontSize="2xl" fontWeight="bold">{fullName}</Text>
         </VStack>
@@ -146,6 +154,13 @@ export const Profile = () => {
           ))}
         </VStack>
       </VStack>
+      <MediaUploadModal
+        isOpen={isOpen}
+        onClose={onClose}
+        onUploadComplete={() => {
+        }}
+        formOrigin="profile"
+      />
     </Box>
   );
 };
