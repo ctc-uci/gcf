@@ -32,7 +32,6 @@ import { FilterComponent } from "../common/FilterComponent";
 export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [unorderedUpdates, setUnorderedUpdates] = useState([]);
-    const { sortOrder, handleSort } = useTableSort(originalData, setData);
     const columns = [
     {
       key: "updateDate",
@@ -58,6 +57,8 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
   ];
   const  [activeFilters, setActiveFilters] = useState([]);
   const filteredData = useTableFilter(activeFilters, originalData);
+  const { sortOrder, handleSort } = useTableSort(filteredData, setData);
+
   
   useEffect(() => {
     setData(filteredData);
