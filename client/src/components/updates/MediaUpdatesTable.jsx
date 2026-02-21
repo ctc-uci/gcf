@@ -19,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
   IconButton,
+  Text
 } from "@chakra-ui/react";
 import {
   HiOutlineAdjustmentsHorizontal,
@@ -133,6 +134,9 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
             />
           </PopoverContent>
         </Popover>
+        <Text fontSize="sm" color="gray.500">
+          Displaying {data.length} results
+        </Text>
         <DownloadIcon mt="10px" />
       </Flex>
 

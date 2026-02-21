@@ -1,14 +1,30 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { Box, Center, Flex, Heading, Spinner } from "@chakra-ui/react";
+import { 
+  Box, 
+  Center, 
+  Flex, 
+  Heading, 
+  Spinner,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  IconButton,
+ } from "@chakra-ui/react";
+ import {
+  HiOutlineAdjustmentsHorizontal,
+} from "react-icons/hi2";
 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useRoleContext } from "@/contexts/hooks/useRoleContext";
 
+import { AccountForm } from "./AccountForm";
 import { AccountsTable } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
-import { AccountForm } from "./AccountForm";
+
+import { useTableFilter } from "../../contexts/hooks/TableFilter"
+import { FilterComponent } from "../common/FilterComponent";
 
 const getAccountsRoute = (role, userId) => {
   if (!userId) return null;
@@ -17,7 +33,6 @@ const getAccountsRoute = (role, userId) => {
     ? `/gcf-users/${userId}/accounts?role=${role}`
     : `/gcf-users/${userId}/accounts`;
 };
-
 
 export const Account = () => {
   const { currentUser } = useAuthContext();
@@ -28,8 +43,26 @@ export const Account = () => {
   const [originalUsers, setOriginalUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false); 
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null)
+  const columns = [
+    {
+      key: "firstName",
+      type: "text",
+    },
+    {
+      key: "email",
+      type: "text",
+    },
+    {
+      key: "role",
+      type: "text",
+    },
+    {
+      key: "programs",
+      type: "list",
+    },
+  ];
 
   const { backend } = useBackendContext();
 
@@ -43,8 +76,8 @@ export const Account = () => {
     }
     try {
       const response = await backend.get(route);
-      const rawData = response.data || []
-      const fetchedData = (rawData).map((item) => ({
+      const rawData = response.data || [];
+      const fetchedData = rawData.map((item) => ({
         id: item.id,
         firstName: item.firstName,
         lastName: item.lastName,
@@ -67,6 +100,13 @@ export const Account = () => {
     fetchData();
   }, [fetchData]);
 
+  const [activeFilters, setActiveFilters] = useState([]);
+  const filteredData = useTableFilter(activeFilters, originalUsers);
+  
+  useEffect(() => {
+    setUsers(filteredData);
+  }, [filteredData, setOriginalUsers]);
+
   return (
     <Box
       p={8}
@@ -87,10 +127,17 @@ export const Account = () => {
           Accounts
         </Heading>
 
-        <AccountToolbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNew = {() => {
-          setIsDrawerOpen(true);
-          setSelectedUser(null)
-        }}/>
+        <AccountToolbar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          columns={columns}
+          setActiveFilters={setActiveFilters}
+          resultCount={users.length}
+          onNew={() => {
+            setIsDrawerOpen(true);
+            setSelectedUser(null);
+          }}
+        />
       </Flex>
 
       {isLoading ? (
@@ -106,13 +153,18 @@ export const Account = () => {
           setData={setUsers}
           originalData={originalUsers}
           searchQuery={searchQuery}
-          onUpdate = {(user) => {
-            setSelectedUser(user)
-            setIsDrawerOpen(true)
+          onUpdate={(user) => {
+            setSelectedUser(user);
+            setIsDrawerOpen(true);
           }}
         />
       )}
-      <AccountForm targetUser = {selectedUser} isOpen = { isDrawerOpen } onClose = {() => setIsDrawerOpen(false)} onSave = {() => fetchData()}></AccountForm>
+      <AccountForm
+        targetUser={selectedUser}
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={() => fetchData()}
+      ></AccountForm>
     </Box>
   );
 };

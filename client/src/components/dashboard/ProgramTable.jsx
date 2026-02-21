@@ -33,6 +33,7 @@ import {
   Tr,
   useDisclosure,
   VStack,
+  Text
 } from "@chakra-ui/react";
 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
@@ -424,6 +425,9 @@ function ProgramDisplay({
                   />
                 </PopoverContent>
               </Popover>
+              <Text fontSize="sm" color="gray.500">
+                Displaying {data.length} results
+              </Text>
             </HStack>
           </HStack>
           <HStack spacing={1}>

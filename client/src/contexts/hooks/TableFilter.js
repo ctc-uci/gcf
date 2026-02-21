@@ -14,6 +14,7 @@ const OPERATION_FUNCTIONS = {
   is: (dataVal, filterVal) => new Date(dataVal).getTime() === new Date(filterVal).getTime(),
   before: (dataVal, filterVal) => new Date(dataVal) < new Date(filterVal),
   after: (dataVal, filterVal) => new Date(dataVal) > new Date(filterVal),
+  contains_item: (dataVal, filterVal) => Array.isArray(dataVal) && dataVal.includes(filterVal),
 };
 
 
@@ -24,9 +25,9 @@ export function useTableFilter(filters, originalData) {
 
     useEffect(() => {
         let resultData = [...originalDataRef.current]
-        filters.forEach((filter) => {
+        filters.forEach((filter, index) => {
             const func = OPERATION_FUNCTIONS[filter.operation];
-            if (filter.logic === "and") {
+            if (filter.logic === "and" || index === 0) {
                 resultData = resultData.filter((row) => {
                     const dataVal = row[filter.column];
                     return func(dataVal, filter.value);

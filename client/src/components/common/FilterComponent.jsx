@@ -35,6 +35,9 @@ const OPERATIONS = {
     { label: "is", value: "equals" },
     { label: "is not", value: "is_not" },
   ],
+  list: [
+  { label: "contains", value: "contains_item" },
+],
 };
 
   function FilterComponent({ columns = [], onFilterChange }) {
