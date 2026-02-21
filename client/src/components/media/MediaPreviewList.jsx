@@ -24,6 +24,7 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
     );
     
     const [folder, setFolder] = useState("");
+    const [description, setDescription] = useState("");
 
     const updateTitle = (index, value) => {
         setTitles((prev) => {
@@ -65,15 +66,15 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
 
                 results.push({
                     s3_key: s3Data.key,
-                    file_name: keyFileName,
+                    file_name: keyFileName.replace(/\s+/g, '_'),
                     file_type: file.type,
                     title: titles[i],
                     description: description,
-                    instrument_id: folder ? parseInt(folder) : null,
+                    instrument_id: null,
                 })
             }
 
-        onComplete(results);
+        onComplete(results, description);
 
         toast({
             title: "Upload successful.",
