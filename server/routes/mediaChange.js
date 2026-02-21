@@ -38,10 +38,10 @@ mediaChangeRouter.get("/:id", async (req, res) => {
 mediaChangeRouter.post("/", async (req, res) => {
   try {
     console.log("Req Body: ", req.body);
-    const { update_id, s3_key, file_name, file_type, is_thumbnail } = req.body;
+    const { update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id } = req.body;
     const newMediaChange = await db.query(
-      `INSERT INTO media_change (update_id, s3_key, file_name, file_type, is_thumbnail) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [update_id, s3_key, file_name, file_type, is_thumbnail]
+      `INSERT INTO media_change (update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id || null]
     );
     res.status(201).json(keysToCamel(newMediaChange[0]));
   } catch (err) {
@@ -53,17 +53,18 @@ mediaChangeRouter.post("/", async (req, res) => {
 mediaChangeRouter.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { update_id, s3_key, file_name, file_type, is_thumbnail } = req.body;
+    const { update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id } = req.body;
     const updatedMediaChange = await db.query(
       `UPDATE media_change SET
         update_id = COALESCE($1, update_id),
         s3_key = COALESCE($2, s3_key),
         file_name = COALESCE($3, file_name),
         file_type = COALESCE($4, file_type),
-        is_thumbnail = COALESCE($5, is_thumbnail)
-        WHERE id = $6
+        is_thumbnail = COALESCE($5, is_thumbnail),
+        instrument_id = COALESCE($6, instrument_id)
+        WHERE id = $7
         RETURNING *;`,
-      [update_id, s3_key, file_name, file_type, is_thumbnail, id]
+      [update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id, id]
     );
 
     if (updatedMediaChange.length === 0) {
@@ -108,6 +109,7 @@ mediaChangeRouter.get("/:userId/media", async (req, res) => {
         mc.file_name,
         mc.file_type,
         mc.is_thumbnail,
+        p.id as program_id,
         p.name as program_name
       FROM program_director pd
       JOIN program p ON pd.program_id = p.id
@@ -120,18 +122,21 @@ mediaChangeRouter.get("/:userId/media", async (req, res) => {
     if (!result || result.length === 0) {
       return res.status(200).json({ 
         media: [],
-        programName: null 
+        programName: null,
+        programId: null
       });
     }
 
     //in the case theres no media we still want to get the program name
     //so this filters out null results
     const programName = result[0].program_name;
+    const programId = result[0].program_id;
     const mediaItems = result.filter(row => row.id !== null);
 
     res.status(200).json({
       media: keysToCamel(mediaItems),
-      programName: programName
+      programName: programName,
+      programId: programId
     });
   } catch (err) {
     console.error(err);
