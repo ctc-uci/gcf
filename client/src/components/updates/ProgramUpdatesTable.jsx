@@ -1,5 +1,6 @@
-import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
 import { useEffect, useState } from "react";
+
+import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
 import {
   Badge,
   Box,
@@ -16,45 +17,50 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import { SortArrows } from "../tables/SortArrows";
-import { useTableSort } from "../../contexts/hooks/TableSort";
 
-export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) => {
+import { useTableSort } from "../../contexts/hooks/TableSort";
+import { SortArrows } from "../tables/SortArrows";
+
+export const ProgramUpdatesTable = ({
+  data,
+  setData,
+  originalData,
+  isLoading,
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [unorderedUpdates, setUnorderedUpdates] = useState([]);
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
-  
-  const handleSearch = event => {
-      setSearchQuery(event.target.value);
-   };
-   //setUnorderedUpdates(data.map((row) => row))
-   useEffect(() => {
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
+  //setUnorderedUpdates(data.map((row) => row))
+  useEffect(() => {
     setUnorderedUpdates(data);
-   }, [searchQuery, data]);
-  
-    useEffect(() => {
-       function filterUpdates(search) {
-        if (search === '') {
-          setData(originalData);
-          return;
-        } 
-         // filter by search query
-         const filtered = unorderedUpdates.filter(update => 
-           // if no search then show everything
-           update.updateDate.toLowerCase().includes(search.toLowerCase()) ||
-           update.note.toLowerCase().includes(search.toLowerCase()) ||
-           update.name.toLowerCase().includes(search.toLowerCase()) ||
-           update.firstName.toLowerCase().includes(search.toLowerCase()) ||
-           update.status.includes(search.toLowerCase())
-         );
-         
-        setData(filtered);
-        
-       }
-   
-     filterUpdates(searchQuery);
-   
-     }, [searchQuery, unorderedUpdates]);
+  }, [searchQuery, data]);
+
+  useEffect(() => {
+    function filterUpdates(search) {
+      if (search === "") {
+        setData(originalData);
+        return;
+      }
+      // filter by search query
+      const filtered = unorderedUpdates.filter(
+        (update) =>
+          // if no search then show everything
+          update.updateDate.toLowerCase().includes(search.toLowerCase()) ||
+          update.note.toLowerCase().includes(search.toLowerCase()) ||
+          update.name.toLowerCase().includes(search.toLowerCase()) ||
+          update.firstName.toLowerCase().includes(search.toLowerCase()) ||
+          update.status.includes(search.toLowerCase())
+      );
+
+      setData(filtered);
+    }
+
+    filterUpdates(searchQuery);
+  }, [searchQuery, unorderedUpdates]);
 
   return (
     <>
@@ -90,11 +96,56 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
             <Thead>
               {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
               <Tr>
-                <Th onClick={() => handleSort('updateDate')} cursor="pointer">Time <SortArrows columnKey={"updateDate"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('note')} cursor="pointer">Notes <SortArrows columnKey={"note"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('name')} cursor="pointer">Program <SortArrows columnKey={"name"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('firstName')} cursor="pointer">Author <SortArrows columnKey={"firstName"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('status')} cursor="pointer">Status <SortArrows columnKey={"status"} sortOrder={sortOrder}/></Th>
+                <Th
+                  onClick={() => handleSort("updateDate")}
+                  cursor="pointer"
+                >
+                  Time{" "}
+                  <SortArrows
+                    columnKey={"updateDate"}
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("note")}
+                  cursor="pointer"
+                >
+                  Notes{" "}
+                  <SortArrows
+                    columnKey={"note"}
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("name")}
+                  cursor="pointer"
+                >
+                  Program{" "}
+                  <SortArrows
+                    columnKey={"name"}
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("firstName")}
+                  cursor="pointer"
+                >
+                  Author{" "}
+                  <SortArrows
+                    columnKey={"firstName"}
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("status")}
+                  cursor="pointer"
+                >
+                  Status{" "}
+                  <SortArrows
+                    columnKey={"status"}
+                    sortOrder={sortOrder}
+                  />
+                </Th>
               </Tr>
             </Thead>
             <Tbody>

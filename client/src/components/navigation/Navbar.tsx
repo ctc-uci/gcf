@@ -26,8 +26,6 @@ export const Navbar = () => {
     navigate("/login");
   };
 
-
-
   useEffect(() => {
     const fetchData = async (table: string, path: string) => {
       try {
@@ -128,8 +126,8 @@ export const Navbar = () => {
           >
             <Text fontSize="2vh">Logout</Text>
           </Button>
-        </Flex >
-      </Flex >
-    </Flex >
+        </Flex>
+      </Flex>
+    </Flex>
   );
 };

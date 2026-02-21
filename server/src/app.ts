@@ -1,25 +1,25 @@
 import { verifyToken } from "@/middleware";
-import { usersRouter } from "@/routes/users";
-import { directorRouter } from "@/routes/programDirector";
-import { programUpdateRouter } from '@/routes/programUpdate';
-import { regionalDirectorRouter } from "@/routes/regionalDirector";
-import { gcfUserRouter } from "@/routes/gcfUser";
-import { updatesPermissionsRouter } from "@/routes/updatesPermissions";
-import { enrollmentChangeRouter } from "@/routes/enrollmentChange";
-import { mediaChangeRouter } from "@/routes/mediaChange";
-import { instrumentRouter } from "@/routes/instrument"
-import { instrumentChangeRouter } from "@/routes/instrument-change"
+import { adminRouter } from "@/routes/admin";
 import { countryRouter } from "@/routes/country";
-import {regionRouter} from "@/routes/region";
+import { enrollmentChangeRouter } from "@/routes/enrollmentChange";
+import { gcfUserRouter } from "@/routes/gcfUser";
+import { imagesRouter } from "@/routes/images";
+import { instrumentRouter } from "@/routes/instrument";
+import { instrumentChangeRouter } from "@/routes/instrument-change";
+import { mediaChangeRouter } from "@/routes/mediaChange";
+import { partnerOrganizationRouter } from "@/routes/partnerOrganization";
+import { programRouter } from "@/routes/program";
+import { directorRouter } from "@/routes/programDirector";
+import { programUpdateRouter } from "@/routes/programUpdate";
+import { rdProgramTableRouter } from "@/routes/rdProgramTable";
+import { regionRouter } from "@/routes/region";
+import { regionalDirectorRouter } from "@/routes/regionalDirector";
+import { updatesPermissionsRouter } from "@/routes/updatesPermissions";
+import { usersRouter } from "@/routes/users";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import { programRouter } from "@/routes/program";
-import { partnerOrganizationRouter } from "@/routes/partnerOrganization";
-import { imagesRouter } from "@/routes/images";
-import { adminRouter } from "@/routes/admin";
-import { rdProgramTableRouter } from "@/routes/rdProgramTable";
 
 dotenv.config();
 
@@ -45,13 +45,13 @@ if (process.env.NODE_ENV === "production") {
 // app.use("/users", usersRouter);
 app.use("/admin", adminRouter);
 app.use("/rdProgramTable", rdProgramTableRouter);
-app.use("/program-directors", directorRouter)
-app.use('/program-updates', programUpdateRouter);
+app.use("/program-directors", directorRouter);
+app.use("/program-updates", programUpdateRouter);
 app.use("/instruments", instrumentRouter);
 app.use("/instrument-changes", instrumentChangeRouter);
 app.use("/gcf-users", gcfUserRouter);
 app.use("/update-permissions", updatesPermissionsRouter);
-app.use("/regional-directors", regionalDirectorRouter)
+app.use("/regional-directors", regionalDirectorRouter);
 app.use("/country", countryRouter);
 app.use("/region", regionRouter);
 app.use("/enrollmentChange", enrollmentChangeRouter);

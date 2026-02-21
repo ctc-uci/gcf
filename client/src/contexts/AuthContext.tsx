@@ -19,7 +19,11 @@ import { useBackendContext } from "./hooks/useBackendContext";
 
 interface AuthContextProps {
   currentUser: User | null;
-  signup: ({ email, password, role }: EmailPasswordRole) => Promise<UserCredential>;
+  signup: ({
+    email,
+    password,
+    role,
+  }: EmailPasswordRole) => Promise<UserCredential>;
   login: ({ email, password }: EmailPassword) => Promise<UserCredential>;
   logout: () => Promise<void>;
   resetPassword: ({ email }: Pick<EmailPassword, "email">) => Promise<void>;
@@ -64,8 +68,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       id: userCredential.user.uid,
       role: role,
       created_by: null,
-      first_name: 'John',
-      last_name: 'Doe'
+      first_name: "John",
+      last_name: "Doe",
     });
 
     return userCredential;
@@ -107,10 +111,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           try {
             await backend.post("/gcf-users/", {
               firebaseUid: result.user.uid,
-              role: 'Admin',
+              role: "Admin",
               created_by: null,
-              first_name: 'John',
-              last_name: 'Doe',
+              first_name: "John",
+              last_name: "Doe",
             });
           } catch (e) {
             await backend.delete(`/gcf-users/${result.user.uid}`);

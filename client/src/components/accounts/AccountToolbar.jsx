@@ -95,7 +95,7 @@ export const AccountToolbar = ({ searchQuery, setSearchQuery, onNew }) => {
             +
           </Text>
         }
-        onClick = {onNew}
+        onClick={onNew}
       >
         New
       </Button>

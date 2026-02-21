@@ -1,5 +1,6 @@
 import { keysToCamel } from "@/common/utils";
 import express from "express";
+
 import { db } from "../db/db-pgp";
 
 const partnerOrganizationRouter = express.Router();
@@ -7,7 +8,9 @@ partnerOrganizationRouter.use(express.json());
 
 partnerOrganizationRouter.get("/", async (req, res) => {
   try {
-    const partnerOrganization = await db.query(`SELECT * FROM partner_organization`);
+    const partnerOrganization = await db.query(
+      `SELECT * FROM partner_organization`
+    );
     res.status(200).json(keysToCamel(partnerOrganization));
   } catch (err) {
     console.error(err);
@@ -24,7 +27,7 @@ partnerOrganizationRouter.get("/:id", async (req, res) => {
       [id]
     );
 
-    if (partnerOrganization.length === 0){
+    if (partnerOrganization.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -74,7 +77,7 @@ partnerOrganizationRouter.put("/:id", async (req, res) => {
       [name, id]
     );
 
-    if (updatedPartnerOrganization.length === 0){
+    if (updatedPartnerOrganization.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -94,7 +97,7 @@ partnerOrganizationRouter.delete("/:id", async (req, res) => {
       [id]
     );
 
-    if (deletedPartnerOrganization.length === 0){
+    if (deletedPartnerOrganization.length === 0) {
       return res.status(404).send("Item not found");
     }
 

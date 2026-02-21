@@ -1,6 +1,7 @@
 // for reference only
 import { keysToCamel } from "@/common/utils";
 import express from "express";
+
 import { db } from "../db/db-pgp";
 
 const sampleRouter = express.Router();
@@ -21,12 +22,9 @@ sampleRouter.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     // rename entry to something relevant to the route
-    const entry = await db.query(
-      `SELECT ALL * FROM table WHERE id = $1`,
-      [id]
-    );
+    const entry = await db.query(`SELECT ALL * FROM table WHERE id = $1`, [id]);
 
-    if (entry.length === 0){
+    if (entry.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -40,7 +38,7 @@ sampleRouter.get("/:id", async (req, res) => {
 sampleRouter.post("/", async (req, res) => {
   try {
     // Destructure req.body
-    const { data } = req.body
+    const { data } = req.body;
     // rename newEntry to something relevant to the route
     const newEntry = await db.query(
       `INSERT INTO table (table_data) VALUES ($1) RETURNING *`,
@@ -66,7 +64,7 @@ sampleRouter.put("/:id", async (req, res) => {
       [data, id]
     );
 
-    if (updatedEntry.length === 0){
+    if (updatedEntry.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -86,7 +84,7 @@ sampleRouter.delete("/:id", async (req, res) => {
       [id]
     );
 
-    if (deletedEntry.length === 0){
+    if (deletedEntry.length === 0) {
       return res.status(404).send("Item not found");
     }
 

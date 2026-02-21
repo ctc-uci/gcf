@@ -1,13 +1,6 @@
 import { useEffect, useState } from "react";
 
-import {
-  Box,
-  HStack,
-  Image,
-  Spinner,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { Box, HStack, Image, Spinner, Text, VStack } from "@chakra-ui/react";
 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
@@ -16,7 +9,9 @@ const DEFAULT_PROFILE_IMAGE = "/default-profile.png";
 
 const fetchProgramData = async (backend, userId) => {
   try {
-    const response = await backend.get(`/program-directors/me/${userId}/program`);
+    const response = await backend.get(
+      `/program-directors/me/${userId}/program`
+    );
     return response.data;
   } catch (err) {
     console.error("Error fetching program data:", err);
@@ -28,7 +23,9 @@ const fetchRegionData = async (backend, userId) => {
   try {
     const rdResponse = await backend.get(`/regional-directors/me/${userId}`);
     if (rdResponse.data?.regionId) {
-      const regionResponse = await backend.get(`/region/${rdResponse.data.regionId}`);
+      const regionResponse = await backend.get(
+        `/region/${rdResponse.data.regionId}`
+      );
       return regionResponse.data;
     }
     return null;
@@ -79,7 +76,12 @@ export const Profile = () => {
 
   if (loading) {
     return (
-      <Box h="100vh" display="flex" alignItems="center" justifyContent="center">
+      <Box
+        h="100vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
         <Spinner size="xl" />
       </Box>
     );
@@ -110,9 +112,22 @@ export const Profile = () => {
   }
 
   return (
-    <Box h="100vh" display="flex" alignItems="center" justifyContent="center">
-      <VStack spacing={8} align="center" p={4} w="100%">
-        <VStack spacing={4} align="center">
+    <Box
+      h="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <VStack
+        spacing={8}
+        align="center"
+        p={4}
+        w="100%"
+      >
+        <VStack
+          spacing={4}
+          align="center"
+        >
           <Image
             src={profilePicture}
             boxSize="300px"
@@ -120,12 +135,31 @@ export const Profile = () => {
             fit="cover"
             alt="Profile"
           />
-          <Text fontSize="2xl" fontWeight="bold">{fullName}</Text>
+          <Text
+            fontSize="2xl"
+            fontWeight="bold"
+          >
+            {fullName}
+          </Text>
         </VStack>
-        <VStack spacing="10px" align="flex-start" w="100%" maxW="624px">
+        <VStack
+          spacing="10px"
+          align="flex-start"
+          w="100%"
+          maxW="624px"
+        >
           {profileData.map(({ label, value }) => (
-            <HStack key={label} spacing={40}>
-              <Text w="80px" fontSize="lg" fontWeight="medium">{label}</Text>
+            <HStack
+              key={label}
+              spacing={40}
+            >
+              <Text
+                w="80px"
+                fontSize="lg"
+                fontWeight="medium"
+              >
+                {label}
+              </Text>
               <Text
                 bg="#D9D9D9"
                 w="504px"

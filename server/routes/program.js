@@ -56,7 +56,6 @@ programRouter.get("/get-program-name/:id", async (req, res) => {
   }
 });
 
-
 programRouter.post("/", async (req, res) => {
   try {
     const {
@@ -186,7 +185,7 @@ programRouter.delete("/:id", async (req, res) => {
 programRouter.get("/:id/regional-directors", async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const result = await db.query(
       `
       SELECT 
@@ -206,7 +205,7 @@ programRouter.get("/:id/regional-directors", async (req, res) => {
       return res.status(200).json([]);
     }
 
-    const regional_directors = result.map(row => ({
+    const regional_directors = result.map((row) => ({
       userId: row.user_id,
       firstName: row.first_name,
       lastName: row.last_name,
@@ -244,9 +243,10 @@ programRouter.post("/:id/playlists", async (req, res) => {
       return res.status(400).json({ error: "link and name are required" });
     }
 
-    const normalizedLink = link.startsWith("http://") || link.startsWith("https://")
-      ? link
-      : `https://${link}`;
+    const normalizedLink =
+      link.startsWith("http://") || link.startsWith("https://")
+        ? link
+        : `https://${link}`;
 
     await db.query(
       `INSERT INTO playlist (program_id, link, name) VALUES ($1, $2, $3)
@@ -335,7 +335,7 @@ programRouter.get("/:id/program-directors", async (req, res) => {
       [id]
     );
 
-    const directors = result.map(row => ({
+    const directors = result.map((row) => ({
       userId: row.user_id,
       firstName: row.first_name,
       lastName: row.last_name,
@@ -347,7 +347,5 @@ programRouter.get("/:id/program-directors", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
-
 
 export { programRouter };

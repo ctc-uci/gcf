@@ -18,7 +18,9 @@ export const UpdatesPage = () => {
   const [mediaUpdatesData, setMediaUpdatesData] = useState([]);
   const [originalMediaUpdatesData, setOriginalMediaUpdatesData] = useState([]);
   const [programUpdatesData, setProgramUpdatesData] = useState([]);
-  const [originalProgramUpdatesData, setOriginalProgramUpdatesData] = useState([]);
+  const [originalProgramUpdatesData, setOriginalProgramUpdatesData] = useState(
+    []
+  );
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,11 +47,10 @@ export const UpdatesPage = () => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [mediaUpdates, programUpdates] =
-          await Promise.all([
-            fetchData(`media-updates/${userId}`),
-            fetchData(`program-updates/${userId}`),
-          ]);
+        const [mediaUpdates, programUpdates] = await Promise.all([
+          fetchData(`media-updates/${userId}`),
+          fetchData(`program-updates/${userId}`),
+        ]);
         setOriginalMediaUpdatesData(mediaUpdates);
         setMediaUpdatesData(mediaUpdates);
         setProgramUpdatesData(programUpdates);
@@ -73,7 +74,6 @@ export const UpdatesPage = () => {
       </Center>
     );
   }
-
 
   return (
     <>

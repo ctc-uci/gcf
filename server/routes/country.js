@@ -1,5 +1,6 @@
 import { keysToCamel } from "@/common/utils";
 import express from "express";
+
 import { db } from "../db/db-pgp";
 
 const countryRouter = express.Router();
@@ -18,12 +19,11 @@ countryRouter.get("/", async (req, res) => {
 countryRouter.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const country = await db.query(
-      `SELECT ALL * FROM country WHERE id = $1`,
-      [id]
-    );
+    const country = await db.query(`SELECT ALL * FROM country WHERE id = $1`, [
+      id,
+    ]);
 
-    if (country.length === 0){
+    if (country.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -36,7 +36,7 @@ countryRouter.get("/:id", async (req, res) => {
 
 countryRouter.post("/", async (req, res) => {
   try {
-    const {region_id, name, last_modified } = req.body
+    const { region_id, name, last_modified } = req.body;
     const newCountry = await db.query(
       `INSERT INTO country (region_id, name, last_modified) 
       VALUES ($1, $2, $3) 
@@ -53,7 +53,7 @@ countryRouter.post("/", async (req, res) => {
 countryRouter.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { region_id, name, last_modified  } = req.body;
+    const { region_id, name, last_modified } = req.body;
     const updatedCountry = await db.query(
       `UPDATE country SET
         region_id = COALESCE($1, region_id),
@@ -64,7 +64,7 @@ countryRouter.put("/:id", async (req, res) => {
       [region_id, name, last_modified, id]
     );
 
-    if (updatedCountry.length === 0){
+    if (updatedCountry.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -83,7 +83,7 @@ countryRouter.delete("/:id", async (req, res) => {
       [id]
     );
 
-    if (deletedCountry.length === 0){
+    if (deletedCountry.length === 0) {
       return res.status(404).send("Item not found");
     }
 
