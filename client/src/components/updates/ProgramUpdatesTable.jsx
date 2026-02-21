@@ -1,4 +1,4 @@
-import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
+import { DownloadIcon, SearchIcon } from "@chakra-ui/icons";
 import { useEffect, useState } from "react";
 import {
   Badge,
@@ -15,14 +15,52 @@ import {
   Th,
   Thead,
   Tr,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  IconButton,
 } from "@chakra-ui/react";
+import {
+  HiOutlineAdjustmentsHorizontal,
+} from "react-icons/hi2";
 import { SortArrows } from "../tables/SortArrows";
 import { useTableSort } from "../../contexts/hooks/TableSort";
+import { useTableFilter } from "../../contexts/hooks/TableFilter"
+import { FilterComponent } from "../common/FilterComponent";
 
 export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [unorderedUpdates, setUnorderedUpdates] = useState([]);
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
+  const columns = [
+      {
+        key: "updateDate",
+        type: "date",
+      },
+      {
+        key: "note",
+        type: "text",
+      },
+      {
+        key: "programName",
+        type: "text",
+      },
+      {
+        key: "firstName",
+        type: "text",
+      },
+      {
+        key: "status",
+        type: "select",
+        options: ["Active", "Inactive"],
+      },
+    ];
+    const  [activeFilters, setActiveFilters] = useState([]);
+    const filteredData = useTableFilter(activeFilters, originalData);
+    
+    useEffect(() => {
+      setData(filteredData);
+    }, [filteredData, setData]);
   
   const handleSearch = event => {
       setSearchQuery(event.target.value);
@@ -43,7 +81,7 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
            // if no search then show everything
            update.updateDate.toLowerCase().includes(search.toLowerCase()) ||
            update.note.toLowerCase().includes(search.toLowerCase()) ||
-           update.name.toLowerCase().includes(search.toLowerCase()) ||
+           update.programName.toLowerCase().includes(search.toLowerCase()) ||
            update.firstName.toLowerCase().includes(search.toLowerCase()) ||
            update.status.includes(search.toLowerCase())
          );
@@ -54,7 +92,7 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
    
      filterUpdates(searchQuery);
    
-     }, [searchQuery, unorderedUpdates]);
+     }, [searchQuery, originalData]);
 
   return (
     <>
@@ -78,7 +116,28 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
             value={searchQuery}
             onChange={handleSearch}
           />
-          <HamburgerIcon mt="10px" />
+          <Popover>
+            <PopoverTrigger>
+              <IconButton
+                aria-label="filter"
+                icon={<HiOutlineAdjustmentsHorizontal />}
+                size="sm"
+                variant="ghost"
+              />
+            </PopoverTrigger>
+            <PopoverContent
+              w="800px"
+              maxW="90vw"
+              shadow="xl"
+            >
+              <FilterComponent
+                columns={columns}
+                onFilterChange={(filters) => {
+                  setActiveFilters(filters);
+                }}
+              />
+            </PopoverContent>
+          </Popover>
           <DownloadIcon mt="10px" />
         </Flex>
 
@@ -92,7 +151,7 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
               <Tr>
                 <Th onClick={() => handleSort('updateDate')} cursor="pointer">Time <SortArrows columnKey={"updateDate"} sortOrder={sortOrder}/></Th>
                 <Th onClick={() => handleSort('note')} cursor="pointer">Notes <SortArrows columnKey={"note"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('name')} cursor="pointer">Program <SortArrows columnKey={"name"} sortOrder={sortOrder}/></Th>
+                <Th onClick={() => handleSort('programName')} cursor="pointer">Program <SortArrows columnKey={"programName"} sortOrder={sortOrder}/></Th>
                 <Th onClick={() => handleSort('firstName')} cursor="pointer">Author <SortArrows columnKey={"firstName"} sortOrder={sortOrder}/></Th>
                 <Th onClick={() => handleSort('status')} cursor="pointer">Status <SortArrows columnKey={"status"} sortOrder={sortOrder}/></Th>
               </Tr>
@@ -111,7 +170,7 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
                   <Tr key={row.id}>
                     <Td>{row.updateDate}</Td>
                     <Td>{row.note}</Td>
-                    <Td>{row.name}</Td>
+                    <Td>{row.programName}</Td>
                     <Td>
                       {row.firstName} {row.lastName}
                     </Td>

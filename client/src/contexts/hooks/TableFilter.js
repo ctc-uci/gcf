@@ -1,18 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 
+const str = (v) => (v ?? "").toString();
+
 const OPERATION_FUNCTIONS = {
-    contains: (dataVal, filterVal) => dataVal.toLowerCase().includes(filterVal.toLowerCase()),
-    equals: (dataVal, filterVal) => dataVal === filterVal,
-    does_not_contain: (dataVal, filterVal) => !dataVal.toLowerCase().includes(filterVal.toLowerCase()),
-    gt: (dataVal, filterVal) => Number(dataVal) > Number(filterVal),
-    lt: (dataVal, filterVal) => Number(dataVal) < Number(filterVal),
-    gte: (dataVal, filterVal) => Number(dataVal) >= Number(filterVal),
-    lte: (dataVal, filterVal) => Number(dataVal) <= Number(filterVal),
-    is: (dataVal, filterVal) => new Date(dataVal).getTime() === new Date(filterVal).getTime(),
-    before: (dataVal, filterVal) => new Date(dataVal) < new Date(filterVal),
-    after: (dataVal, filterVal) => new Date(dataVal) > new Date(filterVal),
-    is_not: (dataVal, filterVal) => dataVal !== filterVal,
-}
+  contains: (dataVal, filterVal) => str(dataVal).toLowerCase().includes(str(filterVal).toLowerCase()),
+  does_not_contain: (dataVal, filterVal) => !str(dataVal).toLowerCase().includes(str(filterVal).toLowerCase()),
+  equals: (dataVal, filterVal) => dataVal === filterVal,
+  is_not: (dataVal, filterVal) => dataVal !== filterVal,
+  gt: (dataVal, filterVal) => Number(dataVal) > Number(filterVal),
+  lt: (dataVal, filterVal) => Number(dataVal) < Number(filterVal),
+  gte: (dataVal, filterVal) => Number(dataVal) >= Number(filterVal),
+  lte: (dataVal, filterVal) => Number(dataVal) <= Number(filterVal),
+  is: (dataVal, filterVal) => new Date(dataVal).getTime() === new Date(filterVal).getTime(),
+  before: (dataVal, filterVal) => new Date(dataVal) < new Date(filterVal),
+  after: (dataVal, filterVal) => new Date(dataVal) > new Date(filterVal),
+};
 
 
 export function useTableFilter(filters, originalData) {

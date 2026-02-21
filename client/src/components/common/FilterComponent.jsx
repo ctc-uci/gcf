@@ -53,7 +53,7 @@ const OPERATIONS = {
       };
     };
 
-    const [filters, setFilters] = useState([createDefaultFilter()]);
+    const [filters, setFilters] = useState([]);
 
     useEffect(() => {
       if (onFilterChange) {
@@ -258,7 +258,6 @@ const OPERATIONS = {
                   color="gray.400"
                   _hover={{ color: "red.500", bg: "red.50" }}
                   onClick={() => removeFilter(filter.id)}
-                  isDisabled={filters.length === 1}
                   title="Remove filter"
                 />
               </HStack>

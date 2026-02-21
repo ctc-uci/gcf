@@ -420,7 +420,6 @@ function ProgramDisplay({
                     onFilterChange={(filters) => {
                       // You can handle the filter logic here later
                       setActiveFilters(filters);
-                      console.log(filters);
                     }}
                   />
                 </PopoverContent>

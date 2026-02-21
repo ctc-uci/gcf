@@ -1,4 +1,4 @@
-import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
+import { DownloadIcon, SearchIcon } from "@chakra-ui/icons";
 import { useEffect, useState } from "react";
 import {
   Badge,
@@ -15,14 +15,52 @@ import {
   Th,
   Thead,
   Tr,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  IconButton,
 } from "@chakra-ui/react";
+import {
+  HiOutlineAdjustmentsHorizontal,
+} from "react-icons/hi2";
 import { SortArrows } from "../tables/SortArrows"
 import { useTableSort } from "../../contexts/hooks/TableSort";
+import { useTableFilter } from "../../contexts/hooks/TableFilter"
+import { FilterComponent } from "../common/FilterComponent";
 
 export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [unorderedUpdates, setUnorderedUpdates] = useState([]);
     const { sortOrder, handleSort } = useTableSort(originalData, setData);
+    const columns = [
+    {
+      key: "updateDate",
+      type: "date",
+    },
+    {
+      key: "note",
+      type: "text",
+    },
+    {
+      key: "programName",
+      type: "text",
+    },
+    {
+      key: "firstName",
+      type: "text",
+    },
+    {
+      key: "status",
+      type: "select",
+      options: ["Active", "Inactive"],
+    },
+  ];
+  const  [activeFilters, setActiveFilters] = useState([]);
+  const filteredData = useTableFilter(activeFilters, originalData);
+  
+  useEffect(() => {
+    setData(filteredData);
+  }, [filteredData, setData]);
   
     const handleSearch = event => {
       setSearchQuery(event.target.value);
@@ -73,7 +111,28 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
           value={searchQuery}
           onChange={handleSearch}
         />
-        <HamburgerIcon mt="10px" />
+        <Popover>
+          <PopoverTrigger>
+            <IconButton
+              aria-label="filter"
+              icon={<HiOutlineAdjustmentsHorizontal />}
+              size="sm"
+              variant="ghost"
+            />
+          </PopoverTrigger>
+          <PopoverContent
+            w="800px"
+            maxW="90vw"
+            shadow="xl"
+          >
+            <FilterComponent
+              columns={columns}
+              onFilterChange={(filters) => {
+                setActiveFilters(filters);
+              }}
+            />
+          </PopoverContent>
+        </Popover>
         <DownloadIcon mt="10px" />
       </Flex>
 
