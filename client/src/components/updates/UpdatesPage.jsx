@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Center, Spinner } from "@chakra-ui/react";
 
@@ -22,20 +22,39 @@ export const UpdatesPage = () => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchData = async (path) => {
+  const fetchData = useCallback(
+    async (path) => {
+      try {
+        const response = await backend.get(`/update-permissions/${path}`);
+        return response.data;
+      } catch (error) {
+        console.error(
+          "Request failed:",
+          path,
+          error.response?.status,
+          error.message
+        );
+        return [];
+      }
+    },
+    [backend]
+  );
+
+  const fetchMediaUpdatesForUser = useCallback(async () => {
     try {
-      const response = await backend.get(`/update-permissions/${path}`);
-      return response.data;
+      const response = await backend.get(
+        `/mediaChange/${userId}/media-updates`
+      );
+      return response.data ?? [];
     } catch (error) {
       console.error(
-        "Request failed:",
-        path,
+        "Request failed: mediaChange/:userId/media-updates",
         error.response?.status,
         error.message
       );
       return [];
     }
-  };
+  }, [backend, userId]);
 
   useEffect(() => {
     if (!userId || !backend) {
@@ -45,11 +64,10 @@ export const UpdatesPage = () => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [mediaUpdates, programUpdates] =
-          await Promise.all([
-            fetchData(`media-updates/${userId}`),
-            fetchData(`program-updates/${userId}`),
-          ]);
+        const [mediaUpdates, programUpdates] = await Promise.all([
+          fetchMediaUpdatesForUser(),
+          fetchData(`program-updates/${userId}`),
+        ]);
         setOriginalMediaUpdatesData(mediaUpdates);
         setMediaUpdatesData(mediaUpdates);
         setProgramUpdatesData(programUpdates);
@@ -61,7 +79,7 @@ export const UpdatesPage = () => {
       }
     };
     loadData();
-  }, [userId, backend]);
+  }, [userId, backend, fetchData, fetchMediaUpdatesForUser]);
 
   if (isLoading) {
     return (
