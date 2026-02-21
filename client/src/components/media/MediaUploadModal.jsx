@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import {
+  Box,
   IconButton,
   Modal,
   ModalBody,
@@ -64,19 +65,28 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete, formOrigin
         </ModalHeader>
 
         <ModalBody>
-          <MediaUpload
-                onFileSelect={(files) =>
-                  formOrigin === "profile" ? setSelectedFiles(files.slice(0,1)) :
-                  setSelectedFiles((prev) => [...(prev || []), ...files])} // append instead of replace upon another upload, unless profile
-                formOrigin={formOrigin}
-              />
-            {console.log(selectedFiles)}
+          <Box display="flex" gap={6}>
+            <Box flex={1}>
+              <MediaUpload
+                    onFileSelect={(files) =>
+                      formOrigin === "profile" ? setSelectedFiles(files.slice(0,1)) :
+                      setSelectedFiles((prev) => [...(prev || []), ...files])} // append instead of replace upon another upload, unless profile
+                    formOrigin={formOrigin}
+                  />
+            </Box>
             {selectedFiles?.length > 0 && (
-              <MediaPreviewList
-                files={selectedFiles}
-                onComplete={onUploadComplete}
-              />
+              <Box w="250px" overflowY="auto" maxH="500px">
+                <MediaPreviewList
+                  files={selectedFiles}
+                  onComplete={(uploadedFiles, description) => {
+                    onUploadComplete?.(uploadedFiles, description);
+                    handleClose();
+                  }}
+                  formOrigin={formOrigin}
+                />
+              </Box>
             )}
+          </Box>
         </ModalBody>
       </ModalContent>
     </Modal>
