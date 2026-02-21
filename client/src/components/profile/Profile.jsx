@@ -94,7 +94,7 @@ export const Profile = () => {
   if (!gcfUser) {
     return null;
   }
-
+  // TODO: get profile picture from s3
   const profilePicture =
     gcfUser.picture && gcfUser.picture.trim() !== ""
       ? gcfUser.picture

@@ -221,7 +221,7 @@ const CurriculumLinkForm = ({ formState, setFormData }) => {
 
 const MediaUploadForm = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
-
+    // TODO: preview media uploads on the form
     return (
         <>
             <Button onClick={onOpen}> + Add </Button>
