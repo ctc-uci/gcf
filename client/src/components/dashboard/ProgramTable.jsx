@@ -419,7 +419,6 @@ function ProgramDisplay({
                   <FilterComponent
                     columns={columns}
                     onFilterChange={(filters) => {
-                      // You can handle the filter logic here later
                       setActiveFilters(filters);
                     }}
                   />
