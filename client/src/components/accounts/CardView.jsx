@@ -41,14 +41,20 @@ export const CardView = ({ data }) => {
 
   return (
     <Grid
-      templateColumns="repeat(3, 1fr)"
+      templateColumns={{
+        base: "repeat(1, 1fr)",
+        md: "repeat(2, 1fr)",
+        lg: "repeat(3, 1fr)",
+      }}
       gap={6}
     >
       {data.map((a) => (
         <GridItem key={a.id}>
           <Card
-            w={324}
-            h={400}
+            w="auto"
+            minW={324}
+            minH={400}
+            h="auto"
             br={20}
           >
             <CardHeader position="relative">
@@ -59,7 +65,7 @@ export const CardView = ({ data }) => {
               >
                 {/* TODO: add ability to open the account edit form onClick */}
                 <IconButton
-                  aria-label="search"
+                  aria-label="edit"
                   icon={<EditIcon />}
                   size="sm"
                   variant="ghost"
