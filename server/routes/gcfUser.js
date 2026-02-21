@@ -77,7 +77,6 @@ gcfUserRouter.post("/admin/create-user", async (req, res) => {
       user: keysToCamel(newGcfUser[0]),
       message: 'User created successfully' 
     });
-    
 
   } catch (err) {
     console.error("Error creating user:", err);
