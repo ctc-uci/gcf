@@ -49,6 +49,7 @@ export const AccountsTable = ({
   originalData,
   searchQuery,
   isCardView,
+  onSave,
   onUpdate,
 }) => {
   const hoverBg = useColorModeValue("gray.50", "gray.700");
@@ -248,7 +249,10 @@ export const AccountsTable = ({
           </Tbody>
         </Table>
       ) : (
-        <CardView data={data} />
+        <CardView
+          data={data}
+          onSave={onSave}
+        />
       )}
     </TableContainer>
   );

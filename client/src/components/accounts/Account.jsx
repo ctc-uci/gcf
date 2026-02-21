@@ -113,6 +113,7 @@ export const Account = () => {
           originalData={originalUsers}
           searchQuery={searchQuery}
           isCardView={isCardView}
+          onSave={() => fetchData()}
           onUpdate={(user) => {
             setSelectedUser(user);
             setIsDrawerOpen(true);
