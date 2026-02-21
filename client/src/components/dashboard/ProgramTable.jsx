@@ -48,6 +48,7 @@ import {
 } from "react-icons/hi2";
 
 import { useTableSort } from "../../contexts/hooks/TableSort";
+import { downloadCsv, escapeCsvValue } from "@/utils/downloadCsv";
 import { SortArrows } from "../tables/SortArrows";
 import { ProgramForm } from "./ProgramForm";
 import GcfGlobe from "/gcf_globe.png";
@@ -292,17 +293,7 @@ function ProgramDisplay({
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
   const [isCardView, setIsCardView] = useState(false);
 
-  const escapeCsvValue = (val) => {
-    if (val == null) return "";
-    const s = String(val);
-    if (s.includes(",") || s.includes('"') || s.includes("\n")) {
-      return `"${s.replace(/"/g, '""')}"`;
-    }
-    return s;
-  };
-
   const downloadDataAsCsv = () => {
-    if (!data || data.length === 0) return;
     const headers = [
       "Program",
       "Status",
@@ -316,7 +307,7 @@ function ProgramDisplay({
       "Program Directors",
       "Curriculum Links",
     ];
-    const rows = data.map((p) => [
+    const rows = (data || []).map((p) => [
       escapeCsvValue(p.title),
       escapeCsvValue(p.status),
       escapeCsvValue(p.launchDate),
@@ -339,14 +330,7 @@ function ProgramDisplay({
         Array.isArray(p.playlists) ? p.playlists.map((l) => l.link ?? l.name).join("; ") : ""
       ),
     ]);
-    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `programs-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadCsv(headers, rows, `programs-${new Date().toISOString().slice(0, 10)}.csv`);
   };
 
   const handleSearch = (event) => {

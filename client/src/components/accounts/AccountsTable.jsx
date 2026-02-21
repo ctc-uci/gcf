@@ -33,22 +33,13 @@ import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { FiEdit2, FiEyeOff } from "react-icons/fi";
 
 import { useTableSort } from "../../contexts/hooks/TableSort";
+import { downloadCsv, escapeCsvValue } from "@/utils/downloadCsv";
 import { SortArrows } from "../tables/SortArrows";
 import GcfGlobe from "/gcf_globe.png";
 
-const escapeCsvValue = (val) => {
-  if (val == null) return "";
-  const s = String(val);
-  if (s.includes(",") || s.includes('"') || s.includes("\n")) {
-    return `"${s.replace(/"/g, '""')}"`;
-  }
-  return s;
-};
-
 export function downloadAccountsAsCsv(data) {
-  if (!data || data.length === 0) return;
   const headers = ["First Name", "Last Name", "Email", "Type", "Program(s)"];
-  const rows = data.map((user) => [
+  const rows = (data || []).map((user) => [
     escapeCsvValue(user.firstName),
     escapeCsvValue(user.lastName),
     escapeCsvValue(user.email),
@@ -57,16 +48,7 @@ export function downloadAccountsAsCsv(data) {
       Array.isArray(user.programs) ? user.programs.join("; ") : ""
     ),
   ]);
-  const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join(
-    "\n"
-  );
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `accounts-${new Date().toISOString().slice(0, 10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+  downloadCsv(headers, rows, `accounts-${new Date().toISOString().slice(0, 10)}.csv`);
 }
 
 export const AccountsTable = ({

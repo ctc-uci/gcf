@@ -17,36 +17,20 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
+import { downloadCsv, escapeCsvValue } from "@/utils/downloadCsv";
 import { SortArrows } from "../tables/SortArrows"
 import { useTableSort } from "../../contexts/hooks/TableSort";
 
-const escapeCsvValue = (val) => {
-  if (val == null) return "";
-  const s = String(val);
-  if (s.includes(",") || s.includes('"') || s.includes("\n")) {
-    return `"${s.replace(/"/g, '""')}"`;
-  }
-  return s;
-};
-
 export function downloadMediaUpdatesAsCsv(data) {
-  if (!data || data.length === 0) return;
   const headers = ["Time", "Notes", "Program", "Author", "Status"];
-  const rows = data.map((row) => [
+  const rows = (data || []).map((row) => [
     escapeCsvValue(row.updateDate),
     escapeCsvValue(row.note),
     escapeCsvValue(row.programName),
     escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(" ")),
     escapeCsvValue(row.status),
   ]);
-  const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `media-updates-${new Date().toISOString().slice(0, 10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+  downloadCsv(headers, rows, `media-updates-${new Date().toISOString().slice(0, 10)}.csv`);
 }
 
 export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) => {
