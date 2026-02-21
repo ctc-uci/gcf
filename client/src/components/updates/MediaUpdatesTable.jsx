@@ -104,9 +104,8 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
                 </Td>
               </Tr>
             ) : (
-              data.map((row) => {
-                console.log(row)
-                return <Tr key={row.id}>
+              data.map((row) => (
+                <Tr key={row.id}>
                   <Td>{row.updateDate}</Td>
                   <Td>{row.note}</Td>
                   <Td>{row.programName}</Td>
@@ -119,7 +118,7 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
                     </Badge>
                   </Td>
                 </Tr>
-              })
+              ))
             )}
           </Tbody>
         </Table>
