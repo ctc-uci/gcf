@@ -10,8 +10,12 @@ regionalDirectorRouter.use(express.json());
 regionalDirectorRouter.get("/me/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const director = await db.query("SELECT * FROM regional_director WHERE user_id = $1 LIMIT 1", [id]);
-    if (!director?.length) return res.status(404).json({ error: "Regional director not found" });
+    const director = await db.query(
+      "SELECT * FROM regional_director WHERE user_id = $1 LIMIT 1",
+      [id]
+    );
+    if (!director?.length)
+      return res.status(404).json({ error: "Regional director not found" });
     res.status(200).json(keysToCamel(director[0]));
   } catch (err) {
     console.error("Error in /me/:id:", err);
@@ -22,8 +26,12 @@ regionalDirectorRouter.get("/me/:id", async (req, res) => {
 regionalDirectorRouter.get("/me/:id/stats", async (req, res) => {
   try {
     const { id } = req.params;
-    const director = await db.query("SELECT region_id FROM regional_director WHERE user_id = $1 LIMIT 1", [id]);
-    if (!director?.length) return res.status(404).json({ error: "Regional director not found" });
+    const director = await db.query(
+      "SELECT region_id FROM regional_director WHERE user_id = $1 LIMIT 1",
+      [id]
+    );
+    if (!director?.length)
+      return res.status(404).json({ error: "Regional director not found" });
     const regionId = director[0].region_id;
     const stats = await db.query(
       `SELECT
@@ -50,8 +58,12 @@ regionalDirectorRouter.get("/me/:id/stats", async (req, res) => {
 regionalDirectorRouter.get("/me/:id/programs", async (req, res) => {
   try {
     const { id } = req.params;
-    const director = await db.query("SELECT region_id FROM regional_director WHERE user_id = $1 LIMIT 1", [id]);
-    if (!director?.length) return res.status(404).json({ error: "Regional director not found" });
+    const director = await db.query(
+      "SELECT region_id FROM regional_director WHERE user_id = $1 LIMIT 1",
+      [id]
+    );
+    if (!director?.length)
+      return res.status(404).json({ error: "Regional director not found" });
     const regionId = director[0].region_id;
     const programs = await db.query(
       `SELECT p.id, p.name
@@ -93,6 +105,26 @@ regionalDirectorRouter.get("/", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+regionalDirectorRouter.get(
+  "/regional-director-region/:id",
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await db.query(
+        `SELECT name
+          FROM region
+          INNER JOIN regional_director ON regional_director.user_id = $1
+          WHERE region.id = regional_director.region_id`,
+        [id]
+      );
+      res.status(200).json(keysToCamel(data));
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Internal Server Error");
+    }
+  }
+);
 
 regionalDirectorRouter.get("/:user_id/program-directors", async (req, res) => {
   try {

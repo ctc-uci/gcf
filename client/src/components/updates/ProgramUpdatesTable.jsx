@@ -6,6 +6,7 @@ import {
   Center,
   Flex,
   Heading,
+  IconButton,
   Input,
   Spinner,
   Table,
@@ -16,8 +17,21 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
+import { downloadCsv, escapeCsvValue } from "@/utils/downloadCsv";
 import { SortArrows } from "../tables/SortArrows";
 import { useTableSort } from "../../contexts/hooks/TableSort";
+
+export function downloadProgramUpdatesAsCsv(data) {
+  const headers = ["Time", "Notes", "Program", "Author", "Status"];
+  const rows = (data || []).map((row) => [
+    escapeCsvValue(row.updateDate),
+    escapeCsvValue(row.note),
+    escapeCsvValue(row.name),
+    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(" ")),
+    escapeCsvValue(row.status),
+  ]);
+  downloadCsv(headers, rows, `program-updates-${new Date().toISOString().slice(0, 10)}.csv`);
+}
 
 export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,7 +93,14 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
             onChange={handleSearch}
           />
           <HamburgerIcon mt="10px" />
-          <DownloadIcon mt="10px" />
+          <IconButton
+            aria-label="Download"
+            icon={<DownloadIcon />}
+            size="sm"
+            variant="ghost"
+            mt="10px"
+            onClick={() => downloadProgramUpdatesAsCsv(data)}
+          />
         </Flex>
 
         <TableContainer
