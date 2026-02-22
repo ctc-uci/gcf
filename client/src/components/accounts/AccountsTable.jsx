@@ -137,14 +137,16 @@ export const AccountsTable = ({
           </Tr>
         </Thead>
         <Tbody>
-          {!data ||
-            (data.length === 0 && (
-              <Center py={10}>
-                <Text color="gray.500">No accounts found.</Text>
-              </Center>
-            ))}
-
-          {data.map((user) => (
+          {!data || data.length === 0 ? (
+            <Tr>
+              <Td colSpan={6}>
+                <Center py={10}>
+                  <Text color="gray.500">No accounts found.</Text>
+                </Center>
+              </Td>
+            </Tr>
+          ) : (
+            data.map((user) => (
             <Tr
               key={user.id}
               _hover={{
@@ -222,7 +224,8 @@ export const AccountsTable = ({
                 </Box>
               </Td>
             </Tr>
-          ))}
+          ))
+          )}
         </Tbody>
       </Table>
     </TableContainer>

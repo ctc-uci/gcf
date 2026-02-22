@@ -522,9 +522,9 @@ export const ProgramForm = ({
     }
   }
 
-  useEffect(() => {
-    console.log("Program status changed to:", formState);
-  }, [formState]);
+  // useEffect(() => {
+  //   console.log("Program status changed to:", formState);
+  // }, [formState]);
 
   useEffect(() => {
     async function getRegions() {
