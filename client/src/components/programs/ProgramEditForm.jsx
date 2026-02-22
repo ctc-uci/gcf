@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 import {
   Button,
@@ -23,9 +23,9 @@ import {
   TagLabel,
   Text,
   VStack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
 export const ProgramUpdateEditForm = ({ programUpdateId }) => {
   const { backend } = useBackendContext();
@@ -36,35 +36,35 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
     useState(false);
   const [instruments, setInstruments] = useState([]);
   const [countries, setCountries] = useState([]);
-  const [selectedInstrument, setSelectedInstrument] = useState("");
+  const [selectedInstrument, setSelectedInstrument] = useState('');
   const [quantity, setQuantity] = useState(0);
   const [addedInstruments, setAddedInstruments] = useState({});
-  const [newInstrumentName, setNewInstrumentName] = useState("");
+  const [newInstrumentName, setNewInstrumentName] = useState('');
   const [regionalDirectors, setRegionalDirectors] = useState([]);
-  const [selectedRegionalDirector, setSelectedRegionalDirector] = useState("");
+  const [selectedRegionalDirector, setSelectedRegionalDirector] = useState('');
   const [addedRegionalDirectors, setAddedRegionalDirectors] = useState({});
   const [enrollmentNumber, setEnrollmentNumber] = useState(null);
   const [graduatedNumber, setGraduatedNumber] = useState(null);
   const [newInstruments, setNewInstruments] = useState([]);
   const [existingInstruments, setExistingInstruments] = useState([]);
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
+  const [title, setTitle] = useState('');
+  const [date, setDate] = useState('');
 
   const [form, setForm] = useState({
-    id: "",
-    created_by: "",
-    program_name: "",
-    date_created: "",
-    country: "",
-    title: "",
-    description: "",
-    primary_language: "",
-    playlist_link: "",
-    partner_org: "",
-    program_status: "",
-    launch_date: "",
-    countries: "",
-    note: "",
+    id: '',
+    created_by: '',
+    program_name: '',
+    date_created: '',
+    country: '',
+    title: '',
+    description: '',
+    primary_language: '',
+    playlist_link: '',
+    partner_org: '',
+    program_status: '',
+    launch_date: '',
+    countries: '',
+    note: '',
   });
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
           .get(`/program-updates/${programUpdateId}`)
           .then((r) => r.data);
       } catch (error) {
-        console.error("Error fetching program update: ", error);
+        console.error('Error fetching program update: ', error);
         return;
       }
       const program_id = programUpdateResponse.programId;
@@ -106,7 +106,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         ]);
       } catch (error) {
         console.error(
-          "Error fetching countries/program/instruments/instrument_change: ",
+          'Error fetching countries/program/instruments/instrument_change: ',
           error
         );
         return;
@@ -135,31 +135,31 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
       setAddedInstruments(instruments);
 
       setForm({
-        id: programResponse.id ?? "",
-        created_by: programResponse.createdBy ?? "",
-        program_name: programResponse.name ?? "",
+        id: programResponse.id ?? '',
+        created_by: programResponse.createdBy ?? '',
+        program_name: programResponse.name ?? '',
         date_created: programResponse.dateCreated
           ? programResponse.dateCreated.slice(0, 10)
-          : "",
-        country: programResponse.country ?? "",
-        title: programUpdateResponse.title ?? "",
-        description: programResponse.description ?? "",
-        primary_language: programResponse.primaryLanguage ?? "",
-        playlist_link: "",
-        partner_org: programResponse.partnerOrg ?? "",
-        program_status: programResponse.status ?? "",
+          : '',
+        country: programResponse.country ?? '',
+        title: programUpdateResponse.title ?? '',
+        description: programResponse.description ?? '',
+        primary_language: programResponse.primaryLanguage ?? '',
+        playlist_link: '',
+        partner_org: programResponse.partnerOrg ?? '',
+        program_status: programResponse.status ?? '',
         launch_date: programResponse.launchDate
           ? programResponse.launchDate.slice(0, 10)
-          : "",
-        note: programUpdateResponse.note ?? "",
+          : '',
+        note: programUpdateResponse.note ?? '',
       });
 
       try {
         userResponse = await backend
-          .get(`/gcf-users/role/${encodeURIComponent("Regional Director")}`)
+          .get(`/gcf-users/role/${encodeURIComponent('Regional Director')}`)
           .then((r) => r.data);
       } catch (error) {
-        console.error("Error fetching user: ", error);
+        console.error('Error fetching user: ', error);
         return;
       }
 
@@ -193,7 +193,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
 
   const handleNewInstrument = () => {
     if (!validNewInstrument()) {
-      setNewInstrumentName("");
+      setNewInstrumentName('');
       return;
     }
   };
@@ -215,8 +215,8 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
       [instrumentName]: (prev[instrumentName] ?? 0) + quantity,
     }));
 
-    setSelectedInstrument("");
-    setNewInstrumentName("");
+    setSelectedInstrument('');
+    setNewInstrumentName('');
     setQuantity(0);
   };
 
@@ -242,7 +242,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
       [directorId]: `${user.firstName} ${user.lastName}`,
     }));
 
-    setSelectedRegionalDirector("");
+    setSelectedRegionalDirector('');
   };
 
   const removeRegionalDirector = (id) => {
@@ -271,7 +271,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         updateDate: new Date().toISOString().slice(0, 10),
       };
 
-      console.log("New instruments to add:", newInstruments);
+      console.log('New instruments to add:', newInstruments);
       try {
         await backend.delete(`/instrument-changes/update/${programUpdateId}`);
       } catch (error) {
@@ -280,13 +280,13 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
 
       for (const instrumentName of newInstruments) {
         try {
-          await backend.post("/instruments", { name: instrumentName });
+          await backend.post('/instruments', { name: instrumentName });
         } catch (error) {
           console.error(`Error adding instrument ${instrumentName}:`, error);
         }
       }
 
-      const instrumentsRes = await backend.get("/instruments");
+      const instrumentsRes = await backend.get('/instruments');
       const instrumentsData = instrumentsRes.data;
       setExistingInstruments(instrumentsData);
 
@@ -301,7 +301,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
             }
 
             console.log(
-              "instrumentsData, update id, and qty",
+              'instrumentsData, update id, and qty',
               instrumentsData,
               programUpdateId,
               qty
@@ -316,7 +316,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         );
 
         for (const change of instrumentChanges) {
-          await backend.post("/instrument-changes", {
+          await backend.post('/instrument-changes', {
             instrumentId: change.instrument_id,
             updateId: change.update_id,
             amountChanged: change.amount_changed,
@@ -336,70 +336,56 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
       }));
 
       if (enrollmentNumber !== null && graduatedNumber !== null) {
-        console.log("Sending enrollment change:", {
+        console.log('Sending enrollment change:', {
           update_id: programUpdateId,
           enrollment_change: enrollmentNumber,
           graduated_change: graduatedNumber,
         });
 
         try {
-          await backend.post("/enrollmentChange", {
+          await backend.post('/enrollmentChange', {
             update_id: programUpdateId,
             enrollment_change: enrollmentNumber,
             graduated_change: graduatedNumber,
           });
         } catch (error) {
-          console.error("POST /enrollmentChange failed:", error);
+          console.error('POST /enrollmentChange failed:', error);
         }
-        console.log("Enrollment change saved");
+        console.log('Enrollment change saved');
       }
 
       const addInstrument = async () => {
         const name = newInstrumentName.trim();
 
         try {
-          await backend.post("/instruments", { name });
+          await backend.post('/instruments', { name });
 
-          const instrumentsData = (await backend.get("/instruments")).data;
+          const instrumentsData = (await backend.get('/instruments')).data;
           setInstruments(instrumentsData);
 
-          setNewInstrumentName("");
+          setNewInstrumentName('');
           return name;
         } catch (error) {
           const status = error?.response?.status;
           throw new Error(
-            `Instrument request failed: ${status ?? "network/unknown"}`
+            `Instrument request failed: ${status ?? 'network/unknown'}`
           );
         }
       };
     } catch (err) {
-      console.error("Save failed:", err);
+      console.error('Save failed:', err);
     }
   };
   return (
-    <VStack
-      p={8}
-      width="35%"
-      borderWidth="1px"
-      borderColor="lightblue"
-    >
-      <Heading
-        size="md"
-        textAlign="center"
-      >
+    <VStack p={8} width="35%" borderWidth="1px" borderColor="lightblue">
+      <Heading size="md" textAlign="center">
         Program
       </Heading>
-      <Divider
-        w="110%"
-        mb={4}
-      ></Divider>
+      <Divider w="110%" mb={4}></Divider>
       {programUpdateId && (
         <>
           <Card bg="gray.100">
-            <CardHeader
-              pt={6}
-              pb={0}
-            >
+            <CardHeader pt={6} pb={0}>
               <Heading size="sm">Update Notes</Heading>
             </CardHeader>
             <CardBody py={1}>
@@ -407,10 +393,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
             </CardBody>
           </Card>
           <FormControl isRequired>
-            <FormLabel
-              fontWeight="normal"
-              color="gray"
-            >
+            <FormLabel fontWeight="normal" color="gray">
               Title
             </FormLabel>
             <Input
@@ -464,25 +447,19 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
           value={form.country}
         >
           {countries.map((c) => (
-            <option
-              key={c.id}
-              value={c.id}
-            >
+            <option key={c.id} value={c.id}>
               {c.name}
             </option>
           ))}
         </Select>
       </FormControl>
       <FormControl>
-        <FormLabel
-          fontWeight="normal"
-          color="gray"
-        >
+        <FormLabel fontWeight="normal" color="gray">
           # Students currently enrolled
         </FormLabel>
         <NumberInput
           width="30%"
-          value={enrollmentNumber ?? ""}
+          value={enrollmentNumber ?? ''}
           onChange={(value) =>
             setEnrollmentNumber(value ? parseInt(value) : null)
           }
@@ -491,15 +468,12 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         </NumberInput>
       </FormControl>
       <FormControl>
-        <FormLabel
-          fontWeight="normal"
-          color="gray"
-        >
+        <FormLabel fontWeight="normal" color="gray">
           # Students graduated
         </FormLabel>
         <NumberInput
           width="30%"
-          value={graduatedNumber ?? ""}
+          value={graduatedNumber ?? ''}
           onChange={(value) =>
             setGraduatedNumber(value ? parseInt(value) : null)
           }
@@ -519,15 +493,12 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
               placeholder="Select Instrument"
               onChange={(e) => {
                 setSelectedInstrument(e.target.value);
-                setNewInstrumentName("");
+                setNewInstrumentName('');
               }}
               value={selectedInstrument}
             >
               {instruments.map((instrument) => (
-                <option
-                  key={instrument.id}
-                  value={instrument.name}
-                >
+                <option key={instrument.id} value={instrument.name}>
                   {instrument.name}
                 </option>
               ))}
@@ -537,7 +508,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
               value={newInstrumentName}
               onChange={(e) => {
                 setNewInstrumentName(e.target.value);
-                setSelectedInstrument("");
+                setSelectedInstrument('');
               }}
             />
             <NumberInput
@@ -565,17 +536,9 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         )}
       </FormControl>
       {Object.keys(addedInstruments).length > 0 && (
-        <HStack
-          width="100%"
-          flexWrap="wrap"
-          spacing={2}
-        >
+        <HStack width="100%" flexWrap="wrap" spacing={2}>
           {Object.entries(addedInstruments).map(([name, quantity]) => (
-            <Tag
-              key={name}
-              size="lg"
-              bg="gray.200"
-            >
+            <Tag key={name} size="lg" bg="gray.200">
               <TagLabel>
                 {name} - {quantity}
               </TagLabel>
@@ -611,10 +574,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
               value={selectedRegionalDirector}
             >
               {regionalDirectors.map((user) => (
-                <option
-                  key={user.id}
-                  value={user.id}
-                >
+                <option key={user.id} value={user.id}>
                   {user.firstName} {user.lastName}
                 </option>
               ))}
@@ -631,17 +591,9 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         )}
       </FormControl>
       {Object.keys(regionalDirectors).length > 0 && (
-        <HStack
-          width="100%"
-          flexWrap="wrap"
-          spacing={2}
-        >
+        <HStack width="100%" flexWrap="wrap" spacing={2}>
           {Object.entries(addedRegionalDirectors).map(([id, name]) => (
-            <Tag
-              key={id}
-              size="lg"
-              bg="gray.200"
-            >
+            <Tag key={id} size="lg" bg="gray.200">
               <TagLabel>{name}</TagLabel>
               <TagCloseButton onClick={() => removeRegionalDirector(id)} />
             </Tag>

@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { AspectRatio, Box, Heading, SimpleGrid, Text } from "@chakra-ui/react";
+import { AspectRatio, Box, Heading, SimpleGrid, Text } from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
 function LessonVideos() {
   const { currentUser } = useAuthContext();
@@ -23,7 +23,7 @@ function LessonVideos() {
         const playlistList = Array.isArray(res.data) ? res.data : [];
         setPlaylists(playlistList);
       } catch (err) {
-        console.error("Error fetching playlists:", err);
+        console.error('Error fetching playlists:', err);
       }
     };
 
@@ -59,19 +59,13 @@ function LessonVideos() {
 
   return (
     <Box>
-      <Heading
-        size="md"
-        mb={4}
-      >
+      <Heading size="md" mb={4}>
         Lesson Videos
       </Heading>
       {playlists.length === 0 && (
         <Text color="gray.500">No lesson videos available</Text>
       )}
-      <SimpleGrid
-        columns={{ base: 1, md: 2, lg: 4 }}
-        spacing={4}
-      >
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
         {playlists.map((playlist, index) => {
           const embedUrl = getYouTubeEmbedUrl(playlist.link);
           if (!embedUrl) return null;
@@ -93,11 +87,7 @@ function LessonVideos() {
                 />
               </AspectRatio>
               <Box p={2}>
-                <Text
-                  fontSize="sm"
-                  fontWeight="medium"
-                  noOfLines={2}
-                >
+                <Text fontSize="sm" fontWeight="medium" noOfLines={2}>
                   {playlist.name}
                 </Text>
               </Box>

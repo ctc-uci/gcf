@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
+import { DownloadIcon, HamburgerIcon, SearchIcon } from '@chakra-ui/icons';
 import {
   Badge,
   Box,
@@ -16,10 +16,10 @@ import {
   Th,
   Thead,
   Tr,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { useTableSort } from "../../contexts/hooks/TableSort";
-import { SortArrows } from "../tables/SortArrows";
+import { useTableSort } from '../../contexts/hooks/TableSort';
+import { SortArrows } from '../tables/SortArrows';
 
 export const MediaUpdatesTable = ({
   data,
@@ -27,7 +27,7 @@ export const MediaUpdatesTable = ({
   originalData,
   isLoading,
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [unorderedUpdates, setUnorderedUpdates] = useState([]);
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
 
@@ -40,7 +40,7 @@ export const MediaUpdatesTable = ({
 
   useEffect(() => {
     function filterUpdates(search) {
-      if (search === "") {
+      if (search === '') {
         setData(originalData);
         return;
       }
@@ -60,19 +60,10 @@ export const MediaUpdatesTable = ({
   }, [searchQuery, originalData]);
 
   return (
-    <Box
-      mt="30px"
-      ml="10px"
-    >
-      <Flex
-        gap={10}
-        mb="20px"
-      >
+    <Box mt="30px" ml="10px">
+      <Flex gap={10} mb="20px">
         <Heading>Media Updates</Heading>
-        <SearchIcon
-          mt="10px"
-          ml="10px"
-        />
+        <SearchIcon mt="10px" ml="10px" />
         <Input
           placeholder="Type to search"
           variant="flushed"
@@ -84,63 +75,39 @@ export const MediaUpdatesTable = ({
         <DownloadIcon mt="10px" />
       </Flex>
 
-      <TableContainer
-        overflowX="auto"
-        maxW="100%"
-      >
+      <TableContainer overflowX="auto" maxW="100%">
         <Table variant="simple">
           <Thead>
             {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
             <Tr>
-              <Th
-                onClick={() => handleSort("updateDate")}
-                cursor="pointer"
-              >
-                Time{" "}
+              <Th onClick={() => handleSort('updateDate')} cursor="pointer">
+                Time{' '}
                 <SortArrows
-                  columnKey={"updateDate"}
+                  columnKey={'updateDate'}
                   sortOrder={sortOrder}
-                />{" "}
+                />{' '}
               </Th>
-              <Th
-                onClick={() => handleSort("note")}
-                cursor="pointer"
-              >
-                Notes{" "}
-                <SortArrows
-                  columnKey={"note"}
-                  sortOrder={sortOrder}
-                />{" "}
+              <Th onClick={() => handleSort('note')} cursor="pointer">
+                Notes{' '}
+                <SortArrows columnKey={'note'} sortOrder={sortOrder} />{' '}
               </Th>
-              <Th
-                onClick={() => handleSort("programName")}
-                cursor="pointer"
-              >
-                Program{" "}
+              <Th onClick={() => handleSort('programName')} cursor="pointer">
+                Program{' '}
                 <SortArrows
-                  columnKey={"programName"}
+                  columnKey={'programName'}
                   sortOrder={sortOrder}
-                />{" "}
+                />{' '}
               </Th>
-              <Th
-                onClick={() => handleSort("firstName")}
-                cursor="pointer"
-              >
-                Author{" "}
+              <Th onClick={() => handleSort('firstName')} cursor="pointer">
+                Author{' '}
                 <SortArrows
-                  columnKey={"firstName"}
+                  columnKey={'firstName'}
                   sortOrder={sortOrder}
-                />{" "}
+                />{' '}
               </Th>
-              <Th
-                onClick={() => handleSort("status")}
-                cursor="pointer"
-              >
-                Status{" "}
-                <SortArrows
-                  columnKey={"status"}
-                  sortOrder={sortOrder}
-                />{" "}
+              <Th onClick={() => handleSort('status')} cursor="pointer">
+                Status{' '}
+                <SortArrows columnKey={'status'} sortOrder={sortOrder} />{' '}
               </Th>
             </Tr>
           </Thead>

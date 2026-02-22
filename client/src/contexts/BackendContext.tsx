@@ -1,8 +1,8 @@
-import { createContext, ReactNode } from "react";
+import { createContext, ReactNode } from 'react';
 
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance } from 'axios';
 
-import { authInterceptor } from "../utils/auth/authInterceptor";
+import { authInterceptor } from '../utils/auth/authInterceptor';
 
 const baseURL = import.meta.env.VITE_BACKEND_HOSTNAME;
 

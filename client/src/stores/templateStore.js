@@ -1,11 +1,11 @@
 /*
 THIS IS A SAMPLE STORE. REPLACE WITH YOUR OWN STORE.
 */
-import { create } from "zustand";
+import { create } from 'zustand';
 
 export const useTemplateStore = create((set) => ({
   // Initial state
-  value: "",
+  value: '',
   count: 0,
 
   // Actions

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 import {
   AddIcon,
@@ -6,7 +6,7 @@ import {
   EditIcon,
   HamburgerIcon,
   Search2Icon,
-} from "@chakra-ui/icons";
+} from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -27,25 +27,25 @@ import {
   Tr,
   useDisclosure,
   VStack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
-} from "react-icons/hi2";
+} from 'react-icons/hi2';
 
-import { useTableSort } from "../../contexts/hooks/TableSort";
-import { SortArrows } from "../tables/SortArrows";
-import { ProgramForm } from "./ProgramForm";
+import { useTableSort } from '../../contexts/hooks/TableSort';
+import { SortArrows } from '../tables/SortArrows';
+import { ProgramForm } from './ProgramForm';
 
 const getRouteByRole = (role, userId) => {
   const routes = {
-    "Super Admin": "/admin/programs",
-    Admin: "/admin/programs",
-    "Regional Director": `/rdProgramTable/${userId}`,
+    'Super Admin': '/admin/programs',
+    Admin: '/admin/programs',
+    'Regional Director': `/rdProgramTable/${userId}`,
   };
   return routes[role];
 };
@@ -57,7 +57,7 @@ function mapAdminRow(row) {
     status: row.status,
     launchDate: row.launchDate,
 
-    location: row.countryName ?? "",
+    location: row.countryName ?? '',
     country: row.country,
 
     students: row.students ?? 0,
@@ -79,7 +79,7 @@ function mapRdRow(row) {
     status: row.programStatus,
     launchDate: row.programLaunchDate,
 
-    location: row.programLocation ?? row.regionName ?? "",
+    location: row.programLocation ?? row.regionName ?? '',
     countryId: row.countryId,
     regionId: row.regionId,
 
@@ -95,9 +95,9 @@ function mapRdRow(row) {
 }
 
 const MAP_BY_ROLE = {
-  "Super Admin": mapAdminRow,
+  'Super Admin': mapAdminRow,
   Admin: mapAdminRow,
-  "Regional Director": mapRdRow,
+  'Regional Director': mapRdRow,
 };
 
 function ExpandableRow({ p, onEdit }) {
@@ -107,7 +107,7 @@ function ExpandableRow({ p, onEdit }) {
       <Tr
         onClick={onToggle}
         cursor="pointer"
-        sx={{ td: { borderBottom: isOpen ? "none" : undefined } }}
+        sx={{ td: { borderBottom: isOpen ? 'none' : undefined } }}
       >
         <Td>{p.title}</Td>
         <Td>{p.status}</Td>
@@ -120,42 +120,25 @@ function ExpandableRow({ p, onEdit }) {
       <Tr>
         <Td
           colSpan={7}
-          borderBottom={isOpen ? "1px solid" : "none"}
+          borderBottom={isOpen ? '1px solid' : 'none'}
           borderColor="gray.200"
           p={isOpen ? undefined : 0}
         >
           <Collapse in={isOpen}>
             <Box position="relative">
               <HStack align="start">
-                <Box
-                  flex="1"
-                  display="grid"
-                >
-                  <Box
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    pb="2"
-                  >
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">
                     Language:
                   </Box>
-                  <Box>{p.primaryLanguage ?? "-"}</Box>
+                  <Box>{p.primaryLanguage ?? '-'}</Box>
                 </Box>
-                <Box
-                  flex="1"
-                  display="grid"
-                >
-                  <Box
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    pb="2"
-                  >
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">
                     Regional Director(s)
                   </Box>
                   <Box>
-                    <VStack
-                      align="start"
-                      spacing={2}
-                    >
+                    <VStack align="start" spacing={2}>
                       {Array.isArray(p.regionalDirectors)
                         ? p.regionalDirectors.map((d, idx) => (
                             <Box
@@ -175,22 +158,12 @@ function ExpandableRow({ p, onEdit }) {
                     </VStack>
                   </Box>
                 </Box>
-                <Box
-                  flex="1"
-                  display="grid"
-                >
-                  <Box
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    pb="2"
-                  >
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">
                     Program Director(s)
                   </Box>
                   <Box>
-                    <VStack
-                      align="start"
-                      spacing={2}
-                    >
+                    <VStack align="start" spacing={2}>
                       {Array.isArray(p.programDirectors)
                         ? p.programDirectors.map((d, idx) => (
                             <Box
@@ -210,15 +183,8 @@ function ExpandableRow({ p, onEdit }) {
                     </VStack>
                   </Box>
                 </Box>
-                <Box
-                  flex="1"
-                  display="grid"
-                >
-                  <Box
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    pb="2"
-                  >
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">
                     Curriculum Link(s)
                   </Box>
                   <Box>
@@ -288,7 +254,7 @@ function ProgramDisplay({
   useEffect(() => {
     if (!originalData || originalData.length === 0) return;
 
-    if (searchQuery === "") {
+    if (searchQuery === '') {
       setData(originalData);
       return;
     }
@@ -325,16 +291,9 @@ function ProgramDisplay({
         program={selectedProgram}
       />
       <TableContainer>
-        <HStack
-          mb={4}
-          justifyContent="space-between"
-          w="100%"
-        >
+        <HStack mb={4} justifyContent="space-between" w="100%">
           <HStack spacing={4}>
-            <Box
-              fontSize="xl"
-              fontWeight="semibold"
-            >
+            <Box fontSize="xl" fontWeight="semibold">
               All Programs
             </Box>
             <HStack spacing={1}>
@@ -371,10 +330,7 @@ function ProgramDisplay({
               size="sm"
               variant="ghost"
             />
-            <Divider
-              orientation="vertical"
-              h="20px"
-            />
+            <Divider orientation="vertical" h="20px" />
             <IconButton
               aria-label="search"
               icon={<HiOutlineSquares2X2 />}
@@ -407,77 +363,36 @@ function ProgramDisplay({
           </HStack>
         </HStack>
 
-        <Table
-          variant="simple"
-          aria-label="collapsible-table"
-        >
+        <Table variant="simple" aria-label="collapsible-table">
           <Thead>
             <Tr>
-              <Th
-                onClick={() => handleSort("title")}
-                cursor="pointer"
-              >
-                Program{" "}
-                <SortArrows
-                  columnKey="title"
-                  sortOrder={sortOrder}
-                />
+              <Th onClick={() => handleSort('title')} cursor="pointer">
+                Program <SortArrows columnKey="title" sortOrder={sortOrder} />
+              </Th>
+              <Th onClick={() => handleSort('status')} cursor="pointer">
+                Status <SortArrows columnKey="status" sortOrder={sortOrder} />
+              </Th>
+              <Th onClick={() => handleSort('launchDate')} cursor="pointer">
+                Launch Date{' '}
+                <SortArrows columnKey="launchDate" sortOrder={sortOrder} />
+              </Th>
+              <Th onClick={() => handleSort('location')} cursor="pointer">
+                Location{' '}
+                <SortArrows columnKey="location" sortOrder={sortOrder} />
+              </Th>
+              <Th onClick={() => handleSort('students')} cursor="pointer">
+                Students{' '}
+                <SortArrows columnKey="students" sortOrder={sortOrder} />
+              </Th>
+              <Th onClick={() => handleSort('instruments')} cursor="pointer">
+                Instruments{' '}
+                <SortArrows columnKey="instruments" sortOrder={sortOrder} />
               </Th>
               <Th
-                onClick={() => handleSort("status")}
+                onClick={() => handleSort('totalInstruments')}
                 cursor="pointer"
               >
-                Status{" "}
-                <SortArrows
-                  columnKey="status"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-              <Th
-                onClick={() => handleSort("launchDate")}
-                cursor="pointer"
-              >
-                Launch Date{" "}
-                <SortArrows
-                  columnKey="launchDate"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-              <Th
-                onClick={() => handleSort("location")}
-                cursor="pointer"
-              >
-                Location{" "}
-                <SortArrows
-                  columnKey="location"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-              <Th
-                onClick={() => handleSort("students")}
-                cursor="pointer"
-              >
-                Students{" "}
-                <SortArrows
-                  columnKey="students"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-              <Th
-                onClick={() => handleSort("instruments")}
-                cursor="pointer"
-              >
-                Instruments{" "}
-                <SortArrows
-                  columnKey="instruments"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-              <Th
-                onClick={() => handleSort("totalInstruments")}
-                cursor="pointer"
-              >
-                Total Instruments{" "}
+                Total Instruments{' '}
                 <SortArrows
                   columnKey="totalInstruments"
                   sortOrder={sortOrder}
@@ -496,11 +411,7 @@ function ProgramDisplay({
               </Tr>
             ) : (
               data.map((p) => (
-                <ExpandableRow
-                  key={p.id}
-                  p={p}
-                  onEdit={openEditForm}
-                />
+                <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
               ))
             )}
           </Tbody>
@@ -519,7 +430,7 @@ function ProgramTable() {
   const [programs, setPrograms] = useState([]);
   const [originalPrograms, setOriginalPrograms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const openEditForm = (program) => {
@@ -570,7 +481,7 @@ function ProgramTable() {
         setOriginalPrograms(mappedPrograms);
         setPrograms(mappedPrograms);
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error('Error fetching data:', err);
       } finally {
         setIsLoading(false);
       }

@@ -1,5 +1,5 @@
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
-import { Box, VStack } from "@chakra-ui/react";
+import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
+import { Box, VStack } from '@chakra-ui/react';
 
 const SORT_ARROW_OPACITY_FADED = 0.35;
 
@@ -7,8 +7,8 @@ export function SortArrows({ columnKey, sortOrder }) {
   const { currentSortColumn, prevSortColumn } = sortOrder;
   const isActive = currentSortColumn === columnKey;
   const stored = prevSortColumn[columnKey];
-  const upHighlight = isActive && stored === "DESCENDING";
-  const downHighlight = isActive && stored === "UNSORTED";
+  const upHighlight = isActive && stored === 'DESCENDING';
+  const downHighlight = isActive && stored === 'UNSORTED';
   return (
     <VStack
       as="span"

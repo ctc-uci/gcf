@@ -1,12 +1,12 @@
-import { keysToCamel } from "@/common/utils";
-import express from "express";
+import { keysToCamel } from '@/common/utils';
+import express from 'express';
 
-import { db } from "../db/db-pgp";
+import { db } from '../db/db-pgp';
 
 const partnerOrganizationRouter = express.Router();
 partnerOrganizationRouter.use(express.json());
 
-partnerOrganizationRouter.get("/", async (req, res) => {
+partnerOrganizationRouter.get('/', async (req, res) => {
   try {
     const partnerOrganization = await db.query(
       `SELECT * FROM partner_organization`
@@ -14,11 +14,11 @@ partnerOrganizationRouter.get("/", async (req, res) => {
     res.status(200).json(keysToCamel(partnerOrganization));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-partnerOrganizationRouter.get("/:id", async (req, res) => {
+partnerOrganizationRouter.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -28,17 +28,17 @@ partnerOrganizationRouter.get("/:id", async (req, res) => {
     );
 
     if (partnerOrganization.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(partnerOrganization[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-partnerOrganizationRouter.post("/", async (req, res) => {
+partnerOrganizationRouter.post('/', async (req, res) => {
   try {
     const { name } = req.body;
 
@@ -58,11 +58,11 @@ partnerOrganizationRouter.post("/", async (req, res) => {
     res.status(201).json(keysToCamel(newPartnerOrganization[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-partnerOrganizationRouter.put("/:id", async (req, res) => {
+partnerOrganizationRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
@@ -78,17 +78,17 @@ partnerOrganizationRouter.put("/:id", async (req, res) => {
     );
 
     if (updatedPartnerOrganization.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(updatedPartnerOrganization[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-partnerOrganizationRouter.delete("/:id", async (req, res) => {
+partnerOrganizationRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -98,13 +98,13 @@ partnerOrganizationRouter.delete("/:id", async (req, res) => {
     );
 
     if (deletedPartnerOrganization.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(deletedPartnerOrganization[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 import {
   Badge,
@@ -16,12 +16,12 @@ import {
   Thead,
   Tr,
   useColorModeValue,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { FiEdit2, FiEyeOff } from "react-icons/fi";
+import { FiEdit2, FiEyeOff } from 'react-icons/fi';
 
-import { useTableSort } from "../../contexts/hooks/TableSort";
-import { SortArrows } from "../tables/SortArrows";
+import { useTableSort } from '../../contexts/hooks/TableSort';
+import { SortArrows } from '../tables/SortArrows';
 
 export const AccountsTable = ({
   data,
@@ -30,12 +30,12 @@ export const AccountsTable = ({
   searchQuery,
   onUpdate,
 }) => {
-  const hoverBg = useColorModeValue("gray.50", "gray.700");
+  const hoverBg = useColorModeValue('gray.50', 'gray.700');
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
 
   useEffect(() => {
     function filterUpdates(search) {
-      if (search === "") {
+      if (search === '') {
         setData(originalData);
         return;
       }
@@ -57,14 +57,11 @@ export const AccountsTable = ({
 
   return (
     <TableContainer>
-      <Table
-        variant="simple"
-        size="md"
-      >
+      <Table variant="simple" size="md">
         <Thead>
           <Tr>
             <Th
-              onClick={() => handleSort("firstName")}
+              onClick={() => handleSort('firstName')}
               cursor="pointer"
               color="black"
               fontSize="sm"
@@ -72,13 +69,10 @@ export const AccountsTable = ({
               fontWeight="bold"
             >
               Name
-              <SortArrows
-                columnKey="firstName"
-                sortOrder={sortOrder}
-              />
+              <SortArrows columnKey="firstName" sortOrder={sortOrder} />
             </Th>
             <Th
-              onClick={() => handleSort("email")}
+              onClick={() => handleSort('email')}
               cursor="pointer"
               color="black"
               fontSize="sm"
@@ -86,13 +80,10 @@ export const AccountsTable = ({
               fontWeight="bold"
             >
               Email
-              <SortArrows
-                columnKey="email"
-                sortOrder={sortOrder}
-              />
+              <SortArrows columnKey="email" sortOrder={sortOrder} />
             </Th>
             <Th
-              onClick={() => handleSort("password")}
+              onClick={() => handleSort('password')}
               cursor="pointer"
               color="black"
               fontSize="sm"
@@ -100,13 +91,10 @@ export const AccountsTable = ({
               fontWeight="bold"
             >
               Password
-              <SortArrows
-                columnKey="passsword"
-                sortOrder={sortOrder}
-              />
+              <SortArrows columnKey="passsword" sortOrder={sortOrder} />
             </Th>
             <Th
-              onClick={() => handleSort("role")}
+              onClick={() => handleSort('role')}
               cursor="pointer"
               color="black"
               fontSize="sm"
@@ -114,13 +102,10 @@ export const AccountsTable = ({
               fontWeight="bold"
             >
               Type
-              <SortArrows
-                columnKey="role"
-                sortOrder={sortOrder}
-              />
+              <SortArrows columnKey="role" sortOrder={sortOrder} />
             </Th>
             <Th
-              onClick={() => handleSort("programs")}
+              onClick={() => handleSort('programs')}
               cursor="pointer"
               color="black"
               fontSize="sm"
@@ -128,10 +113,7 @@ export const AccountsTable = ({
               fontWeight="bold"
             >
               Program(s)
-              <SortArrows
-                columnKey="programs"
-                sortOrder={sortOrder}
-              />
+              <SortArrows columnKey="programs" sortOrder={sortOrder} />
             </Th>
             <Th width="50px"></Th>
           </Tr>
@@ -147,84 +129,73 @@ export const AccountsTable = ({
             </Tr>
           ) : (
             data.map((user) => (
-            <Tr
-              key={user.id}
-              _hover={{
-                bg: hoverBg,
-                "& .action-group": { opacity: 1, visibility: "visible" },
-              }}
-              transition="background 0.2s"
-            >
-              <Td fontWeight="medium">
-                {user.firstName} {user.lastName}
-              </Td>
-
-              <Td>{user.email}</Td>
-
-              <Td>
-                <HStack spacing={2}>
-                  {/* TODO: Update to utilize password field when data is available + hidden functionality */}
-                  <Text
-                    fontSize="lg"
-                    lineHeight="1"
-                    mt="6px"
-                  >
-                    ********
-                  </Text>
-                  <Icon
-                    as={FiEyeOff}
-                    color="gray.500"
-                    cursor="pointer"
-                  />
-                </HStack>
-              </Td>
-
-              <Td>
-                <Badge
-                  px={4}
-                  py={1}
-                  borderRadius="full"
-                  bg="gray.200"
-                  color="gray.800"
-                  textTransform="capitalize"
-                  fontWeight="normal"
-                  fontSize="sm"
-                >
-                  {user.role}
-                </Badge>
-              </Td>
-
-              <Td>
-                {Array.isArray(user.programs) && user.programs.length > 0
-                  ? user.programs.join(", ")
-                  : "-"}
-              </Td>
-
-              <Td
-                p={0}
-                textAlign="right"
+              <Tr
+                key={user.id}
+                _hover={{
+                  bg: hoverBg,
+                  '& .action-group': { opacity: 1, visibility: 'visible' },
+                }}
+                transition="background 0.2s"
               >
-                <Box
-                  className="action-group"
-                  opacity={0}
-                  visibility="hidden"
-                  transition="all 0.2s"
-                  pr={4}
-                >
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    leftIcon={<FiEdit2 />}
-                    colorScheme="gray"
-                    bg="white"
-                    onClick={() => onUpdate(user)}
+                <Td fontWeight="medium">
+                  {user.firstName} {user.lastName}
+                </Td>
+
+                <Td>{user.email}</Td>
+
+                <Td>
+                  <HStack spacing={2}>
+                    {/* TODO: Update to utilize password field when data is available + hidden functionality */}
+                    <Text fontSize="lg" lineHeight="1" mt="6px">
+                      ********
+                    </Text>
+                    <Icon as={FiEyeOff} color="gray.500" cursor="pointer" />
+                  </HStack>
+                </Td>
+
+                <Td>
+                  <Badge
+                    px={4}
+                    py={1}
+                    borderRadius="full"
+                    bg="gray.200"
+                    color="gray.800"
+                    textTransform="capitalize"
+                    fontWeight="normal"
+                    fontSize="sm"
                   >
-                    Update
-                  </Button>
-                </Box>
-              </Td>
-            </Tr>
-          ))
+                    {user.role}
+                  </Badge>
+                </Td>
+
+                <Td>
+                  {Array.isArray(user.programs) && user.programs.length > 0
+                    ? user.programs.join(', ')
+                    : '-'}
+                </Td>
+
+                <Td p={0} textAlign="right">
+                  <Box
+                    className="action-group"
+                    opacity={0}
+                    visibility="hidden"
+                    transition="all 0.2s"
+                    pr={4}
+                  >
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      leftIcon={<FiEdit2 />}
+                      colorScheme="gray"
+                      bg="white"
+                      onClick={() => onUpdate(user)}
+                    >
+                      Update
+                    </Button>
+                  </Box>
+                </Td>
+              </Tr>
+            ))
           )}
         </Tbody>
       </Table>

@@ -1,15 +1,15 @@
-import { keysToCamel } from "@/common/utils";
-import express from "express";
+import { keysToCamel } from '@/common/utils';
+import express from 'express';
 
-import { db } from "../db/db-pgp";
+import { db } from '../db/db-pgp';
 
 const instrumentChangeRouter = express.Router();
 instrumentChangeRouter.use(express.json());
 
-instrumentChangeRouter.post("/", async (req, res) => {
+instrumentChangeRouter.post('/', async (req, res) => {
   try {
     const { instrumentId, updateId, amountChanged } = req.body;
-    console.log("POST /instrument-changes body:", req.body);
+    console.log('POST /instrument-changes body:', req.body);
 
     const newChange = await db.query(
       `INSERT INTO instrument_change
@@ -22,22 +22,22 @@ instrumentChangeRouter.post("/", async (req, res) => {
     res.status(201).json(keysToCamel(newChange[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-instrumentChangeRouter.get("/", async (req, res) => {
+instrumentChangeRouter.get('/', async (req, res) => {
   try {
     const changes = await db.query(`SELECT * FROM instrument_change;`);
 
     res.status(200).json(keysToCamel(changes));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-instrumentChangeRouter.get("/update/:updateId", async (req, res) => {
+instrumentChangeRouter.get('/update/:updateId', async (req, res) => {
   try {
     const { updateId } = req.params;
 
@@ -47,17 +47,17 @@ instrumentChangeRouter.get("/update/:updateId", async (req, res) => {
     );
 
     if (change.length === 0) {
-      return res.status(404).send("Instrument change not found");
+      return res.status(404).send('Instrument change not found');
     }
 
     res.status(200).json(change.map(keysToCamel));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-instrumentChangeRouter.get("/:id", async (req, res) => {
+instrumentChangeRouter.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -67,17 +67,17 @@ instrumentChangeRouter.get("/:id", async (req, res) => {
     );
 
     if (change.length === 0) {
-      return res.status(404).send("Instrument change not found");
+      return res.status(404).send('Instrument change not found');
     }
 
     res.status(200).json(keysToCamel(change[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-instrumentChangeRouter.put("/:id", async (req, res) => {
+instrumentChangeRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { instrumentId, updateId, amountChanged } = req.body;
@@ -93,17 +93,17 @@ instrumentChangeRouter.put("/:id", async (req, res) => {
     );
 
     if (updatedChange.length === 0) {
-      return res.status(404).send("Instrument change not found");
+      return res.status(404).send('Instrument change not found');
     }
 
     res.status(200).json(keysToCamel(updatedChange[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-instrumentChangeRouter.delete("/:id", async (req, res) => {
+instrumentChangeRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -115,17 +115,17 @@ instrumentChangeRouter.delete("/:id", async (req, res) => {
     );
 
     if (deletedChange.length === 0) {
-      return res.status(404).send("Instrument change not found");
+      return res.status(404).send('Instrument change not found');
     }
 
     res.status(200).json(keysToCamel(deletedChange[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-instrumentChangeRouter.delete("/update/:updateId", async (req, res) => {
+instrumentChangeRouter.delete('/update/:updateId', async (req, res) => {
   try {
     const { updateId } = req.params;
 
@@ -137,13 +137,13 @@ instrumentChangeRouter.delete("/update/:updateId", async (req, res) => {
     );
 
     if (deletedChange.length === 0) {
-      return res.status(404).send("Instrument change not found");
+      return res.status(404).send('Instrument change not found');
     }
 
     res.status(200).json(keysToCamel(deletedChange[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 

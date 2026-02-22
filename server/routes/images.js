@@ -1,6 +1,6 @@
-import express from "express";
+import express from 'express';
 
-import { deleteFromS3, getS3ImageURL, getS3UploadURL } from "../common/s3";
+import { deleteFromS3, getS3ImageURL, getS3UploadURL } from '../common/s3';
 
 export const imagesRouter = express.Router();
 imagesRouter.use(express.json());
@@ -11,9 +11,9 @@ imagesRouter.use(express.json());
  * Body: { fileName (optional), contentType (optional, defaults to "image/jpeg") }
  * Returns: { success: true, uploadUrl: string, key: string, bucket: string }
  */
-imagesRouter.post("/upload-url", async (req, res) => {
+imagesRouter.post('/upload-url', async (req, res) => {
   try {
-    const { fileName, contentType = "image/jpeg" } = req.body;
+    const { fileName, contentType = 'image/jpeg' } = req.body;
 
     const result = await getS3UploadURL(fileName, contentType);
 
@@ -22,10 +22,10 @@ imagesRouter.post("/upload-url", async (req, res) => {
       ...result,
     });
   } catch (err) {
-    console.error("Error generating upload URL:", err);
+    console.error('Error generating upload URL:', err);
     res.status(500).json({
       success: false,
-      error: "Failed to generate upload URL",
+      error: 'Failed to generate upload URL',
     });
   }
 });
@@ -37,7 +37,7 @@ imagesRouter.post("/upload-url", async (req, res) => {
  * Query: expiresIn (optional) - expiration time in seconds (default: 3600)
  * Returns: { success: true, url: string, key: string }
  */
-imagesRouter.get("/url/:key", async (req, res) => {
+imagesRouter.get('/url/:key', async (req, res) => {
   try {
     const { key } = req.params;
     const expiresIn = req.query.expiresIn
@@ -54,10 +54,10 @@ imagesRouter.get("/url/:key", async (req, res) => {
       key: decodedKey,
     });
   } catch (err) {
-    console.error("Error generating image URL:", err);
+    console.error('Error generating image URL:', err);
     res.status(500).json({
       success: false,
-      error: "Failed to generate image URL",
+      error: 'Failed to generate image URL',
     });
   }
 });
@@ -68,7 +68,7 @@ imagesRouter.get("/url/:key", async (req, res) => {
  * Params: key - S3 object key
  * Returns: { success: true, message: string }
  */
-imagesRouter.delete("/:key", async (req, res) => {
+imagesRouter.delete('/:key', async (req, res) => {
   try {
     const { key } = req.params;
     const decodedKey = decodeURIComponent(key);
@@ -77,13 +77,13 @@ imagesRouter.delete("/:key", async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Image deleted successfully",
+      message: 'Image deleted successfully',
     });
   } catch (err) {
-    console.error("Error deleting image:", err);
+    console.error('Error deleting image:', err);
     res.status(500).json({
       success: false,
-      error: "Failed to delete image",
+      error: 'Failed to delete image',
     });
   }
 });

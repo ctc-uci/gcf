@@ -1,13 +1,13 @@
-import { keysToCamel } from "@/common/utils";
-import express from "express";
+import { keysToCamel } from '@/common/utils';
+import express from 'express';
 
-import { db } from "../db/db-pgp";
+import { db } from '../db/db-pgp';
 
 const adminRouter = express.Router();
 adminRouter.use(express.json());
 
 // GET /admin/programs - returns all programs with student/instrument counts
-adminRouter.get("/programs", async (req, res) => {
+adminRouter.get('/programs', async (req, res) => {
   try {
     const data = await db.query(
       `SELECT
@@ -33,12 +33,12 @@ adminRouter.get("/programs", async (req, res) => {
     res.json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
 // GET /admin/stats - returns aggregated statistics
-adminRouter.get("/stats", async (req, res) => {
+adminRouter.get('/stats', async (req, res) => {
   try {
     const stats = await db.query(
       `SELECT
@@ -51,7 +51,7 @@ adminRouter.get("/stats", async (req, res) => {
     res.json(keysToCamel(stats[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

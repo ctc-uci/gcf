@@ -1,22 +1,22 @@
-import { keysToCamel } from "@/common/utils";
-import express from "express";
+import { keysToCamel } from '@/common/utils';
+import express from 'express';
 
-import { db } from "../db/db-pgp";
+import { db } from '../db/db-pgp';
 
 const mediaChangeRouter = express.Router();
 mediaChangeRouter.use(express.json());
 
-mediaChangeRouter.get("/", async (req, res) => {
+mediaChangeRouter.get('/', async (req, res) => {
   try {
     const data = await db.query(`SELECT * FROM media_change`);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-mediaChangeRouter.get("/:id", async (req, res) => {
+mediaChangeRouter.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const mediaChange = await db.query(
@@ -25,19 +25,19 @@ mediaChangeRouter.get("/:id", async (req, res) => {
     );
 
     if (mediaChange.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(mediaChange[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-mediaChangeRouter.post("/", async (req, res) => {
+mediaChangeRouter.post('/', async (req, res) => {
   try {
-    console.log("Req Body: ", req.body);
+    console.log('Req Body: ', req.body);
     const { update_id, s3_key, file_name, file_type, is_thumbnail } = req.body;
     const newMediaChange = await db.query(
       `INSERT INTO media_change (update_id, s3_key, file_name, file_type, is_thumbnail) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
@@ -46,11 +46,11 @@ mediaChangeRouter.post("/", async (req, res) => {
     res.status(201).json(keysToCamel(newMediaChange[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-mediaChangeRouter.put("/:id", async (req, res) => {
+mediaChangeRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { update_id, s3_key, file_name, file_type, is_thumbnail } = req.body;
@@ -67,17 +67,17 @@ mediaChangeRouter.put("/:id", async (req, res) => {
     );
 
     if (updatedMediaChange.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(updatedMediaChange[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-mediaChangeRouter.delete("/:id", async (req, res) => {
+mediaChangeRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const deletedMediaChange = await db.query(
@@ -86,19 +86,19 @@ mediaChangeRouter.delete("/:id", async (req, res) => {
     );
 
     if (deletedMediaChange.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(deletedMediaChange[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
 //this route gets all the media associated with a given program director
 //also gets program name given the program director
-mediaChangeRouter.get("/:userId/media", async (req, res) => {
+mediaChangeRouter.get('/:userId/media', async (req, res) => {
   try {
     const { userId } = req.params;
     const result = await db.query(
@@ -138,7 +138,7 @@ mediaChangeRouter.get("/:userId/media", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 

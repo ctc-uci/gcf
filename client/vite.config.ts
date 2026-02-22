@@ -1,8 +1,8 @@
 /// <reference types="vitest" />
-import path from "path";
+import path from 'path';
 
-import react from "@vitejs/plugin-react";
-import { defineConfig, loadEnv } from "vite";
+import react from '@vitejs/plugin-react';
+import { defineConfig, loadEnv } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
 
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "src"),
+        '@': path.resolve(__dirname, 'src'),
       },
     },
 
@@ -24,19 +24,19 @@ export default defineConfig(({ mode }) => {
      */
     server: {
       proxy: {
-        "/__/auth": {
+        '/__/auth': {
           target: `https://${process.env.VITE_FIREBASE_AUTHDOMAIN}`,
           changeOrigin: true,
           secure: true,
-          rewrite: (path) => path.replace(/^\/__\/auth/, "/__/auth"),
+          rewrite: (path) => path.replace(/^\/__\/auth/, '/__/auth'),
         },
       },
     },
 
     test: {
       globals: true,
-      environment: "jsdom",
-      setupFiles: ["./src/test/setup.ts"],
+      environment: 'jsdom',
+      setupFiles: ['./src/test/setup.ts'],
     },
   };
 });

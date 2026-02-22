@@ -1,4 +1,4 @@
-import { Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
+import { Input, InputGroup, InputLeftElement } from '@chakra-ui/react';
 
 function SearchBar({ text, onChange }) {
   return (

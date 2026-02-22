@@ -1,7 +1,7 @@
-import { keysToCamel } from "@/common/utils";
-import express from "express";
+import { keysToCamel } from '@/common/utils';
+import express from 'express';
 
-import { db } from "../db/db-pgp";
+import { db } from '../db/db-pgp';
 
 const rdProgramTableRouter = express.Router();
 rdProgramTableRouter.use(express.json());
@@ -51,14 +51,14 @@ async function getDataByUserId(userId) {
   return data;
 }
 
-rdProgramTableRouter.get("/:userId", async (req, res) => {
+rdProgramTableRouter.get('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const data = await getDataByUserId(userId);
     res.json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

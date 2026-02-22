@@ -1,6 +1,6 @@
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
-import { Navigate } from "react-router-dom";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
   element: JSX.Element;
@@ -20,9 +20,9 @@ export const ProtectedRoute = ({
   return currentUser && isValidRole ? (
     element
   ) : currentUser ? (
-    <Navigate to={"dashboard"} />
+    <Navigate to={'dashboard'} />
   ) : (
-    <Navigate to={"/login"} />
+    <Navigate to={'/login'} />
   );
 };
 
@@ -37,6 +37,6 @@ function getIsValidRole(roles: string[], role: string | undefined) {
   return (
     roles.length === 0 ||
     (role !== undefined && roles.includes(role)) ||
-    role === "admin"
+    role === 'admin'
   );
 }

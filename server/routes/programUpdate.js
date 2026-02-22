@@ -1,23 +1,23 @@
-import { keysToCamel } from "@/common/utils";
-import { db } from "@/db/db-pgp";
-import { json, Router } from "express";
+import { keysToCamel } from '@/common/utils';
+import { db } from '@/db/db-pgp';
+import { json, Router } from 'express';
 
 const programUpdateRouter = Router();
 programUpdateRouter.use(json());
 
 // Reading all program updates
-programUpdateRouter.get("/", async (req, res) => {
+programUpdateRouter.get('/', async (req, res) => {
   try {
     const data = await db.query(`SELECT * FROM program_update`);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
 // Reading a program update
-programUpdateRouter.get("/:id", async (req, res) => {
+programUpdateRouter.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const entry = await db.query(
@@ -28,18 +28,18 @@ programUpdateRouter.get("/:id", async (req, res) => {
     );
 
     if (entry.length === 0) {
-      return res.status(404).send("Program update not found");
+      return res.status(404).send('Program update not found');
     }
 
     res.status(200).json(keysToCamel(entry[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
 // Creating a program update
-programUpdateRouter.post("/", async (req, res) => {
+programUpdateRouter.post('/', async (req, res) => {
   const { title, program_id, created_by, update_date, note } = req.body;
   try {
     const newEntry = await db.query(
@@ -51,12 +51,12 @@ programUpdateRouter.post("/", async (req, res) => {
     res.status(201).json(keysToCamel(newEntry[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
 // Updating a program update
-programUpdateRouter.put("/:id", async (req, res) => {
+programUpdateRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { title, program_id, created_by, update_date, note } = req.body;
@@ -74,18 +74,18 @@ programUpdateRouter.put("/:id", async (req, res) => {
     );
 
     if (newProgramUpdate.length === 0) {
-      return res.status(404).send("Program update not found");
+      return res.status(404).send('Program update not found');
     }
 
     res.status(200).json(keysToCamel(newProgramUpdate[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
 // Deleting a program update
-programUpdateRouter.delete("/:id", async (req, res) => {
+programUpdateRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -97,13 +97,13 @@ programUpdateRouter.delete("/:id", async (req, res) => {
     );
 
     if (deletedProgramUpdate.length === 0) {
-      return res.status(404).send("Program update not found");
+      return res.status(404).send('Program update not found');
     }
 
     res.status(200).json(keysToCamel(deletedProgramUpdate[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 

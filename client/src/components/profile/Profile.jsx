@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { Box, HStack, Image, Spinner, Text, VStack } from "@chakra-ui/react";
+import { Box, HStack, Image, Spinner, Text, VStack } from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
-const DEFAULT_PROFILE_IMAGE = "/default-profile.png";
+const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
 
 const fetchProgramData = async (backend, userId) => {
   try {
@@ -14,7 +14,7 @@ const fetchProgramData = async (backend, userId) => {
     );
     return response.data;
   } catch (err) {
-    console.error("Error fetching program data:", err);
+    console.error('Error fetching program data:', err);
     return null;
   }
 };
@@ -30,7 +30,7 @@ const fetchRegionData = async (backend, userId) => {
     }
     return null;
   } catch (err) {
-    console.error("Error fetching region data:", err);
+    console.error('Error fetching region data:', err);
     return null;
   }
 };
@@ -57,15 +57,15 @@ export const Profile = () => {
 
         const userRole = userData.role;
 
-        if (userRole === "Program Director") {
+        if (userRole === 'Program Director') {
           const programData = await fetchProgramData(backend, userData.id);
           setRoleSpecificData(programData);
-        } else if (userRole === "Regional Director") {
+        } else if (userRole === 'Regional Director') {
           const regionData = await fetchRegionData(backend, userData.id);
           setRoleSpecificData(regionData);
         }
       } catch (err) {
-        console.error("Error fetching user data:", err);
+        console.error('Error fetching user data:', err);
       } finally {
         setLoading(false);
       }
@@ -76,12 +76,7 @@ export const Profile = () => {
 
   if (loading) {
     return (
-      <Box
-        h="100vh"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
+      <Box h="100vh" display="flex" alignItems="center" justifyContent="center">
         <Spinner size="xl" />
       </Box>
     );
@@ -92,42 +87,29 @@ export const Profile = () => {
   }
 
   const profilePicture =
-    gcfUser.picture && gcfUser.picture.trim() !== ""
+    gcfUser.picture && gcfUser.picture.trim() !== ''
       ? gcfUser.picture
       : DEFAULT_PROFILE_IMAGE;
   const fullName =
-    `${gcfUser.firstName || ""} ${gcfUser.lastName || ""}`.trim() || "User";
-  const email = currentUser?.email || "";
+    `${gcfUser.firstName || ''} ${gcfUser.lastName || ''}`.trim() || 'User';
+  const email = currentUser?.email || '';
   const userRole = gcfUser.role;
 
   const profileData = [
-    { label: "Email", value: email },
-    { label: "Role", value: userRole || "" },
+    { label: 'Email', value: email },
+    { label: 'Role', value: userRole || '' },
   ];
 
-  if (userRole === "Program Director" && roleSpecificData?.name) {
-    profileData.push({ label: "Program", value: roleSpecificData.name });
-  } else if (userRole === "Regional Director" && roleSpecificData?.name) {
-    profileData.push({ label: "Region", value: roleSpecificData.name });
+  if (userRole === 'Program Director' && roleSpecificData?.name) {
+    profileData.push({ label: 'Program', value: roleSpecificData.name });
+  } else if (userRole === 'Regional Director' && roleSpecificData?.name) {
+    profileData.push({ label: 'Region', value: roleSpecificData.name });
   }
 
   return (
-    <Box
-      h="100vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-    >
-      <VStack
-        spacing={8}
-        align="center"
-        p={4}
-        w="100%"
-      >
-        <VStack
-          spacing={4}
-          align="center"
-        >
+    <Box h="100vh" display="flex" alignItems="center" justifyContent="center">
+      <VStack spacing={8} align="center" p={4} w="100%">
+        <VStack spacing={4} align="center">
           <Image
             src={profilePicture}
             boxSize="300px"
@@ -135,29 +117,14 @@ export const Profile = () => {
             fit="cover"
             alt="Profile"
           />
-          <Text
-            fontSize="2xl"
-            fontWeight="bold"
-          >
+          <Text fontSize="2xl" fontWeight="bold">
             {fullName}
           </Text>
         </VStack>
-        <VStack
-          spacing="10px"
-          align="flex-start"
-          w="100%"
-          maxW="624px"
-        >
+        <VStack spacing="10px" align="flex-start" w="100%" maxW="624px">
           {profileData.map(({ label, value }) => (
-            <HStack
-              key={label}
-              spacing={40}
-            >
-              <Text
-                w="80px"
-                fontSize="lg"
-                fontWeight="medium"
-              >
+            <HStack key={label} spacing={40}>
+              <Text w="80px" fontSize="lg" fontWeight="medium">
                 {label}
               </Text>
               <Text

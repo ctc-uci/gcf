@@ -10,23 +10,32 @@
     "dev": "yarn tsx concurrently.ts",
     "start": "yarn tsx concurrently.ts",
     "prepare": "husky install",
-    "lint": "eslint",
-    "format": "npx prettier --write .",
     "test": "node test-runner.js",
     "test:server": "yarn workspace server test",
-    "test:client": "yarn workspace client test"
+    "test:client": "yarn workspace client test",
+    "lint": "eslint . --fix",
+    "format": "prettier --write .",
+    "fix": "yarn format && yarn lint --fix"
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx}": "yarn run eslint"
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{css,md,json}": [
+      "prettier --write"
+    ]
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
     "@types/lint-staged": "^13.3.0",
     "concurrently": "^8.2.2",
     "eslint": "^9.9.0",
+    "eslint-config-prettier": "^10.1.8",
     "globals": "^15.9.0",
-    "husky": "^9.0.11",
-    "prettier": "3.3.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
     "typescript-eslint": "^8.1.0"
   },
   "workspaces": {

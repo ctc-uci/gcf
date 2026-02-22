@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 import {
   Button,
@@ -13,11 +13,11 @@ import {
   Input,
   Select,
   VStack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
 export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const { currentUser } = useAuthContext();
@@ -29,11 +29,11 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const targetUserId = targetUser?.id;
 
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    role: "",
-    email: "",
-    password: "",
+    first_name: '',
+    last_name: '',
+    role: '',
+    email: '',
+    password: '',
     programs: [],
     regions: [],
   });
@@ -43,21 +43,21 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   useEffect(() => {
     if (!targetUser) {
       setFormData({
-        first_name: "",
-        last_name: "",
-        role: "",
-        email: "",
-        password: "",
+        first_name: '',
+        last_name: '',
+        role: '',
+        email: '',
+        password: '',
         programs: [],
         regions: [],
       });
     } else {
       setFormData({
-        first_name: targetUser.firstName ?? "",
-        last_name: targetUser.lastName ?? "",
-        role: targetUser.role ?? "",
-        email: targetUser.email ?? "",
-        password: "",
+        first_name: targetUser.firstName ?? '',
+        last_name: targetUser.lastName ?? '',
+        role: targetUser.role ?? '',
+        email: targetUser.email ?? '',
+        password: '',
         programs: [],
         regions: [],
       });
@@ -70,10 +70,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
             );
             setFormData((prev) => ({
               ...prev,
-              email: response.data.email ?? "",
+              email: response.data.email ?? '',
             }));
           } catch (error) {
-            console.error("Error loading target user email", error);
+            console.error('Error loading target user email', error);
           }
         };
         fetchEmail();
@@ -85,27 +85,27 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     async function fetchPrograms() {
       try {
         let response;
-        if (role === "Regional Director") {
+        if (role === 'Regional Director') {
           response = await backend.get(
             `/regional-directors/me/${userId}/programs`
           );
         } else {
-          response = await backend.get("/program");
+          response = await backend.get('/program');
         }
         const program_list = response.data;
         setCurrentPrograms(program_list);
       } catch (error) {
-        console.error("Error fetching programs", error);
+        console.error('Error fetching programs', error);
       }
     }
 
     async function fetchRegions() {
       try {
-        const response = await backend.get("/region");
+        const response = await backend.get('/region');
         const region_list = response.data;
         setCurrentRegions(region_list);
       } catch (error) {
-        console.error("Error fetching regions", error);
+        console.error('Error fetching regions', error);
       }
     }
 
@@ -118,7 +118,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   useEffect(() => {
     if (!targetUserId || !targetUser) return;
 
-    if (targetUser.role === "Program Director") {
+    if (targetUser.role === 'Program Director') {
       const fetchUserPrograms = async () => {
         try {
           const response = await backend.get(
@@ -137,7 +137,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       fetchUserPrograms();
     }
 
-    if (targetUser.role === "Regional Director") {
+    if (targetUser.role === 'Regional Director') {
       const fetchUserRegion = async () => {
         try {
           const response = await backend.get(
@@ -175,20 +175,20 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         await handleUpdateUser();
       }
 
-      alert("User saved successfully!");
+      alert('User saved successfully!');
       onSave();
       onClose();
     } catch (error) {
-      console.error("Error fetching user: ", error);
+      console.error('Error fetching user: ', error);
 
       const errorMessage = error.response?.data?.error || error.message;
 
       if (
-        errorMessage.includes("email-already-exists") ||
-        errorMessage.includes("email address is already in use")
+        errorMessage.includes('email-already-exists') ||
+        errorMessage.includes('email address is already in use')
       ) {
         alert(
-          "This email is already registered. Please use a different email address."
+          'This email is already registered. Please use a different email address.'
         );
       } else {
         alert(`Error: ${errorMessage}`);
@@ -206,7 +206,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       !formData.email ||
       !formData.password
     ) {
-      throw new Error("Please fill in all fields on the form.");
+      throw new Error('Please fill in all fields on the form.');
     }
 
     const userData = {
@@ -219,7 +219,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       programId: formData.programs.length > 0 ? formData.programs[0].id : null,
       regionId: formData.regions.length > 0 ? formData.regions[0].id : null,
     };
-    await backend.post("/gcf-users/admin/create-user", userData);
+    await backend.post('/gcf-users/admin/create-user', userData);
   };
 
   const handleUpdateUser = async () => {
@@ -229,7 +229,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       !formData.role ||
       !formData.email
     ) {
-      throw new Error("Please fill in all fields on the form.");
+      throw new Error('Please fill in all fields on the form.');
     }
     const userData = {
       email: formData.email,
@@ -245,21 +245,17 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     if (formData.password && formData.password.trim().length > 0) {
       userData.password = formData.password;
     }
-    await backend.put("/gcf-users/admin/update-user", userData);
+    await backend.put('/gcf-users/admin/update-user', userData);
   };
 
   return (
     <>
-      <Drawer
-        isOpen={isOpen}
-        placement="right"
-        onClose={onClose}
-      >
+      <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
           <DrawerHeader>
-            {targetUserId ? "Edit Account" : "Create Account"}
+            {targetUserId ? 'Edit Account' : 'Create Account'}
           </DrawerHeader>
 
           <DrawerBody>
@@ -300,7 +296,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                   name="password"
                   type="password"
                   placeholder={
-                    targetUserId ? "Leave blank to keep currrent" : "Password"
+                    targetUserId ? 'Leave blank to keep currrent' : 'Password'
                   }
                   value={formData.password}
                   onChange={handleChange}
@@ -315,16 +311,16 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                   onChange={handleChange}
                   value={formData.role}
                 >
-                  {role === "Super Admin" && (
+                  {role === 'Super Admin' && (
                     <option value="Admin">Admin</option>
                   )}
-                  {(role === "Admin" || role === "Super Admin") && (
+                  {(role === 'Admin' || role === 'Super Admin') && (
                     <option value="Regional Director">Regional Director</option>
                   )}
                   <option value="Program Director">Program Director</option>
                 </Select>
               </FormControl>
-              {formData.role === "Program Director" && (
+              {formData.role === 'Program Director' && (
                 <FormControl>
                   <FormLabel>Program(s)</FormLabel>
                   <Select
@@ -332,7 +328,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     value={
                       formData.programs.length > 0
                         ? formData.programs[0].id
-                        : ""
+                        : ''
                     }
                     onChange={(e) => {
                       const selectedProgramId = e.target.value;
@@ -353,10 +349,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     {currentPrograms &&
                       currentPrograms.map((program) => {
                         return (
-                          <option
-                            key={program.id}
-                            value={program.id}
-                          >
+                          <option key={program.id} value={program.id}>
                             {program.name}
                           </option>
                         );
@@ -364,13 +357,13 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                   </Select>
                 </FormControl>
               )}
-              {formData.role === "Regional Director" && (
+              {formData.role === 'Regional Director' && (
                 <FormControl>
                   <FormLabel>Region</FormLabel>
                   <Select
                     placeholder="Select a region"
                     value={
-                      formData.regions.length > 0 ? formData.regions[0].id : ""
+                      formData.regions.length > 0 ? formData.regions[0].id : ''
                     }
                     onChange={(e) => {
                       const selectedRegionId = e.target.value;
@@ -391,10 +384,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     {currentRegions &&
                       currentRegions.map((region) => {
                         return (
-                          <option
-                            key={region.id}
-                            value={region.id}
-                          >
+                          <option key={region.id} value={region.id}>
                             {region.name}
                           </option>
                         );

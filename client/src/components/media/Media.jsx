@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   Box,
@@ -9,13 +9,13 @@ import {
   Spinner,
   useDisclosure,
   VStack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
-import { MediaGrid } from "./MediaGrid";
-import { MediaUploadModal } from "./MediaUploadModal";
+import { MediaGrid } from './MediaGrid';
+import { MediaUploadModal } from './MediaUploadModal';
 
 export const Media = () => {
   const { currentUser } = useAuthContext();
@@ -25,7 +25,7 @@ export const Media = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [media, setMedia] = useState([]);
-  const [programName, setProgramName] = useState("");
+  const [programName, setProgramName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -44,7 +44,7 @@ export const Media = () => {
       setMedia(transformedMedia);
       setProgramName(response.data.programName);
     } catch (error) {
-      console.error("Error loading media data:", error);
+      console.error('Error loading media data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -70,23 +70,10 @@ export const Media = () => {
 
   return (
     <Box minH="100vh">
-      <Container
-        maxW="container.xl"
-        py={8}
-      >
-        <Box
-          borderRadius="lg"
-          p={8}
-        >
-          <VStack
-            align="start"
-            spacing={6}
-            w="full"
-          >
-            <Heading
-              size="xl"
-              color="gray.800"
-            >
+      <Container maxW="container.xl" py={8}>
+        <Box borderRadius="lg" p={8}>
+          <VStack align="start" spacing={6} w="full">
+            <Heading size="xl" color="gray.800">
               {programName} Media
             </Heading>
 
@@ -95,16 +82,13 @@ export const Media = () => {
               bg="white"
               borderColor="gray.800"
               color="gray.800"
-              _hover={{ bg: "gray.50" }}
+              _hover={{ bg: 'gray.50' }}
               onClick={onOpen}
             >
               + New
             </Button>
 
-            <MediaGrid
-              mediaItems={media}
-              programName={programName}
-            />
+            <MediaGrid mediaItems={media} programName={programName} />
           </VStack>
         </Box>
       </Container>

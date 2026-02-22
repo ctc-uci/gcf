@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { ArrowRightIcon, CloseIcon } from "@chakra-ui/icons";
+import { ArrowRightIcon, CloseIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -19,28 +19,28 @@ import {
   Textarea,
   useToast,
   VStack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
 export const ProgramUpdateForm = ({ programUpdateId = null }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [programId, setProgramId] = useState("");
+  const [programId, setProgramId] = useState('');
   const [availablePrograms, setAvailablePrograms] = useState([]);
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
 
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
+  const [title, setTitle] = useState('');
+  const [date, setDate] = useState('');
   const [enrollmentNumber, setEnrollmentNumber] = useState(null);
   const [graduatedNumber, setGraduatedNumber] = useState(null);
   const [enrollmentChangeId, setEnrollmentChangeId] = useState(null);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState('');
 
-  const [selectedInstrument, setSelectedInstrument] = useState("");
-  const [newInstrumentName, setNewInstrumentName] = useState("");
+  const [selectedInstrument, setSelectedInstrument] = useState('');
+  const [newInstrumentName, setNewInstrumentName] = useState('');
   const [quantity, setQuantity] = useState(0);
 
   const [existingInstruments, setExistingInstruments] = useState([]);
@@ -55,10 +55,10 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
   useEffect(() => {
     const fetchInstruments = async () => {
       try {
-        const response = await backend.get("/instruments");
+        const response = await backend.get('/instruments');
         setExistingInstruments(response.data);
       } catch (error) {
-        console.error("Error fetching instruments:", error);
+        console.error('Error fetching instruments:', error);
         setExistingInstruments([]);
       }
     };
@@ -69,24 +69,24 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
     const fetchPrograms = async () => {
       try {
         let programs = [];
-        if (role === "Program Director") {
+        if (role === 'Program Director') {
           const response = await backend.get(
             `/program-directors/me/${currentUser?.uid}/program`
           );
           programs = response.data ? [response.data] : [];
-        } else if (role === "Regional Director") {
+        } else if (role === 'Regional Director') {
           const response = await backend.get(
             `/regional-directors/${currentUser?.uid}/programs`
           );
           programs = response.data || [];
-        } else if (role === "Admin") {
+        } else if (role === 'Admin') {
           const response = await backend.get(`/program`);
           programs = response.data || [];
         } else {
           toast({
-            title: "Authorization error",
-            description: "You are not authorized to create a program update.",
-            status: "error",
+            title: 'Authorization error',
+            description: 'You are not authorized to create a program update.',
+            status: 'error',
             duration: 5000,
             isClosable: true,
           });
@@ -98,11 +98,11 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
           setProgramId(programs[0].id);
         }
       } catch (error) {
-        console.error("Error fetching programs:", error);
+        console.error('Error fetching programs:', error);
         toast({
-          title: "Error",
-          description: "Failed to load programs.",
-          status: "error",
+          title: 'Error',
+          description: 'Failed to load programs.',
+          status: 'error',
           duration: 5000,
           isClosable: true,
         });
@@ -127,9 +127,9 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
         );
         const data = response.data;
 
-        setTitle(data.title || "");
-        setDate(data.updateDate?.split("T")[0] || "");
-        setNotes(data.note || "");
+        setTitle(data.title || '');
+        setDate(data.updateDate?.split('T')[0] || '');
+        setNotes(data.note || '');
         setProgramId(parseInt(data.programId, 10));
         try {
           const enrollmentResponse = await backend.get(
@@ -143,7 +143,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
             setGraduatedNumber(enrollmentData.graduatedChange || null);
           }
         } catch (error) {
-          console.error("Error fetching enrollment changes:", error);
+          console.error('Error fetching enrollment changes:', error);
         }
 
         try {
@@ -173,10 +173,10 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
             setInstrumentChangeMap(changeMeta);
           }
         } catch (error) {
-          console.error("Error fetching instrument changes:", error);
+          console.error('Error fetching instrument changes:', error);
         }
       } catch (error) {
-        console.error("Error fetching program update:", error);
+        console.error('Error fetching program update:', error);
       } finally {
         setIsLoading(false);
       }
@@ -206,7 +206,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
 
   const handleNewInstrument = () => {
     if (!validNewInstrument()) {
-      setNewInstrumentName("");
+      setNewInstrumentName('');
       return;
     }
   };
@@ -215,13 +215,13 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
     handleNewInstrument();
 
     if (!selectedInstrument && !newInstrumentName) {
-      console.log("nothing selected");
+      console.log('nothing selected');
       return;
     } else if (quantity === 0) {
-      console.log("quantity 0");
+      console.log('quantity 0');
       return;
     } else if (selectedInstrument && newInstrumentName) {
-      console.log("both selected");
+      console.log('both selected');
       return;
     }
 
@@ -234,17 +234,17 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
       [selectedInstrument || newInstrumentName]: parseInt(quantity),
     }));
 
-    setNewInstrumentName("");
-    setSelectedInstrument("");
+    setNewInstrumentName('');
+    setSelectedInstrument('');
     setQuantity(0);
   };
 
   const handleSubmit = async () => {
     if (!title.trim() || !date || !notes.trim()) {
       toast({
-        title: "Validation error",
-        description: "Please fill in title, date, and notes.",
-        status: "error",
+        title: 'Validation error',
+        description: 'Please fill in title, date, and notes.',
+        status: 'error',
         duration: 5000,
         isClosable: true,
       });
@@ -252,12 +252,12 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
     }
     if (
       !programUpdateId &&
-      (programId === null || programId === undefined || programId === "")
+      (programId === null || programId === undefined || programId === '')
     ) {
       toast({
-        title: "Validation error",
-        description: "A program must be selected to create an update.",
-        status: "error",
+        title: 'Validation error',
+        description: 'A program must be selected to create an update.',
+        status: 'error',
         duration: 5000,
         isClosable: true,
       });
@@ -282,7 +282,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
         );
       } else {
         const response = await backend.post(
-          "/program-updates",
+          '/program-updates',
           programUpdateData
         );
         updatedProgramUpdateId = response.data.id;
@@ -290,7 +290,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
 
       for (const instrumentName of newInstruments) {
         try {
-          await backend.post("/instruments", {
+          await backend.post('/instruments', {
             name: instrumentName,
           });
         } catch (error) {
@@ -298,13 +298,13 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
         }
       }
 
-      const instrumentsResponse = await backend.get("/instruments");
+      const instrumentsResponse = await backend.get('/instruments');
       setExistingInstruments(instrumentsResponse.data);
 
       const deletedInstruments = Object.keys(originalInstruments).filter(
         (name) => !addedInstruments[name]
       );
-      console.log("deletedInstruments to remove:", deletedInstruments);
+      console.log('deletedInstruments to remove:', deletedInstruments);
 
       for (const deletedName of deletedInstruments) {
         try {
@@ -364,7 +364,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
             );
             if (instrument) {
               try {
-                await backend.post("/instrument-changes", {
+                await backend.post('/instrument-changes', {
                   instrumentId: instrument.id,
                   updateId: updatedProgramUpdateId,
                   amountChanged: qty,
@@ -388,15 +388,15 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
             enrollment_change: enrollmentNumber,
             graduated_change: graduatedNumber || 0,
           });
-          console.log("Updated existing enrollment change");
+          console.log('Updated existing enrollment change');
         } else {
-          const enrollmentResponse = await backend.post("/enrollmentChange", {
+          const enrollmentResponse = await backend.post('/enrollmentChange', {
             update_id: updatedProgramUpdateId,
             enrollment_change: enrollmentNumber,
             graduated_change: graduatedNumber || 0,
           });
           setEnrollmentChangeId(enrollmentResponse.data.id);
-          console.log("Created new enrollment change");
+          console.log('Created new enrollment change');
         }
       }
 
@@ -416,7 +416,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
           setEnrollmentChangeId(enrollmentData.id);
           setEnrollmentNumber(enrollmentData.enrollmentChange || null);
           setGraduatedNumber(enrollmentData.graduatedChange || null);
-          console.log("Synced enrollment with server state:", enrollmentData);
+          console.log('Synced enrollment with server state:', enrollmentData);
         } else {
           setEnrollmentChangeId(null);
           setEnrollmentNumber(null);
@@ -424,7 +424,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
         }
       } catch (error) {
         console.error(
-          "Error refetching enrollment changes after submit:",
+          'Error refetching enrollment changes after submit:',
           error
         );
       }
@@ -455,7 +455,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
           setOriginalInstruments(JSON.parse(JSON.stringify(instrumentsMap)));
           setInstrumentChangeMap(changeMeta);
           console.log(
-            "Synced addedInstruments with server state:",
+            'Synced addedInstruments with server state:',
             instrumentsMap
           );
         } else {
@@ -465,20 +465,20 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
         }
       } catch (error) {
         console.error(
-          "Error refetching instrument changes after submit:",
+          'Error refetching instrument changes after submit:',
           error
         );
         setAddedInstruments({});
       }
 
       setNewInstruments([]);
-      setTitle("");
-      setDate("");
+      setTitle('');
+      setDate('');
       setEnrollmentNumber(null);
       setGraduatedNumber(null);
       setEnrollmentChangeId(null);
-      setNotes("");
-      setSelectedInstrument("");
+      setNotes('');
+      setSelectedInstrument('');
       if (programUpdateId === null) {
         setAddedInstruments({});
         setOriginalInstruments({});
@@ -486,25 +486,25 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
       }
 
       toast({
-        title: programUpdateId ? "Update saved" : "Update created",
+        title: programUpdateId ? 'Update saved' : 'Update created',
         description: programUpdateId
-          ? "Program update was updated successfully."
-          : "Program update was created successfully.",
-        status: "success",
+          ? 'Program update was updated successfully.'
+          : 'Program update was created successfully.',
+        status: 'success',
         duration: 5000,
         isClosable: true,
       });
     } catch (error) {
-      console.error("Error submitting program update:", error);
+      console.error('Error submitting program update:', error);
       const message =
         error?.response?.data?.message ??
         error?.message ??
-        "Something went wrong. Please try again.";
+        'Something went wrong. Please try again.';
       const statusCode = error?.response?.status;
       toast({
-        title: "Failed to save",
+        title: 'Failed to save',
         description: statusCode ? `${message} (${statusCode})` : message,
-        status: "error",
+        status: 'error',
         duration: 7000,
         isClosable: true,
       });
@@ -524,11 +524,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
       position="relative"
     >
       {/* TODO: Add OnClick */}
-      <Box
-        position="absolute"
-        top={4}
-        right={4}
-      >
+      <Box position="absolute" top={4} right={4}>
         <IconButton
           aria-label="Close"
           icon={<CloseIcon />}
@@ -542,10 +538,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
         <Heading size="md">Create New Update</Heading>
       </HStack>
       <FormControl>
-        <FormLabel
-          fontWeight="normal"
-          color="gray"
-        >
+        <FormLabel fontWeight="normal" color="gray">
           Title
         </FormLabel>
         <Input
@@ -558,10 +551,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
       </FormControl>
 
       <FormControl isRequired>
-        <FormLabel
-          fontWeight="normal"
-          color="gray"
-        >
+        <FormLabel fontWeight="normal" color="gray">
           Program
         </FormLabel>
         <Select
@@ -574,10 +564,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
           }
         >
           {availablePrograms.map((program) => (
-            <option
-              key={program.id}
-              value={program.id}
-            >
+            <option key={program.id} value={program.id}>
               {program.name}
             </option>
           ))}
@@ -585,10 +572,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
       </FormControl>
 
       <FormControl>
-        <FormLabel
-          fontWeight="normal"
-          color="gray"
-        >
+        <FormLabel fontWeight="normal" color="gray">
           Date
         </FormLabel>
         <Input
@@ -602,19 +586,13 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
         />
       </FormControl>
 
-      <HStack
-        width="100%"
-        spacing={4}
-      >
+      <HStack width="100%" spacing={4}>
         <FormControl flex={1}>
-          <FormLabel
-            fontWeight="normal"
-            color="gray"
-          >
+          <FormLabel fontWeight="normal" color="gray">
             # Students Currently Enrolled
           </FormLabel>
           <NumberInput
-            value={enrollmentNumber || ""}
+            value={enrollmentNumber || ''}
             onChange={(value) =>
               setEnrollmentNumber(value ? parseInt(value) : null)
             }
@@ -626,14 +604,11 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
           </NumberInput>
         </FormControl>
         <FormControl flex={1}>
-          <FormLabel
-            fontWeight="normal"
-            color="gray"
-          >
+          <FormLabel fontWeight="normal" color="gray">
             # Students Graduated
           </FormLabel>
           <NumberInput
-            value={graduatedNumber || ""}
+            value={graduatedNumber || ''}
             onChange={(value) =>
               setGraduatedNumber(value ? parseInt(value) : null)
             }
@@ -646,15 +621,9 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
         </FormControl>
       </HStack>
 
-      <HStack
-        width="100%"
-        spacing={4}
-      >
+      <HStack width="100%" spacing={4}>
         <FormControl flex={1}>
-          <FormLabel
-            fontWeight="normal"
-            color="gray"
-          >
+          <FormLabel fontWeight="normal" color="gray">
             Instrument Type
           </FormLabel>
           <Select
@@ -665,20 +634,14 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
             onChange={(e) => setSelectedInstrument(e.target.value)}
           >
             {existingInstruments.map((instrument) => (
-              <option
-                key={instrument.id}
-                value={instrument.name}
-              >
+              <option key={instrument.id} value={instrument.name}>
                 {instrument.name}
               </option>
             ))}
           </Select>
         </FormControl>
         <FormControl flex={1}>
-          <FormLabel
-            fontWeight="normal"
-            color="gray"
-          >
+          <FormLabel fontWeight="normal" color="gray">
             # Donated
           </FormLabel>
           <NumberInput
@@ -708,17 +671,9 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
       </Button>
 
       {Object.keys(addedInstruments).length > 0 && (
-        <HStack
-          width="100%"
-          flexWrap="wrap"
-          spacing={2}
-        >
+        <HStack width="100%" flexWrap="wrap" spacing={2}>
           {Object.entries(addedInstruments).map(([name, quantity]) => (
-            <Tag
-              key={name}
-              size="md"
-              bg="gray.200"
-            >
+            <Tag key={name} size="md" bg="gray.200">
               <TagLabel>
                 {name} - {quantity}
               </TagLabel>
@@ -729,10 +684,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
       )}
 
       <FormControl>
-        <FormLabel
-          fontWeight="normal"
-          color="gray"
-        >
+        <FormLabel fontWeight="normal" color="gray">
           Notes
         </FormLabel>
         <Textarea
@@ -765,7 +717,7 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
         onClick={handleSubmit}
         isLoading={isLoading}
       >
-        {programUpdateId ? "Update" : "Submit"}
+        {programUpdateId ? 'Update' : 'Submit'}
       </Button>
     </VStack>
   );
