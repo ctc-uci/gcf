@@ -55,8 +55,8 @@ export const Navbar = () => {
         console.error("Fetch error:", error);
       }
     };
-    loadData();
-  }, [userId, backend]);
+    if (role === "Program Director" || role === "Regional Director") loadData();
+  }, [role, userId, backend]);
 
   return (
     <Flex
@@ -87,6 +87,7 @@ export const Navbar = () => {
         align="center"
       >
         <Text fontSize="2vh">
+          {role === "Super Admin" ? "Super Admin Dashboard" : ""}
           {role === "Admin" ? "Admin Dashboard" : ""}
           {role === "Regional Director" ? "Regional Director Dashboard" : ""}
           {role === "Program Director" ? `${project}` : ""}

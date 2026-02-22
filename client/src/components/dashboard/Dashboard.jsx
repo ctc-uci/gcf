@@ -20,7 +20,9 @@ const Dashboard = () => {
       <StatisticsSummary />
 
       <Box as="section">
-        {(role === "Admin" || role === "Regional Director") && <ProgramTable />}
+        {(role === "Super Admin" ||
+          role === "Admin" ||
+          role === "Regional Director") && <ProgramTable />}
         {role === "Program Director" && <LessonVideos />}
       </Box>
     </Flex>
