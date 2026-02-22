@@ -1,9 +1,9 @@
 // TODO: keep file only if using s3 file upload
 
-import dotenv from "dotenv";
 import crypto from "crypto";
 
 import aws from "aws-sdk";
+import dotenv from "dotenv";
 
 // Load environment variables if not already loaded
 dotenv.config();

@@ -26,8 +26,6 @@ export const Navbar = () => {
     navigate("/login");
   };
 
-
-
   useEffect(() => {
     const fetchData = async (table: string, path: string) => {
       try {
@@ -57,8 +55,7 @@ export const Navbar = () => {
         console.error("Fetch error:", error);
       }
     };
-    if (role === "Program Director" || role === "Regional Director")
-      loadData();
+    if (role === "Program Director" || role === "Regional Director") loadData();
   }, [role, userId, backend]);
 
   return (
@@ -130,8 +127,8 @@ export const Navbar = () => {
           >
             <Text fontSize="2vh">Logout</Text>
           </Button>
-        </Flex >
-      </Flex >
-    </Flex >
+        </Flex>
+      </Flex>
+    </Flex>
   );
 };

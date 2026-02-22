@@ -79,8 +79,7 @@ updatesPermissionsRouter.get("/program-updates/:id", async (req, res) => {
       return res.status(403).send("Access denied");
     }
 
-    const finalQuery = 
-      `SELECT
+    const finalQuery = `SELECT
           program_update.id,
           program_update.update_date, 
           program_update.note, 
@@ -93,7 +92,7 @@ updatesPermissionsRouter.get("/program-updates/:id", async (req, res) => {
       INNER JOIN program ON program_update.program_id = program.id
       LEFT JOIN gcf_user AS creator ON creator.id = program.created_by
       ${filterJoin}
-      ORDER BY program_update.update_date DESC;`
+      ORDER BY program_update.update_date DESC;`;
 
     const data = await db.query(finalQuery, [id]);
     if (data.length === 0) {

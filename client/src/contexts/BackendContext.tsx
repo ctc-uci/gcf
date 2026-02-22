@@ -1,28 +1,28 @@
-  import { createContext, ReactNode } from "react";
+import { createContext, ReactNode } from "react";
 
-  import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance } from "axios";
 
-  import { authInterceptor } from "../utils/auth/authInterceptor";
+import { authInterceptor } from "../utils/auth/authInterceptor";
 
-  const baseURL = import.meta.env.VITE_BACKEND_HOSTNAME;
+const baseURL = import.meta.env.VITE_BACKEND_HOSTNAME;
 
-  interface BackendContextProps {
-    backend: AxiosInstance;
-  }
+interface BackendContextProps {
+  backend: AxiosInstance;
+}
 
-  export const BackendContext = createContext<BackendContextProps | null>(null);
+export const BackendContext = createContext<BackendContextProps | null>(null);
 
-  export const BackendProvider = ({ children }: { children: ReactNode }) => {
-    const backend = axios.create({
-      baseURL,
-      withCredentials: true,
-    });
+export const BackendProvider = ({ children }: { children: ReactNode }) => {
+  const backend = axios.create({
+    baseURL,
+    withCredentials: true,
+  });
 
-    authInterceptor(backend);
+  authInterceptor(backend);
 
-    return (
-      <BackendContext.Provider value={{ backend }}>
-        {children}
-      </BackendContext.Provider>
-    );
-  };
+  return (
+    <BackendContext.Provider value={{ backend }}>
+      {children}
+    </BackendContext.Provider>
+  );
+};

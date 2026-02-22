@@ -101,7 +101,8 @@ mediaChangeRouter.delete("/:id", async (req, res) => {
 mediaChangeRouter.get("/:userId/media", async (req, res) => {
   try {
     const { userId } = req.params;
-    const result = await db.query(`
+    const result = await db.query(
+      `
       SELECT 
         mc.id,
         mc.s3_key,
@@ -115,23 +116,25 @@ mediaChangeRouter.get("/:userId/media", async (req, res) => {
       LEFT JOIN media_change mc ON mc.update_id = pu.id
       WHERE pd.user_id = $1
       ORDER BY mc.id DESC NULLS LAST
-    `, [userId]);
+    `,
+      [userId]
+    );
 
     if (!result || result.length === 0) {
-      return res.status(200).json({ 
+      return res.status(200).json({
         media: [],
-        programName: null 
+        programName: null,
       });
     }
 
     //in the case theres no media we still want to get the program name
     //so this filters out null results
     const programName = result[0].program_name;
-    const mediaItems = result.filter(row => row.id !== null);
+    const mediaItems = result.filter((row) => row.id !== null);
 
     res.status(200).json({
       media: keysToCamel(mediaItems),
-      programName: programName
+      programName: programName,
     });
   } catch (err) {
     console.error(err);

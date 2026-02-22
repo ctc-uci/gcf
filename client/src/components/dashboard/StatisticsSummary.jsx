@@ -41,7 +41,7 @@ const StatBox = ({ label, number }) => {
 
 const getRouteByRole = (role, userId) => {
   const routes = {
-    "Admin": "/admin/stats",
+    Admin: "/admin/stats",
     "Regional Director": `/regional-directors/me/${userId}/stats`,
     "Program Director": `/program-directors/me/${userId}/stats`,
   };
@@ -49,7 +49,7 @@ const getRouteByRole = (role, userId) => {
 };
 
 const STAT_LABELS_BY_ROLE = {
-  "Admin": [
+  Admin: [
     { label: "Programs", number: 0 },
     { label: "Students", number: 0 },
     { label: "Instruments", number: 0 },
@@ -89,7 +89,7 @@ function statsFromPdData(data) {
 }
 
 const STATS_FROM_RESPONSE = {
-  "Admin": statsFromAdminData,
+  Admin: statsFromAdminData,
   "Regional Director": statsFromRdData,
   "Program Director": statsFromPdData,
 };

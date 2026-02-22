@@ -1,5 +1,6 @@
 import { keysToCamel } from "@/common/utils";
 import express from "express";
+
 import { db } from "../db/db-pgp";
 
 const enrollmentChangeRouter = express.Router();
@@ -23,7 +24,7 @@ enrollmentChangeRouter.get("/update/:updateId", async (req, res) => {
       [updateId]
     );
 
-    if (enrollmentChange.length === 0){
+    if (enrollmentChange.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -42,7 +43,7 @@ enrollmentChangeRouter.get("/:id", async (req, res) => {
       [id]
     );
 
-    if (enrollmentChange.length === 0){
+    if (enrollmentChange.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -52,7 +53,6 @@ enrollmentChangeRouter.get("/:id", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
 
 enrollmentChangeRouter.post("/", async (req, res) => {
   try {
@@ -82,7 +82,7 @@ enrollmentChangeRouter.put("/:id", async (req, res) => {
       [update_id, enrollment_change, graduated_change, id]
     );
 
-    if (updatedEnrollmentChange.length === 0){
+    if (updatedEnrollmentChange.length === 0) {
       return res.status(404).send("Item not found");
     }
 
@@ -101,7 +101,7 @@ enrollmentChangeRouter.delete("/:id", async (req, res) => {
       [id]
     );
 
-    if (deletedEnrollmentChange.length === 0){
+    if (deletedEnrollmentChange.length === 0) {
       return res.status(404).send("Item not found");
     }
 

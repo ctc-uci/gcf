@@ -14,14 +14,15 @@ const Dashboard = () => {
       minH="100vh"
       gap={6}
       as="main"
-      p={10}w
+      p={10}
+      w
     >
       <StatisticsSummary />
 
       <Box as="section">
-        {( role === "Super Admin" || role === "Admin" || role === "Regional Director") && (
-          <ProgramTable />
-        )}
+        {(role === "Super Admin" ||
+          role === "Admin" ||
+          role === "Regional Director") && <ProgramTable />}
         {role === "Program Director" && <LessonVideos />}
       </Box>
     </Flex>

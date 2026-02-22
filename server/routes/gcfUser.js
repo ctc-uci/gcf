@@ -1,5 +1,6 @@
 import { keysToCamel } from "@/common/utils";
 import express from "express";
+
 import { admin } from "../config/firebase";
 import { db } from "../db/db-pgp";
 
@@ -24,13 +25,11 @@ gcfUserRouter.post("/", async (req, res) => {
 
 gcfUserRouter.get("/admin/get-user/:targetUserId", async (req, res) => {
   try {
-    const {targetUserId} = req.params;
+    const { targetUserId } = req.params;
     const user = await admin.auth().getUser(targetUserId);
-    res.status(200).json(
-      {
-        email: user.email
-      }
-    );
+    res.status(200).json({
+      email: user.email,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
@@ -39,12 +38,21 @@ gcfUserRouter.get("/admin/get-user/:targetUserId", async (req, res) => {
 
 gcfUserRouter.post("/admin/create-user", async (req, res) => {
   try {
-    const { email, password, firstName, lastName, role, currentUserId, programId, regionId } = req.body;
+    const {
+      email,
+      password,
+      firstName,
+      lastName,
+      role,
+      currentUserId,
+      programId,
+      regionId,
+    } = req.body;
 
     const userRecord = await admin.auth().createUser({
       email: email,
       password: password,
-      displayName: `${firstName} ${lastName}`
+      displayName: `${firstName} ${lastName}`,
     });
 
     const firebaseUid = userRecord.uid;
@@ -56,7 +64,7 @@ gcfUserRouter.post("/admin/create-user", async (req, res) => {
       [firebaseUid, role, firstName, lastName, currentUserId]
     );
 
-    if (role === 'Program Director' && programId) {
+    if (role === "Program Director" && programId) {
       await db.query(
         `INSERT INTO program_director (user_id, program_id) 
         VALUES ($1, $2)`,
@@ -64,7 +72,7 @@ gcfUserRouter.post("/admin/create-user", async (req, res) => {
       );
     }
 
-    if (role === 'Regional Director' && regionId) {
+    if (role === "Regional Director" && regionId) {
       await db.query(
         `INSERT INTO regional_director (user_id, region_id) 
         VALUES ($1, $2)`,
@@ -72,12 +80,11 @@ gcfUserRouter.post("/admin/create-user", async (req, res) => {
       );
     }
 
-    res.status(201).json({ 
-      uid: firebaseUid, 
+    res.status(201).json({
+      uid: firebaseUid,
       user: keysToCamel(newGcfUser[0]),
-      message: 'User created successfully' 
+      message: "User created successfully",
     });
-
   } catch (err) {
     console.error("Error creating user:", err);
     res.status(500).json({ error: err.message });
@@ -86,21 +93,30 @@ gcfUserRouter.post("/admin/create-user", async (req, res) => {
 
 gcfUserRouter.put("/admin/update-user", async (req, res) => {
   try {
-    const { email, password, firstName, lastName, role, targetId, programId, regionId } = req.body;
+    const {
+      email,
+      password,
+      firstName,
+      lastName,
+      role,
+      targetId,
+      programId,
+      regionId,
+    } = req.body;
 
     await admin.auth().updateUser(targetId, {
       email: email,
       password: password,
-      displayName: `${firstName} ${lastName}`
+      displayName: `${firstName} ${lastName}`,
     });
 
     const oldRoleResponse = await db.query(
       `SELECT role FROM gcf_user WHERE id = $1`,
       [targetId]
     );
-    
+
     const oldRole = oldRoleResponse[0].role;
-    
+
     const updatedGcfUser = await db.query(
       `UPDATE gcf_user SET 
         role =  COALESCE($1, role),
@@ -108,60 +124,58 @@ gcfUserRouter.put("/admin/update-user", async (req, res) => {
         last_name = COALESCE($3, last_name)
         WHERE id = $4
         RETURNING *;`,
-        [role, firstName, lastName, targetId]
+      [role, firstName, lastName, targetId]
     );
 
-    
     if (role !== oldRole) {
-      if (oldRole === 'Program Director') {
+      if (oldRole === "Program Director") {
         await db.query(
           `DELETE FROM program_director WHERE user_id = $1 RETURNING *`,
           [targetId]
-        )
+        );
       }
-      if (oldRole === 'Regional Director') {
+      if (oldRole === "Regional Director") {
         await db.query(
           `DELETE FROM regional_director WHERE user_id = $1 RETURNING *`,
           [targetId]
-        )
+        );
       }
-      
-      if (role === 'Program Director' && programId) {
+
+      if (role === "Program Director" && programId) {
         await db.query(
           `INSERT INTO program_director (user_id, program_id) 
           VALUES ($1, $2)`,
           [targetId, programId]
-        )
+        );
       }
-      if (role === 'Regional Director' && regionId) {
+      if (role === "Regional Director" && regionId) {
         await db.query(
           `INSERT INTO regional_director (user_id, region_id) 
           VALUES ($1, $2)`,
           [targetId, regionId]
-        )
+        );
       }
     } else {
       // Update existing assignments if role hasn't changed
-      if (role === 'Program Director' && programId) {
+      if (role === "Program Director" && programId) {
         await db.query(
           `UPDATE program_director SET program_id = $1 WHERE user_id = $2`,
           [programId, targetId]
-        )
+        );
       }
-      if (role === 'Regional Director' && regionId) {
+      if (role === "Regional Director" && regionId) {
         await db.query(
           `UPDATE regional_director SET region_id = $1 WHERE user_id = $2`,
           [regionId, targetId]
-        )
+        );
       }
     }
-    
-    res.status(201).json({ 
-      uid: targetId, 
-      user: keysToCamel(updatedGcfUser[0]),
-      message: 'User updated successfully' 
-    });
 
+    res.status(201).json({
+      uid: targetId,
+      user: keysToCamel(updatedGcfUser[0]),
+      message: "User updated successfully",
+    });
   } catch (err) {
     console.error("Error creating user:", err);
     res.status(500).json({ error: err.message });
@@ -186,7 +200,7 @@ gcfUserRouter.get("/role/:role", async (req, res) => {
       [role]
     );
 
-    if (gcfUser.length === 0){
+    if (gcfUser.length === 0) {
       return res.status(404).send("Item not found");
     }
 

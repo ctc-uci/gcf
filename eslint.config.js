@@ -18,7 +18,8 @@ export default tseslint.config({
       "error",
       {
         selector: "JSXIdentifier[name='div']",
-        message: "Using <div> tags is not allowed. Use Chakra UI components (Box, Stack, etc.) instead.",
+        message:
+          "Using <div> tags is not allowed. Use Chakra UI components (Box, Stack, etc.) instead.",
       },
     ],
     "@typescript-eslint/no-unused-vars": [

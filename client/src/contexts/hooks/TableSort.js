@@ -1,5 +1,4 @@
-
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 
 // enum and map for sorting cycles
 const sortCycle = Object.freeze({
@@ -19,8 +18,7 @@ export function useTableSort(originalData, setData) {
 
   function updatePrevSortColumn(sortOrderCopy, column) {
     if (Object.hasOwn(sortOrderCopy["prevSortColumn"], column)) {
-      const newSortOrder =
-        sortCycle[sortOrderCopy["prevSortColumn"][column]];
+      const newSortOrder = sortCycle[sortOrderCopy["prevSortColumn"][column]];
       sortOrderCopy["prevSortColumn"][column] = newSortOrder;
       return newSortOrder;
     } else {
@@ -49,10 +47,8 @@ export function useTableSort(originalData, setData) {
           first = first.join(" ");
           second = second.join(" ");
         }
-        
-        if (
-          sortOrderCopy["prevSortColumn"][column] === sortCycle.ASCENDING
-        ) {
+
+        if (sortOrderCopy["prevSortColumn"][column] === sortCycle.ASCENDING) {
           return first.localeCompare(second);
         } else {
           return second.localeCompare(first);

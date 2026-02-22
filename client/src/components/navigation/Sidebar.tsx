@@ -17,8 +17,12 @@ export const Sidebar = () => {
     path: string;
   }
   let navItems: NavItem[] = [];
-  
-  if (role === "Super Admin" || role === "Admin" || role === "Regional Director") {
+
+  if (
+    role === "Super Admin" ||
+    role === "Admin" ||
+    role === "Regional Director"
+  ) {
     navItems = [
       {
         name: "Programs",

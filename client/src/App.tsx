@@ -4,10 +4,10 @@ import Dashboard from "@/components/dashboard/Dashboard";
 // import { ProgramForm } from "@/components/dashboard/ProgramForm";
 import { Login } from "@/components/login/Login";
 import { Layout } from "@/components/navigation/Layout";
+import { Profile } from "@/components/profile/Profile";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Signup } from "@/components/signup/Signup";
 import { UpdatesPage } from "@/components/updates/UpdatesPage";
-import { Profile } from "@/components/profile/Profile";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
@@ -58,7 +58,11 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         element={<Account />}
-                        allowedRoles={["Super Admin", "Admin", "Regional Director"]}
+                        allowedRoles={[
+                          "Super Admin",
+                          "Admin",
+                          "Regional Director",
+                        ]}
                       />
                     }
                   />
@@ -83,8 +87,11 @@ const App = () => {
                     element={<UpdatesPage />}
                   />
                 </Route>
-                
-                <Route path="*" element={<ProtectedRoute element={<CatchAll />} />} />
+
+                <Route
+                  path="*"
+                  element={<ProtectedRoute element={<CatchAll />} />}
+                />
               </Routes>
             </Router>
           </RoleProvider>
