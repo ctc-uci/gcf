@@ -121,6 +121,8 @@ export const Sidebar = () => {
                 _focus={{ textDecoration: "none" }}
                 _active={{ textDecoration: "none" }}
                 display="block"
+                userSelect="none"
+                draggable={false}
               >
                 <Button
                   bg={isActive ? "blue.50" : "white"}
