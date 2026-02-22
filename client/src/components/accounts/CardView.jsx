@@ -23,7 +23,7 @@ import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { AccountForm } from "./AccountForm";
 import GcfGlobe from "/gcf_globe.png";
 
-export const CardView = ({ data, onSave }) => {
+const CardView = ({ data, onSave }) => {
   const { backend } = useBackendContext();
   const [selectedUser, setSelectedUser] = useState({});
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);

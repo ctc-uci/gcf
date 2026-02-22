@@ -8,22 +8,13 @@ import {
   Search2Icon,
 } from "@chakra-ui/icons";
 import {
-  Badge,
   Box,
   Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
   Center,
   Collapse,
   Divider,
-  Flex,
-  Grid,
-  GridItem,
   HStack,
   IconButton,
-  Image,
   Input,
   Link,
   Spinner,
@@ -31,7 +22,6 @@ import {
   TableContainer,
   Tbody,
   Td,
-  Text,
   Th,
   Thead,
   Tr,
@@ -42,16 +32,16 @@ import {
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import { downloadCsv, escapeCsvValue } from "@/utils/downloadCsv";
 import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
 } from "react-icons/hi2";
 
 import { useTableSort } from "../../contexts/hooks/TableSort";
-import { downloadCsv, escapeCsvValue } from "@/utils/downloadCsv";
 import { SortArrows } from "../tables/SortArrows";
+import CardView from "./CardView";
 import { ProgramForm } from "./ProgramForm";
-import GcfGlobe from "/gcf_globe.png";
 
 const getRouteByRole = (role, userId) => {
   const routes = {
@@ -318,19 +308,29 @@ function ProgramDisplay({
       escapeCsvValue(p.primaryLanguage),
       escapeCsvValue(
         Array.isArray(p.regionalDirectors)
-          ? p.regionalDirectors.map((d) => `${d.firstName} ${d.lastName}`).join("; ")
+          ? p.regionalDirectors
+              .map((d) => `${d.firstName} ${d.lastName}`)
+              .join("; ")
           : ""
       ),
       escapeCsvValue(
         Array.isArray(p.programDirectors)
-          ? p.programDirectors.map((d) => `${d.firstName} ${d.lastName}`).join("; ")
+          ? p.programDirectors
+              .map((d) => `${d.firstName} ${d.lastName}`)
+              .join("; ")
           : ""
       ),
       escapeCsvValue(
-        Array.isArray(p.playlists) ? p.playlists.map((l) => l.link ?? l.name).join("; ") : ""
+        Array.isArray(p.playlists)
+          ? p.playlists.map((l) => l.link ?? l.name).join("; ")
+          : ""
       ),
     ]);
-    downloadCsv(headers, rows, `programs-${new Date().toISOString().slice(0, 10)}.csv`);
+    downloadCsv(
+      headers,
+      rows,
+      `programs-${new Date().toISOString().slice(0, 10)}.csv`
+    );
   };
 
   const handleSearch = (event) => {
@@ -563,91 +563,10 @@ function ProgramDisplay({
             </Tbody>
           </Table>
         ) : (
-          <Grid
-            templateColumns="repeat(3, 1fr)"
-            gap={6}
-          >
-            {data.map((p) => (
-              <GridItem key={p.id}>
-                <Card
-                  w={324}
-                  h={400}
-                  br={20}
-                >
-                  <CardHeader position="relative">
-                    <Text size="md"> {p.launchDate} </Text>
-                    <Text size="md"> {p.location} </Text>
-                    <Box
-                      position="absolute"
-                      top={2}
-                      right={2}
-                    >
-                      <IconButton
-                        aria-label="search"
-                        icon={<EditIcon />}
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => openEditForm(p)}
-                        bg="#808080"
-                        borderRadius="full"
-                        color="white"
-                      />
-                    </Box>
-                  </CardHeader>
-                  <CardBody position="relative">
-                    <Center mt={10}>
-                      {/* TODO: replace GCF Globe with an image associated with the program */}
-                      <Image
-                        src={GcfGlobe}
-                        opacity="30%"
-                        h={300}
-                        position="absolute"
-                        draggable="false"
-                        alt="GCF Globe"
-                      />
-                    </Center>
-                    <Box
-                      position="absolute"
-                      bottom={15}
-                      right={2}
-                    >
-                      <Badge
-                        p={2}
-                        borderRadius="full"
-                        bg="#808080"
-                        color="white"
-                      >
-                        {p.students} Students
-                      </Badge>
-                    </Box>
-                  </CardBody>
-                  <CardFooter
-                    bg="gray.200"
-                    w="100%"
-                    h="auto"
-                    minh="20%"
-                  >
-                    <VStack align="left">
-                      <Text> {p.title} </Text>
-                      <Flex
-                        gap={3}
-                        flexWrap="wrap"
-                      >
-                        {p.programDirectors.map((d) => (
-                          <Text
-                            key={d.userId}
-                            fontSize="sm"
-                          >
-                            {d.firstName} {d.lastName}
-                          </Text>
-                        ))}
-                      </Flex>
-                    </VStack>
-                  </CardFooter>
-                </Card>
-              </GridItem>
-            ))}
-          </Grid>
+          <CardView
+            data={data}
+            openEditForm={openEditForm}
+          />
         )}
       </TableContainer>
     </>
