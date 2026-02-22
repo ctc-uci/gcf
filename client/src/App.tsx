@@ -12,7 +12,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
 import { CookiesProvider } from "react-cookie";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-dom";
 
 import { Account } from "./components/accounts/Account";
 import { Media } from "./components/media/Media";
@@ -38,6 +38,10 @@ const App = () => {
                   path="/"
                   element={<ProtectedRoute element={<Layout />} />}
                 >
+                  <Route
+                    index
+                    element={<Navigate to="/dashboard" replace />}
+                  />
                   <Route
                     path="admin"
                     element={
