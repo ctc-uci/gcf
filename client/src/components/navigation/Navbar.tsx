@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { Button, Flex, Icon, Image, Link, Text } from "@chakra-ui/react";
+import { Button, Flex, Icon, Image, Link, Text } from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
-import { HiOutlineLogout, HiOutlineUser } from "react-icons/hi";
-import { useNavigate } from "react-router-dom";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { HiOutlineLogout, HiOutlineUser } from 'react-icons/hi';
+import { useNavigate } from 'react-router-dom';
 
-import { NAVBAR_HEIGHT } from "./layoutConstants";
-import logo from "/logo.png";
+import { NAVBAR_HEIGHT } from './layoutConstants';
+import logo from '/logo.png';
 
 export const Navbar = () => {
   const { role } = useRoleContext();
@@ -17,13 +17,13 @@ export const Navbar = () => {
   const { currentUser } = useAuthContext();
   const { backend } = useBackendContext();
   const userId = currentUser?.uid;
-  const [region, setRegion] = useState(""); // placeholder for region
-  const [project, setProject] = useState(""); // placeholder for project
+  const [region, setRegion] = useState(''); // placeholder for region
+  const [project, setProject] = useState(''); // placeholder for project
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
-    navigate("/login");
+    navigate('/login');
   };
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export const Navbar = () => {
         return response.data;
       } catch (error) {
         console.error(
-          "Request failed:",
+          'Request failed:',
           path,
           error.response?.status,
           error.message
@@ -45,17 +45,17 @@ export const Navbar = () => {
     const loadData = async () => {
       try {
         const [regionData, projectData] = await Promise.all([
-          fetchData("region", `get-region-name/${userId}`),
-          fetchData("program", `get-program-name/${userId}`),
+          fetchData('region', `get-region-name/${userId}`),
+          fetchData('program', `get-program-name/${userId}`),
         ]);
 
         setRegion(regionData.name);
         setProject(projectData.name);
       } catch (error) {
-        console.error("Fetch error:", error);
+        console.error('Fetch error:', error);
       }
     };
-    if (role === "Program Director" || role === "Regional Director") loadData();
+    if (role === 'Program Director' || role === 'Regional Director') loadData();
   }, [role, userId, backend]);
 
   return (
@@ -75,55 +75,44 @@ export const Navbar = () => {
       <Image
         src={logo}
         alt="Logo"
-        width={"9vw"}
+        width={'9vw'}
         maxH="10vh"
         objectFit="contain"
+        draggable={false}
+        userSelect="none"
       />
 
-      <Flex
-        justify="space-between"
-        w="100%"
-        px="2vw"
-        align="center"
-      >
+      <Flex justify="space-between" w="100%" px="2vw" align="center">
         <Text fontSize="2vh">
-          {role === "Super Admin" ? "Super Admin Dashboard" : ""}
-          {role === "Admin" ? "Admin Dashboard" : ""}
-          {role === "Regional Director" ? "Regional Director Dashboard" : ""}
-          {role === "Program Director" ? `${project}` : ""}
+          {role === 'Super Admin' ? 'Super Admin Dashboard' : ''}
+          {role === 'Admin' ? 'Admin Dashboard' : ''}
+          {role === 'Regional Director' ? 'Regional Director Dashboard' : ''}
+          {role === 'Program Director' ? `${project}` : ''}
 
-          {role === "Regional Director" ? `: ${region}` : ""}
+          {role === 'Regional Director' ? `: ${region}` : ''}
         </Text>
 
-        <Flex
-          gap={2}
-          align="center"
-        >
+        <Flex gap={2} align="center">
           <Button
             bg="white"
             as={Link}
             href="/profile"
-            leftIcon={
-              <Icon
-                as={HiOutlineUser}
-                boxSize="2vh"
-              />
-            }
-            _hover={{ variant: "outline" }}
+            leftIcon={<Icon as={HiOutlineUser} boxSize="2vh" />}
+            _hover={{ variant: 'outline', textDecoration: 'none' }}
+            draggable={false}
+            userSelect="none"
+            textDecoration="none"
           >
             <Text fontSize="2vh">User</Text>
           </Button>
           {/* TODO: Remove logout button when auth flow is finalized */}
           <Button
             bg="white"
-            leftIcon={
-              <Icon
-                as={HiOutlineLogout}
-                boxSize="2vh"
-              />
-            }
-            _hover={{ variant: "outline" }}
+            leftIcon={<Icon as={HiOutlineLogout} boxSize="2vh" />}
+            _hover={{ variant: 'outline' }}
             onClick={handleLogout}
+            draggable={false}
+            userSelect="none"
           >
             <Text fontSize="2vh">Logout</Text>
           </Button>
