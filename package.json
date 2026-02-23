@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "yarn tsx concurrently.ts",
     "start": "yarn tsx concurrently.ts",
-    "prepare": "husky install",
+    "prepare": "husky",
     "test": "node test-runner.js",
     "test:server": "yarn workspace server test",
     "test:client": "yarn workspace client test",
