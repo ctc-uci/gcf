@@ -24,10 +24,6 @@ enrollmentChangeRouter.get('/update/:updateId', async (req, res) => {
       [updateId]
     );
 
-    if (enrollmentChange.length === 0) {
-      return res.status(404).send('Item not found');
-    }
-
     res.status(200).json(keysToCamel(enrollmentChange));
   } catch (err) {
     console.error(err);

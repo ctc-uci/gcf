@@ -1,22 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { ArrowRightIcon, CloseIcon } from '@chakra-ui/icons';
 import {
-  Box,
   Button,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerHeader,
+  DrawerOverlay,
   FormControl,
   FormLabel,
-  Heading,
   HStack,
-  IconButton,
   Input,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
   NumberInput,
   NumberInputField,
+  NumberInputStepper,
   Select,
   Tag,
   TagCloseButton,
   TagLabel,
   Textarea,
+  useDisclosure,
   useToast,
   VStack,
 } from '@chakra-ui/react';
@@ -25,7 +31,17 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
-export const ProgramUpdateForm = ({ programUpdateId = null }) => {
+export const ProgramUpdateForm = ({
+  isOpen: isOpenProp,
+  onOpen: onOpenProp,
+  onClose: onCloseProp,
+  programUpdateId = null,
+}) => {
+  const disclosure = useDisclosure();
+  const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
+  const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
+  const onClose = isControlled ? onCloseProp : disclosure.onClose;
+  const btnRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [programId, setProgramId] = useState('');
   const [availablePrograms, setAvailablePrograms] = useState([]);
@@ -52,6 +68,23 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
   const { backend } = useBackendContext();
   const toast = useToast();
 
+  useEffect(() => {
+    if(!programUpdateId) {
+      setTitle('');
+      setDate('');
+      setNotes('');
+      setProgramId('');
+      setEnrollmentNumber(null);
+      setGraduatedNumber(null);
+      setEnrollmentChangeId(null);
+      setAddedInstruments({});
+      setOriginalInstruments({});
+      setNewInstruments([]);
+      setSelectedInstrument('');
+      setQuantity(0);
+    }
+  }, [programUpdateId]);
+  
   useEffect(() => {
     const fetchInstruments = async () => {
       try {
@@ -514,211 +547,160 @@ export const ProgramUpdateForm = ({ programUpdateId = null }) => {
   };
 
   return (
-    <VStack
-      p={8}
-      width="100%"
-      maxWidth="500px"
-      borderWidth="1px"
-      align="start"
-      spacing={4}
-      position="relative"
-    >
-      {/* TODO: Add OnClick */}
-      <Box position="absolute" top={4} right={4}>
-        <IconButton
-          aria-label="Close"
-          icon={<CloseIcon />}
-          variant="ghost"
-          size="sm"
-        />
-      </Box>
-
-      <HStack w="90%">
-        <ArrowRightIcon color="gray"></ArrowRightIcon>
-        <Heading size="md">Create New Update</Heading>
-      </HStack>
-      <FormControl>
-        <FormLabel fontWeight="normal" color="gray">
-          Title
-        </FormLabel>
-        <Input
-          type="text"
-          placeholder="Enter Title Here"
-          bg="gray.100"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </FormControl>
-
-      <FormControl isRequired>
-        <FormLabel fontWeight="normal" color="gray">
-          Program
-        </FormLabel>
-        <Select
-          placeholder="Select Program"
-          bg="#EBEAEA"
-          value={programId}
-          onChange={(e) => setProgramId(e.target.value)}
-          isDisabled={
-            programUpdateId !== null || availablePrograms.length === 1
-          }
-        >
-          {availablePrograms.map((program) => (
-            <option key={program.id} value={program.id}>
-              {program.name}
-            </option>
-          ))}
-        </Select>
-      </FormControl>
-
-      <FormControl>
-        <FormLabel fontWeight="normal" color="gray">
-          Date
-        </FormLabel>
-        <Input
-          width="50%"
-          type="date"
-          placeholder="MM/DD/YYYY"
-          color="black"
-          bg="#EBEAEA"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-      </FormControl>
-
-      <HStack width="100%" spacing={4}>
-        <FormControl flex={1}>
-          <FormLabel fontWeight="normal" color="gray">
-            # Students Currently Enrolled
-          </FormLabel>
-          <NumberInput
-            value={enrollmentNumber || ''}
-            onChange={(value) =>
-              setEnrollmentNumber(value ? parseInt(value) : null)
-            }
-          >
-            <NumberInputField
-              bg="#EBEAEA"
-              textAlign="center"
-            ></NumberInputField>
-          </NumberInput>
-        </FormControl>
-        <FormControl flex={1}>
-          <FormLabel fontWeight="normal" color="gray">
-            # Students Graduated
-          </FormLabel>
-          <NumberInput
-            value={graduatedNumber || ''}
-            onChange={(value) =>
-              setGraduatedNumber(value ? parseInt(value) : null)
-            }
-          >
-            <NumberInputField
-              bg="#EBEAEA"
-              textAlign="center"
-            ></NumberInputField>
-          </NumberInput>
-        </FormControl>
-      </HStack>
-
-      <HStack width="100%" spacing={4}>
-        <FormControl flex={1}>
-          <FormLabel fontWeight="normal" color="gray">
-            Instrument Type
-          </FormLabel>
-          <Select
-            placeholder="Select"
-            textAlign="center"
-            bg="#EBEAEA"
-            value={selectedInstrument}
-            onChange={(e) => setSelectedInstrument(e.target.value)}
-          >
-            {existingInstruments.map((instrument) => (
-              <option key={instrument.id} value={instrument.name}>
-                {instrument.name}
-              </option>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl flex={1}>
-          <FormLabel fontWeight="normal" color="gray">
-            # Donated
-          </FormLabel>
-          <NumberInput
-            width="50%"
-            justifyContent="center"
-            value={quantity}
-            onChange={(value) => setQuantity(parseInt(value) || 0)}
-          >
-            <NumberInputField
-              bg="#EBEAEA"
-              justifyContent="center"
-              textAlign="center"
-            />
-          </NumberInput>
-        </FormControl>
-      </HStack>
-
-      <Button
-        size="sm"
-        variant="outline"
-        borderRadius="10px"
-        borderColor="black"
-        color="#515151"
-        onClick={handleConfirmAddInstrument}
+    <>
+      <Drawer
+        isOpen={isOpen}
+        placement="right"
+        onClose={onClose}
+        finalFocusRef={btnRef}
+        size="lg"
       >
-        + Add instrument
-      </Button>
+        <DrawerOverlay />
+        <DrawerContent>
+          <HStack marginBottom="1em">
+            <DrawerCloseButton left="4" right="auto" />
+            <Button
+              colorScheme="teal"
+              marginLeft="auto"
+              marginRight="2em"
+              width="5em"
+              height="2em"
+              top="2"
+              fontSize="small"
+              onClick={handleSubmit}
+              isLoading={isLoading}
+            >
+              {programUpdateId ? 'Update' : 'Save'}
+            </Button>
+          </HStack>
 
-      {Object.keys(addedInstruments).length > 0 && (
-        <HStack width="100%" flexWrap="wrap" spacing={2}>
-          {Object.entries(addedInstruments).map(([name, quantity]) => (
-            <Tag key={name} size="md" bg="gray.200">
-              <TagLabel>
-                {name} - {quantity}
-              </TagLabel>
-              <TagCloseButton onClick={() => removeInstrument(name)} />
-            </Tag>
-          ))}
-        </HStack>
-      )}
+          <DrawerBody>
+            <VStack spacing={4} align="stretch" marginLeft="1em">
+              <DrawerHeader padding="0 0">
+                {programUpdateId ? 'Edit Update' : 'Create New Update'}
+              </DrawerHeader>
+              <h3>Title</h3>
+              <Input
+                type="text"
+                placeholder="Enter Title Here"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
 
-      <FormControl>
-        <FormLabel fontWeight="normal" color="gray">
-          Notes
-        </FormLabel>
-        <Textarea
-          borderWidth={1}
-          borderColor="black"
-          bg="#EBEAEA"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          minH="120px"
-        ></Textarea>
-      </FormControl>
+              <h3>Program</h3>
+              <Select
+                placeholder="Select Program"
+                value={programId}
+                onChange={(e) => setProgramId(e.target.value)}
+                isDisabled={
+                  programUpdateId !== null || availablePrograms.length === 1
+                }
+              >
+                {availablePrograms.map((program) => (
+                  <option key={program.id} value={program.id}>
+                    {program.name}
+                  </option>
+                ))}
+              </Select>
 
-      <Button
-        variant="outline"
-        size="sm"
-        borderRadius="10px"
-        borderColor="black"
-        color="#515151"
-      >
-        + Add media
-      </Button>
+              <h3>Date</h3>
+              <Input
+                type="date"
+                placeholder="MM/DD/YYYY"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
 
-      <Button
-        width="50%"
-        justifyContent="center"
-        alignItems="center"
-        borderWidth={1}
-        borderColor="black"
-        bg="#A6A6A6"
-        onClick={handleSubmit}
-        isLoading={isLoading}
-      >
-        {programUpdateId ? 'Update' : 'Submit'}
-      </Button>
-    </VStack>
+              <h3># Students Currently Enrolled</h3>
+              <NumberInput
+                min={0}
+                value={enrollmentNumber || ''}
+                onChange={(value) =>
+                  setEnrollmentNumber(value ? parseInt(value) : null)
+                }
+              >
+                <NumberInputField placeholder="Enter # of Students Enrolled" />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+
+              <h3># Students Graduated</h3>
+              <NumberInput
+                min={0}
+                value={graduatedNumber || ''}
+                onChange={(value) =>
+                  setGraduatedNumber(value ? parseInt(value) : null)
+                }
+              >
+                <NumberInputField placeholder="Enter # of Students Graduated" />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+
+              <h3>Instrument(s) & Quantity</h3>
+              <HStack
+                border="1px"
+                borderColor="gray.200"
+                padding="1"
+                borderRadius="md"
+                spacing={2}
+              >
+                <Select
+                  placeholder="Select Instrument"
+                  value={selectedInstrument}
+                  onChange={(e) => setSelectedInstrument(e.target.value)}
+                >
+                  {existingInstruments.map((instrument) => (
+                    <option key={instrument.id} value={instrument.name}>
+                      {instrument.name}
+                    </option>
+                  ))}
+                </Select>
+                <NumberInput
+                  step={1}
+                  defaultValue={0}
+                  min={0}
+                  width="8em"
+                  value={quantity}
+                  onChange={(valueString) => setQuantity(Number(valueString))}
+                >
+                  <NumberInputField />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+                <Button onClick={handleConfirmAddInstrument}>+ Add</Button>
+              </HStack>
+
+              <HStack wrap="wrap">
+                {Object.entries(addedInstruments).map(([name, quantity]) => (
+                  <Tag key={name}>
+                    <TagLabel>
+                      {name}: {quantity}
+                    </TagLabel>
+                    <TagCloseButton onClick={() => removeInstrument(name)} />
+                  </Tag>
+                ))}
+              </HStack>
+
+              <h3>Notes</h3>
+              <Textarea
+                borderColor="black"
+                borderWidth={1}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                minH="120px"
+                placeholder="Enter notes"
+              />
+            </VStack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 };

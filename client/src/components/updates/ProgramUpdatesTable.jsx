@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react';
 
-import { DownloadIcon, HamburgerIcon, SearchIcon } from '@chakra-ui/icons';
+import {
+  AddIcon,
+  DownloadIcon,
+  HamburgerIcon,
+  SearchIcon,
+} from '@chakra-ui/icons';
 import {
   Badge,
   Box,
+  Button,
   Center,
   Flex,
   Heading,
@@ -20,7 +26,7 @@ import {
 
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
-
+import { ProgramUpdateForm } from './ProgramUpdateForm';
 export const ProgramUpdatesTable = ({
   data,
   setData,
@@ -30,7 +36,12 @@ export const ProgramUpdatesTable = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [unorderedUpdates, setUnorderedUpdates] = useState([]);
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
-
+  const [selectedUpdate, setSelectedUpdate] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const openEditForm = (update) => {
+    setSelectedUpdate(update);
+    setIsFormOpen(true);
+  };
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
   };
@@ -64,8 +75,17 @@ export const ProgramUpdatesTable = ({
 
   return (
     <>
+      <ProgramUpdateForm
+        isOpen={isFormOpen}
+        onOpen={() => setIsFormOpen(true)}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedUpdate(null);
+        }}
+        programUpdateId={selectedUpdate?.id}
+      />
       <Box mt="30px" ml="10px">
-        <Flex gap={10} mb="20px">
+        <Flex gap={10} mb="20px" alignItems="center">
           <Heading>Program Updates</Heading>
           <SearchIcon mt="10px" ml="10px" />
           <Input
@@ -77,6 +97,16 @@ export const ProgramUpdatesTable = ({
           />
           <HamburgerIcon mt="10px" />
           <DownloadIcon mt="10px" />
+          <Button
+            size="sm"
+            rightIcon={<AddIcon />}
+            onClick={() => {
+              openEditForm(null);
+            }}
+            ml="auto"
+          >
+            New
+          </Button>
         </Flex>
 
         <TableContainer overflowX="auto" maxW="100%">
@@ -116,7 +146,7 @@ export const ProgramUpdatesTable = ({
                 </Tr>
               ) : (
                 data.map((row) => (
-                  <Tr key={row.id}>
+                  <Tr key={row.id} onClick={() => openEditForm(row)}>
                     <Td>{row.updateDate}</Td>
                     <Td>{row.note}</Td>
                     <Td>{row.name}</Td>

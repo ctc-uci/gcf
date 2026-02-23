@@ -46,9 +46,6 @@ instrumentChangeRouter.get('/update/:updateId', async (req, res) => {
       [updateId]
     );
 
-    if (change.length === 0) {
-      return res.status(404).send('Instrument change not found');
-    }
 
     res.status(200).json(change.map(keysToCamel));
   } catch (err) {
