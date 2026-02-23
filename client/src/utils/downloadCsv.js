@@ -13,6 +13,16 @@ export function escapeCsvValue(val) {
 }
 
 /**
+ * Returns a filename-safe timestamp in local time (YYYY-MM-DDTHH-mm-ss).
+ * Use this when building CSV filenames so downloads use the user's timezone.
+ */
+export function getFilenameTimestamp() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+}
+
+/**
  * Triggers a browser download of the given data as a CSV file.
  * @param {string[]} headers - Column header labels
  * @param {string[][]} rows - Array of rows, each row an array of cell values (already escaped)

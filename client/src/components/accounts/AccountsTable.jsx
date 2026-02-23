@@ -18,7 +18,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 
-import { downloadCsv, escapeCsvValue } from "@/utils/downloadCsv";
+import { downloadCsv, escapeCsvValue, getFilenameTimestamp } from "@/utils/downloadCsv";
 import { FiEdit2, FiEyeOff } from "react-icons/fi";
 
 import { useTableSort } from "../../contexts/hooks/TableSort";
@@ -39,7 +39,7 @@ export function downloadAccountsAsCsv(data) {
   downloadCsv(
     headers,
     rows,
-    `accounts-${new Date().toISOString().slice(0, 10)}.csv`
+    `accounts-${getFilenameTimestamp()}.csv`
   );
 }
 

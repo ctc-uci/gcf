@@ -32,7 +32,7 @@ import {
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useRoleContext } from "@/contexts/hooks/useRoleContext";
-import { downloadCsv, escapeCsvValue } from "@/utils/downloadCsv";
+import { downloadCsv, escapeCsvValue, getFilenameTimestamp } from "@/utils/downloadCsv";
 import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
@@ -329,7 +329,7 @@ function ProgramDisplay({
     downloadCsv(
       headers,
       rows,
-      `programs-${new Date().toISOString().slice(0, 10)}.csv`
+      `programs-${getFilenameTimestamp()}.csv`
     );
   };
 

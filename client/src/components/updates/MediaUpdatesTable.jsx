@@ -17,7 +17,7 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import { downloadCsv, escapeCsvValue } from "@/utils/downloadCsv";
+import { downloadCsv, escapeCsvValue, getFilenameTimestamp } from "@/utils/downloadCsv";
 import { SortArrows } from "../tables/SortArrows"
 import { useTableSort } from "../../contexts/hooks/TableSort";
 
@@ -30,7 +30,7 @@ export function downloadMediaUpdatesAsCsv(data) {
     escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(" ")),
     escapeCsvValue(row.status),
   ]);
-  downloadCsv(headers, rows, `media-updates-${new Date().toISOString().slice(0, 10)}.csv`);
+  downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
 }
 
 export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) => {
