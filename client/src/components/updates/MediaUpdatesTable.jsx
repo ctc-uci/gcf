@@ -7,6 +7,7 @@ import {
   Center,
   Flex,
   Heading,
+  IconButton,
   Input,
   Spinner,
   Table,
@@ -17,10 +18,22 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
-
+import { downloadCsv, escapeCsvValue, getFilenameTimestamp } from "@/utils/downloadCsv";
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
-
+     
+export function downloadMediaUpdatesAsCsv(data) {
+  const headers = ["Time", "Notes", "Program", "Author", "Status"];
+  const rows = (data || []).map((row) => [
+    escapeCsvValue(row.updateDate),
+    escapeCsvValue(row.note),
+    escapeCsvValue(row.programName),
+    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(" ")),
+    escapeCsvValue(row.status),
+  ]);
+  downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
+}
+     
 export const MediaUpdatesTable = ({
   data,
   setData,
@@ -72,7 +85,14 @@ export const MediaUpdatesTable = ({
           onChange={handleSearch}
         />
         <HamburgerIcon mt="10px" />
-        <DownloadIcon mt="10px" />
+        <IconButton
+          aria-label="Download"
+          icon={<DownloadIcon />}
+          size="sm"
+          variant="ghost"
+          mt="10px"
+          onClick={() => downloadMediaUpdatesAsCsv(data)}
+        />
       </Flex>
 
       <TableContainer overflowX="auto" maxW="100%">

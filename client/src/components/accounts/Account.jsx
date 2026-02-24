@@ -7,7 +7,7 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
 import { AccountForm } from './AccountForm';
-import { AccountsTable } from './AccountsTable';
+import { AccountsTable, downloadAccountsAsCsv } from './AccountsTable';
 import { AccountToolbar } from './AccountToolbar';
 
 const getAccountsRoute = (role, userId) => {
@@ -29,6 +29,7 @@ export const Account = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [isCardView, setIsCardView] = useState(false);
 
   const { backend } = useBackendContext();
 
@@ -76,10 +77,12 @@ export const Account = () => {
         <AccountToolbar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          setIsCardView={setIsCardView}
           onNew={() => {
             setIsDrawerOpen(true);
             setSelectedUser(null);
           }}
+          onDownload={() => downloadAccountsAsCsv(users)}
         />
       </Flex>
 
@@ -93,6 +96,8 @@ export const Account = () => {
           setData={setUsers}
           originalData={originalUsers}
           searchQuery={searchQuery}
+          isCardView={isCardView}
+          onSave={() => fetchData()}
           onUpdate={(user) => {
             setSelectedUser(user);
             setIsDrawerOpen(true);

@@ -18,6 +18,8 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { FullscreenFlyoutButton } from "../FullscreenFlyoutButton";
+import { useFullscreenFlyout } from "../useFullScreenFlyout.js";
 
 export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const { currentUser } = useAuthContext();
@@ -27,7 +29,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const [currentRegions, setCurrentRegions] = useState(null);
   const userId = currentUser?.uid;
   const targetUserId = targetUser?.id;
-
+  const [isFullScreen, toggleFullScreen] = useFullscreenFlyout();
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -250,12 +252,27 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
 
   return (
     <>
-      <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+      <Drawer
+        isOpen={isOpen}
+        placement="right"
+        onClose={onClose}
+      >
         <DrawerOverlay />
-        <DrawerContent>
+        <DrawerContent
+          width="20%"
+          maxWidth={isFullScreen ? "100%" : "20%"}
+        >
           <DrawerCloseButton />
+          <FullscreenFlyoutButton
+            isFullScreen={isFullScreen}
+            toggleFullScreen={toggleFullScreen}
+            width="5em"
+            height="2em"
+            marginLeft="1em"
+            marginTop="0.7em"
+          />
           <DrawerHeader>
-            {targetUserId ? 'Edit Account' : 'Create Account'}
+            {targetUserId ? "Edit Account" : "Create Account"}
           </DrawerHeader>
 
           <DrawerBody>
@@ -335,7 +352,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       if (!selectedProgramId) return;
 
                       const selectedProgram = currentPrograms.find(
-                        (p) => p.id == selectedProgramId
+                        (p) => p.id === selectedProgramId
                       );
 
                       if (selectedProgram) {

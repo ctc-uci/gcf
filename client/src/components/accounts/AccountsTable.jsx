@@ -20,6 +20,27 @@ import {
 
 import { FiEdit2, FiEyeOff } from 'react-icons/fi';
 
+import { downloadCsv, escapeCsvValue, getFilenameTimestamp } from "@/utils/downloadCsv";
+import { FiEdit2, FiEyeOff } from "react-icons/fi";
+import CardView from "./CardView";
+
+export function downloadAccountsAsCsv(data) {
+  const headers = ["First Name", "Last Name", "Email", "Type", "Program(s)"];
+  const rows = (data || []).map((user) => [
+    escapeCsvValue(user.firstName),
+    escapeCsvValue(user.lastName),
+    escapeCsvValue(user.email),
+    escapeCsvValue(user.role),
+    escapeCsvValue(
+      Array.isArray(user.programs) ? user.programs.join("; ") : ""
+    ),
+  ]);
+  downloadCsv(
+    headers,
+    rows,
+    `accounts-${getFilenameTimestamp()}.csv`
+  );
+}
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
 
@@ -28,6 +49,8 @@ export const AccountsTable = ({
   setData,
   originalData,
   searchQuery,
+  isCardView,
+  onSave,
   onUpdate,
 }) => {
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
@@ -35,7 +58,7 @@ export const AccountsTable = ({
 
   useEffect(() => {
     function filterUpdates(search) {
-      if (search === '') {
+      if (search === "") {
         setData(originalData);
         return;
       }
@@ -57,78 +80,95 @@ export const AccountsTable = ({
 
   return (
     <TableContainer>
-      <Table variant="simple" size="md">
-        <Thead>
-          <Tr>
-            <Th
-              onClick={() => handleSort('firstName')}
-              cursor="pointer"
-              color="black"
-              fontSize="sm"
-              textTransform="none"
-              fontWeight="bold"
-            >
-              Name
-              <SortArrows columnKey="firstName" sortOrder={sortOrder} />
-            </Th>
-            <Th
-              onClick={() => handleSort('email')}
-              cursor="pointer"
-              color="black"
-              fontSize="sm"
-              textTransform="none"
-              fontWeight="bold"
-            >
-              Email
-              <SortArrows columnKey="email" sortOrder={sortOrder} />
-            </Th>
-            <Th
-              onClick={() => handleSort('password')}
-              cursor="pointer"
-              color="black"
-              fontSize="sm"
-              textTransform="none"
-              fontWeight="bold"
-            >
-              Password
-              <SortArrows columnKey="passsword" sortOrder={sortOrder} />
-            </Th>
-            <Th
-              onClick={() => handleSort('role')}
-              cursor="pointer"
-              color="black"
-              fontSize="sm"
-              textTransform="none"
-              fontWeight="bold"
-            >
-              Type
-              <SortArrows columnKey="role" sortOrder={sortOrder} />
-            </Th>
-            <Th
-              onClick={() => handleSort('programs')}
-              cursor="pointer"
-              color="black"
-              fontSize="sm"
-              textTransform="none"
-              fontWeight="bold"
-            >
-              Program(s)
-              <SortArrows columnKey="programs" sortOrder={sortOrder} />
-            </Th>
-            <Th width="50px"></Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {!data || data.length === 0 ? (
+      {!isCardView ? (
+        <Table
+          variant="simple"
+          size="md"
+        >
+          <Thead>
             <Tr>
-              <Td colSpan={6}>
+              <Th
+                onClick={() => handleSort("firstName")}
+                cursor="pointer"
+                color="black"
+                fontSize="sm"
+                textTransform="none"
+                fontWeight="bold"
+              >
+                Name
+                <SortArrows
+                  columnKey="firstName"
+                  sortOrder={sortOrder}
+                />
+              </Th>
+              <Th
+                onClick={() => handleSort("email")}
+                cursor="pointer"
+                color="black"
+                fontSize="sm"
+                textTransform="none"
+                fontWeight="bold"
+              >
+                Email
+                <SortArrows
+                  columnKey="email"
+                  sortOrder={sortOrder}
+                />
+              </Th>
+              <Th
+                onClick={() => handleSort("password")}
+                cursor="pointer"
+                color="black"
+                fontSize="sm"
+                textTransform="none"
+                fontWeight="bold"
+              >
+                Password
+                <SortArrows
+                  columnKey="passsword"
+                  sortOrder={sortOrder}
+                />
+              </Th>
+              <Th
+                onClick={() => handleSort("role")}
+                cursor="pointer"
+                color="black"
+                fontSize="sm"
+                textTransform="none"
+                fontWeight="bold"
+              >
+                Type
+                <SortArrows
+                  columnKey="role"
+                  sortOrder={sortOrder}
+                />
+              </Th>
+              <Th
+                onClick={() => handleSort("programs")}
+                cursor="pointer"
+                color="black"
+                fontSize="sm"
+                textTransform="none"
+                fontWeight="bold"
+              >
+                Program(s)
+                <SortArrows
+                  columnKey="programs"
+                  sortOrder={sortOrder}
+                />
+              </Th>
+              <Th width="50px"></Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {!data ||
+              (data.length === 0 && (
                 <Center py={10}>
                   <Text color="gray.500">No accounts found.</Text>
                 </Center>
-              </Td>
-            </Tr>
-          ) : (
-            data.map((user) => (
+              ))}
+
+            {data.map((user) => (
               <Tr
                 key={user.id}
                 _hover={{
@@ -195,10 +235,15 @@ export const AccountsTable = ({
                   </Box>
                 </Td>
               </Tr>
-            ))
-          )}
-        </Tbody>
-      </Table>
+            ))}
+          </Tbody>
+        </Table>
+      ) : (
+        <CardView
+          data={data}
+          onSave={onSave}
+        />
+      )}
     </TableContainer>
   );
 };

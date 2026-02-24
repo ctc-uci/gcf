@@ -13,7 +13,13 @@ import {
 
 import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from 'react-icons/fi';
 
-export const AccountToolbar = ({ searchQuery, setSearchQuery, onNew }) => {
+export const AccountToolbar = ({
+  searchQuery,
+  setSearchQuery,
+  setIsCardView,
+  onNew,
+  onDownload,
+}) => {
   // TODO: Implement functionality for search, filter, view toggle, download, and new account
   function handleSearchChange(event) {
     setSearchQuery(event.target.value);
@@ -52,12 +58,14 @@ export const AccountToolbar = ({ searchQuery, setSearchQuery, onNew }) => {
             icon={<FiList />}
             variant="ghost"
             color="gray.500"
+            onClick={() => setIsCardView(false)}
           />
           <IconButton
             aria-label="Grid View"
             icon={<FiGrid />}
             variant="ghost"
             color="gray.400"
+            onClick={() => setIsCardView(true)}
           />
         </HStack>
         <IconButton
@@ -65,6 +73,7 @@ export const AccountToolbar = ({ searchQuery, setSearchQuery, onNew }) => {
           icon={<FiDownload />}
           variant="ghost"
           color="gray.500"
+          onClick={onDownload}
         />
       </HStack>
 

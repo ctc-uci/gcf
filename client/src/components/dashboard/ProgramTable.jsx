@@ -28,7 +28,8 @@ import {
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
-
+import { downloadCsv, escapeCsvValue, getFilenameTimestamp } from "@/utils/downloadCsv";
+import CardView from "./CardView";
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
@@ -36,7 +37,6 @@ import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
 } from 'react-icons/hi2';
-
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
 import { ProgramForm } from './ProgramForm';
@@ -102,6 +102,7 @@ const MAP_BY_ROLE = {
 
 function ExpandableRow({ p, onEdit }) {
   const { isOpen, onToggle } = useDisclosure();
+
   return (
     <>
       <Tr
@@ -138,7 +139,10 @@ function ExpandableRow({ p, onEdit }) {
                     Regional Director(s)
                   </Box>
                   <Box>
-                    <VStack align="start" spacing={2}>
+                    <VStack
+                      align="start"
+                      spacing={2}
+                    >
                       {Array.isArray(p.regionalDirectors)
                         ? p.regionalDirectors.map((d, idx) => (
                             <Box
@@ -163,7 +167,10 @@ function ExpandableRow({ p, onEdit }) {
                     Program Director(s)
                   </Box>
                   <Box>
-                    <VStack align="start" spacing={2}>
+                    <VStack
+                      align="start"
+                      spacing={2}
+                    >
                       {Array.isArray(p.programDirectors)
                         ? p.programDirectors.map((d, idx) => (
                             <Box
@@ -246,6 +253,57 @@ function ProgramDisplay({
   setSelectedProgram,
 }) {
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
+  const [isCardView, setIsCardView] = useState(false);
+
+  const downloadDataAsCsv = () => {
+    const headers = [
+      "Program",
+      "Status",
+      "Launch Date",
+      "Location",
+      "Students",
+      "Instruments",
+      "Total Instruments",
+      "Primary Language",
+      "Regional Directors",
+      "Program Directors",
+      "Curriculum Links",
+    ];
+    const rows = (data || []).map((p) => [
+      escapeCsvValue(p.title),
+      escapeCsvValue(p.status),
+      escapeCsvValue(p.launchDate),
+      escapeCsvValue(p.location),
+      escapeCsvValue(p.students),
+      escapeCsvValue(p.instruments),
+      escapeCsvValue(p.totalInstruments),
+      escapeCsvValue(p.primaryLanguage),
+      escapeCsvValue(
+        Array.isArray(p.regionalDirectors)
+          ? p.regionalDirectors
+              .map((d) => `${d.firstName} ${d.lastName}`)
+              .join("; ")
+          : ""
+      ),
+      escapeCsvValue(
+        Array.isArray(p.programDirectors)
+          ? p.programDirectors
+              .map((d) => `${d.firstName} ${d.lastName}`)
+              .join("; ")
+          : ""
+      ),
+      escapeCsvValue(
+        Array.isArray(p.playlists)
+          ? p.playlists.map((l) => l.link ?? l.name).join("; ")
+          : ""
+      ),
+    ]);
+    downloadCsv(
+      headers,
+      rows,
+      `programs-${getFilenameTimestamp()}.csv`
+    );
+  };
 
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
@@ -329,13 +387,18 @@ function ProgramDisplay({
               icon={<HamburgerIcon />}
               size="sm"
               variant="ghost"
+              onClick={() => setIsCardView(false)}
             />
-            <Divider orientation="vertical" h="20px" />
+            <Divider
+              orientation="vertical"
+              h="20px"
+            />
             <IconButton
               aria-label="search"
               icon={<HiOutlineSquares2X2 />}
               size="sm"
               variant="ghost"
+              onClick={() => setIsCardView(true)}
             />
             <IconButton
               aria-label="filter"
@@ -349,6 +412,7 @@ function ProgramDisplay({
               size="sm"
               variant="ghost"
               ml={2}
+              onClick={downloadDataAsCsv}
             />
             <Button
               size="sm"
@@ -363,59 +427,111 @@ function ProgramDisplay({
           </HStack>
         </HStack>
 
-        <Table variant="simple" aria-label="collapsible-table">
-          <Thead>
-            <Tr>
-              <Th onClick={() => handleSort('title')} cursor="pointer">
-                Program <SortArrows columnKey="title" sortOrder={sortOrder} />
-              </Th>
-              <Th onClick={() => handleSort('status')} cursor="pointer">
-                Status <SortArrows columnKey="status" sortOrder={sortOrder} />
-              </Th>
-              <Th onClick={() => handleSort('launchDate')} cursor="pointer">
-                Launch Date{' '}
-                <SortArrows columnKey="launchDate" sortOrder={sortOrder} />
-              </Th>
-              <Th onClick={() => handleSort('location')} cursor="pointer">
-                Location{' '}
-                <SortArrows columnKey="location" sortOrder={sortOrder} />
-              </Th>
-              <Th onClick={() => handleSort('students')} cursor="pointer">
-                Students{' '}
-                <SortArrows columnKey="students" sortOrder={sortOrder} />
-              </Th>
-              <Th onClick={() => handleSort('instruments')} cursor="pointer">
-                Instruments{' '}
-                <SortArrows columnKey="instruments" sortOrder={sortOrder} />
-              </Th>
-              <Th
-                onClick={() => handleSort('totalInstruments')}
-                cursor="pointer"
-              >
-                Total Instruments{' '}
-                <SortArrows
-                  columnKey="totalInstruments"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {isLoading ? (
+        {!isCardView ? (
+          <Table
+            variant="simple"
+            aria-label="collapsible-table"
+          >
+            <Thead>
               <Tr>
-                <Td colSpan={7}>
-                  <Center py={8}>
-                    <Spinner size="lg" />
-                  </Center>
-                </Td>
+                <Th
+                  onClick={() => handleSort("title")}
+                  cursor="pointer"
+                >
+                  Program{" "}
+                  <SortArrows
+                    columnKey="title"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("status")}
+                  cursor="pointer"
+                >
+                  Status{" "}
+                  <SortArrows
+                    columnKey="status"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("launchDate")}
+                  cursor="pointer"
+                >
+                  Launch Date{" "}
+                  <SortArrows
+                    columnKey="launchDate"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("location")}
+                  cursor="pointer"
+                >
+                  Location{" "}
+                  <SortArrows
+                    columnKey="location"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("students")}
+                  cursor="pointer"
+                >
+                  Students{" "}
+                  <SortArrows
+                    columnKey="students"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("instruments")}
+                  cursor="pointer"
+                >
+                  Instruments{" "}
+                  <SortArrows
+                    columnKey="instruments"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("totalInstruments")}
+                  cursor="pointer"
+                >
+                  Total Instruments{" "}
+                  <SortArrows
+                    columnKey="totalInstruments"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
               </Tr>
-            ) : (
-              data.map((p) => (
-                <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
-              ))
-            )}
-          </Tbody>
-        </Table>
+            </Thead>
+            <Tbody>
+              {isLoading ? (
+                <Tr>
+                  <Td colSpan={7}>
+                    <Center py={8}>
+                      <Spinner size="lg" />
+                    </Center>
+                  </Td>
+                </Tr>
+              ) : (
+                data.map((p) => (
+                  <ExpandableRow
+                    key={p.id}
+                    p={p}
+                    onEdit={openEditForm}
+                  />
+                ))
+              )}
+            </Tbody>
+          </Table>
+        ) : (
+          <CardView
+            data={data}
+            openEditForm={openEditForm}
+          />
+        )}
       </TableContainer>
     </>
   );

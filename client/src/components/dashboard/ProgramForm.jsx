@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 import {
   Button,
@@ -21,10 +21,13 @@ import {
   TagLabel,
   useDisclosure,
   VStack,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
-import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useAuthContext } from "@/contexts/hooks/useAuthContext";
+import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+
+import { FullscreenFlyoutButton } from "../FullscreenFlyoutButton";
+import { useFullscreenFlyout } from "../useFullScreenFlyout.js";
 
 // sub-component for adding instruments
 const InstrumentForm = ({ setFormData }) => {
@@ -262,6 +265,7 @@ export const ProgramForm = ({
   const [initialInstrumentQuantities, setInitialInstrumentQuantities] =
     useState({});
   const [initialCurriculumLinks, setInitialCurriculumLinks] = useState([]);
+  const [isFullScreen, toggleFullScreen] = useFullscreenFlyout();
 
   const [formState, setFormState] = useState({
     status: null,
@@ -512,21 +516,21 @@ export const ProgramForm = ({
       onClose();
       window.location.reload();
     } catch (err) {
-      console.error('Error saving program:', err);
+      console.error("Error saving program:", err);
     }
   }
 
-  // useEffect(() => {
-  //   console.log("Program status changed to:", formState);
-  // }, [formState]);
+  useEffect(() => {
+    console.log("Program status changed to:", formState);
+  }, [formState]);
 
   useEffect(() => {
     async function getRegions() {
       try {
-        const response = await backend.get('/region');
+        const response = await backend.get("/region");
         setRegions(response.data);
       } catch (error) {
-        console.error('Error fetching regions:', error);
+        console.error("Error fetching regions:", error);
       }
     }
     getRegions();
@@ -562,9 +566,23 @@ export const ProgramForm = ({
         size="lg"
       >
         <DrawerOverlay />
-        <DrawerContent>
+        <DrawerContent
+          width="50%"
+          maxWidth={isFullScreen ? "100%" : "50%"}
+        >
           <HStack marginBottom="1em">
-            <DrawerCloseButton left="4" right="auto" />
+            <DrawerCloseButton
+              left="4"
+              right="auto"
+            />
+            <FullscreenFlyoutButton
+              isFullScreen={isFullScreen}
+              toggleFullScreen={toggleFullScreen}
+              width="5em"
+              height="2em"
+              marginLeft="4em"
+              marginTop="0.7em"
+            />
             <Button
               colorScheme="teal"
               marginLeft="auto"
