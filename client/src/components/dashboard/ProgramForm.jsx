@@ -33,7 +33,7 @@ import { useFullscreenFlyout } from "../useFullScreenFlyout.js";
 const InstrumentForm = ({ setFormData }) => {
   const [instruments, setInstruments] = useState([]);
   const [quantity, setQuantity] = useState(0);
-  const [selectedInstrumentId, setSelectedInstrumentId] = useState("");
+  const [selectedInstrumentId, setSelectedInstrumentId] = useState('');
   const { backend } = useBackendContext();
 
   function handleSubmit() {
@@ -56,14 +56,14 @@ const InstrumentForm = ({ setFormData }) => {
       },
     }));
 
-    setSelectedInstrumentId("");
+    setSelectedInstrumentId('');
     setQuantity(0);
   }
 
   useEffect(() => {
     async function fetchInstruments() {
       try {
-        const response = await backend.get("/instruments");
+        const response = await backend.get('/instruments');
         const instrument_names = response.data;
 
         const instrumentMap = new Map();
@@ -75,7 +75,7 @@ const InstrumentForm = ({ setFormData }) => {
         const unique_instruments = Array.from(instrumentMap.values());
         setInstruments(unique_instruments);
       } catch (error) {
-        console.error("Error fetching instruments:", error);
+        console.error('Error fetching instruments:', error);
       }
     }
     fetchInstruments();
@@ -95,10 +95,7 @@ const InstrumentForm = ({ setFormData }) => {
         onChange={(e) => setSelectedInstrumentId(e.target.value)}
       >
         {instruments.map((instrument) => (
-          <option
-            key={instrument.id}
-            value={instrument.id}
-          >
+          <option key={instrument.id} value={instrument.id}>
             {instrument.name}
           </option>
         ))}
@@ -124,13 +121,13 @@ const InstrumentForm = ({ setFormData }) => {
 
 const ProgramDirectorForm = ({ formState, setFormData }) => {
   const [programDirectors, setProgramDirectors] = useState([]);
-  const [selectedDirector, setSelectedDirector] = useState("");
+  const [selectedDirector, setSelectedDirector] = useState('');
   const { backend } = useBackendContext();
 
   useEffect(() => {
     async function fetchProgramDirectors() {
       const response = await backend.get(
-        "/program-directors/program-director-names"
+        '/program-directors/program-director-names'
       );
       const directors = response.data;
 
@@ -152,7 +149,7 @@ const ProgramDirectorForm = ({ formState, setFormData }) => {
       (d) => d.userId === selectedDirector
     );
     if (alreadyAdded) {
-      alert("This director has already been added!");
+      alert('This director has already been added!');
       return;
     }
 
@@ -166,7 +163,7 @@ const ProgramDirectorForm = ({ formState, setFormData }) => {
       programDirectors: [...prevData.programDirectors, directorObj],
     }));
 
-    setSelectedDirector("");
+    setSelectedDirector('');
   }
 
   return (
@@ -183,10 +180,7 @@ const ProgramDirectorForm = ({ formState, setFormData }) => {
         onChange={(e) => setSelectedDirector(e.target.value)}
       >
         {programDirectors.map((director) => (
-          <option
-            value={director.userId}
-            key={director.userId}
-          >
+          <option value={director.userId} key={director.userId}>
             {director.firstName} {director.lastName}
           </option>
         ))}
@@ -198,15 +192,15 @@ const ProgramDirectorForm = ({ formState, setFormData }) => {
 };
 
 const CurriculumLinkForm = ({ formState, setFormData }) => {
-  const [link, setLink] = useState("");
-  const [display, setDisplay] = useState("");
+  const [link, setLink] = useState('');
+  const [display, setDisplay] = useState('');
 
   function handleSubmit() {
     if (!link?.trim()) return;
 
     let validLink = link.trim();
-    if (!validLink.startsWith("http://") && !validLink.startsWith("https://")) {
-      validLink = "https://" + validLink;
+    if (!validLink.startsWith('http://') && !validLink.startsWith('https://')) {
+      validLink = 'https://' + validLink;
     }
 
     const alreadyAdded = (formState.curriculumLinks ?? []).some(
@@ -218,12 +212,12 @@ const CurriculumLinkForm = ({ formState, setFormData }) => {
       ...prevData,
       curriculumLinks: [
         ...(prevData.curriculumLinks ?? []),
-        { link: validLink, name: (display || "Playlist").trim() || "Playlist" },
+        { link: validLink, name: (display || 'Playlist').trim() || 'Playlist' },
       ],
     }));
 
-    setLink("");
-    setDisplay("");
+    setLink('');
+    setDisplay('');
   }
 
   return (
@@ -236,12 +230,12 @@ const CurriculumLinkForm = ({ formState, setFormData }) => {
     >
       <Input
         placeholder="Link"
-        value={link || ""}
+        value={link || ''}
         onChange={(e) => setLink(e.target.value)}
       />
       <Input
         placeholder="Display Name"
-        value={display || ""}
+        value={display || ''}
         onChange={(e) => setDisplay(e.target.value)}
       />
       <Button onClick={handleSubmit}>+ Add</Button>
@@ -289,7 +283,6 @@ export const ProgramForm = ({
 
   useEffect(() => {
     async function loadProgramRegionData() {
-      console.log("loading in program data...");
       if (!program) {
         setFormState({
           status: null,
@@ -317,7 +310,7 @@ export const ProgramForm = ({
           const countryResponse = await backend(`/country/${program.country}`);
           regionId = countryResponse.data.regionId;
         } catch (error) {
-          console.error("error fetching country/region", error);
+          console.error('error fetching country/region', error);
         }
       }
 
@@ -347,13 +340,13 @@ export const ProgramForm = ({
           initialInstrumentMap[id] = inst.quantity ?? 0;
         });
       } catch (err) {
-        console.error("Error fetching program instruments:", err);
+        console.error('Error fetching program instruments:', err);
       }
 
       setFormState({
         status: program.status ?? null,
-        programName: program.title ?? "",
-        launchDate: program.launchDate ? program.launchDate.split("T")[0] : "",
+        programName: program.title ?? '',
+        launchDate: program.launchDate ? program.launchDate.split('T')[0] : '',
         regionId: regionId,
         country: program.country ?? null,
         students: program.students ?? 0,
@@ -365,7 +358,7 @@ export const ProgramForm = ({
         curriculumLinks: Array.isArray(program.playlists)
           ? program.playlists
               .filter((p) => p.link)
-              .map((p) => ({ link: p.link, name: p.name || "Playlist" }))
+              .map((p) => ({ link: p.link, name: p.name || 'Playlist' }))
           : [],
         media: program.media ?? [],
       });
@@ -421,7 +414,7 @@ export const ProgramForm = ({
         primaryLanguage: formState.language,
         partnerOrg: 1, // TODO: this field doesnt exist in the form
         createdBy: currentUser?.uid || currentUser?.id,
-        description: "", // TODO: this field doesnt exist in the form
+        description: '', // TODO: this field doesnt exist in the form
       };
 
       let programId;
@@ -455,7 +448,7 @@ export const ProgramForm = ({
         if (!initialCurriculumLinks.includes(playlist.link)) {
           await backend.post(`/program/${programId}/playlists`, {
             link: playlist.link,
-            name: playlist.name || "Playlist",
+            name: playlist.name || 'Playlist',
           });
         }
       }
@@ -492,11 +485,11 @@ export const ProgramForm = ({
 
       if (hasStudentChange || hasInstrumentChange) {
         const updateResponse = await backend.post(`/program-updates`, {
-          title: "update program stats",
+          title: 'update program stats',
           program_id: programId,
           created_by: currentUser?.uid || currentUser?.id,
           update_date: new Date().toISOString(),
-          note: "Program update",
+          note: 'Program update',
         });
 
         const updateId = updateResponse.data.id;
@@ -556,7 +549,7 @@ export const ProgramForm = ({
         );
         setCountries(response.data);
       } catch (error) {
-        console.error("Error fetching countries:", error);
+        console.error('Error fetching countries:', error);
         setCountries([]);
       }
     }
@@ -600,33 +593,29 @@ export const ProgramForm = ({
               fontSize="small"
               onClick={handleSave}
             >
-              {" "}
-              Save{" "}
+              {' '}
+              Save{' '}
             </Button>
           </HStack>
 
           <DrawerBody>
-            <VStack
-              spacing={4}
-              align="stretch"
-              marginLeft="1em"
-            >
+            <VStack spacing={4} align="stretch" marginLeft="1em">
               <DrawerHeader padding="0 0">Program</DrawerHeader>
               <h3>Status</h3>
               <HStack>
                 {/* changed developing => inactive, launched => active to match the enum values in the database schema for program */}
                 <Button
-                  onClick={() => handleProgramStatusChange("Inactive")}
+                  onClick={() => handleProgramStatusChange('Inactive')}
                   colorScheme={
-                    formState.status === "Inactive" ? "teal" : undefined
+                    formState.status === 'Inactive' ? 'teal' : undefined
                   }
                 >
                   Developing
                 </Button>
                 <Button
-                  onClick={() => handleProgramStatusChange("Active")}
+                  onClick={() => handleProgramStatusChange('Active')}
                   colorScheme={
-                    formState.status === "Active" ? "teal" : undefined
+                    formState.status === 'Active' ? 'teal' : undefined
                   }
                 >
                   Launched
@@ -635,27 +624,24 @@ export const ProgramForm = ({
               <h3>Program Name</h3>
               <Input
                 placeholder="Enter Program Name"
-                value={formState.programName || ""}
+                value={formState.programName || ''}
                 onChange={(e) => handleProgramNameChange(e.target.value)}
               />
               <h3>Launch Date</h3>
               <Input
                 type="date"
                 placeholder="MM/DD/YYYY"
-                value={formState.launchDate || ""}
+                value={formState.launchDate || ''}
                 onChange={(e) => handleProgramLaunchDateChange(e.target.value)}
               />
               <h3>Region</h3>
               <Select
                 placeholder="Select region"
-                value={formState.regionId || ""}
+                value={formState.regionId || ''}
                 onChange={(e) => handleRegionChange(e.target.value)}
               >
                 {regions.map((region) => (
-                  <option
-                    key={region.id}
-                    value={region.id}
-                  >
+                  <option key={region.id} value={region.id}>
                     {region.name}
                   </option>
                 ))}
@@ -665,14 +651,11 @@ export const ProgramForm = ({
                   <h3>Country</h3>
                   <Select
                     placeholder="Select Country"
-                    value={formState.country || ""}
+                    value={formState.country || ''}
                     onChange={(e) => handleCountryChange(e.target.value)}
                   >
                     {countries.map((country) => (
-                      <option
-                        key={country.id}
-                        value={country.id}
-                      >
+                      <option key={country.id} value={country.id}>
                         {country.name}
                       </option>
                     ))}
@@ -723,7 +706,7 @@ export const ProgramForm = ({
               <h3>Language</h3>
               <Select
                 placeholder="Language"
-                value={formState.language || ""}
+                value={formState.language || ''}
                 onChange={(e) => handleLanguageChange(e.target.value)}
               >
                 {/* TODO: Language DB Table */}
@@ -769,8 +752,8 @@ export const ProgramForm = ({
                       onClick={() => {
                         window.open(
                           playlist.link,
-                          "_blank",
-                          "noopener,noreferrer"
+                          '_blank',
+                          'noopener,noreferrer'
                         );
                       }}
                     >

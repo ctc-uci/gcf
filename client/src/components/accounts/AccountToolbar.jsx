@@ -9,9 +9,9 @@ import {
   InputLeftElement,
   Spacer,
   Text,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from "react-icons/fi";
+import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from 'react-icons/fi';
 
 export const AccountToolbar = ({
   searchQuery,
@@ -25,23 +25,10 @@ export const AccountToolbar = ({
     setSearchQuery(event.target.value);
   }
   return (
-    <Flex
-      width="100%"
-      align="center"
-      gap={2}
-    >
-      <InputGroup
-        maxW="300px"
-        ml={{ base: 0, md: 4 }}
-      >
-        <InputLeftElement
-          pointerEvents="none"
-          mt={-2}
-        >
-          <Icon
-            as={FiSearch}
-            color="gray.400"
-          />
+    <Flex width="100%" align="center" gap={2}>
+      <InputGroup maxW="300px" ml={{ base: 0, md: 4 }}>
+        <InputLeftElement pointerEvents="none" mt={-2}>
+          <Icon as={FiSearch} color="gray.400" />
         </InputLeftElement>
 
         <Input
@@ -50,7 +37,7 @@ export const AccountToolbar = ({
           borderBottom="1px solid"
           borderColor="gray.300"
           borderRadius={0}
-          _focus={{ borderColor: "black" }}
+          _focus={{ borderColor: 'black' }}
           px={0}
           pl={10}
           value={searchQuery}
@@ -97,10 +84,7 @@ export const AccountToolbar = ({
         borderRadius="md"
         fontWeight="normal"
         leftIcon={
-          <Text
-            as="span"
-            fontSize="lg"
-          >
+          <Text as="span" fontSize="lg">
             +
           </Text>
         }

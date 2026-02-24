@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 import {
   AddIcon,
@@ -6,7 +6,7 @@ import {
   EditIcon,
   HamburgerIcon,
   Search2Icon,
-} from "@chakra-ui/icons";
+} from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -27,26 +27,25 @@ import {
   Tr,
   useDisclosure,
   VStack,
-} from "@chakra-ui/react";
-
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+} from '@chakra-ui/react';
 import { downloadCsv, escapeCsvValue, getFilenameTimestamp } from "@/utils/downloadCsv";
+import CardView from "./CardView";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
-} from "react-icons/hi2";
-
-import { useTableSort } from "../../contexts/hooks/TableSort";
-import { SortArrows } from "../tables/SortArrows";
-import CardView from "./CardView";
-import { ProgramForm } from "./ProgramForm";
+} from 'react-icons/hi2';
+import { useTableSort } from '../../contexts/hooks/TableSort';
+import { SortArrows } from '../tables/SortArrows';
+import { ProgramForm } from './ProgramForm';
 
 const getRouteByRole = (role, userId) => {
   const routes = {
-    Admin: "/admin/programs",
-    "Regional Director": `/rdProgramTable/${userId}`,
+    'Super Admin': '/admin/programs',
+    Admin: '/admin/programs',
+    'Regional Director': `/rdProgramTable/${userId}`,
   };
   return routes[role];
 };
@@ -58,7 +57,7 @@ function mapAdminRow(row) {
     status: row.status,
     launchDate: row.launchDate,
 
-    location: row.countryName ?? "",
+    location: row.countryName ?? '',
     country: row.country,
 
     students: row.students ?? 0,
@@ -80,7 +79,7 @@ function mapRdRow(row) {
     status: row.programStatus,
     launchDate: row.programLaunchDate,
 
-    location: row.programLocation ?? row.regionName ?? "",
+    location: row.programLocation ?? row.regionName ?? '',
     countryId: row.countryId,
     regionId: row.regionId,
 
@@ -96,8 +95,9 @@ function mapRdRow(row) {
 }
 
 const MAP_BY_ROLE = {
+  'Super Admin': mapAdminRow,
   Admin: mapAdminRow,
-  "Regional Director": mapRdRow,
+  'Regional Director': mapRdRow,
 };
 
 function ExpandableRow({ p, onEdit }) {
@@ -108,7 +108,7 @@ function ExpandableRow({ p, onEdit }) {
       <Tr
         onClick={onToggle}
         cursor="pointer"
-        sx={{ td: { borderBottom: isOpen ? "none" : undefined } }}
+        sx={{ td: { borderBottom: isOpen ? 'none' : undefined } }}
       >
         <Td>{p.title}</Td>
         <Td>{p.status}</Td>
@@ -121,35 +121,21 @@ function ExpandableRow({ p, onEdit }) {
       <Tr>
         <Td
           colSpan={7}
-          borderBottom={isOpen ? "1px solid" : "none"}
+          borderBottom={isOpen ? '1px solid' : 'none'}
           borderColor="gray.200"
           p={isOpen ? undefined : 0}
         >
           <Collapse in={isOpen}>
             <Box position="relative">
               <HStack align="start">
-                <Box
-                  flex="1"
-                  display="grid"
-                >
-                  <Box
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    pb="2"
-                  >
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">
                     Language:
                   </Box>
-                  <Box>{p.primaryLanguage ?? "-"}</Box>
+                  <Box>{p.primaryLanguage ?? '-'}</Box>
                 </Box>
-                <Box
-                  flex="1"
-                  display="grid"
-                >
-                  <Box
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    pb="2"
-                  >
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">
                     Regional Director(s)
                   </Box>
                   <Box>
@@ -176,15 +162,8 @@ function ExpandableRow({ p, onEdit }) {
                     </VStack>
                   </Box>
                 </Box>
-                <Box
-                  flex="1"
-                  display="grid"
-                >
-                  <Box
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    pb="2"
-                  >
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">
                     Program Director(s)
                   </Box>
                   <Box>
@@ -211,15 +190,8 @@ function ExpandableRow({ p, onEdit }) {
                     </VStack>
                   </Box>
                 </Box>
-                <Box
-                  flex="1"
-                  display="grid"
-                >
-                  <Box
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    pb="2"
-                  >
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">
                     Curriculum Link(s)
                   </Box>
                   <Box>
@@ -340,7 +312,7 @@ function ProgramDisplay({
   useEffect(() => {
     if (!originalData || originalData.length === 0) return;
 
-    if (searchQuery === "") {
+    if (searchQuery === '') {
       setData(originalData);
       return;
     }
@@ -365,7 +337,6 @@ function ProgramDisplay({
   }, [searchQuery, originalData]);
 
   if (!getRouteByRole(role, userId)) return null;
-
   return (
     <>
       <ProgramForm
@@ -378,16 +349,9 @@ function ProgramDisplay({
         program={selectedProgram}
       />
       <TableContainer>
-        <HStack
-          mb={4}
-          justifyContent="space-between"
-          w="100%"
-        >
+        <HStack mb={4} justifyContent="space-between" w="100%">
           <HStack spacing={4}>
-            <Box
-              fontSize="xl"
-              fontWeight="semibold"
-            >
+            <Box fontSize="xl" fontWeight="semibold">
               All Programs
             </Box>
             <HStack spacing={1}>
@@ -582,7 +546,7 @@ function ProgramTable() {
   const [programs, setPrograms] = useState([]);
   const [originalPrograms, setOriginalPrograms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const openEditForm = (program) => {
@@ -633,7 +597,7 @@ function ProgramTable() {
         setOriginalPrograms(mappedPrograms);
         setPrograms(mappedPrograms);
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error('Error fetching data:', err);
       } finally {
         setIsLoading(false);
       }

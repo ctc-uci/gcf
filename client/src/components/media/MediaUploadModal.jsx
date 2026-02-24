@@ -1,6 +1,6 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState } from 'react';
 
-import { ChevronLeftIcon } from "@chakra-ui/icons";
+import { ChevronLeftIcon } from '@chakra-ui/icons';
 import {
   IconButton,
   Modal,
@@ -9,10 +9,10 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { MediaPreview } from "./MediaPreview";
-import { MediaUpload } from "./MediaUpload";
+import { MediaPreview } from './MediaPreview';
+import { MediaUpload } from './MediaUpload';
 
 export function MediaUploadModal({ isOpen, onClose, onUploadComplete }) {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -24,25 +24,12 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete }) {
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      isCentered
-      size="xl"
-    >
+    <Modal isOpen={isOpen} onClose={handleClose} isCentered size="xl">
       <ModalOverlay />
-      <ModalContent
-        borderRadius="md"
-        pb={6}
-      >
+      <ModalContent borderRadius="md" pb={6}>
         {selectedFile && (
           <IconButton
-            icon={
-              <ChevronLeftIcon
-                w={6}
-                h={6}
-              />
-            }
+            icon={<ChevronLeftIcon w={6} h={6} />}
             variant="ghost"
             position="absolute"
             left="15px"
@@ -51,10 +38,7 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete }) {
             aria-label="Back"
           />
         )}
-        <ModalCloseButton
-          top="15px"
-          right="15px"
-        />
+        <ModalCloseButton top="15px" right="15px" />
 
         <ModalHeader
           textAlign="center"
@@ -72,10 +56,7 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete }) {
               onFileSelect={(file) => setSelectedFile(file)}
             />
           ) : (
-            <MediaPreview
-              file={selectedFile}
-              onComplete={onUploadComplete}
-            />
+            <MediaPreview file={selectedFile} onComplete={onUploadComplete} />
           )}
         </ModalBody>
       </ModalContent>

@@ -1,37 +1,37 @@
-import { keysToCamel } from "@/common/utils";
-import { admin } from "@/config/firebase";
-import express from "express";
+import { keysToCamel } from '@/common/utils';
+import { admin } from '@/config/firebase';
+import express from 'express';
 
-import { db } from "../db/db-pgp";
+import { db } from '../db/db-pgp';
 
 const regionalDirectorRouter = express.Router();
 regionalDirectorRouter.use(express.json());
 
-regionalDirectorRouter.get("/me/:id", async (req, res) => {
+regionalDirectorRouter.get('/me/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const director = await db.query(
-      "SELECT * FROM regional_director WHERE user_id = $1 LIMIT 1",
+      'SELECT * FROM regional_director WHERE user_id = $1 LIMIT 1',
       [id]
     );
     if (!director?.length)
-      return res.status(404).json({ error: "Regional director not found" });
+      return res.status(404).json({ error: 'Regional director not found' });
     res.status(200).json(keysToCamel(director[0]));
   } catch (err) {
-    console.error("Error in /me/:id:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error in /me/:id:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-regionalDirectorRouter.get("/me/:id/stats", async (req, res) => {
+regionalDirectorRouter.get('/me/:id/stats', async (req, res) => {
   try {
     const { id } = req.params;
     const director = await db.query(
-      "SELECT region_id FROM regional_director WHERE user_id = $1 LIMIT 1",
+      'SELECT region_id FROM regional_director WHERE user_id = $1 LIMIT 1',
       [id]
     );
     if (!director?.length)
-      return res.status(404).json({ error: "Regional director not found" });
+      return res.status(404).json({ error: 'Regional director not found' });
     const regionId = director[0].region_id;
     const stats = await db.query(
       `SELECT
@@ -50,20 +50,20 @@ regionalDirectorRouter.get("/me/:id/stats", async (req, res) => {
     );
     res.status(200).json(keysToCamel(stats[0]));
   } catch (err) {
-    console.error("Error in /me/:id/stats:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error in /me/:id/stats:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-regionalDirectorRouter.get("/me/:id/programs", async (req, res) => {
+regionalDirectorRouter.get('/me/:id/programs', async (req, res) => {
   try {
     const { id } = req.params;
     const director = await db.query(
-      "SELECT region_id FROM regional_director WHERE user_id = $1 LIMIT 1",
+      'SELECT region_id FROM regional_director WHERE user_id = $1 LIMIT 1',
       [id]
     );
     if (!director?.length)
-      return res.status(404).json({ error: "Regional director not found" });
+      return res.status(404).json({ error: 'Regional director not found' });
     const regionId = director[0].region_id;
     const programs = await db.query(
       `SELECT p.id, p.name
@@ -75,12 +75,12 @@ regionalDirectorRouter.get("/me/:id/programs", async (req, res) => {
     );
     res.status(200).json(keysToCamel(programs));
   } catch (err) {
-    console.error("Error in /me/:id/programs:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error in /me/:id/programs:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-regionalDirectorRouter.post("/", async (req, res) => {
+regionalDirectorRouter.post('/', async (req, res) => {
   try {
     const { user_id, region_id } = req.body;
     const newRegionalDirector = await db.query(
@@ -92,17 +92,17 @@ regionalDirectorRouter.post("/", async (req, res) => {
     res.status(201).json(keysToCamel(newRegionalDirector[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-regionalDirectorRouter.get("/", async (req, res) => {
+regionalDirectorRouter.get('/', async (req, res) => {
   try {
     const data = await db.query(`SELECT * FROM regional_director`);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
@@ -126,7 +126,7 @@ regionalDirectorRouter.get(
   }
 );
 
-regionalDirectorRouter.get("/:user_id/program-directors", async (req, res) => {
+regionalDirectorRouter.get('/:user_id/program-directors', async (req, res) => {
   try {
     const { user_id } = req.params;
 
@@ -150,11 +150,11 @@ regionalDirectorRouter.get("/:user_id/program-directors", async (req, res) => {
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-regionalDirectorRouter.get("/:user_id/programs", async (req, res) => {
+regionalDirectorRouter.get('/:user_id/programs', async (req, res) => {
   try {
     const { user_id } = req.params;
 
@@ -171,11 +171,11 @@ regionalDirectorRouter.get("/:user_id/programs", async (req, res) => {
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-regionalDirectorRouter.get("/:user_id", async (req, res) => {
+regionalDirectorRouter.get('/:user_id', async (req, res) => {
   try {
     const { user_id } = req.params;
     const regionalDirector = await db.query(
@@ -184,17 +184,17 @@ regionalDirectorRouter.get("/:user_id", async (req, res) => {
     );
 
     if (regionalDirector.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(regionalDirector[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-regionalDirectorRouter.put("/:id", async (req, res) => {
+regionalDirectorRouter.put('/:id', async (req, res) => {
   try {
     const { user_id } = req.params;
     const { region_id } = req.body;
@@ -207,17 +207,17 @@ regionalDirectorRouter.put("/:id", async (req, res) => {
     );
 
     if (updatedRegionalDirector.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(updatedRegionalDirector[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-regionalDirectorRouter.delete("/:id", async (req, res) => {
+regionalDirectorRouter.delete('/:id', async (req, res) => {
   try {
     const { user_id } = req.params;
     const deletedRegionalDirector = await db.query(
@@ -226,13 +226,13 @@ regionalDirectorRouter.delete("/:id", async (req, res) => {
     );
 
     if (deletedRegionalDirector.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(deletedRegionalDirector[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 import {
   Badge,
@@ -16,13 +16,12 @@ import {
   Thead,
   Tr,
   useColorModeValue,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
+
+import { FiEdit2, FiEyeOff } from 'react-icons/fi';
 
 import { downloadCsv, escapeCsvValue, getFilenameTimestamp } from "@/utils/downloadCsv";
 import { FiEdit2, FiEyeOff } from "react-icons/fi";
-
-import { useTableSort } from "../../contexts/hooks/TableSort";
-import { SortArrows } from "../tables/SortArrows";
 import CardView from "./CardView";
 
 export function downloadAccountsAsCsv(data) {
@@ -42,6 +41,8 @@ export function downloadAccountsAsCsv(data) {
     `accounts-${getFilenameTimestamp()}.csv`
   );
 }
+import { useTableSort } from '../../contexts/hooks/TableSort';
+import { SortArrows } from '../tables/SortArrows';
 
 export const AccountsTable = ({
   data,
@@ -52,7 +53,7 @@ export const AccountsTable = ({
   onSave,
   onUpdate,
 }) => {
-  const hoverBg = useColorModeValue("gray.50", "gray.700");
+  const hoverBg = useColorModeValue('gray.50', 'gray.700');
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
 
   useEffect(() => {
@@ -172,7 +173,7 @@ export const AccountsTable = ({
                 key={user.id}
                 _hover={{
                   bg: hoverBg,
-                  "& .action-group": { opacity: 1, visibility: "visible" },
+                  '& .action-group': { opacity: 1, visibility: 'visible' },
                 }}
                 transition="background 0.2s"
               >
@@ -185,18 +186,10 @@ export const AccountsTable = ({
                 <Td>
                   <HStack spacing={2}>
                     {/* TODO: Update to utilize password field when data is available + hidden functionality */}
-                    <Text
-                      fontSize="lg"
-                      lineHeight="1"
-                      mt="6px"
-                    >
+                    <Text fontSize="lg" lineHeight="1" mt="6px">
                       ********
                     </Text>
-                    <Icon
-                      as={FiEyeOff}
-                      color="gray.500"
-                      cursor="pointer"
-                    />
+                    <Icon as={FiEyeOff} color="gray.500" cursor="pointer" />
                   </HStack>
                 </Td>
 
@@ -217,14 +210,11 @@ export const AccountsTable = ({
 
                 <Td>
                   {Array.isArray(user.programs) && user.programs.length > 0
-                    ? user.programs.join(", ")
-                    : "-"}
+                    ? user.programs.join(', ')
+                    : '-'}
                 </Td>
 
-                <Td
-                  p={0}
-                  textAlign="right"
-                >
+                <Td p={0} textAlign="right">
                   <Box
                     className="action-group"
                     opacity={0}

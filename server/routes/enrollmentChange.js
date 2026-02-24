@@ -1,21 +1,22 @@
-import { keysToCamel } from "@/common/utils";
-import express from "express";
-import { db } from "../db/db-pgp";
+import { keysToCamel } from '@/common/utils';
+import express from 'express';
+
+import { db } from '../db/db-pgp';
 
 const enrollmentChangeRouter = express.Router();
 enrollmentChangeRouter.use(express.json());
 
-enrollmentChangeRouter.get("/", async (req, res) => {
+enrollmentChangeRouter.get('/', async (req, res) => {
   try {
     const data = await db.query(`SELECT * FROM enrollment_change`);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-enrollmentChangeRouter.get("/update/:updateId", async (req, res) => {
+enrollmentChangeRouter.get('/update/:updateId', async (req, res) => {
   try {
     const { updateId } = req.params;
     const enrollmentChange = await db.query(
@@ -23,18 +24,14 @@ enrollmentChangeRouter.get("/update/:updateId", async (req, res) => {
       [updateId]
     );
 
-    if (enrollmentChange.length === 0){
-      return res.status(404).send("Item not found");
-    }
-
     res.status(200).json(keysToCamel(enrollmentChange));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-enrollmentChangeRouter.get("/:id", async (req, res) => {
+enrollmentChangeRouter.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const enrollmentChange = await db.query(
@@ -42,19 +39,18 @@ enrollmentChangeRouter.get("/:id", async (req, res) => {
       [id]
     );
 
-    if (enrollmentChange.length === 0){
-      return res.status(404).send("Item not found");
+    if (enrollmentChange.length === 0) {
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(enrollmentChange));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-
-enrollmentChangeRouter.post("/", async (req, res) => {
+enrollmentChangeRouter.post('/', async (req, res) => {
   try {
     const { update_id, enrollment_change, graduated_change } = req.body;
     const newEnrollmentChange = await db.query(
@@ -64,11 +60,11 @@ enrollmentChangeRouter.post("/", async (req, res) => {
     res.status(201).json(keysToCamel(newEnrollmentChange[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-enrollmentChangeRouter.put("/:id", async (req, res) => {
+enrollmentChangeRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { update_id, enrollment_change, graduated_change } = req.body;
@@ -82,18 +78,18 @@ enrollmentChangeRouter.put("/:id", async (req, res) => {
       [update_id, enrollment_change, graduated_change, id]
     );
 
-    if (updatedEnrollmentChange.length === 0){
-      return res.status(404).send("Item not found");
+    if (updatedEnrollmentChange.length === 0) {
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(updatedEnrollmentChange[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-enrollmentChangeRouter.delete("/:id", async (req, res) => {
+enrollmentChangeRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const deletedEnrollmentChange = await db.query(
@@ -101,14 +97,14 @@ enrollmentChangeRouter.delete("/:id", async (req, res) => {
       [id]
     );
 
-    if (deletedEnrollmentChange.length === 0){
-      return res.status(404).send("Item not found");
+    if (deletedEnrollmentChange.length === 0) {
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(deletedEnrollmentChange[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
