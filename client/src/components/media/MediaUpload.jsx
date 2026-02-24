@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-import { Button, Center } from "@chakra-ui/react";
+import { Button, Center } from '@chakra-ui/react';
 
 export function MediaUpload({ fileInputRef, onFileSelect }) {
   const handleFileChange = (e) => {

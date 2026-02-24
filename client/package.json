@@ -22,7 +22,7 @@
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@hookform/resolvers": "^3.9.0",
-    "axios": "^1.7.4",
+    "axios": "^1.13.5",
     "firebase": "10.12.5",
     "framer-motion": "^11.3.27",
     "patch-package": "^8.0.0",

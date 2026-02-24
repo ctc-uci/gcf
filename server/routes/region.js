@@ -1,22 +1,22 @@
-import { keysToCamel } from "@/common/utils";
-import express from "express";
+import { keysToCamel } from '@/common/utils';
+import express from 'express';
 
-import { db } from "../db/db-pgp";
+import { db } from '../db/db-pgp';
 
 const regionRouter = express.Router();
 regionRouter.use(express.json());
 
-regionRouter.get("/", async (req, res) => {
+regionRouter.get('/', async (req, res) => {
   try {
     const data = await db.query(`SELECT * FROM region`);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-regionRouter.get("/:id", async (req, res) => {
+regionRouter.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const region = await db.query(`SELECT ALL * FROM region WHERE id = $1`, [
@@ -24,17 +24,17 @@ regionRouter.get("/:id", async (req, res) => {
     ]);
 
     if (region.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(region[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-regionRouter.get("/get-region-name/:id", async (req, res) => {
+regionRouter.get('/get-region-name/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const region = await db.query(
@@ -47,17 +47,17 @@ regionRouter.get("/get-region-name/:id", async (req, res) => {
     );
 
     if (region.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(region[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-regionRouter.post("/", async (req, res) => {
+regionRouter.post('/', async (req, res) => {
   try {
     const { name, last_modified } = req.body;
     const newRegion = await db.query(
@@ -69,11 +69,11 @@ regionRouter.post("/", async (req, res) => {
     res.status(201).json(keysToCamel(newRegion[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-regionRouter.put("/:id", async (req, res) => {
+regionRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { name, last_modified } = req.body;
@@ -87,17 +87,17 @@ regionRouter.put("/:id", async (req, res) => {
     );
 
     if (updatedRegion.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(updatedRegion[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-regionRouter.delete("/:id", async (req, res) => {
+regionRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const deletedRegion = await db.query(
@@ -106,13 +106,29 @@ regionRouter.delete("/:id", async (req, res) => {
     );
 
     if (deletedRegion.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(deletedRegion[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+regionRouter.get('/:id/countries', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const countries = await db.query(
+      `SELECT * FROM country WHERE region_id = $1`,
+      [id]
+    );
+
+    res.status(200).json(keysToCamel(countries));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
   }
 });
 

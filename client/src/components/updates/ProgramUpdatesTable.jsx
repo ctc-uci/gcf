@@ -1,8 +1,15 @@
-import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+
+import {
+  AddIcon,
+  DownloadIcon,
+  HamburgerIcon,
+  SearchIcon,
+} from '@chakra-ui/icons';
 import {
   Badge,
   Box,
+  Button,
   Center,
   Flex,
   Heading,
@@ -15,62 +22,72 @@ import {
   Th,
   Thead,
   Tr,
-} from "@chakra-ui/react";
-import { SortArrows } from "../tables/SortArrows";
-import { useTableSort } from "../../contexts/hooks/TableSort";
+} from '@chakra-ui/react';
 
-export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+import { useTableSort } from '../../contexts/hooks/TableSort';
+import { SortArrows } from '../tables/SortArrows';
+import { ProgramUpdateForm } from './ProgramUpdateForm';
+export const ProgramUpdatesTable = ({
+  data,
+  setData,
+  originalData,
+  isLoading,
+}) => {
+  const [searchQuery, setSearchQuery] = useState('');
   const [unorderedUpdates, setUnorderedUpdates] = useState([]);
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
-  
-  const handleSearch = event => {
-      setSearchQuery(event.target.value);
-   };
-   //setUnorderedUpdates(data.map((row) => row))
-   useEffect(() => {
+  const [selectedUpdate, setSelectedUpdate] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const openEditForm = (update) => {
+    setSelectedUpdate(update);
+    setIsFormOpen(true);
+  };
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
+  //setUnorderedUpdates(data.map((row) => row))
+  useEffect(() => {
     setUnorderedUpdates(data);
-   }, [searchQuery, data]);
-  
-    useEffect(() => {
-       function filterUpdates(search) {
-        if (search === '') {
-          setData(originalData);
-          return;
-        } 
-         // filter by search query
-         const filtered = unorderedUpdates.filter(update => 
-           // if no search then show everything
-           update.updateDate.toLowerCase().includes(search.toLowerCase()) ||
-           update.note.toLowerCase().includes(search.toLowerCase()) ||
-           update.name.toLowerCase().includes(search.toLowerCase()) ||
-           update.firstName.toLowerCase().includes(search.toLowerCase()) ||
-           update.status.includes(search.toLowerCase())
-         );
-         
-        setData(filtered);
-        
-       }
-   
-     filterUpdates(searchQuery);
-   
-     }, [searchQuery, unorderedUpdates]);
+  }, [searchQuery, data]);
+
+  useEffect(() => {
+    function filterUpdates(search) {
+      if (search === '') {
+        setData(originalData);
+        return;
+      }
+      // filter by search query
+      const filtered = unorderedUpdates.filter(
+        (update) =>
+          // if no search then show everything
+          update.updateDate.toLowerCase().includes(search.toLowerCase()) ||
+          update.note.toLowerCase().includes(search.toLowerCase()) ||
+          update.name.toLowerCase().includes(search.toLowerCase()) ||
+          update.firstName.toLowerCase().includes(search.toLowerCase()) ||
+          update.status.includes(search.toLowerCase())
+      );
+
+      setData(filtered);
+    }
+
+    filterUpdates(searchQuery);
+  }, [searchQuery, unorderedUpdates]);
 
   return (
     <>
-      <Box
-        mt="30px"
-        ml="10px"
-      >
-        <Flex
-          gap={10}
-          mb="20px"
-        >
+      <ProgramUpdateForm
+        isOpen={isFormOpen}
+        onOpen={() => setIsFormOpen(true)}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedUpdate(null);
+        }}
+        programUpdateId={selectedUpdate?.id}
+      />
+      <Box mt="30px" ml="10px">
+        <Flex gap={10} mb="20px" alignItems="center">
           <Heading>Program Updates</Heading>
-          <SearchIcon
-            mt="10px"
-            ml="10px"
-          />
+          <SearchIcon mt="10px" ml="10px" />
           <Input
             placeholder="Type to search"
             variant="flushed"
@@ -80,21 +97,42 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
           />
           <HamburgerIcon mt="10px" />
           <DownloadIcon mt="10px" />
+          <Button
+            size="sm"
+            rightIcon={<AddIcon />}
+            onClick={() => {
+              openEditForm(null);
+            }}
+            ml="auto"
+          >
+            New
+          </Button>
         </Flex>
 
-        <TableContainer
-          overflowX="auto"
-          maxW="100%"
-        >
+        <TableContainer overflowX="auto" maxW="100%">
           <Table variant="simple">
             <Thead>
               {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
               <Tr>
-                <Th onClick={() => handleSort('updateDate')} cursor="pointer">Time <SortArrows columnKey={"updateDate"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('note')} cursor="pointer">Notes <SortArrows columnKey={"note"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('name')} cursor="pointer">Program <SortArrows columnKey={"name"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('firstName')} cursor="pointer">Author <SortArrows columnKey={"firstName"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('status')} cursor="pointer">Status <SortArrows columnKey={"status"} sortOrder={sortOrder}/></Th>
+                <Th onClick={() => handleSort('updateDate')} cursor="pointer">
+                  Time{' '}
+                  <SortArrows columnKey={'updateDate'} sortOrder={sortOrder} />
+                </Th>
+                <Th onClick={() => handleSort('note')} cursor="pointer">
+                  Notes <SortArrows columnKey={'note'} sortOrder={sortOrder} />
+                </Th>
+                <Th onClick={() => handleSort('name')} cursor="pointer">
+                  Program{' '}
+                  <SortArrows columnKey={'name'} sortOrder={sortOrder} />
+                </Th>
+                <Th onClick={() => handleSort('firstName')} cursor="pointer">
+                  Author{' '}
+                  <SortArrows columnKey={'firstName'} sortOrder={sortOrder} />
+                </Th>
+                <Th onClick={() => handleSort('status')} cursor="pointer">
+                  Status{' '}
+                  <SortArrows columnKey={'status'} sortOrder={sortOrder} />
+                </Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -108,7 +146,7 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
                 </Tr>
               ) : (
                 data.map((row) => (
-                  <Tr key={row.id}>
+                  <Tr key={row.id} onClick={() => openEditForm(row)}>
                     <Td>{row.updateDate}</Td>
                     <Td>{row.note}</Td>
                     <Td>{row.name}</Td>
