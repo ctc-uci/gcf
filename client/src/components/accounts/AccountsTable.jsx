@@ -20,26 +20,25 @@ import {
 
 import { FiEdit2, FiEyeOff } from 'react-icons/fi';
 
-import { downloadCsv, escapeCsvValue, getFilenameTimestamp } from "@/utils/downloadCsv";
-import { FiEdit2, FiEyeOff } from "react-icons/fi";
-import CardView from "./CardView";
+import {
+  downloadCsv,
+  escapeCsvValue,
+  getFilenameTimestamp,
+} from '@/utils/downloadCsv';
+import CardView from './CardView';
 
 export function downloadAccountsAsCsv(data) {
-  const headers = ["First Name", "Last Name", "Email", "Type", "Program(s)"];
+  const headers = ['First Name', 'Last Name', 'Email', 'Type', 'Program(s)'];
   const rows = (data || []).map((user) => [
     escapeCsvValue(user.firstName),
     escapeCsvValue(user.lastName),
     escapeCsvValue(user.email),
     escapeCsvValue(user.role),
     escapeCsvValue(
-      Array.isArray(user.programs) ? user.programs.join("; ") : ""
+      Array.isArray(user.programs) ? user.programs.join('; ') : ''
     ),
   ]);
-  downloadCsv(
-    headers,
-    rows,
-    `accounts-${getFilenameTimestamp()}.csv`
-  );
+  downloadCsv(headers, rows, `accounts-${getFilenameTimestamp()}.csv`);
 }
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
@@ -58,7 +57,7 @@ export const AccountsTable = ({
 
   useEffect(() => {
     function filterUpdates(search) {
-      if (search === "") {
+      if (search === '') {
         setData(originalData);
         return;
       }
@@ -81,14 +80,11 @@ export const AccountsTable = ({
   return (
     <TableContainer>
       {!isCardView ? (
-        <Table
-          variant="simple"
-          size="md"
-        >
+        <Table variant="simple" size="md">
           <Thead>
             <Tr>
               <Th
-                onClick={() => handleSort("firstName")}
+                onClick={() => handleSort('firstName')}
                 cursor="pointer"
                 color="black"
                 fontSize="sm"
@@ -96,13 +92,10 @@ export const AccountsTable = ({
                 fontWeight="bold"
               >
                 Name
-                <SortArrows
-                  columnKey="firstName"
-                  sortOrder={sortOrder}
-                />
+                <SortArrows columnKey="firstName" sortOrder={sortOrder} />
               </Th>
               <Th
-                onClick={() => handleSort("email")}
+                onClick={() => handleSort('email')}
                 cursor="pointer"
                 color="black"
                 fontSize="sm"
@@ -110,13 +103,10 @@ export const AccountsTable = ({
                 fontWeight="bold"
               >
                 Email
-                <SortArrows
-                  columnKey="email"
-                  sortOrder={sortOrder}
-                />
+                <SortArrows columnKey="email" sortOrder={sortOrder} />
               </Th>
               <Th
-                onClick={() => handleSort("password")}
+                onClick={() => handleSort('password')}
                 cursor="pointer"
                 color="black"
                 fontSize="sm"
@@ -124,13 +114,10 @@ export const AccountsTable = ({
                 fontWeight="bold"
               >
                 Password
-                <SortArrows
-                  columnKey="passsword"
-                  sortOrder={sortOrder}
-                />
+                <SortArrows columnKey="passsword" sortOrder={sortOrder} />
               </Th>
               <Th
-                onClick={() => handleSort("role")}
+                onClick={() => handleSort('role')}
                 cursor="pointer"
                 color="black"
                 fontSize="sm"
@@ -138,13 +125,10 @@ export const AccountsTable = ({
                 fontWeight="bold"
               >
                 Type
-                <SortArrows
-                  columnKey="role"
-                  sortOrder={sortOrder}
-                />
+                <SortArrows columnKey="role" sortOrder={sortOrder} />
               </Th>
               <Th
-                onClick={() => handleSort("programs")}
+                onClick={() => handleSort('programs')}
                 cursor="pointer"
                 color="black"
                 fontSize="sm"
@@ -152,10 +136,7 @@ export const AccountsTable = ({
                 fontWeight="bold"
               >
                 Program(s)
-                <SortArrows
-                  columnKey="programs"
-                  sortOrder={sortOrder}
-                />
+                <SortArrows columnKey="programs" sortOrder={sortOrder} />
               </Th>
               <Th width="50px"></Th>
             </Tr>
@@ -239,10 +220,7 @@ export const AccountsTable = ({
           </Tbody>
         </Table>
       ) : (
-        <CardView
-          data={data}
-          onSave={onSave}
-        />
+        <CardView data={data} onSave={onSave} />
       )}
     </TableContainer>
   );
