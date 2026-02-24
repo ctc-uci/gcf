@@ -69,7 +69,7 @@ export const ProgramUpdateForm = ({
   const toast = useToast();
 
   useEffect(() => {
-    if(!programUpdateId) {
+    if (!programUpdateId) {
       setTitle('');
       setDate('');
       setNotes('');
@@ -84,7 +84,7 @@ export const ProgramUpdateForm = ({
       setQuantity(0);
     }
   }, [programUpdateId]);
-  
+
   useEffect(() => {
     const fetchInstruments = async () => {
       try {
