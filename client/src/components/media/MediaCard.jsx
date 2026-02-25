@@ -1,5 +1,7 @@
-import { Box, Image, Center, Spinner } from "@chakra-ui/react";
+import { Box, Image, Center } from "@chakra-ui/react";
 import { useState } from "react";
+
+import gcf_globe from "../../../public/gcf_globe.png";
 
 export const MediaCard = ({ file_name, file_type, imageUrl }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -17,7 +19,11 @@ export const MediaCard = ({ file_name, file_type, imageUrl }) => {
     >
       {isLoading && (
         <Center h="100%">
-          <Spinner size="sm" />
+          <Image
+            src={gcf_globe}
+            alt="Loading..."
+            w="50px"
+          />
         </Center>
       )}
       {isVideo ? (
