@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import {
   Button,
@@ -19,12 +19,22 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
     const toast = useToast();
     const [isUploading, setIsUploading] = useState(false);
 
-    const [titles, setTitles] = useState(() =>
-        files.map((file) => file.name.replace(/\.[^/.]+$/, ""))
-    );
+    const [titles, setTitles] = useState([]);
     
     const [folder, setFolder] = useState("");
     const [description, setDescription] = useState("");
+
+    // keep titles array in sync with files prop
+    useEffect(() => {
+        setTitles((prev) => {
+            return files.map((file, idx) => {
+                if (prev && prev[idx]) {
+                    return prev[idx];
+                }
+                return file.name.replace(/\.[^/.]+$/, "");
+            });
+        });
+    }, [files]);
 
     const updateTitle = (index, value) => {
         setTitles((prev) => {

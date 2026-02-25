@@ -308,8 +308,8 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 lastName: d.lastName,
             }));
 
-            let instrumentMap = {};
-            let initialInstrumentMap = {};
+            const instrumentMap = {};
+            const initialInstrumentMap = {};
             try {
                 const instrumentsResponse = await backend.get(`/program/${program.id}/instruments`);
                 const instruments = instrumentsResponse.data || [];
