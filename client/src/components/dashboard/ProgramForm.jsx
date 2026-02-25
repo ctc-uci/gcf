@@ -219,19 +219,27 @@ const CurriculumLinkForm = ({ formState, setFormData }) => {
     )
 }
 
-const MediaUploadForm = () => {
+const MediaUploadForm = ( { onUploadComplete, uploadedMedia, onRemove }) => {
     const { isOpen, onOpen, onClose } = useDisclosure();
-    // TODO: preview media uploads on the form
+
     return (
         <>
             <Button onClick={onOpen}> + Add </Button>
             <MediaUploadModal
                 isOpen={isOpen}
                 onClose={onClose}
-                onUploadComplete={() => {
-                }}
+                onUploadComplete={onUploadComplete}
                 formOrigin={"program"}
             />
+
+            <HStack wrap="wrap" mt={2}>
+                {(uploadedMedia ?? []).map((item, i) => (
+                    <Tag key={i}>
+                        <TagLabel>{item.file_name}</TagLabel>
+                        <TagCloseButton onClick={() => onRemove(i)}/>
+                    </Tag>
+                ))}
+            </HStack>
         </>
     )
 }
@@ -359,7 +367,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         }
         loadProgramRegionData();
 
-    }, [program, backend])
+    }, [program?.id])
 
     function handleProgramStatusChange(status) {
         setFormState({ ...formState, status: status });
@@ -432,7 +440,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 }
             }
 
-            //curriclum links / playlists
+            //curriculum links / playlists
             const currentLinks = (formState.curriculumLinks ?? []).map((p) => p.link);
             for (const playlist of formState.curriculumLinks ?? []) {
                 if (!initialCurriculumLinks.includes(playlist.link)) {
@@ -451,9 +459,9 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
             }
 
             const studentCountChange = formState.students - oldStudentCount;
-
-
             const instrumentChanges = [];
+            const mediaChanges = formState.media;
+
             const allInstrumentIds = new Set([
                 ...Object.keys(initialInstrumentQuantities || {}),
                 ...Object.keys(formState.instruments || {}),
@@ -473,8 +481,9 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
 
             const hasStudentChange = studentCountChange !== 0;
             const hasInstrumentChange = instrumentChanges.length > 0;
+            const hasMediaChange = mediaChanges.length > 0;
 
-            if (hasStudentChange || hasInstrumentChange) {
+            if (hasStudentChange || hasInstrumentChange || hasMediaChange) {
                 const updateResponse = await backend.post(`/program-updates`, {
                     title: 'update program stats',
                     program_id: programId,
@@ -500,6 +509,19 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                             updateId,
                             amountChanged: instrumentChange.amountChanged,
                         });
+                    }
+                }
+
+                if (hasMediaChange) {
+                    for (const mediaChange of mediaChanges) {
+                        await backend.post(`/mediaChange`, {
+                            update_id: updateId,
+                            s3_key: mediaChange.s3_key,
+                            file_name: mediaChange.file_name,
+                            file_type: mediaChange.file_type,
+                            is_thumbnail: false,
+                            instrument_id: mediaChange.instrument_id || null,
+                        })
                     }
                 }
             }
@@ -696,9 +718,17 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                                     </Tag>
                                 ))}
                             </HStack>
-                            {/* TODO: Add media input */}
                             <h4>Media</h4>
-                            <MediaUploadForm />
+                            <MediaUploadForm
+                                onUploadComplete={(files) =>
+                                    setFormState((prev) => ({ ...prev, media: [...prev.media, ...files] }))
+                                }
+                                uploadedMedia={formState.media}
+                                onRemove={(i) =>
+                                    setFormState((prev) => ({ ...prev, media: prev.media.filter((_, idx) => idx !== i),
+                                    }))
+                                }
+                            />
 
                         </VStack>
                     </DrawerBody>
