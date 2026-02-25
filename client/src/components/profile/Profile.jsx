@@ -40,21 +40,11 @@ const fetchRegionData = async (backend, userId) => {
   }
 };
 
-const updateProfilePicture = async (url) => {
-    const res = await backend.post(`/images/profile-upload`, {url});
-
-    if (!res.ok) {
-      console.error("Error: failed to upload profile picture.")
-    }
-  }
-
 export const Profile = () => {
   const { currentUser } = useAuthContext();
   const { backend } = useBackendContext();
 
-  // disclosure for MediaUploadModal 
   const { isOpen, onOpen, onClose } = useDisclosure();
-
 
   const [gcfUser, setGcfUser] = useState(null);
   const [roleSpecificData, setRoleSpecificData] = useState(null);
@@ -91,11 +81,18 @@ export const Profile = () => {
     fetchUserData();
   }, [currentUser, backend]);
 
-  useEffect(() => {
-    const updateProfilePicture = async () => {
-      if (!gcfUser?.picture)
+  const handleProfilePictureUpload = async (results) => {
+    if (!results?.length) return;
+
+    const key = results[0].file_name;
+
+    try {
+      await backend.post("/images/profile-picture", { key, userId: currentUser.uid });
+      setGcfUser((prev) => ({ ...prev, picture: key }));
+    } catch (err) {
+      console.error("Error saving profile picture:", err);
     }
-  })
+  };
 
   if (loading) {
     return (
@@ -167,8 +164,7 @@ export const Profile = () => {
       <MediaUploadModal
         isOpen={isOpen}
         onClose={onClose}
-        onUploadComplete={() => {
-        }}
+        onUploadComplete={handleProfilePictureUpload}
         formOrigin="profile"
       />
     </Box>

@@ -1,4 +1,5 @@
 import express from "express";
+import { db } from "../db/db-pgp";
 import { getS3UploadURL, getS3ImageURL, deleteFromS3 } from "../common/s3";
 
 export const imagesRouter = express.Router();
@@ -94,17 +95,18 @@ imagesRouter.delete("/:key", async (req, res) => {
  * Returns: { success: true, message: string }
 */
 
-imagesRouter.post("/profile-upload", async (req, res) => {
+imagesRouter.post("/profile-picture", async (req, res) => {
   try {
-    const { fileName, contentType } = req.body;
-    const userId = req.user.id;
+    const { key, userId } = req.body;
 
-    const result = await getS3UploadURL(fileName, contentType);
+    console.log(userId)
 
-    await db
-      .update(users)
-      .set({ picture : result })
-      .where(eq(users.id, userId))
+    await db.none(
+      `UPDATE gcf_user SET picture = $1 WHERE id = $2`,
+      [key, userId]
+    );
+
+    res.status(200).json({ success: true });
   } catch (err) {
     console.error("Error uploading profile picture:", err);
     res.status(500).json({

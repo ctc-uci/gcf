@@ -70,7 +70,6 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete, formOrigin
                   setSelectedFiles((prev) => [...(prev || []), ...files])} // append instead of replace upon another upload, unless profile
                 formOrigin={formOrigin}
               />
-            {console.log(selectedFiles)}
             {selectedFiles?.length > 0 && (
               <MediaPreviewList
                 files={selectedFiles}
