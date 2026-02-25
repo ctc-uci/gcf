@@ -117,7 +117,7 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
                     color="gray.500"
                     fontWeight="bold"
                 >
-                    Uploaded Files:
+                    Uploaded Files
                 </FormLabel>
                 {files.map((file, i) => (
                     <MediaPreview
@@ -136,7 +136,7 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
                             fontWeight="normal"
                             mb={1}
                         >
-                            Select Folder *
+                            Select Folder
                         </FormLabel>
                         <Select
                             border="2px solid"
@@ -144,7 +144,7 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
                             borderColor="gray.100"
                             value={folder}
                             onChange={(e) => setFolder(e.target.value)}
-                            placeholder="Select an instrument"
+                            placeholder="Instrument"
                         >
                             {/* TODO: get actual instruments from table */}
                             <option value="1">Guitar</option>

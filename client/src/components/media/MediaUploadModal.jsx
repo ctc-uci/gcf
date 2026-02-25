@@ -27,12 +27,14 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete, formOrigin
       isOpen={isOpen}
       onClose={handleClose}
       isCentered
+
       size="xl"
     >
       <ModalOverlay />
       <ModalContent
         borderRadius="md"
         pb={6}
+        maxW={"60vw"}
       >
         {selectedFiles && (
           <IconButton
@@ -75,7 +77,7 @@ export function MediaUploadModal({ isOpen, onClose, onUploadComplete, formOrigin
                   />
             </Box>
             {selectedFiles?.length > 0 && (
-              <Box w="250px" overflowY="auto" maxH="500px">
+              <Box w="50%" overflowY="auto" maxH="500px">
                 <MediaPreviewList
                   files={selectedFiles}
                   onComplete={(uploadedFiles, description) => {
