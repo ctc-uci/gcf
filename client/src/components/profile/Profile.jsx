@@ -40,6 +40,14 @@ const fetchRegionData = async (backend, userId) => {
   }
 };
 
+const updateProfilePicture = async (url) => {
+    const res = await backend.post(`/images/profile-upload`, {url});
+
+    if (!res.ok) {
+      console.error("Error: failed to upload profile picture.")
+    }
+  }
+
 export const Profile = () => {
   const { currentUser } = useAuthContext();
   const { backend } = useBackendContext();
@@ -83,16 +91,18 @@ export const Profile = () => {
     fetchUserData();
   }, [currentUser, backend]);
 
+  useEffect(() => {
+    const updateProfilePicture = async () => {
+      if (!gcfUser?.picture)
+    }
+  })
+
   if (loading) {
     return (
       <Box h="100vh" display="flex" alignItems="center" justifyContent="center">
         <Spinner size="xl" />
       </Box>
     );
-  }
-
-  if (!gcfUser) {
-    return null;
   }
 
   const profilePicture =

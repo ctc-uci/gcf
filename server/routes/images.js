@@ -86,3 +86,30 @@ imagesRouter.delete("/:key", async (req, res) => {
     });
   }
 });
+
+/**
+ * POST /images/profile-upload
+ * Add profile picture url to user column
+ * Params: None
+ * Returns: { success: true, message: string }
+*/
+
+imagesRouter.post("/profile-upload", async (req, res) => {
+  try {
+    const { fileName, contentType } = req.body;
+    const userId = req.user.id;
+
+    const result = await getS3UploadURL(fileName, contentType);
+
+    await db
+      .update(users)
+      .set({ picture : result })
+      .where(eq(users.id, userId))
+  } catch (err) {
+    console.error("Error uploading profile picture:", err);
+    res.status(500).json({
+      success: false,
+      error: "Failed to upload image",
+    });
+  }
+})

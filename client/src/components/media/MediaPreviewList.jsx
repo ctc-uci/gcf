@@ -48,13 +48,14 @@ export function MediaPreviewList({ files, onComplete }) {
                 const extension = file.name.includes(".")
                     ? file.name.slice(file.name.lastIndexOf("."))
                     : "";
-
+                
                 const keyFileName = `${titles[i].trim()}${extension}`;
 
                 const { data: s3Data } = await backend.post("/images/upload-url", {
-                    fileName: keyFileName,
-                    contentType: file.type,
+                    key: keyFileName
                 });
+                
+                console.log("file name:", s3Data.uploadUrl)
 
                 if (!s3Data.uploadUrl || !s3Data.key) {
                     throw new Error("Failed to get upload URL");
@@ -64,12 +65,10 @@ export function MediaPreviewList({ files, onComplete }) {
                     baseURL: "",
                     headers: { "Content-Type": file.type },
                 });
-
-                console.log("s3Data:", s3Data);
-
+                
                 results.push({
-                    s3_key: s3Data.key,
-                    file_name: keyFileName,
+                    s3_key: s3Data.uploadUrl,
+                    file_name: s3Data.key,
                     title: titles[i],
                     description: description,
                 })
