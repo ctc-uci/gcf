@@ -1,15 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import {
-  Box,
   Button,
   Center,
   FormControl,
   FormLabel,
-  Image,
-  Input,
-  Spinner,
-  Text,
+  Select,
   Textarea,
   useToast,
   VStack,
@@ -18,16 +14,27 @@ import {
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { MediaPreview } from "./MediaPreview";
 
-export function MediaPreviewList({ files, onComplete }) {
+export function MediaPreviewList({ files, onComplete, formOrigin }) {
     const { backend } = useBackendContext();
     const toast = useToast();
     const [isUploading, setIsUploading] = useState(false);
 
-    const [titles, setTitles] = useState(() =>
-        files.map((file) => file.name.replace(/\.[^/.]+$/, ""))
-    );
+    const [titles, setTitles] = useState([]);
     
+    const [folder, setFolder] = useState("");
     const [description, setDescription] = useState("");
+
+    // keep titles array in sync with files prop
+    useEffect(() => {
+        setTitles((prev) => {
+            return files.map((file, idx) => {
+                if (prev && prev[idx]) {
+                    return prev[idx];
+                }
+                return file.name.replace(/\.[^/.]+$/, "");
+            });
+        });
+    }, [files]);
 
     const updateTitle = (index, value) => {
         setTitles((prev) => {
@@ -67,14 +74,16 @@ export function MediaPreviewList({ files, onComplete }) {
                 });
                 
                 results.push({
-                    s3_key: s3Data.uploadUrl,
-                    file_name: s3Data.key,
+                    s3_key: s3Data.key,
+                    file_name: keyFileName.replace(/\s+/g, '_'),
+                    file_type: file.type,
                     title: titles[i],
                     description: description,
+                    instrument_id: null,
                 })
             }
 
-        onComplete(results);
+        onComplete(results, description);
 
         toast({
             title: "Upload successful.",
@@ -102,31 +111,66 @@ export function MediaPreviewList({ files, onComplete }) {
 
         return (
         <VStack spacing={6} align="stretch">
-            {files.map((file, i) => (
-                <MediaPreview
-                    key={file.name + i}
-                    file={file}
-                    title={titles[i]}
-                    onTitleChange={(val) => updateTitle(i, val)}
-                />
-            ))}
-            <FormControl>
+            <VStack spacing={0} align="stretch">
                 <FormLabel
-                color="gray.500"
-                fontWeight="normal"
-                mb={1}
+                    color="gray.500"
+                    fontWeight="bold"
                 >
-                Description:
+                    Uploaded Files
                 </FormLabel>
-                <Textarea
-                bg="gray.100"
-                border="none"
-                borderRadius="xl"
-                rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                />
-            </FormControl>
+                {files.map((file, i) => (
+                    <MediaPreview
+                        key={file.name + i}
+                        file={file}
+                        title={titles[i]}
+                        onTitleChange={(val) => updateTitle(i, val)}
+                    />
+                ))}
+            </VStack>
+            {formOrigin !== "profile" && (
+                <>
+                    <FormControl>
+                        <FormLabel
+                            color="gray.500"
+                            fontWeight="normal"
+                            mb={1}
+                        >
+                            Select Folder
+                        </FormLabel>
+                        <Select
+                            border="2px solid"
+                            borderRadius="md"
+                            borderColor="gray.100"
+                            value={folder}
+                            onChange={(e) => setFolder(e.target.value)}
+                            placeholder="Instrument"
+                        >
+                            {/* TODO: get actual instruments from table */}
+                            <option value="1">Guitar</option>
+                            <option value="2">Ukulele</option>
+                            <option value="3">Flute</option>
+                        </Select>
+                    </FormControl>
+                    <FormControl>
+                        <FormLabel
+                            color="gray.500"
+                            fontWeight="normal"
+                            mb={1}
+                        >
+                            Notes
+                        </FormLabel>
+                        <Textarea
+                            border="2px solid"
+                            borderRadius="md"
+                            borderColor="gray.100"
+                            rows={3}
+                            value={description}
+                            placeholder="Add Notes"
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
+                    </FormControl>
+                </>
+            )}
             <Center pt={4}>
                 <Button
                     variant="outline"

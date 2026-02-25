@@ -221,7 +221,7 @@ const CurriculumLinkForm = ({ formState, setFormData }) => {
 
 const MediaUploadForm = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
-
+    // TODO: preview media uploads on the form
     return (
         <>
             <Button onClick={onOpen}> + Add </Button>
@@ -308,8 +308,8 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 lastName: d.lastName,
             }));
 
-            let instrumentMap = {};
-            let initialInstrumentMap = {};
+            const instrumentMap = {};
+            const initialInstrumentMap = {};
             try {
                 const instrumentsResponse = await backend.get(`/program/${program.id}/instruments`);
                 const instruments = instrumentsResponse.data || [];

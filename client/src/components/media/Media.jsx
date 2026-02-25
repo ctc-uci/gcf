@@ -26,23 +26,79 @@ export const Media = () => {
 
   const [media, setMedia] = useState([]);
   const [programName, setProgramName] = useState("");
+  const [programId, setProgramId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const onUploadCompleteHandler = async (uploadedFiles,description) => {
+    try {
+      const updateDate = new Date().toISOString().split('T')[0];
+      const programUpdateResponse = await backend.post("/program-updates", {
+        title: "Media Upload",
+        program_id: programId,
+        created_by: userId,
+        update_date: updateDate,
+        note: description || "Media files uploaded",
+      });;
+
+      const updateId = programUpdateResponse.data.id;
+
+      const newMediaItems = [];
+      for (const file of uploadedFiles) {
+        const mediaChangeResponse = await backend.post("/mediaChange", {
+          update_id: updateId,
+          s3_key: file.s3_key,
+          file_name: file.file_name,
+          file_type: file.file_type || "image",
+          is_thumbnail: false,
+          description: file.description,
+          instrument_id: file.instrument_id,
+        });
+
+        const urlResponse = await backend.get(
+          `/images/url/${encodeURIComponent(file.s3_key)}`
+        );
+
+        newMediaItems.push({
+          id: mediaChangeResponse.data.id,
+          s3_key: file.s3_key,
+          file_name: file.file_name,
+          file_type: file.file_type || "image",
+          is_thumbnail: false,
+          imageUrl: urlResponse.data.url,
+        });
+      }
+
+      setMedia((prevMedia) => [...newMediaItems, ...prevMedia]);
+      fetchData();
+    } catch (error) {
+      console.error("Error saving uploaded files:", error);
+    }
+  };
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await backend.get(`/mediaChange/${userId}/media`);
 
-      const transformedMedia = response.data.media.map((media) => ({
-        id: media.id,
-        s3_key: media.s3Key,
-        file_name: media.fileName,
-        file_type: media.fileType,
-        is_thumbnail: media.isThumbnail,
-      }));
+      const transformedMedia = await Promise.all(
+        response.data.media.map(async (media) => {
+          const urlResponse = await backend.get(
+            `/images/url/${encodeURIComponent(media.s3Key)}`
+          );
+          return {
+            id: media.id,
+            s3_key: media.s3Key,
+            file_name: media.fileName,
+            file_type: media.fileType,
+            is_thumbnail: media.isThumbnail,
+            imageUrl: urlResponse.data.url,
+          };
+        })
+      );
 
       setMedia(transformedMedia);
       setProgramName(response.data.programName);
+      setProgramId(response.data.programId);
     } catch (error) {
       console.error("Error loading media data:", error);
     } finally {
@@ -111,10 +167,7 @@ export const Media = () => {
       <MediaUploadModal
         isOpen={isOpen}
         onClose={onClose}
-        onUploadComplete={() => {
-          fetchData();
-          onClose();
-        }}
+        onUploadComplete={onUploadCompleteHandler}
       />
     </Box>
   );

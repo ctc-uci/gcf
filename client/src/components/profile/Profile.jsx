@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   Box,
@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
+import { useRoleContext } from "@/contexts/hooks/useRoleContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
 import { MediaUploadModal } from "../media/MediaUploadModal";
@@ -42,6 +43,7 @@ const fetchRegionData = async (backend, userId) => {
 
 export const Profile = () => {
   const { currentUser } = useAuthContext();
+  const { role } = useRoleContext();
   const { backend } = useBackendContext();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -50,36 +52,34 @@ export const Profile = () => {
   const [roleSpecificData, setRoleSpecificData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchUserData = useCallback(async () => {
+    if (!currentUser?.uid) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const userResponse = await backend.get(`/gcf-users/${currentUser.uid}`);
+      const userData = userResponse.data;
+      setGcfUser(userData);
+
+      if (role === "Program Director") {
+        const programData = await fetchProgramData(backend, userData.id);
+        setRoleSpecificData(programData);
+      } else if (role === "Regional Director") {
+        const regionData = await fetchRegionData(backend, userData.id);
+        setRoleSpecificData(regionData);
+      }
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentUser?.uid, backend, role]);
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (!currentUser?.uid) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const userResponse = await backend.get(`/gcf-users/${currentUser.uid}`);
-        const userData = userResponse.data;
-        setGcfUser(userData);
-
-        const userRole = userData.role;
-
-        if (userRole === "Program Director") {
-          const programData = await fetchProgramData(backend, userData.id);
-          setRoleSpecificData(programData);
-        } else if (userRole === "Regional Director") {
-          const regionData = await fetchRegionData(backend, userData.id);
-          setRoleSpecificData(regionData);
-        }
-      } catch (err) {
-        console.error("Error fetching user data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUserData();
-  }, [currentUser, backend]);
+  }, [fetchUserData]);
 
   const handleProfilePictureUpload = async (results) => {
     if (!results?.length) return;
@@ -110,16 +110,15 @@ export const Profile = () => {
   const fullName =
     `${gcfUser.firstName || ""} ${gcfUser.lastName || ""}`.trim() || "User";
   const email = currentUser?.email || "";
-  const userRole = gcfUser.role;
 
   const profileData = [
     { label: "Email", value: email },
-    { label: "Role", value: userRole || "" },
+    { label: "Role", value: role || "" },
   ];
 
-  if (userRole === "Program Director" && roleSpecificData?.name) {
+  if (role === "Program Director" && roleSpecificData?.name) {
     profileData.push({ label: "Program", value: roleSpecificData.name });
-  } else if (userRole === "Regional Director" && roleSpecificData?.name) {
+  } else if (role === "Regional Director" && roleSpecificData?.name) {
     profileData.push({ label: "Region", value: roleSpecificData.name });
   }
 

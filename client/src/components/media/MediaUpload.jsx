@@ -15,7 +15,7 @@ export function MediaUpload({ onFileSelect, formOrigin }) {
     });
 
   return (
-    <Center border='3px' backgroundColor='#E6FFFA99' borderColor="#2C7A7B" borderStyle="dashed" borderRadius="12px" height="300px" 
+    <Center border='3px' backgroundColor='#E6FFFA99' borderColor="#2C7A7B" borderStyle="dashed" borderRadius="12px" minH="300px" height="full" 
     {...getRootProps()}>
         <input {...getInputProps()} />
         <VStack>

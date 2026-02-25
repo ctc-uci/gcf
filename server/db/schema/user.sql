@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS user (
     last_name VARCHAR(70) NOT NULL,
     date_created DATE NOT NULL,
     created_by BIGINT,
+    picture TEXT,
     CONSTRAINT fk_created_by
         FOREIGN KEY (created_by) REFERENCES user(id)
         ON DELETE SET NULL
