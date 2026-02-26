@@ -114,7 +114,7 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
                   </Td>
                   <Td>
                     <Badge cursor="pointer" onClick={() => setSelectedUpdate(row)}>
-  {                   row.status ?? "Unread"}
+  {                   row.status}
                     </Badge>
                   </Td>
                 </Tr>
