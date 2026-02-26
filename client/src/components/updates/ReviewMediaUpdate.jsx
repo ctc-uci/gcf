@@ -106,7 +106,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
 
           <Text fontWeight="bold" mb={3}>Media</Text>
           <SimpleGrid columns={3} spacing={3}>
-            {/* media will go here once S3 is sorted */}
+            {/* TODO: media will go here once S3 is sorted */}
           </SimpleGrid>
         </DrawerBody>
       </DrawerContent>
