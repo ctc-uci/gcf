@@ -95,7 +95,7 @@ mediaChangeRouter.put("/:updateId/archive", async (req, res) => {
   try {
     const { updateId } = req.params;
     const updated = await db.query(`
-        UPDATE media_change SET status = 'denied' WHERE update_id = $1 RETURNING *
+        UPDATE media_change SET status = 'archived' WHERE update_id = $1 RETURNING *
       `, [updateId]);
     res.status(200).json(keysToCamel(updated))
   }
