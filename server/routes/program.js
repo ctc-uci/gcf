@@ -348,6 +348,33 @@ programRouter.get("/:id/program-directors", async (req, res) => {
   }
 });
 
+programRouter.get("/:id/media", async (req, res) => {
+  try {
+    const {id} = req.params;
+    
+    const result = await db.query(
+      `
+      SELECT m.s3_key, m.file_name, m.file_type, m.is_thumbnail, m.instrument_id
+      FROM media_change m
+      JOIN program_update pu ON m.update_id = pu.id
+      WHERE program_id = $1;
+      `, [id]
+    )
 
+    const media = result.map(row => ({
+      s3_key: row.s3_key,
+      file_name: row.file_name,
+      file_type: row.file_type,
+      is_thumbnail: row.is_thumbnail,
+      instrument_id: row.instrument_id,
+    }))
+
+    res.status(200).json(media);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+})
 
 export { programRouter };

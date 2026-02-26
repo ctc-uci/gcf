@@ -81,14 +81,18 @@ export const Profile = () => {
     fetchUserData();
   }, [fetchUserData]);
 
-  const handleProfilePictureUpload = async (results) => {
-    if (!results?.length) return;
+  const handleProfilePictureUpload = async (uploadedFiles) => {
+    if (!uploadedFiles?.length) return;
 
-    const key = results[0].file_name;
-
+    const key = uploadedFiles[0].s3_key;
+    console.log(key)
+    
     try {
-      await backend.post("/images/profile-picture", { key, userId: currentUser.uid });
-      setGcfUser((prev) => ({ ...prev, picture: key }));
+      const urlResponse = await backend.get(
+        `/images/url/${encodeURIComponent(key)}`
+      );
+      await backend.post("/images/profile-picture", { key: urlResponse.data.url, userId: currentUser.uid });
+      setGcfUser((prev) => ({ ...prev, picture: urlResponse.data.url }));
     } catch (err) {
       console.error("Error saving profile picture:", err);
     }
@@ -102,10 +106,12 @@ export const Profile = () => {
     );
   }
 
+    
   const profilePicture =
-    gcfUser.picture && gcfUser.picture.trim() !== ""
-      ? gcfUser.picture
-      : DEFAULT_PROFILE_IMAGE;
+  gcfUser.picture && gcfUser.picture.trim() !== ""
+    ? 
+      gcfUser.picture
+    : DEFAULT_PROFILE_IMAGE;
 
   const fullName =
     `${gcfUser.firstName || ""} ${gcfUser.lastName || ""}`.trim() || "User";

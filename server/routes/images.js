@@ -89,7 +89,7 @@ imagesRouter.delete("/:key", async (req, res) => {
 });
 
 /**
- * POST /images/profile-upload
+ * POST /images/profile-picture
  * Add profile picture url to user column
  * Params: None
  * Returns: { success: true, message: string }

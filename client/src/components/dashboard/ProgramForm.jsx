@@ -1,4 +1,5 @@
 import {
+    Box,
     Drawer,
     DrawerBody,
     DrawerHeader,
@@ -234,9 +235,11 @@ const MediaUploadForm = ( { onUploadComplete, uploadedMedia, onRemove }) => {
 
             <HStack wrap="wrap" mt={2}>
                 {(uploadedMedia ?? []).map((item, i) => (
-                    <Tag key={i}>
+                    <Tag maxW="200px" key={i}>
                         <TagLabel>{item.file_name}</TagLabel>
                         <TagCloseButton onClick={() => onRemove(i)}/>
+                        <Box h={"2rem"}>
+                        </Box>
                     </Tag>
                 ))}
             </HStack>
@@ -260,6 +263,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     const [initialInstrumentQuantities, setInitialInstrumentQuantities] = useState({});
     const [initialCurriculumLinks, setInitialCurriculumLinks] = useState([]);
 
+    const [initialUploadedMedia, setInitialUploadedMedia] = useState([]);
 
     const [formState, setFormState] = useState({
         status: null,
@@ -277,7 +281,6 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     });
 
     useEffect(() => {
-
         async function loadProgramRegionData() {
             if (!program) {
                 setFormState({
@@ -296,6 +299,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 setInitialProgramDirectorIds([]);
                 setInitialInstrumentQuantities({});
                 setInitialCurriculumLinks([]);
+                setInitialUploadedMedia([]);
                 return;
             }
 
@@ -345,7 +349,6 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 instruments: instrumentMap,
                 language: program.primaryLanguage?.toLowerCase() ?? null,
 
-
                 programDirectors: mappedProgramDirectors,
 
                 curriculumLinks: Array.isArray(program.playlists)
@@ -353,8 +356,12 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                         .filter((p) => p.link)
                         .map((p) => ({ link: p.link, name: p.name || 'Playlist' }))
                     : [],
-                media: program.media ?? []
+                
+                media: Array.isArray(program.media) ? program.media.map((m) => ({ s3_key: m.s3_key, file_name: m.file_name, file_type: m.file_type })) : []
+
             });
+
+            console.log(program)
             setInitialProgramDirectorIds(
                 mappedProgramDirectors.map(d => d.userId).filter(Boolean)
             );
@@ -363,6 +370,8 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 (program.playlists ?? []).filter((p) => p.link).map((p) => p.link)
             );
             regionId = null;
+
+            setInitialUploadedMedia((program.media ?? []).filter((m) => m.file_name).map((m) => m.file_name));
 
         }
         loadProgramRegionData();
@@ -396,6 +405,14 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
     function handleLanguageChange(langChange) {
         setFormState({ ...formState, language: langChange })
     }
+
+    const handleMediaChange = (mediaChange) => {
+        setFormState((prev) => ({
+            ...prev,
+            media: [...(prev.media ?? []), mediaChange]
+        }))
+    }
+
     async function handleSave() {
         //[TODO] : TOTAL INSTRUMENTS, INSTRUMENTS, PARTNERORG
         try {
@@ -720,16 +737,11 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                             </HStack>
                             <h4>Media</h4>
                             <MediaUploadForm
-                                onUploadComplete={(files) =>
-                                    setFormState((prev) => ({ ...prev, media: [...prev.media, ...files] }))
-                                }
+                                onUploadComplete={handleMediaChange}
                                 uploadedMedia={formState.media}
-                                onRemove={(i) =>
-                                    setFormState((prev) => ({ ...prev, media: prev.media.filter((_, idx) => idx !== i),
-                                    }))
-                                }
+                                onRemove={((prev) => ({ ...prev, media: prev.media.filter((_, idx) => idx !== i),
+                                }))}
                             />
-
                         </VStack>
                     </DrawerBody>
                 </DrawerContent>

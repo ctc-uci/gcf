@@ -53,7 +53,6 @@ function mapAdminRow(row) {
     location: row.countryName ?? "",
     country: row.country,
 
-
     students: row.students ?? 0,
     instruments: row.instruments ?? 0,
     totalInstruments: row.instruments ?? 0,
@@ -63,6 +62,8 @@ function mapAdminRow(row) {
 
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
+
+    media: row.media
   };
 }
 
@@ -85,6 +86,8 @@ function mapRdRow(row) {
 
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
+
+    media: row.media
   };
 }
 
@@ -458,10 +461,11 @@ function ProgramTable() {
         const programDetails = await Promise.all(
           rows.map(async (row) => { //TODO: make this more efficient with lazy loading
             const programId = row.id ?? row.programId;
-            const [playlists, programDirectors, regionalDirectors] = await Promise.all([
+            const [playlists, programDirectors, regionalDirectors, media] = await Promise.all([
               backend.get(`/program/${programId}/playlists`),
               backend.get(`/program/${programId}/program-directors`).catch(() => ({ data: [] })),
               backend.get(`/program/${programId}/regional-directors`).catch(() => ({ data: [] })),
+              backend.get(`/program/${programId}/media`).catch(() => ({ data: [] })),
             ]);
 
             return {
@@ -469,6 +473,7 @@ function ProgramTable() {
               playlists: playlists.data,
               programDirectors: programDirectors?.data || [],
               regionalDirectors: regionalDirectors?.data || [],
+              media: media?.data || []
             };
           })
         );
