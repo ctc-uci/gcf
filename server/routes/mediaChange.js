@@ -37,11 +37,11 @@ mediaChangeRouter.get('/:id', async (req, res) => {
 
 mediaChangeRouter.post('/', async (req, res) => {
   try {
-    console.log('Req Body: ', req.body);
-    const { update_id, s3_key, file_name, file_type, is_thumbnail } = req.body;
+    console.log("Req Body: ", req.body);
+    const { update_id, s3_key, file_name, file_type, is_thumbnail, status } = req.body;
     const newMediaChange = await db.query(
-      `INSERT INTO media_change (update_id, s3_key, file_name, file_type, is_thumbnail) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [update_id, s3_key, file_name, file_type, is_thumbnail]
+      `INSERT INTO media_change (update_id, s3_key, file_name, file_type, is_thumbnail, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [update_id, s3_key, file_name, file_type, is_thumbnail, status]
     );
     res.status(201).json(keysToCamel(newMediaChange[0]));
   } catch (err) {
@@ -74,6 +74,48 @@ mediaChangeRouter.put('/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');
+  }
+});
+
+mediaChangeRouter.put('/:updateId/approve', async (req, res) => {
+  try {
+    const { updateId } = req.params;
+    const updated = await db.query(`
+        UPDATE media_change SET status = 'approved' WHERE update_id = $1 RETURNING *
+      `, [updateId]);
+    res.status(200).json(keysToCamel(updated))
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+mediaChangeRouter.put('/:updateId/archive', async (req, res) => {
+  try {
+    const { updateId } = req.params;
+    const updated = await db.query(`
+        UPDATE media_change SET status = 'archived' WHERE update_id = $1 RETURNING *
+      `, [updateId]);
+    res.status(200).json(keysToCamel(updated))
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+mediaChangeRouter.delete("/:updateId/deny", async (req, res) => {
+  try {
+    const { updateId } = req.params;
+    const updated = await db.query(`
+        DELETE FROM media_change WHERE update_id = $1 RETURNING *
+      `, [updateId]);
+    res.status(200).json(keysToCamel(updated))
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
   }
 });
 
@@ -139,6 +181,60 @@ mediaChangeRouter.get('/:userId/media', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');
+  }
+});
+
+mediaChangeRouter.get("/:userId/media-updates", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const roleResult = await db.query(
+      `SELECT role FROM gcf_user WHERE gcf_user.id = $1;`,
+      [userId]
+    );
+
+    if (roleResult.length === 0) return res.status(404).send("User not found");
+
+    const role = roleResult[0].role;
+
+    if (role !== "Admin" && role !== "Regional Director") {
+      return res.status(403).send("Access denied");
+    }
+
+    let filterJoin = "";
+
+    if (role === "Regional Director") {
+      filterJoin = `
+        INNER JOIN country ON program.country = country.id
+        INNER JOIN region ON country.region_id = region.id
+        INNER JOIN regional_director ON regional_director.region_id = region.id AND regional_director.user_id = $1`;
+    }
+
+    const finalQuery = `
+      SELECT * FROM (
+        SELECT DISTINCT ON (program_update.id)
+          program_update.id AS id,
+          program_update.update_date,
+          program_update.note,
+          program.name AS program_name,
+          creator.first_name,
+          creator.last_name,
+          creator.role,
+          media_change.status
+        FROM program_update
+        INNER JOIN media_change ON media_change.update_id = program_update.id
+        INNER JOIN program ON program_update.program_id = program.id
+        LEFT JOIN gcf_user AS creator ON creator.id = program.created_by
+        ${filterJoin}
+        ORDER BY program_update.id, media_change.id
+      ) sub
+      ORDER BY update_date DESC;
+    `;
+    const queryParams = role === "Regional Director" ? [userId] : [];
+    const data = await db.query(finalQuery, queryParams);
+    res.status(200).json(keysToCamel(data));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
   }
 });
 

@@ -17,37 +17,21 @@ import {
   Th,
   Thead,
   Tr,
-} from '@chakra-ui/react';
-import { downloadCsv, escapeCsvValue, getFilenameTimestamp } from "@/utils/downloadCsv";
-import { useTableSort } from '../../contexts/hooks/TableSort';
-import { SortArrows } from '../tables/SortArrows';
-     
-export function downloadMediaUpdatesAsCsv(data) {
-  const headers = ["Time", "Notes", "Program", "Author", "Status"];
-  const rows = (data || []).map((row) => [
-    escapeCsvValue(row.updateDate),
-    escapeCsvValue(row.note),
-    escapeCsvValue(row.programName),
-    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(" ")),
-    escapeCsvValue(row.status),
-  ]);
-  downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
-}
-     
-export const MediaUpdatesTable = ({
-  data,
-  setData,
-  originalData,
-  isLoading,
-}) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [unorderedUpdates, setUnorderedUpdates] = useState([]);
-  const { sortOrder, handleSort } = useTableSort(originalData, setData);
+} from "@chakra-ui/react";
+import { SortArrows } from "../tables/SortArrows"
+import { useTableSort } from "../../contexts/hooks/TableSort";
+import { ReviewMediaUpdate } from "./ReviewMediaUpdate";
 
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
-  };
-  useEffect(() => {
+export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) => {
+    const [searchQuery, setSearchQuery] = useState("");
+    const [unorderedUpdates, setUnorderedUpdates] = useState([]);
+    const { sortOrder, handleSort } = useTableSort(originalData, setData);
+    const [selectedUpdate, setSelectedUpdate] = useState(null);
+
+    const handleSearch = event => {
+      setSearchQuery(event.target.value);
+   };
+   useEffect(() => {
     setUnorderedUpdates(data);
   }, [searchQuery, data]);
 
@@ -150,7 +134,9 @@ export const MediaUpdatesTable = ({
                     {row.firstName} {row.lastName}
                   </Td>
                   <Td>
-                    <Badge> {row.status} </Badge>
+                    <Badge cursor="pointer" onClick={() => setSelectedUpdate(row)}>
+  {                   row.status}
+                    </Badge>
                   </Td>
                 </Tr>
               ))
@@ -158,6 +144,13 @@ export const MediaUpdatesTable = ({
           </Tbody>
         </Table>
       </TableContainer>
+      {selectedUpdate && (
+        <ReviewMediaUpdate
+          update={selectedUpdate}
+          onClose={() => setSelectedUpdate(null)}
+          onUpdate={setData}
+        />
+      )}
     </Box>
   );
 };
