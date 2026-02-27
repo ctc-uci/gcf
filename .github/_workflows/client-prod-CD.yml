@@ -11,8 +11,7 @@ env:
   VITE_FIREBASE_AUTHDOMAIN: ${{ secrets.VITE_FIREBASE_AUTHDOMAIN }}
   VITE_FIREBASE_PROJECTID: ${{ secrets.VITE_FIREBASE_PROJECTID }}
   VITE_FIREBASE_STORAGEBUCKET: ${{ secrets.VITE_FIREBASE_STORAGEBUCKET }}
-  VITE_FIREBASE_MESSAGINGSENDERID:
-    ${{ secrets.VITE_FIREBASE_MESSAGINGSENDERID }}
+  VITE_FIREBASE_MESSAGINGSENDERID: ${{ secrets.VITE_FIREBASE_MESSAGINGSENDERID }}
   VITE_FIREBASE_APPID: ${{ secrets.VITE_FIREBASE_APPID }}
   VITE_BACKEND_HOST: ${{ secrets.VITE_BACKEND_HOST }}
   # …and any additional environment variables
@@ -52,4 +51,4 @@ jobs:
           delete-removed: true
           no-cache: true
           private: true
-          files-to-include: ".*/*,*/*,**"
+          files-to-include: '.*/*,*/*,**'

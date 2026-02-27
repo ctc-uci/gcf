@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
-import { Box, Center, Flex, Heading, Spinner } from "@chakra-ui/react";
+import { Box, Center, Flex, Heading, Spinner } from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
-import { AccountsTable } from "./AccountsTable";
-import { AccountToolbar } from "./AccountToolbar";
-import { AccountForm } from "./AccountForm";
+import { AccountForm } from './AccountForm';
+import { AccountsTable, downloadAccountsAsCsv } from './AccountsTable';
+import { AccountToolbar } from './AccountToolbar';
 
 const getAccountsRoute = (role, userId) => {
   if (!userId) return null;
@@ -18,7 +18,6 @@ const getAccountsRoute = (role, userId) => {
     : `/gcf-users/${userId}/accounts`;
 };
 
-
 export const Account = () => {
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
@@ -27,9 +26,10 @@ export const Account = () => {
   const [users, setUsers] = useState([]);
   const [originalUsers, setOriginalUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false); 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [isCardView, setIsCardView] = useState(false);
 
   const { backend } = useBackendContext();
 
@@ -37,27 +37,27 @@ export const Account = () => {
     setIsLoading(true);
     const route = getAccountsRoute(role, userId);
     if (!route) {
-      console.error("No valid route for accounts. Missing userId or role.");
+      console.error('No valid route for accounts. Missing userId or role.');
       setIsLoading(false);
       return;
     }
     try {
       const response = await backend.get(route);
-      const rawData = response.data || []
-      const fetchedData = (rawData).map((item) => ({
+      const rawData = response.data || [];
+      const fetchedData = rawData.map((item) => ({
         id: item.id,
         firstName: item.firstName,
         lastName: item.lastName,
         role: item.role,
         programs: Array.isArray(item.programs) ? item.programs : [],
-        email: item.email ?? "-",
-        password: "-",
+        email: item.email ?? '-',
+        password: '-',
       }));
 
       setUsers(fetchedData);
       setOriginalUsers(fetchedData);
     } catch (error) {
-      console.error("Error loading data:", error);
+      console.error('Error loading data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -68,37 +68,27 @@ export const Account = () => {
   }, [fetchData]);
 
   return (
-    <Box
-      p={8}
-      bg="white"
-      minH="100vh"
-    >
-      <Flex
-        mb={8}
-        align="center"
-        wrap={{ base: "wrap", md: "nowrap" }}
-        gap={4}
-      >
-        <Heading
-          as="h1"
-          size="lg"
-          fontWeight="500"
-        >
+    <Box p={8} bg="white" minH="100vh">
+      <Flex mb={8} align="center" wrap={{ base: 'wrap', md: 'nowrap' }} gap={4}>
+        <Heading as="h1" size="lg" fontWeight="500">
           Accounts
         </Heading>
 
-        <AccountToolbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNew = {() => {
-          setIsDrawerOpen(true);
-          setSelectedUser(null)
-        }}/>
+        <AccountToolbar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          setIsCardView={setIsCardView}
+          onNew={() => {
+            setIsDrawerOpen(true);
+            setSelectedUser(null);
+          }}
+          onDownload={() => downloadAccountsAsCsv(users)}
+        />
       </Flex>
 
       {isLoading ? (
         <Center py={10}>
-          <Spinner
-            size="xl"
-            color="gray.500"
-          />
+          <Spinner size="xl" color="gray.500" />
         </Center>
       ) : (
         <AccountsTable
@@ -106,13 +96,20 @@ export const Account = () => {
           setData={setUsers}
           originalData={originalUsers}
           searchQuery={searchQuery}
-          onUpdate = {(user) => {
-            setSelectedUser(user)
-            setIsDrawerOpen(true)
+          isCardView={isCardView}
+          onSave={() => fetchData()}
+          onUpdate={(user) => {
+            setSelectedUser(user);
+            setIsDrawerOpen(true);
           }}
         />
       )}
-      <AccountForm targetUser = {selectedUser} isOpen = { isDrawerOpen } onClose = {() => setIsDrawerOpen(false)} onSave = {() => fetchData()}></AccountForm>
+      <AccountForm
+        targetUser={selectedUser}
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={() => fetchData()}
+      ></AccountForm>
     </Box>
   );
 };

@@ -1,14 +1,14 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 
-import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 
-import { CookiesProvider } from "react-cookie";
+import { CookiesProvider } from 'react-cookie';
 
-import App from "./App.tsx";
-import { AuthProvider } from "./contexts/AuthContext.tsx";
-import { BackendProvider } from "./contexts/BackendContext.tsx";
-import { RoleProvider } from "./contexts/RoleContext.tsx";
+import App from './App.tsx';
+import { AuthProvider } from './contexts/AuthContext.tsx';
+import { BackendProvider } from './contexts/BackendContext.tsx';
+import { RoleProvider } from './contexts/RoleContext.tsx';
 
 const colors = {
   brand: {},
@@ -16,7 +16,7 @@ const colors = {
 
 const theme = extendTheme({ colors });
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <CookiesProvider>
       <BackendProvider>

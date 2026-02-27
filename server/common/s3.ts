@@ -1,28 +1,28 @@
 // TODO: keep file only if using s3 file upload
 
-import dotenv from "dotenv";
-import crypto from "crypto";
+import crypto from 'crypto';
 
-import aws from "aws-sdk";
+import aws from 'aws-sdk';
+import dotenv from 'dotenv';
 
 // Load environment variables if not already loaded
 dotenv.config();
 
 const region =
-  process.env.NODE_ENV === "development"
+  process.env.NODE_ENV === 'development'
     ? process.env.DEV_S3_REGION
     : process.env.PROD_S3_REGION;
 const accessKeyId =
-  process.env.NODE_ENV === "development"
+  process.env.NODE_ENV === 'development'
     ? process.env.DEV_S3_ACCESS_KEY_ID
     : process.env.PROD_S3_ACCESS_KEY_ID;
 const secretAccessKey =
-  process.env.NODE_ENV === "development"
+  process.env.NODE_ENV === 'development'
     ? process.env.DEV_S3_SECRET_ACCESS_KEY
     : process.env.PROD_S3_SECRET_ACCESS_KEY;
 
 const bucketName =
-  process.env.NODE_ENV === "development"
+  process.env.NODE_ENV === 'development'
     ? process.env.DEV_S3_BUCKET_NAME
     : process.env.PROD_S3_BUCKET_NAME;
 
@@ -31,7 +31,7 @@ const s3 = new aws.S3({
   region,
   accessKeyId,
   secretAccessKey,
-  signatureVersion: "v4",
+  signatureVersion: 'v4',
 });
 
 /**
@@ -43,11 +43,11 @@ const s3 = new aws.S3({
  */
 const getS3UploadURL = async (
   fileName?: string,
-  contentType: string = "image/jpeg",
+  contentType: string = 'image/jpeg',
   expiresIn: number = 300
 ) => {
   // Generate a unique name for image if not provided
-  const imageName = fileName || `${crypto.randomBytes(16).toString("hex")}.jpg`;
+  const imageName = fileName || `${crypto.randomBytes(16).toString('hex')}.jpg`;
 
   // Set up S3 params
   const params = {
@@ -58,7 +58,7 @@ const getS3UploadURL = async (
   };
 
   // Get a presigned URL for PUT operation
-  const uploadURL = s3.getSignedUrl("putObject", params);
+  const uploadURL = s3.getSignedUrl('putObject', params);
 
   return {
     uploadUrl: uploadURL,
@@ -80,7 +80,7 @@ const getS3ImageURL = (key: string, expiresIn: number = 3600): string => {
     Expires: expiresIn,
   };
 
-  return s3.getSignedUrl("getObject", params);
+  return s3.getSignedUrl('getObject', params);
 };
 
 /**
@@ -93,7 +93,7 @@ const getS3ImageURL = (key: string, expiresIn: number = 3600): string => {
 const uploadToS3 = async (
   buffer: Buffer,
   key: string,
-  contentType: string = "image/jpeg"
+  contentType: string = 'image/jpeg'
 ) => {
   const params = {
     Bucket: bucketName,
