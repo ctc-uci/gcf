@@ -61,8 +61,19 @@ export const Profile = () => {
     try {
       const userResponse = await backend.get(`/gcf-users/${currentUser.uid}`);
       const userData = userResponse.data;
-      setGcfUser(userData);
+      if (userData.picture && userData.picture.trim() !== "") {
+        try {
+          const urlResponse = await backend.get(
+            `/images/url/${encodeURIComponent(userData.picture)}`
+          );
+          userData.picture = urlResponse.data.url;
+        } catch (urlErr) {
+          console.error("Error fetching profile image:", urlErr);
+          userData.picture = null; 
+        }
+      }
 
+      setGcfUser(userData);
       if (role === "Program Director") {
         const programData = await fetchProgramData(backend, userData.id);
         setRoleSpecificData(programData);
@@ -85,18 +96,25 @@ export const Profile = () => {
     if (!uploadedFiles?.length) return;
 
     const key = uploadedFiles[0].s3_key;
-    console.log(key)
+    console.log("Uploading S3 Key:", key);
     
     try {
       const urlResponse = await backend.get(
         `/images/url/${encodeURIComponent(key)}`
       );
-      await backend.post("/images/profile-picture", { key: urlResponse.data.url, userId: currentUser.uid });
-      setGcfUser((prev) => ({ ...prev, picture: urlResponse.data.url }));
+      await backend.post("/images/profile-picture", { 
+        key: key, 
+        userId: currentUser.uid 
+      });
+      
+      setGcfUser((prev) => ({ 
+        ...prev, 
+        picture: urlResponse.data.url 
+      }));
     } catch (err) {
       console.error("Error saving profile picture:", err);
     }
-  };
+};
 
   if (loading) {
     return (
