@@ -192,6 +192,11 @@ mediaChangeRouter.get("/:userId/media-updates", async (req, res) => {
     if (roleResult.length === 0) return res.status(404).send("User not found");
 
     const role = roleResult[0].role;
+
+    if (role !== "Admin" && role !== "Regional Director") {
+      return res.status(403).send("Access denied");
+    }
+
     let filterJoin = "";
 
     if (role === "Regional Director") {
@@ -199,10 +204,6 @@ mediaChangeRouter.get("/:userId/media-updates", async (req, res) => {
         INNER JOIN country ON program.country = country.id
         INNER JOIN region ON country.region_id = region.id
         INNER JOIN regional_director ON regional_director.region_id = region.id AND regional_director.user_id = $1`;
-    } else if (role === "Program Director") {
-      filterJoin = `INNER JOIN program_director ON program_director.program_id = program.id AND program_director.user_id = $1`;
-    } else if (role !== "Admin") {
-      return res.status(403).send("Access denied");
     }
 
     const finalQuery = `
@@ -225,7 +226,8 @@ mediaChangeRouter.get("/:userId/media-updates", async (req, res) => {
       ) sub
       ORDER BY update_date DESC;
     `;
-    const data = await db.query(finalQuery, [userId]);
+    const queryParams = role === "Regional Director" ? [userId] : [];
+    const data = await db.query(finalQuery, [queryParams]);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
