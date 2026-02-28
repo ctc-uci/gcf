@@ -430,7 +430,6 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
 
             });
 
-            console.log(program)
             setInitialProgramDirectorIds(
                 mappedProgramDirectors.map(d => d.userId).filter(Boolean)
             );
@@ -643,10 +642,6 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
             console.error("Error saving program:", err);
         }
     }
-
-    useEffect(() => {
-        console.log("Program status changed to:", formState);
-    }, [formState])
 
     useEffect(() => {
         async function getRegions() {

@@ -62,8 +62,6 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
                     key: keyFileName
                 });
                 
-                console.log("file name:", s3Data.uploadUrl)
-
                 if (!s3Data.uploadUrl || !s3Data.key) {
                     throw new Error("Failed to get upload URL");
                 }

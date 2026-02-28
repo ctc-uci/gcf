@@ -37,7 +37,6 @@ mediaChangeRouter.get("/:id", async (req, res) => {
 
 mediaChangeRouter.post("/", async (req, res) => {
   try {
-    console.log("Req Body: ", req.body);
     const { update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id } = req.body;
     const newMediaChange = await db.query(
       `INSERT INTO media_change (update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
