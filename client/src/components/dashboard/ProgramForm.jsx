@@ -477,7 +477,9 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
 
             const studentCountChange = formState.students - oldStudentCount;
             const instrumentChanges = [];
-            const mediaChanges = formState.media;
+            const mediaChanges = formState.media.filter(
+                (mediaItem) => !initialUploadedMedia.includes(mediaItem.file_name)
+            );
 
             const allInstrumentIds = new Set([
                 ...Object.keys(initialInstrumentQuantities || {}),
@@ -537,7 +539,8 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                             file_name: mediaChange.file_name,
                             file_type: mediaChange.file_type,
                             is_thumbnail: false,
-                            instrument_id: mediaChange.instrument_id || null,
+                            // default instrument to beans
+                            instrument_id: mediaChange.instrument_id || 50,
                         })
                     }
                 }
@@ -739,8 +742,12 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                             <MediaUploadForm
                                 onUploadComplete={handleMediaChange}
                                 uploadedMedia={formState.media}
-                                onRemove={((prev) => ({ ...prev, media: prev.media.filter((_, idx) => idx !== i),
-                                }))}
+                                onRemove={(indexToRemove) => {
+                                    setFormState((prev) => ({ 
+                                        ...prev, 
+                                        media: prev.media.filter((_, idx) => idx !== indexToRemove) 
+                                    }));
+                                }}
                             />
                         </VStack>
                     </DrawerBody>
