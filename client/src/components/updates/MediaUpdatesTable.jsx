@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef } from "react";
 
-import { DownloadIcon, SearchIcon } from "@chakra-ui/icons";
+import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
 import {
   Badge,
   Box,
@@ -21,21 +21,33 @@ import {
   Th,
   Thead,
   Tr,
-} from "@chakra-ui/react";
-
+} from '@chakra-ui/react';
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 
+import { downloadCsv, escapeCsvValue, getFilenameTimestamp } from "@/utils/downloadCsv";
 import { applyFilters } from "../../contexts/hooks/TableFilter";
-import { useTableSort } from "../../contexts/hooks/TableSort";
+import { useTableSort } from '../../contexts/hooks/TableSort';
 import { FilterComponent } from "../common/FilterComponent";
-import { SortArrows } from "../tables/SortArrows";
-
+import { SortArrows } from '../tables/SortArrows';
+     
+export function downloadMediaUpdatesAsCsv(data) {
+  const headers = ["Time", "Notes", "Program", "Author", "Status"];
+  const rows = (data || []).map((row) => [
+    escapeCsvValue(row.updateDate),
+    escapeCsvValue(row.note),
+    escapeCsvValue(row.programName),
+    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(" ")),
+    escapeCsvValue(row.status),
+  ]);
+  downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
+}
+     
 export const MediaUpdatesTable = ({
   originalData,
   isLoading,
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const columns = [
+  const [searchQuery, setSearchQuery] = useState('');
+    const columns = [
     {
       key: "updateDate",
       type: "date",
@@ -103,10 +115,7 @@ export const MediaUpdatesTable = ({
         align="center"
       >
         <Heading>Media Updates</Heading>
-        <SearchIcon
-          mt="10px"
-          ml="10px"
-        />
+        <SearchIcon mt="10px" ml="10px" />
         <Input
           placeholder="Type to search"
           variant="flushed"
@@ -142,13 +151,22 @@ export const MediaUpdatesTable = ({
         >
           Displaying {tableData.length} results
         </Text>
-        <DownloadIcon mt="10px" />
+        <IconButton
+          aria-label="menu"
+          icon={<HamburgerIcon />}
+          size="sm"
+          variant="ghost"
+        />
+        <IconButton
+          aria-label="Download"
+          icon={<DownloadIcon />}
+          size="sm"
+          variant="ghost"
+          onClick={() => downloadMediaUpdatesAsCsv(tableData)}
+        />
       </Flex>
 
-      <TableContainer
-        overflowX="auto"
-        maxW="100%"
-      >
+      <TableContainer overflowX="auto" maxW="100%">
         <Table variant="simple">
           <Thead>
             {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}

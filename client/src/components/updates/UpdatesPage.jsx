@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { Center, Spinner } from "@chakra-ui/react";
+import { Center, Spinner } from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
-import { MediaUpdatesTable } from "./MediaUpdatesTable";
-import { ProgramUpdatesTable } from "./ProgramUpdatesTable";
+import { MediaUpdatesTable } from './MediaUpdatesTable';
+import { ProgramUpdatesTable } from './ProgramUpdatesTable';
 
 export const UpdatesPage = () => {
   const { currentUser } = useAuthContext();
@@ -18,7 +18,9 @@ export const UpdatesPage = () => {
   const [mediaUpdatesData, setMediaUpdatesData] = useState([]);
   const [originalMediaUpdatesData, setOriginalMediaUpdatesData] = useState([]);
   const [programUpdatesData, setProgramUpdatesData] = useState([]);
-  const [originalProgramUpdatesData, setOriginalProgramUpdatesData] = useState([]);
+  const [originalProgramUpdatesData, setOriginalProgramUpdatesData] = useState(
+    []
+  );
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -28,7 +30,7 @@ export const UpdatesPage = () => {
       return response.data;
     } catch (error) {
       console.error(
-        "Request failed:",
+        'Request failed:',
         path,
         error.response?.status,
         error.message
@@ -65,7 +67,7 @@ export const UpdatesPage = () => {
         setProgramUpdatesData(mappedProgram);
         setOriginalProgramUpdatesData(mappedProgram);
       } catch (error) {
-        console.error("Fetch error:", error);
+        console.error('Fetch error:', error);
       } finally {
         setIsLoading(false);
       }
@@ -76,18 +78,14 @@ export const UpdatesPage = () => {
   if (isLoading) {
     return (
       <Center py={10}>
-        <Spinner
-          size="xl"
-          color="gray.500"
-        />
+        <Spinner size="xl" color="gray.500" />
       </Center>
     );
   }
 
-
   return (
     <>
-      {role === "Program Director" ? (
+      {role === 'Program Director' ? (
         <ProgramUpdatesTable
           data={programUpdatesData}
           setData={setProgramUpdatesData}

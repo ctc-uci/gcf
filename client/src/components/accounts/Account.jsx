@@ -15,12 +15,12 @@ import {
   HiOutlineAdjustmentsHorizontal,
 } from "react-icons/hi2";
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
 import { AccountForm } from "./AccountForm";
-import { AccountsTable } from "./AccountsTable";
+import { AccountsTable, downloadAccountsAsCsv } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
 
 import { applyFilters } from "../../contexts/hooks/TableFilter"
@@ -43,7 +43,8 @@ export const Account = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null)
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isCardView, setIsCardView] = useState(false);
   const columns = [
     {
       key: "fullName",
@@ -69,7 +70,7 @@ export const Account = () => {
     setIsLoading(true);
     const route = getAccountsRoute(role, userId);
     if (!route) {
-      console.error("No valid route for accounts. Missing userId or role.");
+      console.error('No valid route for accounts. Missing userId or role.');
       setIsLoading(false);
       return;
     }
@@ -83,14 +84,14 @@ export const Account = () => {
         fullName: `${item.firstName} ${item.lastName}`,
         role: item.role,
         programs: Array.isArray(item.programs) ? item.programs : [],
-        email: item.email ?? "-",
-        password: "-",
+        email: item.email ?? '-',
+        password: '-',
       }));
 
       setUsers(fetchedData);
       setOriginalUsers(fetchedData);
     } catch (error) {
-      console.error("Error loading data:", error);
+      console.error('Error loading data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -104,22 +105,9 @@ export const Account = () => {
 
 
   return (
-    <Box
-      p={8}
-      bg="white"
-      minH="100vh"
-    >
-      <Flex
-        mb={8}
-        align="center"
-        wrap={{ base: "wrap", md: "nowrap" }}
-        gap={4}
-      >
-        <Heading
-          as="h1"
-          size="lg"
-          fontWeight="500"
-        >
+    <Box p={8} bg="white" minH="100vh">
+      <Flex mb={8} align="center" wrap={{ base: 'wrap', md: 'nowrap' }} gap={4}>
+        <Heading as="h1" size="lg" fontWeight="500">
           Accounts
         </Heading>
 
@@ -133,21 +121,22 @@ export const Account = () => {
             setIsDrawerOpen(true);
             setSelectedUser(null);
           }}
+          setIsCardView={setIsCardView}
+          onDownload={() => downloadAccountsAsCsv(users)}
         />
       </Flex>
 
       {isLoading ? (
         <Center py={10}>
-          <Spinner
-            size="xl"
-            color="gray.500"
-          />
+          <Spinner size="xl" color="gray.500" />
         </Center>
       ) : (
         <AccountsTable
           originalData={originalUsers}
           searchQuery={searchQuery}
           activeFilters={activeFilters}
+          isCardView={isCardView}
+          onSave={() => fetchData()}
           onUpdate={(user) => {
             setSelectedUser(user);
             setIsDrawerOpen(true);

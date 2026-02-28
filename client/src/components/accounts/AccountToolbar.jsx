@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
   Spacer,
   Text,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
 import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from "react-icons/fi";
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
@@ -26,29 +26,18 @@ export const AccountToolbar = ({
   columns,
   setActiveFilters,
   resultCount,
+  setIsCardView,
+  onDownload,
 }) => {
   // TODO: Implement functionality for search, filter, view toggle, download, and new account
   function handleSearchChange(event) {
     setSearchQuery(event.target.value);
   }
   return (
-    <Flex
-      width="100%"
-      align="center"
-      gap={2}
-    >
-      <InputGroup
-        maxW="300px"
-        ml={{ base: 0, md: 4 }}
-      >
-        <InputLeftElement
-          pointerEvents="none"
-          mt={-2}
-        >
-          <Icon
-            as={FiSearch}
-            color="gray.400"
-          />
+    <Flex width="100%" align="center" gap={2}>
+      <InputGroup maxW="300px" ml={{ base: 0, md: 4 }}>
+        <InputLeftElement pointerEvents="none" mt={-2}>
+          <Icon as={FiSearch} color="gray.400" />
         </InputLeftElement>
 
         <Input
@@ -57,7 +46,7 @@ export const AccountToolbar = ({
           borderBottom="1px solid"
           borderColor="gray.300"
           borderRadius={0}
-          _focus={{ borderColor: "black" }}
+          _focus={{ borderColor: 'black' }}
           px={0}
           pl={10}
           value={searchQuery}
@@ -92,12 +81,14 @@ export const AccountToolbar = ({
             icon={<FiList />}
             variant="ghost"
             color="gray.500"
+            onClick={() => setIsCardView(false)}
           />
           <IconButton
             aria-label="Grid View"
             icon={<FiGrid />}
             variant="ghost"
             color="gray.400"
+            onClick={() => setIsCardView(true)}
           />
         </HStack>
         <IconButton
@@ -105,6 +96,7 @@ export const AccountToolbar = ({
           icon={<FiDownload />}
           variant="ghost"
           color="gray.500"
+          onClick={onDownload}
         />
         <Text
           fontSize="sm"
@@ -121,10 +113,7 @@ export const AccountToolbar = ({
         borderRadius="md"
         fontWeight="normal"
         leftIcon={
-          <Text
-            as="span"
-            fontSize="lg"
-          >
+          <Text as="span" fontSize="lg">
             +
           </Text>
         }

@@ -1,9 +1,15 @@
 import { useMemo, useState, useRef } from "react";
 
-import { DownloadIcon, SearchIcon } from "@chakra-ui/icons";
+import {
+  AddIcon,
+  DownloadIcon,
+  HamburgerIcon,
+  SearchIcon,
+} from '@chakra-ui/icons';
 import {
   Badge,
   Box,
+  Button,
   Center,
   Flex,
   Heading,
@@ -21,14 +27,31 @@ import {
   Th,
   Thead,
   Tr,
-} from "@chakra-ui/react";
-
+} from '@chakra-ui/react';
+import {
+  downloadCsv,
+  escapeCsvValue,
+  getFilenameTimestamp,
+} from '@/utils/downloadCsv';
+import { applyFilters } from "../../contexts/hooks/TableFilter";
+import { useTableSort } from '../../contexts/hooks/TableSort';
+import { FilterComponent } from "../common/FilterComponent";
+import { SortArrows } from '../tables/SortArrows';
+import { ProgramUpdateForm } from './ProgramUpdateForm';
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 
-import { applyFilters } from "../../contexts/hooks/TableFilter";
-import { useTableSort } from "../../contexts/hooks/TableSort";
-import { FilterComponent } from "../common/FilterComponent";
-import { SortArrows } from "../tables/SortArrows";
+
+export function downloadProgramUpdatesAsCsv(data) {
+  const headers = ['Time', 'Notes', 'Program', 'Author', 'Status'];
+  const rows = (data || []).map((row) => [
+    escapeCsvValue(row.updateDate),
+    escapeCsvValue(row.note),
+    escapeCsvValue(row.name),
+    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
+    escapeCsvValue(row.status),
+  ]);
+  downloadCsv(headers, rows, `program-updates-${getFilenameTimestamp()}.csv`);
+}
 
 export const ProgramUpdatesTable = ({
   originalData,
@@ -63,6 +86,13 @@ export const ProgramUpdatesTable = ({
     applyFilters(activeFilters, originalData),
   [activeFilters, originalData]);
 
+    const [selectedUpdate, setSelectedUpdate] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const openEditForm = (update) => {
+    setSelectedUpdate(update);
+    setIsFormOpen(true);
+  };
+
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
   };
@@ -94,20 +124,19 @@ export const ProgramUpdatesTable = ({
 
   return (
     <>
-      <Box
-        mt="30px"
-        ml="10px"
-      >
-        <Flex
-          gap={10}
-          mb="20px"
-          align="center"
-        >
+      <ProgramUpdateForm
+        isOpen={isFormOpen}
+        onOpen={() => setIsFormOpen(true)}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedUpdate(null);
+        }}
+        programUpdateId={selectedUpdate?.id}
+      />
+      <Box mt="30px" ml="10px">
+        <Flex gap={10} mb="20px" alignItems="center">
           <Heading>Program Updates</Heading>
-          <SearchIcon
-            mt="10px"
-            ml="10px"
-          />
+          <SearchIcon mt="10px" ml="10px" />
           <Input
             placeholder="Type to search"
             variant="flushed"
@@ -143,13 +172,32 @@ export const ProgramUpdatesTable = ({
           >
             Displaying {tableData.length} results
           </Text>
-          <DownloadIcon mt="10px" />
+          <IconButton
+            aria-label="menu"
+            icon={<HamburgerIcon />}
+            size="sm"
+            variant="ghost"
+          />
+          <IconButton
+            aria-label="Download"
+            icon={<DownloadIcon />}
+            size="sm"
+            variant="ghost"
+            onClick={() => downloadMediaUpdatesAsCsv(tableData)}
+          />
+          <Button
+            size="sm"
+            rightIcon={<AddIcon />}
+            onClick={() => {
+              openEditForm(null);
+            }}
+            ml="auto"
+          >
+            New
+          </Button>
         </Flex>
 
-        <TableContainer
-          overflowX="auto"
-          maxW="100%"
-        >
+        <TableContainer overflowX="auto" maxW="100%">
           <Table variant="simple">
             <Thead>
               {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
@@ -217,7 +265,7 @@ export const ProgramUpdatesTable = ({
                 </Tr>
               ) : (
                 tableData.map((row) => (
-                  <Tr key={row.id}>
+                  <Tr key={row.id} onClick={() => openEditForm(row)}>
                     <Td>{row.updateDate}</Td>
                     <Td>{row.note}</Td>
                     <Td>{row.name}</Td>

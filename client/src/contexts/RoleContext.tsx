@@ -1,12 +1,12 @@
-import { createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from 'react';
 
-import { Spinner } from "@chakra-ui/react";
+import { Spinner } from '@chakra-ui/react';
 
-import type { User as DbUser, User } from "../types/user";
-import { auth } from "../utils/auth/firebase";
-import { useBackendContext } from "./hooks/useBackendContext";
+import type { User as DbUser, User } from '../types/user';
+import { auth } from '../utils/auth/firebase';
+import { useBackendContext } from './hooks/useBackendContext';
 
-type DbUserRole = DbUser["role"];
+type DbUserRole = DbUser['role'];
 
 interface RoleContextProps {
   role: DbUserRole | undefined;

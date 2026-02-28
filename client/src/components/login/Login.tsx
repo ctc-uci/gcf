@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect } from 'react';
 
 import {
   AbsoluteCenter,
@@ -19,23 +19,23 @@ import {
   Stack,
   Text,
   useToast,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { authenticateGoogleUser } from "@/utils/auth/providers";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { FaGoogle } from "react-icons/fa6";
-import { Link, useNavigate } from "react-router-dom";
-import { z } from "zod";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { authenticateGoogleUser } from '@/utils/auth/providers';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { FaGoogle } from 'react-icons/fa6';
+import { Link, useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 
-import GcfGlobe from "/gcf_globe.png";
-import logo from "/logo.png";
+import GcfGlobe from '/gcf_globe.png';
+import logo from '/logo.png';
 
 const signinSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters long'),
 });
 
 type SigninFormValues = z.infer<typeof signinSchema>;
@@ -53,17 +53,17 @@ export const Login = () => {
     formState: { errors },
   } = useForm<SigninFormValues>({
     resolver: zodResolver(signinSchema),
-    mode: "onBlur",
+    mode: 'onBlur',
   });
 
   const toastLoginError = useCallback(
     (msg: string) => {
       toast({
-        title: "An error occurred while signing in",
+        title: 'An error occurred while signing in',
         description: msg,
-        status: "error",
-        variant: "subtle",
-        position: "bottom-right",
+        status: 'error',
+        variant: 'subtle',
+        position: 'bottom-right',
       });
     },
     [toast]
@@ -76,31 +76,31 @@ export const Login = () => {
         password: data.password,
       });
 
-      navigate("/dashboard/1");
+      navigate('/dashboard/1');
     } catch (err) {
       const errorCode = err.code;
       const firebaseErrorMsg = err.message;
 
       switch (errorCode) {
-        case "auth/wrong-password":
-        case "auth/invalid-credential":
-        case "auth/invalid-email":
-        case "auth/user-not-found":
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+        case 'auth/invalid-email':
+        case 'auth/user-not-found':
           toastLoginError(
-            "Email address or password does not match our records!"
+            'Email address or password does not match our records!'
           );
           break;
-        case "auth/unverified-email":
-          toastLoginError("Please verify your email address.");
+        case 'auth/unverified-email':
+          toastLoginError('Please verify your email address.');
           break;
-        case "auth/user-disabled":
-          toastLoginError("This account has been disabled.");
+        case 'auth/user-disabled':
+          toastLoginError('This account has been disabled.');
           break;
-        case "auth/too-many-requests":
-          toastLoginError("Too many attempts. Please try again later.");
+        case 'auth/too-many-requests':
+          toastLoginError('Too many attempts. Please try again later.');
           break;
-        case "auth/user-signed-out":
-          toastLoginError("You have been signed out. Please sign in again.");
+        case 'auth/user-signed-out':
+          toastLoginError('You have been signed out. Please sign in again.');
           break;
         default:
           toastLoginError(firebaseErrorMsg);
@@ -128,15 +128,9 @@ export const Login = () => {
         draggable="false"
       />
 
-      <Grid
-        templateColumns="repeat(2, 1fr)"
-        gap={5}
-      >
+      <Grid templateColumns="repeat(2, 1fr)" gap={5}>
         <GridItem>
-          <Box
-            borderRight="3px solid"
-            h="100vh"
-          >
+          <Box borderRight="3px solid" h="100vh">
             <AbsoluteCenter left="25%">
               <Text
                 as="b"
@@ -160,30 +154,24 @@ export const Login = () => {
         </GridItem>
 
         <GridItem>
-          <Box
-            w="100%"
-            mt="20%"
-          >
+          <Box w="100%" mt="20%">
             <Center>
               <Heading as="u">Log In</Heading>
             </Center>
             <Center>
               <form
                 onSubmit={handleSubmit(handleLogin)}
-                style={{ width: "70%" }}
+                style={{ width: '70%' }}
               >
                 <Stack spacing={7}>
-                  <FormControl
-                    isInvalid={!!errors.email}
-                    w={"100%"}
-                  >
+                  <FormControl isInvalid={!!errors.email} w={'100%'}>
                     <FormLabel fontSize="lg">Email</FormLabel>
                     <Center>
                       <Input
                         placeholder="Email"
                         type="email"
-                        size={"lg"}
-                        {...register("email")}
+                        size={'lg'}
+                        {...register('email')}
                         name="email"
                         isRequired
                         autoComplete="email"
@@ -201,8 +189,8 @@ export const Login = () => {
                       <Input
                         placeholder="Password"
                         type="password"
-                        size={"lg"}
-                        {...register("password")}
+                        size={'lg'}
+                        {...register('password')}
                         name="password"
                         isRequired
                         autoComplete="current-password"
@@ -213,23 +201,14 @@ export const Login = () => {
                     <FormErrorMessage>
                       {errors.password?.message?.toString()}
                     </FormErrorMessage>
-                    <Flex
-                      gap="300px"
-                      mt="10px"
-                    >
-                      <ChakraLink
-                        as={Link}
-                        to="/signup"
-                      >
+                    <Flex gap="300px" mt="10px">
+                      <ChakraLink as={Link} to="/signup">
                         <FormHelperText textDecoration="underline">
                           Click here to sign up
                         </FormHelperText>
                       </ChakraLink>
                       {/* TODO: Replace /signup with forgot password form */}
-                      <ChakraLink
-                        as={Link}
-                        to="/signup"
-                      >
+                      <ChakraLink as={Link} to="/signup">
                         <FormHelperText
                           color="blue.400"
                           textDecoration="underline"
@@ -242,7 +221,7 @@ export const Login = () => {
                   <Center>
                     <Button
                       type="submit"
-                      size={"lg"}
+                      size={'lg'}
                       isDisabled={Object.keys(errors).length > 0}
                       bg="black"
                       color="white"

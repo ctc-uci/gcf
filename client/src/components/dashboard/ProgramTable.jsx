@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from 'react';
 
 import {
   AddIcon,
@@ -6,7 +6,7 @@ import {
   EditIcon,
   HamburgerIcon,
   Search2Icon,
-} from "@chakra-ui/icons";
+} from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -18,9 +18,6 @@ import {
   Input,
   Link,
   Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverCloseButton,
   PopoverContent,
   PopoverTrigger,
   Spinner,
@@ -34,26 +31,32 @@ import {
   Tr,
   useDisclosure,
   VStack,
-} from "@chakra-ui/react";
-
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+} from '@chakra-ui/react';
+import {
+  downloadCsv,
+  escapeCsvValue,
+  getFilenameTimestamp,
+} from '@/utils/downloadCsv';
+import CardView from './CardView';
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
-} from "react-icons/hi2";
+} from 'react-icons/hi2';
 
-import { applyFilters } from "../../contexts/hooks/TableFilter";
-import { useTableSort } from "../../contexts/hooks/TableSort";
-import { FilterComponent } from "../common/FilterComponent";
-import { SortArrows } from "../tables/SortArrows";
-import { ProgramForm } from "./ProgramForm";
+import { applyFilters } from '../../contexts/hooks/TableFilter';
+import { useTableSort } from '../../contexts/hooks/TableSort';
+import { FilterComponent } from '../common/FilterComponent';
+import { SortArrows } from '../tables/SortArrows';
+import { ProgramForm } from './ProgramForm';
 
 const getRouteByRole = (role, userId) => {
   const routes = {
-    Admin: "/admin/programs",
-    "Regional Director": `/rdProgramTable/${userId}`,
+    'Super Admin': '/admin/programs',
+    Admin: '/admin/programs',
+    'Regional Director': `/rdProgramTable/${userId}`,
   };
   return routes[role];
 };
@@ -64,17 +67,13 @@ function mapAdminRow(row) {
     title: row.title ?? row.name,
     status: row.status,
     launchDate: row.launchDate,
-
-    location: row.countryName ?? "",
+    location: row.countryName ?? '',
     country: row.country,
-
     students: row.students ?? 0,
     instruments: row.instruments ?? 0,
     totalInstruments: row.instruments ?? 0,
-
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
-
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
   };
@@ -86,35 +85,34 @@ function mapRdRow(row) {
     title: row.programName,
     status: row.programStatus,
     launchDate: row.programLaunchDate,
-
-    location: row.programLocation ?? row.regionName ?? "",
+    location: row.programLocation ?? row.regionName ?? '',
     countryId: row.countryId,
     regionId: row.regionId,
-
     students: row.totalStudents ?? 0,
     instruments: row.totalInstruments ?? 0,
     totalInstruments: row.totalInstruments ?? 0,
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
-
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
   };
 }
 
 const MAP_BY_ROLE = {
+  'Super Admin': mapAdminRow,
   Admin: mapAdminRow,
-  "Regional Director": mapRdRow,
+  'Regional Director': mapRdRow,
 };
 
 function ExpandableRow({ p, onEdit }) {
   const { isOpen, onToggle } = useDisclosure();
+
   return (
     <>
       <Tr
         onClick={onToggle}
         cursor="pointer"
-        sx={{ td: { borderBottom: isOpen ? "none" : undefined } }}
+        sx={{ td: { borderBottom: isOpen ? 'none' : undefined } }}
       >
         <Td>{p.title}</Td>
         <Td>{p.status}</Td>
@@ -127,42 +125,25 @@ function ExpandableRow({ p, onEdit }) {
       <Tr>
         <Td
           colSpan={7}
-          borderBottom={isOpen ? "1px solid" : "none"}
+          borderBottom={isOpen ? '1px solid' : 'none'}
           borderColor="gray.200"
           p={isOpen ? undefined : 0}
         >
           <Collapse in={isOpen}>
             <Box position="relative">
               <HStack align="start">
-                <Box
-                  flex="1"
-                  display="grid"
-                >
-                  <Box
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    pb="2"
-                  >
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">
                     Language:
                   </Box>
-                  <Box>{p.primaryLanguage ?? "-"}</Box>
+                  <Box>{p.primaryLanguage ?? '-'}</Box>
                 </Box>
-                <Box
-                  flex="1"
-                  display="grid"
-                >
-                  <Box
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    pb="2"
-                  >
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">
                     Regional Director(s)
                   </Box>
                   <Box>
-                    <VStack
-                      align="start"
-                      spacing={2}
-                    >
+                    <VStack align="start" spacing={2}>
                       {Array.isArray(p.regionalDirectors)
                         ? p.regionalDirectors.map((d, idx) => (
                             <Box
@@ -182,22 +163,12 @@ function ExpandableRow({ p, onEdit }) {
                     </VStack>
                   </Box>
                 </Box>
-                <Box
-                  flex="1"
-                  display="grid"
-                >
-                  <Box
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    pb="2"
-                  >
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">
                     Program Director(s)
                   </Box>
                   <Box>
-                    <VStack
-                      align="start"
-                      spacing={2}
-                    >
+                    <VStack align="start" spacing={2}>
                       {Array.isArray(p.programDirectors)
                         ? p.programDirectors.map((d, idx) => (
                             <Box
@@ -217,33 +188,24 @@ function ExpandableRow({ p, onEdit }) {
                     </VStack>
                   </Box>
                 </Box>
-                <Box
-                  flex="1"
-                  display="grid"
-                >
-                  <Box
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    pb="2"
-                  >
+                <Box flex="1" display="grid">
+                  <Box fontSize="sm" fontWeight="semibold" pb="2">
                     Curriculum Link(s)
                   </Box>
                   <Box>
                     {Array.isArray(p.playlists)
-                      ? p.playlists.map((l) => {
-                          return (
-                            <Box key={l.link}>
-                              <Link
-                                href={l.link}
-                                color="blue"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {l.name}
-                              </Link>
-                            </Box>
-                          );
-                        })
+                      ? p.playlists.map((l) => (
+                          <Box key={l.link}>
+                            <Link
+                              href={l.link}
+                              color="blue"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {l.name}
+                            </Link>
+                          </Box>
+                        ))
                       : null}
                   </Box>
                 </Box>
@@ -284,42 +246,70 @@ function ProgramDisplay({
   selectedProgram,
   setSelectedProgram,
 }) {
+  const [isCardView, setIsCardView] = useState(false);
+
+  const downloadDataAsCsv = () => {
+    const headers = [
+      'Program',
+      'Status',
+      'Launch Date',
+      'Location',
+      'Students',
+      'Instruments',
+      'Total Instruments',
+      'Primary Language',
+      'Regional Directors',
+      'Program Directors',
+      'Curriculum Links',
+    ];
+    const rows = (tableData || []).map((p) => [
+      escapeCsvValue(p.title),
+      escapeCsvValue(p.status),
+      escapeCsvValue(p.launchDate),
+      escapeCsvValue(p.location),
+      escapeCsvValue(p.students),
+      escapeCsvValue(p.instruments),
+      escapeCsvValue(p.totalInstruments),
+      escapeCsvValue(p.primaryLanguage),
+      escapeCsvValue(
+        Array.isArray(p.regionalDirectors)
+          ? p.regionalDirectors
+              .map((d) => `${d.firstName} ${d.lastName}`)
+              .join('; ')
+          : ''
+      ),
+      escapeCsvValue(
+        Array.isArray(p.programDirectors)
+          ? p.programDirectors
+              .map((d) => `${d.firstName} ${d.lastName}`)
+              .join('; ')
+          : ''
+      ),
+      escapeCsvValue(
+        Array.isArray(p.playlists)
+          ? p.playlists.map((l) => l.link ?? l.name).join('; ')
+          : ''
+      ),
+    ]);
+    downloadCsv(headers, rows, `programs-${getFilenameTimestamp()}.csv`);
+  };
+
   const columns = [
-    {
-      key: "title",
-      type: "text",
-    },
-    {
-      key: "status",
-      type: "select",
-      options: ["Active", "Inactive"],
-    },
-    {
-      key: "launchDate",
-      type: "date",
-    },
-    {
-      key: "location",
-      type: "text",
-    },
-    {
-      key: "students",
-      type: "number",
-    },
-    {
-      key: "instruments",
-      type: "number",
-    },
-    {
-      key: "totalInstruments",
-      type: "number",
-    },
+    { key: 'title', type: 'text' },
+    { key: 'status', type: 'select', options: ['Active', 'Inactive'] },
+    { key: 'launchDate', type: 'date' },
+    { key: 'location', type: 'text' },
+    { key: 'students', type: 'number' },
+    { key: 'instruments', type: 'number' },
+    { key: 'totalInstruments', type: 'number' },
   ];
+
   const [activeFilters, setActiveFilters] = useState([]);
-  
-  const filteredData = useMemo(() => 
-    applyFilters(activeFilters, originalData),
-  [activeFilters, originalData]);
+
+  const filteredData = useMemo(
+    () => applyFilters(activeFilters, originalData ?? []),
+    [activeFilters, originalData]
+  );
 
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
@@ -327,18 +317,26 @@ function ProgramDisplay({
 
   const displayData = useMemo(() => {
     if (!searchQuery) return filteredData;
-    return filteredData.filter(program =>
-      program.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      program.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      program.launchDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      program.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      String(program.students).includes(searchQuery) ||
-      String(program.instruments).includes(searchQuery) ||
-      String(program.totalInstruments).includes(searchQuery)
+    return filteredData.filter(
+      (program) =>
+        program.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        program.status?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        program.launchDate?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        program.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(program.students).includes(searchQuery) ||
+        String(program.instruments).includes(searchQuery) ||
+        String(program.totalInstruments).includes(searchQuery)
     );
   }, [searchQuery, filteredData]);
 
   const [sortedData, setSortedData] = useState(null);
+
+  const prevDisplayData = useRef(displayData);
+  if (prevDisplayData.current !== displayData) {
+    prevDisplayData.current = displayData;
+    setSortedData(null);
+  }
+
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;
 
@@ -356,16 +354,9 @@ function ProgramDisplay({
         program={selectedProgram}
       />
       <TableContainer>
-        <HStack
-          mb={4}
-          justifyContent="space-between"
-          w="100%"
-        >
+        <HStack mb={4} justifyContent="space-between" w="100%">
           <HStack spacing={4}>
-            <Box
-              fontSize="xl"
-              fontWeight="semibold"
-            >
+            <Box fontSize="xl" fontWeight="semibold">
               All Programs
             </Box>
             <HStack spacing={1}>
@@ -395,16 +386,15 @@ function ProgramDisplay({
               icon={<HamburgerIcon />}
               size="sm"
               variant="ghost"
+              onClick={() => setIsCardView(false)}
             />
-            <Divider
-              orientation="vertical"
-              h="20px"
-            />
+            <Divider orientation="vertical" h="20px" />
             <IconButton
               aria-label="search"
               icon={<HiOutlineSquares2X2 />}
               size="sm"
               variant="ghost"
+              onClick={() => setIsCardView(true)}
             />
             <Popover>
               <PopoverTrigger>
@@ -415,23 +405,14 @@ function ProgramDisplay({
                   variant="ghost"
                 />
               </PopoverTrigger>
-              <PopoverContent
-                w="800px"
-                maxW="90vw"
-                shadow="xl"
-              >
+              <PopoverContent w="800px" maxW="90vw" shadow="xl">
                 <FilterComponent
                   columns={columns}
-                  onFilterChange={(filters) => {
-                    setActiveFilters(filters);
-                  }}
+                  onFilterChange={(filters) => setActiveFilters(filters)}
                 />
               </PopoverContent>
             </Popover>
-            <Text
-              fontSize="sm"
-              color="gray.500"
-            >
+            <Text fontSize="sm" color="gray.500">
               Displaying {tableData.length} results
             </Text>
             <IconButton
@@ -440,6 +421,7 @@ function ProgramDisplay({
               size="sm"
               variant="ghost"
               ml={2}
+              onClick={downloadDataAsCsv}
             />
             <Button
               size="sm"
@@ -454,104 +436,63 @@ function ProgramDisplay({
           </HStack>
         </HStack>
 
-        <Table
-          variant="simple"
-          aria-label="collapsible-table"
-        >
-          <Thead>
-            <Tr>
-              <Th
-                onClick={() => handleSort("title")}
-                cursor="pointer"
-              >
-                Program{" "}
-                <SortArrows
-                  columnKey="title"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-              <Th
-                onClick={() => handleSort("status")}
-                cursor="pointer"
-              >
-                Status{" "}
-                <SortArrows
-                  columnKey="status"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-              <Th
-                onClick={() => handleSort("launchDate")}
-                cursor="pointer"
-              >
-                Launch Date{" "}
-                <SortArrows
-                  columnKey="launchDate"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-              <Th
-                onClick={() => handleSort("location")}
-                cursor="pointer"
-              >
-                Location{" "}
-                <SortArrows
-                  columnKey="location"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-              <Th
-                onClick={() => handleSort("students")}
-                cursor="pointer"
-              >
-                Students{" "}
-                <SortArrows
-                  columnKey="students"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-              <Th
-                onClick={() => handleSort("instruments")}
-                cursor="pointer"
-              >
-                Instruments{" "}
-                <SortArrows
-                  columnKey="instruments"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-              <Th
-                onClick={() => handleSort("totalInstruments")}
-                cursor="pointer"
-              >
-                Total Instruments{" "}
-                <SortArrows
-                  columnKey="totalInstruments"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {isLoading ? (
+        {!isCardView ? (
+          <Table variant="simple" aria-label="collapsible-table">
+            <Thead>
               <Tr>
-                <Td colSpan={7}>
-                  <Center py={8}>
-                    <Spinner size="lg" />
-                  </Center>
-                </Td>
+                <Th onClick={() => handleSort('title')} cursor="pointer">
+                  Program <SortArrows columnKey="title" sortOrder={sortOrder} />
+                </Th>
+                <Th onClick={() => handleSort('status')} cursor="pointer">
+                  Status <SortArrows columnKey="status" sortOrder={sortOrder} />
+                </Th>
+                <Th onClick={() => handleSort('launchDate')} cursor="pointer">
+                  Launch Date{' '}
+                  <SortArrows columnKey="launchDate" sortOrder={sortOrder} />
+                </Th>
+                <Th onClick={() => handleSort('location')} cursor="pointer">
+                  Location{' '}
+                  <SortArrows columnKey="location" sortOrder={sortOrder} />
+                </Th>
+                <Th onClick={() => handleSort('students')} cursor="pointer">
+                  Students{' '}
+                  <SortArrows columnKey="students" sortOrder={sortOrder} />
+                </Th>
+                <Th onClick={() => handleSort('instruments')} cursor="pointer">
+                  Instruments{' '}
+                  <SortArrows columnKey="instruments" sortOrder={sortOrder} />
+                </Th>
+                <Th
+                  onClick={() => handleSort('totalInstruments')}
+                  cursor="pointer"
+                >
+                  Total Instruments{' '}
+                  <SortArrows
+                    columnKey="totalInstruments"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
               </Tr>
-            ) : (
-              tableData.map((p) => (
-                <ExpandableRow
-                  key={p.id}
-                  p={p}
-                  onEdit={openEditForm}
-                />
-              ))
-            )}
-          </Tbody>
-        </Table>
+            </Thead>
+            <Tbody>
+              {isLoading ? (
+                <Tr>
+                  <Td colSpan={7}>
+                    <Center py={8}>
+                      <Spinner size="lg" />
+                    </Center>
+                  </Td>
+                </Tr>
+              ) : (
+                tableData.map((p) => (
+                  <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
+                ))
+              )}
+            </Tbody>
+          </Table>
+        ) : (
+          <CardView data={tableData} openEditForm={openEditForm} />
+        )}
       </TableContainer>
     </>
   );
@@ -565,9 +506,10 @@ function ProgramTable() {
   const { backend } = useBackendContext();
   const [originalPrograms, setOriginalPrograms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+
   const openEditForm = (program) => {
     setSelectedProgram(program);
     setIsFormOpen(true);
@@ -591,7 +533,6 @@ function ProgramTable() {
         const rows = Array.isArray(res.data) ? res.data : [];
         const programDetails = await Promise.all(
           rows.map(async (row) => {
-            //TODO: make this more efficient with lazy loading
             const programId = row.id ?? row.programId;
             const [playlists, programDirectors, regionalDirectors] =
               await Promise.all([
@@ -615,7 +556,7 @@ function ProgramTable() {
         const mappedPrograms = programDetails.map(mapRow);
         setOriginalPrograms(mappedPrograms);
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error('Error fetching data:', err);
       } finally {
         setIsLoading(false);
       }
