@@ -41,7 +41,7 @@ export function useTableSort(filteredData, setData) {
     }
 
     setData((prevData) =>
-      [...prevData].sort((a, b) => {
+      [...(prevData ?? filteredDataRef.current)].sort((a, b) => {
         let first = a[column];
         let second = b[column];
 

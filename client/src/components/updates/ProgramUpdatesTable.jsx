@@ -1,100 +1,96 @@
+import { useMemo, useState, useRef } from "react";
+
 import { DownloadIcon, SearchIcon } from "@chakra-ui/icons";
-import { useEffect, useState } from "react";
 import {
   Badge,
   Box,
   Center,
   Flex,
   Heading,
+  IconButton,
   Input,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Spinner,
   Table,
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  IconButton,
-  Text,
 } from "@chakra-ui/react";
-import {
-  HiOutlineAdjustmentsHorizontal,
-} from "react-icons/hi2";
-import { SortArrows } from "../tables/SortArrows";
+
+import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
+
+import { applyFilters } from "../../contexts/hooks/TableFilter";
 import { useTableSort } from "../../contexts/hooks/TableSort";
-import { useTableFilter } from "../../contexts/hooks/TableFilter"
 import { FilterComponent } from "../common/FilterComponent";
+import { SortArrows } from "../tables/SortArrows";
 
-export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) => {
+export const ProgramUpdatesTable = ({
+  originalData,
+  isLoading,
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [unorderedUpdates, setUnorderedUpdates] = useState([]);
   const columns = [
-      {
-        key: "updateDate",
-        type: "date",
-      },
-      {
-        key: "note",
-        type: "text",
-      },
-      {
-        key: "programName",
-        type: "text",
-      },
-      {
-        key: "firstName",
-        type: "text",
-      },
-      {
-        key: "status",
-        type: "select",
-        options: ["Active", "Inactive"],
-      },
-    ];
-    const  [activeFilters, setActiveFilters] = useState([]);
-    const filteredData = useTableFilter(activeFilters, originalData);
-    const { sortOrder, handleSort } = useTableSort(filteredData, setData);
+    {
+      key: "updateDate",
+      type: "date",
+    },
+    {
+      key: "note",
+      type: "text",
+    },
+    {
+      key: "name",
+      type: "text",
+    },
+    {
+      key: "fullName",
+      type: "text",
+    },
+    {
+      key: "status",
+      type: "select",
+      options: ["Active", "Inactive"],
+    },
+  ];
+  const [activeFilters, setActiveFilters] = useState([]);
+  const filteredData = useMemo(() => 
+    applyFilters(activeFilters, originalData),
+  [activeFilters, originalData]);
 
-    
-    useEffect(() => {
-      setData(filteredData);
-    }, [filteredData, setData]);
-  
-  const handleSearch = event => {
-      setSearchQuery(event.target.value);
-   };
-   //setUnorderedUpdates(data.map((row) => row))
-   useEffect(() => {
-    setUnorderedUpdates(data);
-   }, [searchQuery, data]);
-  
-    useEffect(() => {
-       function filterUpdates(search) {
-        if (search === '') {
-          setData(originalData);
-          return;
-        } 
-         // filter by search query
-         const filtered = unorderedUpdates.filter(update => 
-           // if no search then show everything
-           update.updateDate.toLowerCase().includes(search.toLowerCase()) ||
-           update.note.toLowerCase().includes(search.toLowerCase()) ||
-           update.programName.toLowerCase().includes(search.toLowerCase()) ||
-           update.firstName.toLowerCase().includes(search.toLowerCase()) ||
-           update.status.includes(search.toLowerCase())
-         );
-         
-        setData(filtered);
-        
-       }
-   
-     filterUpdates(searchQuery);
-   
-     }, [searchQuery, originalData]);
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const displayData = useMemo(() => {
+    if (searchQuery === "") {
+      return filteredData;
+    }
+    return filteredData.filter(
+        (update) =>
+          update.updateDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          update.note.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          update.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          update.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          update.status.includes(searchQuery.toLowerCase())
+      );
+  }, [searchQuery, filteredData]);
+
+  const [sortedData, setSortedData] = useState(null);
+
+
+  const prevDisplayData = useRef(displayData);
+  if (prevDisplayData.current !== displayData) {
+    prevDisplayData.current = displayData;
+    setSortedData(null);
+  }
+  const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
+  const tableData = sortedData ?? displayData;
 
   return (
     <>
@@ -105,6 +101,7 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
         <Flex
           gap={10}
           mb="20px"
+          align="center"
         >
           <Heading>Program Updates</Heading>
           <SearchIcon
@@ -140,8 +137,11 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
               />
             </PopoverContent>
           </Popover>
-          <Text fontSize="sm" color="gray.500">
-            Displaying {data.length} results
+          <Text
+            fontSize="sm"
+            color="gray.500"
+          >
+            Displaying {tableData.length} results
           </Text>
           <DownloadIcon mt="10px" />
         </Flex>
@@ -154,11 +154,56 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
             <Thead>
               {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
               <Tr>
-                <Th onClick={() => handleSort('updateDate')} cursor="pointer">Time <SortArrows columnKey={"updateDate"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('note')} cursor="pointer">Notes <SortArrows columnKey={"note"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('programName')} cursor="pointer">Program <SortArrows columnKey={"programName"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('firstName')} cursor="pointer">Author <SortArrows columnKey={"firstName"} sortOrder={sortOrder}/></Th>
-                <Th onClick={() => handleSort('status')} cursor="pointer">Status <SortArrows columnKey={"status"} sortOrder={sortOrder}/></Th>
+                <Th
+                  onClick={() => handleSort("updateDate")}
+                  cursor="pointer"
+                >
+                  Time{" "}
+                  <SortArrows
+                    columnKey={"updateDate"}
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("note")}
+                  cursor="pointer"
+                >
+                  Notes{" "}
+                  <SortArrows
+                    columnKey={"note"}
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("programName")}
+                  cursor="pointer"
+                >
+                  Program{" "}
+                  <SortArrows
+                    columnKey={"programName"}
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("firstName")}
+                  cursor="pointer"
+                >
+                  Author{" "}
+                  <SortArrows
+                    columnKey={"firstName"}
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort("status")}
+                  cursor="pointer"
+                >
+                  Status{" "}
+                  <SortArrows
+                    columnKey={"status"}
+                    sortOrder={sortOrder}
+                  />
+                </Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -171,11 +216,11 @@ export const ProgramUpdatesTable = ({ data, setData, originalData, isLoading }) 
                   </Td>
                 </Tr>
               ) : (
-                data.map((row) => (
+                tableData.map((row) => (
                   <Tr key={row.id}>
                     <Td>{row.updateDate}</Td>
                     <Td>{row.note}</Td>
-                    <Td>{row.programName}</Td>
+                    <Td>{row.name}</Td>
                     <Td>
                       {row.firstName} {row.lastName}
                     </Td>

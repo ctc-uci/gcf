@@ -40,6 +40,7 @@ const OPERATIONS = {
 ],
 };
 
+
   function FilterComponent({ columns = [], onFilterChange }) {
     const createDefaultFilter = () => {
       const defaultCol = columns[0];
@@ -57,6 +58,8 @@ const OPERATIONS = {
     };
 
     const [filters, setFilters] = useState([]);
+    const lastFilter = filters[filters.length - 1];
+    const isLastFilterIncomplete = lastFilter && lastFilter.value === "";
 
     useEffect(() => {
       if (onFilterChange) {
@@ -144,6 +147,16 @@ const OPERATIONS = {
         );
       case "text":
       default:
+        return (
+          <Input
+            flex="1"
+            type="text"
+            placeholder="Enter value..."
+            value={filter.value}
+            onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
+          />
+        );
+      case "list":
         return (
           <Input
             flex="1"
@@ -274,6 +287,7 @@ const OPERATIONS = {
             size="sm"
             colorScheme="blue"
             onClick={addFilter}
+            isDisabled={isLastFilterIncomplete}
           >
             + Add Filter
           </Button>

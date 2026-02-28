@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 
 import { 
   Box, 
@@ -23,8 +23,7 @@ import { AccountForm } from "./AccountForm";
 import { AccountsTable } from "./AccountsTable";
 import { AccountToolbar } from "./AccountToolbar";
 
-import { useTableFilter } from "../../contexts/hooks/TableFilter"
-import { FilterComponent } from "../common/FilterComponent";
+import { applyFilters } from "../../contexts/hooks/TableFilter"
 
 const getAccountsRoute = (role, userId) => {
   if (!userId) return null;
@@ -47,7 +46,7 @@ export const Account = () => {
   const [selectedUser, setSelectedUser] = useState(null)
   const columns = [
     {
-      key: "firstName",
+      key: "fullName",
       type: "text",
     },
     {
@@ -81,6 +80,7 @@ export const Account = () => {
         id: item.id,
         firstName: item.firstName,
         lastName: item.lastName,
+        fullName: `${item.firstName} ${item.lastName}`,
         role: item.role,
         programs: Array.isArray(item.programs) ? item.programs : [],
         email: item.email ?? "-",
@@ -101,11 +101,7 @@ export const Account = () => {
   }, [fetchData]);
 
   const [activeFilters, setActiveFilters] = useState([]);
-  const filteredData = useTableFilter(activeFilters, originalUsers);
-  
-  useEffect(() => {
-    setUsers(filteredData);
-  }, [filteredData, setOriginalUsers]);
+
 
   return (
     <Box
@@ -149,10 +145,9 @@ export const Account = () => {
         </Center>
       ) : (
         <AccountsTable
-          data={users}
-          setData={setUsers}
           originalData={originalUsers}
           searchQuery={searchQuery}
+          activeFilters={activeFilters}
           onUpdate={(user) => {
             setSelectedUser(user);
             setIsDrawerOpen(true);

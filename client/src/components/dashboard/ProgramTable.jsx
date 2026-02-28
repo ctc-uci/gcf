@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 import {
   AddIcon,
@@ -28,12 +28,12 @@ import {
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
   useDisclosure,
   VStack,
-  Text
 } from "@chakra-ui/react";
 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
@@ -44,8 +44,8 @@ import {
   HiOutlineSquares2X2,
 } from "react-icons/hi2";
 
+import { applyFilters } from "../../contexts/hooks/TableFilter";
 import { useTableSort } from "../../contexts/hooks/TableSort";
-import { useTableFilter } from "../../contexts/hooks/TableFilter"
 import { FilterComponent } from "../common/FilterComponent";
 import { SortArrows } from "../tables/SortArrows";
 import { ProgramForm } from "./ProgramForm";
@@ -272,8 +272,6 @@ function ExpandableRow({ p, onEdit }) {
 }
 
 function ProgramDisplay({
-  data,
-  setData,
   originalData,
   searchQuery,
   setSearchQuery,
@@ -317,45 +315,32 @@ function ProgramDisplay({
       type: "number",
     },
   ];
-  const  [activeFilters, setActiveFilters] = useState([]);
-  const filteredData = useTableFilter(activeFilters, originalData);
-  const { sortOrder, handleSort } = useTableSort(filteredData, setData);
+  const [activeFilters, setActiveFilters] = useState([]);
   
-  useEffect(() => {
-    setData(filteredData);
-  }, [filteredData, setData]);
-
+  const filteredData = useMemo(() => 
+    applyFilters(activeFilters, originalData),
+  [activeFilters, originalData]);
 
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
   };
 
-  useEffect(() => {
-    if (!originalData || originalData.length === 0) return;
-
-    if (searchQuery === "") {
-      setData(originalData);
-      return;
-    }
-
-    const filtered = originalData.filter(
-      (program) =>
-        program.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.launchDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(program.students)
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        String(program.instruments)
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        String(program.totalInstruments)
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
+  const displayData = useMemo(() => {
+    if (!searchQuery) return filteredData;
+    return filteredData.filter(program =>
+      program.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      program.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      program.launchDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      program.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      String(program.students).includes(searchQuery) ||
+      String(program.instruments).includes(searchQuery) ||
+      String(program.totalInstruments).includes(searchQuery)
     );
-    setData(filtered);
-  }, [searchQuery, originalData]);
+  }, [searchQuery, filteredData]);
+
+  const [sortedData, setSortedData] = useState(null);
+  const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
+  const tableData = sortedData ?? displayData;
 
   if (!getRouteByRole(role, userId)) return null;
 
@@ -402,31 +387,6 @@ function ProgramDisplay({
                 value={searchQuery}
                 onChange={handleSearch}
               />
-              <Popover>
-                <PopoverTrigger>
-                  <IconButton
-                    aria-label="filter"
-                    icon={<HiOutlineAdjustmentsHorizontal />}
-                    size="sm"
-                    variant="ghost"
-                  />
-                </PopoverTrigger>
-                <PopoverContent
-                  w="800px"
-                  maxW="90vw"
-                  shadow="xl"
-                >
-                  <FilterComponent
-                    columns={columns}
-                    onFilterChange={(filters) => {
-                      setActiveFilters(filters);
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-              <Text fontSize="sm" color="gray.500">
-                Displaying {data.length} results
-              </Text>
             </HStack>
           </HStack>
           <HStack spacing={1}>
@@ -446,12 +406,34 @@ function ProgramDisplay({
               size="sm"
               variant="ghost"
             />
-            <IconButton
-              aria-label="filter"
-              icon={<HiOutlineAdjustmentsHorizontal />}
-              size="sm"
-              variant="ghost"
-            />
+            <Popover>
+              <PopoverTrigger>
+                <IconButton
+                  aria-label="filter"
+                  icon={<HiOutlineAdjustmentsHorizontal />}
+                  size="sm"
+                  variant="ghost"
+                />
+              </PopoverTrigger>
+              <PopoverContent
+                w="800px"
+                maxW="90vw"
+                shadow="xl"
+              >
+                <FilterComponent
+                  columns={columns}
+                  onFilterChange={(filters) => {
+                    setActiveFilters(filters);
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+            <Text
+              fontSize="sm"
+              color="gray.500"
+            >
+              Displaying {tableData.length} results
+            </Text>
             <IconButton
               aria-label="download"
               icon={<DownloadIcon />}
@@ -560,7 +542,7 @@ function ProgramDisplay({
                 </Td>
               </Tr>
             ) : (
-              data.map((p) => (
+              tableData.map((p) => (
                 <ExpandableRow
                   key={p.id}
                   p={p}
@@ -581,7 +563,6 @@ function ProgramTable() {
   const { role, loading: roleLoading } = useRoleContext();
 
   const { backend } = useBackendContext();
-  const [programs, setPrograms] = useState([]);
   const [originalPrograms, setOriginalPrograms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -633,7 +614,6 @@ function ProgramTable() {
         );
         const mappedPrograms = programDetails.map(mapRow);
         setOriginalPrograms(mappedPrograms);
-        setPrograms(mappedPrograms);
       } catch (err) {
         console.error("Error fetching data:", err);
       } finally {
@@ -650,8 +630,6 @@ function ProgramTable() {
 
   return (
     <ProgramDisplay
-      data={programs}
-      setData={setPrograms}
       originalData={originalPrograms}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}

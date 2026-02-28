@@ -7,19 +7,26 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
-  Spacer,
-  Text,
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Spacer,
+  Text,
 } from "@chakra-ui/react";
-import {
-  HiOutlineAdjustmentsHorizontal,
-} from "react-icons/hi2";
+
 import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from "react-icons/fi";
+import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
+
 import { FilterComponent } from "../common/FilterComponent";
 
-export const AccountToolbar = ({ searchQuery, setSearchQuery, onNew, columns, setActiveFilters, resultCount }) => {
+export const AccountToolbar = ({
+  searchQuery,
+  setSearchQuery,
+  onNew,
+  columns,
+  setActiveFilters,
+  resultCount,
+}) => {
   // TODO: Implement functionality for search, filter, view toggle, download, and new account
   function handleSearchChange(event) {
     setSearchQuery(event.target.value);
@@ -59,22 +66,26 @@ export const AccountToolbar = ({ searchQuery, setSearchQuery, onNew, columns, se
       </InputGroup>
 
       <HStack spacing={2}>
-      <Popover>
-        <PopoverTrigger>
-          <IconButton
-            aria-label="Filter"
-            icon={<HiOutlineAdjustmentsHorizontal />}
-            variant="ghost"
-            color="gray.500"
-          />
-        </PopoverTrigger>
-        <PopoverContent w="800px" maxW="90vw" shadow="xl">
-          <FilterComponent
-            columns={columns}
-            onFilterChange={(filters) => setActiveFilters(filters)}
-          />
-        </PopoverContent>
-      </Popover>
+        <Popover>
+          <PopoverTrigger>
+            <IconButton
+              aria-label="Filter"
+              icon={<HiOutlineAdjustmentsHorizontal />}
+              variant="ghost"
+              color="gray.500"
+            />
+          </PopoverTrigger>
+          <PopoverContent
+            w="800px"
+            maxW="90vw"
+            shadow="xl"
+          >
+            <FilterComponent
+              columns={columns}
+              onFilterChange={(filters) => setActiveFilters(filters)}
+            />
+          </PopoverContent>
+        </Popover>
         <HStack spacing={0}>
           <IconButton
             aria-label="List View"
@@ -95,7 +106,10 @@ export const AccountToolbar = ({ searchQuery, setSearchQuery, onNew, columns, se
           variant="ghost"
           color="gray.500"
         />
-        <Text fontSize="sm" color="gray.500">
+        <Text
+          fontSize="sm"
+          color="gray.500"
+        >
           Displaying {resultCount} results
         </Text>
       </HStack>
@@ -114,7 +128,7 @@ export const AccountToolbar = ({ searchQuery, setSearchQuery, onNew, columns, se
             +
           </Text>
         }
-        onClick = {onNew}
+        onClick={onNew}
       >
         New
       </Button>

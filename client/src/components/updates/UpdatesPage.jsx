@@ -50,10 +50,20 @@ export const UpdatesPage = () => {
             fetchData(`media-updates/${userId}`),
             fetchData(`program-updates/${userId}`),
           ]);
-        setOriginalMediaUpdatesData(mediaUpdates);
-        setMediaUpdatesData(mediaUpdates);
-        setProgramUpdatesData(programUpdates);
-        setOriginalProgramUpdatesData(programUpdates);
+        const mappedMedia = mediaUpdates.map(item => ({
+          ...item,
+          fullName: `${item.firstName} ${item.lastName}`,
+        }));
+
+        const mappedProgram = programUpdates.map(item => ({
+          ...item,
+          fullName: `${item.firstName} ${item.lastName}`,
+        }));
+
+        setOriginalMediaUpdatesData(mappedMedia);
+        setMediaUpdatesData(mappedMedia);
+        setProgramUpdatesData(mappedProgram);
+        setOriginalProgramUpdatesData(mappedProgram);
       } catch (error) {
         console.error("Fetch error:", error);
       } finally {
