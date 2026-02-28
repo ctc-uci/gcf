@@ -406,10 +406,10 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         setFormState({ ...formState, language: langChange })
     }
 
-    const handleMediaChange = (mediaChange) => {
+    const handleMediaChange = (newMediaFiles) => {
         setFormState((prev) => ({
             ...prev,
-            media: [...(prev.media ?? []), mediaChange]
+            media: [...(prev.media ?? []), ...newMediaFiles] 
         }))
     }
 
@@ -474,12 +474,28 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                     });
                 }
             }
+            
+            // media changes
+            const currentMediaIds = formState.media
+                .map((m) => m.id)
+                .filter((id) => id !== undefined);
+
+            const mediaToDelete = program.media.filter(
+                (oldMedia) => !currentMediaIds.includes(oldMedia.id)
+            );
+
+            for (const media of mediaToDelete) {
+                if (media.id) {
+                    await backend.delete(`/mediaChange/${media.id}`);
+                }
+            }
+
+            const mediaChanges = formState.media.filter(
+                (mediaItem) => !mediaItem.id
+            );
 
             const studentCountChange = formState.students - oldStudentCount;
             const instrumentChanges = [];
-            const mediaChanges = formState.media.filter(
-                (mediaItem) => !initialUploadedMedia.includes(mediaItem.file_name)
-            );
 
             const allInstrumentIds = new Set([
                 ...Object.keys(initialInstrumentQuantities || {}),

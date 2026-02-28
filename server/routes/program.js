@@ -354,7 +354,7 @@ programRouter.get("/:id/media", async (req, res) => {
     
     const result = await db.query(
       `
-      SELECT m.s3_key, m.file_name, m.file_type, m.is_thumbnail, m.instrument_id
+      SELECT m.id, m.s3_key, m.file_name, m.file_type, m.is_thumbnail, m.instrument_id
       FROM media_change m
       JOIN program_update pu ON m.update_id = pu.id
       WHERE program_id = $1;
@@ -362,6 +362,7 @@ programRouter.get("/:id/media", async (req, res) => {
     )
 
     const media = result.map(row => ({
+      id: row.id,
       s3_key: row.s3_key,
       file_name: row.file_name,
       file_type: row.file_type,

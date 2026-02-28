@@ -313,7 +313,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                                             if (!selectedProgramId) return;
 
                                             const selectedProgram = currentPrograms.find(
-                                                p => p.id == selectedProgramId
+                                                p => p.id === selectedProgramId
                                             );
 
                                             if (selectedProgram) {
@@ -341,7 +341,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                                             if (!selectedRegionId) return;
 
                                             const selectedRegion = currentRegions.find(
-                                                r => r.id == selectedRegionId
+                                                r => r.id === selectedRegionId
                                             );
 
                                             if (selectedRegion) {
