@@ -1,14 +1,29 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from "react";
 
-import { Box, Center, Flex, Heading, Spinner } from '@chakra-ui/react';
+import { 
+  Box, 
+  Center, 
+  Flex, 
+  Heading, 
+  Spinner,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  IconButton,
+ } from "@chakra-ui/react";
+ import {
+  HiOutlineAdjustmentsHorizontal,
+} from "react-icons/hi2";
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
-import { AccountForm } from './AccountForm';
-import { AccountsTable, downloadAccountsAsCsv } from './AccountsTable';
-import { AccountToolbar } from './AccountToolbar';
+import { AccountForm } from "./AccountForm";
+import { AccountsTable, downloadAccountsAsCsv } from "./AccountsTable";
+import { AccountToolbar } from "./AccountToolbar";
+
+import { applyFilters } from "../../contexts/hooks/TableFilter"
 
 const getAccountsRoute = (role, userId) => {
   if (!userId) return null;
@@ -26,10 +41,28 @@ export const Account = () => {
   const [users, setUsers] = useState([]);
   const [originalUsers, setOriginalUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isCardView, setIsCardView] = useState(false);
+  const columns = [
+    {
+      key: "fullName",
+      type: "text",
+    },
+    {
+      key: "email",
+      type: "text",
+    },
+    {
+      key: "role",
+      type: "text",
+    },
+    {
+      key: "programs",
+      type: "list",
+    },
+  ];
 
   const { backend } = useBackendContext();
 
@@ -48,6 +81,7 @@ export const Account = () => {
         id: item.id,
         firstName: item.firstName,
         lastName: item.lastName,
+        fullName: `${item.firstName} ${item.lastName}`,
         role: item.role,
         programs: Array.isArray(item.programs) ? item.programs : [],
         email: item.email ?? '-',
@@ -67,6 +101,9 @@ export const Account = () => {
     fetchData();
   }, [fetchData]);
 
+  const [activeFilters, setActiveFilters] = useState([]);
+
+
   return (
     <Box p={8} bg="white" minH="100vh">
       <Flex mb={8} align="center" wrap={{ base: 'wrap', md: 'nowrap' }} gap={4}>
@@ -77,11 +114,14 @@ export const Account = () => {
         <AccountToolbar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          setIsCardView={setIsCardView}
+          columns={columns}
+          setActiveFilters={setActiveFilters}
+          resultCount={users.length}
           onNew={() => {
             setIsDrawerOpen(true);
             setSelectedUser(null);
           }}
+          setIsCardView={setIsCardView}
           onDownload={() => downloadAccountsAsCsv(users)}
         />
       </Flex>
@@ -92,10 +132,9 @@ export const Account = () => {
         </Center>
       ) : (
         <AccountsTable
-          data={users}
-          setData={setUsers}
           originalData={originalUsers}
           searchQuery={searchQuery}
+          activeFilters={activeFilters}
           isCardView={isCardView}
           onSave={() => fetchData()}
           onUpdate={(user) => {

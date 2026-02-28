@@ -7,17 +7,26 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Spacer,
   Text,
 } from '@chakra-ui/react';
 
-import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from 'react-icons/fi';
+import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from "react-icons/fi";
+import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
+
+import { FilterComponent } from "../common/FilterComponent";
 
 export const AccountToolbar = ({
   searchQuery,
   setSearchQuery,
-  setIsCardView,
   onNew,
+  columns,
+  setActiveFilters,
+  resultCount,
+  setIsCardView,
   onDownload,
 }) => {
   // TODO: Implement functionality for search, filter, view toggle, download, and new account
@@ -46,12 +55,26 @@ export const AccountToolbar = ({
       </InputGroup>
 
       <HStack spacing={2}>
-        <IconButton
-          aria-label="Filter"
-          icon={<FiFilter />}
-          variant="ghost"
-          color="gray.500"
-        />
+        <Popover>
+          <PopoverTrigger>
+            <IconButton
+              aria-label="Filter"
+              icon={<HiOutlineAdjustmentsHorizontal />}
+              variant="ghost"
+              color="gray.500"
+            />
+          </PopoverTrigger>
+          <PopoverContent
+            w="800px"
+            maxW="90vw"
+            shadow="xl"
+          >
+            <FilterComponent
+              columns={columns}
+              onFilterChange={(filters) => setActiveFilters(filters)}
+            />
+          </PopoverContent>
+        </Popover>
         <HStack spacing={0}>
           <IconButton
             aria-label="List View"
@@ -75,6 +98,12 @@ export const AccountToolbar = ({
           color="gray.500"
           onClick={onDownload}
         />
+        <Text
+          fontSize="sm"
+          color="gray.500"
+        >
+          Displaying {resultCount} results
+        </Text>
       </HStack>
 
       <Spacer />

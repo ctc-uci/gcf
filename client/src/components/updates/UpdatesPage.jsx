@@ -47,14 +47,25 @@ export const UpdatesPage = () => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [mediaUpdates, programUpdates] = await Promise.all([
-          fetchData(`media-updates/${userId}`),
-          fetchData(`program-updates/${userId}`),
-        ]);
-        setOriginalMediaUpdatesData(mediaUpdates);
-        setMediaUpdatesData(mediaUpdates);
-        setProgramUpdatesData(programUpdates);
-        setOriginalProgramUpdatesData(programUpdates);
+        const [mediaUpdates, programUpdates] =
+          await Promise.all([
+            fetchData(`media-updates/${userId}`),
+            fetchData(`program-updates/${userId}`),
+          ]);
+        const mappedMedia = mediaUpdates.map(item => ({
+          ...item,
+          fullName: `${item.firstName} ${item.lastName}`,
+        }));
+
+        const mappedProgram = programUpdates.map(item => ({
+          ...item,
+          fullName: `${item.firstName} ${item.lastName}`,
+        }));
+
+        setOriginalMediaUpdatesData(mappedMedia);
+        setMediaUpdatesData(mappedMedia);
+        setProgramUpdatesData(mappedProgram);
+        setOriginalProgramUpdatesData(mappedProgram);
       } catch (error) {
         console.error('Fetch error:', error);
       } finally {

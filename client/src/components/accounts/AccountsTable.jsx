@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 
 import {
   Badge,
@@ -42,40 +41,42 @@ export function downloadAccountsAsCsv(data) {
 }
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
+import { useMemo, useRef, useState } from "react";
+import { applyFilters } from "../../contexts/hooks/TableFilter";
 
 export const AccountsTable = ({
-  data,
-  setData,
   originalData,
   searchQuery,
+  activeFilters,
   isCardView,
   onSave,
   onUpdate,
 }) => {
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
-  const { sortOrder, handleSort } = useTableSort(originalData, setData);
+  const filteredData = useMemo(() =>
+    applyFilters(activeFilters, originalData ?? []),
+  [activeFilters, originalData]);
 
-  useEffect(() => {
-    function filterUpdates(search) {
-      if (search === '') {
-        setData(originalData);
-        return;
-      }
-      // filter by search query
-      const filtered = originalData.filter(
-        (update) =>
-          // if no search then show everything
-          update.email.toLowerCase().includes(search.toLowerCase()) ||
-          update.firstName.toLowerCase().includes(search.toLowerCase()) ||
-          update.programs.some((program) =>
-            program.toLowerCase().includes(search.toLowerCase())
-          )
-      );
-      setData(filtered);
-    }
+  const displayData = useMemo(() => {
+    if (!searchQuery) return filteredData;
+    return filteredData.filter(user =>
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.programs?.some(p => p.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }, [searchQuery, filteredData]);
 
-    filterUpdates(searchQuery);
-  }, [searchQuery, originalData, setData]);
+  const [sortedData, setSortedData] = useState(null);
+
+  const prevDisplayData = useRef(displayData);
+  if (prevDisplayData.current !== displayData) {
+    prevDisplayData.current = displayData;
+    setSortedData(null);
+  }
+
+  const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
+  const tableData = sortedData ?? displayData;
 
   return (
     <TableContainer>
@@ -142,14 +143,14 @@ export const AccountsTable = ({
             </Tr>
           </Thead>
           <Tbody>
-            {!data ||
-              (data.length === 0 && (
+            {!tableData ||
+              (tableData.length === 0 && (
                 <Center py={10}>
                   <Text color="gray.500">No accounts found.</Text>
                 </Center>
               ))}
 
-            {data.map((user) => (
+            {tableData.map((user) => (
               <Tr
                 key={user.id}
                 _hover={{
