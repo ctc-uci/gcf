@@ -347,6 +347,8 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         media: []
     });
 
+    const [activeTab, setActiveTab] = useState('overview');
+
     useEffect(() => {
         async function loadProgramRegionData() {
             if (!program) {
@@ -444,6 +446,12 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
         loadProgramRegionData();
 
     }, [program?.id])
+
+    useEffect(() => {
+        if (isOpen) {
+            setActiveTab('overview');
+        }
+    }, [isOpen]);
 
     function handleProgramStatusChange(status) {
         setFormState({ ...formState, status: status });
@@ -690,148 +698,184 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                             <DrawerHeader padding="0 0">
                                 Program
                             </DrawerHeader>
-                            <h3>Status</h3>
-                            <HStack>
-                                {/* changed developing => inactive, launched => active to match the enum values in the database schema for program */}
-                                <Button onClick={() => handleProgramStatusChange("Inactive")} colorScheme={formState.status === "Inactive" ? "teal" : undefined}>Developing</Button>
-                                <Button onClick={() => handleProgramStatusChange("Active")} colorScheme={formState.status === "Active" ? "teal" : undefined}>Launched</Button>
+                            <HStack w="full" spacing={0} mb={4}>
+                                <Button
+                                    flex={1}
+                                    variant="ghost"
+                                    borderRadius={0}
+                                    onClick={() => setActiveTab('overview')}
+                                    color={activeTab === 'overview' ? 'teal.500' : 'gray.600'}
+                                    borderBottom="2px solid"
+                                    borderColor={activeTab === 'overview' ? 'teal.500' : 'gray.200'}
+                                    _hover={{ bg: 'gray.50' }}
+                                >
+                                    Overview
+                                </Button>
+                                
+                                <Button
+                                    flex={1}
+                                    variant="ghost"
+                                    borderRadius={0}
+                                    onClick={() => setActiveTab('media')}
+                                    color={activeTab === 'media' ? 'teal.500' : 'gray.600'}
+                                    borderBottom="2px solid"
+                                    borderColor={activeTab === 'media' ? 'teal.500' : 'gray.200'}
+                                    _hover={{ bg: 'gray.50' }}
+                                >
+                                    Media
+                                </Button>
                             </HStack>
-                            <h3>Program Name</h3>
-                            <Input placeholder="Enter Program Name" value={formState.programName || ''} onChange={(e) => handleProgramNameChange(e.target.value)} />
-                            <h3>Launch Date</h3>
-                            <Input type="date" placeholder="MM/DD/YYYY" value={formState.launchDate || ''} onChange={(e) => handleProgramLaunchDateChange(e.target.value)} />
-                            <h3>Region</h3>
-                            <Select
-                                placeholder='Select region'
-                                value={formState.regionId || ''}
-                                onChange={(e) => handleRegionChange(e.target.value)}
-                            >
-                                {regions.map((region) => (
-                                    <option key={region.id} value={region.id}>{region.name}</option>
-                                ))}
-                            </Select>
-                            {formState.regionId && (
+
+                            {activeTab === 'overview' && (
                                 <>
-                                    <h3>Country</h3>
+                                    <h3>Status</h3>
+                                    <HStack>
+                                        <Button onClick={() => handleProgramStatusChange("Inactive")} colorScheme={formState.status === "Inactive" ? "teal" : undefined}>Developing</Button>
+                                        <Button onClick={() => handleProgramStatusChange("Active")} colorScheme={formState.status === "Active" ? "teal" : undefined}>Launched</Button>
+                                    </HStack>
+                                    <h3>Program Name</h3>
+                                    <Input placeholder="Enter Program Name" value={formState.programName || ''} onChange={(e) => handleProgramNameChange(e.target.value)} />
+                                    <h3>Launch Date</h3>
+                                    <Input type="date" placeholder="MM/DD/YYYY" value={formState.launchDate || ''} onChange={(e) => handleProgramLaunchDateChange(e.target.value)} />
+                                    <h3>Region</h3>
                                     <Select
-                                        placeholder='Select Country'
-                                        value={formState.country || ''}
-                                        onChange={(e) => handleCountryChange(e.target.value)}
+                                        placeholder='Select region'
+                                        value={formState.regionId || ''}
+                                        onChange={(e) => handleRegionChange(e.target.value)}
                                     >
-                                        {countries.map((country) => (
-                                            <option key={country.id} value={country.id}>
-                                                {country.name}
-                                            </option>
+                                        {regions.map((region) => (
+                                            <option key={region.id} value={region.id}>{region.name}</option>
                                         ))}
                                     </Select>
+                                    {formState.regionId && (
+                                        <>
+                                            <h3>Country</h3>
+                                            <Select
+                                                placeholder='Select Country'
+                                                value={formState.country || ''}
+                                                onChange={(e) => handleCountryChange(e.target.value)}
+                                            >
+                                                {countries.map((country) => (
+                                                    <option key={country.id} value={country.id}>
+                                                        {country.name}
+                                                    </option>
+                                                ))}
+                                            </Select>
+                                        </>
+                                    )}
+                                    <h3>Students</h3>
+                                    <NumberInput min={0} value={formState.students} onChange={(e) => handleStudentNumberChange(Number(e))}>
+                                        <NumberInputField placeholder="Enter # of Students" />
+                                        <NumberInputStepper>
+                                            <NumberIncrementStepper />
+                                            <NumberDecrementStepper />
+                                        </NumberInputStepper>
+                                    </NumberInput>
+
+                                    <h3> Instrument(s) & Quantity </h3>
+                                    <HStack wrap="wrap">
+
+                                        <InstrumentForm
+                                            setFormData={setFormState}
+                                        />
+
+                                        {Object.entries(formState.instruments || {}).map(
+                                            ([instrumentId, instrumentData]) => (
+                                                <Tag key={instrumentId}>
+                                                    <TagLabel>
+                                                        {instrumentData.name}: {instrumentData.quantity}
+                                                    </TagLabel>
+                                                    <TagCloseButton
+                                                        onClick={() => {
+                                                            setFormState((prevData) => {
+                                                                const {
+                                                                    [instrumentId]: _,
+                                                                    ...remainingInstruments
+                                                                } = prevData.instruments;
+                                                                return {
+                                                                    ...prevData,
+                                                                    instruments: remainingInstruments,
+                                                                };
+                                                            });
+                                                        }}
+                                                    />
+                                                </Tag>
+                                            )
+                                        )}
+                                    </HStack>
+                                    <h3>Language</h3>
+                                    <Select
+                                        placeholder="Language"
+                                        value={formState.language || ''}
+                                        onChange={(e) => handleLanguageChange(e.target.value)}
+                                    >
+                                        {/* TODO: Language DB Table */}
+                                        <option value="english">English</option>
+                                        <option value="spanish">Spanish</option>
+                                        <option value="french">French</option>
+                                        <option value="arabic">Arabic</option>
+                                        <option value="mandarin">Mandarin</option>
+                                    </Select>
+                                    <h3>Program Directors</h3>
+                                    <HStack wrap="wrap">
+                                        <ProgramDirectorForm formState={formState} setFormData={setFormState} />
+                                        {formState.programDirectors.map((director) => (
+                                            <Tag key={director.userId}>
+                                                <TagLabel>{`${director.firstName} ${director.lastName}`}</TagLabel>
+                                                <TagCloseButton onClick={() => {
+                                                    setFormState((prevData) => ({
+                                                        ...prevData,
+                                                        programDirectors: prevData.programDirectors.filter(d => d !== director)
+                                                    }));
+                                                }} />
+                                            </Tag>
+                                        ))}
+                                    </HStack>
+
+                                    <h3>Curriculum Links</h3>
+                                    <CurriculumLinkForm formState={formState} setFormData={setFormState} />
+                                    <HStack wrap="wrap">
+                                        {(formState.curriculumLinks ?? []).map((playlist) => (
+                                            <Tag key={playlist.link}>
+                                                <TagLabel
+                                                    cursor="pointer"
+                                                    onClick={() => {
+                                                        window.open(playlist.link, '_blank', 'noopener,noreferrer');
+                                                    }}
+                                                >
+                                                    {playlist.name}
+                                                </TagLabel>
+                                                <TagCloseButton
+                                                    onClick={() => {
+                                                        setFormState((prev) => ({
+                                                            ...prev,
+                                                            curriculumLinks: prev.curriculumLinks.filter(
+                                                                (p) => p.link !== playlist.link
+                                                            )
+                                                        }));
+                                                    }}
+                                                />
+                                            </Tag>
+                                        ))}
+                                    </HStack>
                                 </>
                             )}
-                            <h3>Students</h3>
-                            <NumberInput min={0} value={formState.students} onChange={(e) => handleStudentNumberChange(Number(e))}>
-                                <NumberInputField placeholder="Enter # of Students" />
-                                <NumberInputStepper>
-                                    <NumberIncrementStepper />
-                                    <NumberDecrementStepper />
-                                </NumberInputStepper>
-                            </NumberInput>
 
-                            <h3> Instrument(s) & Quantity </h3>
-                            <HStack wrap="wrap">
-
-                                <InstrumentForm
-                                    setFormData={setFormState}
-                                />
-
-                                {Object.entries(formState.instruments || {}).map(
-                                    ([instrumentId, instrumentData]) => (
-                                        <Tag key={instrumentId}>
-                                            <TagLabel>
-                                                {instrumentData.name}: {instrumentData.quantity}
-                                            </TagLabel>
-                                            <TagCloseButton
-                                                onClick={() => {
-                                                    setFormState((prevData) => {
-                                                        const {
-                                                            [instrumentId]: _,
-                                                            ...remainingInstruments
-                                                        } = prevData.instruments;
-                                                        return {
-                                                            ...prevData,
-                                                            instruments: remainingInstruments,
-                                                        };
-                                                    });
-                                                }}
-                                            />
-                                        </Tag>
-                                    )
-                                )}
-                            </HStack>
-                            <h3>Language</h3>
-                            <Select
-                                placeholder="Language"
-                                value={formState.language || ''}
-                                onChange={(e) => handleLanguageChange(e.target.value)}
-                            >
-                                {/* TODO: Language DB Table */}
-                                <option value="english">English</option>
-                                <option value="spanish">Spanish</option>
-                                <option value="french">French</option>
-                                <option value="arabic">Arabic</option>
-                                <option value="mandarin">Mandarin</option>
-                            </Select>
-                            <h3>Program Directors</h3>
-                            <HStack wrap="wrap">
-                                <ProgramDirectorForm formState={formState} setFormData={setFormState} />
-                                {formState.programDirectors.map((director) => (
-                                    <Tag key={director.userId}>
-                                        <TagLabel>{`${director.firstName} ${director.lastName}`}</TagLabel>
-                                        <TagCloseButton onClick={() => {
-                                            setFormState((prevData) => ({
-                                                ...prevData,
-                                                programDirectors: prevData.programDirectors.filter(d => d !== director)
+                            {activeTab === 'media' && (
+                                <>
+                                    <h4>Media</h4>
+                                    <MediaUploadForm
+                                        onUploadComplete={handleMediaChange}
+                                        uploadedMedia={formState.media}
+                                        onRemove={(indexToRemove) => {
+                                            setFormState((prev) => ({ 
+                                                ...prev, 
+                                                media: prev.media.filter((_, idx) => idx !== indexToRemove) 
                                             }));
-                                        }} />
-                                    </Tag>
-                                ))}
-                            </HStack>
-
-                            <h3>Curriculum Links</h3>
-                            <CurriculumLinkForm formState={formState} setFormData={setFormState} />
-                            <HStack wrap="wrap">
-                                {(formState.curriculumLinks ?? []).map((playlist) => (
-                                    <Tag key={playlist.link}>
-                                        <TagLabel
-                                            cursor="pointer"
-                                            onClick={() => {
-                                                window.open(playlist.link, '_blank', 'noopener,noreferrer');
-                                            }}
-                                        >
-                                            {playlist.name}
-                                        </TagLabel>
-                                        <TagCloseButton
-                                            onClick={() => {
-                                                setFormState((prev) => ({
-                                                    ...prev,
-                                                    curriculumLinks: prev.curriculumLinks.filter(
-                                                        (p) => p.link !== playlist.link
-                                                    )
-                                                }));
-                                            }}
-                                        />
-                                    </Tag>
-                                ))}
-                            </HStack>
-                            <h4>Media</h4>
-                            <MediaUploadForm
-                                onUploadComplete={handleMediaChange}
-                                uploadedMedia={formState.media}
-                                onRemove={(indexToRemove) => {
-                                    setFormState((prev) => ({ 
-                                        ...prev, 
-                                        media: prev.media.filter((_, idx) => idx !== indexToRemove) 
-                                    }));
-                                }}
-                            />
+                                        }}
+                                    />
+                                </>
+                            )}
                         </VStack>
                     </DrawerBody>
                 </DrawerContent>
