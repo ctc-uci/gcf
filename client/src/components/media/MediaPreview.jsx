@@ -8,7 +8,7 @@ import {
   Box
 } from "@chakra-ui/react";
 
-import gcf_globe from "../../../public/gcf_globe.png";
+import gcf_globe from "/gcf_globe.png";
 
 import { useMemo } from "react";
 
