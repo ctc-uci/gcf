@@ -20,9 +20,25 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
     const [isUploading, setIsUploading] = useState(false);
 
     const [titles, setTitles] = useState([]);
-    
+    const [instruments, setInstruments] = useState([]);
     const [folder, setFolder] = useState("");
     const [description, setDescription] = useState("");
+
+    useEffect(() => {
+        async function fetchInstruments() {
+            try {
+                const response = await backend.get("/instruments");
+                const data = response.data || [];
+                const unique = Array.from(
+                    new Map(data.map((i) => [i.name, i])).values()
+                );
+                setInstruments(unique);
+            } catch (err) {
+                console.error("Failed to fetch instruments:", err);
+            }
+        }
+        fetchInstruments();
+    }, [backend]);
 
     // keep titles array in sync with files prop
     useEffect(() => {
@@ -143,10 +159,11 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
                             onChange={(e) => setFolder(e.target.value)}
                             placeholder="Instrument"
                         >
-                            {/* TODO: get actual instruments from table */}
-                            <option value="1">Guitar</option>
-                            <option value="2">Ukulele</option>
-                            <option value="3">Flute</option>
+                            {instruments.map((inst) => (
+                                <option key={inst.id} value={inst.id}>
+                                    {inst.name}
+                                </option>
+                            ))}
                         </Select>
                     </FormControl>
                     <FormControl>
