@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState } from "react";
 
 import { DownloadIcon, HamburgerIcon, SearchIcon } from "@chakra-ui/icons";
 import {
@@ -95,11 +95,9 @@ export const MediaUpdatesTable = ({
   const [sortedData, setSortedData] = useState(null);
 
 
-  const prevDisplayData = useRef(displayData);
-  if (prevDisplayData.current !== displayData) {
-    prevDisplayData.current = displayData;
+  useEffect(() => {
     setSortedData(null);
-  }
+  }, [displayData]);
 
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;

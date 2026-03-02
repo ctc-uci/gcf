@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 import {
   AddIcon,
@@ -331,11 +331,9 @@ function ProgramDisplay({
 
   const [sortedData, setSortedData] = useState(null);
 
-  const prevDisplayData = useRef(displayData);
-  if (prevDisplayData.current !== displayData) {
-    prevDisplayData.current = displayData;
+  useEffect(() => {
     setSortedData(null);
-  }
+  }, [displayData]);
 
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;

@@ -24,6 +24,7 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+
 import CardView from './CardView';
 
 export function downloadAccountsAsCsv(data) {
@@ -41,7 +42,7 @@ export function downloadAccountsAsCsv(data) {
 }
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { applyFilters } from "../../contexts/hooks/TableFilter";
 
 export const AccountsTable = ({
@@ -59,21 +60,26 @@ export const AccountsTable = ({
 
   const displayData = useMemo(() => {
     if (!searchQuery) return filteredData;
-    return filteredData.filter(user =>
-      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.programs?.some(p => p.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
+    const query = searchQuery.toLowerCase();
+
+    return filteredData.filter((user) => {
+      const fullName = `${user.firstName || ''} ${user.lastName || ''}`
+        .trim()
+        .toLowerCase();
+
+      return (
+        fullName.includes(query) ||
+        user.email?.toLowerCase().includes(query) ||
+        user.programs?.some((p) => p.toLowerCase().includes(query))
+      );
+    });
   }, [searchQuery, filteredData]);
 
   const [sortedData, setSortedData] = useState(null);
 
-  const prevDisplayData = useRef(displayData);
-  if (prevDisplayData.current !== displayData) {
-    prevDisplayData.current = displayData;
+  useEffect(() => {
     setSortedData(null);
-  }
+  }, [displayData]);
 
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;
