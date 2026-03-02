@@ -69,7 +69,7 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
     {
       key: 'status',
       type: 'select',
-      options: ['approved', 'archived'],
+      options: ['Approved', 'Archived', 'Unread'],
     },
   ];
   const [activeFilters, setActiveFilters] = useState([]);

@@ -27,7 +27,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
       await backend.put(`/mediaChange/${updateId}/approve`);
       onUpdate(prev =>
         prev.map(row =>
-          row.id === updateId ? { ...row, status: "approved" } : row
+          row.id === updateId ? { ...row, status: "Approved" } : row
         )
       );
       setMessage("Media update approved successfully.");
@@ -43,7 +43,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
       await backend.put(`/mediaChange/${updateId}/archive`);
       onUpdate(prev =>
         prev.map(row =>
-          row.id === updateId ? { ...row, status: "archived" } : row
+          row.id === updateId ? { ...row, status: "Archived" } : row
         )
       );
       setMessage("Media update archived successfully.");
