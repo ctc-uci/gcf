@@ -343,8 +343,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
             }
 
             onClose();
-            window.location.reload();
-        } catch (err) {
+       } catch (err) {
             console.error("Error saving program:", err);
         }
     }
