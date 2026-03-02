@@ -43,7 +43,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
       await backend.put(`/mediaChange/${updateId}/archive`);
       onUpdate(prev =>
         prev.map(row =>
-          row.id === updateId ? { ...row, status: "denied" } : row
+          row.id === updateId ? { ...row, status: "archived" } : row
         )
       );
       setMessage("Media update archived successfully.");
