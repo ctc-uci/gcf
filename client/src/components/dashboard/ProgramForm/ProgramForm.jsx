@@ -28,7 +28,7 @@ import { ProgramDirectorForm } from './ProgramDirectorForm'
 import { CurriculumLinkForm } from './CurriculumLinkForm'
 import { MediaUploadForm } from './MediaUploadForm'
 
-export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: onCloseProp, program }) => {
+export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: onCloseProp, onSave, program }) => {
     const disclosure = useDisclosure();
 
     const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
@@ -342,6 +342,7 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
                 }
             }
 
+            onSave?.();
             onClose();
        } catch (err) {
             console.error("Error saving program:", err);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   AddIcon,
   DownloadIcon,
@@ -201,7 +201,8 @@ function ProgramDisplay({
   isFormOpen,
   setIsFormOpen,
   selectedProgram,
-  setSelectedProgram
+  setSelectedProgram,
+  onSave
 }) {
   const { sortOrder, handleSort } = useTableSort(originalData, setData);
 
@@ -247,6 +248,7 @@ function ProgramDisplay({
         setIsFormOpen(false);
         setSelectedProgram(null);
       }}
+      onSave={onSave}
       program={selectedProgram}
     />
     <TableContainer>
@@ -442,7 +444,7 @@ function ProgramTable() {
     setIsFormOpen(true);
   }
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (roleLoading) return;
 
     const route = getRouteByRole(role, userId);
@@ -453,42 +455,42 @@ function ProgramTable() {
       return;
     }
 
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const res = await backend.get(route);
-        const rows = Array.isArray(res.data) ? res.data : [];
-        const programDetails = await Promise.all(
-          rows.map(async (row) => { //TODO: make this more efficient with lazy loading
-            const programId = row.id ?? row.programId;
-            const [playlists, programDirectors, regionalDirectors, media] = await Promise.all([
-              backend.get(`/program/${programId}/playlists`),
-              backend.get(`/program/${programId}/program-directors`).catch(() => ({ data: [] })),
-              backend.get(`/program/${programId}/regional-directors`).catch(() => ({ data: [] })),
-              backend.get(`/program/${programId}/media`).catch(() => ({ data: [] })),
-            ]);
+    setIsLoading(true);
+    try {
+      const res = await backend.get(route);
+      const rows = Array.isArray(res.data) ? res.data : [];
+      const programDetails = await Promise.all(
+        rows.map(async (row) => { //TODO: make this more efficient with lazy loading
+          const programId = row.id ?? row.programId;
+          const [playlists, programDirectors, regionalDirectors, media] = await Promise.all([
+            backend.get(`/program/${programId}/playlists`),
+            backend.get(`/program/${programId}/program-directors`).catch(() => ({ data: [] })),
+            backend.get(`/program/${programId}/regional-directors`).catch(() => ({ data: [] })),
+            backend.get(`/program/${programId}/media`).catch(() => ({ data: [] })),
+          ]);
 
-            return {
-              ...row,
-              playlists: playlists.data,
-              programDirectors: programDirectors?.data || [],
-              regionalDirectors: regionalDirectors?.data || [],
-              media: media?.data || []
-            };
-          })
-        );
-        const mappedPrograms = programDetails.map(mapRow);
-        setOriginalPrograms(mappedPrograms);
-        setPrograms(mappedPrograms);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+          return {
+            ...row,
+            playlists: playlists.data,
+            programDirectors: programDirectors?.data || [],
+            regionalDirectors: regionalDirectors?.data || [],
+            media: media?.data || []
+          };
+        })
+      );
+      const mappedPrograms = programDetails.map(mapRow);
+      setOriginalPrograms(mappedPrograms);
+      setPrograms(mappedPrograms);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+    } finally {
+      setIsLoading(false);
+    }
   }, [role, roleLoading, userId, backend]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (!getRouteByRole(role, userId) && !roleLoading) {
     return null;
@@ -509,6 +511,7 @@ function ProgramTable() {
       setIsFormOpen={setIsFormOpen}
       selectedProgram={selectedProgram}
       setSelectedProgram={setSelectedProgram}
+      onSave={fetchData}
     />
   );
 }
