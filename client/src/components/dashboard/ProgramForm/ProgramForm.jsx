@@ -259,18 +259,18 @@ export const ProgramForm = ({ isOpen: isOpenProp, onOpen: onOpenProp, onClose: o
             const currentMediaIds = formState.media
                 .map((m) => m.id)
                 .filter((id) => id !== undefined);
+            if (program) {
+                const programMedia = program?.media ?? [];
+                const mediaToDelete = programMedia.filter(
+                    (oldMedia) => !currentMediaIds.includes(oldMedia.id)
+                );
 
-            const programMedia = program?.media ?? [];
-            const mediaToDelete = programMedia.filter(
-                (oldMedia) => !currentMediaIds.includes(oldMedia.id)
-            );
-
-            for (const media of mediaToDelete) {
-                if (media.id) {
-                    await backend.delete(`/mediaChange/${media.id}`);
+                for (const media of mediaToDelete) {
+                    if (media.id) {
+                        await backend.delete(`/mediaChange/${media.id}`);
+                    }
                 }
             }
-
             const mediaChanges = formState.media.filter(
                 (mediaItem) => !mediaItem.id
             );
