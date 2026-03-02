@@ -7,9 +7,9 @@ const sortCycle = Object.freeze({
   UNSORTED: 'ASCENDING',
 });
 
-export function useTableSort(originalData, setData) {
-  const originalDataRef = useRef(originalData);
-  originalDataRef.current = originalData;
+export function useTableSort(filteredData, setData) {
+  const filteredDataRef = useRef(filteredData);
+  filteredDataRef.current = filteredData;
 
   const [sortOrder, setSortOrder] = useState({
     currentSortColumn: null,
@@ -34,12 +34,12 @@ export function useTableSort(originalData, setData) {
     setSortOrder(sortOrderCopy);
 
     if (newSortOrder === sortCycle.UNSORTED) {
-      setData([...originalDataRef.current]);
+      setData([...filteredDataRef.current]);
       return;
     }
 
     setData((prevData) =>
-      [...prevData].sort((a, b) => {
+      [...(prevData ?? filteredDataRef.current)].sort((a, b) => {
         let first = a[column];
         let second = b[column];
 

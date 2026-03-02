@@ -66,21 +66,32 @@ export const UpdatesPage = () => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        
         if (role === 'Program Director') {
           const programUpdates = await fetchData(`program-updates/${userId}`);
-          setProgramUpdatesData(programUpdates);
-          setOriginalProgramUpdatesData(programUpdates);
+          const mappedProgram = programUpdates.map(item => ({
+            ...item,
+            fullName: `${item.firstName} ${item.lastName}`,
+          }));
+          setProgramUpdatesData(mappedProgram);
+          setOriginalProgramUpdatesData(mappedProgram);
         }
         else {
           const [mediaUpdates, programUpdates] = await Promise.all([
             fetchMediaUpdatesForUser(),
             fetchData(`program-updates/${userId}`),
           ]);
-          setOriginalMediaUpdatesData(mediaUpdates);
-          setMediaUpdatesData(mediaUpdates);
-          setProgramUpdatesData(programUpdates);
-          setOriginalProgramUpdatesData(programUpdates);
+          const mappedMedia = mediaUpdates.map(item => ({
+            ...item,
+            fullName: `${item.firstName} ${item.lastName}`,
+          }));
+          const mappedProgram = programUpdates.map(item => ({
+            ...item,
+            fullName: `${item.firstName} ${item.lastName}`,
+          }));
+          setOriginalMediaUpdatesData(mappedMedia);  
+          setMediaUpdatesData(mappedMedia);
+          setProgramUpdatesData(mappedProgram);
+          setOriginalProgramUpdatesData(mappedProgram);
         }
       } catch (error) {
         console.error('Fetch error:', error);
