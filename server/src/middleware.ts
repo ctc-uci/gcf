@@ -1,7 +1,7 @@
-import { admin } from "@/config/firebase";
-import { db } from "@/db/db-pgp";
-import type { NextFunction, Request, Response } from "express";
-import type { DecodedIdToken } from "firebase-admin/auth";
+import { admin } from '@/config/firebase';
+import { db } from '@/db/db-pgp';
+import type { NextFunction, Request, Response } from 'express';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 
 /**
  * Verifies the access token attached to the request's cookies.
@@ -15,21 +15,21 @@ export const verifyToken = async (
     const { cookies } = req;
 
     if (!cookies.accessToken) {
-      return res.status(400).send("@verifyToken invalid access token");
+      return res.status(400).send('@verifyToken invalid access token');
     }
 
     const decodedToken = await admin.auth().verifyIdToken(cookies.accessToken);
 
     // this should not happen!
     if (!decodedToken) {
-      return res.status(400).send("@verifyToken no decodedToken returned");
+      return res.status(400).send('@verifyToken no decodedToken returned');
     }
 
     res.locals.decodedToken = decodedToken;
 
     next();
   } catch (_err) {
-    return res.status(400).send("@verifyToken error validating token");
+    return res.status(400).send('@verifyToken error validating token');
   }
 };
 
@@ -46,7 +46,7 @@ export const verifyRole = (requiredRole: string | string[]) => {
       const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
 
       if (!cookies.accessToken) {
-        return res.status(400).send("@verifyToken invalid access token");
+        return res.status(400).send('@verifyToken invalid access token');
       }
 
       const decodedToken: DecodedIdToken =
@@ -54,12 +54,12 @@ export const verifyRole = (requiredRole: string | string[]) => {
         (await admin.auth().verifyIdToken(cookies.accessToken));
 
       const users = await db.query(
-        "SELECT * FROM users WHERE firebase_uid = $1 LIMIT 1",
+        'SELECT * FROM users WHERE firebase_uid = $1 LIMIT 1',
         [decodedToken.uid]
       );
 
       // admins should be allowed to access all routes
-      if (roles.includes(users.at(0).role) || users.at(0).role === "admin") {
+      if (roles.includes(users.at(0).role) || users.at(0).role === 'admin') {
         next();
       } else {
         res
@@ -67,7 +67,7 @@ export const verifyRole = (requiredRole: string | string[]) => {
           .send(`@verifyRole invalid role (required: ${requiredRole})`);
       }
     } catch (_err) {
-      res.status(401).send("@verifyRole could not verify role");
+      res.status(401).send('@verifyRole could not verify role');
     }
   };
 };

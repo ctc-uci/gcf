@@ -19,10 +19,12 @@ const DEFAULT_PROFILE_IMAGE = "/default-profile.png";
 
 const fetchProgramData = async (backend, userId) => {
   try {
-    const response = await backend.get(`/program-directors/me/${userId}/program`);
+    const response = await backend.get(
+      `/program-directors/me/${userId}/program`
+    );
     return response.data;
   } catch (err) {
-    console.error("Error fetching program data:", err);
+    console.error('Error fetching program data:', err);
     return null;
   }
 };
@@ -31,12 +33,14 @@ const fetchRegionData = async (backend, userId) => {
   try {
     const rdResponse = await backend.get(`/regional-directors/me/${userId}`);
     if (rdResponse.data?.regionId) {
-      const regionResponse = await backend.get(`/region/${rdResponse.data.regionId}`);
+      const regionResponse = await backend.get(
+        `/region/${rdResponse.data.regionId}`
+      );
       return regionResponse.data;
     }
     return null;
   } catch (err) {
-    console.error("Error fetching region data:", err);
+    console.error('Error fetching region data:', err);
     return null;
   }
 };
@@ -158,12 +162,16 @@ export const Profile = () => {
             alt="Profile"
             onClick={onOpen}
           />
-          <Text fontSize="2xl" fontWeight="bold">{fullName}</Text>
+          <Text fontSize="2xl" fontWeight="bold">
+            {fullName}
+          </Text>
         </VStack>
         <VStack spacing="10px" align="flex-start" w="100%" maxW="624px">
           {profileData.map(({ label, value }) => (
             <HStack key={label} spacing={40}>
-              <Text w="80px" fontSize="lg" fontWeight="medium">{label}</Text>
+              <Text w="80px" fontSize="lg" fontWeight="medium">
+                {label}
+              </Text>
               <Text
                 bg="#D9D9D9"
                 w="504px"

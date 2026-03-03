@@ -74,9 +74,13 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
                 
                 const keyFileName = `${titles[i].trim()}${extension}`;
 
-                const { data: s3Data } = await backend.post("/images/upload-url", {
-                    key: keyFileName
-                });
+                const { data: s3Data } = await backend.post(
+                  '/images/upload-url',
+                  {
+                    fileName: keyFileName,
+                    contentType: file.type,
+                  }
+                );
                 
                 if (!s3Data.uploadUrl || !s3Data.key) {
                     throw new Error("Failed to get upload URL");

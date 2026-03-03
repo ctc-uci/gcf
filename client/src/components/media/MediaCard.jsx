@@ -1,11 +1,11 @@
-import { Box, Image, Center } from "@chakra-ui/react";
-import { useState } from "react";
+import { Box, Image, Center } from '@chakra-ui/react';
+import { useState } from 'react';
 
-import gcf_globe from "/gcf_globe.png";
+import gcf_globe from '/gcf_globe.png';
 
 export const MediaCard = ({ file_name, file_type, imageUrl }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const isVideo = file_type?.startsWith("video");
+  const isVideo = file_type?.startsWith('video');
 
   return (
     <Box
@@ -19,11 +19,7 @@ export const MediaCard = ({ file_name, file_type, imageUrl }) => {
     >
       {isLoading && (
         <Center h="100%">
-          <Image
-            src={gcf_globe}
-            alt="Loading..."
-            w="50px"
-          />
+          <Image src={gcf_globe} alt="Loading..." w="50px" />
         </Center>
       )}
       {isVideo ? (
@@ -31,10 +27,10 @@ export const MediaCard = ({ file_name, file_type, imageUrl }) => {
           src={imageUrl}
           controls
           style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            display: isLoading ? "none" : "block",
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            display: isLoading ? 'none' : 'block',
           }}
           onLoadedData={() => setIsLoading(false)}
         />
@@ -45,7 +41,7 @@ export const MediaCard = ({ file_name, file_type, imageUrl }) => {
           w="100%"
           h="100%"
           objectFit="contain"
-          display={isLoading ? "none" : "block"}
+          display={isLoading ? 'none' : 'block'}
           onLoad={() => setIsLoading(false)}
         />
       )}

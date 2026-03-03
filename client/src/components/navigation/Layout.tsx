@@ -1,10 +1,10 @@
-import { Box } from "@chakra-ui/react";
+import { Box } from '@chakra-ui/react';
 
-import { Outlet } from "react-router-dom";
+import { Outlet } from 'react-router-dom';
 
-import { NAVBAR_HEIGHT, SIDEBAR_WIDTH } from "./layoutConstants";
-import { Navbar } from "./Navbar";
-import { Sidebar } from "./Sidebar";
+import { NAVBAR_HEIGHT, SIDEBAR_WIDTH } from './layoutConstants';
+import { Navbar } from './Navbar';
+import { Sidebar } from './Sidebar';
 
 export const Layout = () => {
   return (

@@ -1,4 +1,4 @@
-CREATE TYPE ROLES AS ENUM ('Regional Director', 'Program Director', 'Admin');
+CREATE TYPE ROLES AS ENUM ('Regional Director', 'Program Director', 'Admin', 'Super Admin');
 
 CREATE TABLE IF NOT EXISTS user (
     id BIGSERIAL PRIMARY KEY,

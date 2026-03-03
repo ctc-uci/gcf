@@ -1,13 +1,14 @@
-import { keysToCamel } from "@/common/utils";
-import express from "express";
-import { db } from "../db/db-pgp";
+import { keysToCamel } from '@/common/utils';
+import express from 'express';
+
+import { db } from '../db/db-pgp';
 
 const rdProgramTableRouter = express.Router();
 rdProgramTableRouter.use(express.json());
 
 async function getDataByUserId(userId) {
-    const data = await db.query(
-        `SELECT
+  const data = await db.query(
+    `SELECT
             r.id AS region_id,
             r.name AS region_name,
 
@@ -45,19 +46,19 @@ async function getDataByUserId(userId) {
         ORDER BY
             r.name,
             p.name;`,
-        [userId]
-    );
-    return data;
+    [userId]
+  );
+  return data;
 }
 
-rdProgramTableRouter.get("/:userId", async (req, res) => {
+rdProgramTableRouter.get('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const data = await getDataByUserId(userId);
     res.json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

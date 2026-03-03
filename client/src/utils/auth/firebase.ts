@@ -1,8 +1,8 @@
-import axios from "axios";
-import { initializeApp } from "firebase/app";
-import { getAuth, User } from "firebase/auth";
+import axios from 'axios';
+import { initializeApp } from 'firebase/app';
+import { getAuth, User } from 'firebase/auth';
 
-import { cookieKeys, setCookie } from "./cookie";
+import { cookieKeys, setCookie } from './cookie';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_APIKEY,
@@ -51,7 +51,7 @@ export const refreshToken = async () => {
   if (currentUser) {
     const refreshToken = currentUser.refreshToken;
     const response = await axios.post(REFRESH_URL, {
-      grant_type: "refresh_token",
+      grant_type: 'refresh_token',
       refresh_token: refreshToken,
     });
 

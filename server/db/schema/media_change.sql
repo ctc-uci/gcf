@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS media_change (
     is_thumbnail BOOLEAN NOT NULL,
     description TEXT,
     instrument_id BIGINT,
+    status TEXT DEFAULT 'Unread',
     CONSTRAINT fk_program_update
         FOREIGN KEY(update_id)
             REFERENCES program_update(id)

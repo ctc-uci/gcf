@@ -1,13 +1,13 @@
-import { keysToCamel } from "@/common/utils";
-import { admin } from "@/config/firebase";
-import { db } from "@/db/db-pgp"; // TODO: replace this db with
-import { verifyRole } from "@/middleware";
-import { Router } from "express";
+import { keysToCamel } from '@/common/utils';
+import { admin } from '@/config/firebase';
+import { db } from '@/db/db-pgp'; // TODO: replace this db with
+import { verifyRole } from '@/middleware';
+import { Router } from 'express';
 
 export const usersRouter = Router();
 
 // Get all users
-usersRouter.get("/", async (req, res) => {
+usersRouter.get('/', async (req, res) => {
   try {
     const users = await db.query(`SELECT * FROM users ORDER BY id ASC`);
 
@@ -18,11 +18,11 @@ usersRouter.get("/", async (req, res) => {
 });
 
 // Get a user by ID
-usersRouter.get("/:firebaseUid", async (req, res) => {
+usersRouter.get('/:firebaseUid', async (req, res) => {
   try {
     const { firebaseUid } = req.params;
 
-    const user = await db.query("SELECT * FROM users WHERE firebase_uid = $1", [
+    const user = await db.query('SELECT * FROM users WHERE firebase_uid = $1', [
       firebaseUid,
     ]);
 
@@ -33,12 +33,12 @@ usersRouter.get("/:firebaseUid", async (req, res) => {
 });
 
 // Delete a user by ID, both in Firebase and NPO DB
-usersRouter.delete("/:firebaseUid", async (req, res) => {
+usersRouter.delete('/:firebaseUid', async (req, res) => {
   try {
     const { firebaseUid } = req.params;
 
     await admin.auth().deleteUser(firebaseUid);
-    const user = await db.query("DELETE FROM users WHERE firebase_uid = $1", [
+    const user = await db.query('DELETE FROM users WHERE firebase_uid = $1', [
       firebaseUid,
     ]);
 
@@ -49,12 +49,12 @@ usersRouter.delete("/:firebaseUid", async (req, res) => {
 });
 
 // Create user
-usersRouter.post("/create", async (req, res) => {
+usersRouter.post('/create', async (req, res) => {
   try {
     const { email, firebaseUid } = req.body;
 
     const user = await db.query(
-      "INSERT INTO users (email, firebase_uid) VALUES ($1, $2) RETURNING *",
+      'INSERT INTO users (email, firebase_uid) VALUES ($1, $2) RETURNING *',
       [email, firebaseUid]
     );
 
@@ -65,12 +65,12 @@ usersRouter.post("/create", async (req, res) => {
 });
 
 // Update a user by ID
-usersRouter.put("/update", async (req, res) => {
+usersRouter.put('/update', async (req, res) => {
   try {
     const { email, firebaseUid } = req.body;
 
     const user = await db.query(
-      "UPDATE users SET email = $1 WHERE firebase_uid = $2 RETURNING *",
+      'UPDATE users SET email = $1 WHERE firebase_uid = $2 RETURNING *',
       [email, firebaseUid]
     );
 
@@ -81,7 +81,7 @@ usersRouter.put("/update", async (req, res) => {
 });
 
 // Get all users (as admin)
-usersRouter.get("/admin/all", verifyRole("admin"), async (req, res) => {
+usersRouter.get('/admin/all', verifyRole('admin'), async (req, res) => {
   try {
     const users = await db.query(`SELECT * FROM users`);
 
@@ -92,12 +92,12 @@ usersRouter.get("/admin/all", verifyRole("admin"), async (req, res) => {
 });
 
 // Update a user's role
-usersRouter.put("/update/set-role", verifyRole("admin"), async (req, res) => {
+usersRouter.put('/update/set-role', verifyRole('admin'), async (req, res) => {
   try {
     const { role, firebaseUid } = req.body;
 
     const user = await db.query(
-      "UPDATE users SET role = $1 WHERE firebase_uid = $2 RETURNING *",
+      'UPDATE users SET role = $1 WHERE firebase_uid = $2 RETURNING *',
       [role, firebaseUid]
     );
 

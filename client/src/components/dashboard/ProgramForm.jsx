@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+
 import {
   Box,
   Button,
@@ -22,15 +24,17 @@ import {
   TagLabel,
   useDisclosure,
   VStack,
-} from '@chakra-ui/react';
-import { useEffect, useRef, useState } from 'react';
+} from "@chakra-ui/react";
 
-import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import { MediaUploadModal } from '@/components/media/MediaUploadModal';
+import { useAuthContext } from "@/contexts/hooks/useAuthContext";
+import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { MediaUploadModal } from "@/components/media/MediaUploadModal";
 
-// --- InstrumentForm (inlined) ---
-function InstrumentForm({ setFormData }) {
+import { FullscreenFlyoutButton } from "../FullscreenFlyoutButton";
+import { useFullscreenFlyout } from "../useFullScreenFlyout.js";
+
+// sub-component for adding instruments
+const InstrumentForm = ({ setFormData }) => {
   const [instruments, setInstruments] = useState([]);
   const [quantity, setQuantity] = useState(0);
   const [selectedInstrumentId, setSelectedInstrumentId] = useState('');
@@ -43,7 +47,6 @@ function InstrumentForm({ setFormData }) {
       (instrument) => String(instrument.id) === String(selectedInstrumentId)
     );
     if (!instrumentObj) return;
-
     setFormData((prevData) => ({
       ...prevData,
       instruments: {
@@ -117,9 +120,9 @@ function InstrumentForm({ setFormData }) {
       <Button onClick={handleSubmit}> + Add </Button>
     </HStack>
   );
-}
+};
 
-// --- ProgramDirectorForm (inlined) ---
+// --- ProgramDirectorForm (inlined/standardized) ---
 function ProgramDirectorForm({ formState, setFormData }) {
   const [programDirectors, setProgramDirectors] = useState([]);
   const [selectedDirector, setSelectedDirector] = useState('');
@@ -132,6 +135,7 @@ function ProgramDirectorForm({ formState, setFormData }) {
       );
       const directors = response.data;
 
+      // avoid dup key error
       const uniqueDirectors = Array.from(
         new Map((directors || []).map((d) => [d.userId, d])).values()
       );
@@ -190,7 +194,7 @@ function ProgramDirectorForm({ formState, setFormData }) {
   );
 }
 
-// --- CurriculumLinkForm (inlined) ---
+// --- CurriculumLinkForm (inlined/standardized) ---
 function CurriculumLinkForm({ formState, setFormData }) {
   const [link, setLink] = useState('');
   const [display, setDisplay] = useState('');
