@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 
 import {
   AddIcon,
@@ -32,24 +32,20 @@ import {
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
+import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from 'react-icons/hi2';
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { applyFilters } from '../../contexts/hooks/TableFilter';
+import { useTableSort } from '../../contexts/hooks/TableSort';
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
-} from '@/utils/downloadCsv';
-import CardView from './CardView';
-import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import { useRoleContext } from '@/contexts/hooks/useRoleContext';
-import {
-  HiOutlineAdjustmentsHorizontal,
-  HiOutlineSquares2X2,
-} from 'react-icons/hi2';
-
-import { applyFilters } from '../../contexts/hooks/TableFilter';
-import { useTableSort } from '../../contexts/hooks/TableSort';
+} from '../../utils/downloadCsv';
 import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
+import CardView from './CardView';
 import { ProgramForm } from './ProgramForm';
 
 const getRouteByRole = (role, userId) => {
@@ -69,6 +65,8 @@ function mapAdminRow(row) {
     launchDate: row.launchDate,
     location: row.countryName ?? '',
     country: row.country,
+
+
     students: row.students ?? 0,
     instruments: row.instruments ?? 0,
     totalInstruments: row.instruments ?? 0,
@@ -76,6 +74,8 @@ function mapAdminRow(row) {
     regionalDirectors: row.regionalDirectors,
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
+
+    media: row.media
   };
 }
 
@@ -95,6 +95,8 @@ function mapRdRow(row) {
     regionalDirectors: row.regionalDirectors,
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
+
+    media: row.media
   };
 }
 
@@ -245,6 +247,7 @@ function ProgramDisplay({
   setIsFormOpen,
   selectedProgram,
   setSelectedProgram,
+  onSave,
 }) {
   const [isCardView, setIsCardView] = useState(false);
 
@@ -342,42 +345,56 @@ function ProgramDisplay({
 
   return (
     <>
-      <ProgramForm
-        isOpen={isFormOpen}
-        onOpen={() => setIsFormOpen(true)}
-        onClose={() => {
-          setIsFormOpen(false);
-          setSelectedProgram(null);
-        }}
-        program={selectedProgram}
-      />
-      <TableContainer>
-        <HStack mb={4} justifyContent="space-between" w="100%">
-          <HStack spacing={4}>
-            <Box fontSize="xl" fontWeight="semibold">
-              All Programs
-            </Box>
-            <HStack spacing={1}>
-              <IconButton
-                aria-label="search"
-                icon={<Search2Icon />}
-                size="sm"
-                variant="ghost"
-              />
-              <Input
-                w="120px"
-                size="xs"
-                placeholder="Type to search"
-                variant="unstyled"
-                borderBottom="1px solid"
-                borderColor="gray.300"
-                borderRadius="0"
-                px={1}
-                value={searchQuery}
-                onChange={handleSearch}
-              />
-            </HStack>
+    <ProgramForm
+      isOpen={isFormOpen}
+      onOpen={() => setIsFormOpen(true)}
+      onClose={() => {
+        setIsFormOpen(false);
+        setSelectedProgram(null);
+      }}
+      program={selectedProgram}
+      onSave={onSave}
+    />
+    <TableContainer>
+      <HStack
+        mb={4}
+        justifyContent="space-between"
+        w="100%"
+      >
+        <HStack spacing={4}>
+          <Box
+            fontSize="xl"
+            fontWeight="semibold"
+          >
+            All Programs
+          </Box>
+          <HStack spacing={1}>
+            <IconButton
+              aria-label="search"
+              icon={<Search2Icon />}
+              size="sm"
+              variant="ghost"
+            />
+            <Input
+              w="120px"
+              size="xs"
+              placeholder="Type to search"
+              variant="unstyled"
+              borderBottom="1px solid"
+              borderColor="gray.300"
+              borderRadius="0"
+              px={1}
+              value={searchQuery}
+              onChange={handleSearch}
+            />
+            <IconButton
+              aria-label="filter"
+              icon={<HiOutlineAdjustmentsHorizontal />}
+              size="sm"
+              variant="ghost"
+            />
           </HStack>
+        </HStack>
           <HStack spacing={1}>
             <IconButton
               aria-label="menu"
@@ -513,7 +530,7 @@ function ProgramTable() {
     setIsFormOpen(true);
   };
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (roleLoading) return;
 
     const route = getRouteByRole(role, userId);
@@ -524,44 +541,41 @@ function ProgramTable() {
       return;
     }
 
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const res = await backend.get(route);
-        const rows = Array.isArray(res.data) ? res.data : [];
-        const programDetails = await Promise.all(
-          rows.map(async (row) => {
-            const programId = row.id ?? row.programId;
-            const [playlists, programDirectors, regionalDirectors] =
-              await Promise.all([
-                backend.get(`/program/${programId}/playlists`),
-                backend
-                  .get(`/program/${programId}/program-directors`)
-                  .catch(() => ({ data: [] })),
-                backend
-                  .get(`/program/${programId}/regional-directors`)
-                  .catch(() => ({ data: [] })),
-              ]);
+    setIsLoading(true);
+    try {
+      const res = await backend.get(route);
+      const rows = Array.isArray(res.data) ? res.data : [];
+      const programDetails = await Promise.all(
+        rows.map(async (row) => {
+          // TODO: make this more efficient with lazy loading
+          const programId = row.id ?? row.programId;
+          const [playlists, programDirectors, regionalDirectors] = await Promise.all([
+            backend.get(`/program/${programId}/playlists`),
+            backend.get(`/program/${programId}/program-directors`).catch(() => ({ data: [] })),
+            backend.get(`/program/${programId}/regional-directors`).catch(() => ({ data: [] })),
+          ]);
 
-            return {
-              ...row,
-              playlists: playlists.data,
-              programDirectors: programDirectors?.data || [],
-              regionalDirectors: regionalDirectors?.data || [],
-            };
-          })
-        );
-        const mappedPrograms = programDetails.map(mapRow);
-        setOriginalPrograms(mappedPrograms);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+          return {
+            ...row,
+            playlists: playlists.data,
+            programDirectors: programDirectors?.data || [],
+            regionalDirectors: regionalDirectors?.data || [],
+          };
+        })
+      );
+      const mappedPrograms = programDetails.map(mapRow);
+      setOriginalPrograms(mappedPrograms);
+      setPrograms(mappedPrograms);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+    } finally {
+      setIsLoading(false);
+    }
   }, [role, roleLoading, userId, backend]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (!getRouteByRole(role, userId) && !roleLoading) {
     return null;
@@ -580,6 +594,7 @@ function ProgramTable() {
       setIsFormOpen={setIsFormOpen}
       selectedProgram={selectedProgram}
       setSelectedProgram={setSelectedProgram}
+      onSave={fetchData}
     />
   );
 }

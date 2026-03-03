@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
 import {
+  Box,
   Button,
   Drawer,
+  Image,
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
@@ -16,6 +18,7 @@ import {
   NumberInputField,
   NumberInputStepper,
   Select,
+  Spinner,
   Tag,
   TagCloseButton,
   TagLabel,
@@ -25,6 +28,7 @@ import {
 
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { MediaUploadModal } from "@/components/media/MediaUploadModal";
 
 import { FullscreenFlyoutButton } from "../FullscreenFlyoutButton";
 import { useFullscreenFlyout } from "../useFullScreenFlyout.js";
@@ -43,7 +47,6 @@ const InstrumentForm = ({ setFormData }) => {
       (instrument) => String(instrument.id) === String(selectedInstrumentId)
     );
     if (!instrumentObj) return;
-
     setFormData((prevData) => ({
       ...prevData,
       instruments: {
@@ -119,7 +122,8 @@ const InstrumentForm = ({ setFormData }) => {
   );
 };
 
-const ProgramDirectorForm = ({ formState, setFormData }) => {
+// --- ProgramDirectorForm (inlined/standardized) ---
+function ProgramDirectorForm({ formState, setFormData }) {
   const [programDirectors, setProgramDirectors] = useState([]);
   const [selectedDirector, setSelectedDirector] = useState('');
   const { backend } = useBackendContext();
@@ -131,14 +135,13 @@ const ProgramDirectorForm = ({ formState, setFormData }) => {
       );
       const directors = response.data;
 
-      //avoid dup key error
+      // avoid dup key error
       const uniqueDirectors = Array.from(
         new Map((directors || []).map((d) => [d.userId, d])).values()
       );
 
       setProgramDirectors(uniqueDirectors);
     }
-    // fetch all program directors from db
     fetchProgramDirectors();
   }, [backend]);
 
@@ -189,9 +192,10 @@ const ProgramDirectorForm = ({ formState, setFormData }) => {
       <Button onClick={handleSubmit}> + Add </Button>
     </HStack>
   );
-};
+}
 
-const CurriculumLinkForm = ({ formState, setFormData }) => {
+// --- CurriculumLinkForm (inlined/standardized) ---
+function CurriculumLinkForm({ formState, setFormData }) {
   const [link, setLink] = useState('');
   const [display, setDisplay] = useState('');
 
@@ -199,7 +203,10 @@ const CurriculumLinkForm = ({ formState, setFormData }) => {
     if (!link?.trim()) return;
 
     let validLink = link.trim();
-    if (!validLink.startsWith('http://') && !validLink.startsWith('https://')) {
+    if (
+      !validLink.startsWith('http://') &&
+      !validLink.startsWith('https://')
+    ) {
       validLink = 'https://' + validLink;
     }
 
@@ -212,7 +219,10 @@ const CurriculumLinkForm = ({ formState, setFormData }) => {
       ...prevData,
       curriculumLinks: [
         ...(prevData.curriculumLinks ?? []),
-        { link: validLink, name: (display || 'Playlist').trim() || 'Playlist' },
+        {
+          link: validLink,
+          name: (display || 'Playlist').trim() || 'Playlist',
+        },
       ],
     }));
 
@@ -241,15 +251,115 @@ const CurriculumLinkForm = ({ formState, setFormData }) => {
       <Button onClick={handleSubmit}>+ Add</Button>
     </HStack>
   );
-};
+}
 
+// --- MediaPreviewTag (inlined, from MediaUploadForm) ---
+function MediaPreviewTag({ item, onRemove }) {
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { backend } = useBackendContext();
+
+  useEffect(() => {
+    const fetchUrl = async () => {
+      if (!item.s3_key) return;
+
+      try {
+        const res = await backend.get(
+          `/images/url/${encodeURIComponent(item.s3_key)}`
+        );
+        if (res.data && res.data.success) {
+          setPreviewUrl(res.data.url);
+        }
+      } catch (error) {
+        console.error('Failed to fetch image URL:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUrl();
+  }, [item.s3_key, backend]);
+
+  const isVideo = item.file_type?.startsWith('video/');
+
+  return (
+    <Tag maxW="250px" p={2} borderRadius="md" size="lg">
+      <Box
+        w="2.5rem"
+        h="2.5rem"
+        mr={2}
+        flexShrink={0}
+        borderRadius="md"
+        overflow="hidden"
+        bg="gray.200"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        {isLoading ? (
+          <Spinner size="xs" />
+        ) : isVideo ? (
+          <video
+            src={previewUrl}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            muted
+            playsInline
+          />
+        ) : (
+          <Image
+            src={previewUrl}
+            alt={item.file_name}
+            boxSize="100%"
+            objectFit="cover"
+          />
+        )}
+      </Box>
+
+      <TagLabel isTruncated title={item.file_name}>
+        {item.file_name}
+      </TagLabel>
+      <TagCloseButton onClick={onRemove} />
+    </Tag>
+  );
+}
+
+// --- MediaUploadForm (inlined) ---
+function MediaUploadForm({ onUploadComplete, uploadedMedia, onRemove }) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  return (
+    <>
+      <Button onClick={onOpen}> + Add </Button>
+      <MediaUploadModal
+        isOpen={isOpen}
+        onClose={onClose}
+        onUploadComplete={onUploadComplete}
+        formOrigin="program"
+      />
+
+      <HStack wrap="wrap" mt={2} spacing={3}>
+        {(uploadedMedia ?? []).map((item, i) => (
+          <MediaPreviewTag
+            key={item.id || item.s3_key || i}
+            item={item}
+            onRemove={() => onRemove(i)}
+          />
+        ))}
+      </HStack>
+    </>
+  );
+}
+
+// --- Main ProgramForm ---
 export const ProgramForm = ({
   isOpen: isOpenProp,
   onOpen: onOpenProp,
   onClose: onCloseProp,
+  onSave,
   program,
 }) => {
   const disclosure = useDisclosure();
+
   const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
   const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
   const onClose = isControlled ? onCloseProp : disclosure.onClose;
@@ -265,7 +375,8 @@ export const ProgramForm = ({
   const [initialInstrumentQuantities, setInitialInstrumentQuantities] =
     useState({});
   const [initialCurriculumLinks, setInitialCurriculumLinks] = useState([]);
-  const [isFullScreen, toggleFullScreen] = useFullscreenFlyout();
+
+  const [initialUploadedMedia, setInitialUploadedMedia] = useState([]);
 
   const [formState, setFormState] = useState({
     status: null,
@@ -280,6 +391,8 @@ export const ProgramForm = ({
     curriculumLinks: [],
     media: [],
   });
+
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     async function loadProgramRegionData() {
@@ -300,6 +413,7 @@ export const ProgramForm = ({
         setInitialProgramDirectorIds([]);
         setInitialInstrumentQuantities({});
         setInitialCurriculumLinks([]);
+        setInitialUploadedMedia([]);
         return;
       }
 
@@ -307,7 +421,9 @@ export const ProgramForm = ({
 
       if (program.country) {
         try {
-          const countryResponse = await backend(`/country/${program.country}`);
+          const countryResponse = await backend.get(
+            `/country/${program.country}`
+          );
           regionId = countryResponse.data.regionId;
         } catch (error) {
           console.error('error fetching country/region', error);
@@ -322,8 +438,8 @@ export const ProgramForm = ({
         })
       );
 
-      let instrumentMap = {};
-      let initialInstrumentMap = {};
+      const instrumentMap = {};
+      const initialInstrumentMap = {};
       try {
         const instrumentsResponse = await backend.get(
           `/program/${program.id}/instruments`
@@ -346,7 +462,9 @@ export const ProgramForm = ({
       setFormState({
         status: program.status ?? null,
         programName: program.title ?? '',
-        launchDate: program.launchDate ? program.launchDate.split('T')[0] : '',
+        launchDate: program.launchDate
+          ? program.launchDate.split('T')[0]
+          : '',
         regionId: regionId,
         country: program.country ?? null,
         students: program.students ?? 0,
@@ -360,8 +478,16 @@ export const ProgramForm = ({
               .filter((p) => p.link)
               .map((p) => ({ link: p.link, name: p.name || 'Playlist' }))
           : [],
-        media: program.media ?? [],
+
+        media: Array.isArray(program.media)
+          ? program.media.map((m) => ({
+              s3_key: m.s3_key,
+              file_name: m.file_name,
+              file_type: m.file_type,
+            }))
+          : [],
       });
+
       setInitialProgramDirectorIds(
         mappedProgramDirectors.map((d) => d.userId).filter(Boolean)
       );
@@ -369,10 +495,21 @@ export const ProgramForm = ({
       setInitialCurriculumLinks(
         (program.playlists ?? []).filter((p) => p.link).map((p) => p.link)
       );
-      regionId = null;
+
+      setInitialUploadedMedia(
+        (program.media ?? [])
+          .filter((m) => m.file_name)
+          .map((m) => m.file_name)
+      );
     }
     loadProgramRegionData();
-  }, [program, backend]);
+  }, [program?.id, backend]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab('overview');
+    }
+  }, [isOpen]);
 
   function handleProgramStatusChange(status) {
     setFormState({ ...formState, status: status });
@@ -401,8 +538,15 @@ export const ProgramForm = ({
   function handleLanguageChange(langChange) {
     setFormState({ ...formState, language: langChange });
   }
+
+  const handleMediaChange = (newMediaFiles) => {
+    setFormState((prev) => ({
+      ...prev,
+      media: [...(prev.media ?? []), ...newMediaFiles],
+    }));
+  };
+
   async function handleSave() {
-    //[TODO] : TOTAL INSTRUMENTS, INSTRUMENTS, PARTNERORG
     try {
       const data = {
         name: formState.programName,
@@ -412,9 +556,9 @@ export const ProgramForm = ({
         country: formState.country,
         students: formState.students ?? 0,
         primaryLanguage: formState.language,
-        partnerOrg: 1, // TODO: this field doesnt exist in the form
+        partnerOrg: 1,
         createdBy: currentUser?.uid || currentUser?.id,
-        description: '', // TODO: this field doesnt exist in the form
+        description: '',
       };
 
       let programId;
@@ -442,8 +586,9 @@ export const ProgramForm = ({
         }
       }
 
-      //curriclum links / playlists
-      const currentLinks = (formState.curriculumLinks ?? []).map((p) => p.link);
+      const currentLinks = (formState.curriculumLinks ?? []).map(
+        (p) => p.link
+      );
       for (const playlist of formState.curriculumLinks ?? []) {
         if (!initialCurriculumLinks.includes(playlist.link)) {
           await backend.post(`/program/${programId}/playlists`, {
@@ -460,9 +605,26 @@ export const ProgramForm = ({
         }
       }
 
-      const studentCountChange = formState.students - oldStudentCount;
+      const currentMediaIds = formState.media
+        .map((m) => m.id)
+        .filter((id) => id !== undefined);
+      if (program) {
+        const programMedia = program?.media ?? [];
+        const mediaToDelete = programMedia.filter(
+          (oldMedia) => !currentMediaIds.includes(oldMedia.id)
+        );
 
+        for (const media of mediaToDelete) {
+          if (media.id) {
+            await backend.delete(`/mediaChange/${media.id}`);
+          }
+        }
+      }
+      const mediaChanges = formState.media.filter((mediaItem) => !mediaItem.id);
+
+      const studentCountChange = formState.students - oldStudentCount;
       const instrumentChanges = [];
+
       const allInstrumentIds = new Set([
         ...Object.keys(initialInstrumentQuantities || {}),
         ...Object.keys(formState.instruments || {}),
@@ -482,8 +644,9 @@ export const ProgramForm = ({
 
       const hasStudentChange = studentCountChange !== 0;
       const hasInstrumentChange = instrumentChanges.length > 0;
+      const hasMediaChange = mediaChanges.length > 0;
 
-      if (hasStudentChange || hasInstrumentChange) {
+      if (hasStudentChange || hasInstrumentChange || hasMediaChange) {
         const updateResponse = await backend.post(`/program-updates`, {
           title: 'update program stats',
           program_id: programId,
@@ -511,26 +674,35 @@ export const ProgramForm = ({
             });
           }
         }
+
+        if (hasMediaChange) {
+          for (const mediaChange of mediaChanges) {
+            await backend.post(`/mediaChange`, {
+              update_id: updateId,
+              s3_key: mediaChange.s3_key,
+              file_name: mediaChange.file_name,
+              file_type: mediaChange.file_type,
+              is_thumbnail: false,
+              instrument_id: mediaChange.instrument_id || 50,
+            });
+          }
+        }
       }
 
+      onSave?.();
       onClose();
-      window.location.reload();
     } catch (err) {
-      console.error("Error saving program:", err);
+      console.error('Error saving program:', err);
     }
   }
 
   useEffect(() => {
-    console.log("Program status changed to:", formState);
-  }, [formState]);
-
-  useEffect(() => {
     async function getRegions() {
       try {
-        const response = await backend.get("/region");
+        const response = await backend.get('/region');
         setRegions(response.data);
       } catch (error) {
-        console.error("Error fetching regions:", error);
+        console.error('Error fetching regions:', error);
       }
     }
     getRegions();
@@ -566,23 +738,9 @@ export const ProgramForm = ({
         size="lg"
       >
         <DrawerOverlay />
-        <DrawerContent
-          width="50%"
-          maxWidth={isFullScreen ? "100%" : "50%"}
-        >
+        <DrawerContent>
           <HStack marginBottom="1em">
-            <DrawerCloseButton
-              left="4"
-              right="auto"
-            />
-            <FullscreenFlyoutButton
-              isFullScreen={isFullScreen}
-              toggleFullScreen={toggleFullScreen}
-              width="5em"
-              height="2em"
-              marginLeft="4em"
-              marginTop="0.7em"
-            />
+            <DrawerCloseButton left="4" right="auto" />
             <Button
               colorScheme="teal"
               marginLeft="auto"
@@ -601,178 +759,240 @@ export const ProgramForm = ({
           <DrawerBody>
             <VStack spacing={4} align="stretch" marginLeft="1em">
               <DrawerHeader padding="0 0">Program</DrawerHeader>
-              <h3>Status</h3>
-              <HStack>
-                {/* changed developing => inactive, launched => active to match the enum values in the database schema for program */}
+              <HStack w="full" spacing={0} mb={4}>
                 <Button
-                  onClick={() => handleProgramStatusChange('Inactive')}
-                  colorScheme={
-                    formState.status === 'Inactive' ? 'teal' : undefined
+                  flex={1}
+                  variant="ghost"
+                  borderRadius={0}
+                  onClick={() => setActiveTab('overview')}
+                  color={activeTab === 'overview' ? 'teal.500' : 'gray.600'}
+                  borderBottom="2px solid"
+                  borderColor={
+                    activeTab === 'overview' ? 'teal.500' : 'gray.200'
                   }
+                  _hover={{ bg: 'gray.50' }}
                 >
-                  Developing
+                  Overview
                 </Button>
+
                 <Button
-                  onClick={() => handleProgramStatusChange('Active')}
-                  colorScheme={
-                    formState.status === 'Active' ? 'teal' : undefined
+                  flex={1}
+                  variant="ghost"
+                  borderRadius={0}
+                  onClick={() => setActiveTab('media')}
+                  color={activeTab === 'media' ? 'teal.500' : 'gray.600'}
+                  borderBottom="2px solid"
+                  borderColor={
+                    activeTab === 'media' ? 'teal.500' : 'gray.200'
                   }
+                  _hover={{ bg: 'gray.50' }}
                 >
-                  Launched
+                  Media
                 </Button>
               </HStack>
-              <h3>Program Name</h3>
-              <Input
-                placeholder="Enter Program Name"
-                value={formState.programName || ''}
-                onChange={(e) => handleProgramNameChange(e.target.value)}
-              />
-              <h3>Launch Date</h3>
-              <Input
-                type="date"
-                placeholder="MM/DD/YYYY"
-                value={formState.launchDate || ''}
-                onChange={(e) => handleProgramLaunchDateChange(e.target.value)}
-              />
-              <h3>Region</h3>
-              <Select
-                placeholder="Select region"
-                value={formState.regionId || ''}
-                onChange={(e) => handleRegionChange(e.target.value)}
-              >
-                {regions.map((region) => (
-                  <option key={region.id} value={region.id}>
-                    {region.name}
-                  </option>
-                ))}
-              </Select>
-              {formState.regionId && (
+
+              {activeTab === 'overview' && (
                 <>
-                  <h3>Country</h3>
+                  <h3>Status</h3>
+                  <HStack>
+                    <Button
+                      onClick={() => handleProgramStatusChange('Inactive')}
+                      colorScheme={
+                        formState.status === 'Inactive' ? 'teal' : undefined
+                      }
+                    >
+                      Developing
+                    </Button>
+                    <Button
+                      onClick={() => handleProgramStatusChange('Active')}
+                      colorScheme={
+                        formState.status === 'Active' ? 'teal' : undefined
+                      }
+                    >
+                      Launched
+                    </Button>
+                  </HStack>
+                  <h3>Program Name</h3>
+                  <Input
+                    placeholder="Enter Program Name"
+                    value={formState.programName || ''}
+                    onChange={(e) =>
+                      handleProgramNameChange(e.target.value)
+                    }
+                  />
+                  <h3>Launch Date</h3>
+                  <Input
+                    type="date"
+                    placeholder="MM/DD/YYYY"
+                    value={formState.launchDate || ''}
+                    onChange={(e) =>
+                      handleProgramLaunchDateChange(e.target.value)
+                    }
+                  />
+                  <h3>Region</h3>
                   <Select
-                    placeholder="Select Country"
-                    value={formState.country || ''}
-                    onChange={(e) => handleCountryChange(e.target.value)}
+                    placeholder="Select region"
+                    value={formState.regionId || ''}
+                    onChange={(e) => handleRegionChange(e.target.value)}
                   >
-                    {countries.map((country) => (
-                      <option key={country.id} value={country.id}>
-                        {country.name}
+                    {regions.map((region) => (
+                      <option key={region.id} value={region.id}>
+                        {region.name}
                       </option>
                     ))}
                   </Select>
+                  {formState.regionId && (
+                    <>
+                      <h3>Country</h3>
+                      <Select
+                        placeholder="Select Country"
+                        value={formState.country || ''}
+                        onChange={(e) =>
+                          handleCountryChange(e.target.value)
+                        }
+                      >
+                        {countries.map((country) => (
+                          <option key={country.id} value={country.id}>
+                            {country.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </>
+                  )}
+                  <h3>Students</h3>
+                  <NumberInput
+                    min={0}
+                    value={formState.students}
+                    onChange={(e) =>
+                      handleStudentNumberChange(Number(e))
+                    }
+                  >
+                    <NumberInputField placeholder="Enter # of Students" />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
+
+                  <h3> Instrument(s) & Quantity </h3>
+                  <HStack wrap="wrap">
+                    <InstrumentForm setFormData={setFormState} />
+
+                    {Object.entries(formState.instruments || {}).map(
+                      ([instrumentId, instrumentData]) => (
+                        <Tag key={instrumentId}>
+                          <TagLabel>
+                            {instrumentData.name}: {instrumentData.quantity}
+                          </TagLabel>
+                          <TagCloseButton
+                            onClick={() => {
+                              setFormState((prevData) => {
+                                const {
+                                  [instrumentId]: _,
+                                  ...remainingInstruments
+                                } = prevData.instruments;
+                                return {
+                                  ...prevData,
+                                  instruments: remainingInstruments,
+                                };
+                              });
+                            }}
+                          />
+                        </Tag>
+                      )
+                    )}
+                  </HStack>
+                  <h3>Language</h3>
+                  <Select
+                    placeholder="Language"
+                    value={formState.language || ''}
+                    onChange={(e) =>
+                      handleLanguageChange(e.target.value)
+                    }
+                  >
+                    <option value="english">English</option>
+                    <option value="spanish">Spanish</option>
+                    <option value="french">French</option>
+                    <option value="arabic">Arabic</option>
+                    <option value="mandarin">Mandarin</option>
+                  </Select>
+                  <h3>Program Directors</h3>
+                  <HStack wrap="wrap">
+                    <ProgramDirectorForm
+                      formState={formState}
+                      setFormData={setFormState}
+                    />
+                    {formState.programDirectors.map((director) => (
+                      <Tag key={director.userId}>
+                        <TagLabel>{`${director.firstName} ${director.lastName}`}</TagLabel>
+                        <TagCloseButton
+                          onClick={() => {
+                            setFormState((prevData) => ({
+                              ...prevData,
+                              programDirectors:
+                                prevData.programDirectors.filter(
+                                  (d) => d !== director
+                                ),
+                            }));
+                          }}
+                        />
+                      </Tag>
+                    ))}
+                  </HStack>
+
+                  <h3>Curriculum Links</h3>
+                  <CurriculumLinkForm
+                    formState={formState}
+                    setFormData={setFormState}
+                  />
+                  <HStack wrap="wrap">
+                    {(formState.curriculumLinks ?? []).map((playlist) => (
+                      <Tag key={playlist.link}>
+                        <TagLabel
+                          cursor="pointer"
+                          onClick={() => {
+                            window.open(
+                              playlist.link,
+                              '_blank',
+                              'noopener,noreferrer'
+                            );
+                          }}
+                        >
+                          {playlist.name}
+                        </TagLabel>
+                        <TagCloseButton
+                          onClick={() => {
+                            setFormState((prev) => ({
+                              ...prev,
+                              curriculumLinks: prev.curriculumLinks.filter(
+                                (p) => p.link !== playlist.link
+                              ),
+                            }));
+                          }}
+                        />
+                      </Tag>
+                    ))}
+                  </HStack>
                 </>
               )}
-              <h3>Students</h3>
-              <NumberInput
-                min={0}
-                value={formState.students}
-                onChange={(e) => handleStudentNumberChange(Number(e))}
-              >
-                <NumberInputField placeholder="Enter # of Students" />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
 
-              <h3> Instrument(s) & Quantity </h3>
-              <HStack wrap="wrap">
-                <InstrumentForm setFormData={setFormState} />
-
-                {Object.entries(formState.instruments || {}).map(
-                  ([instrumentId, instrumentData]) => (
-                    <Tag key={instrumentId}>
-                      <TagLabel>
-                        {instrumentData.name}: {instrumentData.quantity}
-                      </TagLabel>
-                      <TagCloseButton
-                        onClick={() => {
-                          setFormState((prevData) => {
-                            const {
-                              [instrumentId]: _,
-                              ...remainingInstruments
-                            } = prevData.instruments;
-                            return {
-                              ...prevData,
-                              instruments: remainingInstruments,
-                            };
-                          });
-                        }}
-                      />
-                    </Tag>
-                  )
-                )}
-              </HStack>
-              <h3>Language</h3>
-              <Select
-                placeholder="Language"
-                value={formState.language || ''}
-                onChange={(e) => handleLanguageChange(e.target.value)}
-              >
-                {/* TODO: Language DB Table */}
-                <option value="english">English</option>
-                <option value="spanish">Spanish</option>
-                <option value="french">French</option>
-                <option value="arabic">Arabic</option>
-                <option value="mandarin">Mandarin</option>
-              </Select>
-              <h3>Program Directors</h3>
-              <HStack wrap="wrap">
-                <ProgramDirectorForm
-                  formState={formState}
-                  setFormData={setFormState}
-                />
-                {formState.programDirectors.map((director) => (
-                  <Tag key={director.userId}>
-                    <TagLabel>{`${director.firstName} ${director.lastName}`}</TagLabel>
-                    <TagCloseButton
-                      onClick={() => {
-                        setFormState((prevData) => ({
-                          ...prevData,
-                          programDirectors: prevData.programDirectors.filter(
-                            (d) => d !== director
-                          ),
-                        }));
-                      }}
-                    />
-                  </Tag>
-                ))}
-              </HStack>
-
-              <h3>Curriculum Links</h3>
-              <CurriculumLinkForm
-                formState={formState}
-                setFormData={setFormState}
-              />
-              <HStack wrap="wrap">
-                {(formState.curriculumLinks ?? []).map((playlist) => (
-                  <Tag key={playlist.link}>
-                    <TagLabel
-                      cursor="pointer"
-                      onClick={() => {
-                        window.open(
-                          playlist.link,
-                          '_blank',
-                          'noopener,noreferrer'
-                        );
-                      }}
-                    >
-                      {playlist.name}
-                    </TagLabel>
-                    <TagCloseButton
-                      onClick={() => {
-                        setFormState((prev) => ({
-                          ...prev,
-                          curriculumLinks: prev.curriculumLinks.filter(
-                            (p) => p.link !== playlist.link
-                          ),
-                        }));
-                      }}
-                    />
-                  </Tag>
-                ))}
-              </HStack>
-              {/* TODO: Add media input */}
+              {activeTab === 'media' && (
+                <>
+                  <h4>Media</h4>
+                  <MediaUploadForm
+                    onUploadComplete={handleMediaChange}
+                    uploadedMedia={formState.media}
+                    onRemove={(indexToRemove) => {
+                      setFormState((prev) => ({
+                        ...prev,
+                        media: prev.media.filter(
+                          (_, idx) => idx !== indexToRemove
+                        ),
+                      }));
+                    }}
+                  />
+                </>
+              )}
             </VStack>
           </DrawerBody>
         </DrawerContent>
