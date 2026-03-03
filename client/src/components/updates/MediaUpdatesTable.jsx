@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 import { DownloadIcon, HamburgerIcon, SearchIcon } from '@chakra-ui/icons';
 import {
@@ -9,56 +9,109 @@ import {
   Heading,
   IconButton,
   Input,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Spinner,
   Table,
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
-} from "@chakra-ui/react";
-import { SortArrows } from "../tables/SortArrows"
-import { useTableSort } from "../../contexts/hooks/TableSort";
-import { ReviewMediaUpdate } from "./ReviewMediaUpdate";
+} from '@chakra-ui/react';
+import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
+
+import {
+  downloadCsv,
+  escapeCsvValue,
+  getFilenameTimestamp,
+} from '@/utils/downloadCsv';
+import { applyFilters } from '../../contexts/hooks/TableFilter';
+import { useTableSort } from '../../contexts/hooks/TableSort';
+import { FilterComponent } from '../common/FilterComponent';
+import { SortArrows } from '../tables/SortArrows';
+import { ReviewMediaUpdate } from './ReviewMediaUpdate';
+
+export function downloadMediaUpdatesAsCsv(data) {
+  const headers = ['Time', 'Notes', 'Program', 'Author', 'Status'];
+  const rows = (data || []).map((row) => [
+    escapeCsvValue(row.updateDate),
+    escapeCsvValue(row.note),
+    escapeCsvValue(row.programName),
+    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
+    escapeCsvValue(row.status),
+  ]);
+  downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
+}
 
 export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) => {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [unorderedUpdates, setUnorderedUpdates] = useState([]);
-    const { sortOrder, handleSort } = useTableSort(originalData, setData);
-    const [selectedUpdate, setSelectedUpdate] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const columns = [
+    {
+      key: 'updateDate',
+      type: 'date',
+    },
+    {
+      key: 'note',
+      type: 'text',
+    },
+    {
+      key: 'programName',
+      type: 'text',
+    },
+    {
+      key: 'fullName',
+      type: 'text',
+    },
+    {
+      key: 'status',
+      type: 'select',
+      options: ['Approved', 'Archived', 'Unread'],
+    },
+  ];
+  const [activeFilters, setActiveFilters] = useState([]);
 
-    const handleSearch = event => {
-      setSearchQuery(event.target.value);
-   };
-   useEffect(() => {
-    setUnorderedUpdates(data);
-  }, [searchQuery, data]);
+  const sourceData = data ?? originalData ?? [];
+
+  const filteredData = useMemo(
+    () => applyFilters(activeFilters, sourceData),
+    [activeFilters, sourceData]
+  );
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const displayData = useMemo(() => {
+    if (searchQuery === '') {
+      return filteredData;
+    }
+    return filteredData.filter(
+      (update) =>
+        update.updateDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        update.note.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        update.programName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        update.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        update.status.includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, filteredData]);
+
+  const [sortedData, setSortedData] = useState(null);
+  const [selectedUpdate, setSelectedUpdate] = useState(null);
 
   useEffect(() => {
-    function filterUpdates(search) {
-      if (search === '') {
-        setData(originalData);
-        return;
-      }
-      // filter by search query
-      const filtered = unorderedUpdates.filter(
-        (update) =>
-          // if no search then show everything
-          update.updateDate.toLowerCase().includes(search.toLowerCase()) ||
-          update.note.toLowerCase().includes(search.toLowerCase()) ||
-          update.firstName.toLowerCase().includes(search.toLowerCase()) ||
-          update.status.includes(search.toLowerCase())
-      );
-      setData(filtered);
-    }
+    setSortedData(null);
+  }, [displayData]);
 
-    filterUpdates(searchQuery);
-  }, [searchQuery, originalData]);
+  const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
+  const tableData = sortedData ?? displayData;
 
   return (
     <Box mt="30px" ml="10px">
-      <Flex gap={10} mb="20px">
+      <Flex gap={10} mb="20px" align="center">
         <Heading>Media Updates</Heading>
         <SearchIcon mt="10px" ml="10px" />
         <Input
@@ -68,14 +121,39 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
           value={searchQuery}
           onChange={handleSearch}
         />
-        <HamburgerIcon mt="10px" />
+        <Popover>
+          <PopoverTrigger>
+            <IconButton
+              aria-label="filter"
+              icon={<HiOutlineAdjustmentsHorizontal />}
+              size="sm"
+              variant="ghost"
+            />
+          </PopoverTrigger>
+          <PopoverContent w="800px" maxW="90vw" shadow="xl">
+            <FilterComponent
+              columns={columns}
+              onFilterChange={(filters) => {
+                setActiveFilters(filters);
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+        <Text fontSize="sm" color="gray.500">
+          Displaying {tableData.length} results
+        </Text>
+        <IconButton
+          aria-label="menu"
+          icon={<HamburgerIcon />}
+          size="sm"
+          variant="ghost"
+        />
         <IconButton
           aria-label="Download"
           icon={<DownloadIcon />}
           size="sm"
           variant="ghost"
-          mt="10px"
-          onClick={() => downloadMediaUpdatesAsCsv(data)}
+          onClick={() => downloadMediaUpdatesAsCsv(tableData)}
         />
       </Flex>
 
@@ -86,32 +164,21 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
             <Tr>
               <Th onClick={() => handleSort('updateDate')} cursor="pointer">
                 Time{' '}
-                <SortArrows
-                  columnKey={'updateDate'}
-                  sortOrder={sortOrder}
-                />{' '}
+                <SortArrows columnKey={'updateDate'} sortOrder={sortOrder} />{' '}
               </Th>
               <Th onClick={() => handleSort('note')} cursor="pointer">
-                Notes{' '}
-                <SortArrows columnKey={'note'} sortOrder={sortOrder} />{' '}
+                Notes <SortArrows columnKey={'note'} sortOrder={sortOrder} />{' '}
               </Th>
               <Th onClick={() => handleSort('programName')} cursor="pointer">
                 Program{' '}
-                <SortArrows
-                  columnKey={'programName'}
-                  sortOrder={sortOrder}
-                />{' '}
+                <SortArrows columnKey={'programName'} sortOrder={sortOrder} />{' '}
               </Th>
               <Th onClick={() => handleSort('firstName')} cursor="pointer">
                 Author{' '}
-                <SortArrows
-                  columnKey={'firstName'}
-                  sortOrder={sortOrder}
-                />{' '}
+                <SortArrows columnKey={'firstName'} sortOrder={sortOrder} />{' '}
               </Th>
               <Th onClick={() => handleSort('status')} cursor="pointer">
-                Status{' '}
-                <SortArrows columnKey={'status'} sortOrder={sortOrder} />{' '}
+                Status <SortArrows columnKey={'status'} sortOrder={sortOrder} />{' '}
               </Th>
             </Tr>
           </Thead>
@@ -125,7 +192,7 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
                 </Td>
               </Tr>
             ) : (
-              data.map((row) => (
+              tableData.map((row) => (
                 <Tr key={row.id}>
                   <Td>{row.updateDate}</Td>
                   <Td>{row.note}</Td>
@@ -134,8 +201,11 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
                     {row.firstName} {row.lastName}
                   </Td>
                   <Td>
-                    <Badge cursor="pointer" onClick={() => setSelectedUpdate(row)}>
-  {                   row.status}
+                    <Badge
+                      cursor="pointer"
+                      onClick={() => setSelectedUpdate(row)}
+                    >
+                      {row.status}
                     </Badge>
                   </Td>
                 </Tr>
