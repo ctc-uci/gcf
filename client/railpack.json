@@ -9,6 +9,6 @@
     }
   },
   "deploy": {
-    "startCommand": "yarn preview"
+    "startCommand": "yarn preview:railway"
   }
 }
