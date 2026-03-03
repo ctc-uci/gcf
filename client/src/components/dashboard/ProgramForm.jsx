@@ -481,6 +481,7 @@ export const ProgramForm = ({
 
         media: Array.isArray(program.media)
           ? program.media.map((m) => ({
+              id: m.id,
               s3_key: m.s3_key,
               file_name: m.file_name,
               file_type: m.file_type,

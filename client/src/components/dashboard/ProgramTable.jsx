@@ -549,23 +549,26 @@ function ProgramTable() {
         rows.map(async (row) => {
           // TODO: make this more efficient with lazy loading
           const programId = row.id ?? row.programId;
-          const [playlists, programDirectors, regionalDirectors] = await Promise.all([
-            backend.get(`/program/${programId}/playlists`),
-            backend.get(`/program/${programId}/program-directors`).catch(() => ({ data: [] })),
-            backend.get(`/program/${programId}/regional-directors`).catch(() => ({ data: [] })),
-          ]);
+          const [playlists, programDirectors, regionalDirectors, media] =
+            await Promise.all([
+              backend.get(`/program/${programId}/playlists`),
+              backend.get(`/program/${programId}/program-directors`).catch(() => ({ data: [] })),
+              backend.get(`/program/${programId}/regional-directors`).catch(() => ({ data: [] })),
+              backend.get(`/program/${programId}/media`).catch(() => ({ data: [] })),
+            ]);
 
           return {
             ...row,
             playlists: playlists.data,
             programDirectors: programDirectors?.data || [],
             regionalDirectors: regionalDirectors?.data || [],
+            media: media?.data || [],
           };
         })
       );
       const mappedPrograms = programDetails.map(mapRow);
       setOriginalPrograms(mappedPrograms);
-      setPrograms(mappedPrograms);
+    
     } catch (err) {
       console.error("Error fetching data:", err);
     } finally {
