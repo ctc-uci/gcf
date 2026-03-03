@@ -2,7 +2,7 @@
   "$schema": "https://schema.railpack.com",
   "steps": {
     "install": {
-      "commands": ["npm install"]
+      "commands": ["npm install --omit=dev --ignore-scripts"]
     },
     "build": {
       "commands": ["npm run build"]
