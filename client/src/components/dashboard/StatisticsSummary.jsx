@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 
 import {
   Box,
-  Center,
   Heading,
   HStack,
   IconButton,
@@ -91,7 +90,7 @@ const STATS_FROM_RESPONSE = {
   'Program Director': statsFromPdData,
 };
 
-const StatisticsSummary = () => {
+const StatisticsSummary = ({ refreshTrigger = 0 }) => {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { role: role, loading: roleLoading } = useRoleContext();
@@ -127,7 +126,7 @@ const StatisticsSummary = () => {
     };
 
     fetchData();
-  }, [role, roleLoading, userId, backend]);
+  }, [role, roleLoading, userId, backend, refreshTrigger]);
 
   return (
     <Box as="section">
@@ -142,21 +141,31 @@ const StatisticsSummary = () => {
           />
         </HStack>
 
-        <HStack spacing={6}>
-          {isLoading ? (
-            <Center py={8} minH="120px">
-              <Spinner size="lg" />
-            </Center>
-          ) : (
-            stats.map((stat) => (
+        <Box position="relative">
+          <HStack spacing={6} minH="120px">
+            {stats.map((stat) => (
               <StatBox
                 key={stat.label}
                 label={stat.label}
                 number={stat.number}
               />
-            ))
+            ))}
+          </HStack>
+          {isLoading && (
+            <Box
+              position="absolute"
+              inset={0}
+              bg="whiteAlpha.800"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              zIndex={1}
+              borderRadius="md"
+            >
+              <Spinner size="lg" />
+            </Box>
           )}
-        </HStack>
+        </Box>
       </VStack>
     </Box>
   );

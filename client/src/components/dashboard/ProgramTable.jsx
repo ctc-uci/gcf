@@ -248,6 +248,7 @@ function ProgramDisplay({
   selectedProgram,
   setSelectedProgram,
   onSave,
+  onStatsRefresh,
 }) {
   const [isCardView, setIsCardView] = useState(false);
 
@@ -353,7 +354,10 @@ function ProgramDisplay({
         setSelectedProgram(null);
       }}
       program={selectedProgram}
-      onSave={onSave}
+      onSave={() => {
+        onSave?.();
+        onStatsRefresh?.();
+      }}
     />
     <TableContainer>
       <HStack
@@ -451,69 +455,84 @@ function ProgramDisplay({
           </HStack>
         </HStack>
 
-        {!isCardView ? (
-          <Table variant="simple" aria-label="collapsible-table">
-            <Thead>
-              <Tr>
-                <Th onClick={() => handleSort('title')} cursor="pointer">
-                  Program <SortArrows columnKey="title" sortOrder={sortOrder} />
-                </Th>
-                <Th onClick={() => handleSort('status')} cursor="pointer">
-                  Status <SortArrows columnKey="status" sortOrder={sortOrder} />
-                </Th>
-                <Th onClick={() => handleSort('launchDate')} cursor="pointer">
-                  Launch Date{' '}
-                  <SortArrows columnKey="launchDate" sortOrder={sortOrder} />
-                </Th>
-                <Th onClick={() => handleSort('location')} cursor="pointer">
-                  Location{' '}
-                  <SortArrows columnKey="location" sortOrder={sortOrder} />
-                </Th>
-                <Th onClick={() => handleSort('students')} cursor="pointer">
-                  Students{' '}
-                  <SortArrows columnKey="students" sortOrder={sortOrder} />
-                </Th>
-                <Th onClick={() => handleSort('instruments')} cursor="pointer">
-                  Instruments{' '}
-                  <SortArrows columnKey="instruments" sortOrder={sortOrder} />
-                </Th>
-                <Th
-                  onClick={() => handleSort('totalInstruments')}
-                  cursor="pointer"
-                >
-                  Total Instruments{' '}
-                  <SortArrows
-                    columnKey="totalInstruments"
-                    sortOrder={sortOrder}
-                  />
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {isLoading ? (
+        <Box position="relative">
+          {!isCardView ? (
+            <Table variant="simple" aria-label="collapsible-table">
+              <Thead>
                 <Tr>
-                  <Td colSpan={7}>
-                    <Center py={8}>
-                      <Spinner size="lg" />
-                    </Center>
-                  </Td>
+                  <Th onClick={() => handleSort('title')} cursor="pointer">
+                    Program <SortArrows columnKey="title" sortOrder={sortOrder} />
+                  </Th>
+                  <Th onClick={() => handleSort('status')} cursor="pointer">
+                    Status <SortArrows columnKey="status" sortOrder={sortOrder} />
+                  </Th>
+                  <Th onClick={() => handleSort('launchDate')} cursor="pointer">
+                    Launch Date{' '}
+                    <SortArrows columnKey="launchDate" sortOrder={sortOrder} />
+                  </Th>
+                  <Th onClick={() => handleSort('location')} cursor="pointer">
+                    Location{' '}
+                    <SortArrows columnKey="location" sortOrder={sortOrder} />
+                  </Th>
+                  <Th onClick={() => handleSort('students')} cursor="pointer">
+                    Students{' '}
+                    <SortArrows columnKey="students" sortOrder={sortOrder} />
+                  </Th>
+                  <Th onClick={() => handleSort('instruments')} cursor="pointer">
+                    Instruments{' '}
+                    <SortArrows columnKey="instruments" sortOrder={sortOrder} />
+                  </Th>
+                  <Th
+                    onClick={() => handleSort('totalInstruments')}
+                    cursor="pointer"
+                  >
+                    Total Instruments{' '}
+                    <SortArrows
+                      columnKey="totalInstruments"
+                      sortOrder={sortOrder}
+                    />
+                  </Th>
                 </Tr>
-              ) : (
-                tableData.map((p) => (
-                  <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
-                ))
-              )}
-            </Tbody>
-          </Table>
-        ) : (
-          <CardView data={tableData} openEditForm={openEditForm} />
-        )}
+              </Thead>
+              <Tbody>
+                {tableData.length === 0 && isLoading ? (
+                  <Tr>
+                    <Td colSpan={7}>
+                      <Center py={8}>
+                        <Spinner size="lg" />
+                      </Center>
+                    </Td>
+                  </Tr>
+                ) : (
+                  tableData.map((p) => (
+                    <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
+                  ))
+                )}
+              </Tbody>
+            </Table>
+          ) : (
+            <CardView data={tableData} openEditForm={openEditForm} />
+          )}
+          {isLoading && tableData.length > 0 && (
+            <Box
+              position="absolute"
+              inset={0}
+              bg="whiteAlpha.800"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              zIndex={1}
+            >
+              <Spinner size="lg" />
+            </Box>
+          )}
+        </Box>
       </TableContainer>
     </>
   );
 }
 
-function ProgramTable() {
+function ProgramTable({ onStatsRefresh }) {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { role, loading: roleLoading } = useRoleContext();
@@ -598,6 +617,7 @@ function ProgramTable() {
       selectedProgram={selectedProgram}
       setSelectedProgram={setSelectedProgram}
       onSave={fetchData}
+      onStatsRefresh={onStatsRefresh}
     />
   );
 }

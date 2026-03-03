@@ -23,6 +23,7 @@ export const UpdatesPage = () => {
   );
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isProgramUpdatesLoading, setIsProgramUpdatesLoading] = useState(false);
 
   const fetchData = useCallback(
     async (path) => {
@@ -59,6 +60,7 @@ export const UpdatesPage = () => {
   }, [backend, userId]);
 
   const refetchProgramUpdates = useCallback(async () => {
+    setIsProgramUpdatesLoading(true);
     try {
       const programUpdates = await fetchData(`program-updates/${userId}`);
       const mappedProgram = (programUpdates || []).map(item => ({
@@ -69,6 +71,8 @@ export const UpdatesPage = () => {
       setOriginalProgramUpdatesData(mappedProgram);
     } catch (error) {
       console.error('Error refetching program updates:', error);
+    } finally {
+      setIsProgramUpdatesLoading(false);
     }
   }, [fetchData, userId]);
 
@@ -131,7 +135,7 @@ export const UpdatesPage = () => {
           data={programUpdatesData}
           setData={setProgramUpdatesData}
           originalData={originalProgramUpdatesData}
-          isLoading={isLoading}
+          isLoading={isLoading || isProgramUpdatesLoading}
           onSave={refetchProgramUpdates}
         />
       ) : (
@@ -146,7 +150,7 @@ export const UpdatesPage = () => {
             data={programUpdatesData}
             setData={setProgramUpdatesData}
             originalData={originalProgramUpdatesData}
-            isLoading={isLoading}
+            isLoading={isLoading || isProgramUpdatesLoading}
             onSave={refetchProgramUpdates}
           />
         </>

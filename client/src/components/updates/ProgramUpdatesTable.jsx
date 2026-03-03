@@ -198,90 +198,105 @@ export const ProgramUpdatesTable = ({
           </Button>
         </Flex>
 
-        <TableContainer overflowX="auto" maxW="100%">
-          <Table variant="simple">
-            <Thead>
-              {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
-              <Tr>
-                <Th
-                  onClick={() => handleSort("updateDate")}
-                  cursor="pointer"
-                >
-                  Time{" "}
-                  <SortArrows
-                    columnKey={"updateDate"}
-                    sortOrder={sortOrder}
-                  />
-                </Th>
-                <Th
-                  onClick={() => handleSort("note")}
-                  cursor="pointer"
-                >
-                  Notes{" "}
-                  <SortArrows
-                    columnKey={"note"}
-                    sortOrder={sortOrder}
-                  />
-                </Th>
-                <Th
-                  onClick={() => handleSort("programName")}
-                  cursor="pointer"
-                >
-                  Program{" "}
-                  <SortArrows
-                    columnKey={"programName"}
-                    sortOrder={sortOrder}
-                  />
-                </Th>
-                <Th
-                  onClick={() => handleSort("firstName")}
-                  cursor="pointer"
-                >
-                  Author{" "}
-                  <SortArrows
-                    columnKey={"firstName"}
-                    sortOrder={sortOrder}
-                  />
-                </Th>
-                <Th
-                  onClick={() => handleSort("status")}
-                  cursor="pointer"
-                >
-                  Status{" "}
-                  <SortArrows
-                    columnKey={"status"}
-                    sortOrder={sortOrder}
-                  />
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {isLoading ? (
+        <Box position="relative">
+          <TableContainer overflowX="auto" maxW="100%">
+            <Table variant="simple">
+              <Thead>
+                {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
                 <Tr>
-                  <Td colSpan={5}>
-                    <Center py={8}>
-                      <Spinner size="lg" />
-                    </Center>
-                  </Td>
+                  <Th
+                    onClick={() => handleSort("updateDate")}
+                    cursor="pointer"
+                  >
+                    Time{" "}
+                    <SortArrows
+                      columnKey={"updateDate"}
+                      sortOrder={sortOrder}
+                    />
+                  </Th>
+                  <Th
+                    onClick={() => handleSort("note")}
+                    cursor="pointer"
+                  >
+                    Notes{" "}
+                    <SortArrows
+                      columnKey={"note"}
+                      sortOrder={sortOrder}
+                    />
+                  </Th>
+                  <Th
+                    onClick={() => handleSort("programName")}
+                    cursor="pointer"
+                  >
+                    Program{" "}
+                    <SortArrows
+                      columnKey={"programName"}
+                      sortOrder={sortOrder}
+                    />
+                  </Th>
+                  <Th
+                    onClick={() => handleSort("firstName")}
+                    cursor="pointer"
+                  >
+                    Author{" "}
+                    <SortArrows
+                      columnKey={"firstName"}
+                      sortOrder={sortOrder}
+                    />
+                  </Th>
+                  <Th
+                    onClick={() => handleSort("status")}
+                    cursor="pointer"
+                  >
+                    Status{" "}
+                    <SortArrows
+                      columnKey={"status"}
+                      sortOrder={sortOrder}
+                    />
+                  </Th>
                 </Tr>
-              ) : (
-                tableData.map((row) => (
-                  <Tr key={row.id} onClick={() => openEditForm(row)}>
-                    <Td>{row.updateDate}</Td>
-                    <Td>{row.note}</Td>
-                    <Td>{row.name}</Td>
-                    <Td>
-                      {row.firstName} {row.lastName}
-                    </Td>
-                    <Td>
-                      <Badge>{row.status}</Badge>
+              </Thead>
+              <Tbody>
+                {tableData.length === 0 && isLoading ? (
+                  <Tr>
+                    <Td colSpan={5}>
+                      <Center py={8}>
+                        <Spinner size="lg" />
+                      </Center>
                     </Td>
                   </Tr>
-                ))
-              )}
-            </Tbody>
-          </Table>
-        </TableContainer>
+                ) : (
+                  tableData.map((row) => (
+                    <Tr key={row.id} onClick={() => openEditForm(row)}>
+                      <Td>{row.updateDate}</Td>
+                      <Td>{row.note}</Td>
+                      <Td>{row.name}</Td>
+                      <Td>
+                        {row.firstName} {row.lastName}
+                      </Td>
+                      <Td>
+                        <Badge>{row.status}</Badge>
+                      </Td>
+                    </Tr>
+                  ))
+                )}
+              </Tbody>
+            </Table>
+          </TableContainer>
+          {isLoading && tableData.length > 0 && (
+            <Box
+              position="absolute"
+              inset={0}
+              bg="whiteAlpha.800"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              zIndex={1}
+            >
+              <Spinner size="lg" />
+            </Box>
+          )}
+        </Box>
       </Box>
     </>
   );
