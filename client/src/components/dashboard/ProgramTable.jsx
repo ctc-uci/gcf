@@ -33,7 +33,7 @@ import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useRoleContext } from "@/contexts/hooks/useRoleContext";
 import { useTableSort } from "../../contexts/hooks/TableSort";
 import { SortArrows } from "../tables/SortArrows";
-import { ProgramForm } from "./ProgramForm";
+import { ProgramForm } from './ProgramForm';
 
 const getRouteByRole = (role, userId) => {
   const routes = {
