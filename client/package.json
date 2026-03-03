@@ -12,6 +12,7 @@
     "lint": "eslint",
     "format": "npx prettier --write .",
     "preview": "vite preview",
+    "preview:railway": "vite preview --host 0.0.0.0",
     "postinstall": "patch-package",
     "test": "vitest --run",
     "test:watch": "vitest"
