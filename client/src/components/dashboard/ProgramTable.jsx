@@ -46,7 +46,7 @@ import {
 import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
 import CardView from './CardView';
-import { ProgramForm } from './ProgramForm';
+import { ProgramForm } from './ProgramForm/index';
 
 const getRouteByRole = (role, userId) => {
   const routes = {
