@@ -17,7 +17,6 @@ import {
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import { authenticateGoogleUser } from '@/utils/auth/providers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // import { FaGoogle } from "react-icons/fa6";
@@ -70,10 +69,6 @@ export const Signup = () => {
         });
       }
     }
-  };
-
-  const handleGoogleSignup = async () => {
-    await authenticateGoogleUser();
   };
 
   useEffect(() => {

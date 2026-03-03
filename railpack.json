@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "steps": {
+    "install": {
+      "commands": ["yarn install"]
+    },
+    "build": {
+      "commands": ["yarn build"]
+    }
+  },
+  "deploy": {
+    "startCommand": "yarn preview"
+  }
+}

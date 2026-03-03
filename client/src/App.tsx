@@ -19,7 +19,9 @@ import {
   Navigate,
 } from 'react-router-dom';
 
+// @ts-ignore JS module without TypeScript types
 import { Account } from './components/accounts/Account';
+// @ts-ignore JS module without TypeScript types
 import { Media } from './components/media/Media';
 
 const App = () => {
