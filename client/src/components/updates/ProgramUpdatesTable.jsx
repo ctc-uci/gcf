@@ -56,6 +56,7 @@ export function downloadProgramUpdatesAsCsv(data) {
 export const ProgramUpdatesTable = ({
   originalData,
   isLoading,
+  onSave,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const columns = [
@@ -130,6 +131,7 @@ export const ProgramUpdatesTable = ({
           setIsFormOpen(false);
           setSelectedUpdate(null);
         }}
+        onSave={onSave}
         programUpdateId={selectedUpdate?.id}
       />
       <Box mt="30px" ml="10px">

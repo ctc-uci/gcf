@@ -58,6 +58,20 @@ export const UpdatesPage = () => {
     }
   }, [backend, userId]);
 
+  const refetchProgramUpdates = useCallback(async () => {
+    try {
+      const programUpdates = await fetchData(`program-updates/${userId}`);
+      const mappedProgram = (programUpdates || []).map(item => ({
+        ...item,
+        fullName: `${item.firstName} ${item.lastName}`,
+      }));
+      setProgramUpdatesData(mappedProgram);
+      setOriginalProgramUpdatesData(mappedProgram);
+    } catch (error) {
+      console.error('Error refetching program updates:', error);
+    }
+  }, [fetchData, userId]);
+
   useEffect(() => {
     if (!userId || !backend) {
       setIsLoading(false);
@@ -68,7 +82,7 @@ export const UpdatesPage = () => {
       try {
         if (role === 'Program Director') {
           const programUpdates = await fetchData(`program-updates/${userId}`);
-          const mappedProgram = programUpdates.map(item => ({
+          const mappedProgram = (programUpdates || []).map(item => ({
             ...item,
             fullName: `${item.firstName} ${item.lastName}`,
           }));
@@ -80,11 +94,11 @@ export const UpdatesPage = () => {
             fetchMediaUpdatesForUser(),
             fetchData(`program-updates/${userId}`),
           ]);
-          const mappedMedia = mediaUpdates.map(item => ({
+          const mappedMedia = (mediaUpdates || []).map(item => ({
             ...item,
             fullName: `${item.firstName} ${item.lastName}`,
           }));
-          const mappedProgram = programUpdates.map(item => ({
+          const mappedProgram = (programUpdates || []).map(item => ({
             ...item,
             fullName: `${item.firstName} ${item.lastName}`,
           }));
@@ -118,6 +132,7 @@ export const UpdatesPage = () => {
           setData={setProgramUpdatesData}
           originalData={originalProgramUpdatesData}
           isLoading={isLoading}
+          onSave={refetchProgramUpdates}
         />
       ) : (
         <>
@@ -132,6 +147,7 @@ export const UpdatesPage = () => {
             setData={setProgramUpdatesData}
             originalData={originalProgramUpdatesData}
             isLoading={isLoading}
+            onSave={refetchProgramUpdates}
           />
         </>
       )}
