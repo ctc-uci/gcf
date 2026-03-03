@@ -3,7 +3,7 @@ import { Box, Flex } from '@chakra-ui/react';
 
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
-import LessonVideos from './lessonVideos';
+import LessonVideos from './LessonVideos';
 import ProgramTable from './ProgramTable';
 import StatisticsSummary from './StatisticsSummary';
 
