@@ -1,18 +1,30 @@
 import firebaseAdmin, { type ServiceAccount } from 'firebase-admin';
 import dotenv from 'dotenv';
-
-// JSON file fallback (used when env var is not provided)
-// https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments
-import fileServiceAccount from './firebase-adminsdk.json';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 
-const serviceAccountFromEnv = process.env.FIREBASE_ADMIN_SDK
-  ? (JSON.parse(process.env.FIREBASE_ADMIN_SDK) as ServiceAccount)
-  : null;
+function loadServiceAccount(): ServiceAccount {
+  // Prefer credentials from env var when available
+  if (process.env.FIREBASE_ADMIN_SDK) {
+    return JSON.parse(process.env.FIREBASE_ADMIN_SDK) as ServiceAccount;
+  }
 
-const serviceAccount: ServiceAccount =
-  serviceAccountFromEnv ?? (fileServiceAccount as ServiceAccount);
+  // Fallback to local JSON file for environments where it's present (e.g. local dev)
+  const jsonPath = path.join(__dirname, 'firebase-adminsdk.json');
+
+  if (fs.existsSync(jsonPath)) {
+    const raw = fs.readFileSync(jsonPath, 'utf8');
+    return JSON.parse(raw) as ServiceAccount;
+  }
+
+  throw new Error(
+    'Firebase admin credentials not configured. Set FIREBASE_ADMIN_SDK or add config/firebase-adminsdk.json.'
+  );
+}
+
+const serviceAccount = loadServiceAccount();
 
 export const admin = firebaseAdmin.initializeApp({
   credential: firebaseAdmin.credential.cert(serviceAccount),
