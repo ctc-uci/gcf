@@ -33,6 +33,10 @@ export default defineConfig(({ mode }) => {
       },
     },
 
+    preview: {
+      allowedHosts: ['gcf.up.railway.app'],
+    },
+
     test: {
       globals: true,
       environment: 'jsdom',
