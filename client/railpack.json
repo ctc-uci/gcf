@@ -2,13 +2,13 @@
   "$schema": "https://schema.railpack.com",
   "steps": {
     "install": {
-      "commands": ["yarn install"]
+      "commands": ["npm install"]
     },
     "build": {
-      "commands": ["yarn build"]
+      "commands": ["npm run build"]
     }
   },
   "deploy": {
-    "startCommand": "yarn preview:railway"
+    "startCommand": "npm run preview:railway"
   }
 }
