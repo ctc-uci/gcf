@@ -172,7 +172,7 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
             icon={<DownloadIcon />}
             size="sm"
             variant="ghost"
-            onClick={() => downloadMediaUpdatesAsCsv(tableData)}
+            onClick={() => downloadProgramUpdatesAsCsv(tableData)}
           />
           <Button
             size="sm"
