@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from 'react';
 
 import {
   AddIcon,
@@ -33,13 +33,12 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
-import { applyFilters } from "../../contexts/hooks/TableFilter";
+import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
-import { FilterComponent } from "../common/FilterComponent";
+import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './ProgramUpdateForm';
-import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
-
+import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 
 export function downloadProgramUpdatesAsCsv(data) {
   const headers = ['Time', 'Notes', 'Program', 'Author', 'Status'];
@@ -53,41 +52,38 @@ export function downloadProgramUpdatesAsCsv(data) {
   downloadCsv(headers, rows, `program-updates-${getFilenameTimestamp()}.csv`);
 }
 
-export const ProgramUpdatesTable = ({
-  originalData,
-  isLoading,
-  onSave,
-}) => {
-  const [searchQuery, setSearchQuery] = useState("");
+export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
+  const [searchQuery, setSearchQuery] = useState('');
   const columns = [
     {
-      key: "updateDate",
-      type: "date",
+      key: 'updateDate',
+      type: 'date',
     },
     {
-      key: "note",
-      type: "text",
+      key: 'note',
+      type: 'text',
     },
     {
-      key: "name",
-      type: "text",
+      key: 'name',
+      type: 'text',
     },
     {
-      key: "fullName",
-      type: "text",
+      key: 'fullName',
+      type: 'text',
     },
     {
-      key: "status",
-      type: "select",
-      options: ["Active", "Inactive"],
+      key: 'status',
+      type: 'select',
+      options: ['Active', 'Inactive'],
     },
   ];
   const [activeFilters, setActiveFilters] = useState([]);
-  const filteredData = useMemo(() => 
-    applyFilters(activeFilters, originalData),
-  [activeFilters, originalData]);
+  const filteredData = useMemo(
+    () => applyFilters(activeFilters, originalData),
+    [activeFilters, originalData]
+  );
 
-    const [selectedUpdate, setSelectedUpdate] = useState(null);
+  const [selectedUpdate, setSelectedUpdate] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const openEditForm = (update) => {
     setSelectedUpdate(update);
@@ -99,21 +95,20 @@ export const ProgramUpdatesTable = ({
   };
 
   const displayData = useMemo(() => {
-    if (searchQuery === "") {
+    if (searchQuery === '') {
       return filteredData;
     }
     return filteredData.filter(
-        (update) =>
-          update.updateDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          update.note.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          update.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          update.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          update.status.includes(searchQuery.toLowerCase())
-      );
+      (update) =>
+        update.updateDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        update.note.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        update.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        update.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        update.status.includes(searchQuery.toLowerCase())
+    );
   }, [searchQuery, filteredData]);
 
   const [sortedData, setSortedData] = useState(null);
-
 
   useEffect(() => {
     setSortedData(null);
@@ -154,11 +149,7 @@ export const ProgramUpdatesTable = ({
                 variant="ghost"
               />
             </PopoverTrigger>
-            <PopoverContent
-              w="800px"
-              maxW="90vw"
-              shadow="xl"
-            >
+            <PopoverContent w="800px" maxW="90vw" shadow="xl">
               <FilterComponent
                 columns={columns}
                 onFilterChange={(filters) => {
@@ -167,10 +158,7 @@ export const ProgramUpdatesTable = ({
               />
             </PopoverContent>
           </Popover>
-          <Text
-            fontSize="sm"
-            color="gray.500"
-          >
+          <Text fontSize="sm" color="gray.500">
             Displaying {tableData.length} results
           </Text>
           <IconButton
@@ -204,55 +192,34 @@ export const ProgramUpdatesTable = ({
               <Thead>
                 {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
                 <Tr>
-                  <Th
-                    onClick={() => handleSort("updateDate")}
-                    cursor="pointer"
-                  >
-                    Time{" "}
+                  <Th onClick={() => handleSort('updateDate')} cursor="pointer">
+                    Time{' '}
                     <SortArrows
-                      columnKey={"updateDate"}
+                      columnKey={'updateDate'}
                       sortOrder={sortOrder}
                     />
                   </Th>
+                  <Th onClick={() => handleSort('note')} cursor="pointer">
+                    Notes{' '}
+                    <SortArrows columnKey={'note'} sortOrder={sortOrder} />
+                  </Th>
                   <Th
-                    onClick={() => handleSort("note")}
+                    onClick={() => handleSort('programName')}
                     cursor="pointer"
                   >
-                    Notes{" "}
+                    Program{' '}
                     <SortArrows
-                      columnKey={"note"}
+                      columnKey={'programName'}
                       sortOrder={sortOrder}
                     />
                   </Th>
-                  <Th
-                    onClick={() => handleSort("programName")}
-                    cursor="pointer"
-                  >
-                    Program{" "}
-                    <SortArrows
-                      columnKey={"programName"}
-                      sortOrder={sortOrder}
-                    />
+                  <Th onClick={() => handleSort('firstName')} cursor="pointer">
+                    Author{' '}
+                    <SortArrows columnKey={'firstName'} sortOrder={sortOrder} />
                   </Th>
-                  <Th
-                    onClick={() => handleSort("firstName")}
-                    cursor="pointer"
-                  >
-                    Author{" "}
-                    <SortArrows
-                      columnKey={"firstName"}
-                      sortOrder={sortOrder}
-                    />
-                  </Th>
-                  <Th
-                    onClick={() => handleSort("status")}
-                    cursor="pointer"
-                  >
-                    Status{" "}
-                    <SortArrows
-                      columnKey={"status"}
-                      sortOrder={sortOrder}
-                    />
+                  <Th onClick={() => handleSort('status')} cursor="pointer">
+                    Status{' '}
+                    <SortArrows columnKey={'status'} sortOrder={sortOrder} />
                   </Th>
                 </Tr>
               </Thead>
@@ -267,7 +234,11 @@ export const ProgramUpdatesTable = ({
                   </Tr>
                 ) : (
                   tableData.map((row) => (
-                    <Tr key={row.id} onClick={() => openEditForm(row)}>
+                    <Tr
+                      key={row.id}
+                      onClick={() => openEditForm(row)}
+                      cursor="pointer"
+                    >
                       <Td>{row.updateDate}</Td>
                       <Td>{row.note}</Td>
                       <Td>{row.name}</Td>
