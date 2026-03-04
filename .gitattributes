@@ -1,0 +1,12 @@
+# Handle line endings automatically for files detected as text 
+# and force LF checkouts.
+* text=auto eol=lf
+
+# Explicitly declare text files you want to always be LF
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.html text eol=lf

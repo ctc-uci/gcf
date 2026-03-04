@@ -6,6 +6,6 @@
   ],
   "compilerOptions": {
     "checkJs": false,
-    "allowJs": true,
+    "allowJs": true
   }
 }

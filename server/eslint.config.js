@@ -1,26 +1,29 @@
-import js from "@eslint/js";
-import globals from "globals";
-import tseslint from "typescript-eslint";
+import js from '@eslint/js';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+import eslintConfigPrettier from "eslint-config-prettier";
 
 export default tseslint.config({
   extends: [js.configs.recommended, ...tseslint.configs.recommended],
-  files: ["**/*.{ts,tsx,js,jsx}"],
-  ignores: ["dist"],
+  files: ['**/*.{ts,tsx,js,jsx}'],
+  ignores: ['dist'],
   languageOptions: {
     ecmaVersion: 2020,
     globals: globals.browser,
   },
 
   rules: {
-    "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": [
-      "warn",
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'warn',
       {
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_",
-        caughtErrorsIgnorePattern: "^_",
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
       },
     ],
-    eqeqeq: "error",
+    eqeqeq: 'error',
+    },
   },
-});
+  eslintConfigPrettier,
+);

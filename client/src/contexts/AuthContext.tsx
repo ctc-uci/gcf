@@ -1,8 +1,8 @@
-import { createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from 'react';
 
-import { CreateToastFnReturn, Spinner } from "@chakra-ui/react";
+import { CreateToastFnReturn, Spinner } from '@chakra-ui/react';
 
-import { AxiosInstance } from "axios";
+import { AxiosInstance } from 'axios';
 import {
   createUserWithEmailAndPassword,
   getRedirectResult,
@@ -11,18 +11,22 @@ import {
   signOut,
   User,
   UserCredential,
-} from "firebase/auth";
-import { NavigateFunction } from "react-router-dom";
+} from 'firebase/auth';
+import { NavigateFunction } from 'react-router-dom';
 
-import { auth } from "../utils/auth/firebase";
-import { useBackendContext } from "./hooks/useBackendContext";
+import { auth } from '../utils/auth/firebase';
+import { useBackendContext } from './hooks/useBackendContext';
 
 interface AuthContextProps {
   currentUser: User | null;
-  signup: ({ email, password, role }: EmailPasswordRole) => Promise<UserCredential>;
+  signup: ({
+    email,
+    password,
+    role,
+  }: EmailPasswordRole) => Promise<UserCredential>;
   login: ({ email, password }: EmailPassword) => Promise<UserCredential>;
   logout: () => Promise<void>;
-  resetPassword: ({ email }: Pick<EmailPassword, "email">) => Promise<void>;
+  resetPassword: ({ email }: Pick<EmailPassword, 'email'>) => Promise<void>;
   handleRedirectResult: (
     backend: AxiosInstance,
     navigate: NavigateFunction,
@@ -60,12 +64,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password
     );
 
-    await backend.post("/gcf-users/", {
+    await backend.post('/gcf-users/', {
       id: userCredential.user.uid,
       role: role,
       created_by: null,
       first_name: 'John',
-      last_name: 'Doe'
+      last_name: 'Doe',
     });
 
     return userCredential;
@@ -83,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return signOut(auth);
   };
 
-  const resetPassword = ({ email }: Pick<EmailPassword, "email">) => {
+  const resetPassword = ({ email }: Pick<EmailPassword, 'email'>) => {
     return sendPasswordResetEmail(auth, email);
   };
 
@@ -105,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const response = await backend.get(`/gcf-users/${result.user.uid}`);
         if (response.data.length === 0) {
           try {
-            await backend.post("/gcf-users/", {
+            await backend.post('/gcf-users/', {
               firebaseUid: result.user.uid,
               role: 'Admin',
               created_by: null,
@@ -115,16 +119,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           } catch (e) {
             await backend.delete(`/gcf-users/${result.user.uid}`);
             toast({
-              title: "An error occurred",
+              title: 'An error occurred',
               description: `Account was not created: ${e.message}`,
-              status: "error",
+              status: 'error',
             });
           }
         }
-        navigate("/dashboard");
+        navigate('/dashboard');
       }
     } catch (error) {
-      console.error("Redirect result error:", error);
+      console.error('Redirect result error:', error);
     }
   };
 

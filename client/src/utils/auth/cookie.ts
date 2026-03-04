@@ -1,4 +1,4 @@
-import { Cookies } from "react-cookie";
+import { Cookies } from 'react-cookie';
 
 interface CookieConfig {
   maxAge: number;
@@ -12,12 +12,12 @@ interface CookieConfig {
  */
 const cookieConfig: CookieConfig = {
   maxAge: 3600,
-  path: "/",
-  secure: document.location.protocol === "https:",
+  path: '/',
+  secure: document.location.protocol === 'https:',
 };
 
 export const cookieKeys = {
-  ACCESS_TOKEN: "accessToken",
+  ACCESS_TOKEN: 'accessToken',
 };
 
 export const setCookie = ({
@@ -36,7 +36,7 @@ export const setCookie = ({
   }
 
   if (config.secure) {
-    cookie += "; secure";
+    cookie += '; secure';
   }
 
   document.cookie = cookie;
