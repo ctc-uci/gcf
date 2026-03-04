@@ -1,5 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-
+import { useEffect, useRef, useState } from 'react';
+import {
+  CountrySelect,
+  StateSelect,
+  CitySelect,
+  RegionSelect,
+  GetRegions,
+  GetCountriesByRegion,
+  GetCountries,
+  GetState,
+  GetCity,
+} from 'react-country-state-city';
+import 'react-country-state-city/dist/react-country-state-city.css';
 import {
   Box,
   Button,
@@ -18,20 +29,23 @@ import {
   NumberInputField,
   NumberInputStepper,
   Select,
+  Text,
   Spinner,
   Tag,
   TagCloseButton,
   TagLabel,
   useDisclosure,
   VStack,
-} from "@chakra-ui/react";
+  Grid,
+  GridItem,
+} from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { MediaUploadModal } from "@/components/media/MediaUploadModal";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { MediaUploadModal } from '@/components/media/MediaUploadModal';
 
-import { FullscreenFlyoutButton } from "../FullscreenFlyoutButton";
-import { useFullscreenFlyout } from "../useFullScreenFlyout.js";
+import { FullscreenFlyoutButton } from '../FullscreenFlyoutButton';
+import { useFullscreenFlyout } from '../useFullScreenFlyout.js';
 
 // sub-component for adding instruments
 const InstrumentForm = ({ setFormData }) => {
@@ -203,10 +217,7 @@ function CurriculumLinkForm({ formState, setFormData }) {
     if (!link?.trim()) return;
 
     let validLink = link.trim();
-    if (
-      !validLink.startsWith('http://') &&
-      !validLink.startsWith('https://')
-    ) {
+    if (!validLink.startsWith('http://') && !validLink.startsWith('https://')) {
       validLink = 'https://' + validLink;
     }
 
@@ -365,9 +376,16 @@ export const ProgramForm = ({
   const onClose = isControlled ? onCloseProp : disclosure.onClose;
   const btnRef = useRef(null);
   const { backend } = useBackendContext();
-  const [regions, setRegions] = useState([]);
-  const [countries, setCountries] = useState([]);
+  const [region, setRegion] = useState('');
+  const [country, setCountry] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
   const { currentUser } = useAuthContext();
+
+  const [countriesList, setCountriesList] = useState([]);
+  const [regionList, setRegionList] = useState([]);
+  const [stateList, setStateList] = useState([]);
+  const [cityList, setCityList] = useState([]);
 
   const [initialProgramDirectorIds, setInitialProgramDirectorIds] = useState(
     []
@@ -393,6 +411,36 @@ export const ProgramForm = ({
   });
 
   const [activeTab, setActiveTab] = useState('overview');
+
+  useEffect(() => {
+    GetRegions().then((result) => {
+      setRegionList(result);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (region) {
+      GetCountriesByRegion(region).then((result) => {
+        setCountriesList(result);
+      });
+    }
+  }, [region]);
+
+  useEffect(() => {
+    if (country) {
+      GetState(parseInt(country)).then((result) => {
+        setStateList(result);
+      });
+    }
+  }, [country]);
+
+  useEffect(() => {
+    if (country && state) {
+      GetCity(parseInt(country), parseInt(state)).then((result) => {
+        setCityList(result);
+      });
+    }
+  }, [country, state]);
 
   useEffect(() => {
     async function loadProgramRegionData() {
@@ -462,9 +510,7 @@ export const ProgramForm = ({
       setFormState({
         status: program.status ?? null,
         programName: program.title ?? '',
-        launchDate: program.launchDate
-          ? program.launchDate.split('T')[0]
-          : '',
+        launchDate: program.launchDate ? program.launchDate.split('T')[0] : '',
         regionId: regionId,
         country: program.country ?? null,
         students: program.students ?? 0,
@@ -497,9 +543,7 @@ export const ProgramForm = ({
       );
 
       setInitialUploadedMedia(
-        (program.media ?? [])
-          .filter((m) => m.file_name)
-          .map((m) => m.file_name)
+        (program.media ?? []).filter((m) => m.file_name).map((m) => m.file_name)
       );
     }
     loadProgramRegionData();
@@ -586,9 +630,7 @@ export const ProgramForm = ({
         }
       }
 
-      const currentLinks = (formState.curriculumLinks ?? []).map(
-        (p) => p.link
-      );
+      const currentLinks = (formState.curriculumLinks ?? []).map((p) => p.link);
       for (const playlist of formState.curriculumLinks ?? []) {
         if (!initialCurriculumLinks.includes(playlist.link)) {
           await backend.post(`/program/${programId}/playlists`, {
@@ -696,37 +738,17 @@ export const ProgramForm = ({
     }
   }
 
-  useEffect(() => {
-    async function getRegions() {
-      try {
-        const response = await backend.get('/region');
-        setRegions(response.data);
-      } catch (error) {
-        console.error('Error fetching regions:', error);
-      }
-    }
-    getRegions();
-  }, [formState.regionId, backend]);
-
-  useEffect(() => {
-    async function getCountriesForRegion() {
-      if (!formState.regionId) {
-        setCountries([]);
-        return;
-      }
-
-      try {
-        const response = await backend.get(
-          `/region/${formState.regionId}/countries`
-        );
-        setCountries(response.data);
-      } catch (error) {
-        console.error('Error fetching countries:', error);
-        setCountries([]);
-      }
-    }
-    getCountriesForRegion();
-  }, [formState.regionId, backend]);
+  // useEffect(() => {
+  //   async function getRegions() {
+  //     try {
+  //       const response = await backend.get('/region');
+  //       setRegion(response.data);
+  //     } catch (error) {
+  //       console.error('Error fetching regions:', error);
+  //     }
+  //   }
+  //   getRegions();
+  // }, [formState.regionId, backend]);
 
   return (
     <>
@@ -782,9 +804,7 @@ export const ProgramForm = ({
                   onClick={() => setActiveTab('media')}
                   color={activeTab === 'media' ? 'teal.500' : 'gray.600'}
                   borderBottom="2px solid"
-                  borderColor={
-                    activeTab === 'media' ? 'teal.500' : 'gray.200'
-                  }
+                  borderColor={activeTab === 'media' ? 'teal.500' : 'gray.200'}
                   _hover={{ bg: 'gray.50' }}
                 >
                   Media
@@ -816,9 +836,7 @@ export const ProgramForm = ({
                   <Input
                     placeholder="Enter Program Name"
                     value={formState.programName || ''}
-                    onChange={(e) =>
-                      handleProgramNameChange(e.target.value)
-                    }
+                    onChange={(e) => handleProgramNameChange(e.target.value)}
                   />
                   <h3>Launch Date</h3>
                   <Input
@@ -829,43 +847,68 @@ export const ProgramForm = ({
                       handleProgramLaunchDateChange(e.target.value)
                     }
                   />
-                  <h3>Region</h3>
-                  <Select
-                    placeholder="Select region"
-                    value={formState.regionId || ''}
-                    onChange={(e) => handleRegionChange(e.target.value)}
-                  >
-                    {regions.map((region) => (
-                      <option key={region.id} value={region.id}>
-                        {region.name}
-                      </option>
-                    ))}
-                  </Select>
-                  {formState.regionId && (
-                    <>
-                      <h3>Country</h3>
+                  <h3>Location</h3>
+                  <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+                    <GridItem>
                       <Select
-                        placeholder="Select Country"
-                        value={formState.country || ''}
-                        onChange={(e) =>
-                          handleCountryChange(e.target.value)
-                        }
+                        onChange={(e) => setRegion(e.target.value)}
+                        placeholder="Select region..."
+                        value={region}
                       >
-                        {countries.map((country) => (
-                          <option key={country.id} value={country.id}>
-                            {country.name}
+                        {regionList.map((_region) => (
+                          <option key={_region.id} value={_region.name}>
+                            {_region.name}
                           </option>
                         ))}
                       </Select>
-                    </>
-                  )}
+                    </GridItem>
+                    <GridItem>
+                      <Select
+                        onChange={(e) => setCountry(e.target.value)}
+                        placeholder="Select country..."
+                        value={country}
+                      >
+                        {countriesList.map((_country) => (
+                          <option key={_country.id} value={_country.id}>
+                            {_country.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </GridItem>
+                    <GridItem>
+                      <Select
+                        onChange={(e) => setState(e.target.value)}
+                        value={state}
+                        placeholder="Select state..."
+                        style={{ width: '100%', minHeight: 40 }}
+                      >
+                        {stateList.map((_state) => (
+                          <option key={_state.id} value={_state.id}>
+                            {_state.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </GridItem>
+                    <GridItem>
+                      <Select
+                        onChange={(e) => setCity(e.target.value)}
+                        value={city}
+                        placeholder="Select city..."
+                        style={{ width: '100%', minHeight: 40 }}
+                      >
+                        {cityList.map((_city) => (
+                          <option key={_city.id} value={_city.id}>
+                            {_city.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </GridItem>
+                  </Grid>
                   <h3>Students</h3>
                   <NumberInput
                     min={0}
                     value={formState.students}
-                    onChange={(e) =>
-                      handleStudentNumberChange(Number(e))
-                    }
+                    onChange={(e) => handleStudentNumberChange(Number(e))}
                   >
                     <NumberInputField placeholder="Enter # of Students" />
                     <NumberInputStepper>
@@ -906,9 +949,7 @@ export const ProgramForm = ({
                   <Select
                     placeholder="Language"
                     value={formState.language || ''}
-                    onChange={(e) =>
-                      handleLanguageChange(e.target.value)
-                    }
+                    onChange={(e) => handleLanguageChange(e.target.value)}
                   >
                     <option value="english">English</option>
                     <option value="spanish">Spanish</option>
