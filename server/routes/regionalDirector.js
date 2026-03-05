@@ -7,6 +7,20 @@ import { db } from "../db/db-pgp";
 const regionalDirectorRouter = express.Router();
 regionalDirectorRouter.use(express.json());
 
+// Retrieves first and last name of all regional directors
+regionalDirectorRouter.get("/all", async (req, res) => {
+  try {
+    const data = await db.query(
+      `SELECT u.first_name, u.last_name
+       FROM gcf_user u WHERE u.id IN (SELECT user_id FROM regional_director)`,
+    );
+    res.status(200).json(keysToCamel(data));
+  } catch (err) {
+    console.error("Error in /all", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 regionalDirectorRouter.get("/me/:id", async (req, res) => {
   try {
     const { id } = req.params;
