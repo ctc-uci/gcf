@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   AbsoluteCenter,
@@ -21,6 +21,8 @@ import {
   useToast,
 } from '@chakra-ui/react';
 
+import { ForgotPassword } from './ForgotPassword';
+
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { authenticateGoogleUser } from '@/utils/auth/providers';
@@ -41,6 +43,7 @@ const signinSchema = z.object({
 type SigninFormValues = z.infer<typeof signinSchema>;
 
 export const Login = () => {
+  const [isForgot, setIsForgot] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -152,90 +155,92 @@ export const Login = () => {
             />
           </Box>
         </GridItem>
-
-        <GridItem>
-          <Box w="100%" mt="20%">
-            <Center>
-              <Heading as="u">Log In</Heading>
-            </Center>
-            <Center>
-              <form
-                onSubmit={handleSubmit(handleLogin)}
-                style={{ width: '70%' }}
-              >
-                <Stack spacing={7}>
-                  <FormControl isInvalid={!!errors.email} w={'100%'}>
-                    <FormLabel fontSize="lg">Email</FormLabel>
+        {isForgot ? (
+          <ForgotPassword />
+        ) : (
+          <GridItem>
+            <Box w="100%" mt="20%">
+              <Center>
+                <Heading as="u">Log In</Heading>
+              </Center>
+              <Center>
+                <form
+                  onSubmit={handleSubmit(handleLogin)}
+                  style={{ width: '70%' }}
+                >
+                  <Stack spacing={7}>
+                    <FormControl isInvalid={!!errors.email} w={'100%'}>
+                      <FormLabel fontSize="lg">Email</FormLabel>
+                      <Center>
+                        <Input
+                          placeholder="Email"
+                          type="email"
+                          size={'lg'}
+                          {...register('email')}
+                          name="email"
+                          isRequired
+                          autoComplete="email"
+                          borderRadius="full"
+                          bg="gray.100"
+                        />
+                      </Center>
+                      <FormErrorMessage>
+                        {errors.email?.message?.toString()}
+                      </FormErrorMessage>
+                    </FormControl>
+                    <FormControl isInvalid={!!errors.password}>
+                      <FormLabel fontSize="lg">Password</FormLabel>
+                      <Center>
+                        <Input
+                          placeholder="Password"
+                          type="password"
+                          size={'lg'}
+                          {...register('password')}
+                          name="password"
+                          isRequired
+                          autoComplete="current-password"
+                          borderRadius="full"
+                          bg="gray.100"
+                        />
+                      </Center>
+                      <FormErrorMessage>
+                        {errors.password?.message?.toString()}
+                      </FormErrorMessage>
+                      <Flex gap="300px" mt="10px">
+                        <ChakraLink as={Link} to="/signup">
+                          <FormHelperText textDecoration="underline">
+                            Click here to sign up
+                          </FormHelperText>
+                        </ChakraLink>
+                        <ChakraLink onClick={() => setIsForgot(true)}>
+                          <FormHelperText
+                            color="blue.400"
+                            textDecoration="underline"
+                          >
+                            Forgot Password?
+                          </FormHelperText>
+                        </ChakraLink>
+                      </Flex>
+                    </FormControl>
                     <Center>
-                      <Input
-                        placeholder="Email"
-                        type="email"
+                      <Button
+                        type="submit"
                         size={'lg'}
-                        {...register('email')}
-                        name="email"
-                        isRequired
-                        autoComplete="email"
+                        isDisabled={Object.keys(errors).length > 0}
+                        bg="black"
+                        color="white"
                         borderRadius="full"
-                        bg="gray.100"
-                      />
+                        w="200px"
+                      >
+                        Login
+                      </Button>
                     </Center>
-                    <FormErrorMessage>
-                      {errors.email?.message?.toString()}
-                    </FormErrorMessage>
-                  </FormControl>
-                  <FormControl isInvalid={!!errors.password}>
-                    <FormLabel fontSize="lg">Password</FormLabel>
-                    <Center>
-                      <Input
-                        placeholder="Password"
-                        type="password"
-                        size={'lg'}
-                        {...register('password')}
-                        name="password"
-                        isRequired
-                        autoComplete="current-password"
-                        borderRadius="full"
-                        bg="gray.100"
-                      />
-                    </Center>
-                    <FormErrorMessage>
-                      {errors.password?.message?.toString()}
-                    </FormErrorMessage>
-                    <Flex gap="300px" mt="10px">
-                      <ChakraLink as={Link} to="/signup">
-                        <FormHelperText textDecoration="underline">
-                          Click here to sign up
-                        </FormHelperText>
-                      </ChakraLink>
-                      {/* TODO: Replace /signup with forgot password form */}
-                      <ChakraLink as={Link} to="/signup">
-                        <FormHelperText
-                          color="blue.400"
-                          textDecoration="underline"
-                        >
-                          Forgot Password?
-                        </FormHelperText>
-                      </ChakraLink>
-                    </Flex>
-                  </FormControl>
-                  <Center>
-                    <Button
-                      type="submit"
-                      size={'lg'}
-                      isDisabled={Object.keys(errors).length > 0}
-                      bg="black"
-                      color="white"
-                      borderRadius="full"
-                      w="200px"
-                    >
-                      Login
-                    </Button>
-                  </Center>
-                </Stack>
-              </form>
-            </Center>
-          </Box>
-        </GridItem>
+                  </Stack>
+                </form>
+              </Center>
+            </Box>
+          </GridItem>
+        )}
       </Grid>
     </Center>
   );
