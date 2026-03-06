@@ -213,6 +213,11 @@ gcfUserRouter.get('/role/:role', async (req, res) => {
 
 gcfUserRouter.get('/:id/accounts', async (req, res) => {
   try {
+
+    //for testing the badges 
+    res.status(200).json([]);
+    return;
+
     const { id } = req.params;
     const { role } = req.query;
 
