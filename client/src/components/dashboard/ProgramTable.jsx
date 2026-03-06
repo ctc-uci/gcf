@@ -32,7 +32,10 @@ import {
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
-import { HiOutlineAdjustmentsHorizontal, HiOutlineSquares2X2 } from 'react-icons/hi2';
+import {
+  HiOutlineAdjustmentsHorizontal,
+  HiOutlineSquares2X2,
+} from 'react-icons/hi2';
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
@@ -65,8 +68,8 @@ function mapAdminRow(row) {
     launchDate: row.launchDate,
     location: row.countryName ?? '',
     country: row.country,
-
-
+    city: row.city,
+    state: row.state,
     students: row.students ?? 0,
     instruments: row.instruments ?? 0,
     totalInstruments: row.instruments ?? 0,
@@ -74,8 +77,7 @@ function mapAdminRow(row) {
     regionalDirectors: row.regionalDirectors,
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
-
-    media: row.media
+    media: row.media,
   };
 }
 
@@ -96,7 +98,7 @@ function mapRdRow(row) {
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
 
-    media: row.media
+    media: row.media,
   };
 }
 
@@ -345,56 +347,49 @@ function ProgramDisplay({
 
   return (
     <>
-    <ProgramForm
-      isOpen={isFormOpen}
-      onOpen={() => setIsFormOpen(true)}
-      onClose={() => {
-        setIsFormOpen(false);
-        setSelectedProgram(null);
-      }}
-      program={selectedProgram}
-      onSave={onSave}
-    />
-    <TableContainer>
-      <HStack
-        mb={4}
-        justifyContent="space-between"
-        w="100%"
-      >
-        <HStack spacing={4}>
-          <Box
-            fontSize="xl"
-            fontWeight="semibold"
-          >
-            All Programs
-          </Box>
-          <HStack spacing={1}>
-            <IconButton
-              aria-label="search"
-              icon={<Search2Icon />}
-              size="sm"
-              variant="ghost"
-            />
-            <Input
-              w="120px"
-              size="xs"
-              placeholder="Type to search"
-              variant="unstyled"
-              borderBottom="1px solid"
-              borderColor="gray.300"
-              borderRadius="0"
-              px={1}
-              value={searchQuery}
-              onChange={handleSearch}
-            />
-            <IconButton
-              aria-label="filter"
-              icon={<HiOutlineAdjustmentsHorizontal />}
-              size="sm"
-              variant="ghost"
-            />
+      <ProgramForm
+        isOpen={isFormOpen}
+        onOpen={() => setIsFormOpen(true)}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedProgram(null);
+        }}
+        program={selectedProgram}
+        onSave={onSave}
+      />
+      <TableContainer>
+        <HStack mb={4} justifyContent="space-between" w="100%">
+          <HStack spacing={4}>
+            <Box fontSize="xl" fontWeight="semibold">
+              All Programs
+            </Box>
+            <HStack spacing={1}>
+              <IconButton
+                aria-label="search"
+                icon={<Search2Icon />}
+                size="sm"
+                variant="ghost"
+              />
+              <Input
+                w="120px"
+                size="xs"
+                placeholder="Type to search"
+                variant="unstyled"
+                borderBottom="1px solid"
+                borderColor="gray.300"
+                borderRadius="0"
+                px={1}
+                value={searchQuery}
+                onChange={handleSearch}
+              />
+              <IconButton
+                aria-label="filter"
+                icon={<HiOutlineAdjustmentsHorizontal />}
+                size="sm"
+                variant="ghost"
+              />
+            </HStack>
           </HStack>
-        </HStack>
           <HStack spacing={1}>
             <IconButton
               aria-label="menu"
@@ -549,11 +544,16 @@ function ProgramTable() {
         rows.map(async (row) => {
           // TODO: make this more efficient with lazy loading
           const programId = row.id ?? row.programId;
-          const [playlists, programDirectors, regionalDirectors] = await Promise.all([
-            backend.get(`/program/${programId}/playlists`),
-            backend.get(`/program/${programId}/program-directors`).catch(() => ({ data: [] })),
-            backend.get(`/program/${programId}/regional-directors`).catch(() => ({ data: [] })),
-          ]);
+          const [playlists, programDirectors, regionalDirectors] =
+            await Promise.all([
+              backend.get(`/program/${programId}/playlists`),
+              backend
+                .get(`/program/${programId}/program-directors`)
+                .catch(() => ({ data: [] })),
+              backend
+                .get(`/program/${programId}/regional-directors`)
+                .catch(() => ({ data: [] })),
+            ]);
 
           return {
             ...row,
@@ -567,7 +567,7 @@ function ProgramTable() {
       setOriginalPrograms(mappedPrograms);
       setPrograms(mappedPrograms);
     } catch (err) {
-      console.error("Error fetching data:", err);
+      console.error('Error fetching data:', err);
     } finally {
       setIsLoading(false);
     }
