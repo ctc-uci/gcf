@@ -97,6 +97,33 @@ directorRouter.get('/me/:userId/playlist', async (req, res) => {
   }
 });
 
+// get director's region
+directorRouter.get('/me/:userId/region', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const director = await db.query(
+      'SELECT program_id FROM program_director WHERE user_id = $1 LIMIT 1',
+      [userId]
+    );
+
+    if (!director?.length)
+      return res.status(404).json({ error: 'Program director not found' });
+    const region = await db.query(
+      `SELECT r.id
+            FROM program AS p
+            INNER JOIN country AS c ON p.country = c.id
+            INNER JOIN region AS r ON c.region_id = r.id
+            INNER JOIN program_director AS pd ON pd.program_id = p.id
+            WHERE pd.user_id = $1;`,
+      [director]
+    );
+
+    res.status(200).json(keysToCamel(region));
+  } catch (err) {
+    pass;
+  }
+});
+
 // create program director
 directorRouter.post('/', async (req, res) => {
   try {

@@ -33,6 +33,44 @@ programRouter.get('/:id', async (req, res) => {
   }
 });
 
+programRouter.get('/city/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const program = await db.query(`SELECT city FROM program WHERE id = $1`, [
+      id,
+    ]);
+
+    if (program.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(program[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+programRouter.get('/state/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const program = await db.query(`SELECT state FROM program WHERE id = $1`, [
+      id,
+    ]);
+
+    if (program.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(program[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 programRouter.get('/get-program-name/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -62,6 +100,8 @@ programRouter.post('/', async (req, res) => {
       createdBy,
       name,
       country,
+      state,
+      city,
       title,
       description,
       primaryLanguage,
@@ -77,6 +117,8 @@ programRouter.post('/', async (req, res) => {
         name,
         date_created,
         country,
+        state,
+        city,
         title,
         description,
         primary_language,
@@ -85,7 +127,7 @@ programRouter.post('/', async (req, res) => {
         launch_date
       )
       VALUES (
-        $1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9
+        $1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11
       )
       RETURNING *;
       `,
@@ -93,6 +135,8 @@ programRouter.post('/', async (req, res) => {
         createdBy,
         name,
         country,
+        state,
+        city,
         title,
         description ?? null,
         primaryLanguage ?? null,
@@ -115,6 +159,8 @@ programRouter.put('/:id', async (req, res) => {
     const {
       name,
       country,
+      state,
+      city,
       title,
       description,
       primaryLanguage,
@@ -129,18 +175,22 @@ programRouter.put('/:id', async (req, res) => {
       SET
         name = COALESCE($1, name),
         country = COALESCE($2, country),
-        title = COALESCE($3, title),
-        description = COALESCE($4, description),
-        primary_language = COALESCE($5, primary_language),
-        partner_org = COALESCE($6, partner_org),
-        status = COALESCE($7, status),
-        launch_date = COALESCE($8, launch_date)
-      WHERE id = $9
+        state = COALESCE($3, state),
+        city = COALESCE($4, city),
+        title = COALESCE($5, title),
+        description = COALESCE($6, description),
+        primary_language = COALESCE($7, primary_language),
+        partner_org = COALESCE($8, partner_org),
+        status = COALESCE($9, status),
+        launch_date = COALESCE($10, launch_date)
+      WHERE id = $11
       RETURNING *;
       `,
       [
         name,
         country,
+        state,
+        city,
         title,
         description,
         primaryLanguage,
