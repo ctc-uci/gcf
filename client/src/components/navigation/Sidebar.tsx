@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Icon, Link, VStack } from '@chakra-ui/react';
+import { Box, Button, Flex, Icon, Image, Link, VStack } from '@chakra-ui/react';
 
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { FaGuitar } from 'react-icons/fa';
@@ -6,7 +6,8 @@ import { HiOutlineUser } from 'react-icons/hi';
 import { MdOutlineNotifications, MdPermMedia } from 'react-icons/md';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 
-import { NAVBAR_HEIGHT, SIDEBAR_WIDTH } from './layoutConstants';
+import { SIDEBAR_WIDTH } from './layoutConstants';
+import logo from '/logo.png';
 
 export const Sidebar = () => {
   const { role } = useRoleContext();
@@ -61,18 +62,23 @@ export const Sidebar = () => {
   }
   return (
     <Box
-      position="fixed"
-      top={NAVBAR_HEIGHT}
-      left={0}
       width={SIDEBAR_WIDTH}
-      height={`calc(100vh - ${NAVBAR_HEIGHT})`}
-      borderRight="1px solid #e2e8f0"
       bg="white"
-      pt="18px"
-      zIndex={9}
+      borderRadius="xl"
+      boxShadow="sm"
+      pt={4}
+      pb={6}
+      px={4}
+      height="95vh"
+      display="flex"
+      flexDirection="column"
+      alignItems="stretch"
     >
-      <VStack>
-        <Flex direction="column" gap={3}>
+      <VStack align="stretch" spacing={5} flex="1">
+        <Box display="flex" justifyContent="center" flexShrink={0}>
+          <Image src={logo} alt="Logo" objectFit="contain" draggable={false} />
+        </Box>
+        <Flex direction="column" gap={3} flex="1">
           {navItems.map((item) => {
             const isActive =
               location.pathname === item.path ||

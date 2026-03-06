@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Button, Flex, Icon, Image, Link, Text } from '@chakra-ui/react';
+import { Button, Flex, Icon, Link, Text } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
@@ -9,7 +9,6 @@ import { HiOutlineLogout, HiOutlineUser } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 
 import { NAVBAR_HEIGHT } from './layoutConstants';
-import logo from '/logo.png';
 
 export const Navbar = () => {
   const { role } = useRoleContext();
@@ -44,17 +43,23 @@ export const Navbar = () => {
 
     const loadData = async () => {
       try {
-        if (role === "Regional Director") {
-          const regionData = await fetchData("region", `get-region-name/${userId}`);
-          setRegion(regionData?.name ?? "");
-          setProject("");
-        } else if (role === "Program Director") {
-          const projectData = await fetchData("program", `get-program-name/${userId}`);
-          setProject(projectData?.name ?? "");
-          setRegion("");
+        if (role === 'Regional Director') {
+          const regionData = await fetchData(
+            'region',
+            `get-region-name/${userId}`
+          );
+          setRegion(regionData?.name ?? '');
+          setProject('');
+        } else if (role === 'Program Director') {
+          const projectData = await fetchData(
+            'program',
+            `get-program-name/${userId}`
+          );
+          setProject(projectData?.name ?? '');
+          setRegion('');
         } else {
-          setRegion("");
-          setProject("");
+          setRegion('');
+          setProject('');
         }
       } catch (error) {
         console.error('Fetch error:', error);
@@ -65,28 +70,15 @@ export const Navbar = () => {
 
   return (
     <Flex
-      position="fixed"
-      top={0}
-      left={0}
-      right={0}
-      zIndex={10}
       height={NAVBAR_HEIGHT}
       align="center"
       w="100%"
-      pl="1.4vw"
-      borderBottom="1px solid #e2e8f0"
+      px={6}
+      py={4}
+      borderRadius="xl"
+      boxShadow="sm"
       bg="white"
     >
-      <Image
-        src={logo}
-        alt="Logo"
-        width={'9vw'}
-        maxH="10vh"
-        objectFit="contain"
-        draggable={false}
-        userSelect="none"
-      />
-
       <Flex justify="space-between" w="100%" px="2vw" align="center">
         <Text fontSize="2vh">
           {role === 'Super Admin' ? 'Super Admin Dashboard' : ''}
