@@ -1,5 +1,5 @@
 CREATE TABLE country (
-    id SERIAL PRIMARY KEY,
+    iso_code VARCHAR(70) PRIMARY KEY,
  	region_id INT NOT NULL,
     name VARCHAR(70) NOT NULL,
     last_modified TIMESTAMP NOT NULL
