@@ -92,15 +92,16 @@ export const Sidebar = () => {
                 draggable={false}
               >
                 <Button
-                  bg={isActive ? 'blue.50' : 'white'}
-                  color={isActive ? 'blue.700' : undefined}
+                  bg={isActive ? 'teal.500' : 'white'}
+                  color={isActive ? 'white' : undefined}
                   leftIcon={item.icon}
                   height="4.5vh"
                   justifyContent="left"
                   width="100%"
                   px={6}
                   py={5}
-                  _hover={{ bg: isActive ? 'blue.100' : 'gray.100' }}
+                  borderRadius="xl"
+                  _hover={{ bg: isActive ? 'teal.600' : 'gray.100' }}
                 >
                   {item.name}
                 </Button>

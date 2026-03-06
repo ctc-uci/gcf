@@ -18,6 +18,8 @@ const BADGE_CONFIG = {
     icon: FiBell,
     message: 'No updates have been made yet.',
   },
+
+  // when is this used (come back to it later) lwk should be program instead of region
   'no-program-region-assigned': {
     icon: IoHomeOutline,
     message:
