@@ -1,6 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { Button, Flex, Icon, Link, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  HStack,
+  Icon,
+  Image,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Text,
+} from '@chakra-ui/react';
+
+const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
+import { ChevronDownIcon } from '@chakra-ui/icons';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
@@ -18,7 +33,51 @@ export const Navbar = () => {
   const userId = currentUser?.uid;
   const [region, setRegion] = useState(''); // placeholder for region
   const [project, setProject] = useState(''); // placeholder for project
+  const [userName, setUserName] = useState(currentUser?.displayName ?? '');
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(
+    null
+  );
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isHoverActive, setIsHoverActive] = useState(false);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hoverDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const [triggerWidth, setTriggerWidth] = useState(160);
   const navigate = useNavigate();
+
+  const clearAllTimeouts = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    if (hoverDelayRef.current) {
+      clearTimeout(hoverDelayRef.current);
+      hoverDelayRef.current = null;
+    }
+  };
+
+  const openMenu = () => {
+    clearAllTimeouts();
+    if (triggerRef.current) {
+      setTriggerWidth(triggerRef.current.offsetWidth);
+    }
+    setIsMenuOpen(true);
+    hoverDelayRef.current = setTimeout(() => {
+      setIsHoverActive(true);
+      hoverDelayRef.current = null;
+    }, 20);
+  };
+
+  const closeMenuDelayed = () => {
+    clearAllTimeouts();
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsMenuOpen(false);
+      closeTimeoutRef.current = setTimeout(() => {
+        setIsHoverActive(false);
+        closeTimeoutRef.current = null;
+      }, 0);
+    }, 0);
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -61,12 +120,50 @@ export const Navbar = () => {
           setRegion('');
           setProject('');
         }
+
+        if (userId) {
+          try {
+            const userResponse = await backend.get(`/gcf-users/${userId}`);
+            const userData = userResponse.data;
+            if (userData?.firstName || userData?.lastName) {
+              const fullName = `${userData.firstName ?? ''} ${
+                userData.lastName ?? ''
+              }`.trim();
+              setUserName(fullName || currentUser?.displayName || '');
+            } else if (currentUser?.displayName) {
+              setUserName(currentUser.displayName);
+            }
+            if (userData?.picture && userData.picture.trim() !== '') {
+              const urlResponse = await backend.get(
+                `/images/url/${encodeURIComponent(userData.picture)}`
+              );
+              setProfilePictureUrl(urlResponse.data.url);
+            } else {
+              setProfilePictureUrl(DEFAULT_PROFILE_IMAGE);
+            }
+          } catch {
+            setProfilePictureUrl(DEFAULT_PROFILE_IMAGE);
+          }
+        }
       } catch (error) {
         console.error('Fetch error:', error);
       }
     };
     loadData();
   }, [userId, backend, role]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+      if (hoverDelayRef.current) clearTimeout(hoverDelayRef.current);
+    };
+  }, []);
+
+  const boxBg = !isMenuOpen
+    ? 'transparent'
+    : isHoverActive
+      ? 'gray.300'
+      : 'white';
 
   return (
     <Flex
@@ -90,29 +187,83 @@ export const Navbar = () => {
         </Text>
 
         <Flex gap={2} align="center">
-          <Button
-            bg="white"
-            as={Link}
-            href="/profile"
-            leftIcon={<Icon as={HiOutlineUser} boxSize="2vh" />}
-            _hover={{ variant: 'outline', textDecoration: 'none' }}
-            draggable={false}
-            userSelect="none"
-            textDecoration="none"
+          <Menu
+            isOpen={isMenuOpen}
+            onClose={() => setIsMenuOpen(false)}
+            placement="bottom-end"
+            offset={[0, 0]}
           >
-            <Text fontSize="2vh">User</Text>
-          </Button>
-          {/* TODO: Remove logout button when auth flow is finalized */}
-          <Button
-            bg="white"
-            leftIcon={<Icon as={HiOutlineLogout} boxSize="2vh" />}
-            _hover={{ variant: 'outline' }}
-            onClick={handleLogout}
-            draggable={false}
-            userSelect="none"
-          >
-            <Text fontSize="2vh">Logout</Text>
-          </Button>
+            <MenuButton
+              as={Button}
+              bg="transparent"
+              p={0}
+              borderRadius="full"
+              _hover={{ bg: 'transparent' }}
+              onMouseEnter={openMenu}
+              onMouseLeave={closeMenuDelayed}
+            >
+              <Box
+                ref={triggerRef}
+                px={3}
+                py={2}
+                bg={boxBg}
+                borderRadius={isMenuOpen ? '20px 20px 0 0' : '20px'}
+                minW="160px"
+              >
+                <HStack spacing={3} justify="center" align="center">
+                  <Image
+                    src={profilePictureUrl ?? DEFAULT_PROFILE_IMAGE}
+                    alt="Profile"
+                    w="28px"
+                    h="28px"
+                    borderRadius="full"
+                    objectFit="cover"
+                  />
+                  <Text fontSize="2vh" fontWeight="semibold">
+                    {userName || 'User'}
+                  </Text>
+                  <ChevronDownIcon boxSize={4} />
+                </HStack>
+              </Box>
+            </MenuButton>
+            <MenuList
+              onMouseEnter={openMenu}
+              onMouseLeave={closeMenuDelayed}
+              p={0}
+              minW={triggerWidth}
+              w={triggerWidth}
+              bg="transparent"
+              border="none"
+              boxShadow="none"
+              mt="-1px"
+            >
+              <Box
+                bg={boxBg}
+                borderRadius="0 0 20px 20px"
+                py={2}
+                px={1}
+                overflow="hidden"
+                w="100%"
+              >
+                <MenuItem
+                  onClick={() => navigate('/profile')}
+                  icon={<Icon as={HiOutlineUser} boxSize="2vh" />}
+                  bg={boxBg}
+                  _hover={{ bg: isHoverActive ? 'gray.400' : 'gray.100' }}
+                >
+                  Profile
+                </MenuItem>
+                <MenuItem
+                  onClick={handleLogout}
+                  icon={<Icon as={HiOutlineLogout} boxSize="2vh" />}
+                  bg={boxBg}
+                  _hover={{ bg: isHoverActive ? 'gray.400' : 'gray.100' }}
+                >
+                  Log Out
+                </MenuItem>
+              </Box>
+            </MenuList>
+          </Menu>
         </Flex>
       </Flex>
     </Flex>
