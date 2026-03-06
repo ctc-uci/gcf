@@ -34,6 +34,7 @@ import { useTableSort } from '../../contexts/hooks/TableSort';
 import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
 import { ReviewMediaUpdate } from './ReviewMediaUpdate';
+import { EmptyStateBadge } from '../badges/EmptyStateBadge';
 
 export function downloadMediaUpdatesAsCsv(data) {
   const headers = ['Time', 'Notes', 'Program', 'Author', 'Status'];
@@ -47,7 +48,12 @@ export function downloadMediaUpdatesAsCsv(data) {
   downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
 }
 
-export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) => {
+export const MediaUpdatesTable = ({
+  data,
+  setData,
+  originalData,
+  isLoading,
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const columns = [
     {
@@ -157,63 +163,78 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
         />
       </Flex>
 
-      <TableContainer overflowX="auto" maxW="100%">
-        <Table variant="simple">
-          <Thead>
-            {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
-            <Tr>
-              <Th onClick={() => handleSort('updateDate')} cursor="pointer">
-                Time{' '}
-                <SortArrows columnKey={'updateDate'} sortOrder={sortOrder} />{' '}
-              </Th>
-              <Th onClick={() => handleSort('note')} cursor="pointer">
-                Notes <SortArrows columnKey={'note'} sortOrder={sortOrder} />{' '}
-              </Th>
-              <Th onClick={() => handleSort('programName')} cursor="pointer">
-                Program{' '}
-                <SortArrows columnKey={'programName'} sortOrder={sortOrder} />{' '}
-              </Th>
-              <Th onClick={() => handleSort('firstName')} cursor="pointer">
-                Author{' '}
-                <SortArrows columnKey={'firstName'} sortOrder={sortOrder} />{' '}
-              </Th>
-              <Th onClick={() => handleSort('status')} cursor="pointer">
-                Status <SortArrows columnKey={'status'} sortOrder={sortOrder} />{' '}
-              </Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {isLoading ? (
+      {!isLoading && tableData.length === 0 ? (
+        <EmptyStateBadge variant="no-updates" />
+      ) : (
+        <TableContainer overflowX="auto" maxW="100%">
+          <Table variant="simple">
+            <Thead>
+              {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
               <Tr>
-                <Td colSpan={5}>
-                  <Center py={8}>
-                    <Spinner size="lg" />
-                  </Center>
-                </Td>
+                <Th onClick={() => handleSort('updateDate')} cursor="pointer">
+                  Time{' '}
+                  <SortArrows
+                    columnKey={'updateDate'}
+                    sortOrder={sortOrder}
+                  />{' '}
+                </Th>
+                <Th onClick={() => handleSort('note')} cursor="pointer">
+                  Notes{' '}
+                  <SortArrows columnKey={'note'} sortOrder={sortOrder} />{' '}
+                </Th>
+                <Th onClick={() => handleSort('programName')} cursor="pointer">
+                  Program{' '}
+                  <SortArrows
+                    columnKey={'programName'}
+                    sortOrder={sortOrder}
+                  />{' '}
+                </Th>
+                <Th onClick={() => handleSort('firstName')} cursor="pointer">
+                  Author{' '}
+                  <SortArrows
+                    columnKey={'firstName'}
+                    sortOrder={sortOrder}
+                  />{' '}
+                </Th>
+                <Th onClick={() => handleSort('status')} cursor="pointer">
+                  Status{' '}
+                  <SortArrows columnKey={'status'} sortOrder={sortOrder} />{' '}
+                </Th>
               </Tr>
-            ) : (
-              tableData.map((row) => (
-                <Tr key={row.id}>
-                  <Td>{row.updateDate}</Td>
-                  <Td>{row.note}</Td>
-                  <Td>{row.programName}</Td>
-                  <Td>
-                    {row.firstName} {row.lastName}
-                  </Td>
-                  <Td>
-                    <Badge
-                      cursor="pointer"
-                      onClick={() => setSelectedUpdate(row)}
-                    >
-                      {row.status}
-                    </Badge>
+            </Thead>
+            <Tbody>
+              {isLoading ? (
+                <Tr>
+                  <Td colSpan={5}>
+                    <Center py={8}>
+                      <Spinner size="lg" />
+                    </Center>
                   </Td>
                 </Tr>
-              ))
-            )}
-          </Tbody>
-        </Table>
-      </TableContainer>
+              ) : (
+                tableData.map((row) => (
+                  <Tr key={row.id}>
+                    <Td>{row.updateDate}</Td>
+                    <Td>{row.note}</Td>
+                    <Td>{row.programName}</Td>
+                    <Td>
+                      {row.firstName} {row.lastName}
+                    </Td>
+                    <Td>
+                      <Badge
+                        cursor="pointer"
+                        onClick={() => setSelectedUpdate(row)}
+                      >
+                        {row.status}
+                      </Badge>
+                    </Td>
+                  </Tr>
+                ))
+              )}
+            </Tbody>
+          </Table>
+        </TableContainer>
+      )}
       {selectedUpdate && (
         <ReviewMediaUpdate
           update={selectedUpdate}

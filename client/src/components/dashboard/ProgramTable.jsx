@@ -50,6 +50,7 @@ import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
 import CardView from './CardView';
 import { ProgramForm } from './ProgramForm/index';
+import { EmptyStateBadge } from '../badges/EmptyStateBadge';
 
 const getRouteByRole = (role, userId) => {
   const routes = {
@@ -446,64 +447,79 @@ function ProgramDisplay({
 
         <Box position="relative">
           {!isCardView ? (
-            <Table variant="simple" aria-label="collapsible-table">
-              <Thead>
-                <Tr>
-                  <Th onClick={() => handleSort('title')} cursor="pointer">
-                    Program{' '}
-                    <SortArrows columnKey="title" sortOrder={sortOrder} />
-                  </Th>
-                  <Th onClick={() => handleSort('status')} cursor="pointer">
-                    Status{' '}
-                    <SortArrows columnKey="status" sortOrder={sortOrder} />
-                  </Th>
-                  <Th onClick={() => handleSort('launchDate')} cursor="pointer">
-                    Launch Date{' '}
-                    <SortArrows columnKey="launchDate" sortOrder={sortOrder} />
-                  </Th>
-                  <Th onClick={() => handleSort('location')} cursor="pointer">
-                    Location{' '}
-                    <SortArrows columnKey="location" sortOrder={sortOrder} />
-                  </Th>
-                  <Th onClick={() => handleSort('students')} cursor="pointer">
-                    Students{' '}
-                    <SortArrows columnKey="students" sortOrder={sortOrder} />
-                  </Th>
-                  <Th
-                    onClick={() => handleSort('instruments')}
-                    cursor="pointer"
-                  >
-                    Instruments{' '}
-                    <SortArrows columnKey="instruments" sortOrder={sortOrder} />
-                  </Th>
-                  <Th
-                    onClick={() => handleSort('totalInstruments')}
-                    cursor="pointer"
-                  >
-                    Total Instruments{' '}
-                    <SortArrows
-                      columnKey="totalInstruments"
-                      sortOrder={sortOrder}
-                    />
-                  </Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {tableData.length === 0 && isLoading ? (
+            !isLoading && tableData.length === 0 ? (
+              <EmptyStateBadge variant="no-programs" />
+            ) : (
+              <Table variant="simple" aria-label="collapsible-table">
+                <Thead>
                   <Tr>
-                    <Td colSpan={7}>
-                      <Center py={8}>
-                        <Spinner size="lg" />
-                      </Center>
-                    </Td>
+                    <Th onClick={() => handleSort('title')} cursor="pointer">
+                      Program{' '}
+                      <SortArrows columnKey="title" sortOrder={sortOrder} />
+                    </Th>
+                    <Th onClick={() => handleSort('status')} cursor="pointer">
+                      Status{' '}
+                      <SortArrows columnKey="status" sortOrder={sortOrder} />
+                    </Th>
+                    <Th
+                      onClick={() => handleSort('launchDate')}
+                      cursor="pointer"
+                    >
+                      Launch Date{' '}
+                      <SortArrows
+                        columnKey="launchDate"
+                        sortOrder={sortOrder}
+                      />
+                    </Th>
+                    <Th onClick={() => handleSort('location')} cursor="pointer">
+                      Location{' '}
+                      <SortArrows columnKey="location" sortOrder={sortOrder} />
+                    </Th>
+                    <Th onClick={() => handleSort('students')} cursor="pointer">
+                      Students{' '}
+                      <SortArrows columnKey="students" sortOrder={sortOrder} />
+                    </Th>
+                    <Th
+                      onClick={() => handleSort('instruments')}
+                      cursor="pointer"
+                    >
+                      Instruments{' '}
+                      <SortArrows
+                        columnKey="instruments"
+                        sortOrder={sortOrder}
+                      />
+                    </Th>
+                    <Th
+                      onClick={() => handleSort('totalInstruments')}
+                      cursor="pointer"
+                    >
+                      Total Instruments{' '}
+                      <SortArrows
+                        columnKey="totalInstruments"
+                        sortOrder={sortOrder}
+                      />
+                    </Th>
                   </Tr>
-                ) : (
-                  tableData.map((p) => (
-                    <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
-                  ))
-                )}
-              </Tbody>
-            </Table>
+                </Thead>
+                <Tbody>
+                  {tableData.length === 0 && isLoading ? (
+                    <Tr>
+                      <Td colSpan={7}>
+                        <Center py={8}>
+                          <Spinner size="lg" />
+                        </Center>
+                      </Td>
+                    </Tr>
+                  ) : (
+                    tableData.map((p) => (
+                      <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
+                    ))
+                  )}
+                </Tbody>
+              </Table>
+            )
+          ) : tableData.length === 0 && !isLoading ? (
+            <EmptyStateBadge variant="no-programs" />
           ) : (
             <CardView data={tableData} openEditForm={openEditForm} />
           )}

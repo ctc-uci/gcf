@@ -190,6 +190,11 @@ mediaChangeRouter.get('/:userId/media', async (req, res) => {
 
 mediaChangeRouter.get("/:userId/media-updates", async (req, res) => {
   try {
+    //[DELETE BEFORE PR]
+    //temp
+    // res.status(200).json([]);
+    // return;
+
     const { userId } = req.params;
     const roleResult = await db.query(
       `SELECT role FROM gcf_user WHERE gcf_user.id = $1;`,
