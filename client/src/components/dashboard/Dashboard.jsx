@@ -12,10 +12,10 @@ const Dashboard = () => {
   const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
 
   return (
-    <Flex direction="column" minH="100vh" gap={6} as="main" p={10} w>
+    <Flex direction="column" minH="100vh" gap={6} as="main" p={10} maxW="70vw">
       <StatisticsSummary refreshTrigger={statsRefreshTrigger} />
 
-      <Box as="section">
+      <Box as="section" w="fit-content">
         {(role === 'Super Admin' ||
           role === 'Admin' ||
           role === 'Regional Director') && (

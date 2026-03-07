@@ -362,7 +362,7 @@ function ProgramDisplay({
           onStatsRefresh?.();
         }}
       />
-      <TableContainer w="90%">
+      <TableContainer w="80vw">
         <HStack mb={4} justifyContent="space-between" w="100%">
           <HStack spacing={4}>
             <Box fontSize="xl" fontWeight="semibold">

@@ -17,20 +17,22 @@ import { MdOutlineFileDownload } from 'react-icons/md';
 const StatBox = ({ label, number }) => {
   return (
     <Box
-      maxW="200px"
+      flex="1"
+      minW={0}
       p={6}
-      border="1px solid"
-      borderColor="gray.300"
-      bg="white"
-      color="black"
       borderRadius="md"
+      bgGradient="linear(to-r, gray.600, gray.400)"
+      color="white"
+      boxShadow="md"
       display="flex"
       flexDirection="column"
     >
-      <Box fontSize="xl" mb={4}>
+      <Box fontSize="xl" mb={4} color="whiteAlpha.900">
         {label}
       </Box>
-      <Box fontSize="2xl">{number}</Box>
+      <Box fontSize="2xl" fontWeight="semibold">
+        {number}
+      </Box>
     </Box>
   );
 };
@@ -141,8 +143,8 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
           />
         </HStack>
 
-        <Box position="relative">
-          <HStack spacing={6} minH="120px">
+        <Box position="relative" w="full">
+          <HStack spacing={6} minH="120px" w="full" align="stretch">
             {stats.map((stat) => (
               <StatBox
                 key={stat.label}
