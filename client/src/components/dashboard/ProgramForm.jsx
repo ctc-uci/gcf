@@ -50,12 +50,10 @@ import { useFullscreenFlyout } from '../useFullScreenFlyout.js';
 
 // sub-component for selecting location (region/country/state/city)
 const LocationForm = ({ formState, setFormData }) => {
-  const [country, setCountry] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
   const { backend } = useBackendContext();
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
+
   const userId = currentUser?.uid;
 
   const [countriesList, setCountriesList] = useState([]);
@@ -528,16 +526,7 @@ export const ProgramForm = ({
   const onClose = isControlled ? onCloseProp : disclosure.onClose;
   const btnRef = useRef(null);
   const { backend } = useBackendContext();
-  const [region, setRegion] = useState('');
-  const [country, setCountry] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
   const { currentUser } = useAuthContext();
-
-  const [countriesList, setCountriesList] = useState([]);
-  const [regionList, setRegionList] = useState([]);
-  const [stateList, setStateList] = useState([]);
-  const [cityList, setCityList] = useState([]);
 
   const [initialProgramDirectorIds, setInitialProgramDirectorIds] = useState(
     []
@@ -547,8 +536,6 @@ export const ProgramForm = ({
   const [initialCurriculumLinks, setInitialCurriculumLinks] = useState([]);
 
   const [initialUploadedMedia, setInitialUploadedMedia] = useState([]);
-
-  const [initialLocation, setInitialLocation] = useState({});
 
   const [formState, setFormState] = useState({
     status: null,
