@@ -21,6 +21,25 @@ regionalDirectorRouter.get("/all", async (req, res) => {
   }
 });
 
+regionalDirectorRouter.get("/region/:region_id", async (req, res) => {
+  try {
+    const { region_id } = req.params;
+    const director = await db.query(
+      `SELECT rd.*, u.first_name, u.last_name
+       FROM regional_director rd
+       JOIN gcf_user u ON u.id = rd.user_id
+       WHERE rd.region_id = $1
+       LIMIT 1`,
+      [region_id],
+    );
+    if (!director?.length) return res.status(200).json(null);
+    res.status(200).json(keysToCamel(director[0]));
+  } catch (err) {
+    console.error("Error in /region/:region_id", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 regionalDirectorRouter.get("/me/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -81,6 +100,8 @@ regionalDirectorRouter.get("/me/:id/programs", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
 
 regionalDirectorRouter.post("/", async (req, res) => {
   try {

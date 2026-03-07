@@ -1,9 +1,13 @@
 import RegionsForm from "@/components/regions/RegionsForm";
+import { RegionsGrid } from "@/components/regions/RegionsGrid";
 
-const RegionsPage = () => {
+export const RegionsPage = () => {
     return (
-        <text>Region!</text>
+        <div>
+            <text>Region!</text>
+            <RegionsGrid />
+        </div>
     );
 }
 
-export default RegionsPage;
+// export default RegionsPage;
