@@ -109,6 +109,43 @@ const MAP_BY_ROLE = {
   'Regional Director': mapRdRow,
 };
 
+const STATUS_TAG_STYLES = {
+  active: {
+    label: 'Launched',
+    bg: '#e0f2f1',
+    color: '#00796b',
+  },
+  inactive: {
+    label: 'Developing',
+    bg: '#fff3e0',
+    color: '#ef6c00',
+  },
+};
+
+function StatusTag({ status }) {
+  const normalized = String(status ?? '').toLowerCase();
+  const style = STATUS_TAG_STYLES[normalized] ?? {
+    label: status ?? '—',
+    bg: 'gray.100',
+    color: 'gray.700',
+  };
+  return (
+    <Box
+      as="span"
+      display="inline-block"
+      px={2}
+      py={0.5}
+      borderRadius="md"
+      fontSize="sm"
+      fontWeight="medium"
+      bg={style.bg}
+      color={style.color}
+    >
+      {style.label}
+    </Box>
+  );
+}
+
 function ExpandableRow({ p, onEdit }) {
   const { isOpen, onToggle } = useDisclosure();
 
@@ -117,10 +154,17 @@ function ExpandableRow({ p, onEdit }) {
       <Tr
         onClick={onToggle}
         cursor="pointer"
-        sx={{ td: { borderBottom: isOpen ? 'none' : undefined } }}
+        sx={{
+          '& td': {
+            borderBottom: isOpen ? 'none' : '1px solid',
+            borderColor: 'gray.200',
+          },
+        }}
       >
         <Td>{p.title}</Td>
-        <Td>{p.status}</Td>
+        <Td>
+          <StatusTag status={p.status} />
+        </Td>
         <Td>{p.launchDate}</Td>
         <Td>{p.location}</Td>
         <Td>{p.students}</Td>
@@ -253,6 +297,7 @@ function ProgramDisplay({
   onSave,
   onStatsRefresh,
 }) {
+  console.log('originalData', originalData);
   const [isCardView, setIsCardView] = useState(false);
 
   const downloadDataAsCsv = () => {
@@ -450,9 +495,28 @@ function ProgramDisplay({
             !isLoading && tableData.length === 0 ? (
               <EmptyStateBadge variant="no-programs" />
             ) : (
-              <Table variant="simple" aria-label="collapsible-table">
+              <Table
+                variant="unstyled"
+                aria-label="collapsible-table"
+                sx={{
+                  border: '1px solid',
+                  borderColor: 'gray.200',
+                  borderRadius: 'md',
+                }}
+              >
                 <Thead>
-                  <Tr>
+                  <Tr
+                    sx={{
+                      '& th': {
+                        borderBottom: '1px solid',
+                        borderColor: 'gray.200',
+                        color: 'gray.700',
+                        fontWeight: 'bold',
+                        textTransform: 'uppercase',
+                        fontSize: 'xs',
+                      },
+                    }}
+                  >
                     <Th onClick={() => handleSort('title')} cursor="pointer">
                       Program{' '}
                       <SortArrows columnKey="title" sortOrder={sortOrder} />
@@ -504,7 +568,11 @@ function ProgramDisplay({
                 <Tbody>
                   {tableData.length === 0 && isLoading ? (
                     <Tr>
-                      <Td colSpan={7}>
+                      <Td
+                        colSpan={7}
+                        borderBottom="1px solid"
+                        borderColor="gray.200"
+                      >
                         <Center py={8}>
                           <Spinner size="lg" />
                         </Center>
@@ -574,6 +642,7 @@ function ProgramTable({ onStatsRefresh }) {
     try {
       const res = await backend.get(route);
       const rows = Array.isArray(res.data) ? res.data : [];
+      console.log('rows', rows);
       const programDetails = await Promise.all(
         rows.map(async (row) => {
           // TODO: make this more efficient with lazy loading
@@ -601,7 +670,9 @@ function ProgramTable({ onStatsRefresh }) {
           };
         })
       );
+      console.log('programDetails', programDetails);
       const mappedPrograms = programDetails.map(mapRow);
+      console.log('mappedPrograms', mappedPrograms);
       setOriginalPrograms(mappedPrograms);
     } catch (err) {
       console.error('Error fetching data:', err);
