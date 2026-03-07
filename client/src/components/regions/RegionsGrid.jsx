@@ -34,12 +34,12 @@ export const RegionsGrid = () => {
         <Box>
             <SimpleGrid 
             columns={{ base: 1, md: 2, lg: 4 }}
-            spacing={4}
+            spacing={10}
             >
-             { regions.map((region, index) => {
+             { regions.map((region) => {
                 return (
                     <RegionCard
-                        key={index}
+                        key={region.id}
                         region={region}
                     />
                 );

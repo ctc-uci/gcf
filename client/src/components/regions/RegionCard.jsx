@@ -1,9 +1,15 @@
 import {
+    HStack,
+    Box,
     Card,
     CardHeader,
     CardBody,
-    Text
+    Text,
+    Icon
 } from '@chakra-ui/react'
+
+import { GrEdit } from "react-icons/gr";
+import { MdAccountCircle } from "react-icons/md";
 
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useEffect, useState } from "react";
@@ -11,6 +17,7 @@ import { useEffect, useState } from "react";
 export const RegionCard = ({ region }) => {
     const { backend } = useBackendContext();
     const [regionalDirector, setRegionalDirector] = useState(null);
+    const [programs, setPrograms] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -26,11 +33,72 @@ export const RegionCard = ({ region }) => {
     fetchData();
     }, [region.id, backend]);
 
+    useEffect(() => {
+        if (!regionalDirector?.userId) return;
+        const fetchData = async () => {
+            try {
+                const res = await backend.get(`/regional-directors/${regionalDirector?.userId}/programs`);
+                const programs = res.data ? res.data : [];
+                setPrograms(programs);
+            } catch (err) {
+                console.error("Error fetching programs:", err);
+            }
+        };
+
+    fetchData();
+    }, [regionalDirector?.userId, backend]);
+
     return (
-        <Card>
-            <CardHeader>{region.name}</CardHeader>
-            <CardBody>
-                <Text>Regional Director: {regionalDirector ? regionalDirector["firstName"] : "N/A"} {regionalDirector ? regionalDirector["lastName"] : ""}</Text>
+        <Card h="100%" display="flex" flexDirection="column">
+            <CardHeader 
+                fontSize="lg" 
+                fontWeight="semibold"
+                mb ="-3"
+            >
+                {region.name}
+            </CardHeader>
+            <CardBody mt = "-4">
+                <Text 
+                    fontSize="xs" 
+                    mb="2"
+                    fontWeight="semibold"
+                    color="gray.500"
+                >
+                    Regional Director
+                </Text>
+                <HStack ml="2">
+                    <Icon as={MdAccountCircle} mb="1" boxSize={5} color="gray.600"/>
+                    <Text mb="2">
+                        {regionalDirector ? `${regionalDirector.firstName} ${regionalDirector.lastName}` : "N/A"}
+                    </Text>
+                </HStack>
+                <Text 
+                    fontSize="xs"
+                    fontWeight="semibold"
+                    color="gray.500"
+                >
+                    Assigned Programs
+                </Text>
+                <Box 
+                    overflowY="auto" 
+                    h="200px"
+                    sx={{
+                    scrollbarWidth: "none",  
+                    msOverflowStyle: "none", 
+                    "&::-webkit-scrollbar": {
+                    display: "none"      
+                    }}}
+                >
+                    {programs.length === 0 ? (
+                    <Text>No programs assigned</Text>
+                    ) : (
+                    programs.map((program) => (
+                        <Text key={program.id}>
+                        {program.name}
+                        </Text>
+                    ))
+                    )}
+                </Box>
             </CardBody>
         </Card>
     );
