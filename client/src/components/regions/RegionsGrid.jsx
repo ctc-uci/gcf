@@ -9,7 +9,7 @@ import {
 import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
-export const RegionsGrid = () => {
+export const RegionsGrid = ({ onNewRegion }) => {
     const { currentUser } = useAuthContext();
     const userID = currentUser.uid;
     const { backend } = useBackendContext();
@@ -41,6 +41,7 @@ export const RegionsGrid = () => {
                     <RegionCard
                         key={region.id}
                         region={region}
+                        onEdit={onNewRegion}
                     />
                 );
             })}

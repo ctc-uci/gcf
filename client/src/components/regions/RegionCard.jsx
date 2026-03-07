@@ -6,7 +6,7 @@ import {
     CardBody,
     Text,
     Icon,
-    Button
+    Button,
 } from '@chakra-ui/react'
 
 import { GrEdit } from "react-icons/gr";
@@ -14,9 +14,8 @@ import { MdAccountCircle } from "react-icons/md";
 
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useEffect, useState } from "react";
-import { SiTeal } from 'react-icons/si';
 
-export const RegionCard = ({ region }) => {
+export const RegionCard = ({ region, onEdit }) => {
     const { backend } = useBackendContext();
     const [regionalDirector, setRegionalDirector] = useState(null);
     const [programs, setPrograms] = useState([]);
@@ -49,8 +48,6 @@ export const RegionCard = ({ region }) => {
 
     fetchData();
     }, [regionalDirector?.userId, backend]);
-
-    const handleEditClick = () => {}
 
     return (
         <Card 
@@ -94,11 +91,11 @@ export const RegionCard = ({ region }) => {
                     overflowY="auto" 
                     h="200px"
                     sx={{
-                    scrollbarWidth: "none",  
-                    msOverflowStyle: "none", 
-                    "&::-webkit-scrollbar": {
-                    display: "none"      
-                    }}}
+                        scrollbarWidth: "none",  
+                        msOverflowStyle: "none", 
+                        "&::-webkit-scrollbar": {
+                        display: "none"      
+                        }}}
                 >
                     {programs.length === 0 ? (
                     <Text>No programs assigned</Text>
@@ -121,7 +118,7 @@ export const RegionCard = ({ region }) => {
                         color: "white",
                         bg: "teal.500"}}
                 _groupHover={{ opacity: 1 }}
-                onClick={handleEditClick}
+                onClick={onEdit}
                 color="teal.500"
                 bg="white"
                 border="2px solid"

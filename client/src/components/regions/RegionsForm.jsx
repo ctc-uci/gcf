@@ -12,7 +12,7 @@ import {
 
 // TODO: add delete button, add save/cancel buttons, add expand button, delete and cancel buttons should pop up confirmation dialog
 
-const RegionsForm = () => {
+const RegionsForm = ({ isOpen, onClose, onSave }) => {
     const { backend } = useBackendContext();
     const [regionalDirectors, setRegionalDirectors] = useState([]);
 
@@ -29,8 +29,6 @@ const RegionsForm = () => {
         }
         fetchRegionalDirectors();
     }, [backend]);
-
-    console.log("Regional Directors:", regionalDirectors);
 
     return (
         <VStack spacing={4}>
