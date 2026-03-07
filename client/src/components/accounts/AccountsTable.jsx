@@ -87,14 +87,14 @@ export const AccountsTable = ({
 
   if (!isCardView && (!tableData || tableData.length === 0)) {
     return (
-      <TableContainer>
+      <TableContainer w="full" maxW="100%" overflowX="auto">
         <EmptyStateBadge variant="no-accounts" />
       </TableContainer>
     );
   }
 
   return (
-    <TableContainer>
+    <TableContainer maxW="80vw">
       {!isCardView ? (
         <Table variant="simple" size="md">
           <Thead>

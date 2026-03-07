@@ -169,7 +169,7 @@ export const Navbar = () => {
     <Flex
       height={NAVBAR_HEIGHT}
       align="center"
-      w="100%"
+      w="80vw"
       px={6}
       py={4}
       borderRadius="xl"
