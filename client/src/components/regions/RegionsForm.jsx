@@ -8,6 +8,11 @@ import {
     FormErrorMessage,
     Select,
     Button,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
+    Portal
 } from '@chakra-ui/react'
 
 // TODO: add delete button, add save/cancel buttons, add expand button, delete and cancel buttons should pop up confirmation dialog
@@ -15,7 +20,9 @@ import {
 const RegionsForm = ({ isOpen, onClose, onSave }) => {
     const { backend } = useBackendContext();
     const [regionalDirectors, setRegionalDirectors] = useState([]);
+    const [countries, setCountries] = useState([]);
 
+    // useEffect to get list of all regional directors for dropdown
     useEffect(() => {
         const fetchRegionalDirectors = async () => {
             try {
@@ -28,6 +35,23 @@ const RegionsForm = ({ isOpen, onClose, onSave }) => {
             }
         }
         fetchRegionalDirectors();
+    }, [backend]);
+
+    // useEffect to get list of all countries for dropdown
+    // TODO: instead of fetching country name, fetch ISO codes once new column is added, then use ISO codes to get names through library
+    useEffect(() => {
+        const fetchCountries = async () => {
+            try {
+                const res = await backend.get('/country');
+                const countriesList = Array.isArray(res.data) ? res.data : [];
+                setCountries(countriesList);
+                console.log("Fetched countries:", countriesList);
+            }  
+            catch (err) {
+                console.error("Error fetching countries:", err);
+            }
+        }
+        fetchCountries();
     }, [backend]);
 
     return (
@@ -50,7 +74,20 @@ const RegionsForm = ({ isOpen, onClose, onSave }) => {
             </FormControl>
 
             <FormControl>
-                <Button> +Add</Button>
+                <Menu>
+                    <MenuButton as={Button} variant="outline" size="sm">
+                        + Add
+                    </MenuButton>
+                    <Portal>
+                        <MenuList>
+                            {countries?.map((country) => (
+                                <MenuItem key={country.id} value={country.id}>
+                                    {country.name}
+                                </MenuItem>
+                            ))}
+                        </MenuList>
+                    </Portal>
+                </Menu>
             </FormControl>
         </VStack>
     );
