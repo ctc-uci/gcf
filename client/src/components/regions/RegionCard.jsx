@@ -5,7 +5,8 @@ import {
     CardHeader,
     CardBody,
     Text,
-    Icon
+    Icon,
+    Button
 } from '@chakra-ui/react'
 
 import { GrEdit } from "react-icons/gr";
@@ -13,6 +14,7 @@ import { MdAccountCircle } from "react-icons/md";
 
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useEffect, useState } from "react";
+import { SiTeal } from 'react-icons/si';
 
 export const RegionCard = ({ region }) => {
     const { backend } = useBackendContext();
@@ -48,8 +50,17 @@ export const RegionCard = ({ region }) => {
     fetchData();
     }, [regionalDirector?.userId, backend]);
 
+    const handleEditClick = () => {}
+
     return (
-        <Card h="100%" display="flex" flexDirection="column">
+        <Card 
+            h="100%" 
+            display="flex" 
+            flexDirection="column"
+            role="group"
+            position="relative"
+            _hover={{shadow: "md"}}
+        >
             <CardHeader 
                 fontSize="lg" 
                 fontWeight="semibold"
@@ -100,6 +111,24 @@ export const RegionCard = ({ region }) => {
                     )}
                 </Box>
             </CardBody>
+            <Button
+                leftIcon={<GrEdit />}
+                position="absolute"
+                top="8px"
+                right="8px"
+                opacity={0}
+                _hover={{
+                        color: "white",
+                        bg: "teal.500"}}
+                _groupHover={{ opacity: 1 }}
+                onClick={handleEditClick}
+                color="teal.500"
+                bg="white"
+                border="2px solid"
+                borderColor="teal.500" 
+            > 
+                Edit 
+            </Button>
         </Card>
     );
 }
