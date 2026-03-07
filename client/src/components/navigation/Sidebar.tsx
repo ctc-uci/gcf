@@ -4,6 +4,7 @@ import { useRoleContext } from "@/contexts/hooks/useRoleContext";
 import { FaGuitar } from "react-icons/fa";
 import { HiOutlineUser } from "react-icons/hi";
 import { MdOutlineNotifications, MdPermMedia } from "react-icons/md";
+import { FaGear } from "react-icons/fa6";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 
 import { NAVBAR_HEIGHT, SIDEBAR_WIDTH } from "./layoutConstants";
@@ -85,6 +86,18 @@ export const Sidebar = () => {
       },
     ];
   }
+
+  if (role === "Admin") {
+    navItems.push({
+      name: "Regions",
+      icon: (<Icon
+        as={FaGear}
+        boxSize="20px"
+      />),
+      path: "/regions",
+    })
+  }
+
   return (
     <Box
       position="fixed"

@@ -6,14 +6,10 @@ import {
     SimpleGrid,
 } from '@chakra-ui/react'
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
 export const RegionsGrid = ({ onNewRegion }) => {
-    const { currentUser } = useAuthContext();
-    const userID = currentUser.uid;
     const { backend } = useBackendContext();
-
     const [regions, setRegions] = useState([]);
 
     useEffect(() => {
