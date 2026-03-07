@@ -68,7 +68,8 @@ function mapAdminRow(row) {
     launchDate: row.launchDate,
     location: row.countryName ?? '',
     country: row.country,
-
+    city: row.city,
+    state: row.state,
     students: row.students ?? 0,
     instruments: row.instruments ?? 0,
     totalInstruments: row.instruments ?? 0,
