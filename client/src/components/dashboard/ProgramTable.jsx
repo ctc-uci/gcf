@@ -88,7 +88,9 @@ function mapRdRow(row) {
     status: row.programStatus,
     launchDate: row.programLaunchDate,
     location: row.programLocation ?? row.regionName ?? '',
-    countryId: row.countryId,
+    country: row.countryId,
+    city: row.city,
+    state: row.state,
     regionId: row.regionId,
     students: row.totalStudents ?? 0,
     instruments: row.totalInstruments ?? 0,
@@ -97,7 +99,6 @@ function mapRdRow(row) {
     regionalDirectors: row.regionalDirectors,
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
-
     media: row.media,
   };
 }
