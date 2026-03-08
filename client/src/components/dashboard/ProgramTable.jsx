@@ -479,13 +479,15 @@ function ProgramDisplay({
             />
             <Button
               size="sm"
-              rightIcon={<AddIcon />}
+              leftIcon={<AddIcon />}
+              backgroundColor="teal.500"
+              color="white"
               onClick={() => {
                 setSelectedProgram(null);
                 setIsFormOpen(true);
               }}
             >
-              New
+              New Program
             </Button>
           </HStack>
         </HStack>
