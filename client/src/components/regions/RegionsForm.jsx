@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useBackendContext } from '@/contexts/hooks/useBackendContext'
+
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import {
     VStack,
@@ -12,17 +13,28 @@ import {
     MenuButton,
     MenuList,
     MenuItem,
-    Portal
+    Portal,
+    Flex,
+    Tag,
+    TagLabel,
+    TagCloseButton,
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogContent,
+    AlertDialogOverlay,
 } from '@chakra-ui/react'
 
-// TODO: add delete button, add save/cancel buttons, add expand button, delete and cancel buttons should pop up confirmation dialog
-
-const RegionsForm = ({ isOpen, onClose, onSave }) => {
+const RegionsForm = ({ isOpen, onClose, onSave, onDelete }) => {
     const { backend } = useBackendContext();
     const [regionalDirectors, setRegionalDirectors] = useState([]);
     const [countries, setCountries] = useState([]);
+    const [selectedCountries, setSelectedCountries] = useState([]);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
-    // useEffect to get list of all regional directors for dropdown
+    // useEffect to fetch names of all regional directors for dropdown
     useEffect(() => {
         const fetchRegionalDirectors = async () => {
             try {
@@ -37,15 +49,13 @@ const RegionsForm = ({ isOpen, onClose, onSave }) => {
         fetchRegionalDirectors();
     }, [backend]);
 
-    // useEffect to get list of all countries for dropdown
-    // TODO: instead of fetching country name, fetch ISO codes once new column is added, then use ISO codes to get names through library
+    // useEffect to fetch countries; TODO: switch to use library
     useEffect(() => {
         const fetchCountries = async () => {
             try {
                 const res = await backend.get('/country');
                 const countriesList = Array.isArray(res.data) ? res.data : [];
                 setCountries(countriesList);
-                console.log("Fetched countries:", countriesList);
             }  
             catch (err) {
                 console.error("Error fetching countries:", err);
@@ -53,6 +63,16 @@ const RegionsForm = ({ isOpen, onClose, onSave }) => {
         }
         fetchCountries();
     }, [backend]);
+
+    const handleSelect = (country) => {
+        if (!selectedCountries.includes(country)) {
+            setSelectedCountries([...selectedCountries, country]);
+        }
+    };
+
+    const handleRemove = (country) => {
+        setSelectedCountries(selectedCountries.filter(c => c !== country));
+    };
 
     return (
         <VStack spacing={4}>
@@ -74,6 +94,15 @@ const RegionsForm = ({ isOpen, onClose, onSave }) => {
             </FormControl>
 
             <FormControl>
+                <FormLabel>Assigned Countries</FormLabel>
+                <Flex wrap="wrap" gap={2} mb={2}>
+                    {selectedCountries.map((country) => (
+                        <Tag key={country} variant="solid" colorScheme="gray">
+                            <TagLabel>{country}</TagLabel>
+                            <TagCloseButton onClick={() => handleRemove(country)} />
+                        </Tag>
+                    ))}
+                </Flex>
                 <Menu>
                     <MenuButton as={Button} variant="outline" size="sm">
                         + Add
@@ -81,7 +110,7 @@ const RegionsForm = ({ isOpen, onClose, onSave }) => {
                     <Portal>
                         <MenuList>
                             {countries?.map((country) => (
-                                <MenuItem key={country.id} value={country.id}>
+                                <MenuItem key={country.id} value={country.id} onClick={() => handleSelect(country.name)}>
                                     {country.name}
                                 </MenuItem>
                             ))}
@@ -89,6 +118,68 @@ const RegionsForm = ({ isOpen, onClose, onSave }) => {
                     </Portal>
                 </Menu>
             </FormControl>
+
+            <Flex width="100%" justifyContent="space-between" mt={4}>
+                <Button colorScheme="red" variant="ghost" onClick={() => setIsDeleteDialogOpen(true)}>
+                    Delete
+                </Button>
+                <Flex gap={2}>
+                    <Button variant="outline" onClick={() => setIsCancelDialogOpen(true)}>
+                        Cancel
+                    </Button>
+                    <Button colorScheme="teal" onClick={onSave}>
+                        Save
+                    </Button>
+                </Flex>
+            </Flex>
+
+            <AlertDialog
+                isOpen={isDeleteDialogOpen}
+                onClose={() => setIsDeleteDialogOpen(false)}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                            Delete Region
+                        </AlertDialogHeader>
+                        <AlertDialogBody>
+                            Are you sure you want to delete this region?
+                        </AlertDialogBody>
+                        <AlertDialogFooter>
+                            <Button onClick={() => setIsDeleteDialogOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button colorScheme="red" onClick={() => { onDelete(); setIsDeleteDialogOpen(false); }} ml={3}>
+                                Delete
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
+
+            <AlertDialog
+                isOpen={isCancelDialogOpen}
+                onClose={() => setIsCancelDialogOpen(false)}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                            Unsaved Changes
+                        </AlertDialogHeader>
+                        <AlertDialogBody>
+                            Are you sure you want to exit? You have unsaved changes.
+                        </AlertDialogBody>
+                        <AlertDialogFooter>
+                            <Button onClick={() => { onSave(); setIsCancelDialogOpen(false); }}>
+                                Save & Exit
+                            </Button>
+                            <Button colorScheme="red" onClick={() => { onClose(); setIsCancelDialogOpen(false); }} ml={3}>
+                                Exit Without Saving
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
         </VStack>
     );
 }
