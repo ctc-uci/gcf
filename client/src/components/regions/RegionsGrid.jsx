@@ -1,17 +1,9 @@
 import { useEffect, useState } from "react";
 import { RegionCard } from "@/components/regions/RegionCard";
-import RegionsForm from "@/components/regions/RegionsForm";
 
 import { 
     Box, 
     SimpleGrid,
-    Drawer,
-    DrawerOverlay,
-    DrawerContent,
-    DrawerHeader,
-    DrawerCloseButton,
-    DrawerBody,
-    Button,
 } from '@chakra-ui/react'
 
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
@@ -19,8 +11,6 @@ import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 export const RegionsGrid = ({ onNewRegion }) => {
     const { backend } = useBackendContext();
     const [regions, setRegions] = useState([]);
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const [drawerSize, setDrawerSize] = useState("md");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -36,22 +26,8 @@ export const RegionsGrid = ({ onNewRegion }) => {
         fetchData();
     }, [backend]);
 
-    const handleSave = () => {
-        // TODO: save logic
-        setIsDrawerOpen(false);
-    };
-
-    const handleDelete = () => {
-        // TODO: delete logic
-        setIsDrawerOpen(false);
-    };
-
     return (
         <Box>
-            <Button colorScheme="teal" mb={4} onClick={() => setIsDrawerOpen(true)}>
-                New Region
-            </Button>
-
             <SimpleGrid 
                 columns={{ base: 1, md: 2, lg: 4 }}
                 spacing={10}
@@ -64,35 +40,6 @@ export const RegionsGrid = ({ onNewRegion }) => {
                     />
                 ))}
             </SimpleGrid>
-
-            <Drawer
-                isOpen={isDrawerOpen}
-                placement="right"
-                onClose={() => setIsDrawerOpen(false)}
-                size={drawerSize}
-            >
-                <DrawerOverlay />
-                <DrawerContent>
-                    <DrawerCloseButton />
-                    <DrawerHeader display="flex" alignItems="center" gap={2} pr={10}>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDrawerSize(drawerSize === "md" ? "full" : "md")}
-                        >
-                            {drawerSize === "md" ? "⤢" : "⤡"}
-                        </Button>
-                        New Region
-                    </DrawerHeader>
-                    <DrawerBody>
-                        <RegionsForm
-                            onClose={() => setIsDrawerOpen(false)}
-                            onSave={handleSave}
-                            onDelete={handleDelete}
-                        />
-                    </DrawerBody>
-                </DrawerContent>
-            </Drawer>
         </Box>
     );
 }

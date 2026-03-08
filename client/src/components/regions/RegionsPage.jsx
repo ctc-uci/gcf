@@ -34,6 +34,7 @@ export const RegionsPage = () => {
                         border: "2px solid",
                         borderColor: "teal.500"
                     }}
+                onClick={() => setIsDrawerOpen(true)}
             >
                 + New Region
             </Button>
