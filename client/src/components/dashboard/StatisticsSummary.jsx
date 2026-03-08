@@ -1,19 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 import {
   Box,
-  Center,
   Heading,
   HStack,
   IconButton,
   Spinner,
   VStack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
-import { MdOutlineFileDownload } from "react-icons/md";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { MdOutlineFileDownload } from 'react-icons/md';
 
 const StatBox = ({ label, number }) => {
   return (
@@ -28,10 +27,7 @@ const StatBox = ({ label, number }) => {
       display="flex"
       flexDirection="column"
     >
-      <Box
-        fontSize="xl"
-        mb={4}
-      >
+      <Box fontSize="xl" mb={4}>
         {label}
       </Box>
       <Box fontSize="2xl">{number}</Box>
@@ -41,60 +37,60 @@ const StatBox = ({ label, number }) => {
 
 const getRouteByRole = (role, userId) => {
   const routes = {
-    "Admin": "/admin/stats",
-    "Regional Director": `/regional-directors/me/${userId}/stats`,
-    "Program Director": `/program-directors/me/${userId}/stats`,
+    Admin: '/admin/stats',
+    'Regional Director': `/regional-directors/me/${userId}/stats`,
+    'Program Director': `/program-directors/me/${userId}/stats`,
   };
   return routes[role];
 };
 
 const STAT_LABELS_BY_ROLE = {
-  "Admin": [
-    { label: "Programs", number: 0 },
-    { label: "Students", number: 0 },
-    { label: "Instruments", number: 0 },
+  Admin: [
+    { label: 'Programs', number: 0 },
+    { label: 'Students', number: 0 },
+    { label: 'Instruments', number: 0 },
   ],
-  "Regional Director": [
-    { label: "Programs", number: 0 },
-    { label: "Students", number: 0 },
-    { label: "Instruments", number: 0 },
+  'Regional Director': [
+    { label: 'Programs', number: 0 },
+    { label: 'Students', number: 0 },
+    { label: 'Instruments', number: 0 },
   ],
-  "Program Director": [
-    { label: "Current Enrollment", number: 0 },
-    { label: "Instruments Donated", number: 0 },
+  'Program Director': [
+    { label: 'Current Enrollment', number: 0 },
+    { label: 'Instruments Donated', number: 0 },
   ],
 };
 
 function statsFromAdminData(data) {
   return [
-    { label: "Programs", number: data?.totalPrograms ?? 0 },
-    { label: "Students", number: data?.totalStudents ?? 0 },
-    { label: "Instruments", number: data?.totalInstruments ?? 0 },
+    { label: 'Programs', number: data?.totalPrograms ?? 0 },
+    { label: 'Students', number: data?.totalStudents ?? 0 },
+    { label: 'Instruments', number: data?.totalInstruments ?? 0 },
   ];
 }
 
 function statsFromRdData(data) {
   return [
-    { label: "Programs", number: data?.totalPrograms ?? 0 },
-    { label: "Students", number: data?.totalStudents ?? 0 },
-    { label: "Instruments", number: data?.totalInstruments ?? 0 },
+    { label: 'Programs', number: data?.totalPrograms ?? 0 },
+    { label: 'Students', number: data?.totalStudents ?? 0 },
+    { label: 'Instruments', number: data?.totalInstruments ?? 0 },
   ];
 }
 
 function statsFromPdData(data) {
   return [
-    { label: "Current Enrollment", number: data?.students ?? 0 },
-    { label: "Instruments Donated", number: data?.instruments ?? 0 },
+    { label: 'Current Enrollment', number: data?.students ?? 0 },
+    { label: 'Instruments Donated', number: data?.instruments ?? 0 },
   ];
 }
 
 const STATS_FROM_RESPONSE = {
-  "Admin": statsFromAdminData,
-  "Regional Director": statsFromRdData,
-  "Program Director": statsFromPdData,
+  Admin: statsFromAdminData,
+  'Regional Director': statsFromRdData,
+  'Program Director': statsFromPdData,
 };
 
-const StatisticsSummary = () => {
+const StatisticsSummary = ({ refreshTrigger = 0 }) => {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { role: role, loading: roleLoading } = useRoleContext();
@@ -123,21 +119,18 @@ const StatisticsSummary = () => {
         const nextStats = mapResponse(res.data ?? {});
         setStats(nextStats);
       } catch (err) {
-        console.error("Error fetching statistics:", err);
+        console.error('Error fetching statistics:', err);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [role, roleLoading, userId, backend]);
+  }, [role, roleLoading, userId, backend, refreshTrigger]);
 
   return (
     <Box as="section">
-      <VStack
-        spacing={6}
-        align="left"
-      >
+      <VStack spacing={6} align="left">
         <HStack>
           <Heading size="md">Statistics Summary</Heading>
           <IconButton
@@ -148,24 +141,31 @@ const StatisticsSummary = () => {
           />
         </HStack>
 
-        <HStack spacing={6}>
-          {isLoading ? (
-            <Center
-              py={8}
-              minH="120px"
-            >
-              <Spinner size="lg" />
-            </Center>
-          ) : (
-            stats.map((stat) => (
+        <Box position="relative">
+          <HStack spacing={6} minH="120px">
+            {stats.map((stat) => (
               <StatBox
                 key={stat.label}
                 label={stat.label}
                 number={stat.number}
               />
-            ))
+            ))}
+          </HStack>
+          {isLoading && (
+            <Box
+              position="absolute"
+              inset={0}
+              bg="whiteAlpha.800"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              zIndex={1}
+              borderRadius="md"
+            >
+              <Spinner size="lg" />
+            </Box>
           )}
-        </HStack>
+        </Box>
       </VStack>
     </Box>
   );

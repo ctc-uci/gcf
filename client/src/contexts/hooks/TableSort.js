@@ -1,16 +1,15 @@
-
-import { useState, useRef } from "react";
+import { useRef, useState } from 'react';
 
 // enum and map for sorting cycles
 const sortCycle = Object.freeze({
-  ASCENDING: "DESCENDING",
-  DESCENDING: "UNSORTED",
-  UNSORTED: "ASCENDING",
+  ASCENDING: 'DESCENDING',
+  DESCENDING: 'UNSORTED',
+  UNSORTED: 'ASCENDING',
 });
 
-export function useTableSort(originalData, setData) {
-  const originalDataRef = useRef(originalData);
-  originalDataRef.current = originalData;
+export function useTableSort(filteredData, setData) {
+  const filteredDataRef = useRef(filteredData);
+  filteredDataRef.current = filteredData;
 
   const [sortOrder, setSortOrder] = useState({
     currentSortColumn: null,
@@ -18,41 +17,38 @@ export function useTableSort(originalData, setData) {
   });
 
   function updatePrevSortColumn(sortOrderCopy, column) {
-    if (Object.hasOwn(sortOrderCopy["prevSortColumn"], column)) {
-      const newSortOrder =
-        sortCycle[sortOrderCopy["prevSortColumn"][column]];
-      sortOrderCopy["prevSortColumn"][column] = newSortOrder;
+    if (Object.hasOwn(sortOrderCopy['prevSortColumn'], column)) {
+      const newSortOrder = sortCycle[sortOrderCopy['prevSortColumn'][column]];
+      sortOrderCopy['prevSortColumn'][column] = newSortOrder;
       return newSortOrder;
     } else {
-      sortOrderCopy["prevSortColumn"][column] = sortCycle.ASCENDING;
+      sortOrderCopy['prevSortColumn'][column] = sortCycle.ASCENDING;
       return sortCycle.ASCENDING;
     }
   }
 
   function handleSort(column) {
     const sortOrderCopy = { ...sortOrder };
-    sortOrderCopy["currentSortColumn"] = column;
+    sortOrderCopy['currentSortColumn'] = column;
     const newSortOrder = updatePrevSortColumn(sortOrderCopy, column);
     setSortOrder(sortOrderCopy);
 
     if (newSortOrder === sortCycle.UNSORTED) {
-      setData([...originalDataRef.current]);
+      setData([...filteredDataRef.current]);
       return;
     }
 
     setData((prevData) =>
-      [...prevData].sort((a, b) => {
+      [...(prevData ?? filteredDataRef.current)].sort((a, b) => {
         let first = a[column];
         let second = b[column];
 
         if (Array.isArray(first) && Array.isArray(second)) {
-          first = first.join(" ");
-          second = second.join(" ");
+          first = first.join(' ');
+          second = second.join(' ');
         }
-        
-        if (
-          sortOrderCopy["prevSortColumn"][column] === sortCycle.ASCENDING
-        ) {
+
+        if (sortOrderCopy['prevSortColumn'][column] === sortCycle.ASCENDING) {
           return first.localeCompare(second);
         } else {
           return second.localeCompare(first);

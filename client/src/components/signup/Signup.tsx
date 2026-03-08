@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 import {
   Button,
@@ -13,23 +13,22 @@ import {
   Stack,
   useToast,
   VStack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { authenticateGoogleUser } from '@/utils/auth/providers';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 // import { FaGoogle } from "react-icons/fa6";
-import { Link, useNavigate } from "react-router-dom";
-import { z } from "zod";
-
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { authenticateGoogleUser } from "@/utils/auth/providers";
+import { Link, useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 
 const signupSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
-  role: z.enum(["Regional Director", "Program Director", "Admin"], {
-    required_error: "Please select a role",
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters long'),
+  role: z.enum(['Regional Director', 'Program Director', 'Admin'], {
+    required_error: 'Please select a role',
   }),
 });
 
@@ -47,7 +46,7 @@ export const Signup = () => {
     formState: { errors },
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
-    mode: "onBlur",
+    mode: 'onBlur',
   });
 
   const handleSignup = async (data: SignupFormValues) => {
@@ -55,19 +54,19 @@ export const Signup = () => {
       const user = await signup({
         email: data.email,
         password: data.password,
-        role: data.role
+        role: data.role,
       });
 
       if (user) {
-        navigate("/dashboard");
+        navigate('/dashboard');
       }
     } catch (err) {
       if (err instanceof Error) {
         toast({
-          title: "An error occurred",
+          title: 'An error occurred',
           description: err.message,
-          status: "error",
-          variant: "subtle",
+          status: 'error',
+          variant: 'subtle',
         });
       }
     }
@@ -82,27 +81,18 @@ export const Signup = () => {
   }, [backend, handleRedirectResult, navigate, toast]);
 
   return (
-    <VStack
-      spacing={8}
-      sx={{ width: 300, marginX: "auto" }}
-    >
+    <VStack spacing={8} sx={{ width: 300, marginX: 'auto' }}>
       <Heading>Signup</Heading>
 
-      <form
-        onSubmit={handleSubmit(handleSignup)}
-        style={{ width: "100%" }}
-      >
+      <form onSubmit={handleSubmit(handleSignup)} style={{ width: '100%' }}>
         <Stack spacing={2}>
-          <FormControl
-            isInvalid={!!errors.email}
-            w={"100%"}
-          >
+          <FormControl isInvalid={!!errors.email} w={'100%'}>
             <Center>
               <Input
                 placeholder="Email"
                 type="email"
-                size={"lg"}
-                {...register("email")}
+                size={'lg'}
+                {...register('email')}
                 name="email"
                 isRequired
                 autoComplete="email"
@@ -117,8 +107,8 @@ export const Signup = () => {
               <Input
                 placeholder="Password"
                 type="password"
-                size={"lg"}
-                {...register("password")}
+                size={'lg'}
+                {...register('password')}
                 name="password"
                 isRequired
                 autoComplete="password"
@@ -133,32 +123,28 @@ export const Signup = () => {
             <Center>
               <Select
                 placeholder="Select role"
-                size={"lg"}
-                {...register("role")}
+                size={'lg'}
+                {...register('role')}
                 name="role"
                 isRequired
               >
                 <option value="Admin">Admin</option>
                 <option value="Regional Director">Regional Director</option>
                 <option value="Program Director">Program Director</option>
-
               </Select>
             </Center>
             <FormErrorMessage>
               {errors.role?.message?.toString()}
             </FormErrorMessage>
-            <ChakraLink
-              as={Link}
-              to="/login"
-            >
+            <ChakraLink as={Link} to="/login">
               <FormHelperText>Click here to login</FormHelperText>
             </ChakraLink>
           </FormControl>
 
           <Button
             type="submit"
-            size={"lg"}
-            sx={{ width: "100%" }}
+            size={'lg'}
+            sx={{ width: '100%' }}
             isDisabled={Object.keys(errors).length > 0}
           >
             Signup

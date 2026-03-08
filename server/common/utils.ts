@@ -3,7 +3,7 @@ const isNumeric = (value: string) => {
 };
 
 const isBoolean = (value: string) => {
-  return [true, false, "true", "false"].includes(value);
+  return [true, false, 'true', 'false'].includes(value);
 };
 
 const isZipCode = (value: string) => {
@@ -38,7 +38,7 @@ const isISODate = (value: unknown) => {
 // toCamel, isArray, and isObject are helper functions used within utils only
 const toCamel = (string: string) => {
   return string.replace(/([-_][a-z])/g, ($1) => {
-    return $1.toUpperCase().replace("-", "").replace("_", "");
+    return $1.toUpperCase().replace('-', '').replace('_', '');
   });
 };
 
@@ -50,7 +50,7 @@ const isObject = (object: unknown) => {
   return (
     object === Object(object) &&
     !isArray(object) &&
-    typeof object !== "function" &&
+    typeof object !== 'function' &&
     !isISODate(object)
   );
 };
@@ -73,15 +73,15 @@ const keysToCamel = (data: object | string[] | string) => {
   }
 
   if (
-    typeof data === "string" &&
+    typeof data === 'string' &&
     data.length > 0 &&
-    data[0] === "{" &&
-    data.at(-1) === "}"
+    data[0] === '{' &&
+    data.at(-1) === '}'
   ) {
-    const sanitizedString = data.replace(/"/g, "");
+    const sanitizedString = data.replace(/"/g, '');
     const parsedList = sanitizedString
       .slice(1, sanitizedString.length - 1)
-      .split(",");
+      .split(',');
 
     return parsedList;
   }
