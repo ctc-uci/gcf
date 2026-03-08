@@ -6,19 +6,12 @@ import {
     Box,
     Button,
     Flex,
-    Drawer,
-    DrawerOverlay,
-    DrawerContent,
-    DrawerCloseButton,
-    DrawerHeader,
-    DrawerBody,
 } from "@chakra-ui/react";
 
 import { useState } from "react";
 
 export const RegionsPage = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const [drawerSize, setDrawerSize] = useState("md");
     const [selectedRegion, setSelectedRegion] = useState(null);
 
     const handleEditRegion = (region) => {
@@ -47,44 +40,22 @@ export const RegionsPage = () => {
                         border: "2px solid",
                         borderColor: "teal.500"
                     }}
+                    onClick={handleNewRegion}
+                >
+                    + New Region
+                </Button>
 
-                onClick={() => setIsDrawerOpen(true)}
-            >
-                + New Region
-            </Button>
             </Flex>
 
             <RegionsGrid onEditRegion={handleEditRegion} />
 
-            <Drawer
+            <RegionsForm
                 isOpen={isDrawerOpen}
-                placement="right"
+                region={selectedRegion}
                 onClose={() => setIsDrawerOpen(false)}
-                size={drawerSize}
-            >
-                <DrawerOverlay />
-                <DrawerContent>
-                    <DrawerCloseButton />
-                    <DrawerHeader display="flex" alignItems="center" gap={2} pr={10}>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDrawerSize(drawerSize === "md" ? "full" : "md")}
-                        >
-                            {drawerSize === "md" ? "⤢" : "⤡"}
-                        </Button>
-                        {selectedRegion ? "Edit Region" : "New Region"}
-                    </DrawerHeader>
-                    <DrawerBody>
-                        <RegionsForm
-                            region={selectedRegion}
-                            onClose={() => setIsDrawerOpen(false)}
-                            onSave={() => setIsDrawerOpen(false)}
-                            onDelete={() => setIsDrawerOpen(false)}
-                        />
-                    </DrawerBody>
-                </DrawerContent>
-            </Drawer>
+                onSave={() => setIsDrawerOpen(false)}
+                onDelete={() => setIsDrawerOpen(false)}
+            />
         </Box>
     );
 }
