@@ -47,10 +47,11 @@ export const RegionsPage = () => {
                         border: "2px solid",
                         borderColor: "teal.500"
                     }}
-                    onClick={handleNewRegion}
-                >
-                    + New Region
-                </Button>
+
+                onClick={() => setIsDrawerOpen(true)}
+            >
+                + New Region
+            </Button>
             </Flex>
 
             <RegionsGrid onEditRegion={handleEditRegion} />
