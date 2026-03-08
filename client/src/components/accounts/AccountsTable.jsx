@@ -1,5 +1,4 @@
 import {
-  Badge,
   Box,
   Button,
   Center,
@@ -15,6 +14,43 @@ import {
   Tr,
   useColorModeValue,
 } from '@chakra-ui/react';
+
+const ACCOUNT_TYPE_TAG_STYLES = {
+  'regional director': {
+    label: 'Regional Director',
+    bg: '#e0f2f1',
+    color: '#00796b',
+  },
+  'program director': {
+    label: 'Program Director',
+    bg: '#fff3e0',
+    color: '#ef6c00',
+  },
+};
+
+function AccountTypeTag({ role }) {
+  const normalized = String(role ?? '').toLowerCase();
+  const style = ACCOUNT_TYPE_TAG_STYLES[normalized] ?? {
+    label: role ?? '—',
+    bg: 'gray.100',
+    color: 'gray.700',
+  };
+  return (
+    <Box
+      as="span"
+      display="inline-block"
+      px={2}
+      py={0.5}
+      borderRadius="md"
+      fontSize="sm"
+      fontWeight="medium"
+      bg={style.bg}
+      color={style.color}
+    >
+      {style.label}
+    </Box>
+  );
+}
 
 import { FiEdit2, FiEyeOff } from 'react-icons/fi';
 
@@ -96,61 +132,45 @@ export const AccountsTable = ({
   return (
     <TableContainer maxW="80vw">
       {!isCardView ? (
-        <Table variant="simple" size="md">
+        <Table
+          variant="unstyled"
+          size="md"
+          sx={{
+            border: '1px solid',
+            borderColor: 'gray.200',
+            borderRadius: 'md',
+          }}
+        >
           <Thead>
-            <Tr>
-              <Th
-                onClick={() => handleSort('firstName')}
-                cursor="pointer"
-                color="black"
-                fontSize="sm"
-                textTransform="none"
-                fontWeight="bold"
-              >
+            <Tr
+              sx={{
+                '& th': {
+                  borderBottom: '1px solid',
+                  borderColor: 'gray.200',
+                  color: 'gray.700',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase',
+                  fontSize: 'xs',
+                },
+              }}
+            >
+              <Th onClick={() => handleSort('firstName')} cursor="pointer">
                 Name
                 <SortArrows columnKey="firstName" sortOrder={sortOrder} />
               </Th>
-              <Th
-                onClick={() => handleSort('email')}
-                cursor="pointer"
-                color="black"
-                fontSize="sm"
-                textTransform="none"
-                fontWeight="bold"
-              >
+              <Th onClick={() => handleSort('email')} cursor="pointer">
                 Email
                 <SortArrows columnKey="email" sortOrder={sortOrder} />
               </Th>
-              <Th
-                onClick={() => handleSort('password')}
-                cursor="pointer"
-                color="black"
-                fontSize="sm"
-                textTransform="none"
-                fontWeight="bold"
-              >
+              <Th onClick={() => handleSort('password')} cursor="pointer">
                 Password
                 <SortArrows columnKey="passsword" sortOrder={sortOrder} />
               </Th>
-              <Th
-                onClick={() => handleSort('role')}
-                cursor="pointer"
-                color="black"
-                fontSize="sm"
-                textTransform="none"
-                fontWeight="bold"
-              >
+              <Th onClick={() => handleSort('role')} cursor="pointer">
                 Type
                 <SortArrows columnKey="role" sortOrder={sortOrder} />
               </Th>
-              <Th
-                onClick={() => handleSort('programs')}
-                cursor="pointer"
-                color="black"
-                fontSize="sm"
-                textTransform="none"
-                fontWeight="bold"
-              >
+              <Th onClick={() => handleSort('programs')} cursor="pointer">
                 Program(s)
                 <SortArrows columnKey="programs" sortOrder={sortOrder} />
               </Th>
@@ -166,6 +186,12 @@ export const AccountsTable = ({
                   '& .action-group': { opacity: 1, visibility: 'visible' },
                 }}
                 transition="background 0.2s"
+                sx={{
+                  '& td': {
+                    borderBottom: '1px solid',
+                    borderColor: 'gray.200',
+                  },
+                }}
               >
                 <Td fontWeight="medium">
                   {user.firstName} {user.lastName}
@@ -184,18 +210,7 @@ export const AccountsTable = ({
                 </Td>
 
                 <Td>
-                  <Badge
-                    px={4}
-                    py={1}
-                    borderRadius="full"
-                    bg="gray.200"
-                    color="gray.800"
-                    textTransform="capitalize"
-                    fontWeight="normal"
-                    fontSize="sm"
-                  >
-                    {user.role}
-                  </Badge>
+                  <AccountTypeTag role={user.role} />
                 </Td>
 
                 <Td>

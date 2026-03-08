@@ -7,7 +7,6 @@ import {
   SearchIcon,
 } from '@chakra-ui/icons';
 import {
-  Badge,
   Box,
   Button,
   Center,
@@ -40,6 +39,35 @@ import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './ProgramUpdateForm';
 import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 import { EmptyStateBadge } from '../badges/EmptyStateBadge';
+
+const PROGRAM_STATUS_TAG_STYLES = {
+  active: { label: 'Active', bg: '#e0f2f1', color: '#00796b' },
+  inactive: { label: 'Inactive', bg: '#fff3e0', color: '#ef6c00' },
+};
+
+function ProgramStatusTag({ status }) {
+  const normalized = String(status ?? '').toLowerCase();
+  const style = PROGRAM_STATUS_TAG_STYLES[normalized] ?? {
+    label: status ?? '—',
+    bg: 'gray.100',
+    color: 'gray.700',
+  };
+  return (
+    <Box
+      as="span"
+      display="inline-block"
+      px={2}
+      py={0.5}
+      borderRadius="md"
+      fontSize="sm"
+      fontWeight="medium"
+      bg={style.bg}
+      color={style.color}
+    >
+      {style.label}
+    </Box>
+  );
+}
 
 export function downloadProgramUpdatesAsCsv(data) {
   const headers = ['Time', 'Notes', 'Program', 'Author', 'Status'];
@@ -192,10 +220,27 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
             <EmptyStateBadge variant="no-updates" />
           ) : (
             <TableContainer overflowX="auto" maxW="100%">
-              <Table variant="simple">
+              <Table
+                variant="unstyled"
+                sx={{
+                  border: '1px solid',
+                  borderColor: 'gray.200',
+                  borderRadius: 'md',
+                }}
+              >
                 <Thead>
-                  {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
-                  <Tr>
+                  <Tr
+                    sx={{
+                      '& th': {
+                        borderBottom: '1px solid',
+                        borderColor: 'gray.200',
+                        color: 'gray.700',
+                        fontWeight: 'bold',
+                        textTransform: 'uppercase',
+                        fontSize: 'xs',
+                      },
+                    }}
+                  >
                     <Th
                       onClick={() => handleSort('updateDate')}
                       cursor="pointer"
@@ -239,7 +284,11 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
                 <Tbody>
                   {tableData.length === 0 && isLoading ? (
                     <Tr>
-                      <Td colSpan={5}>
+                      <Td
+                        colSpan={5}
+                        borderBottom="1px solid"
+                        borderColor="gray.200"
+                      >
                         <Center py={8}>
                           <Spinner size="lg" />
                         </Center>
@@ -251,6 +300,12 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
                         key={row.id}
                         onClick={() => openEditForm(row)}
                         cursor="pointer"
+                        sx={{
+                          '& td': {
+                            borderBottom: '1px solid',
+                            borderColor: 'gray.200',
+                          },
+                        }}
                       >
                         <Td>{row.updateDate}</Td>
                         <Td>{row.note}</Td>
@@ -259,7 +314,7 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
                           {row.firstName} {row.lastName}
                         </Td>
                         <Td>
-                          <Badge>{row.status}</Badge>
+                          <ProgramStatusTag status={row.status} />
                         </Td>
                       </Tr>
                     ))

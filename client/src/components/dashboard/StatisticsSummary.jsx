@@ -30,7 +30,7 @@ const StatBox = ({ label, number }) => {
       <Box fontSize="xl" mb={4} color="whiteAlpha.900">
         {label}
       </Box>
-      <Box fontSize="2xl" fontWeight="semibold">
+      <Box fontSize="4xl" fontWeight="semibold">
         {number}
       </Box>
     </Box>

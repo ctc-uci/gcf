@@ -2,7 +2,6 @@ import { useMemo, useState, useEffect } from 'react';
 
 import { DownloadIcon, HamburgerIcon, SearchIcon } from '@chakra-ui/icons';
 import {
-  Badge,
   Box,
   Center,
   Flex,
@@ -35,6 +34,37 @@ import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
 import { ReviewMediaUpdate } from './ReviewMediaUpdate';
 import { EmptyStateBadge } from '../badges/EmptyStateBadge';
+
+const MEDIA_STATUS_TAG_STYLES = {
+  unread: { label: 'Unread', bg: '#fff3e0', color: '#ef6c00' },
+  approved: { label: 'Approved', bg: '#e0f2f1', color: '#00796b' },
+};
+
+function MediaStatusTag({ status, onClick }) {
+  const normalized = String(status ?? '').toLowerCase();
+  const style = MEDIA_STATUS_TAG_STYLES[normalized] ?? {
+    label: status ?? '—',
+    bg: 'gray.100',
+    color: 'gray.700',
+  };
+  return (
+    <Box
+      as="span"
+      display="inline-block"
+      px={2}
+      py={0.5}
+      borderRadius="md"
+      fontSize="sm"
+      fontWeight="medium"
+      bg={style.bg}
+      color={style.color}
+      cursor={onClick ? 'pointer' : undefined}
+      onClick={onClick}
+    >
+      {style.label}
+    </Box>
+  );
+}
 
 export function downloadMediaUpdatesAsCsv(data) {
   const headers = ['Time', 'Notes', 'Program', 'Author', 'Status'];
@@ -167,10 +197,27 @@ export const MediaUpdatesTable = ({
         <EmptyStateBadge variant="no-updates" />
       ) : (
         <TableContainer overflowX="auto" maxW="100%">
-          <Table variant="simple">
+          <Table
+            variant="unstyled"
+            sx={{
+              border: '1px solid',
+              borderColor: 'gray.200',
+              borderRadius: 'md',
+            }}
+          >
             <Thead>
-              {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
-              <Tr>
+              <Tr
+                sx={{
+                  '& th': {
+                    borderBottom: '1px solid',
+                    borderColor: 'gray.200',
+                    color: 'gray.700',
+                    fontWeight: 'bold',
+                    textTransform: 'uppercase',
+                    fontSize: 'xs',
+                  },
+                }}
+              >
                 <Th onClick={() => handleSort('updateDate')} cursor="pointer">
                   Time{' '}
                   <SortArrows
@@ -205,7 +252,11 @@ export const MediaUpdatesTable = ({
             <Tbody>
               {isLoading ? (
                 <Tr>
-                  <Td colSpan={5}>
+                  <Td
+                    colSpan={5}
+                    borderBottom="1px solid"
+                    borderColor="gray.200"
+                  >
                     <Center py={8}>
                       <Spinner size="lg" />
                     </Center>
@@ -213,7 +264,15 @@ export const MediaUpdatesTable = ({
                 </Tr>
               ) : (
                 tableData.map((row) => (
-                  <Tr key={row.id}>
+                  <Tr
+                    key={row.id}
+                    sx={{
+                      '& td': {
+                        borderBottom: '1px solid',
+                        borderColor: 'gray.200',
+                      },
+                    }}
+                  >
                     <Td>{row.updateDate}</Td>
                     <Td>{row.note}</Td>
                     <Td>{row.programName}</Td>
@@ -221,12 +280,10 @@ export const MediaUpdatesTable = ({
                       {row.firstName} {row.lastName}
                     </Td>
                     <Td>
-                      <Badge
-                        cursor="pointer"
+                      <MediaStatusTag
+                        status={row.status}
                         onClick={() => setSelectedUpdate(row)}
-                      >
-                        {row.status}
-                      </Badge>
+                      />
                     </Td>
                   </Tr>
                 ))
