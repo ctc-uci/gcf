@@ -15,6 +15,7 @@ import { MdAccountCircle } from "react-icons/md";
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 import { useEffect, useState } from "react";
 
+
 export const RegionCard = ({ region, onEdit }) => {
     const { backend } = useBackendContext();
     const [regionalDirector, setRegionalDirector] = useState(null);
@@ -118,11 +119,12 @@ export const RegionCard = ({ region, onEdit }) => {
                         color: "white",
                         bg: "teal.500"}}
                 _groupHover={{ opacity: 1 }}
-                onClick={onEdit}
+                onClick={() => onEdit(region)}
                 color="teal.500"
                 bg="white"
                 border="2px solid"
                 borderColor="teal.500" 
+                
             > 
                 Edit 
             </Button>
