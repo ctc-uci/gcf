@@ -255,7 +255,29 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                         Are you sure you want to exit? You have unsaved changes.
                                     </AlertDialogBody>
                                     <AlertDialogFooter>
-                                        <Button onClick={() => { onSave(); setIsCancelDialogOpen(false); }}>
+                                        <Button onClick={async () => {
+                                            try {
+                                                if (!region) {
+                                                    const newRegion = await backend.post('/region', {
+                                                        name: regionName,
+                                                        last_modified: new Date().toISOString()
+                                                    });
+                                                    const newRegionId = newRegion.data.id;
+
+                                                    await Promise.all(selectedCountries.map((countryName) =>
+                                                        backend.post('/country', {
+                                                            region_id: newRegionId,
+                                                            name: countryName,
+                                                            last_modified: new Date().toISOString()
+                                                        })
+                                                    ));
+                                                }
+                                                onSave();
+                                                setIsCancelDialogOpen(false);
+                                            } catch (err) {
+                                                console.error("Error saving region:", err);
+                                            }
+                                        }}>
                                             Save & Exit
                                         </Button>
                                         <Button colorScheme="red" onClick={() => { onClose(); setIsCancelDialogOpen(false); }} ml={3}>
