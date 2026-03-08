@@ -10,10 +10,12 @@ import StatisticsSummary from './StatisticsSummary';
 const Dashboard = () => {
   const { role } = useRoleContext();
   const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [selectedVideo, setSelectedVideo] = useState(null); 
 
   return (
     <Flex direction="column" minH="100vh" gap={6} as="main" p={10} w>
-      <StatisticsSummary refreshTrigger={statsRefreshTrigger} />
+      {!selectedPlaylist && <StatisticsSummary refreshTrigger={statsRefreshTrigger} />}
 
       <Box as="section">
         {(role === 'Super Admin' ||
@@ -23,7 +25,13 @@ const Dashboard = () => {
             onStatsRefresh={() => setStatsRefreshTrigger((t) => t + 1)}
           />
         )}
-        {role === 'Program Director' && <LessonVideos />}
+        {role === 'Program Director' && 
+        <LessonVideos
+          selectedPlaylist={selectedPlaylist}
+          setSelectedPlaylist={setSelectedPlaylist}
+          selectedVideo={selectedVideo}
+          setSelectedVideo={setSelectedVideo}
+        />}
       </Box>
     </Flex>
   );

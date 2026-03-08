@@ -1,19 +1,33 @@
 import { useEffect, useState } from 'react';
 
-import { AspectRatio, Box, Heading, SimpleGrid, Text } from '@chakra-ui/react';
+import {
+  AspectRatio,
+  Box,
+  Heading,
+  HStack,
+  SimpleGrid,
+  Text,
+  IconButton,
+} from '@chakra-ui/react';
+import { FiFolder } from 'react-icons/fi';
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
+import VideoPlayer from './VideoPlayer'
+import { getYouTubeEmbedUrl } from '@/utils/youtube';
+
 const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 
-function LessonVideos() {
+function LessonVideos({ selectedPlaylist, setSelectedPlaylist, selectedVideo, setSelectedVideo }) {
   const { currentUser } = useAuthContext();
   const userId = currentUser.uid;
 
   const { backend } = useBackendContext();
   const [playlists, setPlaylists] = useState([]);
   const [playlistVideos, setPlaylistVideos] = useState([]);
+  const [instruments, setInstruments] = useState({});
 
   useEffect(() => {
     if (!userId) return;
@@ -33,6 +47,25 @@ function LessonVideos() {
     fetchData();
   }, [userId, backend]);
 
+  useEffect(() => {
+    async function fetchInstruments() {
+      try {
+        const response = await backend.get('/instruments');
+        const instruments = response.data;
+
+        const instrumentMap = {};
+        instruments.forEach((instrument) => {
+          instrumentMap[instrument.id] = instrument.name;
+        });
+        setInstruments(instrumentMap);
+      } catch (error) {
+        console.error('Error fetching instruments:', error);
+      }
+    }
+    fetchInstruments();
+    console.log(instruments);
+  }, [backend]);
+
   // Extract all the videos in each playlist
   useEffect(() => {
     const getYoutubeVideos = async () => {
@@ -41,24 +74,45 @@ function LessonVideos() {
           playlists.map(async (playlist) => {
             const url = new URL(playlist.link);
             const playlistId = url.searchParams.get('list');
-            console.log(playlistId);
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=5&key=${YOUTUBE_API_KEY}`)
+            const res = await fetch(
+              `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=10&key=${YOUTUBE_API_KEY}`
+            );
             return res.json();
           })
-      );
-        const videos = playlists.map((playlist, index) => ({
-          ...playlist,
-          videos: results[index].items
-        }));
-        console.log(videos);
-        setPlaylistVideos(videos);
+        );
+        const videos = {};
+        playlists.forEach((playlist, index) => {
+          const instrumentName = instruments[playlist.instrumentId];
+          if (!videos[instrumentName]) {
+            videos[instrumentName] = [];
+          }
+          videos[instrumentName].push(...results[index].items);
+        });
+        const videosArray = Object.entries(videos).map(
+          ([instrumentName, videos]) => ({
+            instrumentName,
+            videos,
+          })
+        );
+
+        console.log(videosArray);
+        setPlaylistVideos(videosArray);
         //console.log(playlistVideos);
       } catch (err) {
-      console.error('Error fetching videos: ', err);
+        console.error('Error fetching videos: ', err);
       }
-    }
+    };
     getYoutubeVideos();
-  }, [playlists]);
+  }, [instruments, playlists]);
+
+  if (selectedPlaylist) {
+    return <VideoPlayer
+            playlist={selectedPlaylist.videos}
+            videos={playlistVideos}
+            selectedVideo={selectedVideo}
+            onBack={() => setSelectedPlaylist(null)} 
+            />;
+  }
 
   // Extract YouTube video ID from various URL formats
   const getYouTubeVideoId = (url) => {
@@ -80,13 +134,6 @@ function LessonVideos() {
     return null;
   };
 
-  // Convert YouTube URL to embed URL
-  const getYouTubeEmbedUrl = (video) => {
-    const videoId = video.snippet.resourceId.videoId;
-    if (!videoId) return null;
-    return `https://www.youtube.com/embed/${videoId}`;
-  };
-
   return (
     <Box>
       <Heading size="md" mb={4}>
@@ -96,37 +143,46 @@ function LessonVideos() {
         <Text color="gray.500">No lesson videos available</Text>
       )}
       {playlistVideos.map((playlist) => {
-        console.log(playlist);
         return (
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
-            {playlist.videos.map((video, index) => {
-              const embedUrl = getYouTubeEmbedUrl(video);
-              if (!embedUrl) return null;
-              return (
-                <Box
-                  key={`${playlist.programId}-${video.link}-${index}`}
-                  borderWidth="1px"
-                  borderRadius="md"
-                  overflow="hidden"
-                >
-                  <AspectRatio ratio={16 / 9}>
-                    <iframe
-                      src={embedUrl}
-                      title={video.snippet.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      style={{ border: 0 }}
-                    />
-                  </AspectRatio>
-                  <Box p={2}>
-                    <Text fontSize="sm" fontWeight="medium" noOfLines={2}>
-                      {video.snippet.title}
-                    </Text>
+          <>
+            <HStack>
+              <FiFolder></FiFolder>
+              <Text>{playlist.instrumentName}</Text>
+            </HStack>
+            <HStack>
+              <IconButton icon={<ChevronLeftIcon />} size="xs" flexShrink={0} />
+              {playlist.videos.map((video, index) => {
+                const embedUrl = getYouTubeEmbedUrl(video);
+                if (!embedUrl) return null;
+                return (
+                  <Box 
+                    key={`${playlist.programId}-${video.link}-${index}`}
+                    borderWidth="1px"
+                    borderRadius="md"
+                    overflow="hidden"
+                    w="md"
+                    onClick={() => {setSelectedVideo(video); setSelectedPlaylist(playlist);}}
+                  >
+                    <AspectRatio ratio={16 / 9} w="100%">
+                      <iframe
+                        src={embedUrl}
+                        title={video.snippet.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        style={{ border: 0 }}
+                      />
+                    </AspectRatio>
+                    <Box p={2}>
+                      <Text fontSize="sm" fontWeight="medium" noOfLines={2}>
+                        {video.snippet.title}
+                      </Text>
+                    </Box>
                   </Box>
-                </Box>
-              );
-            })}
-          </SimpleGrid>
+                );
+              })}
+              <IconButton icon={<ChevronRightIcon />} size="xs" />
+            </HStack>
+          </>
         );
       })}
     </Box>
