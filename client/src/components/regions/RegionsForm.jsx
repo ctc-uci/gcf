@@ -199,9 +199,21 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                         <Button onClick={() => setIsDeleteDialogOpen(false)}>
                                             Cancel
                                         </Button>
-                                        <Button colorScheme="red" onClick={() => { onDelete(); setIsDeleteDialogOpen(false); }} ml={3}>
-                                            Delete
-                                        </Button>
+                                        <Button 
+                                            colorScheme="red" 
+                                            onClick={async () => {
+                                                try {
+                                                    await backend.delete(`/region/${region.id}`);
+                                                    onDelete();
+                                                    setIsDeleteDialogOpen(false);
+                                                } catch (err) {
+                                                    console.error("Error deleting region:", err);
+                                                }
+                                            }} 
+                                            ml={3}
+                                        >
+                                        Delete
+                                    </Button>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialogOverlay>
