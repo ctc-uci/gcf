@@ -278,7 +278,25 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                     <AlertDialogFooter>
                                         <Button onClick={async () => {
                                             try {
-                                                if (!region) {
+                                                if (region) {
+                                                    await backend.put(`/region/${region.id}`, {
+                                                        name: regionName,
+                                                        last_modified: new Date().toISOString()
+                                                    });
+
+                                                    const existingRes = await backend.get(`/region/${region.id}/countries`);
+                                                    const existingCountries = Array.isArray(existingRes.data) ? existingRes.data : [];
+                                                    const existingNames = existingCountries.map(c => c.name);
+
+                                                    const newCountries = selectedCountries.filter(name => !existingNames.includes(name));
+                                                    await Promise.all(newCountries.map((countryName) =>
+                                                        backend.post('/country', {
+                                                            region_id: region.id,
+                                                            name: countryName,
+                                                            last_modified: new Date().toISOString()
+                                                        })
+                                                    ));
+                                                } else {
                                                     const newRegion = await backend.post('/region', {
                                                         name: regionName,
                                                         last_modified: new Date().toISOString()
@@ -293,8 +311,8 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                                         })
                                                     ));
                                                 }
-                                                setIsCancelDialogOpen(false);
                                                 onSave();
+                                                setIsCancelDialogOpen(false);
                                             } catch (err) {
                                                 console.error("Error saving region:", err);
                                             }
