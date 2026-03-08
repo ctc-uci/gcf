@@ -179,7 +179,28 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                 </Button>
                                 <Button colorScheme="teal" onClick={async () => {
                                     try {
-                                        if (!region) {
+                                        if (region) {
+                                            // update existing region name
+                                            await backend.put(`/region/${region.id}`, {
+                                                name: regionName,
+                                                last_modified: new Date().toISOString()
+                                            });
+
+                                            // fetch existing countries for this region
+                                            const existingRes = await backend.get(`/region/${region.id}/countries`);
+                                            const existingCountries = Array.isArray(existingRes.data) ? existingRes.data : [];
+                                            const existingNames = existingCountries.map(c => c.name);
+
+                                            // only POST countries that don't already exist
+                                            const newCountries = selectedCountries.filter(name => !existingNames.includes(name));
+                                            await Promise.all(newCountries.map((countryName) =>
+                                                backend.post('/country', {
+                                                    region_id: region.id,
+                                                    name: countryName,
+                                                    last_modified: new Date().toISOString()
+                                                })
+                                            ));
+                                        } else {
                                             // create new region
                                             const newRegion = await backend.post('/region', {
                                                 name: regionName,
@@ -272,8 +293,8 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                                         })
                                                     ));
                                                 }
-                                                onSave();
                                                 setIsCancelDialogOpen(false);
+                                                onSave();
                                             } catch (err) {
                                                 console.error("Error saving region:", err);
                                             }
