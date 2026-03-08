@@ -61,6 +61,7 @@ const RegionsForm = ({ isOpen, onClose, onSave, onDelete }) => {
             try {
                 const res = await backend.get('/country');
                 const countriesList = Array.isArray(res.data) ? res.data : [];
+                console.log("Fetched countries:", countriesList);
                 setCountries(countriesList);
             }  
             catch (err) {
@@ -144,7 +145,7 @@ const RegionsForm = ({ isOpen, onClose, onSave, onDelete }) => {
                                     <MenuButton as={Button} variant="outline" size="sm">
                                         + Add
                                     </MenuButton>
-                                    <Portal>
+                                    
                                         <MenuList>
                                             {countries?.map((country) => (
                                                 <MenuItem key={country.id} value={country.id} onClick={() => handleSelect(country.name)}>
@@ -152,7 +153,7 @@ const RegionsForm = ({ isOpen, onClose, onSave, onDelete }) => {
                                                 </MenuItem>
                                             ))}
                                         </MenuList>
-                                    </Portal>
+                                    
                                 </Menu>
                             </FormControl>
 
