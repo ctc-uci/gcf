@@ -37,10 +37,10 @@ mediaChangeRouter.get('/:id', async (req, res) => {
 
 mediaChangeRouter.post('/', async (req, res) => {
   try {
-    const { update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id } = req.body;
+    const { update_id, s3_key, file_name, file_type, is_thumbnail } = req.body;
     const newMediaChange = await db.query(
-      `INSERT INTO media_change (update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id || null]
+      `INSERT INTO media_change (update_id, s3_key, file_name, file_type, is_thumbnail) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [update_id, s3_key, file_name, file_type, is_thumbnail]
     );
     res.status(201).json(keysToCamel(newMediaChange[0]));
   } catch (err) {
@@ -52,7 +52,7 @@ mediaChangeRouter.post('/', async (req, res) => {
 mediaChangeRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id } = req.body;
+    const { update_id, s3_key, file_name, file_type, is_thumbnail } = req.body;
     const updatedMediaChange = await db.query(
       `UPDATE media_change SET
         update_id = COALESCE($1, update_id),
@@ -60,10 +60,9 @@ mediaChangeRouter.put('/:id', async (req, res) => {
         file_name = COALESCE($3, file_name),
         file_type = COALESCE($4, file_type),
         is_thumbnail = COALESCE($5, is_thumbnail),
-        instrument_id = COALESCE($6, instrument_id)
-        WHERE id = $7
+        WHERE id = $6
         RETURNING *;`,
-      [update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id, id]
+      [update_id, s3_key, file_name, file_type, is_thumbnail, id]
     );
 
     if (updatedMediaChange.length === 0) {
