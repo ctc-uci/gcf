@@ -20,6 +20,7 @@ export const RegionsGrid = ({ onNewRegion }) => {
     const { backend } = useBackendContext();
     const [regions, setRegions] = useState([]);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [drawerSize, setDrawerSize] = useState("md");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -68,12 +69,21 @@ export const RegionsGrid = ({ onNewRegion }) => {
                 isOpen={isDrawerOpen}
                 placement="right"
                 onClose={() => setIsDrawerOpen(false)}
-                size="md"
+                size={drawerSize}
             >
                 <DrawerOverlay />
                 <DrawerContent>
                     <DrawerCloseButton />
-                    <DrawerHeader>New Region</DrawerHeader>
+                    <DrawerHeader display="flex" alignItems="center" gap={2} pr={10}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDrawerSize(drawerSize === "md" ? "full" : "md")}
+                        >
+                            {drawerSize === "md" ? "⤢" : "⤡"}
+                        </Button>
+                        New Region
+                    </DrawerHeader>
                     <DrawerBody>
                         <RegionsForm
                             onClose={() => setIsDrawerOpen(false)}
