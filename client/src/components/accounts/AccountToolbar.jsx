@@ -14,10 +14,10 @@ import {
   Text,
 } from '@chakra-ui/react';
 
-import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from "react-icons/fi";
-import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
+import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from 'react-icons/fi';
+import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 
-import { FilterComponent } from "../common/FilterComponent";
+import { FilterComponent } from '../common/FilterComponent';
 
 export const AccountToolbar = ({
   searchQuery,
@@ -64,11 +64,7 @@ export const AccountToolbar = ({
               color="gray.500"
             />
           </PopoverTrigger>
-          <PopoverContent
-            w="800px"
-            maxW="90vw"
-            shadow="xl"
-          >
+          <PopoverContent w="800px" maxW="90vw" shadow="xl">
             <FilterComponent
               columns={columns}
               onFilterChange={(filters) => setActiveFilters(filters)}
@@ -98,10 +94,7 @@ export const AccountToolbar = ({
           color="gray.500"
           onClick={onDownload}
         />
-        <Text
-          fontSize="sm"
-          color="gray.500"
-        >
+        <Text fontSize="sm" color="gray.500">
           Displaying {resultCount} results
         </Text>
       </HStack>
@@ -118,8 +111,10 @@ export const AccountToolbar = ({
           </Text>
         }
         onClick={onNew}
+        bg="teal.500"
+        color="white"
       >
-        New
+        New Account
       </Button>
     </Flex>
   );

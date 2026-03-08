@@ -205,13 +205,15 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
           />
           <Button
             size="sm"
-            rightIcon={<AddIcon />}
+            leftIcon={<AddIcon />}
             onClick={() => {
               openEditForm(null);
             }}
+            bg="teal.500"
             ml="auto"
+            color="white"
           >
-            New
+            New Update
           </Button>
         </Flex>
 
