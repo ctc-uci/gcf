@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useBackendContext } from '@/contexts/hooks/useBackendContext'
 
 import {
@@ -18,7 +18,6 @@ import {
     MenuButton,
     MenuList,
     MenuItem,
-    Portal,
     Flex,
     Tag,
     TagLabel,
@@ -31,7 +30,7 @@ import {
     AlertDialogOverlay,
 } from '@chakra-ui/react'
 
-const RegionsForm = ({ isOpen, onClose, onSave, onDelete }) => {
+const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     const { backend } = useBackendContext();
     const [regionalDirectors, setRegionalDirectors] = useState([]);
     const [countries, setCountries] = useState([]);
@@ -39,6 +38,7 @@ const RegionsForm = ({ isOpen, onClose, onSave, onDelete }) => {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
     const [drawerSize, setDrawerSize] = useState("md");
+    const [regionName, setRegionName] = useState("");
 
     // useEffect to fetch names of all regional directors for dropdown
     useEffect(() => {
@@ -55,13 +55,12 @@ const RegionsForm = ({ isOpen, onClose, onSave, onDelete }) => {
         fetchRegionalDirectors();
     }, [backend]);
 
-    // useEffect to fetch countries; TODO: switch to use library
+    // useEffect to fetch countries
     useEffect(() => {
         const fetchCountries = async () => {
             try {
                 const res = await backend.get('/country');
                 const countriesList = Array.isArray(res.data) ? res.data : [];
-                console.log("Fetched countries:", countriesList);
                 setCountries(countriesList);
             }  
             catch (err) {
@@ -71,16 +70,15 @@ const RegionsForm = ({ isOpen, onClose, onSave, onDelete }) => {
         fetchCountries();
     }, [backend]);
 
-    //moved these here along w/ drawer code since they were in RegionsGrid but are relevant to the form
-    const handleSave = () => {
-        // TODO: save logic
-        setIsDrawerOpen(false);
-    };
-
-    const handleDelete = () => {
-        // TODO: delete logic
-        setIsDrawerOpen(false);
-    };
+    // useEffect to pre-fill the region information when using the Edit button
+    useEffect(() => {
+        if (region) {
+            setRegionName(region.name || "");
+        } else {
+            setRegionName("");
+            setSelectedCountries([]);
+        }
+    }, [region]);
 
     const handleSelect = (country) => {
         if (!selectedCountries.includes(country)) {
@@ -94,133 +92,136 @@ const RegionsForm = ({ isOpen, onClose, onSave, onDelete }) => {
 
     return (
         <Drawer
-                isOpen={isOpen}
-                placement="right"
-                onClose={onClose}
-                size={drawerSize}
+            isOpen={isOpen}
+            placement="right"
+            onClose={onClose}
+            size={drawerSize}
         >
             <DrawerOverlay />
-                <DrawerContent>
-                    <DrawerCloseButton />
-                    <DrawerHeader display="flex" alignItems="center" gap={2} pr={10}>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDrawerSize(drawerSize === "md" ? "full" : "md")}
-                        >
-                            {drawerSize === "md" ? "⤢" : "⤡"}
-                        </Button>
-                        New Region
-                    </DrawerHeader>
-                    <DrawerBody>
-                        <VStack spacing={4}>
-                            <FormControl isRequired>
-                                <FormLabel>Region Name</FormLabel>
-                                <input type='text' placeholder="Enter region name" />
-                                <FormErrorMessage>Error: Region name is required.</FormErrorMessage>
-                            </FormControl>
+            <DrawerContent>
+                <DrawerCloseButton />
+                <DrawerHeader display="flex" alignItems="center" gap={2} pr={10}>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDrawerSize(drawerSize === "md" ? "full" : "md")}
+                    >
+                        {drawerSize === "md" ? "⤢" : "⤡"}
+                    </Button>
+                    {region ? "Edit Region" : "New Region"}
+                </DrawerHeader>
+                <DrawerBody>
+                    <VStack spacing={4}>
+                        <FormControl isRequired>
+                            <FormLabel>Region Name</FormLabel>
+                            <input
+                                type='text'
+                                placeholder="Enter region name"
+                                value={regionName}
+                                onChange={(e) => setRegionName(e.target.value)}
+                            />
+                            <FormErrorMessage>Error: Region name is required.</FormErrorMessage>
+                        </FormControl>
 
-                            <FormControl>
-                                <FormLabel>Regional Director</FormLabel>
-                                <Select placeholder="Region Name" width="20%">
-                                    {regionalDirectors?.map((director) => (
-                                        <option key={director.id} value={director.id}>
-                                            {director.firstName} {director.lastName}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </FormControl>
+                        <FormControl>
+                            <FormLabel>Regional Director</FormLabel>
+                            <Select placeholder="Select a director">
+                                {regionalDirectors?.map((director) => (
+                                    <option key={director.id} value={director.id}>
+                                        {director.firstName} {director.lastName}
+                                    </option>
+                                ))}
+                            </Select>
+                        </FormControl>
 
-                            <FormControl>
-                                <FormLabel>Assigned Countries</FormLabel>
-                                <Flex wrap="wrap" gap={2} mb={2}>
-                                    {selectedCountries.map((country) => (
-                                        <Tag key={country} variant="solid" colorScheme="gray">
-                                            <TagLabel>{country}</TagLabel>
-                                            <TagCloseButton onClick={() => handleRemove(country)} />
-                                        </Tag>
-                                    ))}
-                                </Flex>
-                                <Menu>
-                                    <MenuButton as={Button} variant="outline" size="sm">
-                                        + Add
-                                    </MenuButton>
-                                    
-                                        <MenuList>
-                                            {countries?.map((country) => (
-                                                <MenuItem key={country.id} value={country.id} onClick={() => handleSelect(country.name)}>
-                                                    {country.name}
-                                                </MenuItem>
-                                            ))}
-                                        </MenuList>
-                                    
-                                </Menu>
-                            </FormControl>
-
-                            <Flex width="100%" justifyContent="space-between" mt={4}>
-                                <Button colorScheme="red" variant="ghost" onClick={() => setIsDeleteDialogOpen(true)}>
-                                    Delete
-                                </Button>
-                                <Flex gap={2}>
-                                    <Button variant="outline" onClick={() => setIsCancelDialogOpen(true)}>
-                                        Cancel
-                                    </Button>
-                                    <Button colorScheme="teal" onClick={onSave}>
-                                        Save
-                                    </Button>
-                                </Flex>
+                        <FormControl>
+                            <FormLabel>Assigned Countries</FormLabel>
+                            <Flex wrap="wrap" gap={2} mb={2}>
+                                {selectedCountries.map((country) => (
+                                    <Tag key={country} variant="solid" colorScheme="gray">
+                                        <TagLabel>{country}</TagLabel>
+                                        <TagCloseButton onClick={() => handleRemove(country)} />
+                                    </Tag>
+                                ))}
                             </Flex>
+                            <Menu>
+                                <MenuButton as={Button} variant="outline" size="sm">
+                                    + Add
+                                </MenuButton>
+                                <MenuList>
+                                    {countries?.map((country) => (
+                                        <MenuItem key={country.id} value={country.id} onClick={() => handleSelect(country.name)}>
+                                            {country.name}
+                                        </MenuItem>
+                                    ))}
+                                </MenuList>
+                            </Menu>
+                        </FormControl>
 
-                            <AlertDialog
-                                isOpen={isDeleteDialogOpen}
-                                onClose={() => setIsDeleteDialogOpen(false)}
-                            >
-                                <AlertDialogOverlay>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                                            Delete Region
-                                        </AlertDialogHeader>
-                                        <AlertDialogBody>
-                                            Are you sure you want to delete this region?
-                                        </AlertDialogBody>
-                                        <AlertDialogFooter>
-                                            <Button onClick={() => setIsDeleteDialogOpen(false)}>
-                                                Cancel
-                                            </Button>
-                                            <Button colorScheme="red" onClick={() => { onDelete(); setIsDeleteDialogOpen(false); }} ml={3}>
-                                                Delete
-                                            </Button>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialogOverlay>
-                            </AlertDialog>
+                        <Flex width="100%" justifyContent="space-between" mt={4}>
+                            <Button colorScheme="red" variant="ghost" onClick={() => setIsDeleteDialogOpen(true)}>
+                                Delete
+                            </Button>
+                            <Flex gap={2}>
+                                <Button variant="outline" onClick={() => setIsCancelDialogOpen(true)}>
+                                    Cancel
+                                </Button>
+                                <Button colorScheme="teal" onClick={onSave}>
+                                    Save
+                                </Button>
+                            </Flex>
+                        </Flex>
 
-                            <AlertDialog
-                                isOpen={isCancelDialogOpen}
-                                onClose={() => setIsCancelDialogOpen(false)}
-                            >
-                                <AlertDialogOverlay>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                                            Unsaved Changes
-                                        </AlertDialogHeader>
-                                        <AlertDialogBody>
-                                            Are you sure you want to exit? You have unsaved changes.
-                                        </AlertDialogBody>
-                                        <AlertDialogFooter>
-                                            <Button onClick={() => { onSave(); setIsCancelDialogOpen(false); }}>
-                                                Save & Exit
-                                            </Button>
-                                            <Button colorScheme="red" onClick={() => { onClose(); setIsCancelDialogOpen(false); }} ml={3}>
-                                                Exit Without Saving
-                                            </Button>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialogOverlay>
-                            </AlertDialog>
-                        </VStack>
-                    </DrawerBody>
-                </DrawerContent>
+                        <AlertDialog
+                            isOpen={isDeleteDialogOpen}
+                            onClose={() => setIsDeleteDialogOpen(false)}
+                        >
+                            <AlertDialogOverlay>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                                        Delete Region
+                                    </AlertDialogHeader>
+                                    <AlertDialogBody>
+                                        Are you sure you want to delete this region?
+                                    </AlertDialogBody>
+                                    <AlertDialogFooter>
+                                        <Button onClick={() => setIsDeleteDialogOpen(false)}>
+                                            Cancel
+                                        </Button>
+                                        <Button colorScheme="red" onClick={() => { onDelete(); setIsDeleteDialogOpen(false); }} ml={3}>
+                                            Delete
+                                        </Button>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialogOverlay>
+                        </AlertDialog>
+
+                        <AlertDialog
+                            isOpen={isCancelDialogOpen}
+                            onClose={() => setIsCancelDialogOpen(false)}
+                        >
+                            <AlertDialogOverlay>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                                        Unsaved Changes
+                                    </AlertDialogHeader>
+                                    <AlertDialogBody>
+                                        Are you sure you want to exit? You have unsaved changes.
+                                    </AlertDialogBody>
+                                    <AlertDialogFooter>
+                                        <Button onClick={() => { onSave(); setIsCancelDialogOpen(false); }}>
+                                            Save & Exit
+                                        </Button>
+                                        <Button colorScheme="red" onClick={() => { onClose(); setIsCancelDialogOpen(false); }} ml={3}>
+                                            Exit Without Saving
+                                        </Button>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialogOverlay>
+                        </AlertDialog>
+                    </VStack>
+                </DrawerBody>
+            </DrawerContent>
         </Drawer>
     );
 }

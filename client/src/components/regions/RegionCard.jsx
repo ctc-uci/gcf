@@ -119,7 +119,7 @@ export const RegionCard = ({ region, onEdit }) => {
                         color: "white",
                         bg: "teal.500"}}
                 _groupHover={{ opacity: 1 }}
-                onClick={() => onEdit(region)}
+                onClick={() => onEdit(region, regionalDirector)}
                 color="teal.500"
                 bg="white"
                 border="2px solid"

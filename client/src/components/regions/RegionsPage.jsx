@@ -14,8 +14,8 @@ export const RegionsPage = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedRegion, setSelectedRegion] = useState(null);
 
-    const handleEditRegion = (region) => {
-        setSelectedRegion(region);
+    const handleEditRegion = (region, regionalDirector) => {
+        setSelectedRegion({ ...region, regionalDirector });
         setIsDrawerOpen(true);
     };
 
