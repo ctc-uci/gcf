@@ -36,7 +36,7 @@ export const RegionsGrid = ({ onEditRegion }) => {
                     <RegionCard
                         key={region.id}
                         region={region}
-                        onEdit={(region) => onEditRegion(region)}
+                        onEdit={(region, regionalDirector) => onEditRegion(region, regionalDirector)}
                     />
                 ))}
             </SimpleGrid>

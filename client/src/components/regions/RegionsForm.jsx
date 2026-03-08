@@ -35,6 +35,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     const [regionalDirectors, setRegionalDirectors] = useState([]);
     const [countries, setCountries] = useState([]);
     const [selectedCountries, setSelectedCountries] = useState([]);
+    const [selectedDirector, setSelectedDirector] = useState("");
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
     const [drawerSize, setDrawerSize] = useState("md");
@@ -72,13 +73,19 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
 
     // useEffect to pre-fill the region information when using the Edit button
     useEffect(() => {
-        if (region) {
+    if (region) {
             setRegionName(region.name || "");
+            const match = regionalDirectors.find(
+                d => d.firstName === region.regionalDirector?.firstName &&
+                    d.lastName === region.regionalDirector?.lastName
+            );
+            setSelectedDirector(match?.id?.toString() ?? "");
         } else {
             setRegionName("");
+            setSelectedDirector("");
             setSelectedCountries([]);
         }
-    }, [region]);
+    }, [region, regionalDirectors]);
 
     const handleSelect = (country) => {
         if (!selectedCountries.includes(country)) {
@@ -125,7 +132,11 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
 
                         <FormControl>
                             <FormLabel>Regional Director</FormLabel>
-                            <Select placeholder="Select a director">
+                            <Select
+                                placeholder="Select a director"
+                                value={selectedDirector}
+                                onChange={(e) => setSelectedDirector(e.target.value)}
+                            >
                                 {regionalDirectors?.map((director) => (
                                     <option key={director.id} value={director.id}>
                                         {director.firstName} {director.lastName}

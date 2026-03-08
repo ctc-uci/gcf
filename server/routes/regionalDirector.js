@@ -11,7 +11,7 @@ regionalDirectorRouter.use(express.json());
 regionalDirectorRouter.get("/all", async (req, res) => {
   try {
     const data = await db.query(
-      `SELECT u.first_name, u.last_name
+      `SELECT *
        FROM gcf_user u WHERE u.id IN (SELECT user_id FROM regional_director)`,
     );
     res.status(200).json(keysToCamel(data));
