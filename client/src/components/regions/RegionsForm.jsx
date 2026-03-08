@@ -177,7 +177,30 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                 <Button variant="outline" onClick={() => setIsCancelDialogOpen(true)}>
                                     Cancel
                                 </Button>
-                                <Button colorScheme="teal" onClick={onSave}>
+                                <Button colorScheme="teal" onClick={async () => {
+                                    try {
+                                        if (!region) {
+                                            // create new region
+                                            const newRegion = await backend.post('/region', {
+                                                name: regionName,
+                                                last_modified: new Date().toISOString()
+                                            });
+                                            const newRegionId = newRegion.data.id;
+
+                                            // create a country entry for each selected country
+                                            await Promise.all(selectedCountries.map((countryName) =>
+                                                backend.post('/country', {
+                                                    region_id: newRegionId,
+                                                    name: countryName,
+                                                    last_modified: new Date().toISOString()
+                                                })
+                                            ));
+                                        }
+                                        onSave();
+                                    } catch (err) {
+                                        console.error("Error saving region:", err);
+                                    }
+                                }}>
                                     Save
                                 </Button>
                             </Flex>
