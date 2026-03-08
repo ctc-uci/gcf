@@ -2,7 +2,7 @@ import { Box, Button, Flex, Icon, Image, Link, VStack } from '@chakra-ui/react';
 
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { FaGuitar } from 'react-icons/fa';
-import { HiOutlineUser } from 'react-icons/hi';
+import { HiOutlineCog, HiOutlineUser } from 'react-icons/hi';
 import { MdOutlineNotifications, MdPermMedia } from 'react-icons/md';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 
@@ -19,11 +19,30 @@ export const Sidebar = () => {
   }
   let navItems: NavItem[] = [];
 
-  if (
-    role === 'Super Admin' ||
-    role === 'Admin' ||
-    role === 'Regional Director'
-  ) {
+  if (role === 'Super Admin' || role === 'Admin') {
+    navItems = [
+      {
+        name: 'Programs',
+        icon: <Icon as={FaGuitar} boxSize="20px" />,
+        path: '/dashboard',
+      },
+      {
+        name: 'Updates',
+        icon: <Icon as={MdOutlineNotifications} boxSize="20px" />,
+        path: '/updates',
+      },
+      {
+        name: 'Accounts',
+        icon: <Icon as={HiOutlineUser} boxSize="20px" />,
+        path: '/account',
+      },
+      {
+        name: 'Regions',
+        icon: <Icon as={HiOutlineCog} boxSize="20px" />,
+        path: '/regions',
+      },
+    ];
+  } else if (role === 'Regional Director') {
     navItems = [
       {
         name: 'Programs',
@@ -69,7 +88,7 @@ export const Sidebar = () => {
       pt={4}
       pb={6}
       px={4}
-      height="95vh"
+      minHeight="95vh"
       display="flex"
       flexDirection="column"
       alignItems="stretch"
