@@ -17,7 +17,7 @@ import { useState } from 'react';
 
 import { getYouTubeEmbedUrl } from '@/utils/youtube';
 
-function VideoPlayer({ playlist, videos, selectedVideo, onBack }) {
+function VideoPlayer({ playlist, videos, selectedVideo, onBack, setSelectedVideo }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
@@ -40,7 +40,9 @@ function VideoPlayer({ playlist, videos, selectedVideo, onBack }) {
           <Heading>{selectedVideo.snippet.title}</Heading>
         </VStack>
         {isOpen && (
-          <Box flex={isOpen ? 0.2 : 0}>
+          <Box flex={isOpen ? 0.2 : 0}
+            bg="gray.100"
+          >
             <IconButton
               icon={<ChevronRightIcon />}
               onClick={() => setIsOpen(!isOpen)}
@@ -55,6 +57,11 @@ function VideoPlayer({ playlist, videos, selectedVideo, onBack }) {
                     <Box
                       key={`${playlist.programId}-${video.link}-${index}`}
                       w="xs"
+                      bg={video === selectedVideo ? "gray.300" : ""}
+                      p={4}
+                      onClick={() => {
+                      setSelectedVideo(video);
+                    }}
                     >
                       <AspectRatio ratio={16 / 9}>
                         <iframe

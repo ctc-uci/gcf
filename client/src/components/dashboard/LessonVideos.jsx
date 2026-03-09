@@ -117,6 +117,7 @@ function LessonVideos({
         videos={playlistVideos}
         selectedVideo={selectedVideo}
         onBack={() => setSelectedPlaylist(null)}
+        setSelectedVideo={setSelectedVideo}
       />
     );
   }
