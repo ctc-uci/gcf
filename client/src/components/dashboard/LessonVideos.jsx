@@ -18,7 +18,6 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import VideoPlayer from './VideoPlayer';
 import { getYouTubeEmbedUrl } from '@/utils/youtube';
 
-const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 
 function LessonVideos({
   selectedPlaylist,
@@ -79,10 +78,8 @@ function LessonVideos({
           playlists.map(async (playlist) => {
             const url = new URL(playlist.link);
             const playlistId = url.searchParams.get('list');
-            const res = await fetch(
-              `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=10&key=${YOUTUBE_API_KEY}`
-            );
-            return res.json();
+            const res = await backend.get(`/playlistCache/${playlistId}`);
+            return { items: res.data};
           })
         );
         const videos = {};
@@ -157,7 +154,7 @@ function LessonVideos({
               <FiFolder></FiFolder>
               <Text>{playlist.instrumentName}</Text>
             </HStack>
-            <HStack>
+            <HStack overflowX="auto">
               <IconButton icon={<ChevronLeftIcon />} size="xs" flexShrink={0} />
               {playlist.videos.map((video, index) => {
                 const embedUrl = getYouTubeEmbedUrl(video);
@@ -168,7 +165,9 @@ function LessonVideos({
                     borderWidth="1px"
                     borderRadius="md"
                     overflow="hidden"
+                    flexShrink={0}
                     w="md"
+                    h="xs"
                     onClick={() => {
                       setSelectedVideo(video);
                       setSelectedPlaylist(playlist);
