@@ -8,7 +8,6 @@ import {
   Center,
   FormControl,
   FormErrorMessage,
-  FormHelperText,
   FormLabel,
   GridItem,
   Heading,
@@ -19,8 +18,8 @@ import {
 
 import { BackendContext } from '../../contexts/BackendContext';
 
-export const ForgotPassword = () => {
-  const [submitted, setSubmitted] = useState(false);
+export const ForgotPassword = ({ setIsForgot }) => {
+  const [, setSubmitted] = useState(false);
   const { backend } = useContext(BackendContext);
   const [errorMessage, setErrorMessage] = useState('');
   const auth = getAuth();
@@ -32,6 +31,16 @@ export const ForgotPassword = () => {
       await backend.post('/gcf-users/verify-email', { email });
       await sendPasswordResetEmail(auth, email);
       setSubmitted(true);
+      toast({
+        title: 'Email sent successfully!',
+        description: 'Please check your email',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+        position: 'bottom-right',
+      });
+
+      setIsForgot(false);
     } catch {
       setErrorMessage('Invalid Email');
       toast({

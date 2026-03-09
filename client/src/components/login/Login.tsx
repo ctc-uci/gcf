@@ -22,6 +22,7 @@ import {
 } from '@chakra-ui/react';
 
 import { ForgotPassword } from './ForgotPassword';
+import { CreatePassword } from './CreatePassword';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
@@ -29,7 +30,8 @@ import { authenticateGoogleUser } from '@/utils/auth/providers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { FaGoogle } from 'react-icons/fa6';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+
 import { z } from 'zod';
 
 import GcfGlobe from '/gcf_globe.png';
@@ -46,6 +48,8 @@ export const Login = () => {
   const [isForgot, setIsForgot] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get('mode');
 
   const { login, handleRedirectResult } = useAuthContext();
   const { backend } = useBackendContext();
@@ -155,8 +159,15 @@ export const Login = () => {
             />
           </Box>
         </GridItem>
-        {isForgot ? (
-          <ForgotPassword />
+        {/* TODO: Add back button to reset/create password pages to navigate to login */}
+        {mode === 'resetPassword' ? (
+          <GridItem display="flex" justifyContent="center" alignItems="center">
+            <CreatePassword />
+          </GridItem>
+        ) : isForgot ? (
+          <GridItem display="flex" justifyContent="center" alignItems="center">
+            <ForgotPassword setIsForgot={setIsForgot} />
+          </GridItem>
         ) : (
           <GridItem>
             <Box w="100%" mt="20%">

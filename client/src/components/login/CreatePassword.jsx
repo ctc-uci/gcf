@@ -21,7 +21,9 @@ import {
 
 const createPasswordSchema = z
   .object({
-    newPassword: z.string().min(6, 'Password is not valid'),
+    newPassword: z
+      .string()
+      .min(6, 'Password must be at least 6 characters long'),
     confirmPassword: z.string(),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
