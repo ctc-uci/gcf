@@ -213,8 +213,6 @@ gcfUserRouter.get('/role/:role', async (req, res) => {
 
 gcfUserRouter.get('/:id/accounts', async (req, res) => {
   try {
-
-
     const { id } = req.params;
     const { role } = req.query;
 
