@@ -53,7 +53,6 @@ async function getDataByUserId(userId) {
 
 rdProgramTableRouter.get('/:userId', async (req, res) => {
   try {
-
     const { userId } = req.params;
     const data = await getDataByUserId(userId);
     res.json(keysToCamel(data));
