@@ -44,19 +44,30 @@ export const Navbar = () => {
 
     const loadData = async () => {
       try {
-        const [regionData, projectData] = await Promise.all([
-          fetchData('region', `get-region-name/${userId}`),
-          fetchData('program', `get-program-name/${userId}`),
-        ]);
-
-        setRegion(regionData.name);
-        setProject(projectData.name);
+        if (role === 'Regional Director') {
+          const regionData = await fetchData(
+            'region',
+            `get-region-name/${userId}`
+          );
+          setRegion(regionData?.name ?? '');
+          setProject('');
+        } else if (role === 'Program Director') {
+          const projectData = await fetchData(
+            'program',
+            `get-program-name/${userId}`
+          );
+          setProject(projectData?.name ?? '');
+          setRegion('');
+        } else {
+          setRegion('');
+          setProject('');
+        }
       } catch (error) {
         console.error('Fetch error:', error);
       }
     };
-    if (role === 'Program Director' || role === 'Regional Director') loadData();
-  }, [role, userId, backend]);
+    loadData();
+  }, [userId, backend, role]);
 
   return (
     <Flex

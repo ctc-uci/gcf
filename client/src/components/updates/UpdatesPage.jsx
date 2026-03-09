@@ -23,6 +23,7 @@ export const UpdatesPage = () => {
   );
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isProgramUpdatesLoading, setIsProgramUpdatesLoading] = useState(false);
 
   const fetchData = useCallback(
     async (path) => {
@@ -31,7 +32,7 @@ export const UpdatesPage = () => {
         return response.data;
       } catch (error) {
         console.error(
-          "Request failed:",
+          'Request failed:',
           path,
           error.response?.status,
           error.message
@@ -58,6 +59,23 @@ export const UpdatesPage = () => {
     }
   }, [backend, userId]);
 
+  const refetchProgramUpdates = useCallback(async () => {
+    setIsProgramUpdatesLoading(true);
+    try {
+      const programUpdates = await fetchData(`program-updates/${userId}`);
+      const mappedProgram = (programUpdates || []).map((item) => ({
+        ...item,
+        fullName: `${item.firstName} ${item.lastName}`,
+      }));
+      setProgramUpdatesData(mappedProgram);
+      setOriginalProgramUpdatesData(mappedProgram);
+    } catch (error) {
+      console.error('Error refetching program updates:', error);
+    } finally {
+      setIsProgramUpdatesLoading(false);
+    }
+  }, [fetchData, userId]);
+
   useEffect(() => {
     if (!userId || !backend) {
       setIsLoading(false);
@@ -68,27 +86,26 @@ export const UpdatesPage = () => {
       try {
         if (role === 'Program Director') {
           const programUpdates = await fetchData(`program-updates/${userId}`);
-          const mappedProgram = programUpdates.map(item => ({
+          const mappedProgram = (programUpdates || []).map((item) => ({
             ...item,
             fullName: `${item.firstName} ${item.lastName}`,
           }));
           setProgramUpdatesData(mappedProgram);
           setOriginalProgramUpdatesData(mappedProgram);
-        }
-        else {
+        } else {
           const [mediaUpdates, programUpdates] = await Promise.all([
             fetchMediaUpdatesForUser(),
             fetchData(`program-updates/${userId}`),
           ]);
-          const mappedMedia = mediaUpdates.map(item => ({
+          const mappedMedia = (mediaUpdates || []).map((item) => ({
             ...item,
             fullName: `${item.firstName} ${item.lastName}`,
           }));
-          const mappedProgram = programUpdates.map(item => ({
+          const mappedProgram = (programUpdates || []).map((item) => ({
             ...item,
             fullName: `${item.firstName} ${item.lastName}`,
           }));
-          setOriginalMediaUpdatesData(mappedMedia);  
+          setOriginalMediaUpdatesData(mappedMedia);
           setMediaUpdatesData(mappedMedia);
           setProgramUpdatesData(mappedProgram);
           setOriginalProgramUpdatesData(mappedProgram);
@@ -117,7 +134,8 @@ export const UpdatesPage = () => {
           data={programUpdatesData}
           setData={setProgramUpdatesData}
           originalData={originalProgramUpdatesData}
-          isLoading={isLoading}
+          isLoading={isLoading || isProgramUpdatesLoading}
+          onSave={refetchProgramUpdates}
         />
       ) : (
         <>
@@ -131,7 +149,8 @@ export const UpdatesPage = () => {
             data={programUpdatesData}
             setData={setProgramUpdatesData}
             originalData={originalProgramUpdatesData}
-            isLoading={isLoading}
+            isLoading={isLoading || isProgramUpdatesLoading}
+            onSave={refetchProgramUpdates}
           />
         </>
       )}

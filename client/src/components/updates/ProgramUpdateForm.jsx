@@ -35,6 +35,7 @@ export const ProgramUpdateForm = ({
   isOpen: isOpenProp,
   onOpen: onOpenProp,
   onClose: onCloseProp,
+  onSave,
   programUpdateId = null,
 }) => {
   const disclosure = useDisclosure();
@@ -248,13 +249,10 @@ export const ProgramUpdateForm = ({
     handleNewInstrument();
 
     if (!selectedInstrument && !newInstrumentName) {
-      console.log('nothing selected');
       return;
     } else if (quantity === 0) {
-      console.log('quantity 0');
       return;
     } else if (selectedInstrument && newInstrumentName) {
-      console.log('both selected');
       return;
     }
 
@@ -337,20 +335,14 @@ export const ProgramUpdateForm = ({
       const deletedInstruments = Object.keys(originalInstruments).filter(
         (name) => !addedInstruments[name]
       );
-      console.log('deletedInstruments to remove:', deletedInstruments);
 
       for (const deletedName of deletedInstruments) {
         try {
           const changeMeta = instrumentChangeMap[deletedName];
-          console.log(`Deleting ${deletedName}, changeMeta:`, changeMeta);
 
           if (changeMeta && changeMeta.changeId) {
             const delRes = await backend.delete(
               `/instrument-changes/${changeMeta.changeId}`
-            );
-            console.log(
-              `Successfully deleted instrument change for ${deletedName}:`,
-              delRes && delRes.data ? delRes.data : delRes
             );
 
             setInstrumentChangeMap((prev) => {
@@ -386,7 +378,6 @@ export const ProgramUpdateForm = ({
                   updateId: updatedProgramUpdateId,
                   amountChanged: qty,
                 });
-                console.log(`Updated instrument change for ${name}`);
               } catch (error) {
                 console.error(`Error updating instrument ${name}:`, error);
               }
@@ -402,7 +393,6 @@ export const ProgramUpdateForm = ({
                   updateId: updatedProgramUpdateId,
                   amountChanged: qty,
                 });
-                console.log(`Created instrument change for ${name}`);
               } catch (error) {
                 console.error(
                   `Error creating instrument change for ${name}:`,
@@ -421,7 +411,6 @@ export const ProgramUpdateForm = ({
             enrollment_change: enrollmentNumber,
             graduated_change: graduatedNumber || 0,
           });
-          console.log('Updated existing enrollment change');
         } else {
           const enrollmentResponse = await backend.post('/enrollmentChange', {
             update_id: updatedProgramUpdateId,
@@ -429,7 +418,6 @@ export const ProgramUpdateForm = ({
             graduated_change: graduatedNumber || 0,
           });
           setEnrollmentChangeId(enrollmentResponse.data.id);
-          console.log('Created new enrollment change');
         }
       }
 
@@ -449,7 +437,6 @@ export const ProgramUpdateForm = ({
           setEnrollmentChangeId(enrollmentData.id);
           setEnrollmentNumber(enrollmentData.enrollmentChange || null);
           setGraduatedNumber(enrollmentData.graduatedChange || null);
-          console.log('Synced enrollment with server state:', enrollmentData);
         } else {
           setEnrollmentChangeId(null);
           setEnrollmentNumber(null);
@@ -487,10 +474,6 @@ export const ProgramUpdateForm = ({
           setAddedInstruments(instrumentsMap);
           setOriginalInstruments(JSON.parse(JSON.stringify(instrumentsMap)));
           setInstrumentChangeMap(changeMeta);
-          console.log(
-            'Synced addedInstruments with server state:',
-            instrumentsMap
-          );
         } else {
           setAddedInstruments({});
           setOriginalInstruments({});
@@ -527,6 +510,8 @@ export const ProgramUpdateForm = ({
         duration: 5000,
         isClosable: true,
       });
+
+      onSave?.();
     } catch (error) {
       console.error('Error submitting program update:', error);
       const message =

@@ -18,8 +18,8 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
-import { FullscreenFlyoutButton } from "../FullscreenFlyoutButton";
-import { useFullscreenFlyout } from "../useFullScreenFlyout.js";
+import { FullscreenFlyoutButton } from '../FullscreenFlyoutButton';
+import { useFullscreenFlyout } from '../useFullScreenFlyout.js';
 
 export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const { currentUser } = useAuthContext();
@@ -268,16 +268,9 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
 
   return (
     <>
-      <Drawer
-        isOpen={isOpen}
-        placement="right"
-        onClose={onClose}
-      >
+      <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
         <DrawerOverlay />
-        <DrawerContent
-          width="20%"
-          maxWidth={isFullScreen ? "100%" : "20%"}
-        >
+        <DrawerContent width="20%" maxWidth={isFullScreen ? '100%' : '20%'}>
           <DrawerCloseButton />
           <FullscreenFlyoutButton
             isFullScreen={isFullScreen}
@@ -288,7 +281,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
             marginTop="0.7em"
           />
           <DrawerHeader>
-            {targetUserId ? "Edit Account" : "Create Account"}
+            {targetUserId ? 'Edit Account' : 'Create Account'}
           </DrawerHeader>
 
           <DrawerBody>

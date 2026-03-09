@@ -1,6 +1,6 @@
 import express from 'express';
-
-import { deleteFromS3, getS3ImageURL, getS3UploadURL } from '../common/s3';
+import { db } from '../db/db-pgp';
+import { getS3UploadURL, getS3ImageURL, deleteFromS3 } from '../common/s3';
 
 export const imagesRouter = express.Router();
 imagesRouter.use(express.json());
@@ -84,6 +84,34 @@ imagesRouter.delete('/:key', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to delete image',
+    });
+  }
+});
+
+/**
+ * POST /images/profile-picture
+ * Add profile picture url to user column
+ * Params: None
+ * Returns: { success: true, message: string }
+ */
+
+imagesRouter.post('/profile-picture', async (req, res) => {
+  try {
+    const { key, userId } = req.body;
+
+    console.log(userId);
+
+    await db.none(`UPDATE gcf_user SET picture = $1 WHERE id = $2`, [
+      key,
+      userId,
+    ]);
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('Error uploading profile picture:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to upload image',
     });
   }
 });

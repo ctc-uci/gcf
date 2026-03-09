@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 
 import {
   AddIcon,
@@ -33,24 +33,23 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import {
-  downloadCsv,
-  escapeCsvValue,
-  getFilenameTimestamp,
-} from '@/utils/downloadCsv';
-import CardView from './CardView';
-import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import { useRoleContext } from '@/contexts/hooks/useRoleContext';
-import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
 } from 'react-icons/hi2';
-
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
+import {
+  downloadCsv,
+  escapeCsvValue,
+  getFilenameTimestamp,
+} from '../../utils/downloadCsv';
 import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
-import { ProgramForm } from './ProgramForm';
+import CardView from './CardView';
+import { ProgramForm } from './ProgramForm/index';
 
 const getRouteByRole = (role, userId) => {
   const routes = {
@@ -69,6 +68,7 @@ function mapAdminRow(row) {
     launchDate: row.launchDate,
     location: row.countryName ?? '',
     country: row.country,
+
     students: row.students ?? 0,
     instruments: row.instruments ?? 0,
     totalInstruments: row.instruments ?? 0,
@@ -76,6 +76,8 @@ function mapAdminRow(row) {
     regionalDirectors: row.regionalDirectors,
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
+
+    media: row.media,
   };
 }
 
@@ -95,6 +97,8 @@ function mapRdRow(row) {
     regionalDirectors: row.regionalDirectors,
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
+
+    media: row.media,
   };
 }
 
@@ -245,6 +249,8 @@ function ProgramDisplay({
   setIsFormOpen,
   selectedProgram,
   setSelectedProgram,
+  onSave,
+  onStatsRefresh,
 }) {
   const [isCardView, setIsCardView] = useState(false);
 
@@ -350,6 +356,10 @@ function ProgramDisplay({
           setSelectedProgram(null);
         }}
         program={selectedProgram}
+        onSave={() => {
+          onSave?.();
+          onStatsRefresh?.();
+        }}
       />
       <TableContainer>
         <HStack mb={4} justifyContent="space-between" w="100%">
@@ -434,69 +444,89 @@ function ProgramDisplay({
           </HStack>
         </HStack>
 
-        {!isCardView ? (
-          <Table variant="simple" aria-label="collapsible-table">
-            <Thead>
-              <Tr>
-                <Th onClick={() => handleSort('title')} cursor="pointer">
-                  Program <SortArrows columnKey="title" sortOrder={sortOrder} />
-                </Th>
-                <Th onClick={() => handleSort('status')} cursor="pointer">
-                  Status <SortArrows columnKey="status" sortOrder={sortOrder} />
-                </Th>
-                <Th onClick={() => handleSort('launchDate')} cursor="pointer">
-                  Launch Date{' '}
-                  <SortArrows columnKey="launchDate" sortOrder={sortOrder} />
-                </Th>
-                <Th onClick={() => handleSort('location')} cursor="pointer">
-                  Location{' '}
-                  <SortArrows columnKey="location" sortOrder={sortOrder} />
-                </Th>
-                <Th onClick={() => handleSort('students')} cursor="pointer">
-                  Students{' '}
-                  <SortArrows columnKey="students" sortOrder={sortOrder} />
-                </Th>
-                <Th onClick={() => handleSort('instruments')} cursor="pointer">
-                  Instruments{' '}
-                  <SortArrows columnKey="instruments" sortOrder={sortOrder} />
-                </Th>
-                <Th
-                  onClick={() => handleSort('totalInstruments')}
-                  cursor="pointer"
-                >
-                  Total Instruments{' '}
-                  <SortArrows
-                    columnKey="totalInstruments"
-                    sortOrder={sortOrder}
-                  />
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {isLoading ? (
+        <Box position="relative">
+          {!isCardView ? (
+            <Table variant="simple" aria-label="collapsible-table">
+              <Thead>
                 <Tr>
-                  <Td colSpan={7}>
-                    <Center py={8}>
-                      <Spinner size="lg" />
-                    </Center>
-                  </Td>
+                  <Th onClick={() => handleSort('title')} cursor="pointer">
+                    Program{' '}
+                    <SortArrows columnKey="title" sortOrder={sortOrder} />
+                  </Th>
+                  <Th onClick={() => handleSort('status')} cursor="pointer">
+                    Status{' '}
+                    <SortArrows columnKey="status" sortOrder={sortOrder} />
+                  </Th>
+                  <Th onClick={() => handleSort('launchDate')} cursor="pointer">
+                    Launch Date{' '}
+                    <SortArrows columnKey="launchDate" sortOrder={sortOrder} />
+                  </Th>
+                  <Th onClick={() => handleSort('location')} cursor="pointer">
+                    Location{' '}
+                    <SortArrows columnKey="location" sortOrder={sortOrder} />
+                  </Th>
+                  <Th onClick={() => handleSort('students')} cursor="pointer">
+                    Students{' '}
+                    <SortArrows columnKey="students" sortOrder={sortOrder} />
+                  </Th>
+                  <Th
+                    onClick={() => handleSort('instruments')}
+                    cursor="pointer"
+                  >
+                    Instruments{' '}
+                    <SortArrows columnKey="instruments" sortOrder={sortOrder} />
+                  </Th>
+                  <Th
+                    onClick={() => handleSort('totalInstruments')}
+                    cursor="pointer"
+                  >
+                    Total Instruments{' '}
+                    <SortArrows
+                      columnKey="totalInstruments"
+                      sortOrder={sortOrder}
+                    />
+                  </Th>
                 </Tr>
-              ) : (
-                tableData.map((p) => (
-                  <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
-                ))
-              )}
-            </Tbody>
-          </Table>
-        ) : (
-          <CardView data={tableData} openEditForm={openEditForm} />
-        )}
+              </Thead>
+              <Tbody>
+                {tableData.length === 0 && isLoading ? (
+                  <Tr>
+                    <Td colSpan={7}>
+                      <Center py={8}>
+                        <Spinner size="lg" />
+                      </Center>
+                    </Td>
+                  </Tr>
+                ) : (
+                  tableData.map((p) => (
+                    <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
+                  ))
+                )}
+              </Tbody>
+            </Table>
+          ) : (
+            <CardView data={tableData} openEditForm={openEditForm} />
+          )}
+          {isLoading && tableData.length > 0 && (
+            <Box
+              position="absolute"
+              inset={0}
+              bg="whiteAlpha.800"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              zIndex={1}
+            >
+              <Spinner size="lg" />
+            </Box>
+          )}
+        </Box>
       </TableContainer>
     </>
   );
 }
 
-function ProgramTable() {
+function ProgramTable({ onStatsRefresh }) {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { role, loading: roleLoading } = useRoleContext();
@@ -513,7 +543,7 @@ function ProgramTable() {
     setIsFormOpen(true);
   };
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (roleLoading) return;
 
     const route = getRouteByRole(role, userId);
@@ -524,44 +554,49 @@ function ProgramTable() {
       return;
     }
 
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const res = await backend.get(route);
-        const rows = Array.isArray(res.data) ? res.data : [];
-        const programDetails = await Promise.all(
-          rows.map(async (row) => {
-            const programId = row.id ?? row.programId;
-            const [playlists, programDirectors, regionalDirectors] =
-              await Promise.all([
-                backend.get(`/program/${programId}/playlists`),
-                backend
-                  .get(`/program/${programId}/program-directors`)
-                  .catch(() => ({ data: [] })),
-                backend
-                  .get(`/program/${programId}/regional-directors`)
-                  .catch(() => ({ data: [] })),
-              ]);
+    setIsLoading(true);
+    try {
+      const res = await backend.get(route);
+      const rows = Array.isArray(res.data) ? res.data : [];
+      const programDetails = await Promise.all(
+        rows.map(async (row) => {
+          // TODO: make this more efficient with lazy loading
+          const programId = row.id ?? row.programId;
+          const [playlists, programDirectors, regionalDirectors, media] =
+            await Promise.all([
+              backend.get(`/program/${programId}/playlists`),
+              backend
+                .get(`/program/${programId}/program-directors`)
+                .catch(() => ({ data: [] })),
+              backend
+                .get(`/program/${programId}/regional-directors`)
+                .catch(() => ({ data: [] })),
+              backend
+                .get(`/program/${programId}/media`)
+                .catch(() => ({ data: [] })),
+            ]);
 
-            return {
-              ...row,
-              playlists: playlists.data,
-              programDirectors: programDirectors?.data || [],
-              regionalDirectors: regionalDirectors?.data || [],
-            };
-          })
-        );
-        const mappedPrograms = programDetails.map(mapRow);
-        setOriginalPrograms(mappedPrograms);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+          return {
+            ...row,
+            playlists: playlists.data,
+            programDirectors: programDirectors?.data || [],
+            regionalDirectors: regionalDirectors?.data || [],
+            media: media?.data || [],
+          };
+        })
+      );
+      const mappedPrograms = programDetails.map(mapRow);
+      setOriginalPrograms(mappedPrograms);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+    } finally {
+      setIsLoading(false);
+    }
   }, [role, roleLoading, userId, backend]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (!getRouteByRole(role, userId) && !roleLoading) {
     return null;
@@ -580,6 +615,8 @@ function ProgramTable() {
       setIsFormOpen={setIsFormOpen}
       selectedProgram={selectedProgram}
       setSelectedProgram={setSelectedProgram}
+      onSave={fetchData}
+      onStatsRefresh={onStatsRefresh}
     />
   );
 }
