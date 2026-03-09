@@ -9,8 +9,6 @@ adminRouter.use(express.json());
 // GET /admin/programs - returns all programs with student/instrument counts
 adminRouter.get('/programs', async (req, res) => {
   try {
-
-
     const data = await db.query(
       `SELECT
         p.*,
