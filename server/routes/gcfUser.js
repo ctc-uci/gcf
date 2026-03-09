@@ -214,10 +214,6 @@ gcfUserRouter.get('/role/:role', async (req, res) => {
 gcfUserRouter.get('/:id/accounts', async (req, res) => {
   try {
 
-    //[DELETE BEFORE PR]
-    //for testing the badges n
-    // res.status(200).json([]);
-    // return;
 
     const { id } = req.params;
     const { role } = req.query;

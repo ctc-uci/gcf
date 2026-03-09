@@ -18,18 +18,11 @@ const BADGE_CONFIG = {
     icon: FiBell,
     message: 'No updates have been made yet.',
   },
-
-  // when is this used (come back to it later) lwk should be program instead of region
-  'no-program-region-assigned': {
-    icon: IoHomeOutline,
-    message:
-      'Your account is all set! A GCF Admin will assign you to a region shortly.',
-  },
 };
 
 /**
  * Reusable empty-state badge shown when a table/section has no data.
- * @param {'no-accounts' | 'no-programs' | 'no-updates' | 'no-program-region-assigned'} variant
+ * @param {'no-accounts' | 'no-programs' | 'no-updates'} variant
  */
 export function EmptyStateBadge({ variant = 'no-updates' }) {
   const config = BADGE_CONFIG[variant];

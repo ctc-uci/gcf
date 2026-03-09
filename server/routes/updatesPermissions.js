@@ -58,11 +58,6 @@ updatesPermissionsRouter.get('/media-updates/:id', async (req, res) => {
 updatesPermissionsRouter.get('/program-updates/:id', async (req, res) => {
   try {
 
-    //[DELETE BEFORE PR]
-
-    //badges 
-    // res.status(200).json([]);
-    // return;
 
     const { id } = req.params;
     const roleResult = await db.query(

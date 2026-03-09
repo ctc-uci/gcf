@@ -10,10 +10,6 @@ adminRouter.use(express.json());
 adminRouter.get('/programs', async (req, res) => {
   try {
 
-    //[DELETE BEFORE PR]
-    //badge testing
-    // res.json([]);
-    // return;
 
     const data = await db.query(
       `SELECT
