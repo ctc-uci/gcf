@@ -20,6 +20,7 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { FullscreenFlyoutButton } from '../FullscreenFlyoutButton';
 import { useFullscreenFlyout } from '../useFullScreenFlyout.js';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 
 export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const { currentUser } = useAuthContext();
@@ -30,6 +31,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const userId = currentUser?.uid;
   const targetUserId = targetUser?.id;
   const [isFullScreen, toggleFullScreen] = useFullscreenFlyout();
+  const auth = getAuth();
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -205,15 +207,13 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       !formData.first_name ||
       !formData.last_name ||
       !formData.role ||
-      !formData.email ||
-      !formData.password
+      !formData.email
     ) {
       throw new Error('Please fill in all fields on the form.');
     }
 
     const userData = {
       email: formData.email,
-      password: formData.password,
       firstName: formData.first_name,
       lastName: formData.last_name,
       role: formData.role,
@@ -222,14 +222,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       regionId: formData.regions.length > 0 ? formData.regions[0].id : null,
     };
     await backend.post('/gcf-users/admin/create-user', userData);
-    await backend.post('/nodemailer', {
-      email: formData.email,
-      password: formData.password,
-      firstName: formData.first_name,
-      lastName: formData.last_name,
-      role: formData.role,
-      isNewAccount: true,
-    });
+    await sendPasswordResetEmail(auth, formData.email);
   };
 
   const handleUpdateUser = async () => {
@@ -316,18 +309,20 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 />
               </FormControl>
 
-              <FormControl isRequired>
-                <FormLabel>Password</FormLabel>
-                <Input
-                  name="password"
-                  type="password"
-                  placeholder={
-                    targetUserId ? 'Leave blank to keep currrent' : 'Password'
-                  }
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </FormControl>
+              {targetUserId && (
+                <FormControl>
+                  <FormLabel>Password</FormLabel>
+                  <Input
+                    name="password"
+                    type="password"
+                    placeholder={
+                      targetUserId ? 'Leave blank to keep currrent' : 'Password'
+                    }
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                </FormControl>
+              )}
 
               <FormControl>
                 <FormLabel>User Type</FormLabel>
@@ -396,7 +391,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       if (!selectedRegionId) return;
 
                       const selectedRegion = currentRegions.find(
-                        (r) => r.id == selectedRegionId
+                        (r) => r.id === selectedRegionId
                       );
 
                       if (selectedRegion) {
