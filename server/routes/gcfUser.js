@@ -398,7 +398,7 @@ gcfUserRouter.delete('/:id', async (req, res) => {
 gcfUserRouter.post('/verify-email', async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await admin.auth().getUserByEmail(email);
+    await admin.auth().getUserByEmail(email);
     res.status(200).send();
   } catch (err) {
     res.status(400).send(err.message);
