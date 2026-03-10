@@ -1,7 +1,7 @@
 // @ts-check
 
 /**
- * @type{import('prettier').Config}
+ * @type {import('prettier').Config}
  */
 const config = {
   tabWidth: 2,
@@ -12,9 +12,10 @@ const config = {
   arrowParens: 'always',
   singleAttributePerLine: true,
   endOfLine: 'lf',
-  singleQuote: false,
+  singleQuote: true,
   semi: true,
   useTabs: false,
+  jsxSingleQuote: false,
   plugins: ['@ianvs/prettier-plugin-sort-imports'],
   importOrder: [
     '^(react/(.*)$)|^(react$)|^(react-dom$)|^(react-dom/(.*)$)',
