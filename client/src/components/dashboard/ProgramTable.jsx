@@ -71,7 +71,7 @@ function mapAdminRow(row) {
     country: row.country,
 
     students: row.students ?? 0,
-    instruments: row.instruments ?? 0,
+    instruments: row.instrumentTypes ?? [],
     totalInstruments: row.instruments ?? 0,
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
@@ -92,7 +92,7 @@ function mapRdRow(row) {
     countryId: row.countryId,
     regionId: row.regionId,
     students: row.totalStudents ?? 0,
-    instruments: row.totalInstruments ?? 0,
+    instruments: row.instrumentTypes ?? [],
     totalInstruments: row.totalInstruments ?? 0,
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
@@ -121,6 +121,30 @@ const STATUS_TAG_STYLES = {
     color: '#ef6c00',
   },
 };
+
+// pool of colors for the instrument type tags
+const INSTRUMENT_TAG_PALETTE = [
+  { bg: '#C6F6D5', color: '#22543D' },
+  { bg: '#BEE3F8', color: '#2C5282' },
+  { bg: '#FED7D7', color: '#742A2A' },
+  { bg: '#FEECC7', color: '#744210' },
+  { bg: '#E9D8FD', color: '#553C9A' },
+  { bg: '#FED7E2', color: '#702459' },
+  { bg: '#C4F1F9', color: '#086F83' },
+  { bg: '#D6F3D5', color: '#276749' },
+];
+
+function getInstrumentTagStyle(instrumentName) {
+  if (!instrumentName) return INSTRUMENT_TAG_PALETTE[0];
+  let hash = 0;
+  const str = String(instrumentName).toLowerCase();
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % INSTRUMENT_TAG_PALETTE.length;
+  return INSTRUMENT_TAG_PALETTE[index];
+}
 
 function StatusTag({ status }) {
   const normalized = String(status ?? '').toLowerCase();
@@ -168,7 +192,35 @@ function ExpandableRow({ p, onEdit }) {
         <Td>{p.launchDate}</Td>
         <Td>{p.location}</Td>
         <Td>{p.students}</Td>
-        <Td>{p.instruments}</Td>
+        <Td>
+          {Array.isArray(p.instruments) || Array.isArray(p.instrumentTypes) ? (
+            <HStack spacing={2} flexWrap="wrap">
+              {(Array.isArray(p.instruments)
+                ? p.instruments
+                : p.instrumentTypes
+              ).map((inst, idx) => {
+                const style = getInstrumentTagStyle(inst.name);
+                return (
+                  <Box
+                    as="span"
+                    display="inline-block"
+                    px={2}
+                    py={0.5}
+                    borderRadius="md"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    bg={style.bg}
+                    color={style.color}
+                  >
+                    {inst.name} {inst.quantity}
+                  </Box>
+                );
+              })}
+            </HStack>
+          ) : (
+            (p.instruments ?? '-')
+          )}
+        </Td>
         <Td>{p.totalInstruments}</Td>
       </Tr>
       <Tr>
@@ -314,35 +366,48 @@ function ProgramDisplay({
       'Program Directors',
       'Curriculum Links',
     ];
-    const rows = (tableData || []).map((p) => [
-      escapeCsvValue(p.title),
-      escapeCsvValue(p.status),
-      escapeCsvValue(p.launchDate),
-      escapeCsvValue(p.location),
-      escapeCsvValue(p.students),
-      escapeCsvValue(p.instruments),
-      escapeCsvValue(p.totalInstruments),
-      escapeCsvValue(p.primaryLanguage),
-      escapeCsvValue(
-        Array.isArray(p.regionalDirectors)
-          ? p.regionalDirectors
-              .map((d) => `${d.firstName} ${d.lastName}`)
-              .join('; ')
-          : ''
-      ),
-      escapeCsvValue(
-        Array.isArray(p.programDirectors)
-          ? p.programDirectors
-              .map((d) => `${d.firstName} ${d.lastName}`)
-              .join('; ')
-          : ''
-      ),
-      escapeCsvValue(
-        Array.isArray(p.playlists)
-          ? p.playlists.map((l) => l.link ?? l.name).join('; ')
-          : ''
-      ),
-    ]);
+    const rows = (tableData || []).map((p) => {
+      const instrumentsArray =
+        (Array.isArray(p.instruments) && p.instruments) ||
+        (Array.isArray(p.instrumentTypes) && p.instrumentTypes) ||
+        null;
+
+      const instrumentsFormatted = instrumentsArray
+        ? instrumentsArray
+            .map((inst) => `${inst.name ?? ''}: ${inst.quantity ?? 0}`)
+            .join('; ')
+        : p.instruments;
+
+      return [
+        escapeCsvValue(p.title),
+        escapeCsvValue(p.status),
+        escapeCsvValue(p.launchDate),
+        escapeCsvValue(p.location),
+        escapeCsvValue(p.students),
+        escapeCsvValue(instrumentsFormatted),
+        escapeCsvValue(p.totalInstruments),
+        escapeCsvValue(p.primaryLanguage),
+        escapeCsvValue(
+          Array.isArray(p.regionalDirectors)
+            ? p.regionalDirectors
+                .map((d) => `${d.firstName} ${d.lastName}`)
+                .join('; ')
+            : ''
+        ),
+        escapeCsvValue(
+          Array.isArray(p.programDirectors)
+            ? p.programDirectors
+                .map((d) => `${d.firstName} ${d.lastName}`)
+                .join('; ')
+            : ''
+        ),
+        escapeCsvValue(
+          Array.isArray(p.playlists)
+            ? p.playlists.map((l) => l.link ?? l.name).join('; ')
+            : ''
+        ),
+      ];
+    });
     downloadCsv(headers, rows, `programs-${getFilenameTimestamp()}.csv`);
   };
 
@@ -369,15 +434,22 @@ function ProgramDisplay({
 
   const displayData = useMemo(() => {
     if (!searchQuery) return filteredData;
+    const query = searchQuery.toLowerCase();
     return filteredData.filter(
       (program) =>
-        program.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.status?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.launchDate?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(program.students).includes(searchQuery) ||
-        String(program.instruments).includes(searchQuery) ||
-        String(program.totalInstruments).includes(searchQuery)
+        program.title?.toLowerCase().includes(query) ||
+        program.status?.toLowerCase().includes(query) ||
+        program.launchDate?.toLowerCase().includes(query) ||
+        program.location?.toLowerCase().includes(query) ||
+        String(program.students).includes(query) ||
+        (Array.isArray(program.instruments)
+          ? program.instruments.some((inst) =>
+              `${inst.name ?? ''} ${inst.quantity ?? ''}`
+                .toLowerCase()
+                .includes(query)
+            )
+          : String(program.instruments).includes(query)) ||
+        String(program.totalInstruments).includes(query)
     );
   }, [searchQuery, filteredData]);
 
@@ -649,22 +721,29 @@ function ProgramTable({ onStatsRefresh }) {
         rows.map(async (row) => {
           // TODO: make this more efficient with lazy loading
           const programId = row.id ?? row.programId;
-          const [playlists, programDirectors, regionalDirectors, media] =
-            await Promise.all([
-              backend.get(`/program/${programId}/playlists`),
-              backend
-                .get(`/program/${programId}/program-directors`)
-                .catch(() => ({ data: [] })),
-              backend
-                .get(`/program/${programId}/regional-directors`)
-                .catch(() => ({ data: [] })),
-              backend
-                .get(`/program/${programId}/media`)
-                .catch(() => ({ data: [] })),
-            ]);
+          const [
+            instrumentTypes,
+            playlists,
+            programDirectors,
+            regionalDirectors,
+            media,
+          ] = await Promise.all([
+            backend.get(`/program/${programId}/instruments`),
+            backend.get(`/program/${programId}/playlists`),
+            backend
+              .get(`/program/${programId}/program-directors`)
+              .catch(() => ({ data: [] })),
+            backend
+              .get(`/program/${programId}/regional-directors`)
+              .catch(() => ({ data: [] })),
+            backend
+              .get(`/program/${programId}/media`)
+              .catch(() => ({ data: [] })),
+          ]);
 
           return {
             ...row,
+            instrumentTypes: instrumentTypes?.data || [],
             playlists: playlists.data,
             programDirectors: programDirectors?.data || [],
             regionalDirectors: regionalDirectors?.data || [],
