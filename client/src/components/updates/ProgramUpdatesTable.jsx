@@ -7,6 +7,7 @@ import {
   SearchIcon,
 } from '@chakra-ui/icons';
 import {
+  Badge,
   Box,
   Button,
   Center,
@@ -38,36 +39,6 @@ import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './ProgramUpdateForm';
 import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
-import { EmptyStateBadge } from '../badges/EmptyStateBadge';
-
-const PROGRAM_STATUS_TAG_STYLES = {
-  active: { label: 'Active', bg: '#e0f2f1', color: '#00796b' },
-  inactive: { label: 'Inactive', bg: '#fff3e0', color: '#ef6c00' },
-};
-
-function ProgramStatusTag({ status }) {
-  const normalized = String(status ?? '').toLowerCase();
-  const style = PROGRAM_STATUS_TAG_STYLES[normalized] ?? {
-    label: status ?? '—',
-    bg: 'gray.100',
-    color: 'gray.700',
-  };
-  return (
-    <Box
-      as="span"
-      display="inline-block"
-      px={2}
-      py={0.5}
-      borderRadius="md"
-      fontSize="sm"
-      fontWeight="medium"
-      bg={style.bg}
-      color={style.color}
-    >
-      {style.label}
-    </Box>
-  );
-}
 
 export function downloadProgramUpdatesAsCsv(data) {
   const headers = ['Time', 'Notes', 'Program', 'Author', 'Status'];
@@ -205,126 +176,84 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
           />
           <Button
             size="sm"
-            leftIcon={<AddIcon />}
+            rightIcon={<AddIcon />}
             onClick={() => {
               openEditForm(null);
             }}
-            bg="teal.500"
             ml="auto"
-            color="white"
           >
-            New Update
+            New
           </Button>
         </Flex>
 
         <Box position="relative">
-          {!isLoading && tableData.length === 0 ? (
-            <EmptyStateBadge variant="no-updates" />
-          ) : (
-            <TableContainer overflowX="auto" maxW="100%">
-              <Table
-                variant="unstyled"
-                sx={{
-                  border: '1px solid',
-                  borderColor: 'gray.200',
-                  borderRadius: 'md',
-                }}
-              >
-                <Thead>
-                  <Tr
-                    sx={{
-                      '& th': {
-                        borderBottom: '1px solid',
-                        borderColor: 'gray.200',
-                        color: 'gray.700',
-                        fontWeight: 'bold',
-                        textTransform: 'uppercase',
-                        fontSize: 'xs',
-                      },
-                    }}
+          <TableContainer overflowX="auto" maxW="100%">
+            <Table variant="simple">
+              <Thead>
+                {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
+                <Tr>
+                  <Th onClick={() => handleSort('updateDate')} cursor="pointer">
+                    Time{' '}
+                    <SortArrows
+                      columnKey={'updateDate'}
+                      sortOrder={sortOrder}
+                    />
+                  </Th>
+                  <Th onClick={() => handleSort('note')} cursor="pointer">
+                    Notes{' '}
+                    <SortArrows columnKey={'note'} sortOrder={sortOrder} />
+                  </Th>
+                  <Th
+                    onClick={() => handleSort('programName')}
+                    cursor="pointer"
                   >
-                    <Th
-                      onClick={() => handleSort('updateDate')}
-                      cursor="pointer"
-                    >
-                      Time{' '}
-                      <SortArrows
-                        columnKey={'updateDate'}
-                        sortOrder={sortOrder}
-                      />
-                    </Th>
-                    <Th onClick={() => handleSort('note')} cursor="pointer">
-                      Notes{' '}
-                      <SortArrows columnKey={'note'} sortOrder={sortOrder} />
-                    </Th>
-                    <Th
-                      onClick={() => handleSort('programName')}
-                      cursor="pointer"
-                    >
-                      Program{' '}
-                      <SortArrows
-                        columnKey={'programName'}
-                        sortOrder={sortOrder}
-                      />
-                    </Th>
-                    <Th
-                      onClick={() => handleSort('firstName')}
-                      cursor="pointer"
-                    >
-                      Author{' '}
-                      <SortArrows
-                        columnKey={'firstName'}
-                        sortOrder={sortOrder}
-                      />
-                    </Th>
-                    <Th onClick={() => handleSort('status')} cursor="pointer">
-                      Status{' '}
-                      <SortArrows columnKey={'status'} sortOrder={sortOrder} />
-                    </Th>
+                    Program{' '}
+                    <SortArrows
+                      columnKey={'programName'}
+                      sortOrder={sortOrder}
+                    />
+                  </Th>
+                  <Th onClick={() => handleSort('firstName')} cursor="pointer">
+                    Author{' '}
+                    <SortArrows columnKey={'firstName'} sortOrder={sortOrder} />
+                  </Th>
+                  <Th onClick={() => handleSort('status')} cursor="pointer">
+                    Status{' '}
+                    <SortArrows columnKey={'status'} sortOrder={sortOrder} />
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {tableData.length === 0 && isLoading ? (
+                  <Tr>
+                    <Td colSpan={5}>
+                      <Center py={8}>
+                        <Spinner size="lg" />
+                      </Center>
+                    </Td>
                   </Tr>
-                </Thead>
-                <Tbody>
-                  {tableData.length === 0 && isLoading ? (
-                    <Tr>
-                      <Td
-                        colSpan={5}
-                        borderBottom="1px solid"
-                        borderColor="gray.200"
-                      >
-                        <Center py={8}>
-                          <Spinner size="lg" />
-                        </Center>
+                ) : (
+                  tableData.map((row) => (
+                    <Tr
+                      key={row.id}
+                      onClick={() => openEditForm(row)}
+                      cursor="pointer"
+                    >
+                      <Td>{row.updateDate}</Td>
+                      <Td>{row.note}</Td>
+                      <Td>{row.name}</Td>
+                      <Td>
+                        {row.firstName} {row.lastName}
+                      </Td>
+                      <Td>
+                        <Badge>{row.status}</Badge>
                       </Td>
                     </Tr>
-                  ) : (
-                    tableData.map((row) => (
-                      <Tr
-                        key={row.id}
-                        onClick={() => openEditForm(row)}
-                        cursor="pointer"
-                        sx={{
-                          '& td': {
-                            borderBottom: '1px solid',
-                            borderColor: 'gray.200',
-                          },
-                        }}
-                      >
-                        <Td>{row.updateDate}</Td>
-                        <Td>{row.note}</Td>
-                        <Td>{row.name}</Td>
-                        <Td>
-                          {row.firstName} {row.lastName}
-                        </Td>
-                        <Td>
-                          <ProgramStatusTag status={row.status} />
-                        </Td>
-                      </Tr>
-                    ))
-                  )}
-                </Tbody>
-              </Table>
-            </TableContainer>
-          )}
+                  ))
+                )}
+              </Tbody>
+            </Table>
+          </TableContainer>
           {isLoading && tableData.length > 0 && (
             <Box
               position="absolute"

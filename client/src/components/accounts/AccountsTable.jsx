@@ -1,4 +1,5 @@
 import {
+  Badge,
   Box,
   Button,
   Center,
@@ -15,43 +16,6 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 
-const ACCOUNT_TYPE_TAG_STYLES = {
-  'regional director': {
-    label: 'Regional Director',
-    bg: '#e0f2f1',
-    color: '#00796b',
-  },
-  'program director': {
-    label: 'Program Director',
-    bg: '#fff3e0',
-    color: '#ef6c00',
-  },
-};
-
-function AccountTypeTag({ role }) {
-  const normalized = String(role ?? '').toLowerCase();
-  const style = ACCOUNT_TYPE_TAG_STYLES[normalized] ?? {
-    label: role ?? '—',
-    bg: 'gray.100',
-    color: 'gray.700',
-  };
-  return (
-    <Box
-      as="span"
-      display="inline-block"
-      px={2}
-      py={0.5}
-      borderRadius="md"
-      fontSize="sm"
-      fontWeight="medium"
-      bg={style.bg}
-      color={style.color}
-    >
-      {style.label}
-    </Box>
-  );
-}
-
 import { FiEdit2, FiEyeOff } from 'react-icons/fi';
 
 import {
@@ -61,7 +25,6 @@ import {
 } from '@/utils/downloadCsv';
 
 import CardView from './CardView';
-import { EmptyStateBadge } from '../badges/EmptyStateBadge';
 
 export function downloadAccountsAsCsv(data) {
   const headers = ['First Name', 'Last Name', 'Email', 'Type', 'Program(s)'];
@@ -121,56 +84,64 @@ export const AccountsTable = ({
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;
 
-  if (!isCardView && (!tableData || tableData.length === 0)) {
-    return (
-      <TableContainer w="full" maxW="100%" overflowX="auto">
-        <EmptyStateBadge variant="no-accounts" />
-      </TableContainer>
-    );
-  }
-
   return (
-    <TableContainer maxW="80vw">
+    <TableContainer>
       {!isCardView ? (
-        <Table
-          variant="unstyled"
-          size="md"
-          sx={{
-            border: '1px solid',
-            borderColor: 'gray.200',
-            borderRadius: 'md',
-          }}
-        >
+        <Table variant="simple" size="md">
           <Thead>
-            <Tr
-              sx={{
-                '& th': {
-                  borderBottom: '1px solid',
-                  borderColor: 'gray.200',
-                  color: 'gray.700',
-                  fontWeight: 'bold',
-                  textTransform: 'uppercase',
-                  fontSize: 'xs',
-                },
-              }}
-            >
-              <Th onClick={() => handleSort('firstName')} cursor="pointer">
+            <Tr>
+              <Th
+                onClick={() => handleSort('firstName')}
+                cursor="pointer"
+                color="black"
+                fontSize="sm"
+                textTransform="none"
+                fontWeight="bold"
+              >
                 Name
                 <SortArrows columnKey="firstName" sortOrder={sortOrder} />
               </Th>
-              <Th onClick={() => handleSort('email')} cursor="pointer">
+              <Th
+                onClick={() => handleSort('email')}
+                cursor="pointer"
+                color="black"
+                fontSize="sm"
+                textTransform="none"
+                fontWeight="bold"
+              >
                 Email
                 <SortArrows columnKey="email" sortOrder={sortOrder} />
               </Th>
-              <Th onClick={() => handleSort('password')} cursor="pointer">
+              <Th
+                onClick={() => handleSort('password')}
+                cursor="pointer"
+                color="black"
+                fontSize="sm"
+                textTransform="none"
+                fontWeight="bold"
+              >
                 Password
                 <SortArrows columnKey="passsword" sortOrder={sortOrder} />
               </Th>
-              <Th onClick={() => handleSort('role')} cursor="pointer">
+              <Th
+                onClick={() => handleSort('role')}
+                cursor="pointer"
+                color="black"
+                fontSize="sm"
+                textTransform="none"
+                fontWeight="bold"
+              >
                 Type
                 <SortArrows columnKey="role" sortOrder={sortOrder} />
               </Th>
-              <Th onClick={() => handleSort('programs')} cursor="pointer">
+              <Th
+                onClick={() => handleSort('programs')}
+                cursor="pointer"
+                color="black"
+                fontSize="sm"
+                textTransform="none"
+                fontWeight="bold"
+              >
                 Program(s)
                 <SortArrows columnKey="programs" sortOrder={sortOrder} />
               </Th>
@@ -178,6 +149,13 @@ export const AccountsTable = ({
             </Tr>
           </Thead>
           <Tbody>
+            {!tableData ||
+              (tableData.length === 0 && (
+                <Center py={10}>
+                  <Text color="gray.500">No accounts found.</Text>
+                </Center>
+              ))}
+
             {tableData.map((user) => (
               <Tr
                 key={user.id}
@@ -186,12 +164,6 @@ export const AccountsTable = ({
                   '& .action-group': { opacity: 1, visibility: 'visible' },
                 }}
                 transition="background 0.2s"
-                sx={{
-                  '& td': {
-                    borderBottom: '1px solid',
-                    borderColor: 'gray.200',
-                  },
-                }}
               >
                 <Td fontWeight="medium">
                   {user.firstName} {user.lastName}
@@ -210,7 +182,18 @@ export const AccountsTable = ({
                 </Td>
 
                 <Td>
-                  <AccountTypeTag role={user.role} />
+                  <Badge
+                    px={4}
+                    py={1}
+                    borderRadius="full"
+                    bg="gray.200"
+                    color="gray.800"
+                    textTransform="capitalize"
+                    fontWeight="normal"
+                    fontSize="sm"
+                  >
+                    {user.role}
+                  </Badge>
                 </Td>
 
                 <Td>
