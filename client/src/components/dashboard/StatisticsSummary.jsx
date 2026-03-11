@@ -13,7 +13,11 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { MdOutlineFileDownload } from 'react-icons/md';
-
+import {
+  downloadCsv,
+  escapeCsvValue,
+  getFilenameTimestamp,
+} from '@/utils/downloadCsv';
 const StatBox = ({ label, number }) => {
   return (
     <Box
@@ -99,6 +103,17 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
   const [stats, setStats] = useState(initialStats);
   const [isLoading, setIsLoading] = useState(true);
 
+  const downloadDataAsCsv = () => {
+    const headers = stats.map((stat) => stat.label);
+    const rows = [stats.map((stat) => escapeCsvValue(stat.number))];
+
+    downloadCsv(
+      headers,
+      rows,
+      `statistics-summary-${getFilenameTimestamp()}.csv`
+    );
+  };
+
   useEffect(() => {
     if (roleLoading) return;
 
@@ -136,6 +151,7 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
           <IconButton
             aria-label="download"
             icon={<MdOutlineFileDownload />}
+            onClick={downloadDataAsCsv}
             size="sm"
             variant="ghost"
           />
