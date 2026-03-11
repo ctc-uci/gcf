@@ -28,6 +28,7 @@ import {
     AlertDialogHeader,
     AlertDialogContent,
     AlertDialogOverlay,
+    useToast,
 } from '@chakra-ui/react'
 
 const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
@@ -40,6 +41,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
     const [drawerSize, setDrawerSize] = useState("md");
     const [regionName, setRegionName] = useState("");
+    const toast = useToast();
 
     // useEffect to fetch names of all regional directors for dropdown
     useEffect(() => {
@@ -180,18 +182,15 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                 <Button colorScheme="teal" onClick={async () => {
                                     try {
                                         if (region) {
-                                            // update existing region name
                                             await backend.put(`/region/${region.id}`, {
                                                 name: regionName,
                                                 last_modified: new Date().toISOString()
                                             });
 
-                                            // fetch existing countries for this region
                                             const existingRes = await backend.get(`/region/${region.id}/countries`);
                                             const existingCountries = Array.isArray(existingRes.data) ? existingRes.data : [];
                                             const existingNames = existingCountries.map(c => c.name);
 
-                                            // only POST countries that don't already exist
                                             const newCountries = selectedCountries.filter(name => !existingNames.includes(name));
                                             await Promise.all(newCountries.map((countryName) =>
                                                 backend.post('/country', {
@@ -201,14 +200,12 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                                 })
                                             ));
                                         } else {
-                                            // create new region
                                             const newRegion = await backend.post('/region', {
                                                 name: regionName,
                                                 last_modified: new Date().toISOString()
                                             });
                                             const newRegionId = newRegion.data.id;
 
-                                            // create a country entry for each selected country
                                             await Promise.all(selectedCountries.map((countryName) =>
                                                 backend.post('/country', {
                                                     region_id: newRegionId,
@@ -248,6 +245,12 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                             onClick={async () => {
                                                 try {
                                                     await backend.delete(`/region/${region.id}`);
+                                                    toast({
+                                                        title: "Region successfully deleted",
+                                                        status: "success",
+                                                        duration: 5000,
+                                                        isClosable: true,
+                                                    });
                                                     onDelete();
                                                     setIsDeleteDialogOpen(false);
                                                 } catch (err) {
@@ -256,8 +259,8 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                             }} 
                                             ml={3}
                                         >
-                                        Delete
-                                    </Button>
+                                            Delete
+                                        </Button>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialogOverlay>
