@@ -16,6 +16,8 @@ import {
   HStack,
   IconButton,
   Input,
+  InputGroup,
+  InputLeftElement,
   Link,
   Popover,
   PopoverContent,
@@ -39,14 +41,12 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
-import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
 } from '../../utils/downloadCsv';
-import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
 import CardView from './CardView';
 import { ProgramForm } from './ProgramForm/index';
@@ -349,7 +349,6 @@ function ProgramDisplay({
   onSave,
   onStatsRefresh,
 }) {
-  console.log('originalData', originalData);
   const [isCardView, setIsCardView] = useState(false);
 
   const downloadDataAsCsv = () => {
@@ -411,31 +410,41 @@ function ProgramDisplay({
     downloadCsv(headers, rows, `programs-${getFilenameTimestamp()}.csv`);
   };
 
-  const columns = [
-    { key: 'title', type: 'text' },
-    { key: 'status', type: 'select', options: ['Active', 'Inactive'] },
-    { key: 'launchDate', type: 'date' },
-    { key: 'location', type: 'text' },
-    { key: 'students', type: 'number' },
-    { key: 'instruments', type: 'number' },
-    { key: 'totalInstruments', type: 'number' },
-  ];
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterLocation, setFilterLocation] = useState('');
+  const [filterInstruments, setFilterInstruments] = useState('');
+  const filtersDisclosure = useDisclosure();
 
-  const [activeFilters, setActiveFilters] = useState([]);
-
-  const filteredData = useMemo(
-    () => applyFilters(activeFilters, originalData ?? []),
-    [activeFilters, originalData]
-  );
-
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
-  };
+  const filterBySearchPanel = useMemo(() => {
+    let data = originalData ?? [];
+    if (filterStatus) {
+      const norm = String(filterStatus).toLowerCase();
+      data = data.filter((p) => {
+        const s = String(p.status ?? '').toLowerCase();
+        if (norm === 'active') return s === 'active' || s === 'launched';
+        if (norm === 'inactive') return s === 'inactive' || s === 'developing';
+        return s === norm;
+      });
+    }
+    if (filterLocation.trim()) {
+      const q = filterLocation.trim().toLowerCase();
+      data = data.filter((p) => (p.location ?? '').toLowerCase().includes(q));
+    }
+    if (filterInstruments.trim()) {
+      const q = filterInstruments.trim().toLowerCase();
+      data = data.filter((p) => {
+        const list = Array.isArray(p.instruments) ? p.instruments : [];
+        if (!Array.isArray(list)) return false;
+        return list.some((inst) => (inst.name ?? '').toLowerCase().includes(q));
+      });
+    }
+    return data;
+  }, [originalData, filterStatus, filterLocation, filterInstruments]);
 
   const displayData = useMemo(() => {
-    if (!searchQuery) return filteredData;
+    if (!searchQuery) return filterBySearchPanel;
     const query = searchQuery.toLowerCase();
-    return filteredData.filter(
+    return filterBySearchPanel.filter(
       (program) =>
         program.title?.toLowerCase().includes(query) ||
         program.status?.toLowerCase().includes(query) ||
@@ -451,7 +460,7 @@ function ProgramDisplay({
           : String(program.instruments).includes(query)) ||
         String(program.totalInstruments).includes(query)
     );
-  }, [searchQuery, filteredData]);
+  }, [searchQuery, filterBySearchPanel]);
 
   const [sortedData, setSortedData] = useState(null);
 
@@ -481,74 +490,169 @@ function ProgramDisplay({
       />
       <TableContainer w="80vw">
         <HStack mb={4} justifyContent="space-between" w="100%">
-          <HStack spacing={4}>
-            <Box fontSize="xl" fontWeight="semibold">
-              All Programs
+          <HStack spacing={3}>
+            <Box fontSize="3xl" fontWeight="semibold">
+              Programs
             </Box>
-            <HStack spacing={1}>
-              <IconButton
-                aria-label="search"
-                icon={<Search2Icon />}
-                size="sm"
-                variant="ghost"
-              />
-              <Input
-                w="120px"
-                size="xs"
-                placeholder="Type to search"
-                variant="unstyled"
-                borderBottom="1px solid"
-                borderColor="gray.300"
-                borderRadius="0"
-                px={1}
-                value={searchQuery}
-                onChange={handleSearch}
-              />
-            </HStack>
-          </HStack>
-          <HStack spacing={1}>
             <IconButton
-              aria-label="menu"
+              aria-label="download CSV"
+              icon={<DownloadIcon />}
+              size="sm"
+              variant="ghost"
+              onClick={downloadDataAsCsv}
+            />
+          </HStack>
+          <HStack spacing={2}>
+            <Popover
+              isOpen={filtersDisclosure.isOpen}
+              onClose={filtersDisclosure.onClose}
+              placement="bottom-start"
+            >
+              <PopoverTrigger>
+                <HStack
+                  spacing={2}
+                  as="button"
+                  type="button"
+                  border="1px solid"
+                  borderColor="gray.200"
+                  borderRadius="md"
+                  px={3}
+                  py={2}
+                  bg="white"
+                  _hover={{ borderColor: 'gray.300' }}
+                  onClick={filtersDisclosure.onOpen}
+                  w="200px"
+                  justifyContent="flex-start"
+                >
+                  <Search2Icon />
+                  <Text
+                    fontSize="sm"
+                    color="gray.500"
+                    flex={1}
+                    textAlign="left"
+                  >
+                    Search
+                  </Text>
+                </HStack>
+              </PopoverTrigger>
+              <PopoverContent w="400px" maxW="90vw" shadow="xl">
+                <Box p={4}>
+                  <Text fontWeight="bold" fontSize="lg" mb={4}>
+                    Filters
+                  </Text>
+                  <VStack align="stretch" spacing={4}>
+                    <Box>
+                      <Text fontSize="sm" fontWeight="semibold" mb={2}>
+                        Program Status
+                      </Text>
+                      <HStack spacing={2}>
+                        <Box
+                          as="button"
+                          type="button"
+                          px={3}
+                          py={1.5}
+                          borderRadius="md"
+                          fontSize="sm"
+                          fontWeight="medium"
+                          bg={
+                            filterStatus === 'inactive'
+                              ? STATUS_TAG_STYLES.inactive.bg
+                              : 'gray.100'
+                          }
+                          color={
+                            filterStatus === 'inactive'
+                              ? STATUS_TAG_STYLES.inactive.color
+                              : 'gray.600'
+                          }
+                          onClick={() =>
+                            setFilterStatus((s) =>
+                              s === 'inactive' ? '' : 'inactive'
+                            )
+                          }
+                        >
+                          Developing
+                        </Box>
+                        <Box
+                          as="button"
+                          type="button"
+                          px={3}
+                          py={1.5}
+                          borderRadius="md"
+                          fontSize="sm"
+                          fontWeight="medium"
+                          bg={
+                            filterStatus === 'active'
+                              ? STATUS_TAG_STYLES.active.bg
+                              : 'gray.100'
+                          }
+                          color={
+                            filterStatus === 'active'
+                              ? STATUS_TAG_STYLES.active.color
+                              : 'gray.600'
+                          }
+                          onClick={() =>
+                            setFilterStatus((s) =>
+                              s === 'active' ? '' : 'active'
+                            )
+                          }
+                        >
+                          Launched
+                        </Box>
+                      </HStack>
+                    </Box>
+                    <Box>
+                      <Text fontSize="sm" fontWeight="semibold" mb={2}>
+                        Location
+                      </Text>
+                      <InputGroup size="sm">
+                        <InputLeftElement pointerEvents="none">
+                          <Search2Icon color="gray.400" boxSize={4} />
+                        </InputLeftElement>
+                        <Input
+                          pl={8}
+                          placeholder="Search Locations"
+                          value={filterLocation}
+                          onChange={(e) => setFilterLocation(e.target.value)}
+                        />
+                      </InputGroup>
+                    </Box>
+                    <Box>
+                      <Text fontSize="sm" fontWeight="semibold" mb={2}>
+                        Instruments
+                      </Text>
+                      <InputGroup size="sm">
+                        <InputLeftElement pointerEvents="none">
+                          <Search2Icon color="gray.400" boxSize={4} />
+                        </InputLeftElement>
+                        <Input
+                          pl={8}
+                          placeholder="Search Instruments"
+                          value={filterInstruments}
+                          onChange={(e) => setFilterInstruments(e.target.value)}
+                        />
+                      </InputGroup>
+                    </Box>
+                  </VStack>
+                </Box>
+              </PopoverContent>
+            </Popover>
+
+            <IconButton
+              aria-label="table view"
               icon={<HamburgerIcon />}
               size="sm"
               variant="ghost"
               onClick={() => setIsCardView(false)}
             />
-            <Divider orientation="vertical" h="20px" />
+            <Divider orientation="vertical" h="20px" borderWidth="1px" />
             <IconButton
-              aria-label="search"
+              aria-label="card view"
               icon={<HiOutlineSquares2X2 />}
               size="sm"
               variant="ghost"
               onClick={() => setIsCardView(true)}
             />
-            <Popover>
-              <PopoverTrigger>
-                <IconButton
-                  aria-label="filter"
-                  icon={<HiOutlineAdjustmentsHorizontal />}
-                  size="sm"
-                  variant="ghost"
-                />
-              </PopoverTrigger>
-              <PopoverContent w="800px" maxW="90vw" shadow="xl">
-                <FilterComponent
-                  columns={columns}
-                  onFilterChange={(filters) => setActiveFilters(filters)}
-                />
-              </PopoverContent>
-            </Popover>
-            <Text fontSize="sm" color="gray.500">
-              Displaying {tableData.length} results
-            </Text>
-            <IconButton
-              aria-label="download"
-              icon={<DownloadIcon />}
-              size="sm"
-              variant="ghost"
-              ml={2}
-              onClick={downloadDataAsCsv}
-            />
+
             <Button
               size="sm"
               leftIcon={<AddIcon />}
@@ -582,8 +686,8 @@ function ProgramDisplay({
                   <Tr
                     sx={{
                       '& th': {
-                        borderBottom: '1px solid',
-                        borderColor: 'gray.200',
+                        borderBottom: '2px solid',
+                        borderColor: 'gray.300',
                         color: 'gray.700',
                         fontWeight: 'bold',
                         textTransform: 'uppercase',
@@ -716,7 +820,6 @@ function ProgramTable({ onStatsRefresh }) {
     try {
       const res = await backend.get(route);
       const rows = Array.isArray(res.data) ? res.data : [];
-      console.log('rows', rows);
       const programDetails = await Promise.all(
         rows.map(async (row) => {
           // TODO: make this more efficient with lazy loading
@@ -751,9 +854,7 @@ function ProgramTable({ onStatsRefresh }) {
           };
         })
       );
-      console.log('programDetails', programDetails);
       const mappedPrograms = programDetails.map(mapRow);
-      console.log('mappedPrograms', mappedPrograms);
       setOriginalPrograms(mappedPrograms);
     } catch (err) {
       console.error('Error fetching data:', err);
