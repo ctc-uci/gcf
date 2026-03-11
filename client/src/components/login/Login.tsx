@@ -14,6 +14,7 @@ import {
   Grid,
   GridItem,
   Heading,
+  IconButton,
   Image,
   Input,
   Stack,
@@ -29,7 +30,7 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { authenticateGoogleUser } from '@/utils/auth/providers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { FaGoogle } from 'react-icons/fa6';
+import { FaGoogle, FaArrowLeft } from 'react-icons/fa6';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { z } from 'zod';
@@ -159,13 +160,47 @@ export const Login = () => {
             />
           </Box>
         </GridItem>
-        {/* TODO: Add back button to reset/create password pages to navigate to login */}
         {mode === 'resetPassword' ? (
-          <GridItem display="flex" justifyContent="center" alignItems="center">
+          <GridItem
+            position="relative"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <IconButton
+              aria-label="Back to login"
+              icon={<FaArrowLeft />}
+              position="absolute"
+              top={8}
+              left={8}
+              onClick={() => {
+                searchParams.delete('mode');
+                navigate({ search: searchParams.toString() });
+              }}
+              bg="gray.200"
+              borderRadius="md"
+              _hover={{ bg: 'gray.300' }}
+            />
             <CreatePassword />
           </GridItem>
         ) : isForgot ? (
-          <GridItem display="flex" justifyContent="center" alignItems="center">
+          <GridItem
+            position="relative"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <IconButton
+              aria-label="Back to login"
+              icon={<FaArrowLeft />}
+              position="absolute"
+              top={8}
+              left={8}
+              onClick={() => setIsForgot(false)}
+              bg="gray.200"
+              borderRadius="md"
+              _hover={{ bg: 'gray.300' }}
+            />
             <ForgotPassword setIsForgot={setIsForgot} />
           </GridItem>
         ) : (
@@ -218,11 +253,6 @@ export const Login = () => {
                         {errors.password?.message?.toString()}
                       </FormErrorMessage>
                       <Flex gap="300px" mt="10px">
-                        <ChakraLink as={Link} to="/signup">
-                          <FormHelperText textDecoration="underline">
-                            Click here to sign up
-                          </FormHelperText>
-                        </ChakraLink>
                         <ChakraLink onClick={() => setIsForgot(true)}>
                           <FormHelperText
                             color="blue.400"

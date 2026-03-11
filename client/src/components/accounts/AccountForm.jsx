@@ -13,6 +13,7 @@ import {
   Input,
   Select,
   VStack,
+  useToast,
 } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
@@ -32,6 +33,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const targetUserId = targetUser?.id;
   const [isFullScreen, toggleFullScreen] = useFullscreenFlyout();
   const auth = getAuth();
+  const toast = useToast();
+
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -178,8 +181,12 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       } else {
         await handleUpdateUser();
       }
-
-      alert('User saved successfully!');
+      toast({
+        title: 'User saved successfully!',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
       onSave();
       onClose();
     } catch (error) {
@@ -191,11 +198,22 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         errorMessage.includes('email-already-exists') ||
         errorMessage.includes('email address is already in use')
       ) {
-        alert(
-          'This email is already registered. Please use a different email address.'
-        );
+        toast({
+          title: 'Email already exists',
+          description:
+            'This email is already registered. Please use a different email address.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
       } else {
-        alert(`Error: ${errorMessage}`);
+        toast({
+          title: 'Error',
+          description: `Error: ${errorMessage}`,
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
       }
     } finally {
       setIsLoading(false);
