@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   AspectRatio,
@@ -99,7 +99,6 @@ function LessonVideos({
 
         console.log(videosArray);
         setPlaylistVideos(videosArray);
-        //console.log(playlistVideos);
       } catch (err) {
         console.error('Error fetching videos: ', err);
       }
@@ -147,9 +146,9 @@ function LessonVideos({
       {playlists.length === 0 && (
         <Text color="gray.500">No lesson videos available</Text>
       )}
-      {playlistVideos.map((playlist) => {
+      {playlistVideos.map((playlist, i) => {
         return (
-          <>
+          <React.Fragment key={`${playlist.instrumentName}-${i}`}>
             <HStack>
               <FiFolder></FiFolder>
               <Text>{playlist.instrumentName}</Text>
@@ -192,7 +191,7 @@ function LessonVideos({
               })}
               <IconButton icon={<ChevronRightIcon />} size="xs" />
             </HStack>
-          </>
+          </React.Fragment>
         );
       })}
     </Box>

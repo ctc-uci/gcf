@@ -1,7 +1,6 @@
 CREATE TABLE playlist_cache (
-    playlist_id BIGINT,
+    playlist_id VARCHAR,
     videos JSONB,
     cache_time TIMESTAMP,
-    CONSTRAINT fk_playlist_id FOREIGN KEY (playlist_id) REFERENCES playlist(id),
     PRIMARY KEY(playlist_id)
 );
