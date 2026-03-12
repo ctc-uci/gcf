@@ -189,7 +189,7 @@ export const Navbar = () => {
                 in={isMenuOpen}
                 animateOpacity
                 transition={{
-                  enter: { duration: 0.4, delay: 0.1 },
+                  enter: { duration: 0.4, delay: 0.15 },
                   exit: { duration: 0.2 },
                 }}
               >
