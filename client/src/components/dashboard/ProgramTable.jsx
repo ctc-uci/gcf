@@ -658,6 +658,9 @@ function ProgramDisplay({
               leftIcon={<AddIcon />}
               backgroundColor="teal.500"
               color="white"
+              _hover={{
+                backgroundColor: 'teal.600',
+              }}
               onClick={() => {
                 setSelectedProgram(null);
                 setIsFormOpen(true);

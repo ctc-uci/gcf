@@ -130,7 +130,6 @@ export const Sidebar = () => {
                   _hover={{
                     bg: isActive ? 'teal.600' : 'gray.100',
                     transform: 'translateX(2px)',
-                    boxShadow: 'sm',
                   }}
                 >
                   {item.name}
