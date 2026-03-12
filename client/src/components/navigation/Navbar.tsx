@@ -123,7 +123,7 @@ export const Navbar = () => {
       align="center"
       w="80vw"
       px={6}
-      py={4}
+      py={6}
       borderRadius="xl"
       boxShadow="sm"
       bg="white"
@@ -151,7 +151,7 @@ export const Navbar = () => {
             >
               <Box
                 px={3}
-                py={2}
+                py={1.5}
                 bg={triggerBg}
                 borderRadius={isMenuOpen ? '20px 20px 0 0' : '20px'}
                 minW="160px"

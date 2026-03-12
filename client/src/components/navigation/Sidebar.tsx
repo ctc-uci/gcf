@@ -126,7 +126,7 @@ export const Sidebar = () => {
                   px={6}
                   py={5}
                   borderRadius="xl"
-                  transition="background-color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease"
+                  transition="background-color 0.4s ease, transform 0.4s ease"
                   _hover={{
                     bg: isActive ? 'teal.600' : 'gray.100',
                     transform: 'translateX(2px)',

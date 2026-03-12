@@ -113,11 +113,9 @@ export const AccountToolbar = ({
         onClick={onNew}
         bg="teal.500"
         color="white"
-        transition="background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease"
+        transition="background-color 0.25s ease, transform 0.25s ease"
         _hover={{
           bg: 'teal.600',
-          transform: 'translateY(-1px)',
-          boxShadow: 'sm',
         }}
       >
         New Account
