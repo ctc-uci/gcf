@@ -34,7 +34,7 @@ export const AccountToolbar = ({
     setSearchQuery(event.target.value);
   }
   return (
-    <Flex width="100%" align="center" gap={2}>
+    <Flex width="70vw" align="center" gap={2}>
       <InputGroup maxW="300px" ml={{ base: 0, md: 4 }}>
         <InputLeftElement pointerEvents="none" mt={-2}>
           <Icon as={FiSearch} color="gray.400" />
