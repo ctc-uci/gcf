@@ -38,16 +38,17 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     const [countries, setCountries] = useState([]);
     const [selectedCountries, setSelectedCountries] = useState([]);
     const [selectedDirector, setSelectedDirector] = useState("");
+    const [originalDirectorId, setOriginalDirectorId] = useState("");
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
     const [drawerSize, setDrawerSize] = useState("md");
     const [regionName, setRegionName] = useState("");
     const toast = useToast();
-    const [searchTerm, setSearchTerm] = useState('')
+    const [searchTerm, setSearchTerm] = useState('');
 
     const filteredCountries = countries.filter(country =>
         country.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    );
 
     // useEffect to fetch names of all regional directors for dropdown
     useEffect(() => {
@@ -64,7 +65,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
         fetchRegionalDirectors();
     }, [backend]);
 
-    // useEffect to fetch countries
+    // useEffect to fetch all countries
     useEffect(() => {
         const fetchCountries = async () => {
             try {
@@ -83,11 +84,27 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     useEffect(() => {
         if (region) {
             setRegionName(region.name || "");
-            const match = regionalDirectors.find(
-                d => d.firstName === region.regionalDirector?.firstName &&
-                    d.lastName === region.regionalDirector?.lastName
-            );
-            setSelectedDirector(match?.id?.toString() ?? "");
+
+            // pre-fill regional director by fetching the director for this region
+            const fetchRegionDirector = async () => {
+                try {
+                    const res = await backend.get(`/regional-directors/region/${region.id}/`);
+                    if (res.data) {
+                        const match = regionalDirectors.find(d => d.id === res.data.userId);
+                        const directorId = match?.id?.toString() ?? "";
+                        setSelectedDirector(directorId);
+                        setOriginalDirectorId(directorId);
+                    } else {
+                        setSelectedDirector("");
+                        setOriginalDirectorId("");
+                    }
+                } catch (err) {
+                    console.error("Error fetching region director:", err);
+                    setSelectedDirector("");
+                    setOriginalDirectorId("");
+                }
+            };
+            fetchRegionDirector();
 
             // fetch and set existing countries for this region
             const fetchRegionCountries = async () => {
@@ -105,6 +122,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
         } else {
             setRegionName("");
             setSelectedDirector("");
+            setOriginalDirectorId("");
             setSelectedCountries([]);
         }
     }, [region, regionalDirectors, backend]);
@@ -117,6 +135,67 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
 
     const handleRemove = (country) => {
         setSelectedCountries(selectedCountries.filter(c => c !== country));
+    };
+
+    const saveRegion = async () => {
+        if (region) {
+            // update existing region name
+            await backend.put(`/region/${region.id}`, {
+                name: regionName,
+                last_modified: new Date().toISOString()
+            });
+
+            // handle regional director change
+            if (selectedDirector !== originalDirectorId) {
+                // remove old director's association with this region
+                if (originalDirectorId) {
+                    await backend.delete(`/regional-directors/${originalDirectorId}/region/${region.id}`);
+                }
+                // associate new director with this region
+                if (selectedDirector) {
+                    await backend.put(`/regional-directors/${selectedDirector}/region`, {
+                        region_id: region.id
+                    });
+                }
+            }
+
+            // fetch existing countries and only POST new ones
+            const existingRes = await backend.get(`/region/${region.id}/countries`);
+            const existingCountries = Array.isArray(existingRes.data) ? existingRes.data : [];
+            const existingNames = existingCountries.map(c => c.name);
+
+            const newCountries = selectedCountries.filter(name => !existingNames.includes(name));
+            await Promise.all(newCountries.map((countryName) =>
+                backend.post('/country', {
+                    region_id: region.id,
+                    name: countryName,
+                    last_modified: new Date().toISOString()
+                })
+            ));
+        } else {
+            // create new region
+            const newRegion = await backend.post('/region', {
+                name: regionName,
+                last_modified: new Date().toISOString()
+            });
+            const newRegionId = newRegion.data.id;
+
+            // associate director with new region
+            if (selectedDirector) {
+                await backend.put(`/regional-directors/${selectedDirector}/region`, {
+                    region_id: newRegionId
+                });
+            }
+
+            // create country entries
+            await Promise.all(selectedCountries.map((countryName) =>
+                backend.post('/country', {
+                    region_id: newRegionId,
+                    name: countryName,
+                    last_modified: new Date().toISOString()
+                })
+            ));
+        }
     };
 
     return (
@@ -186,6 +265,10 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                         placeholder="Search countries..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
+                                        onClick={(e) => e.stopPropagation()}
+                                        mx={2}
+                                        width="90%"
+                                        mb={2}
                                     />
                                     {filteredCountries?.map((country) => (
                                         <MenuItem key={country.id} value={country.id} onClick={() => handleSelect(country.name)}>
@@ -206,39 +289,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                 </Button>
                                 <Button colorScheme="teal" onClick={async () => {
                                     try {
-                                        if (region) {
-                                            await backend.put(`/region/${region.id}`, {
-                                                name: regionName,
-                                                last_modified: new Date().toISOString()
-                                            });
-
-                                            const existingRes = await backend.get(`/region/${region.id}/countries`);
-                                            const existingCountries = Array.isArray(existingRes.data) ? existingRes.data : [];
-                                            const existingNames = existingCountries.map(c => c.name);
-
-                                            const newCountries = selectedCountries.filter(name => !existingNames.includes(name));
-                                            await Promise.all(newCountries.map((countryName) =>
-                                                backend.post('/country', {
-                                                    region_id: region.id,
-                                                    name: countryName,
-                                                    last_modified: new Date().toISOString()
-                                                })
-                                            ));
-                                        } else {
-                                            const newRegion = await backend.post('/region', {
-                                                name: regionName,
-                                                last_modified: new Date().toISOString()
-                                            });
-                                            const newRegionId = newRegion.data.id;
-
-                                            await Promise.all(selectedCountries.map((countryName) =>
-                                                backend.post('/country', {
-                                                    region_id: newRegionId,
-                                                    name: countryName,
-                                                    last_modified: new Date().toISOString()
-                                                })
-                                            ));
-                                        }
+                                        await saveRegion();
                                         onSave();
                                     } catch (err) {
                                         console.error("Error saving region:", err);
@@ -306,39 +357,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                     <AlertDialogFooter>
                                         <Button onClick={async () => {
                                             try {
-                                                if (region) {
-                                                    await backend.put(`/region/${region.id}`, {
-                                                        name: regionName,
-                                                        last_modified: new Date().toISOString()
-                                                    });
-
-                                                    const existingRes = await backend.get(`/region/${region.id}/countries`);
-                                                    const existingCountries = Array.isArray(existingRes.data) ? existingRes.data : [];
-                                                    const existingNames = existingCountries.map(c => c.name);
-
-                                                    const newCountries = selectedCountries.filter(name => !existingNames.includes(name));
-                                                    await Promise.all(newCountries.map((countryName) =>
-                                                        backend.post('/country', {
-                                                            region_id: region.id,
-                                                            name: countryName,
-                                                            last_modified: new Date().toISOString()
-                                                        })
-                                                    ));
-                                                } else {
-                                                    const newRegion = await backend.post('/region', {
-                                                        name: regionName,
-                                                        last_modified: new Date().toISOString()
-                                                    });
-                                                    const newRegionId = newRegion.data.id;
-
-                                                    await Promise.all(selectedCountries.map((countryName) =>
-                                                        backend.post('/country', {
-                                                            region_id: newRegionId,
-                                                            name: countryName,
-                                                            last_modified: new Date().toISOString()
-                                                        })
-                                                    ));
-                                                }
+                                                await saveRegion();
                                                 onSave();
                                                 setIsCancelDialogOpen(false);
                                             } catch (err) {
