@@ -29,6 +29,7 @@ import {
     AlertDialogContent,
     AlertDialogOverlay,
     useToast,
+    Input,
 } from '@chakra-ui/react'
 
 const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
@@ -42,6 +43,11 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     const [drawerSize, setDrawerSize] = useState("md");
     const [regionName, setRegionName] = useState("");
     const toast = useToast();
+    const [searchTerm, setSearchTerm] = useState('')
+
+    const filteredCountries = countries.filter(country =>
+        country.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
 
     // useEffect to fetch names of all regional directors for dropdown
     useEffect(() => {
@@ -101,7 +107,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
             setSelectedDirector("");
             setSelectedCountries([]);
         }
-    }, [region, regionalDirectors]);
+    }, [region, regionalDirectors, backend]);
 
     const handleSelect = (country) => {
         if (!selectedCountries.includes(country)) {
@@ -176,7 +182,12 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                     + Add
                                 </MenuButton>
                                 <MenuList>
-                                    {countries?.map((country) => (
+                                    <Input
+                                        placeholder="Search countries..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                    {filteredCountries?.map((country) => (
                                         <MenuItem key={country.id} value={country.id} onClick={() => handleSelect(country.name)}>
                                             {country.name}
                                         </MenuItem>
