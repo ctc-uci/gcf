@@ -75,13 +75,27 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
 
     // useEffect to pre-fill the region information when using the Edit button
     useEffect(() => {
-    if (region) {
+        if (region) {
             setRegionName(region.name || "");
             const match = regionalDirectors.find(
                 d => d.firstName === region.regionalDirector?.firstName &&
                     d.lastName === region.regionalDirector?.lastName
             );
             setSelectedDirector(match?.id?.toString() ?? "");
+
+            // fetch and set existing countries for this region
+            const fetchRegionCountries = async () => {
+                try {
+                    const res = await backend.get(`/region/${region.id}/countries`);
+                    const regionCountries = Array.isArray(res.data) ? res.data : [];
+                    setSelectedCountries(regionCountries.map(c => c.name));
+                } catch (err) {
+                    console.error("Error fetching region countries:", err);
+                    setSelectedCountries([]);
+                }
+            };
+            fetchRegionCountries();
+
         } else {
             setRegionName("");
             setSelectedDirector("");
