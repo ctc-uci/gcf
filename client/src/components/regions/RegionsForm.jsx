@@ -290,6 +290,12 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                 <Button colorScheme="teal" onClick={async () => {
                                     try {
                                         await saveRegion();
+                                        toast({
+                                            title: "Successfully saved region",
+                                            status: "success",
+                                            duration: 5000,
+                                            isClosable: true,
+                                        });
                                         onSave();
                                     } catch (err) {
                                         console.error("Error saving region:", err);
@@ -358,6 +364,12 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                         <Button onClick={async () => {
                                             try {
                                                 await saveRegion();
+                                                toast({
+                                                    title: "Successfully saved region",
+                                                    status: "success",
+                                                    duration: 5000,
+                                                    isClosable: true,
+                                                });
                                                 onSave();
                                                 setIsCancelDialogOpen(false);
                                             } catch (err) {
