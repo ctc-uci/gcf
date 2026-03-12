@@ -13,6 +13,7 @@ import { BackendProvider } from "@/contexts/BackendContext";
 import { RoleProvider } from "@/contexts/RoleContext";
 import { CookiesProvider } from "react-cookie";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { RegionsPage } from "./components/regions/RegionsPage";
 
 import { Account } from "./components/accounts/Account";
 import { Media } from "./components/media/Media";
@@ -76,6 +77,11 @@ const App = () => {
                   <Route
                     path={"dashboard"}
                     element={<Dashboard />}
+                  />
+
+                  <Route
+                    path="/regions"
+                    element={<RegionsPage />}
                   />
 
                   <Route
