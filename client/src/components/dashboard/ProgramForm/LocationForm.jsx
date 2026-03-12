@@ -4,10 +4,22 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
-import { GetState, GetCity, GetCountries } from 'react-country-state-city';
+import { GetState, GetCity } from 'react-country-state-city';
 import 'react-country-state-city/dist/react-country-state-city.css';
 
 import { Select, Grid, GridItem } from '@chakra-ui/react';
+
+const STATELESS_COUNTRIES = new Set([
+  145, // Monaco
+  238, // Vatican City
+  199, // Singapore
+  33, // Brunei
+  60, // Djibouti
+  117, // Kuwait
+  228, // Tuvalu
+  49, // Comoros
+  66, // El Salvador
+]);
 
 export function LocationForm({ formState, setFormData }) {
   const { backend } = useBackendContext();
@@ -15,6 +27,7 @@ export function LocationForm({ formState, setFormData }) {
   const { role } = useRoleContext();
 
   const userId = currentUser?.uid;
+  const isStateless = STATELESS_COUNTRIES.has(Number(formState.country));
 
   const [countriesList, setCountriesList] = useState([]);
   const [regionList, setRegionList] = useState([]);
@@ -24,7 +37,7 @@ export function LocationForm({ formState, setFormData }) {
   useEffect(() => {
     async function getRegions() {
       try {
-        if (role == 'Regional Director') {
+        if (role === 'Regional Director') {
           const regionalDirectorRegionId = await backend.get(
             `/regional-directors/${userId}`
           );
@@ -32,12 +45,12 @@ export function LocationForm({ formState, setFormData }) {
             `/region/${regionalDirectorRegionId.data.regionId}`
           );
           setRegionList([response.data]);
-        } else if (role == 'Program Director') {
+        } else if (role === 'Program Director') {
           const response = await backend.get(
             `/program-directors/me/${userId}/region`
           );
           setRegionList([response.data]);
-        } else if (role == 'Admin') {
+        } else if (role === 'Admin') {
           const response = await backend.get('/region');
           setRegionList(response.data);
         }
@@ -75,9 +88,7 @@ export function LocationForm({ formState, setFormData }) {
         (state) => state.id === formState.state
       );
 
-      console.log(selectedState);
-
-      if (selectedState.hasCities) {
+      if (selectedState?.hasCities) {
         GetCity(parseInt(formState.country), parseInt(selectedState.id)).then(
           (result) => {
             setCityList(result);
@@ -85,7 +96,7 @@ export function LocationForm({ formState, setFormData }) {
         );
       }
     }
-  }, [formState.country, formState.state]);
+  }, [formState.country, formState.state, stateList]);
 
   function handleRegionChange(selectedRegion) {
     setFormData({ ...formState, regionId: selectedRegion, country: null });
@@ -127,6 +138,7 @@ export function LocationForm({ formState, setFormData }) {
           ))}
         </Select>
       </GridItem>
+
       <GridItem>
         {formState.regionId && (
           <Select
@@ -142,13 +154,15 @@ export function LocationForm({ formState, setFormData }) {
           </Select>
         )}
       </GridItem>
+
       <GridItem>
         {formState.country && (
           <Select
             onChange={(e) => handleStateChange(e.target.value)}
             value={formState.state || ''}
-            placeholder="Select state/province..."
-            style={{ width: '100%', minHeight: 40 }}
+            placeholder={
+              isStateless ? 'Select city...' : 'Select state/province...'
+            }
           >
             {stateList.map((_state) => (
               <option key={_state.id} value={_state.id}>
@@ -158,13 +172,13 @@ export function LocationForm({ formState, setFormData }) {
           </Select>
         )}
       </GridItem>
+
       <GridItem>
-        {formState.state && (
+        {formState.state && !isStateless && (
           <Select
             onChange={(e) => handleCityChange(e.target.value)}
             value={formState.city || ''}
             placeholder="Select city..."
-            style={{ width: '100%', minHeight: 40 }}
           >
             {cityList.map((_city) => (
               <option key={_city.id} value={_city.id}>
