@@ -4,17 +4,7 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
-import {
-  CountrySelect,
-  StateSelect,
-  CitySelect,
-  RegionSelect,
-  GetRegions,
-  GetCountriesByRegion,
-  GetCountries,
-  GetState,
-  GetCity,
-} from 'react-country-state-city';
+import { GetState, GetCity, GetCountries } from 'react-country-state-city';
 import 'react-country-state-city/dist/react-country-state-city.css';
 
 import { Select, Grid, GridItem } from '@chakra-ui/react';
@@ -56,7 +46,7 @@ export function LocationForm({ formState, setFormData }) {
       }
     }
     getRegions();
-  }, [formState.regionId, backend]);
+  }, [formState.regionId, role, userId, backend]);
 
   useEffect(() => {
     async function getCountries() {
@@ -69,7 +59,7 @@ export function LocationForm({ formState, setFormData }) {
       }
     }
     getCountries();
-  }, [formState.regionId]);
+  }, [formState.regionId, backend, role, userId]);
 
   useEffect(() => {
     if (formState.country) {
@@ -81,13 +71,19 @@ export function LocationForm({ formState, setFormData }) {
 
   useEffect(() => {
     if (formState.country && formState.state) {
-      console.log(formState.country, formState.state);
-      GetCity(parseInt(formState.country), parseInt(formState.state)).then(
-        (result) => {
-          setCityList(result);
-          console.log(result);
-        }
+      const selectedState = stateList.find(
+        (state) => state.id === formState.state
       );
+
+      console.log(selectedState);
+
+      if (selectedState.hasCities) {
+        GetCity(parseInt(formState.country), parseInt(selectedState.id)).then(
+          (result) => {
+            setCityList(result);
+          }
+        );
+      }
     }
   }, [formState.country, formState.state]);
 
@@ -96,11 +92,20 @@ export function LocationForm({ formState, setFormData }) {
   }
 
   function handleCountryChange(countryId) {
-    setFormData({ ...formState, country: Number(countryId) });
+    setFormData({
+      ...formState,
+      country: countryId ? Number(countryId) : null,
+      state: null,
+      city: null,
+    });
   }
 
   function handleStateChange(stateId) {
-    setFormData({ ...formState, state: Number(stateId) });
+    setFormData({
+      ...formState,
+      state: stateId ? Number(stateId) : null,
+      city: null,
+    });
   }
 
   function handleCityChange(cityId) {
@@ -123,45 +128,51 @@ export function LocationForm({ formState, setFormData }) {
         </Select>
       </GridItem>
       <GridItem>
-        <Select
-          onChange={(e) => handleCountryChange(e.target.value)}
-          placeholder="Select country..."
-          value={formState.country || ''}
-        >
-          {countriesList.map((_country) => (
-            <option key={_country.id} value={_country.id}>
-              {_country.name}
-            </option>
-          ))}
-        </Select>
+        {formState.regionId && (
+          <Select
+            onChange={(e) => handleCountryChange(e.target.value)}
+            placeholder="Select country..."
+            value={formState.country || ''}
+          >
+            {countriesList.map((_country) => (
+              <option key={_country.id} value={_country.id}>
+                {_country.name}
+              </option>
+            ))}
+          </Select>
+        )}
       </GridItem>
       <GridItem>
-        <Select
-          onChange={(e) => handleStateChange(e.target.value)}
-          value={formState.state || ''}
-          placeholder="Select state..."
-          style={{ width: '100%', minHeight: 40 }}
-        >
-          {stateList.map((_state) => (
-            <option key={_state.id} value={_state.id}>
-              {_state.name}
-            </option>
-          ))}
-        </Select>
+        {formState.country && (
+          <Select
+            onChange={(e) => handleStateChange(e.target.value)}
+            value={formState.state || ''}
+            placeholder="Select state/province..."
+            style={{ width: '100%', minHeight: 40 }}
+          >
+            {stateList.map((_state) => (
+              <option key={_state.id} value={_state.id}>
+                {_state.name}
+              </option>
+            ))}
+          </Select>
+        )}
       </GridItem>
       <GridItem>
-        <Select
-          onChange={(e) => handleCityChange(e.target.value)}
-          value={formState.city || ''}
-          placeholder="Select city..."
-          style={{ width: '100%', minHeight: 40 }}
-        >
-          {cityList.map((_city) => (
-            <option key={_city.id} value={_city.id}>
-              {_city.name}
-            </option>
-          ))}
-        </Select>
+        {formState.state && (
+          <Select
+            onChange={(e) => handleCityChange(e.target.value)}
+            value={formState.city || ''}
+            placeholder="Select city..."
+            style={{ width: '100%', minHeight: 40 }}
+          >
+            {cityList.map((_city) => (
+              <option key={_city.id} value={_city.id}>
+                {_city.name}
+              </option>
+            ))}
+          </Select>
+        )}
       </GridItem>
     </Grid>
   );

@@ -46,8 +46,6 @@ export const ProgramForm = ({
   const onClose = isControlled ? onCloseProp : disclosure.onClose;
   const btnRef = useRef(null);
   const { backend } = useBackendContext();
-  const [regions, setRegions] = useState([]);
-  const [countries, setCountries] = useState([]);
   const { currentUser } = useAuthContext();
 
   const [initialProgramDirectorIds, setInitialProgramDirectorIds] = useState(
@@ -379,38 +377,6 @@ export const ProgramForm = ({
       console.error('Error saving program:', err);
     }
   }
-
-  useEffect(() => {
-    async function getRegions() {
-      try {
-        const response = await backend.get('/region');
-        setRegions(response.data);
-      } catch (error) {
-        console.error('Error fetching regions:', error);
-      }
-    }
-    getRegions();
-  }, [formState.regionId, backend]);
-
-  useEffect(() => {
-    async function getCountriesForRegion() {
-      if (!formState.regionId) {
-        setCountries([]);
-        return;
-      }
-
-      try {
-        const response = await backend.get(
-          `/region/${formState.regionId}/countries`
-        );
-        setCountries(response.data);
-      } catch (error) {
-        console.error('Error fetching countries:', error);
-        setCountries([]);
-      }
-    }
-    getCountriesForRegion();
-  }, [formState.regionId, backend]);
 
   return (
     <Drawer

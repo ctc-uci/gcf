@@ -106,21 +106,6 @@ regionalDirectorRouter.get('/', async (req, res) => {
   }
 });
 
-regionalDirectorRouter.get('/region-id/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const data = await db.query(
-      `SELECT region_id FROM regional_director
-                                WHERE user_id = $1`,
-      [id]
-    );
-    res.status(200).json(keysToCamel(data));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
 regionalDirectorRouter.get(
   '/regional-director-region/:id',
   async (req, res) => {
