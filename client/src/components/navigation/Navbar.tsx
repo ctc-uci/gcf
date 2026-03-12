@@ -1,16 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Box,
   Button,
+  Collapse,
   Flex,
   HStack,
   Icon,
   Image,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Text,
 } from '@chakra-ui/react';
 
@@ -38,45 +35,11 @@ export const Navbar = () => {
     null
   );
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isHoverActive, setIsHoverActive] = useState(false);
-  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hoverDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const [triggerWidth, setTriggerWidth] = useState(160);
+  const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
 
-  const clearAllTimeouts = () => {
-    if (closeTimeoutRef.current) {
-      clearTimeout(closeTimeoutRef.current);
-      closeTimeoutRef.current = null;
-    }
-    if (hoverDelayRef.current) {
-      clearTimeout(hoverDelayRef.current);
-      hoverDelayRef.current = null;
-    }
-  };
-
-  const openMenu = () => {
-    clearAllTimeouts();
-    if (triggerRef.current) {
-      setTriggerWidth(triggerRef.current.offsetWidth);
-    }
-    setIsMenuOpen(true);
-    hoverDelayRef.current = setTimeout(() => {
-      setIsHoverActive(true);
-      hoverDelayRef.current = null;
-    }, 20);
-  };
-
-  const closeMenuDelayed = () => {
-    clearAllTimeouts();
-    closeTimeoutRef.current = setTimeout(() => {
-      setIsMenuOpen(false);
-      closeTimeoutRef.current = setTimeout(() => {
-        setIsHoverActive(false);
-        closeTimeoutRef.current = null;
-      }, 0);
-    }, 0);
+  const handleMenuToggle = () => {
+    setIsMenuOpen((prev) => !prev);
   };
 
   const handleLogout = async () => {
@@ -152,18 +115,7 @@ export const Navbar = () => {
     loadData();
   }, [userId, backend, role]);
 
-  useEffect(() => {
-    return () => {
-      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-      if (hoverDelayRef.current) clearTimeout(hoverDelayRef.current);
-    };
-  }, []);
-
-  const boxBg = !isMenuOpen
-    ? 'transparent'
-    : isHoverActive
-      ? 'gray.300'
-      : 'white';
+  const triggerBg = isMenuOpen || isHovered ? 'gray.300' : 'transparent';
 
   return (
     <Flex
@@ -177,7 +129,7 @@ export const Navbar = () => {
       bg="white"
     >
       <Flex justify="space-between" w="100%" px="2vw" align="center">
-        <Text fontSize="2vh">
+        <Text fontSize="2vh" fontWeight="bold">
           {role === 'Super Admin' ? 'Super Admin Dashboard' : ''}
           {role === 'Admin' ? 'Admin Dashboard' : ''}
           {role === 'Regional Director' ? 'Regional Director Dashboard' : ''}
@@ -187,28 +139,23 @@ export const Navbar = () => {
         </Text>
 
         <Flex gap={2} align="center">
-          <Menu
-            isOpen={isMenuOpen}
-            onClose={() => setIsMenuOpen(false)}
-            placement="bottom-end"
-            offset={[0, 0]}
-          >
-            <MenuButton
-              as={Button}
+          <Box position="relative">
+            <Button
               bg="transparent"
               p={0}
               borderRadius="full"
               _hover={{ bg: 'transparent' }}
-              onMouseEnter={openMenu}
-              onMouseLeave={closeMenuDelayed}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              onClick={handleMenuToggle}
             >
               <Box
-                ref={triggerRef}
                 px={3}
                 py={2}
-                bg={boxBg}
+                bg={triggerBg}
                 borderRadius={isMenuOpen ? '20px 20px 0 0' : '20px'}
                 minW="160px"
+                transition="background-color 0.4s ease, border-radius 0.4s ease"
               >
                 <HStack spacing={3} justify="center" align="center">
                   <Image
@@ -222,48 +169,63 @@ export const Navbar = () => {
                   <Text fontSize="2vh" fontWeight="semibold">
                     {userName || 'User'}
                   </Text>
-                  <ChevronDownIcon boxSize={4} />
+                  <ChevronDownIcon
+                    boxSize={4}
+                    transition="transform 0.4s ease"
+                    transform={isMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)'}
+                  />
                 </HStack>
               </Box>
-            </MenuButton>
-            <MenuList
-              onMouseEnter={openMenu}
-              onMouseLeave={closeMenuDelayed}
-              p={0}
-              minW={triggerWidth}
-              w={triggerWidth}
-              bg="transparent"
-              border="none"
-              boxShadow="none"
-              mt="-1px"
+            </Button>
+            <Box
+              position="absolute"
+              top="100%"
+              left={0}
+              right={0}
+              zIndex={10}
+              w="100%"
             >
-              <Box
-                bg={boxBg}
-                borderRadius="0 0 20px 20px"
-                py={2}
-                px={1}
-                overflow="hidden"
-                w="100%"
+              <Collapse
+                in={isMenuOpen}
+                animateOpacity
+                transition={{
+                  enter: { duration: 0.4, delay: 0.1 },
+                  exit: { duration: 0.2 },
+                }}
               >
-                <MenuItem
-                  onClick={() => navigate('/profile')}
-                  icon={<Icon as={HiOutlineUser} boxSize="2vh" />}
-                  bg={boxBg}
-                  _hover={{ bg: isHoverActive ? 'gray.400' : 'gray.100' }}
+                <Box
+                  bg="gray.300"
+                  borderRadius="0 0 20px 20px"
+                  py={2}
+                  px={1}
+                  w="100%"
                 >
-                  Profile
-                </MenuItem>
-                <MenuItem
-                  onClick={handleLogout}
-                  icon={<Icon as={HiOutlineLogout} boxSize="2vh" />}
-                  bg={boxBg}
-                  _hover={{ bg: isHoverActive ? 'gray.400' : 'gray.100' }}
-                >
-                  Log Out
-                </MenuItem>
-              </Box>
-            </MenuList>
-          </Menu>
+                  <Button
+                    onClick={() => navigate('/profile')}
+                    leftIcon={<Icon as={HiOutlineUser} boxSize="2vh" />}
+                    w="100%"
+                    justifyContent="flex-start"
+                    variant="ghost"
+                    bg="transparent"
+                    _hover={{ bg: 'gray.400' }}
+                  >
+                    <Text fontSize="2vh">Profile</Text>
+                  </Button>
+                  <Button
+                    onClick={handleLogout}
+                    leftIcon={<Icon as={HiOutlineLogout} boxSize="2vh" />}
+                    w="100%"
+                    justifyContent="flex-start"
+                    variant="ghost"
+                    bg="transparent"
+                    _hover={{ bg: 'gray.400' }}
+                  >
+                    <Text fontSize="2vh">Log Out</Text>
+                  </Button>
+                </Box>
+              </Collapse>
+            </Box>
+          </Box>
         </Flex>
       </Flex>
     </Flex>
