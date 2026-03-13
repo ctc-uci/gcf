@@ -68,7 +68,8 @@ function mapAdminRow(row) {
     launchDate: row.launchDate,
     location: row.countryName ?? '',
     country: row.country,
-
+    city: row.city,
+    state: row.state,
     students: row.students ?? 0,
     instruments: row.instruments ?? 0,
     totalInstruments: row.instruments ?? 0,
@@ -88,7 +89,9 @@ function mapRdRow(row) {
     status: row.programStatus,
     launchDate: row.programLaunchDate,
     location: row.programLocation ?? row.regionName ?? '',
-    countryId: row.countryId,
+    country: row.countryId,
+    city: row.city,
+    state: row.state,
     regionId: row.regionId,
     students: row.totalStudents ?? 0,
     instruments: row.totalInstruments ?? 0,
@@ -97,7 +100,6 @@ function mapRdRow(row) {
     regionalDirectors: row.regionalDirectors,
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
-
     media: row.media,
   };
 }
