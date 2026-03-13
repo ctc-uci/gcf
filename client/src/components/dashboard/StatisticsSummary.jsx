@@ -12,12 +12,13 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
-import { MdOutlineFileDownload } from 'react-icons/md';
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { MdOutlineFileDownload } from 'react-icons/md';
+
 const StatBox = ({ label, number }) => {
   return (
     <Box
@@ -31,7 +32,10 @@ const StatBox = ({ label, number }) => {
       display="flex"
       flexDirection="column"
     >
-      <Box fontSize="xl" mb={4}>
+      <Box
+        fontSize="xl"
+        mb={4}
+      >
         {label}
       </Box>
       <Box fontSize="2xl">{number}</Box>
@@ -145,7 +149,10 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
 
   return (
     <Box as="section">
-      <VStack spacing={6} align="left">
+      <VStack
+        spacing={6}
+        align="left"
+      >
         <HStack>
           <Heading size="md">Statistics Summary</Heading>
           <IconButton
@@ -158,7 +165,10 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
         </HStack>
 
         <Box position="relative">
-          <HStack spacing={6} minH="120px">
+          <HStack
+            spacing={6}
+            minH="120px"
+          >
             {stats.map((stat) => (
               <StatBox
                 key={stat.label}
