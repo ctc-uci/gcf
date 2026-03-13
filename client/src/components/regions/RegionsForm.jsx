@@ -54,7 +54,6 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
         c.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // useEffect to fetch names of all regional directors for dropdown
     useEffect(() => {
         const fetchRegionalDirectors = async () => {
             try {
@@ -74,12 +73,10 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
             setCountries(result);
         });
     }, []);
-    // useEffect to pre-fill the region information when using the Edit button
     useEffect(() => {
         if (region) {
             setRegionName(region.name || "");
 
-            // pre-fill regional director by fetching the director for this region
             const fetchRegionDirector = async () => {
                 try {
                     const res = await backend.get(`/regional-directors/region/${region.id}/`);
@@ -100,7 +97,6 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
             };
             fetchRegionDirector();
 
-            // fetch and set existing countries for this region
             const fetchRegionCountries = async () => {
                 try {
                     const res = await backend.get(`/region/${region.id}/countries`);
@@ -139,19 +135,15 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
 
     const saveRegion = async () => {
         if (region) {
-            // update existing region name
             await backend.put(`/region/${region.id}`, {
                 name: regionName,
                 last_modified: new Date().toISOString()
             });
 
-            // handle regional director change
             if (selectedDirector !== originalDirectorId) {
-                // remove old director's association with this region
                 if (originalDirectorId) {
                     await backend.delete(`/regional-directors/${originalDirectorId}/region/${region.id}`);
                 }
-                // associate new director with this region
                 if (selectedDirector) {
                     await backend.put(`/regional-directors/${selectedDirector}/region`, {
                         region_id: region.id
@@ -159,7 +151,6 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                 }
             }
 
-            // fetch existing countries and only POST new ones
             const existingRes = await backend.get(`/region/${region.id}/countries`);
             const existingCountries = Array.isArray(existingRes.data) ? existingRes.data : [];
             const existingNames = existingCountries.map(c => c.name);
@@ -184,21 +175,18 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                 )
             );
         } else {
-            // create new region
             const newRegion = await backend.post('/region', {
                 name: regionName,
                 last_modified: new Date().toISOString()
             });
             const newRegionId = newRegion.data.id;
 
-            // associate director with new region
             if (selectedDirector) {
                 await backend.put(`/regional-directors/${selectedDirector}/region`, {
                     region_id: newRegionId
                 });
             }
 
-            // create country entries
             await Promise.all(
                 selectedCountries.map(country =>
                     backend.post('/country', {
