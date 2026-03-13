@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { useBackendContext } from '@/contexts/hooks/useBackendContext'
 
 import {
+  GetCountries
+} from "react-country-state-city";
+
+import {
     VStack,
     Drawer,
     DrawerBody,
@@ -65,20 +69,11 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
         fetchRegionalDirectors();
     }, [backend]);
 
-    // useEffect to fetch all countries
     useEffect(() => {
-        const fetchCountries = async () => {
-            try {
-                const res = await backend.get('/country');
-                const countriesList = Array.isArray(res.data) ? res.data : [];
-                setCountries(countriesList);
-            }  
-            catch (err) {
-                console.error("Error fetching countries:", err);
-            }
-        }
-        fetchCountries();
-    }, [backend]);
+        GetCountries().then((result) => {
+            setCountries(result);
+        });
+    }, []);
 
     // useEffect to pre-fill the region information when using the Edit button
     useEffect(() => {
@@ -260,7 +255,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                 <MenuButton as={Button} variant="outline" size="sm">
                                     + Add
                                 </MenuButton>
-                                <MenuList>
+                                <MenuList maxH="300px" overflowY="auto">
                                     <Input
                                         placeholder="Search countries..."
                                         value={searchTerm}
