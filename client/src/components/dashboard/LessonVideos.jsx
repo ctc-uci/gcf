@@ -155,29 +155,31 @@ function LessonVideos({
               px={5}
               py={2}
               borderTopRadius="md"
-              ml={20}
             >
               <FiFolder></FiFolder>
-              <Text fontWeight="extrabold" fontSize="xl">
+              <Text fontWeight="bold" fontSize="lg">
                 {playlist.instrumentName}
               </Text>
             </HStack>
             <Flex align="center">
-              <IconButton
-                icon={<ChevronLeftIcon boxSize={20} />}
-                variant="ghost"
-                size="xl"
-                color="gray.400"
-                flexShrink={0}
-                isDisabled={startIndex === 0}
-                onClick={() => handlePrev(playlist.instrumentName)}
-              />
+              {startIndex > 0 && (
+                <IconButton
+                  icon={<ChevronLeftIcon boxSize={16} />}
+                  variant="ghost"
+                  size="lg"
+                  color="gray.400"
+                  flexShrink={0}
+                  onClick={() => handlePrev(playlist.instrumentName)}
+                />
+              )}
               <HStack
                 overflowX="auto"
                 bg="gray.100"
                 w="fit-content"
                 borderBottomRadius="xl"
                 borderTopRightRadius="xl"
+                p={5}
+                spacing={5}
               >
                 {videosShown.map((video, index) => {
                   const snippet = video.snippet;
@@ -193,17 +195,21 @@ function LessonVideos({
                     <Box
                       key={`${playlist.programId}-${video.link}-${index}`}
                       borderRadius="md"
-                      p={5}
                       overflow="hidden"
                       flexShrink={0}
-                      w="md"
+                      w="320px"
+                      maxW="320px"
                       cursor="pointer"
                       onClick={() => {
                         setSelectedVideo(video);
                         setSelectedPlaylist(playlist);
                       }}
                     >
-                      <Box position="relative" borderRadius="2xl" overflow="hidden">
+                      <Box
+                        position="relative"
+                        borderRadius="2xl"
+                        overflow="hidden"
+                      >
                         <AspectRatio ratio={16 / 9} w="100%">
                           <Image src={thumbnail} />
                         </AspectRatio>
@@ -213,10 +219,10 @@ function LessonVideos({
                           left="0"
                           w="100%"
                           bg="blackAlpha.700"
-                          p={2}
+                          p={1.5}
                         >
                           <Text
-                            fontSize="sm"
+                            fontSize="xs"
                             fontWeight="medium"
                             color="white"
                             noOfLines={2}
@@ -234,7 +240,7 @@ function LessonVideos({
                           justify="center"
                           bg="blackAlpha.300"
                         >
-                          <FiPlay fill="white" color="white" size={40} />
+                          <FiPlay fill="white" color="white" size={28} />
                         </Flex>
                       </Box>
                     </Box>
