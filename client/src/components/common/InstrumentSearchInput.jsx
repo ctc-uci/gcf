@@ -5,6 +5,7 @@ import {
   List,
   ListItem,
   Text,
+  HStack,
   useOutsideClick,
 } from '@chakra-ui/react';
 
@@ -14,7 +15,7 @@ export function InstrumentSearchInput({
   onChange,
   onSelectExisting,
   onCreateNew,
-  placeholder = 'Search or type instrument name...',
+  placeholder = 'Search instrument',
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
@@ -99,9 +100,10 @@ export function InstrumentSearchInput({
                 borderTopWidth={filtered.length ? 1 : 0}
                 borderColor="gray.100"
               >
-                <Text color="teal.600" fontWeight="medium">
-                  + Add new &quot;{value.trim()}&quot;
-                </Text>
+                <HStack spacing={3} align="center">
+                  <Text>+</Text>
+                  <Text>Add new &quot;{value.trim()}&quot;</Text>
+                </HStack>
               </ListItem>
             )}
           </List>

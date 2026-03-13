@@ -99,7 +99,7 @@ export function InstrumentForm({ setFormData }) {
           }}
           onSelectExisting={(inst) => setSelectedInstrument(inst)}
           onCreateNew={handleCreateNewInstrument}
-          placeholder="Search or type instrument name..."
+          placeholder="Search instrument"
         />
         {selectedInstrument && (
           <Text fontSize="sm" color="gray.600" mt={1}>

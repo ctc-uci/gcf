@@ -6,86 +6,107 @@ import {
   Button,
   AspectRatio,
   Heading,
+  Image,
+  Divider,
 } from '@chakra-ui/react';
 import {
   ArrowBackIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
   IconButton,
 } from '@chakra-ui/icons';
 import { useState } from 'react';
 
 import { getYouTubeEmbedUrl } from '@/utils/youtube';
 
-function VideoPlayer({ playlist, videos, selectedVideo, onBack, setSelectedVideo }) {
+function VideoPlayer({
+  playlist,
+  videos,
+  selectedVideo,
+  onBack,
+  setSelectedVideo,
+}) {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <>
-      <HStack justify="space-between" align="center">
-        <Button leftIcon={<ArrowBackIcon />} variant="ghost" onClick={onBack}>
+    <HStack align="flex-start" spacing={0} w="100%">
+      <VStack flex={1} align="flex-start" mr={8}>
+        <Button
+          leftIcon={<ArrowBackIcon />}
+          size="lg"
+          variant="ghost"
+          my={4}
+          color="white"
+          _hover={{ bg: 'teal.600' }}
+          bg="teal.500"
+          onClick={onBack}
+        >
           Back
         </Button>
-        {!isOpen && (
-          <IconButton
-            icon={<ChevronLeftIcon />}
-            onClick={() => setIsOpen(!isOpen)}
-          />
-        )}
-      </HStack>
-      <HStack align="flex-start">
-        <VStack flex={isOpen ? 0.8 : 1} align="flex-start">
-          <AspectRatio ratio={16 / 9} w="100%">
-            <iframe src={getYouTubeEmbedUrl(selectedVideo)} allowFullScreen />
+        <Box borderRadius="3xl" overflow="hidden" w="100%">
+          <AspectRatio ratio={16 / 9} w="100%" borderRadius="3xl" overflow="hidden">
+            <iframe src={getYouTubeEmbedUrl(selectedVideo)} allowFullScreen/>
           </AspectRatio>
           <Heading>{selectedVideo.snippet.title}</Heading>
-        </VStack>
-        {isOpen && (
-          <Box flex={isOpen ? 0.2 : 0}
-            bg="gray.100"
-          >
-            <IconButton
-              icon={<ChevronRightIcon />}
-              onClick={() => setIsOpen(!isOpen)}
-            />
-            <VStack overflowY="auto" maxH="100vh">
-              <Heading>Playlist</Heading>
-              {playlist.map((video, index) => {
-                const embedUrl = getYouTubeEmbedUrl(video);
-                if (!embedUrl) return null;
-                return (
-                  <>
-                    <Box
-                      key={`${playlist.programId}-${video.link}-${index}`}
-                      w="xs"
-                      bg={video === selectedVideo ? "gray.300" : ""}
-                      p={4}
-                      onClick={() => {
-                      setSelectedVideo(video);
-                    }}
-                    >
-                      <AspectRatio ratio={16 / 9}>
-                        <iframe
-                          src={embedUrl}
-                          title={video.snippet.title}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          style={{ border: 0 }}
-                        />
-                      </AspectRatio>
-                      <Box p={2}>
-                        <Text fontSize="sm" fontWeight="medium" noOfLines={2}>
-                          {video.snippet.title}
-                        </Text>
-                      </Box>
-                    </Box>
-                  </>
-                );
-              })}
-            </VStack>
-          </Box>
-        )}
-      </HStack>
-    </>
+        </Box>
+      </VStack>
+
+      {!isOpen && (
+        <IconButton
+          icon={<ArrowLeftIcon />}
+          onClick={() => setIsOpen(true)}
+          alignSelf="flex-start"
+          mt={4}
+          bg="None"
+          size="lg"
+        />
+      )}
+
+      {isOpen && (
+          <Box w="350px" bg="gray.100" alignSelf="stretch" mr={-12} p={5} borderTopLeftRadius="xl" h="100vh" overflowY="auto">          
+          <IconButton
+            icon={<ArrowRightIcon />}
+            size="lg"
+            onClick={() => setIsOpen(false)}
+
+          />
+          <VStack overflowY="auto" w="100%">
+            <Heading>Playlist</Heading>
+            <Divider my={3} borderColor="gray.600"/>
+            {playlist.map((video) => {
+              const snippet = video.snippet;
+              const thumbnail =
+                snippet?.thumbnails?.maxres?.url ??
+                snippet?.thumbnails?.high?.url ??
+                snippet?.thumbnails?.medium?.url ??
+                snippet?.thumbnails?.default?.url ??
+                `https://img.youtube.com/vi/${snippet.resourceId.videoId}/hqdefault.jpg`;
+              const embedUrl = getYouTubeEmbedUrl(video);
+              if (!embedUrl) return null;
+              return (
+                <Box
+                  key={video.snippet.resourceId.videoId}
+                  w="100%"
+                  bg={video === selectedVideo ? 'gray.300' : ''}
+                  cursor="pointer"
+                  borderRadius="2xl"
+                  overflow="hidden"
+                  onClick={() => setSelectedVideo(video)}
+                >
+                  <AspectRatio ratio={16 / 9} borderRadius="2xl">
+                    <Image src={thumbnail} />
+                  </AspectRatio>
+                  <Box p={4}>
+                    <Text fontSize="sm" fontWeight="medium" noOfLines={2}>
+                      {snippet.title}
+                    </Text>
+                  </Box>
+                </Box>
+              );
+            })}
+          </VStack>
+        </Box>
+      )}
+    </HStack>
   );
 }
 

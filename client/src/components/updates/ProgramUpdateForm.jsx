@@ -662,7 +662,7 @@ export const ProgramUpdateForm = ({
                       setSelectedInstrument('');
                       setSearchQuery('');
                     }}
-                    placeholder="Search or type instrument name..."
+                    placeholder="Search instrument"
                   />
                   {(selectedInstrument || newInstrumentName) && (
                     <Text fontSize="sm" color="gray.600" mt={1}>
