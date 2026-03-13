@@ -50,8 +50,8 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     const toast = useToast();
     const [searchTerm, setSearchTerm] = useState('');
 
-    const filteredCountries = countries.filter(country =>
-        country.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredCountries = countries.filter(c =>
+        c.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // useEffect to fetch names of all regional directors for dropdown
@@ -74,7 +74,6 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
             setCountries(result);
         });
     }, []);
-
     // useEffect to pre-fill the region information when using the Edit button
     useEffect(() => {
         if (region) {
@@ -106,10 +105,14 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                 try {
                     const res = await backend.get(`/region/${region.id}/countries`);
                     const regionCountries = Array.isArray(res.data) ? res.data : [];
-                    setSelectedCountries(regionCountries.map(c => c.name));
+
+                    const mapped = regionCountries
+                        .map(rc => countries.find(c => c.name === rc.name))
+                        .filter(Boolean);
+
+                    setSelectedCountries(mapped);
                 } catch (err) {
                     console.error("Error fetching region countries:", err);
-                    setSelectedCountries([]);
                 }
             };
             fetchRegionCountries();
@@ -120,16 +123,18 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
             setOriginalDirectorId("");
             setSelectedCountries([]);
         }
-    }, [region, regionalDirectors, backend]);
+    }, [countries, region, regionalDirectors, backend]);
 
     const handleSelect = (country) => {
-        if (!selectedCountries.includes(country)) {
-            setSelectedCountries([...selectedCountries, country]);
+        if (!selectedCountries.some(c => c.iso2 === country.iso2)) {
+            setSelectedCountries(prev => [...prev, country]);
         }
     };
 
-    const handleRemove = (country) => {
-        setSelectedCountries(selectedCountries.filter(c => c !== country));
+    const handleRemove = (iso2) => {
+        setSelectedCountries(prev =>
+            prev.filter(c => c.iso2 !== iso2)
+        );
     };
 
     const saveRegion = async () => {
@@ -159,14 +164,25 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
             const existingCountries = Array.isArray(existingRes.data) ? existingRes.data : [];
             const existingNames = existingCountries.map(c => c.name);
 
-            const newCountries = selectedCountries.filter(name => !existingNames.includes(name));
-            await Promise.all(newCountries.map((countryName) =>
-                backend.post('/country', {
-                    region_id: region.id,
-                    name: countryName,
-                    last_modified: new Date().toISOString()
-                })
-            ));
+            const newCountries = selectedCountries.filter(
+                c => !existingNames.includes(c.name)
+            );            
+            
+            console.log("Sending country:", {
+                region_id: region?.id,
+                name: newCountries[0].name,
+                iso_code: newCountries[0].iso2
+            });
+            await Promise.all(
+                newCountries.map(country =>
+                    backend.post('/country', {
+                        region_id: region.id,
+                        name: country.name,
+                        iso_code: country.iso2,
+                        last_modified: new Date().toISOString()
+                    })
+                )
+            );
         } else {
             // create new region
             const newRegion = await backend.post('/region', {
@@ -183,16 +199,18 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
             }
 
             // create country entries
-            await Promise.all(selectedCountries.map((countryName) =>
-                backend.post('/country', {
-                    region_id: newRegionId,
-                    name: countryName,
-                    last_modified: new Date().toISOString()
-                })
-            ));
+            await Promise.all(
+                selectedCountries.map(country =>
+                    backend.post('/country', {
+                        region_id: newRegionId,
+                        name: country.name,
+                        iso_code: country.iso2,
+                        last_modified: new Date().toISOString()
+                    })
+                )
+            );
         }
     };
-
     return (
         <Drawer
             isOpen={isOpen}
@@ -245,9 +263,9 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                             <FormLabel>Assigned Countries</FormLabel>
                             <Flex wrap="wrap" gap={2} mb={2}>
                                 {selectedCountries.map((country) => (
-                                    <Tag key={country} variant="solid" colorScheme="gray">
-                                        <TagLabel>{country}</TagLabel>
-                                        <TagCloseButton onClick={() => handleRemove(country)} />
+                                    <Tag key={country.iso2} variant="solid" colorScheme="gray">
+                                        <TagLabel>{country.name}</TagLabel>
+                                        <TagCloseButton onClick={() => handleRemove(country.iso2)} />
                                     </Tag>
                                 ))}
                             </Flex>
@@ -266,7 +284,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                                         mb={2}
                                     />
                                     {filteredCountries?.map((country) => (
-                                        <MenuItem key={country.id} value={country.id} onClick={() => handleSelect(country.name)}>
+                                        <MenuItem key={country.id} value={country.id} onClick={() => handleSelect(country)}>
                                             {country.name}
                                         </MenuItem>
                                     ))}
