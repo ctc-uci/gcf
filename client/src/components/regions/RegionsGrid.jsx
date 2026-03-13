@@ -8,7 +8,7 @@ import {
 
 import { useBackendContext } from "@/contexts/hooks/useBackendContext";
 
-export const RegionsGrid = ({ onNewRegion }) => {
+export const RegionsGrid = ({ onEditRegion }) => {
     const { backend } = useBackendContext();
     const [regions, setRegions] = useState([]);
 
@@ -36,7 +36,7 @@ export const RegionsGrid = ({ onNewRegion }) => {
                     <RegionCard
                         key={region.id}
                         region={region}
-                        onEdit={onNewRegion}
+                        onEdit={(region, regionalDirector) => onEditRegion(region, regionalDirector)}
                     />
                 ))}
             </SimpleGrid>
