@@ -8,15 +8,7 @@ export const MediaCard = ({ file_name, file_type, imageUrl }) => {
   const isVideo = file_type?.startsWith('video');
 
   return (
-    <Box
-      h="200px"
-      borderRadius="md"
-      border="2px solid"
-      borderColor="gray.800"
-      p={4}
-      overflow="hidden"
-      bg="gray.100"
-    >
+    <Box h="200px" borderRadius="md" overflow="hidden">
       {isLoading && (
         <Center h="100%">
           <Image src={gcf_globe} alt="Loading..." w="50px" />
@@ -31,6 +23,7 @@ export const MediaCard = ({ file_name, file_type, imageUrl }) => {
             height: '100%',
             objectFit: 'contain',
             display: isLoading ? 'none' : 'block',
+            borderRadius: '6px',
           }}
           onLoadedData={() => setIsLoading(false)}
         />
@@ -42,6 +35,7 @@ export const MediaCard = ({ file_name, file_type, imageUrl }) => {
           h="100%"
           objectFit="contain"
           display={isLoading ? 'none' : 'block'}
+          borderRadius="md"
           onLoad={() => setIsLoading(false)}
         />
       )}
