@@ -36,12 +36,12 @@ countryRouter.get("/:id", async (req, res) => {
 
 countryRouter.post("/", async (req, res) => {
   try {
-    const {region_id, name, last_modified } = req.body
+    const {region_id, name, last_modified, iso_code } = req.body
     const newCountry = await db.query(
-      `INSERT INTO country (region_id, name, last_modified) 
-      VALUES ($1, $2, $3) 
+      `INSERT INTO country (region_id, name, last_modified, iso_code) 
+      VALUES ($1, $2, $3, $4) 
       RETURNING *`,
-      [region_id, name, last_modified]
+      [region_id, name, last_modified, iso_code]
     );
     res.status(201).json(keysToCamel(newCountry[0]));
   } catch (err) {
