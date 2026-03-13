@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 export const RegionCard = ({ region, onEdit }) => {
     const { backend } = useBackendContext();
     const [regionalDirector, setRegionalDirector] = useState(null);
-    const [programs, setPrograms] = useState([]);
+    const [countries, setCountries] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -36,19 +36,18 @@ export const RegionCard = ({ region, onEdit }) => {
     }, [region.id, backend]);
 
     useEffect(() => {
-        if (!regionalDirector?.userId) return;
         const fetchData = async () => {
             try {
-                const res = await backend.get(`/regional-directors/${regionalDirector?.userId}/programs`);
-                const programs = res.data ? res.data : [];
-                setPrograms(programs);
+                const res = await backend.get(`/region/${region.id}/countries/`);
+                const countryList = res.data ? res.data : [];
+                setCountries(countryList);
             } catch (err) {
-                console.error("Error fetching programs:", err);
+                console.error("Error fetching countries:", err);
             }
         };
 
     fetchData();
-    }, [regionalDirector?.userId, backend]);
+    }, [region.id, backend]);
 
     return (
         <Card 
@@ -98,12 +97,12 @@ export const RegionCard = ({ region, onEdit }) => {
                         display: "none"      
                         }}}
                 >
-                    {programs.length === 0 ? (
-                    <Text>No programs assigned</Text>
+                    {countries.length === 0 ? (
+                    <Text>No countries assigned</Text>
                     ) : (
-                    programs.map((program) => (
-                        <Text key={program.id}>
-                        {program.name}
+                    countries.map((country) => (
+                        <Text key={country.id}>
+                        {country.name}
                         </Text>
                     ))
                     )}
