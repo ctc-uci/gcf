@@ -32,24 +32,9 @@ function LessonVideos({
   const [playlists, setPlaylists] = useState([]);
   const [playlistVideos, setPlaylistVideos] = useState([]);
   const [instruments, setInstruments] = useState({});
-  const [scrollState, setScrollState] = useState({});
   const scrollRefs = useRef({});
 
-  const CARD_WIDTH = 320;
-  const CARD_GAP = 20;
-  const SCROLL_AMOUNT = 3 * (CARD_WIDTH + CARD_GAP);
-
-  const updateScrollState = (instrumentName, el) => {
-    if (!el) return;
-    setScrollState((prev) => ({
-      ...prev,
-      [instrumentName]: {
-        scrollLeft: el.scrollLeft,
-        scrollWidth: el.scrollWidth,
-        clientWidth: el.clientWidth,
-      },
-    }));
-  };
+  const SCROLL_AMOUNT = 3 * (320 + 20); // 3 videos (width + gap)
 
   const handleNext = (instrumentName) => {
     const el = scrollRefs.current[instrumentName];
@@ -59,14 +44,6 @@ function LessonVideos({
   const handlePrev = (instrumentName) => {
     const el = scrollRefs.current[instrumentName];
     if (el) el.scrollBy({ left: -SCROLL_AMOUNT, behavior: 'smooth' });
-  };
-
-  const canScrollLeft = (instrumentName) =>
-    (scrollState[instrumentName]?.scrollLeft ?? 0) > 0;
-  const canScrollRight = (instrumentName) => {
-    const s = scrollState[instrumentName];
-    if (!s) return true;
-    return s.scrollLeft < s.scrollWidth - s.clientWidth - 1;
   };
 
   useEffect(() => {
@@ -174,80 +151,116 @@ function LessonVideos({
               {playlist.instrumentName}
             </Text>
           </HStack>
-          <HStack
-            overflowX="auto"
-            overflowY="hidden"
-            bg="gray.100"
-            w="fit-content"
-            maxW="1040px"
-            borderBottomRadius="xl"
-            borderTopRightRadius="xl"
-            p={5}
-            spacing={5}
-            sx={{ '&::-webkit-scrollbar': { height: '8px' } }}
-          >
-            {playlist.videos.map((video, index) => {
-              const snippet = video.snippet;
-              const thumbnail =
-                snippet?.thumbnails?.maxres?.url ??
-                snippet?.thumbnails?.high?.url ??
-                snippet?.thumbnails?.medium?.url ??
-                snippet?.thumbnails?.default?.url ??
-                `https://img.youtube.com/vi/${snippet.resourceId.videoId}/hqdefault.jpg`;
-              const embedUrl = getYouTubeEmbedUrl(video);
-              if (!embedUrl) return null;
-              return (
-                <Box
-                  key={`${playlist.instrumentName}-${video.snippet?.resourceId?.videoId ?? index}-${index}`}
-                  borderRadius="md"
-                  overflow="hidden"
-                  flexShrink={0}
-                  w="320px"
-                  maxW="320px"
-                  cursor="pointer"
-                  onClick={() => {
-                    setSelectedVideo(video);
-                    setSelectedPlaylist(playlist);
-                  }}
-                >
-                  <Box position="relative" borderRadius="2xl" overflow="hidden">
-                    <AspectRatio ratio={16 / 9} w="100%">
-                      <Image src={thumbnail} />
-                    </AspectRatio>
+          <Box position="relative" w="fit-content">
+            <IconButton
+              position="absolute"
+              left="-70px"
+              top="50%"
+              transform="translateY(-50%)"
+              zIndex={1}
+              icon={<ChevronLeftIcon boxSize={16} />}
+              variant="ghost"
+              size="lg"
+              color="gray.400"
+              onClick={() => handlePrev(playlist.instrumentName)}
+              aria-label="Scroll left"
+            />
+            <Box
+              ref={(el) => {
+                scrollRefs.current[playlist.instrumentName] = el;
+              }}
+              overflowX="auto"
+              overflowY="hidden"
+              bg="gray.100"
+              w="fit-content"
+              maxW="1040px"
+              borderBottomRadius="xl"
+              borderTopRightRadius="xl"
+              p={5}
+              sx={{ '&::-webkit-scrollbar': { height: '8px' } }}
+            >
+              <HStack spacing={5} w="max-content">
+                {playlist.videos.map((video, index) => {
+                  const snippet = video.snippet;
+                  const thumbnail =
+                    snippet?.thumbnails?.maxres?.url ??
+                    snippet?.thumbnails?.high?.url ??
+                    snippet?.thumbnails?.medium?.url ??
+                    snippet?.thumbnails?.default?.url ??
+                    `https://img.youtube.com/vi/${snippet.resourceId.videoId}/hqdefault.jpg`;
+                  const embedUrl = getYouTubeEmbedUrl(video);
+                  if (!embedUrl) return null;
+                  return (
                     <Box
-                      position="absolute"
-                      bottom="0"
-                      left="0"
-                      w="100%"
-                      bg="blackAlpha.700"
-                      p={1.5}
+                      key={`${playlist.instrumentName}-${video.snippet?.resourceId?.videoId ?? index}-${index}`}
+                      borderRadius="md"
+                      overflow="hidden"
+                      flexShrink={0}
+                      w="320px"
+                      maxW="320px"
+                      cursor="pointer"
+                      onClick={() => {
+                        setSelectedVideo(video);
+                        setSelectedPlaylist(playlist);
+                      }}
                     >
-                      <Text
-                        fontSize="xs"
-                        fontWeight="medium"
-                        color="white"
-                        noOfLines={2}
+                      <Box
+                        position="relative"
+                        borderRadius="2xl"
+                        overflow="hidden"
                       >
-                        {snippet.title}
-                      </Text>
+                        <AspectRatio ratio={16 / 9} w="100%">
+                          <Image src={thumbnail} />
+                        </AspectRatio>
+                        <Box
+                          position="absolute"
+                          bottom="0"
+                          left="0"
+                          w="100%"
+                          bg="blackAlpha.700"
+                          p={1.5}
+                        >
+                          <Text
+                            fontSize="xs"
+                            fontWeight="medium"
+                            color="white"
+                            noOfLines={2}
+                          >
+                            {snippet.title}
+                          </Text>
+                        </Box>
+                        <Flex
+                          position="absolute"
+                          top="0"
+                          left="0"
+                          w="100%"
+                          h="100%"
+                          align="center"
+                          justify="center"
+                          bg="blackAlpha.300"
+                        >
+                          <FiPlay fill="white" color="white" size={28} />
+                        </Flex>
+                      </Box>
                     </Box>
-                    <Flex
-                      position="absolute"
-                      top="0"
-                      left="0"
-                      w="100%"
-                      h="100%"
-                      align="center"
-                      justify="center"
-                      bg="blackAlpha.300"
-                    >
-                      <FiPlay fill="white" color="white" size={28} />
-                    </Flex>
-                  </Box>
-                </Box>
-              );
-            })}
-          </HStack>
+                  );
+                })}
+              </HStack>
+            </Box>
+            <IconButton
+              position="absolute"
+              right="-70px"
+              top="50%"
+              transform="translateY(-50%)"
+              zIndex={1}
+              icon={<ChevronRightIcon boxSize={16} />}
+              variant="ghost"
+              size="lg"
+              color="gray.400"
+              onClick={() => handleNext(playlist.instrumentName)}
+              aria-label="Scroll right"
+            />
+          </Box>
         </Box>
       ))}
     </Box>
