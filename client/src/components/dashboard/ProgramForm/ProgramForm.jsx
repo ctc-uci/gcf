@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+
 import {
   Button,
   Drawer,
@@ -25,10 +26,11 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
-import { InstrumentForm } from './InstrumentForm';
-import { ProgramDirectorForm } from './ProgramDirectorForm';
 import { CurriculumLinkForm } from './CurriculumLinkForm';
+import { InstrumentForm } from './InstrumentForm';
+import { LocationForm } from './LocationForm';
 import { MediaUploadForm } from './MediaUploadForm';
+import { ProgramDirectorForm } from './ProgramDirectorForm';
 
 export const ProgramForm = ({
   isOpen: isOpenProp,
@@ -44,8 +46,6 @@ export const ProgramForm = ({
   const onClose = isControlled ? onCloseProp : disclosure.onClose;
   const btnRef = useRef(null);
   const { backend } = useBackendContext();
-  const [regions, setRegions] = useState([]);
-  const [countries, setCountries] = useState([]);
   const { currentUser } = useAuthContext();
 
   const [initialProgramDirectorIds, setInitialProgramDirectorIds] = useState(
@@ -63,6 +63,8 @@ export const ProgramForm = ({
     launchDate: null,
     regionId: null,
     country: null,
+    city: null,
+    state: null,
     students: 0,
     instruments: {},
     language: null,
@@ -82,6 +84,8 @@ export const ProgramForm = ({
           launchDate: null,
           regionId: null,
           country: null,
+          state: null,
+          city: null,
           students: 0,
           instruments: {},
           language: null,
@@ -143,6 +147,8 @@ export const ProgramForm = ({
         programName: program.title ?? '',
         launchDate: program.launchDate ? program.launchDate.split('T')[0] : '',
         regionId: regionId,
+        state: program.state ?? null,
+        city: program.city ?? null,
         country: program.country ?? null,
         students: program.students ?? 0,
         instruments: instrumentMap,
@@ -230,6 +236,8 @@ export const ProgramForm = ({
         status: formState.status,
         launchDate: formState.launchDate,
         country: formState.country,
+        state: formState.state,
+        city: formState.city,
         students: formState.students ?? 0,
         primaryLanguage: formState.language,
         partnerOrg: 1,
@@ -370,38 +378,6 @@ export const ProgramForm = ({
     }
   }
 
-  useEffect(() => {
-    async function getRegions() {
-      try {
-        const response = await backend.get('/region');
-        setRegions(response.data);
-      } catch (error) {
-        console.error('Error fetching regions:', error);
-      }
-    }
-    getRegions();
-  }, [formState.regionId, backend]);
-
-  useEffect(() => {
-    async function getCountriesForRegion() {
-      if (!formState.regionId) {
-        setCountries([]);
-        return;
-      }
-
-      try {
-        const response = await backend.get(
-          `/region/${formState.regionId}/countries`
-        );
-        setCountries(response.data);
-      } catch (error) {
-        console.error('Error fetching countries:', error);
-        setCountries([]);
-      }
-    }
-    getCountriesForRegion();
-  }, [formState.regionId, backend]);
-
   return (
     <Drawer
       isOpen={isOpen}
@@ -413,7 +389,10 @@ export const ProgramForm = ({
       <DrawerOverlay />
       <DrawerContent>
         <HStack marginBottom="1em">
-          <DrawerCloseButton left="4" right="auto" />
+          <DrawerCloseButton
+            left="4"
+            right="auto"
+          />
           <Button
             colorScheme="teal"
             marginLeft="auto"
@@ -430,9 +409,17 @@ export const ProgramForm = ({
         </HStack>
 
         <DrawerBody>
-          <VStack spacing={4} align="stretch" marginLeft="1em">
+          <VStack
+            spacing={4}
+            align="stretch"
+            marginLeft="1em"
+          >
             <DrawerHeader padding="0 0">Program</DrawerHeader>
-            <HStack w="full" spacing={0} mb={4}>
+            <HStack
+              w="full"
+              spacing={0}
+              mb={4}
+            >
               <Button
                 flex={1}
                 variant="ghost"
@@ -496,34 +483,11 @@ export const ProgramForm = ({
                     handleProgramLaunchDateChange(e.target.value)
                   }
                 />
-                <h3>Region</h3>
-                <Select
-                  placeholder="Select region"
-                  value={formState.regionId || ''}
-                  onChange={(e) => handleRegionChange(e.target.value)}
-                >
-                  {regions.map((region) => (
-                    <option key={region.id} value={region.id}>
-                      {region.name}
-                    </option>
-                  ))}
-                </Select>
-                {formState.regionId && (
-                  <>
-                    <h3>Country</h3>
-                    <Select
-                      placeholder="Select Country"
-                      value={formState.country || ''}
-                      onChange={(e) => handleCountryChange(e.target.value)}
-                    >
-                      {countries.map((country) => (
-                        <option key={country.id} value={country.id}>
-                          {country.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </>
-                )}
+                <h3>Location</h3>
+                <LocationForm
+                  formState={formState}
+                  setFormData={setFormState}
+                />
                 <h3>Students</h3>
                 <NumberInput
                   min={0}

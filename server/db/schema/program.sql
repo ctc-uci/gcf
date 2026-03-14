@@ -6,6 +6,8 @@ CREATE TABLE program (
     name VARCHAR(70) NOT NULL,
     date_created TIMESTAMP NOT NULL,
     country INTEGER NOT NULL,
+    state INTEGER,
+    city INTEGER,
     title VARCHAR(140) NOT NULL,
     description VARCHAR,
     primary_language VARCHAR,

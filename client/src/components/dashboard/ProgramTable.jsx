@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   AddIcon,
@@ -32,13 +32,15 @@ import {
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
+
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
 } from 'react-icons/hi2';
-import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import {
@@ -68,7 +70,8 @@ function mapAdminRow(row) {
     launchDate: row.launchDate,
     location: row.countryName ?? '',
     country: row.country,
-
+    city: row.city,
+    state: row.state,
     students: row.students ?? 0,
     instruments: row.instruments ?? 0,
     totalInstruments: row.instruments ?? 0,
@@ -88,7 +91,9 @@ function mapRdRow(row) {
     status: row.programStatus,
     launchDate: row.programLaunchDate,
     location: row.programLocation ?? row.regionName ?? '',
-    countryId: row.countryId,
+    country: row.countryId,
+    city: row.city,
+    state: row.state,
     regionId: row.regionId,
     students: row.totalStudents ?? 0,
     instruments: row.totalInstruments ?? 0,
@@ -97,7 +102,6 @@ function mapRdRow(row) {
     regionalDirectors: row.regionalDirectors,
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
-
     media: row.media,
   };
 }
@@ -136,18 +140,35 @@ function ExpandableRow({ p, onEdit }) {
           <Collapse in={isOpen}>
             <Box position="relative">
               <HStack align="start">
-                <Box flex="1" display="grid">
-                  <Box fontSize="sm" fontWeight="semibold" pb="2">
+                <Box
+                  flex="1"
+                  display="grid"
+                >
+                  <Box
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    pb="2"
+                  >
                     Language:
                   </Box>
                   <Box>{p.primaryLanguage ?? '-'}</Box>
                 </Box>
-                <Box flex="1" display="grid">
-                  <Box fontSize="sm" fontWeight="semibold" pb="2">
+                <Box
+                  flex="1"
+                  display="grid"
+                >
+                  <Box
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    pb="2"
+                  >
                     Regional Director(s)
                   </Box>
                   <Box>
-                    <VStack align="start" spacing={2}>
+                    <VStack
+                      align="start"
+                      spacing={2}
+                    >
                       {Array.isArray(p.regionalDirectors)
                         ? p.regionalDirectors.map((d, idx) => (
                             <Box
@@ -167,12 +188,22 @@ function ExpandableRow({ p, onEdit }) {
                     </VStack>
                   </Box>
                 </Box>
-                <Box flex="1" display="grid">
-                  <Box fontSize="sm" fontWeight="semibold" pb="2">
+                <Box
+                  flex="1"
+                  display="grid"
+                >
+                  <Box
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    pb="2"
+                  >
                     Program Director(s)
                   </Box>
                   <Box>
-                    <VStack align="start" spacing={2}>
+                    <VStack
+                      align="start"
+                      spacing={2}
+                    >
                       {Array.isArray(p.programDirectors)
                         ? p.programDirectors.map((d, idx) => (
                             <Box
@@ -192,8 +223,15 @@ function ExpandableRow({ p, onEdit }) {
                     </VStack>
                   </Box>
                 </Box>
-                <Box flex="1" display="grid">
-                  <Box fontSize="sm" fontWeight="semibold" pb="2">
+                <Box
+                  flex="1"
+                  display="grid"
+                >
+                  <Box
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    pb="2"
+                  >
                     Curriculum Link(s)
                   </Box>
                   <Box>
@@ -362,9 +400,16 @@ function ProgramDisplay({
         }}
       />
       <TableContainer>
-        <HStack mb={4} justifyContent="space-between" w="100%">
+        <HStack
+          mb={4}
+          justifyContent="space-between"
+          w="100%"
+        >
           <HStack spacing={4}>
-            <Box fontSize="xl" fontWeight="semibold">
+            <Box
+              fontSize="xl"
+              fontWeight="semibold"
+            >
               All Programs
             </Box>
             <HStack spacing={1}>
@@ -396,7 +441,10 @@ function ProgramDisplay({
               variant="ghost"
               onClick={() => setIsCardView(false)}
             />
-            <Divider orientation="vertical" h="20px" />
+            <Divider
+              orientation="vertical"
+              h="20px"
+            />
             <IconButton
               aria-label="search"
               icon={<HiOutlineSquares2X2 />}
@@ -413,14 +461,21 @@ function ProgramDisplay({
                   variant="ghost"
                 />
               </PopoverTrigger>
-              <PopoverContent w="800px" maxW="90vw" shadow="xl">
+              <PopoverContent
+                w="800px"
+                maxW="90vw"
+                shadow="xl"
+              >
                 <FilterComponent
                   columns={columns}
                   onFilterChange={(filters) => setActiveFilters(filters)}
                 />
               </PopoverContent>
             </Popover>
-            <Text fontSize="sm" color="gray.500">
+            <Text
+              fontSize="sm"
+              color="gray.500"
+            >
               Displaying {tableData.length} results
             </Text>
             <IconButton
@@ -446,35 +501,71 @@ function ProgramDisplay({
 
         <Box position="relative">
           {!isCardView ? (
-            <Table variant="simple" aria-label="collapsible-table">
+            <Table
+              variant="simple"
+              aria-label="collapsible-table"
+            >
               <Thead>
                 <Tr>
-                  <Th onClick={() => handleSort('title')} cursor="pointer">
+                  <Th
+                    onClick={() => handleSort('title')}
+                    cursor="pointer"
+                  >
                     Program{' '}
-                    <SortArrows columnKey="title" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="title"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
-                  <Th onClick={() => handleSort('status')} cursor="pointer">
+                  <Th
+                    onClick={() => handleSort('status')}
+                    cursor="pointer"
+                  >
                     Status{' '}
-                    <SortArrows columnKey="status" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="status"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
-                  <Th onClick={() => handleSort('launchDate')} cursor="pointer">
+                  <Th
+                    onClick={() => handleSort('launchDate')}
+                    cursor="pointer"
+                  >
                     Launch Date{' '}
-                    <SortArrows columnKey="launchDate" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="launchDate"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
-                  <Th onClick={() => handleSort('location')} cursor="pointer">
+                  <Th
+                    onClick={() => handleSort('location')}
+                    cursor="pointer"
+                  >
                     Location{' '}
-                    <SortArrows columnKey="location" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="location"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
-                  <Th onClick={() => handleSort('students')} cursor="pointer">
+                  <Th
+                    onClick={() => handleSort('students')}
+                    cursor="pointer"
+                  >
                     Students{' '}
-                    <SortArrows columnKey="students" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="students"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                   <Th
                     onClick={() => handleSort('instruments')}
                     cursor="pointer"
                   >
                     Instruments{' '}
-                    <SortArrows columnKey="instruments" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="instruments"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                   <Th
                     onClick={() => handleSort('totalInstruments')}
@@ -499,13 +590,20 @@ function ProgramDisplay({
                   </Tr>
                 ) : (
                   tableData.map((p) => (
-                    <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
+                    <ExpandableRow
+                      key={p.id}
+                      p={p}
+                      onEdit={openEditForm}
+                    />
                   ))
                 )}
               </Tbody>
             </Table>
           ) : (
-            <CardView data={tableData} openEditForm={openEditForm} />
+            <CardView
+              data={tableData}
+              openEditForm={openEditForm}
+            />
           )}
           {isLoading && tableData.length > 0 && (
             <Box

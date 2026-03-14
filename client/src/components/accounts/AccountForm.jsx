@@ -12,12 +12,15 @@ import {
   FormLabel,
   Input,
   Select,
+  useToast,
   VStack,
 } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+
 import { FullscreenFlyoutButton } from '../FullscreenFlyoutButton';
 import { useFullscreenFlyout } from '../useFullScreenFlyout.js';
 
@@ -30,6 +33,9 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const userId = currentUser?.uid;
   const targetUserId = targetUser?.id;
   const [isFullScreen, toggleFullScreen] = useFullscreenFlyout();
+  const auth = getAuth();
+  const toast = useToast();
+
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -176,8 +182,12 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       } else {
         await handleUpdateUser();
       }
-
-      alert('User saved successfully!');
+      toast({
+        title: 'User saved successfully!',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
       onSave();
       onClose();
     } catch (error) {
@@ -189,11 +199,22 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         errorMessage.includes('email-already-exists') ||
         errorMessage.includes('email address is already in use')
       ) {
-        alert(
-          'This email is already registered. Please use a different email address.'
-        );
+        toast({
+          title: 'Email already exists',
+          description:
+            'This email is already registered. Please use a different email address.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
       } else {
-        alert(`Error: ${errorMessage}`);
+        toast({
+          title: 'Error',
+          description: `Error: ${errorMessage}`,
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
       }
     } finally {
       setIsLoading(false);
@@ -205,15 +226,13 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       !formData.first_name ||
       !formData.last_name ||
       !formData.role ||
-      !formData.email ||
-      !formData.password
+      !formData.email
     ) {
       throw new Error('Please fill in all fields on the form.');
     }
 
     const userData = {
       email: formData.email,
-      password: formData.password,
       firstName: formData.first_name,
       lastName: formData.last_name,
       role: formData.role,
@@ -222,14 +241,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       regionId: formData.regions.length > 0 ? formData.regions[0].id : null,
     };
     await backend.post('/gcf-users/admin/create-user', userData);
-    await backend.post('/nodemailer', {
-      email: formData.email,
-      password: formData.password,
-      firstName: formData.first_name,
-      lastName: formData.last_name,
-      role: formData.role,
-      isNewAccount: true,
-    });
+    await sendPasswordResetEmail(auth, formData.email);
   };
 
   const handleUpdateUser = async () => {
@@ -268,9 +280,16 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
 
   return (
     <>
-      <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+      <Drawer
+        isOpen={isOpen}
+        placement="right"
+        onClose={onClose}
+      >
         <DrawerOverlay />
-        <DrawerContent width="20%" maxWidth={isFullScreen ? '100%' : '20%'}>
+        <DrawerContent
+          width="20%"
+          maxWidth={isFullScreen ? '100%' : '20%'}
+        >
           <DrawerCloseButton />
           <FullscreenFlyoutButton
             isFullScreen={isFullScreen}
@@ -316,18 +335,20 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 />
               </FormControl>
 
-              <FormControl isRequired>
-                <FormLabel>Password</FormLabel>
-                <Input
-                  name="password"
-                  type="password"
-                  placeholder={
-                    targetUserId ? 'Leave blank to keep currrent' : 'Password'
-                  }
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </FormControl>
+              {targetUserId && (
+                <FormControl>
+                  <FormLabel>Password</FormLabel>
+                  <Input
+                    name="password"
+                    type="password"
+                    placeholder={
+                      targetUserId ? 'Leave blank to keep currrent' : 'Password'
+                    }
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                </FormControl>
+              )}
 
               <FormControl>
                 <FormLabel>User Type</FormLabel>
@@ -375,7 +396,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     {currentPrograms &&
                       currentPrograms.map((program) => {
                         return (
-                          <option key={program.id} value={program.id}>
+                          <option
+                            key={program.id}
+                            value={program.id}
+                          >
                             {program.name}
                           </option>
                         );
@@ -396,7 +420,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       if (!selectedRegionId) return;
 
                       const selectedRegion = currentRegions.find(
-                        (r) => r.id == selectedRegionId
+                        (r) => r.id === selectedRegionId
                       );
 
                       if (selectedRegion) {
@@ -410,7 +434,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     {currentRegions &&
                       currentRegions.map((region) => {
                         return (
-                          <option key={region.id} value={region.id}>
+                          <option
+                            key={region.id}
+                            value={region.id}
+                          >
                             {region.name}
                           </option>
                         );
