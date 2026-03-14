@@ -1,21 +1,22 @@
-import {
-  Box,
-  HStack,
-  VStack,
-  Text,
-  Button,
-  AspectRatio,
-  Heading,
-  Image,
-  Divider,
-} from '@chakra-ui/react';
+import { useState } from 'react';
+
 import {
   ArrowBackIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
   IconButton,
 } from '@chakra-ui/icons';
-import { useState } from 'react';
+import {
+  AspectRatio,
+  Box,
+  Button,
+  Divider,
+  Heading,
+  HStack,
+  Image,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 
 import { getYouTubeEmbedUrl } from '@/utils/youtube';
 
@@ -29,8 +30,16 @@ function VideoPlayer({
 }) {
   const [isOpen, setIsOpen] = useState(true);
   return (
-    <HStack align="flex-start" spacing={0} w="100%">
-      <VStack flex={1} align="flex-start" mr={8}>
+    <HStack
+      align="flex-start"
+      spacing={0}
+      w="100%"
+    >
+      <VStack
+        flex={1}
+        align="flex-start"
+        mr={8}
+      >
         <Button
           leftIcon={<ArrowBackIcon />}
           size="md"
@@ -43,16 +52,25 @@ function VideoPlayer({
         >
           Back
         </Button>
-        <Box overflow="hidden" w="100%">
+        <Box
+          overflow="hidden"
+          w="100%"
+        >
           <AspectRatio
             ratio={16 / 9}
             w="100%"
             borderRadius="3xl"
             overflow="hidden"
           >
-            <iframe src={getYouTubeEmbedUrl(selectedVideo)} allowFullScreen />
+            <iframe
+              src={getYouTubeEmbedUrl(selectedVideo)}
+              allowFullScreen
+            />
           </AspectRatio>
-          <Heading size="md" pt={5}>
+          <Heading
+            size="md"
+            pt={5}
+          >
             {selectedVideo.snippet.title}
           </Heading>
         </Box>
@@ -85,9 +103,16 @@ function VideoPlayer({
             size="md"
             onClick={() => setIsOpen(false)}
           />
-          <VStack overflowY="auto" w="100%" spacing={3}>
+          <VStack
+            overflowY="auto"
+            w="100%"
+            spacing={3}
+          >
             <Heading size="md">{playlistName}</Heading>
-            <Divider my={3} borderColor="gray.600" />
+            <Divider
+              my={3}
+              borderColor="gray.600"
+            />
             {playlist.map((video) => {
               const snippet = video.snippet;
               const thumbnail =
@@ -108,11 +133,18 @@ function VideoPlayer({
                   overflow="hidden"
                   onClick={() => setSelectedVideo(video)}
                 >
-                  <AspectRatio ratio={16 / 9} borderRadius="2xl">
+                  <AspectRatio
+                    ratio={16 / 9}
+                    borderRadius="2xl"
+                  >
                     <Image src={thumbnail} />
                   </AspectRatio>
                   <Box p={3}>
-                    <Text fontSize="sm" fontWeight="medium" noOfLines={2}>
+                    <Text
+                      fontSize="sm"
+                      fontWeight="medium"
+                      noOfLines={2}
+                    >
                       {snippet.title}
                     </Text>
                   </Box>

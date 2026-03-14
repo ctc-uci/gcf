@@ -29,12 +29,26 @@ export function MediaUploadModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} isCentered size="xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      isCentered
+      size="xl"
+    >
       <ModalOverlay />
-      <ModalContent borderRadius="md" maxW="60vw" pb={6}>
+      <ModalContent
+        borderRadius="md"
+        maxW="60vw"
+        pb={6}
+      >
         {selectedFiles && selectedFiles.length > 0 && (
           <IconButton
-            icon={<ChevronLeftIcon w={6} h={6} />}
+            icon={
+              <ChevronLeftIcon
+                w={6}
+                h={6}
+              />
+            }
             variant="ghost"
             position="absolute"
             left="15px"
@@ -43,7 +57,10 @@ export function MediaUploadModal({
             aria-label="Back"
           />
         )}
-        <ModalCloseButton top="15px" right="15px" />
+        <ModalCloseButton
+          top="15px"
+          right="15px"
+        />
 
         <ModalHeader
           textAlign="center"
@@ -55,7 +72,10 @@ export function MediaUploadModal({
         </ModalHeader>
 
         <ModalBody>
-          <Box display="flex" gap={6}>
+          <Box
+            display="flex"
+            gap={6}
+          >
             <Box flex={1}>
               <MediaUpload
                 onFileSelect={(files) =>
@@ -67,7 +87,11 @@ export function MediaUploadModal({
               />
             </Box>
             {selectedFiles?.length > 0 && (
-              <Box w="50%" overflowY="auto" maxH="500px">
+              <Box
+                w="50%"
+                overflowY="auto"
+                maxH="500px"
+              >
                 <MediaPreviewList
                   files={selectedFiles}
                   onComplete={(uploadedFiles, description) => {

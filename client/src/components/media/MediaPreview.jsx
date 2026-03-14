@@ -1,16 +1,16 @@
+import { useMemo } from 'react';
+
 import {
+  Box,
+  Center,
+  Flex,
   FormControl,
+  Image,
   Input,
   VStack,
-  Flex,
-  Center,
-  Image,
-  Box,
 } from '@chakra-ui/react';
 
 import gcf_globe from '/gcf_globe.png';
-
-import { useMemo } from 'react';
 
 export function MediaPreview({ file, title, onTitleChange }) {
   const previewUrl = useMemo(() => {
@@ -18,7 +18,10 @@ export function MediaPreview({ file, title, onTitleChange }) {
   }, [file]);
 
   return (
-    <VStack align="stretch" mb={2}>
+    <VStack
+      align="stretch"
+      mb={2}
+    >
       <Flex>
         <Box h={'2rem'}>
           {file.type.startsWith('video') ? (
@@ -35,7 +38,11 @@ export function MediaPreview({ file, title, onTitleChange }) {
               objectFit="contain"
               fallback={
                 <Center h="100%">
-                  <Image src={gcf_globe} alt="Loading..." w="40px" />
+                  <Image
+                    src={gcf_globe}
+                    alt="Loading..."
+                    w="40px"
+                  />
                 </Center>
               }
             />

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+
 import { Button, HStack, Select } from '@chakra-ui/react';
+
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
 export function ProgramDirectorForm({ formState, setFormData }) {
@@ -61,7 +63,10 @@ export function ProgramDirectorForm({ formState, setFormData }) {
         onChange={(e) => setSelectedDirector(e.target.value)}
       >
         {programDirectors.map((director) => (
-          <option value={director.userId} key={director.userId}>
+          <option
+            value={director.userId}
+            key={director.userId}
+          >
             {director.firstName} {director.lastName}
           </option>
         ))}
