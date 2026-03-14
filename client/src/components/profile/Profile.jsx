@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   Box,
@@ -6,16 +6,17 @@ import {
   Image,
   Spinner,
   Text,
+  useDisclosure,
   VStack,
-  useDisclosure
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
-import { MediaUploadModal } from "../media/MediaUploadModal";
-const DEFAULT_PROFILE_IMAGE = "/default-profile.png";
+import { MediaUploadModal } from '../media/MediaUploadModal';
+
+const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
 
 const fetchProgramData = async (backend, userId) => {
   try {
@@ -65,28 +66,28 @@ export const Profile = () => {
     try {
       const userResponse = await backend.get(`/gcf-users/${currentUser.uid}`);
       const userData = userResponse.data;
-      if (userData.picture && userData.picture.trim() !== "") {
+      if (userData.picture && userData.picture.trim() !== '') {
         try {
           const urlResponse = await backend.get(
             `/images/url/${encodeURIComponent(userData.picture)}`
           );
           userData.picture = urlResponse.data.url;
         } catch (urlErr) {
-          console.error("Error fetching profile image:", urlErr);
-          userData.picture = null; 
+          console.error('Error fetching profile image:', urlErr);
+          userData.picture = null;
         }
       }
 
       setGcfUser(userData);
-      if (role === "Program Director") {
+      if (role === 'Program Director') {
         const programData = await fetchProgramData(backend, userData.id);
         setRoleSpecificData(programData);
-      } else if (role === "Regional Director") {
+      } else if (role === 'Regional Director') {
         const regionData = await fetchRegionData(backend, userData.id);
         setRoleSpecificData(regionData);
       }
     } catch (err) {
-      console.error("Error fetching user data:", err);
+      console.error('Error fetching user data:', err);
     } finally {
       setLoading(false);
     }
@@ -100,60 +101,76 @@ export const Profile = () => {
     if (!uploadedFiles?.length) return;
 
     const key = uploadedFiles[0].s3_key;
-    console.log("Uploading S3 Key:", key);
-    
+    console.log('Uploading S3 Key:', key);
+
     try {
       const urlResponse = await backend.get(
         `/images/url/${encodeURIComponent(key)}`
       );
-      await backend.post("/images/profile-picture", { 
-        key: key, 
-        userId: currentUser.uid 
+      await backend.post('/images/profile-picture', {
+        key: key,
+        userId: currentUser.uid,
       });
-      
-      setGcfUser((prev) => ({ 
-        ...prev, 
-        picture: urlResponse.data.url 
+
+      setGcfUser((prev) => ({
+        ...prev,
+        picture: urlResponse.data.url,
       }));
     } catch (err) {
-      console.error("Error saving profile picture:", err);
+      console.error('Error saving profile picture:', err);
     }
-};
+  };
 
   if (loading) {
     return (
-      <Box h="100vh" display="flex" alignItems="center" justifyContent="center">
+      <Box
+        h="100vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
         <Spinner size="xl" />
       </Box>
     );
   }
 
-    
   const profilePicture =
-  gcfUser.picture && gcfUser.picture.trim() !== ""
-    ? 
-      gcfUser.picture
-    : DEFAULT_PROFILE_IMAGE;
+    gcfUser.picture && gcfUser.picture.trim() !== ''
+      ? gcfUser.picture
+      : DEFAULT_PROFILE_IMAGE;
 
   const fullName =
-    `${gcfUser.firstName || ""} ${gcfUser.lastName || ""}`.trim() || "User";
-  const email = currentUser?.email || "";
+    `${gcfUser.firstName || ''} ${gcfUser.lastName || ''}`.trim() || 'User';
+  const email = currentUser?.email || '';
 
   const profileData = [
-    { label: "Email", value: email },
-    { label: "Role", value: role || "" },
+    { label: 'Email', value: email },
+    { label: 'Role', value: role || '' },
   ];
 
-  if (role === "Program Director" && roleSpecificData?.name) {
-    profileData.push({ label: "Program", value: roleSpecificData.name });
-  } else if (role === "Regional Director" && roleSpecificData?.name) {
-    profileData.push({ label: "Region", value: roleSpecificData.name });
+  if (role === 'Program Director' && roleSpecificData?.name) {
+    profileData.push({ label: 'Program', value: roleSpecificData.name });
+  } else if (role === 'Regional Director' && roleSpecificData?.name) {
+    profileData.push({ label: 'Region', value: roleSpecificData.name });
   }
 
   return (
-    <Box h="100vh" display="flex" alignItems="center" justifyContent="center">
-      <VStack spacing={8} align="center" p={4} w="100%">
-        <VStack spacing={4} align="center">
+    <Box
+      h="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <VStack
+        spacing={8}
+        align="center"
+        p={4}
+        w="100%"
+      >
+        <VStack
+          spacing={4}
+          align="center"
+        >
           <Image
             src={profilePicture}
             boxSize="300px"
@@ -162,14 +179,29 @@ export const Profile = () => {
             alt="Profile"
             onClick={onOpen}
           />
-          <Text fontSize="2xl" fontWeight="bold">
+          <Text
+            fontSize="2xl"
+            fontWeight="bold"
+          >
             {fullName}
           </Text>
         </VStack>
-        <VStack spacing="10px" align="flex-start" w="100%" maxW="624px">
+        <VStack
+          spacing="10px"
+          align="flex-start"
+          w="100%"
+          maxW="624px"
+        >
           {profileData.map(({ label, value }) => (
-            <HStack key={label} spacing={40}>
-              <Text w="80px" fontSize="lg" fontWeight="medium">
+            <HStack
+              key={label}
+              spacing={40}
+            >
+              <Text
+                w="80px"
+                fontSize="lg"
+                fontWeight="medium"
+              >
                 {label}
               </Text>
               <Text

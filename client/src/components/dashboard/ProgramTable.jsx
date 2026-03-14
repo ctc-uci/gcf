@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   AddIcon,
@@ -34,23 +34,27 @@ import {
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
+
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
 } from 'react-icons/hi2';
-import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+
+import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
 } from '../../utils/downloadCsv';
+import { EmptyStateBadge } from '../badges/EmptyStateBadge';
+import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
 import CardView from './CardView';
 import { ProgramForm } from './ProgramForm/index';
-import { EmptyStateBadge } from '../badges/EmptyStateBadge';
 
 const getRouteByRole = (role, userId) => {
   const routes = {
@@ -69,7 +73,8 @@ function mapAdminRow(row) {
     launchDate: row.launchDate,
     location: row.countryName ?? '',
     country: row.country,
-
+    city: row.city,
+    state: row.state,
     students: row.students ?? 0,
     instruments: row.instrumentTypes ?? [],
     totalInstruments: row.instruments ?? 0,
@@ -89,7 +94,9 @@ function mapRdRow(row) {
     status: row.programStatus,
     launchDate: row.programLaunchDate,
     location: row.programLocation ?? row.regionName ?? '',
-    countryId: row.countryId,
+    country: row.countryId,
+    city: row.city,
+    state: row.state,
     regionId: row.regionId,
     students: row.totalStudents ?? 0,
     instruments: row.instrumentTypes ?? [],
@@ -98,7 +105,6 @@ function mapRdRow(row) {
     regionalDirectors: row.regionalDirectors,
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
-
     media: row.media,
   };
 }
@@ -194,7 +200,10 @@ function ExpandableRow({ p, onEdit }) {
         <Td>{p.students}</Td>
         <Td>
           {Array.isArray(p.instruments) || Array.isArray(p.instrumentTypes) ? (
-            <HStack spacing={2} flexWrap="wrap">
+            <HStack
+              spacing={2}
+              flexWrap="wrap"
+            >
               {(Array.isArray(p.instruments)
                 ? p.instruments
                 : p.instrumentTypes
@@ -233,18 +242,35 @@ function ExpandableRow({ p, onEdit }) {
           <Collapse in={isOpen}>
             <Box position="relative">
               <HStack align="start">
-                <Box flex="1" display="grid">
-                  <Box fontSize="sm" fontWeight="semibold" pb="2">
+                <Box
+                  flex="1"
+                  display="grid"
+                >
+                  <Box
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    pb="2"
+                  >
                     Language:
                   </Box>
                   <Box>{p.primaryLanguage ?? '-'}</Box>
                 </Box>
-                <Box flex="1" display="grid">
-                  <Box fontSize="sm" fontWeight="semibold" pb="2">
+                <Box
+                  flex="1"
+                  display="grid"
+                >
+                  <Box
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    pb="2"
+                  >
                     Regional Director(s)
                   </Box>
                   <Box>
-                    <VStack align="start" spacing={2}>
+                    <VStack
+                      align="start"
+                      spacing={2}
+                    >
                       {Array.isArray(p.regionalDirectors)
                         ? p.regionalDirectors.map((d, idx) => (
                             <Box
@@ -264,12 +290,22 @@ function ExpandableRow({ p, onEdit }) {
                     </VStack>
                   </Box>
                 </Box>
-                <Box flex="1" display="grid">
-                  <Box fontSize="sm" fontWeight="semibold" pb="2">
+                <Box
+                  flex="1"
+                  display="grid"
+                >
+                  <Box
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    pb="2"
+                  >
                     Program Director(s)
                   </Box>
                   <Box>
-                    <VStack align="start" spacing={2}>
+                    <VStack
+                      align="start"
+                      spacing={2}
+                    >
                       {Array.isArray(p.programDirectors)
                         ? p.programDirectors.map((d, idx) => (
                             <Box
@@ -289,8 +325,15 @@ function ExpandableRow({ p, onEdit }) {
                     </VStack>
                   </Box>
                 </Box>
-                <Box flex="1" display="grid">
-                  <Box fontSize="sm" fontWeight="semibold" pb="2">
+                <Box
+                  flex="1"
+                  display="grid"
+                >
+                  <Box
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    pb="2"
+                  >
                     Curriculum Link(s)
                   </Box>
                   <Box>
@@ -410,6 +453,17 @@ function ProgramDisplay({
     downloadCsv(headers, rows, `programs-${getFilenameTimestamp()}.csv`);
   };
 
+  const columns = [
+    { key: 'title', type: 'text' },
+    { key: 'status', type: 'select', options: ['Active', 'Inactive'] },
+    { key: 'launchDate', type: 'date' },
+    { key: 'location', type: 'text' },
+    { key: 'students', type: 'number' },
+    { key: 'instruments', type: 'number' },
+    { key: 'totalInstruments', type: 'number' },
+  ];
+  const [activeFilters, setActiveFilters] = useState([]);
+
   const [filterStatus, setFilterStatus] = useState('');
   const [filterLocation, setFilterLocation] = useState('');
   const [filterInstruments, setFilterInstruments] = useState('');
@@ -489,9 +543,16 @@ function ProgramDisplay({
         }}
       />
       <TableContainer w="80vw">
-        <HStack mb={4} justifyContent="space-between" w="100%">
+        <HStack
+          mb={4}
+          justifyContent="space-between"
+          w="100%"
+        >
           <HStack spacing={3}>
-            <Box fontSize="3xl" fontWeight="semibold">
+            <Box
+              fontSize="3xl"
+              fontWeight="semibold"
+            >
               Programs
             </Box>
             <IconButton
@@ -535,14 +596,29 @@ function ProgramDisplay({
                   </Text>
                 </HStack>
               </PopoverTrigger>
-              <PopoverContent w="400px" maxW="90vw" shadow="xl">
+              <PopoverContent
+                w="400px"
+                maxW="90vw"
+                shadow="xl"
+              >
                 <Box p={4}>
-                  <Text fontWeight="bold" fontSize="lg" mb={4}>
+                  <Text
+                    fontWeight="bold"
+                    fontSize="lg"
+                    mb={4}
+                  >
                     Filters
                   </Text>
-                  <VStack align="stretch" spacing={4}>
+                  <VStack
+                    align="stretch"
+                    spacing={4}
+                  >
                     <Box>
-                      <Text fontSize="sm" fontWeight="semibold" mb={2}>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        mb={2}
+                      >
                         Program Status
                       </Text>
                       <HStack spacing={2}>
@@ -601,12 +677,19 @@ function ProgramDisplay({
                       </HStack>
                     </Box>
                     <Box>
-                      <Text fontSize="sm" fontWeight="semibold" mb={2}>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        mb={2}
+                      >
                         Location
                       </Text>
                       <InputGroup size="sm">
                         <InputLeftElement pointerEvents="none">
-                          <Search2Icon color="gray.400" boxSize={4} />
+                          <Search2Icon
+                            color="gray.400"
+                            boxSize={4}
+                          />
                         </InputLeftElement>
                         <Input
                           pl={8}
@@ -617,12 +700,19 @@ function ProgramDisplay({
                       </InputGroup>
                     </Box>
                     <Box>
-                      <Text fontSize="sm" fontWeight="semibold" mb={2}>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        mb={2}
+                      >
                         Instruments
                       </Text>
                       <InputGroup size="sm">
                         <InputLeftElement pointerEvents="none">
-                          <Search2Icon color="gray.400" boxSize={4} />
+                          <Search2Icon
+                            color="gray.400"
+                            boxSize={4}
+                          />
                         </InputLeftElement>
                         <Input
                           pl={8}
@@ -644,7 +734,11 @@ function ProgramDisplay({
               variant="ghost"
               onClick={() => setIsCardView(false)}
             />
-            <Divider orientation="vertical" h="20px" borderWidth="1px" />
+            <Divider
+              orientation="vertical"
+              h="20px"
+              borderWidth="1px"
+            />
             <IconButton
               aria-label="card view"
               icon={<HiOutlineSquares2X2 />}
@@ -653,6 +747,40 @@ function ProgramDisplay({
               onClick={() => setIsCardView(true)}
             />
 
+            <Popover>
+              <PopoverTrigger>
+                <IconButton
+                  aria-label="filter"
+                  icon={<HiOutlineAdjustmentsHorizontal />}
+                  size="sm"
+                  variant="ghost"
+                />
+              </PopoverTrigger>
+              <PopoverContent
+                w="800px"
+                maxW="90vw"
+                shadow="xl"
+              >
+                <FilterComponent
+                  columns={columns}
+                  onFilterChange={(filters) => setActiveFilters(filters)}
+                />
+              </PopoverContent>
+            </Popover>
+            <Text
+              fontSize="sm"
+              color="gray.500"
+            >
+              Displaying {tableData.length} results
+            </Text>
+            <IconButton
+              aria-label="download"
+              icon={<DownloadIcon />}
+              size="sm"
+              variant="ghost"
+              ml={2}
+              onClick={downloadDataAsCsv}
+            />
             <Button
               size="sm"
               leftIcon={<AddIcon />}
@@ -698,13 +826,25 @@ function ProgramDisplay({
                       },
                     }}
                   >
-                    <Th onClick={() => handleSort('title')} cursor="pointer">
+                    <Th
+                      onClick={() => handleSort('title')}
+                      cursor="pointer"
+                    >
                       Program{' '}
-                      <SortArrows columnKey="title" sortOrder={sortOrder} />
+                      <SortArrows
+                        columnKey="title"
+                        sortOrder={sortOrder}
+                      />
                     </Th>
-                    <Th onClick={() => handleSort('status')} cursor="pointer">
+                    <Th
+                      onClick={() => handleSort('status')}
+                      cursor="pointer"
+                    >
                       Status{' '}
-                      <SortArrows columnKey="status" sortOrder={sortOrder} />
+                      <SortArrows
+                        columnKey="status"
+                        sortOrder={sortOrder}
+                      />
                     </Th>
                     <Th
                       onClick={() => handleSort('launchDate')}
@@ -716,13 +856,25 @@ function ProgramDisplay({
                         sortOrder={sortOrder}
                       />
                     </Th>
-                    <Th onClick={() => handleSort('location')} cursor="pointer">
+                    <Th
+                      onClick={() => handleSort('location')}
+                      cursor="pointer"
+                    >
                       Location{' '}
-                      <SortArrows columnKey="location" sortOrder={sortOrder} />
+                      <SortArrows
+                        columnKey="location"
+                        sortOrder={sortOrder}
+                      />
                     </Th>
-                    <Th onClick={() => handleSort('students')} cursor="pointer">
+                    <Th
+                      onClick={() => handleSort('students')}
+                      cursor="pointer"
+                    >
                       Students{' '}
-                      <SortArrows columnKey="students" sortOrder={sortOrder} />
+                      <SortArrows
+                        columnKey="students"
+                        sortOrder={sortOrder}
+                      />
                     </Th>
                     <Th
                       onClick={() => handleSort('instruments')}
@@ -761,7 +913,11 @@ function ProgramDisplay({
                     </Tr>
                   ) : (
                     tableData.map((p) => (
-                      <ExpandableRow key={p.id} p={p} onEdit={openEditForm} />
+                      <ExpandableRow
+                        key={p.id}
+                        p={p}
+                        onEdit={openEditForm}
+                      />
                     ))
                   )}
                 </Tbody>
@@ -770,7 +926,10 @@ function ProgramDisplay({
           ) : tableData.length === 0 && !isLoading ? (
             <EmptyStateBadge variant="no-programs" />
           ) : (
-            <CardView data={tableData} openEditForm={openEditForm} />
+            <CardView
+              data={tableData}
+              openEditForm={openEditForm}
+            />
           )}
           {isLoading && tableData.length > 0 && (
             <Box

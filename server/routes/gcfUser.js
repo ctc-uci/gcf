@@ -1,6 +1,6 @@
 import { keysToCamel } from '@/common/utils';
 import express from 'express';
-
+import { randomBytes } from 'crypto';
 import { admin } from '../config/firebase';
 import { db } from '../db/db-pgp';
 
@@ -40,7 +40,6 @@ gcfUserRouter.post('/admin/create-user', async (req, res) => {
   try {
     const {
       email,
-      password,
       firstName,
       lastName,
       role,
@@ -49,9 +48,11 @@ gcfUserRouter.post('/admin/create-user', async (req, res) => {
       regionId,
     } = req.body;
 
+    const tempPassword = randomBytes(16).toString('hex');
+
     const userRecord = await admin.auth().createUser({
       email: email,
-      password: password,
+      password: tempPassword,
       displayName: `${firstName} ${lastName}`,
     });
 
@@ -391,6 +392,16 @@ gcfUserRouter.delete('/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');
+  }
+});
+
+gcfUserRouter.post('/verify-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    await admin.auth().getUserByEmail(email);
+    res.status(200).send();
+  } catch (err) {
+    res.status(400).send(err.message);
   }
 });
 

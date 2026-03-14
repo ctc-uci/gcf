@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { Box, Flex } from '@chakra-ui/react';
 
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
@@ -10,12 +11,26 @@ import StatisticsSummary from './StatisticsSummary';
 const Dashboard = () => {
   const { role } = useRoleContext();
   const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [selectedVideo, setSelectedVideo] = useState(null);
 
   return (
-    <Flex direction="column" minH="100vh" gap={6} as="main" p={10} maxW="70vw">
-      <StatisticsSummary refreshTrigger={statsRefreshTrigger} />
+    <Flex
+      direction="column"
+      minH="100vh"
+      gap={6}
+      as="main"
+      p={10}
+      w
+    >
+      {!selectedPlaylist && (
+        <StatisticsSummary refreshTrigger={statsRefreshTrigger} />
+      )}
 
-      <Box as="section" w="fit-content">
+      <Box
+        as="section"
+        w="fit-content"
+      >
         {(role === 'Super Admin' ||
           role === 'Admin' ||
           role === 'Regional Director') && (
@@ -23,7 +38,14 @@ const Dashboard = () => {
             onStatsRefresh={() => setStatsRefreshTrigger((t) => t + 1)}
           />
         )}
-        {role === 'Program Director' && <LessonVideos />}
+        {role === 'Program Director' && (
+          <LessonVideos
+            selectedPlaylist={selectedPlaylist}
+            setSelectedPlaylist={setSelectedPlaylist}
+            selectedVideo={selectedVideo}
+            setSelectedVideo={setSelectedVideo}
+          />
+        )}
       </Box>
     </Flex>
   );

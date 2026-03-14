@@ -12,6 +12,11 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import {
+  downloadCsv,
+  escapeCsvValue,
+  getFilenameTimestamp,
+} from '@/utils/downloadCsv';
 import { MdOutlineFileDownload } from 'react-icons/md';
 
 const StatBox = ({ label, number }) => {
@@ -27,10 +32,17 @@ const StatBox = ({ label, number }) => {
       display="flex"
       flexDirection="column"
     >
-      <Box fontSize="xl" mb={4} color="whiteAlpha.900">
+      <Box
+        fontSize="xl"
+        mb={4}
+        color="whiteAlpha.900"
+      >
         {label}
       </Box>
-      <Box fontSize="4xl" fontWeight="semibold">
+      <Box
+        fontSize="4xl"
+        fontWeight="semibold"
+      >
         {number}
       </Box>
     </Box>
@@ -101,6 +113,17 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
   const [stats, setStats] = useState(initialStats);
   const [isLoading, setIsLoading] = useState(true);
 
+  const downloadDataAsCsv = () => {
+    const headers = stats.map((stat) => stat.label);
+    const rows = [stats.map((stat) => escapeCsvValue(stat.number))];
+
+    downloadCsv(
+      headers,
+      rows,
+      `statistics-summary-${getFilenameTimestamp()}.csv`
+    );
+  };
+
   useEffect(() => {
     if (roleLoading) return;
 
@@ -132,19 +155,31 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
 
   return (
     <Box as="section">
-      <VStack spacing={6} align="left">
+      <VStack
+        spacing={6}
+        align="left"
+      >
         <HStack>
           <Heading size="md">Statistics Summary</Heading>
           <IconButton
             aria-label="download"
             icon={<MdOutlineFileDownload />}
+            onClick={downloadDataAsCsv}
             size="sm"
             variant="ghost"
           />
         </HStack>
 
-        <Box position="relative" w="full">
-          <HStack spacing={6} minH="120px" w="full" align="stretch">
+        <Box
+          position="relative"
+          w="full"
+        >
+          <HStack
+            spacing={6}
+            minH="120px"
+            w="full"
+            align="stretch"
+          >
             {stats.map((stat) => (
               <StatBox
                 key={stat.label}
