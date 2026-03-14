@@ -4,10 +4,10 @@ import { useRoleContext } from "@/contexts/hooks/useRoleContext";
 import { FaGuitar } from "react-icons/fa";
 import { HiOutlineUser } from "react-icons/hi";
 import { MdOutlineNotifications, MdPermMedia } from "react-icons/md";
-import { FaGear } from "react-icons/fa6";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 
 import { NAVBAR_HEIGHT, SIDEBAR_WIDTH } from "./layoutConstants";
+import { BsFillGearFill } from "react-icons/bs";
 
 export const Sidebar = () => {
   const { role } = useRoleContext();
@@ -91,7 +91,7 @@ export const Sidebar = () => {
     navItems.push({
       name: "Regions",
       icon: (<Icon
-        as={FaGear}
+        as={BsFillGearFill}
         boxSize="20px"
       />),
       path: "/regions",

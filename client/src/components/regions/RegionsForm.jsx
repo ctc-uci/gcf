@@ -5,6 +5,9 @@ import {
   GetCountries
 } from "react-country-state-city";
 
+import { BsArrowsAngleContract } from "react-icons/bs";
+import { BsArrowsAngleExpand } from "react-icons/bs";
+
 import {
     VStack,
     Drawer,
@@ -215,7 +218,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                         size="sm"
                         onClick={() => setDrawerSize(drawerSize === "md" ? "full" : "md")}
                     >
-                        {drawerSize === "md" ? "⤢" : "⤡"}
+                        {drawerSize === "md" ? <BsArrowsAngleExpand /> : <BsArrowsAngleContract />}
                     </Button>
                     {region ? "Edit Region" : "New Region"}
                 </DrawerHeader>
