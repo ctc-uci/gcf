@@ -12,16 +12,17 @@ import {
   FormLabel,
   Input,
   Select,
-  VStack,
   useToast,
+  VStack,
 } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+
 import { FullscreenFlyoutButton } from '../FullscreenFlyoutButton';
 import { useFullscreenFlyout } from '../useFullScreenFlyout.js';
-import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 
 export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const { currentUser } = useAuthContext();
@@ -279,9 +280,16 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
 
   return (
     <>
-      <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+      <Drawer
+        isOpen={isOpen}
+        placement="right"
+        onClose={onClose}
+      >
         <DrawerOverlay />
-        <DrawerContent width="20%" maxWidth={isFullScreen ? '100%' : '20%'}>
+        <DrawerContent
+          width="20%"
+          maxWidth={isFullScreen ? '100%' : '20%'}
+        >
           <DrawerCloseButton />
           <FullscreenFlyoutButton
             isFullScreen={isFullScreen}
@@ -388,7 +396,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     {currentPrograms &&
                       currentPrograms.map((program) => {
                         return (
-                          <option key={program.id} value={program.id}>
+                          <option
+                            key={program.id}
+                            value={program.id}
+                          >
                             {program.name}
                           </option>
                         );
@@ -423,7 +434,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     {currentRegions &&
                       currentRegions.map((region) => {
                         return (
-                          <option key={region.id} value={region.id}>
+                          <option
+                            key={region.id}
+                            value={region.id}
+                          >
                             {region.name}
                           </option>
                         );

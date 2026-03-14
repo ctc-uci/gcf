@@ -1,19 +1,16 @@
-import { useState } from "react";
-import { Button, HStack, Input } from "@chakra-ui/react";
+import { useState } from 'react';
+import { Button, HStack, Input } from '@chakra-ui/react';
 
 export function CurriculumLinkForm({ formState, setFormData }) {
-  const [link, setLink] = useState("");
-  const [display, setDisplay] = useState("");
+  const [link, setLink] = useState('');
+  const [display, setDisplay] = useState('');
 
   function handleSubmit() {
     if (!link?.trim()) return;
 
     let validLink = link.trim();
-    if (
-      !validLink.startsWith("http://") &&
-      !validLink.startsWith("https://")
-    ) {
-      validLink = "https://" + validLink;
+    if (!validLink.startsWith('http://') && !validLink.startsWith('https://')) {
+      validLink = 'https://' + validLink;
     }
 
     const alreadyAdded = (formState.curriculumLinks ?? []).some(
@@ -27,13 +24,13 @@ export function CurriculumLinkForm({ formState, setFormData }) {
         ...(prevData.curriculumLinks ?? []),
         {
           link: validLink,
-          name: (display || "Playlist").trim() || "Playlist",
+          name: (display || 'Playlist').trim() || 'Playlist',
         },
       ],
     }));
 
-    setLink("");
-    setDisplay("");
+    setLink('');
+    setDisplay('');
   }
 
   return (
@@ -46,12 +43,12 @@ export function CurriculumLinkForm({ formState, setFormData }) {
     >
       <Input
         placeholder="Link"
-        value={link || ""}
+        value={link || ''}
         onChange={(e) => setLink(e.target.value)}
       />
       <Input
         placeholder="Display Name"
-        value={display || ""}
+        value={display || ''}
         onChange={(e) => setDisplay(e.target.value)}
       />
       <Button onClick={handleSubmit}>+ Add</Button>

@@ -1,14 +1,9 @@
 import { useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { confirmPasswordReset, getAuth } from 'firebase/auth';
-import { MdOutlineSubdirectoryArrowRight } from 'react-icons/md';
 
 import {
   Box,
   Button,
+  Link as ChakraLink,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -16,8 +11,14 @@ import {
   Input,
   Stack,
   useToast,
-  Link as ChakraLink,
 } from '@chakra-ui/react';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { confirmPasswordReset, getAuth } from 'firebase/auth';
+import { useForm } from 'react-hook-form';
+import { MdOutlineSubdirectoryArrowRight } from 'react-icons/md';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { z } from 'zod';
 
 const createPasswordSchema = z
   .object({
@@ -90,8 +91,17 @@ export const CreatePassword = () => {
   };
 
   return (
-    <Box w="450px" bg="white" padding="40px" borderRadius="12px" boxShadow="xl">
-      <Heading fontSize="3xl" mb={6}>
+    <Box
+      w="450px"
+      bg="white"
+      padding="40px"
+      borderRadius="12px"
+      boxShadow="xl"
+    >
+      <Heading
+        fontSize="3xl"
+        mb={6}
+      >
         Create Password
       </Heading>
 
@@ -144,7 +154,10 @@ export const CreatePassword = () => {
             Submit
           </Button>
 
-          <Box textAlign="right" mt={2}>
+          <Box
+            textAlign="right"
+            mt={2}
+          >
             <ChakraLink
               color="blue.600"
               textDecoration="underline"

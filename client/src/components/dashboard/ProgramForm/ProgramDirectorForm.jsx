@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
-import { Button, HStack, Select } from "@chakra-ui/react";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useEffect, useState } from 'react';
+import { Button, HStack, Select } from '@chakra-ui/react';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
 export function ProgramDirectorForm({ formState, setFormData }) {
   const [programDirectors, setProgramDirectors] = useState([]);
-  const [selectedDirector, setSelectedDirector] = useState("");
+  const [selectedDirector, setSelectedDirector] = useState('');
   const { backend } = useBackendContext();
 
   useEffect(() => {
     async function fetchProgramDirectors() {
       const response = await backend.get(
-        "/program-directors/program-director-names"
+        '/program-directors/program-director-names'
       );
       const directors = response.data;
 
@@ -30,7 +30,7 @@ export function ProgramDirectorForm({ formState, setFormData }) {
       (d) => d.userId === selectedDirector
     );
     if (alreadyAdded) {
-      alert("This director has already been added!");
+      alert('This director has already been added!');
       return;
     }
 
@@ -44,7 +44,7 @@ export function ProgramDirectorForm({ formState, setFormData }) {
       programDirectors: [...prevData.programDirectors, directorObj],
     }));
 
-    setSelectedDirector("");
+    setSelectedDirector('');
   }
 
   return (

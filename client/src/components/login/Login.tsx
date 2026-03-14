@@ -22,19 +22,17 @@ import {
   useToast,
 } from '@chakra-ui/react';
 
-import { ForgotPassword } from './ForgotPassword';
-import { CreatePassword } from './CreatePassword';
-
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { authenticateGoogleUser } from '@/utils/auth/providers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { FaGoogle, FaArrowLeft } from 'react-icons/fa6';
+import { FaArrowLeft, FaGoogle } from 'react-icons/fa6';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-
 import { z } from 'zod';
 
+import { CreatePassword } from './CreatePassword';
+import { ForgotPassword } from './ForgotPassword';
 import GcfGlobe from '/gcf_globe.png';
 import logo from '/logo.png';
 
@@ -136,9 +134,15 @@ export const Login = () => {
         draggable="false"
       />
 
-      <Grid templateColumns="repeat(2, 1fr)" gap={5}>
+      <Grid
+        templateColumns="repeat(2, 1fr)"
+        gap={5}
+      >
         <GridItem>
-          <Box borderRight="3px solid" h="100vh">
+          <Box
+            borderRight="3px solid"
+            h="100vh"
+          >
             <AbsoluteCenter left="25%">
               <Text
                 as="b"
@@ -205,7 +209,10 @@ export const Login = () => {
           </GridItem>
         ) : (
           <GridItem>
-            <Box w="100%" mt="20%">
+            <Box
+              w="100%"
+              mt="20%"
+            >
               <Center>
                 <Heading as="u">Log In</Heading>
               </Center>
@@ -215,7 +222,10 @@ export const Login = () => {
                   style={{ width: '70%' }}
                 >
                   <Stack spacing={7}>
-                    <FormControl isInvalid={!!errors.email} w={'100%'}>
+                    <FormControl
+                      isInvalid={!!errors.email}
+                      w={'100%'}
+                    >
                       <FormLabel fontSize="lg">Email</FormLabel>
                       <Center>
                         <Input
@@ -252,7 +262,10 @@ export const Login = () => {
                       <FormErrorMessage>
                         {errors.password?.message?.toString()}
                       </FormErrorMessage>
-                      <Flex gap="300px" mt="10px">
+                      <Flex
+                        gap="300px"
+                        mt="10px"
+                      >
                         <ChakraLink onClick={() => setIsForgot(true)}>
                           <FormHelperText
                             color="blue.400"

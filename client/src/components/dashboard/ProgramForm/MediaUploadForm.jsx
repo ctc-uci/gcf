@@ -1,6 +1,6 @@
-import { Button, HStack, useDisclosure } from "@chakra-ui/react";
-import { MediaUploadModal } from "@/components/media/MediaUploadModal";
-import { MediaPreviewTag } from "./MediaPreviewTag";
+import { Button, HStack, useDisclosure } from '@chakra-ui/react';
+import { MediaUploadModal } from '@/components/media/MediaUploadModal';
+import { MediaPreviewTag } from './MediaPreviewTag';
 
 export function MediaUploadForm({ onUploadComplete, uploadedMedia, onRemove }) {
   const { isOpen, onOpen, onClose } = useDisclosure();

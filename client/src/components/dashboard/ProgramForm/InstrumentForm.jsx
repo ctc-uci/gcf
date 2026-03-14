@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
+  Box,
   Button,
   HStack,
   NumberDecrementStepper,
@@ -7,43 +8,60 @@ import {
   NumberInput,
   NumberInputField,
   NumberInputStepper,
-  Select,
-} from "@chakra-ui/react";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+  Text,
+} from '@chakra-ui/react';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { InstrumentSearchInput } from '@/components/common/InstrumentSearchInput';
 
 export function InstrumentForm({ setFormData }) {
   const [instruments, setInstruments] = useState([]);
   const [quantity, setQuantity] = useState(0);
-  const [selectedInstrumentId, setSelectedInstrumentId] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedInstrument, setSelectedInstrument] = useState(null);
   const { backend } = useBackendContext();
 
-  function handleSubmit() {
-    if (!selectedInstrumentId || quantity === 0) return;
+  async function handleCreateNewInstrument(name) {
+    try {
+      const response = await backend.post('/instruments', {
+        name: name.trim(),
+      });
+      const newInst = response.data;
+      setSelectedInstrument({
+        id: newInst.id,
+        name: newInst.name ?? name.trim(),
+      });
+      setInstruments((prev) => [
+        ...prev,
+        { id: newInst.id, name: newInst.name ?? name.trim() },
+      ]);
+    } catch (error) {
+      console.error('Error creating instrument:', error);
+    }
+  }
 
-    const instrumentObj = instruments.find(
-      (instrument) => String(instrument.id) === String(selectedInstrumentId)
-    );
-    if (!instrumentObj) return;
+  function handleSubmit() {
+    if (!selectedInstrument || quantity === 0) return;
+
     setFormData((prevData) => ({
       ...prevData,
       instruments: {
         ...prevData.instruments,
-        [selectedInstrumentId]: {
-          id: Number(selectedInstrumentId),
-          name: instrumentObj.name,
+        [String(selectedInstrument.id)]: {
+          id: Number(selectedInstrument.id),
+          name: selectedInstrument.name,
           quantity,
         },
       },
     }));
 
-    setSelectedInstrumentId("");
+    setSelectedInstrument(null);
     setQuantity(0);
   }
 
   useEffect(() => {
     async function fetchInstruments() {
       try {
-        const response = await backend.get("/instruments");
+        const response = await backend.get('/instruments');
         const instrument_names = response.data;
 
         const instrumentMap = new Map();
@@ -55,7 +73,7 @@ export function InstrumentForm({ setFormData }) {
         const unique_instruments = Array.from(instrumentMap.values());
         setInstruments(unique_instruments);
       } catch (error) {
-        console.error("Error fetching instruments:", error);
+        console.error('Error fetching instruments:', error);
       }
     }
     fetchInstruments();
@@ -68,18 +86,27 @@ export function InstrumentForm({ setFormData }) {
       padding="1"
       borderRadius="md"
       spacing={2}
+      align="flex-start"
+      wrap="wrap"
     >
-      <Select
-        placeholder="Select Instrument"
-        value={selectedInstrumentId}
-        onChange={(e) => setSelectedInstrumentId(e.target.value)}
-      >
-        {instruments.map((instrument) => (
-          <option key={instrument.id} value={instrument.id}>
-            {instrument.name}
-          </option>
-        ))}
-      </Select>
+      <Box flex="1" minW="12rem">
+        <InstrumentSearchInput
+          instruments={instruments}
+          value={searchQuery}
+          onChange={(val) => {
+            setSearchQuery(val);
+            if (val) setSelectedInstrument(null);
+          }}
+          onSelectExisting={(inst) => setSelectedInstrument(inst)}
+          onCreateNew={handleCreateNewInstrument}
+          placeholder="Search instrument"
+        />
+        {selectedInstrument && (
+          <Text fontSize="sm" color="gray.600" mt={1}>
+            Selected: {selectedInstrument.name}
+          </Text>
+        )}
+      </Box>
       <NumberInput
         step={1}
         defaultValue={0}
@@ -94,7 +121,9 @@ export function InstrumentForm({ setFormData }) {
           <NumberDecrementStepper />
         </NumberInputStepper>
       </NumberInput>
-      <Button onClick={handleSubmit}> + Add </Button>
+      <Button onClick={handleSubmit} isDisabled={!selectedInstrument}>
+        + Add
+      </Button>
     </HStack>
   );
 }

@@ -44,17 +44,23 @@ export const Navbar = () => {
 
     const loadData = async () => {
       try {
-        if (role === "Regional Director") {
-          const regionData = await fetchData("region", `get-region-name/${userId}`);
-          setRegion(regionData?.name ?? "");
-          setProject("");
-        } else if (role === "Program Director") {
-          const projectData = await fetchData("program", `get-program-name/${userId}`);
-          setProject(projectData?.name ?? "");
-          setRegion("");
+        if (role === 'Regional Director') {
+          const regionData = await fetchData(
+            'region',
+            `get-region-name/${userId}`
+          );
+          setRegion(regionData?.name ?? '');
+          setProject('');
+        } else if (role === 'Program Director') {
+          const projectData = await fetchData(
+            'program',
+            `get-program-name/${userId}`
+          );
+          setProject(projectData?.name ?? '');
+          setRegion('');
         } else {
-          setRegion("");
-          setProject("");
+          setRegion('');
+          setProject('');
         }
       } catch (error) {
         console.error('Fetch error:', error);

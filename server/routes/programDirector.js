@@ -120,7 +120,7 @@ directorRouter.get('/me/:userId/region', async (req, res) => {
 
     res.status(200).json(keysToCamel(region));
   } catch (err) {
-    pass;
+    console.error('Error in /me/:userId/region:', err);
   }
 });
 

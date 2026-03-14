@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { GetCity, GetState } from 'react-country-state-city';
 
-import { GetState, GetCity } from 'react-country-state-city';
 import 'react-country-state-city/dist/react-country-state-city.css';
 
-import { Select, Grid, GridItem } from '@chakra-ui/react';
+import { Grid, GridItem, Select } from '@chakra-ui/react';
 
 const STATELESS_COUNTRIES = new Set([
   145, // Monaco
@@ -124,7 +124,10 @@ export function LocationForm({ formState, setFormData }) {
   }
 
   return (
-    <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+    <Grid
+      templateColumns="repeat(2, 1fr)"
+      gap={6}
+    >
       <GridItem>
         <Select
           onChange={(e) => handleRegionChange(e.target.value)}
@@ -132,7 +135,10 @@ export function LocationForm({ formState, setFormData }) {
           value={formState.regionId || ''}
         >
           {regionList.map((_region) => (
-            <option key={_region.id} value={_region.id}>
+            <option
+              key={_region.id}
+              value={_region.id}
+            >
               {_region.name}
             </option>
           ))}
@@ -147,7 +153,10 @@ export function LocationForm({ formState, setFormData }) {
             value={formState.country || ''}
           >
             {countriesList.map((_country) => (
-              <option key={_country.id} value={_country.id}>
+              <option
+                key={_country.id}
+                value={_country.id}
+              >
                 {_country.name}
               </option>
             ))}
@@ -165,7 +174,10 @@ export function LocationForm({ formState, setFormData }) {
             }
           >
             {stateList.map((_state) => (
-              <option key={_state.id} value={_state.id}>
+              <option
+                key={_state.id}
+                value={_state.id}
+              >
                 {_state.name}
               </option>
             ))}
@@ -181,7 +193,10 @@ export function LocationForm({ formState, setFormData }) {
             placeholder="Select city..."
           >
             {cityList.map((_city) => (
-              <option key={_city.id} value={_city.id}>
+              <option
+                key={_city.id}
+                value={_city.id}
+              >
                 {_city.name}
               </option>
             ))}

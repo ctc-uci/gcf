@@ -26,11 +26,11 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
+import { CurriculumLinkForm } from './CurriculumLinkForm';
 import { InstrumentForm } from './InstrumentForm';
 import { LocationForm } from './LocationForm';
-import { ProgramDirectorForm } from './ProgramDirectorForm';
-import { CurriculumLinkForm } from './CurriculumLinkForm';
 import { MediaUploadForm } from './MediaUploadForm';
+import { ProgramDirectorForm } from './ProgramDirectorForm';
 
 export const ProgramForm = ({
   isOpen: isOpenProp,
@@ -389,7 +389,10 @@ export const ProgramForm = ({
       <DrawerOverlay />
       <DrawerContent>
         <HStack marginBottom="1em">
-          <DrawerCloseButton left="4" right="auto" />
+          <DrawerCloseButton
+            left="4"
+            right="auto"
+          />
           <Button
             colorScheme="teal"
             marginLeft="auto"
@@ -406,9 +409,17 @@ export const ProgramForm = ({
         </HStack>
 
         <DrawerBody>
-          <VStack spacing={4} align="stretch" marginLeft="1em">
+          <VStack
+            spacing={4}
+            align="stretch"
+            marginLeft="1em"
+          >
             <DrawerHeader padding="0 0">Program</DrawerHeader>
-            <HStack w="full" spacing={0} mb={4}>
+            <HStack
+              w="full"
+              spacing={0}
+              mb={4}
+            >
               <Button
                 flex={1}
                 variant="ghost"

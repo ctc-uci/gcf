@@ -15,9 +15,14 @@ import {
 import { MediaPreviewList } from './MediaPreviewList';
 import { MediaUpload } from './MediaUpload';
 
-export function MediaUploadModal({ isOpen, onClose, onUploadComplete, formOrigin }) {
+export function MediaUploadModal({
+  isOpen,
+  onClose,
+  onUploadComplete,
+  formOrigin,
+}) {
   const [selectedFiles, setSelectedFiles] = useState([]);
-  
+
   const handleClose = () => {
     setSelectedFiles([]);
     onClose();

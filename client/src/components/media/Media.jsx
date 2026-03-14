@@ -29,26 +29,26 @@ export const Media = () => {
   const [programId, setProgramId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const onUploadCompleteHandler = async (uploadedFiles,description) => {
+  const onUploadCompleteHandler = async (uploadedFiles, description) => {
     try {
       const updateDate = new Date().toISOString().split('T')[0];
-      const programUpdateResponse = await backend.post("/program-updates", {
-        title: "Media Upload",
+      const programUpdateResponse = await backend.post('/program-updates', {
+        title: 'Media Upload',
         program_id: programId,
         created_by: userId,
         update_date: updateDate,
-        note: description || "Media files uploaded",
-      });;
+        note: description || 'Media files uploaded',
+      });
 
       const updateId = programUpdateResponse.data.id;
 
       const newMediaItems = [];
       for (const file of uploadedFiles) {
-        const mediaChangeResponse = await backend.post("/mediaChange", {
+        const mediaChangeResponse = await backend.post('/mediaChange', {
           update_id: updateId,
           s3_key: file.s3_key,
           file_name: file.file_name,
-          file_type: file.file_type || "image",
+          file_type: file.file_type || 'image',
           is_thumbnail: false,
           description: file.description,
           instrument_id: file.instrument_id,
@@ -62,7 +62,7 @@ export const Media = () => {
           id: mediaChangeResponse.data.id,
           s3_key: file.s3_key,
           file_name: file.file_name,
-          file_type: file.file_type || "image",
+          file_type: file.file_type || 'image',
           is_thumbnail: false,
           imageUrl: urlResponse.data.url,
         });
@@ -71,7 +71,7 @@ export const Media = () => {
       setMedia((prevMedia) => [...newMediaItems, ...prevMedia]);
       fetchData();
     } catch (error) {
-      console.error("Error saving uploaded files:", error);
+      console.error('Error saving uploaded files:', error);
     }
   };
 

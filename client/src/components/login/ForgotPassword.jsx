@@ -1,6 +1,4 @@
-import { sendPasswordResetEmail, getAuth } from 'firebase/auth';
-import { MdOutlineSubdirectoryArrowRight } from 'react-icons/md';
-import { useState, useContext } from 'react';
+import { useContext, useState } from 'react';
 
 import {
   Box,
@@ -15,6 +13,9 @@ import {
   Stack,
   useToast,
 } from '@chakra-ui/react';
+
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import { MdOutlineSubdirectoryArrowRight } from 'react-icons/md';
 
 import { BackendContext } from '../../contexts/BackendContext';
 
@@ -72,8 +73,14 @@ export const ForgotPassword = ({ setIsForgot }) => {
             verifyEmail(email);
           }}
         >
-          <Stack mt="28px" spacing={7}>
-            <FormControl w={'100%'} isInvalid={!!errorMessage}>
+          <Stack
+            mt="28px"
+            spacing={7}
+          >
+            <FormControl
+              w={'100%'}
+              isInvalid={!!errorMessage}
+            >
               <FormLabel fontSize="lg">Email</FormLabel>
               <Center>
                 <Input

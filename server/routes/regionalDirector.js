@@ -1,5 +1,4 @@
 import { keysToCamel } from '@/common/utils';
-import { admin } from '@/config/firebase';
 import express from 'express';
 
 import { db } from '../db/db-pgp';
