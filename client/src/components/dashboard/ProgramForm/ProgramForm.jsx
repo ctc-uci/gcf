@@ -158,8 +158,13 @@ export const ProgramForm = ({
 
         curriculumLinks: Array.isArray(program.playlists)
           ? program.playlists
-              .filter((p) => p.link)
-              .map((p) => ({ link: p.link, name: p.name || 'Playlist' }))
+              .filter((p) => p.link && p.instrumentId != null)
+              .map((p) => ({
+                link: p.link,
+                name: p.name || 'Playlist',
+                instrumentId: p.instrumentId ?? p.instrument_id,
+                instrumentName: p.instrumentName ?? p.instrument_name ?? '',
+              }))
           : [],
 
         media: Array.isArray(program.media)
@@ -177,7 +182,14 @@ export const ProgramForm = ({
       );
       setInitialInstrumentQuantities(initialInstrumentMap);
       setInitialCurriculumLinks(
-        (program.playlists ?? []).filter((p) => p.link).map((p) => p.link)
+        (program.playlists ?? [])
+          .filter(
+            (p) => p.link && (p.instrumentId != null || p.instrument_id != null)
+          )
+          .map((p) => ({
+            link: p.link,
+            instrumentId: p.instrumentId ?? p.instrument_id,
+          }))
       );
 
       setInitialUploadedMedia(
@@ -270,19 +282,27 @@ export const ProgramForm = ({
         }
       }
 
-      const currentLinks = (formState.curriculumLinks ?? []).map((p) => p.link);
+      const currentLinkKeys = (formState.curriculumLinks ?? []).map(
+        (p) => `${p.link}\0${p.instrumentId}`
+      );
       for (const playlist of formState.curriculumLinks ?? []) {
-        if (!initialCurriculumLinks.includes(playlist.link)) {
+        const key = `${playlist.link}\0${playlist.instrumentId}`;
+        if (
+          !initialCurriculumLinks.some(
+            (i) => `${i.link}\0${i.instrumentId}` === key
+          )
+        ) {
           await backend.post(`/program/${programId}/playlists`, {
             link: playlist.link,
             name: playlist.name || 'Playlist',
+            instrumentId: playlist.instrumentId,
           });
         }
       }
-      for (const oldLink of initialCurriculumLinks) {
-        if (!currentLinks.includes(oldLink)) {
+      for (const old of initialCurriculumLinks) {
+        if (!currentLinkKeys.includes(`${old.link}\0${old.instrumentId}`)) {
           await backend.delete(`/program/${programId}/playlists`, {
-            data: { link: oldLink },
+            data: { link: old.link, instrumentId: old.instrumentId },
           });
         }
       }
@@ -567,10 +587,12 @@ export const ProgramForm = ({
                 <CurriculumLinkForm
                   formState={formState}
                   setFormData={setFormState}
+                  programId={program?.id}
+                  backend={backend}
                 />
                 <HStack wrap="wrap">
                   {(formState.curriculumLinks ?? []).map((playlist) => (
-                    <Tag key={playlist.link}>
+                    <Tag key={`${playlist.link}-${playlist.instrumentId}`}>
                       <TagLabel
                         cursor="pointer"
                         onClick={() => {
@@ -581,6 +603,9 @@ export const ProgramForm = ({
                           );
                         }}
                       >
+                        {playlist.instrumentName
+                          ? `${playlist.instrumentName}: `
+                          : ''}
                         {playlist.name}
                       </TagLabel>
                       <TagCloseButton
@@ -588,7 +613,11 @@ export const ProgramForm = ({
                           setFormState((prev) => ({
                             ...prev,
                             curriculumLinks: prev.curriculumLinks.filter(
-                              (p) => p.link !== playlist.link
+                              (p) =>
+                                !(
+                                  p.link === playlist.link &&
+                                  p.instrumentId === playlist.instrumentId
+                                )
                             ),
                           }));
                         }}

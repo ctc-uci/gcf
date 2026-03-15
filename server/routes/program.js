@@ -287,10 +287,13 @@ programRouter.get('/:id/playlists', async (req, res) => {
 programRouter.post('/:id/playlists', async (req, res) => {
   try {
     const { id } = req.params;
-    const { link, name } = req.body;
+    const { link, name, instrumentId } = req.body;
 
     if (!link || !name) {
       return res.status(400).json({ error: 'link and name are required' });
+    }
+    if (instrumentId === null) {
+      return res.status(400).json({ error: 'instrumentId is required' });
     }
 
     const normalizedLink =
@@ -299,14 +302,15 @@ programRouter.post('/:id/playlists', async (req, res) => {
         : `https://${link}`;
 
     await db.query(
-      `INSERT INTO playlist (program_id, link, name) VALUES ($1, $2, $3)
-       ON CONFLICT (program_id, link) DO UPDATE SET name = EXCLUDED.name`,
-      [id, normalizedLink, name]
+      `INSERT INTO playlist (program_id, instrument_id, link, name)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (program_id, instrument_id, link) DO UPDATE SET name = EXCLUDED.name`,
+      [id, instrumentId, normalizedLink, name]
     );
 
     const [inserted] = await db.query(
-      `SELECT * FROM playlist WHERE program_id = $1 AND link = $2`,
-      [id, normalizedLink]
+      `SELECT * FROM playlist WHERE program_id = $1 AND instrument_id = $2 AND link = $3`,
+      [id, instrumentId, normalizedLink]
     );
     res.status(201).json(keysToCamel(inserted[0]));
   } catch (err) {
@@ -318,15 +322,18 @@ programRouter.post('/:id/playlists', async (req, res) => {
 programRouter.delete('/:id/playlists', async (req, res) => {
   try {
     const { id } = req.params;
-    const { link } = req.body;
+    const { link, instrumentId } = req.body;
 
     if (!link) {
       return res.status(400).json({ error: 'link is required' });
     }
+    if (instrumentId === null) {
+      return res.status(400).json({ error: 'instrumentId is required' });
+    }
 
     const result = await db.query(
-      `DELETE FROM playlist WHERE program_id = $1 AND link = $2 RETURNING *`,
-      [id, link]
+      `DELETE FROM playlist WHERE program_id = $1 AND instrument_id = $2 AND link = $3 RETURNING *`,
+      [id, instrumentId, link]
     );
 
     if (result.length === 0) {
