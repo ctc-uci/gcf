@@ -168,7 +168,6 @@ const ProgramDirectorView = ({ data, isLoading, onSave }) => {
 
   return (
     <Box p={8} bg="gray.50" minH="100vh" mx={-4} mt={0}>
-      {/* Header row */}
       <Flex align="center" gap={4} mb={4} wrap="wrap">
         <HStack
           spacing={2}
@@ -185,7 +184,6 @@ const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           </Heading>
         </HStack>
 
-        {/* Search */}
         <InputGroup maxW="200px">
           <InputLeftElement pointerEvents="none" h="32px">
             <Icon as={FiSearch} color="gray.400" boxSize="14px" />
@@ -206,7 +204,6 @@ const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           />
         </InputGroup>
 
-        {/* Filter */}
         <Popover>
           <PopoverTrigger>
             <IconButton
@@ -225,7 +222,6 @@ const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           </PopoverContent>
         </Popover>
 
-        {/* Sort */}
         <IconButton
           aria-label="Sort"
           icon={<HiArrowsUpDown />}
@@ -234,7 +230,6 @@ const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           size="sm"
         />
 
-        {/* List/Grid toggle */}
         <HStack
           spacing={0}
           border="1px solid"
@@ -259,7 +254,6 @@ const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           />
         </HStack>
 
-        {/* Download */}
         <IconButton
           icon={<FiDownload />}
           variant="ghost"
@@ -269,7 +263,6 @@ const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           onClick={() => downloadProgramUpdatesAsCsv(data)}
         />
 
-        {/* + New button */}
         <Button
           bg="teal.500"
           color="white"
@@ -283,7 +276,6 @@ const ProgramDirectorView = ({ data, isLoading, onSave }) => {
         </Button>
       </Flex>
 
-      {/* Table */}
       {!isCollapsed && (
         <Box position="relative" bg="white" borderRadius="xl" overflow="hidden">
           {tableData.length === 0 && !isLoading ? (
@@ -416,7 +408,6 @@ const ProgramDirectorView = ({ data, isLoading, onSave }) => {
         </Box>
       )}
 
-      {/* Create Update Drawer */}
       <CreateUpdateDrawer
         isOpen={createDrawerDisclosure.isOpen}
         onClose={createDrawerDisclosure.onClose}
@@ -466,7 +457,6 @@ const UpdatesSection = ({
 
   return (
     <Box mb={6}>
-      {/* Section header */}
       <Flex align="center" gap={3} mb={3} wrap="wrap">
         <HStack
           spacing={2}
@@ -564,7 +554,6 @@ const UpdatesSection = ({
         </HStack>
       </Flex>
 
-      {/* Section content */}
       {!isCollapsed && (
         <Box bg="white" borderRadius="xl" overflow="hidden">
           {isMedia ? (
@@ -768,7 +757,6 @@ export const UpdatesPage = () => {
   if (isAdmin) {
     return (
       <Box p={8} bg="gray.50" minH="100vh" mx={-4} mt={0}>
-        {/* Header */}
         <Flex align="center" gap={4} mb={4} wrap="wrap">
           <Heading as="h1" size="lg" fontWeight="500">
             Updates
@@ -859,7 +847,6 @@ export const UpdatesPage = () => {
             </Tab>
           </TabList>
 
-          {/* Admin toolbar: Search + Filter + Sort (no list/grid toggle) */}
           <Flex align="center" gap={3} mt={4} mb={4} wrap="wrap">
             <InputGroup maxW="200px">
               <InputLeftElement pointerEvents="none" h="32px">
@@ -966,7 +953,6 @@ export const UpdatesPage = () => {
   // Regional Director view: section splits (Special Requests / Other Updates)
   return (
     <Box p={8} bg="gray.50" minH="100vh" mx={-4} mt={0}>
-      {/* Header */}
       <Flex align="center" gap={4} mb={4} wrap="wrap">
         <Heading as="h1" size="lg" fontWeight="500">
           Updates
