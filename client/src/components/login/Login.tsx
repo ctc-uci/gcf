@@ -62,7 +62,6 @@ export const Login = () => {
     mode: 'onBlur',
   });
 
-  // Welcome text cycling animation
   useEffect(() => {
     const interval = setInterval(() => {
       setTextIndex((prev) => (prev + 1) % welcomeTexts.length);
