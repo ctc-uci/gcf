@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Flex,
   HStack,
@@ -8,17 +7,16 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  InputRightElement,
   Popover,
   PopoverContent,
   PopoverTrigger,
   Spacer,
 } from '@chakra-ui/react';
 
+import { BsArrowDownUp } from 'react-icons/bs';
 import { FiGrid, FiList, FiPlus, FiSearch } from 'react-icons/fi';
-import {
-  HiArrowsUpDown,
-  HiOutlineAdjustmentsHorizontal,
-} from 'react-icons/hi2';
+import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 import { FilterComponent } from '../common/FilterComponent';
 
 export const AccountToolbar = ({
@@ -34,13 +32,12 @@ export const AccountToolbar = ({
   }
 
   return (
-    <Flex width="100%" align="center" gap={4}>
+    <Flex width="100%" align="center" gap={6}>
       <Spacer />
-      <InputGroup w="222px">
+      <InputGroup w="280px">
         <InputLeftElement pointerEvents="none" h="32px">
           <Icon as={FiSearch} color="gray.600" boxSize="14px" />
         </InputLeftElement>
-
         <Input
           placeholder="Search"
           bg="white"
@@ -52,43 +49,47 @@ export const AccountToolbar = ({
           _focus={{ borderColor: 'gray.400' }}
           _placeholder={{ color: 'gray.400' }}
           pl={8}
+          pr={9}
           value={searchQuery}
           onChange={handleSearchChange}
         />
+        <InputRightElement h="32px" w="32px">
+          <Popover>
+            <PopoverTrigger>
+              <IconButton
+                aria-label="Filter"
+                icon={<HiOutlineAdjustmentsHorizontal size={18} />}
+                variant="ghost"
+                color="gray.600"
+                size="sm"
+                minW="auto"
+                h="24px"
+                w="24px"
+                p={0}
+              />
+            </PopoverTrigger>
+            <PopoverContent w="800px" maxW="90vw" shadow="xl">
+              <FilterComponent
+                columns={columns}
+                onFilterChange={onFilterChange}
+              />
+            </PopoverContent>
+          </Popover>
+        </InputRightElement>
       </InputGroup>
 
-      <HStack spacing={1} align="center">
-        <Popover>
-          <PopoverTrigger>
-            <IconButton
-              aria-label="Filter"
-              icon={<HiOutlineAdjustmentsHorizontal size={20} />}
-              variant="ghost"
-              color="gray.600"
-              size="sm"
-              minW="auto"
-              h="20px"
-              p={0}
-            />
-          </PopoverTrigger>
-          <PopoverContent w="800px" maxW="90vw" shadow="xl">
-            <FilterComponent
-              columns={columns}
-              onFilterChange={onFilterChange}
-            />
-          </PopoverContent>
-        </Popover>
+      <HStack spacing={6} align="center">
         <IconButton
           aria-label="Sort"
-          icon={<HiArrowsUpDown size={20} />}
+          icon={<BsArrowDownUp size={20} />}
           variant="ghost"
           color="gray.600"
-          size="sm"
-          minW="auto"
+          w="20px"
           h="20px"
+          minW="20px"
           p={0}
         />
-        <HStack spacing={1} align="center">
+        <HStack w="48px" h="20px" spacing="4px" align="center" justify="center">
           <IconButton
             aria-label="List View"
             icon={<FiList size={20} />}
@@ -97,14 +98,9 @@ export const AccountToolbar = ({
             size="sm"
             minW="auto"
             h="20px"
+            w="20px"
             p={0}
             onClick={() => setIsCardView(false)}
-          />
-          <Box
-            w="0px"
-            h="16px"
-            borderLeft="1.5px solid"
-            borderColor="gray.600"
           />
           <IconButton
             aria-label="Grid View"
@@ -114,6 +110,7 @@ export const AccountToolbar = ({
             size="sm"
             minW="auto"
             h="20px"
+            w="20px"
             p={0}
             onClick={() => setIsCardView(true)}
           />
