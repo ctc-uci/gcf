@@ -126,7 +126,6 @@ export const Login = () => {
 
   return (
     <Grid templateColumns="repeat(2, 1fr)" h="100vh">
-      {/* Left Panel */}
       <GridItem p="16px">
         <Flex
           direction="column"
@@ -169,7 +168,6 @@ export const Login = () => {
         </Flex>
       </GridItem>
 
-      {/* Right Panel */}
       <GridItem bg="#D6F1EF">
         <Flex
           direction="column"
