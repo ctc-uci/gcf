@@ -127,17 +127,18 @@ export const Login = () => {
   return (
     <Grid templateColumns="repeat(2, 1fr)" h="100vh">
       {/* Left Panel */}
-      <GridItem>
+      <GridItem p="16px">
         <Flex
           direction="column"
           align="center"
           justify="center"
           h="100%"
+          gap="120px"
           borderRight="none"
           position="relative"
           overflow="hidden"
         >
-          <Box mb={6} h="60px" display="flex" alignItems="center">
+          <Box h="60px" display="flex" alignItems="center">
             <AnimatePresence mode="wait">
               <motion.div
                 key={textIndex}
@@ -157,12 +158,19 @@ export const Login = () => {
             </AnimatePresence>
           </Box>
 
-          <Image src={GcfGlobe} alt="GCF Globe" maxH="55%" draggable="false" />
+          <Image
+            src={GcfGlobe}
+            alt="GCF Globe"
+            w="460px"
+            h="460px"
+            opacity={1}
+            draggable={false}
+          />
         </Flex>
       </GridItem>
 
       {/* Right Panel */}
-      <GridItem bg="cyan.50">
+      <GridItem bg="#D6F1EF">
         <Flex
           direction="column"
           align="center"
@@ -176,7 +184,7 @@ export const Login = () => {
             p={10}
             w="100%"
             maxW="500px"
-            boxShadow="sm"
+            boxShadow="8px 16px 8px 0px #31979529"
           >
             <Heading fontWeight="bold" fontSize="3xl" mb={6}>
               Login
