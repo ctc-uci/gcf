@@ -237,8 +237,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       lastName: formData.last_name,
       role: formData.role,
       currentUserId: userId,
-      programId: formData.programs.length > 0 ? formData.programs[0].id : null,
-      regionId: formData.regions.length > 0 ? formData.regions[0].id : null,
+      programId:
+        formData.programs.length > 0 ? Number(formData.programs[0].id) : null,
+      regionId:
+        formData.regions.length > 0 ? Number(formData.regions[0].id) : null,
     };
     await backend.post('/gcf-users/admin/create-user', userData);
     await sendPasswordResetEmail(auth, formData.email);
@@ -260,22 +262,24 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       role: formData.role,
       currentUserId: userId,
       targetId: targetUserId,
-      programId: formData.programs.length > 0 ? formData.programs[0].id : null,
-      regionId: formData.regions.length > 0 ? formData.regions[0].id : null,
+      programId:
+        formData.programs.length > 0 ? Number(formData.programs[0].id) : null,
+      regionId:
+        formData.regions.length > 0 ? Number(formData.regions[0].id) : null,
     };
 
     if (formData.password && formData.password.trim().length > 0) {
       userData.password = formData.password;
     }
     await backend.put('/gcf-users/admin/update-user', userData);
-    await backend.post('/nodemailer', {
-      email: formData.email,
-      password: formData.password || null,
-      firstName: formData.first_name,
-      lastName: formData.last_name,
-      role: formData.role,
-      isNewAccount: false,
-    });
+    // await backend.post('/nodemailer', {
+    //   email: formData.email,
+    //   password: formData.password || null,
+    //   firstName: formData.first_name,
+    //   lastName: formData.last_name,
+    //   role: formData.role,
+    //   isNewAccount: false,
+    // });
   };
 
   return (
@@ -374,7 +378,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     placeholder="Select a program"
                     value={
                       formData.programs.length > 0
-                        ? formData.programs[0].id
+                        ? String(formData.programs[0].id)
                         : ''
                     }
                     onChange={(e) => {
@@ -382,7 +386,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       if (!selectedProgramId) return;
 
                       const selectedProgram = currentPrograms.find(
-                        (p) => p.id === selectedProgramId
+                        (p) => String(p.id) === String(selectedProgramId)
                       );
 
                       if (selectedProgram) {
@@ -413,14 +417,16 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                   <Select
                     placeholder="Select a region"
                     value={
-                      formData.regions.length > 0 ? formData.regions[0].id : ''
+                      formData.regions.length > 0
+                        ? String(formData.regions[0].id)
+                        : ''
                     }
                     onChange={(e) => {
                       const selectedRegionId = e.target.value;
                       if (!selectedRegionId) return;
 
                       const selectedRegion = currentRegions.find(
-                        (r) => r.id === selectedRegionId
+                        (r) => String(r.id) === String(selectedRegionId)
                       );
 
                       if (selectedRegion) {

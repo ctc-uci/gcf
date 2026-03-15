@@ -56,6 +56,17 @@ import { SortArrows } from '../tables/SortArrows';
 import CardView from './CardView';
 import { ProgramForm } from './ProgramForm/index';
 
+const formatLaunchDate = (isoString) => {
+  if (!isoString) return '';
+  try {
+    const date = new Date(isoString);
+    if (Number.isNaN(date.getTime())) return isoString;
+    return date.toISOString().slice(0, 10).replace(/-/g, '/');
+  } catch {
+    return isoString;
+  }
+};
+
 const getRouteByRole = (role, userId) => {
   const routes = {
     'Super Admin': '/admin/programs',
@@ -195,7 +206,7 @@ function ExpandableRow({ p, onEdit }) {
         <Td>
           <StatusTag status={p.status} />
         </Td>
-        <Td>{p.launchDate}</Td>
+        <Td>{formatLaunchDate(p.launchDate)}</Td>
         <Td>{p.location}</Td>
         <Td>{p.students}</Td>
         <Td>
@@ -423,7 +434,7 @@ function ProgramDisplay({
       return [
         escapeCsvValue(p.title),
         escapeCsvValue(p.status),
-        escapeCsvValue(p.launchDate),
+        escapeCsvValue(formatLaunchDate(p.launchDate)),
         escapeCsvValue(p.location),
         escapeCsvValue(p.students),
         escapeCsvValue(instrumentsFormatted),
@@ -542,7 +553,7 @@ function ProgramDisplay({
           onStatsRefresh?.();
         }}
       />
-      <TableContainer w="80vw">
+      <TableContainer w="75vw">
         <HStack
           mb={4}
           justifyContent="space-between"
