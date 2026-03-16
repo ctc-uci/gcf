@@ -1,6 +1,7 @@
 import { Box, Button, Flex, Icon, Link, VStack } from '@chakra-ui/react';
 
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { BsFillGearFill } from 'react-icons/bs';
 import { FaGuitar } from 'react-icons/fa';
 import { HiOutlineUser } from 'react-icons/hi';
 import { MdOutlineNotifications, MdPermMedia } from 'react-icons/md';
@@ -18,25 +19,79 @@ export const Sidebar = () => {
   }
   let navItems: NavItem[] = [];
 
-  if (
-    role === 'Super Admin' ||
-    role === 'Admin' ||
-    role === 'Regional Director'
-  ) {
+  if (role === 'Super Admin' || role === 'Admin') {
     navItems = [
       {
         name: 'Programs',
-        icon: <Icon as={FaGuitar} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={FaGuitar}
+            boxSize="20px"
+          />
+        ),
         path: '/dashboard',
       },
       {
         name: 'Updates',
-        icon: <Icon as={MdOutlineNotifications} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={MdOutlineNotifications}
+            boxSize="20px"
+          />
+        ),
         path: '/updates',
       },
       {
         name: 'Accounts',
-        icon: <Icon as={HiOutlineUser} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={HiOutlineUser}
+            boxSize="20px"
+          />
+        ),
+        path: '/account',
+      },
+      {
+        name: 'Regions',
+        icon: (
+          <Icon
+            as={BsFillGearFill}
+            boxSize="20px"
+          />
+        ),
+        path: '/regions',
+      },
+    ];
+  } else if (role === 'Regional Director') {
+    navItems = [
+      {
+        name: 'Programs',
+        icon: (
+          <Icon
+            as={FaGuitar}
+            boxSize="20px"
+          />
+        ),
+        path: '/dashboard',
+      },
+      {
+        name: 'Updates',
+        icon: (
+          <Icon
+            as={MdOutlineNotifications}
+            boxSize="20px"
+          />
+        ),
+        path: '/updates',
+      },
+      {
+        name: 'Accounts',
+        icon: (
+          <Icon
+            as={HiOutlineUser}
+            boxSize="20px"
+          />
+        ),
         path: '/account',
       },
     ];
@@ -44,17 +99,32 @@ export const Sidebar = () => {
     navItems = [
       {
         name: 'Programs',
-        icon: <Icon as={FaGuitar} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={FaGuitar}
+            boxSize="20px"
+          />
+        ),
         path: '/dashboard',
       },
       {
         name: 'Updates',
-        icon: <Icon as={MdOutlineNotifications} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={MdOutlineNotifications}
+            boxSize="20px"
+          />
+        ),
         path: '/updates',
       },
       {
         name: 'Media',
-        icon: <Icon as={MdPermMedia} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={MdPermMedia}
+            boxSize="20px"
+          />
+        ),
         path: '/media',
       },
     ];
@@ -72,7 +142,10 @@ export const Sidebar = () => {
       zIndex={9}
     >
       <VStack>
-        <Flex direction="column" gap={3}>
+        <Flex
+          direction="column"
+          gap={3}
+        >
           {navItems.map((item) => {
             const isActive =
               location.pathname === item.path ||
