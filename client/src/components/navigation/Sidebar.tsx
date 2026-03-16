@@ -23,22 +23,43 @@ export const Sidebar = () => {
     navItems = [
       {
         name: 'Programs',
-        icon: <Icon as={FaGuitar} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={FaGuitar}
+            boxSize="20px"
+          />
+        ),
         path: '/dashboard',
       },
       {
         name: 'Updates',
-        icon: <Icon as={MdOutlineNotifications} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={MdOutlineNotifications}
+            boxSize="20px"
+          />
+        ),
         path: '/updates',
       },
       {
         name: 'Accounts',
-        icon: <Icon as={HiOutlineUser} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={HiOutlineUser}
+            boxSize="20px"
+          />
+        ),
         path: '/account',
       },
+      // TODO: just in case the regions table route is different
       {
         name: 'Regions',
-        icon: <Icon as={HiOutlineCog} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={HiOutlineCog}
+            boxSize="20px"
+          />
+        ),
         path: '/regions',
       },
     ];
@@ -46,17 +67,32 @@ export const Sidebar = () => {
     navItems = [
       {
         name: 'Programs',
-        icon: <Icon as={FaGuitar} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={FaGuitar}
+            boxSize="20px"
+          />
+        ),
         path: '/dashboard',
       },
       {
         name: 'Updates',
-        icon: <Icon as={MdOutlineNotifications} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={MdOutlineNotifications}
+            boxSize="20px"
+          />
+        ),
         path: '/updates',
       },
       {
         name: 'Accounts',
-        icon: <Icon as={HiOutlineUser} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={HiOutlineUser}
+            boxSize="20px"
+          />
+        ),
         path: '/account',
       },
     ];
@@ -64,17 +100,32 @@ export const Sidebar = () => {
     navItems = [
       {
         name: 'Programs',
-        icon: <Icon as={FaGuitar} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={FaGuitar}
+            boxSize="20px"
+          />
+        ),
         path: '/dashboard',
       },
       {
         name: 'Updates',
-        icon: <Icon as={MdOutlineNotifications} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={MdOutlineNotifications}
+            boxSize="20px"
+          />
+        ),
         path: '/updates',
       },
       {
         name: 'Media',
-        icon: <Icon as={MdPermMedia} boxSize="20px" />,
+        icon: (
+          <Icon
+            as={MdPermMedia}
+            boxSize="20px"
+          />
+        ),
         path: '/media',
       },
     ];
@@ -93,11 +144,28 @@ export const Sidebar = () => {
       flexDirection="column"
       alignItems="stretch"
     >
-      <VStack align="stretch" spacing={5} flex="1">
-        <Box display="flex" justifyContent="center" flexShrink={0}>
-          <Image src={logo} alt="Logo" objectFit="contain" draggable={false} />
+      <VStack
+        align="stretch"
+        spacing={5}
+        flex="1"
+      >
+        <Box
+          display="flex"
+          justifyContent="center"
+          flexShrink={0}
+        >
+          <Image
+            src={logo}
+            alt="Logo"
+            objectFit="contain"
+            draggable={false}
+          />
         </Box>
-        <Flex direction="column" gap={3} flex="1">
+        <Flex
+          direction="column"
+          gap={3}
+          flex="1"
+        >
           {navItems.map((item) => {
             const isActive =
               location.pathname === item.path ||
