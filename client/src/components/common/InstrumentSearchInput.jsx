@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react';
+
 import {
   Box,
+  HStack,
   Input,
   List,
   ListItem,
   Text,
-  HStack,
   useOutsideClick,
 } from '@chakra-ui/react';
 
@@ -50,7 +51,12 @@ export function InstrumentSearchInput({
   };
 
   return (
-    <Box ref={containerRef} position="relative" width="100%" minW="12rem">
+    <Box
+      ref={containerRef}
+      position="relative"
+      width="100%"
+      minW="12rem"
+    >
       <Input
         placeholder={placeholder}
         value={value}
@@ -77,7 +83,10 @@ export function InstrumentSearchInput({
           maxH="12rem"
           overflowY="auto"
         >
-          <List spacing={0} py={1}>
+          <List
+            spacing={0}
+            py={1}
+          >
             {filtered.map((instrument) => (
               <ListItem
                 key={instrument.id}
@@ -100,7 +109,10 @@ export function InstrumentSearchInput({
                 borderTopWidth={filtered.length ? 1 : 0}
                 borderColor="gray.100"
               >
-                <HStack spacing={3} align="center">
+                <HStack
+                  spacing={3}
+                  align="center"
+                >
                   <Text>+</Text>
                   <Text>Add new &quot;{value.trim()}&quot;</Text>
                 </HStack>

@@ -16,6 +16,8 @@ import {
   HStack,
   IconButton,
   Input,
+  InputGroup,
+  InputLeftElement,
   Link,
   Popover,
   PopoverContent,
@@ -48,10 +50,22 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '../../utils/downloadCsv';
+import { EmptyStateBadge } from '../badges/EmptyStateBadge';
 import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
 import CardView from './CardView';
 import { ProgramForm } from './ProgramForm/index';
+
+const formatLaunchDate = (isoString) => {
+  if (!isoString) return '';
+  try {
+    const date = new Date(isoString);
+    if (Number.isNaN(date.getTime())) return isoString;
+    return date.toISOString().slice(0, 10).replace(/-/g, '/');
+  } catch {
+    return isoString;
+  }
+};
 
 const getRouteByRole = (role, userId) => {
   const routes = {
@@ -73,7 +87,7 @@ function mapAdminRow(row) {
     city: row.city,
     state: row.state,
     students: row.students ?? 0,
-    instruments: row.instruments ?? 0,
+    instruments: row.instrumentTypes ?? [],
     totalInstruments: row.instruments ?? 0,
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
@@ -96,7 +110,7 @@ function mapRdRow(row) {
     state: row.state,
     regionId: row.regionId,
     students: row.totalStudents ?? 0,
-    instruments: row.totalInstruments ?? 0,
+    instruments: row.instrumentTypes ?? [],
     totalInstruments: row.totalInstruments ?? 0,
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
@@ -112,6 +126,67 @@ const MAP_BY_ROLE = {
   'Regional Director': mapRdRow,
 };
 
+const STATUS_TAG_STYLES = {
+  active: {
+    label: 'Launched',
+    bg: '#e0f2f1',
+    color: '#00796b',
+  },
+  inactive: {
+    label: 'Developing',
+    bg: '#fff3e0',
+    color: '#ef6c00',
+  },
+};
+
+// pool of colors for the instrument type tags
+const INSTRUMENT_TAG_PALETTE = [
+  { bg: '#C6F6D5', color: '#22543D' },
+  { bg: '#BEE3F8', color: '#2C5282' },
+  { bg: '#FED7D7', color: '#742A2A' },
+  { bg: '#FEECC7', color: '#744210' },
+  { bg: '#E9D8FD', color: '#553C9A' },
+  { bg: '#FED7E2', color: '#702459' },
+  { bg: '#C4F1F9', color: '#086F83' },
+  { bg: '#D6F3D5', color: '#276749' },
+];
+
+function getInstrumentTagStyle(instrumentName) {
+  if (!instrumentName) return INSTRUMENT_TAG_PALETTE[0];
+  let hash = 0;
+  const str = String(instrumentName).toLowerCase();
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % INSTRUMENT_TAG_PALETTE.length;
+  return INSTRUMENT_TAG_PALETTE[index];
+}
+
+function StatusTag({ status }) {
+  const normalized = String(status ?? '').toLowerCase();
+  const style = STATUS_TAG_STYLES[normalized] ?? {
+    label: status ?? '—',
+    bg: 'gray.100',
+    color: 'gray.700',
+  };
+  return (
+    <Box
+      as="span"
+      display="inline-block"
+      px={2}
+      py={0.5}
+      borderRadius="md"
+      fontSize="sm"
+      fontWeight="medium"
+      bg={style.bg}
+      color={style.color}
+    >
+      {style.label}
+    </Box>
+  );
+}
+
 function ExpandableRow({ p, onEdit }) {
   const { isOpen, onToggle } = useDisclosure();
 
@@ -120,14 +195,52 @@ function ExpandableRow({ p, onEdit }) {
       <Tr
         onClick={onToggle}
         cursor="pointer"
-        sx={{ td: { borderBottom: isOpen ? 'none' : undefined } }}
+        sx={{
+          '& td': {
+            borderBottom: isOpen ? 'none' : '1px solid',
+            borderColor: 'gray.200',
+          },
+        }}
       >
         <Td>{p.title}</Td>
-        <Td>{p.status}</Td>
-        <Td>{p.launchDate}</Td>
+        <Td>
+          <StatusTag status={p.status} />
+        </Td>
+        <Td>{formatLaunchDate(p.launchDate)}</Td>
         <Td>{p.location}</Td>
         <Td>{p.students}</Td>
-        <Td>{p.instruments}</Td>
+        <Td>
+          {Array.isArray(p.instruments) || Array.isArray(p.instrumentTypes) ? (
+            <HStack
+              spacing={2}
+              flexWrap="wrap"
+            >
+              {(Array.isArray(p.instruments)
+                ? p.instruments
+                : p.instrumentTypes
+              ).map((inst, idx) => {
+                const style = getInstrumentTagStyle(inst.name);
+                return (
+                  <Box
+                    as="span"
+                    display="inline-block"
+                    px={2}
+                    py={0.5}
+                    borderRadius="md"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    bg={style.bg}
+                    color={style.color}
+                  >
+                    {inst.name} {inst.quantity}
+                  </Box>
+                );
+              })}
+            </HStack>
+          ) : (
+            (p.instruments ?? '-')
+          )}
+        </Td>
         <Td>{p.totalInstruments}</Td>
       </Tr>
       <Tr>
@@ -306,35 +419,48 @@ function ProgramDisplay({
       'Program Directors',
       'Curriculum Links',
     ];
-    const rows = (tableData || []).map((p) => [
-      escapeCsvValue(p.title),
-      escapeCsvValue(p.status),
-      escapeCsvValue(p.launchDate),
-      escapeCsvValue(p.location),
-      escapeCsvValue(p.students),
-      escapeCsvValue(p.instruments),
-      escapeCsvValue(p.totalInstruments),
-      escapeCsvValue(p.primaryLanguage),
-      escapeCsvValue(
-        Array.isArray(p.regionalDirectors)
-          ? p.regionalDirectors
-              .map((d) => `${d.firstName} ${d.lastName}`)
-              .join('; ')
-          : ''
-      ),
-      escapeCsvValue(
-        Array.isArray(p.programDirectors)
-          ? p.programDirectors
-              .map((d) => `${d.firstName} ${d.lastName}`)
-              .join('; ')
-          : ''
-      ),
-      escapeCsvValue(
-        Array.isArray(p.playlists)
-          ? p.playlists.map((l) => l.link ?? l.name).join('; ')
-          : ''
-      ),
-    ]);
+    const rows = (tableData || []).map((p) => {
+      const instrumentsArray =
+        (Array.isArray(p.instruments) && p.instruments) ||
+        (Array.isArray(p.instrumentTypes) && p.instrumentTypes) ||
+        null;
+
+      const instrumentsFormatted = instrumentsArray
+        ? instrumentsArray
+            .map((inst) => `${inst.name ?? ''}: ${inst.quantity ?? 0}`)
+            .join('; ')
+        : p.instruments;
+
+      return [
+        escapeCsvValue(p.title),
+        escapeCsvValue(p.status),
+        escapeCsvValue(formatLaunchDate(p.launchDate)),
+        escapeCsvValue(p.location),
+        escapeCsvValue(p.students),
+        escapeCsvValue(instrumentsFormatted),
+        escapeCsvValue(p.totalInstruments),
+        escapeCsvValue(p.primaryLanguage),
+        escapeCsvValue(
+          Array.isArray(p.regionalDirectors)
+            ? p.regionalDirectors
+                .map((d) => `${d.firstName} ${d.lastName}`)
+                .join('; ')
+            : ''
+        ),
+        escapeCsvValue(
+          Array.isArray(p.programDirectors)
+            ? p.programDirectors
+                .map((d) => `${d.firstName} ${d.lastName}`)
+                .join('; ')
+            : ''
+        ),
+        escapeCsvValue(
+          Array.isArray(p.playlists)
+            ? p.playlists.map((l) => l.link ?? l.name).join('; ')
+            : ''
+        ),
+      ];
+    });
     downloadCsv(headers, rows, `programs-${getFilenameTimestamp()}.csv`);
   };
 
@@ -347,31 +473,59 @@ function ProgramDisplay({
     { key: 'instruments', type: 'number' },
     { key: 'totalInstruments', type: 'number' },
   ];
-
   const [activeFilters, setActiveFilters] = useState([]);
 
-  const filteredData = useMemo(
-    () => applyFilters(activeFilters, originalData ?? []),
-    [activeFilters, originalData]
-  );
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterLocation, setFilterLocation] = useState('');
+  const [filterInstruments, setFilterInstruments] = useState('');
+  const filtersDisclosure = useDisclosure();
 
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
-  };
+  const filterBySearchPanel = useMemo(() => {
+    let data = originalData ?? [];
+    if (filterStatus) {
+      const norm = String(filterStatus).toLowerCase();
+      data = data.filter((p) => {
+        const s = String(p.status ?? '').toLowerCase();
+        if (norm === 'active') return s === 'active' || s === 'launched';
+        if (norm === 'inactive') return s === 'inactive' || s === 'developing';
+        return s === norm;
+      });
+    }
+    if (filterLocation.trim()) {
+      const q = filterLocation.trim().toLowerCase();
+      data = data.filter((p) => (p.location ?? '').toLowerCase().includes(q));
+    }
+    if (filterInstruments.trim()) {
+      const q = filterInstruments.trim().toLowerCase();
+      data = data.filter((p) => {
+        const list = Array.isArray(p.instruments) ? p.instruments : [];
+        if (!Array.isArray(list)) return false;
+        return list.some((inst) => (inst.name ?? '').toLowerCase().includes(q));
+      });
+    }
+    return data;
+  }, [originalData, filterStatus, filterLocation, filterInstruments]);
 
   const displayData = useMemo(() => {
-    if (!searchQuery) return filteredData;
-    return filteredData.filter(
+    if (!searchQuery) return filterBySearchPanel;
+    const query = searchQuery.toLowerCase();
+    return filterBySearchPanel.filter(
       (program) =>
-        program.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.status?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.launchDate?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(program.students).includes(searchQuery) ||
-        String(program.instruments).includes(searchQuery) ||
-        String(program.totalInstruments).includes(searchQuery)
+        program.title?.toLowerCase().includes(query) ||
+        program.status?.toLowerCase().includes(query) ||
+        program.launchDate?.toLowerCase().includes(query) ||
+        program.location?.toLowerCase().includes(query) ||
+        String(program.students).includes(query) ||
+        (Array.isArray(program.instruments)
+          ? program.instruments.some((inst) =>
+              `${inst.name ?? ''} ${inst.quantity ?? ''}`
+                .toLowerCase()
+                .includes(query)
+            )
+          : String(program.instruments).includes(query)) ||
+        String(program.totalInstruments).includes(query)
     );
-  }, [searchQuery, filteredData]);
+  }, [searchQuery, filterBySearchPanel]);
 
   const [sortedData, setSortedData] = useState(null);
 
@@ -399,43 +553,193 @@ function ProgramDisplay({
           onStatsRefresh?.();
         }}
       />
-      <TableContainer>
+      <TableContainer w="75vw">
         <HStack
           mb={4}
           justifyContent="space-between"
           w="100%"
         >
-          <HStack spacing={4}>
+          <HStack spacing={3}>
             <Box
-              fontSize="xl"
+              fontSize="3xl"
               fontWeight="semibold"
             >
-              All Programs
+              Programs
             </Box>
-            <HStack spacing={1}>
-              <IconButton
-                aria-label="search"
-                icon={<Search2Icon />}
-                size="sm"
-                variant="ghost"
-              />
-              <Input
-                w="120px"
-                size="xs"
-                placeholder="Type to search"
-                variant="unstyled"
-                borderBottom="1px solid"
-                borderColor="gray.300"
-                borderRadius="0"
-                px={1}
-                value={searchQuery}
-                onChange={handleSearch}
-              />
-            </HStack>
-          </HStack>
-          <HStack spacing={1}>
             <IconButton
-              aria-label="menu"
+              aria-label="download CSV"
+              icon={<DownloadIcon />}
+              size="sm"
+              variant="ghost"
+              onClick={downloadDataAsCsv}
+            />
+          </HStack>
+          <HStack spacing={2}>
+            <Popover
+              isOpen={filtersDisclosure.isOpen}
+              onClose={filtersDisclosure.onClose}
+              placement="bottom-start"
+            >
+              <PopoverTrigger>
+                <HStack
+                  spacing={2}
+                  as="button"
+                  type="button"
+                  border="1px solid"
+                  borderColor="gray.200"
+                  borderRadius="md"
+                  px={3}
+                  py={2}
+                  bg="white"
+                  _hover={{ borderColor: 'gray.300' }}
+                  onClick={filtersDisclosure.onOpen}
+                  w="200px"
+                  justifyContent="flex-start"
+                >
+                  <Search2Icon />
+                  <Text
+                    fontSize="sm"
+                    color="gray.500"
+                    flex={1}
+                    textAlign="left"
+                  >
+                    Search
+                  </Text>
+                </HStack>
+              </PopoverTrigger>
+              <PopoverContent
+                w="400px"
+                maxW="90vw"
+                shadow="xl"
+              >
+                <Box p={4}>
+                  <Text
+                    fontWeight="bold"
+                    fontSize="lg"
+                    mb={4}
+                  >
+                    Filters
+                  </Text>
+                  <VStack
+                    align="stretch"
+                    spacing={4}
+                  >
+                    <Box>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        mb={2}
+                      >
+                        Program Status
+                      </Text>
+                      <HStack spacing={2}>
+                        <Box
+                          as="button"
+                          type="button"
+                          px={3}
+                          py={1.5}
+                          borderRadius="md"
+                          fontSize="sm"
+                          fontWeight="medium"
+                          bg={
+                            filterStatus === 'inactive'
+                              ? STATUS_TAG_STYLES.inactive.bg
+                              : 'gray.100'
+                          }
+                          color={
+                            filterStatus === 'inactive'
+                              ? STATUS_TAG_STYLES.inactive.color
+                              : 'gray.600'
+                          }
+                          onClick={() =>
+                            setFilterStatus((s) =>
+                              s === 'inactive' ? '' : 'inactive'
+                            )
+                          }
+                        >
+                          Developing
+                        </Box>
+                        <Box
+                          as="button"
+                          type="button"
+                          px={3}
+                          py={1.5}
+                          borderRadius="md"
+                          fontSize="sm"
+                          fontWeight="medium"
+                          bg={
+                            filterStatus === 'active'
+                              ? STATUS_TAG_STYLES.active.bg
+                              : 'gray.100'
+                          }
+                          color={
+                            filterStatus === 'active'
+                              ? STATUS_TAG_STYLES.active.color
+                              : 'gray.600'
+                          }
+                          onClick={() =>
+                            setFilterStatus((s) =>
+                              s === 'active' ? '' : 'active'
+                            )
+                          }
+                        >
+                          Launched
+                        </Box>
+                      </HStack>
+                    </Box>
+                    <Box>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        mb={2}
+                      >
+                        Location
+                      </Text>
+                      <InputGroup size="sm">
+                        <InputLeftElement pointerEvents="none">
+                          <Search2Icon
+                            color="gray.400"
+                            boxSize={4}
+                          />
+                        </InputLeftElement>
+                        <Input
+                          pl={8}
+                          placeholder="Search Locations"
+                          value={filterLocation}
+                          onChange={(e) => setFilterLocation(e.target.value)}
+                        />
+                      </InputGroup>
+                    </Box>
+                    <Box>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        mb={2}
+                      >
+                        Instruments
+                      </Text>
+                      <InputGroup size="sm">
+                        <InputLeftElement pointerEvents="none">
+                          <Search2Icon
+                            color="gray.400"
+                            boxSize={4}
+                          />
+                        </InputLeftElement>
+                        <Input
+                          pl={8}
+                          placeholder="Search Instruments"
+                          value={filterInstruments}
+                          onChange={(e) => setFilterInstruments(e.target.value)}
+                        />
+                      </InputGroup>
+                    </Box>
+                  </VStack>
+                </Box>
+              </PopoverContent>
+            </Popover>
+
+            <IconButton
+              aria-label="table view"
               icon={<HamburgerIcon />}
               size="sm"
               variant="ghost"
@@ -444,14 +748,16 @@ function ProgramDisplay({
             <Divider
               orientation="vertical"
               h="20px"
+              borderWidth="1px"
             />
             <IconButton
-              aria-label="search"
+              aria-label="card view"
               icon={<HiOutlineSquares2X2 />}
               size="sm"
               variant="ghost"
               onClick={() => setIsCardView(true)}
             />
+
             <Popover>
               <PopoverTrigger>
                 <IconButton
@@ -488,117 +794,148 @@ function ProgramDisplay({
             />
             <Button
               size="sm"
-              rightIcon={<AddIcon />}
+              leftIcon={<AddIcon />}
+              backgroundColor="teal.500"
+              color="white"
+              _hover={{
+                backgroundColor: 'teal.600',
+              }}
               onClick={() => {
                 setSelectedProgram(null);
                 setIsFormOpen(true);
               }}
             >
-              New
+              New Program
             </Button>
           </HStack>
         </HStack>
 
         <Box position="relative">
           {!isCardView ? (
-            <Table
-              variant="simple"
-              aria-label="collapsible-table"
-            >
-              <Thead>
-                <Tr>
-                  <Th
-                    onClick={() => handleSort('title')}
-                    cursor="pointer"
+            !isLoading && tableData.length === 0 ? (
+              <EmptyStateBadge variant="no-programs" />
+            ) : (
+              <Table
+                variant="unstyled"
+                aria-label="collapsible-table"
+                sx={{
+                  border: '1px solid',
+                  borderColor: 'gray.200',
+                  borderRadius: 'md',
+                }}
+              >
+                <Thead>
+                  <Tr
+                    sx={{
+                      '& th': {
+                        borderBottom: '2px solid',
+                        borderColor: 'gray.300',
+                        color: 'gray.700',
+                        fontWeight: 'bold',
+                        textTransform: 'uppercase',
+                        fontSize: 'xs',
+                      },
+                    }}
                   >
-                    Program{' '}
-                    <SortArrows
-                      columnKey="title"
-                      sortOrder={sortOrder}
-                    />
-                  </Th>
-                  <Th
-                    onClick={() => handleSort('status')}
-                    cursor="pointer"
-                  >
-                    Status{' '}
-                    <SortArrows
-                      columnKey="status"
-                      sortOrder={sortOrder}
-                    />
-                  </Th>
-                  <Th
-                    onClick={() => handleSort('launchDate')}
-                    cursor="pointer"
-                  >
-                    Launch Date{' '}
-                    <SortArrows
-                      columnKey="launchDate"
-                      sortOrder={sortOrder}
-                    />
-                  </Th>
-                  <Th
-                    onClick={() => handleSort('location')}
-                    cursor="pointer"
-                  >
-                    Location{' '}
-                    <SortArrows
-                      columnKey="location"
-                      sortOrder={sortOrder}
-                    />
-                  </Th>
-                  <Th
-                    onClick={() => handleSort('students')}
-                    cursor="pointer"
-                  >
-                    Students{' '}
-                    <SortArrows
-                      columnKey="students"
-                      sortOrder={sortOrder}
-                    />
-                  </Th>
-                  <Th
-                    onClick={() => handleSort('instruments')}
-                    cursor="pointer"
-                  >
-                    Instruments{' '}
-                    <SortArrows
-                      columnKey="instruments"
-                      sortOrder={sortOrder}
-                    />
-                  </Th>
-                  <Th
-                    onClick={() => handleSort('totalInstruments')}
-                    cursor="pointer"
-                  >
-                    Total Instruments{' '}
-                    <SortArrows
-                      columnKey="totalInstruments"
-                      sortOrder={sortOrder}
-                    />
-                  </Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {tableData.length === 0 && isLoading ? (
-                  <Tr>
-                    <Td colSpan={7}>
-                      <Center py={8}>
-                        <Spinner size="lg" />
-                      </Center>
-                    </Td>
+                    <Th
+                      onClick={() => handleSort('title')}
+                      cursor="pointer"
+                    >
+                      Program{' '}
+                      <SortArrows
+                        columnKey="title"
+                        sortOrder={sortOrder}
+                      />
+                    </Th>
+                    <Th
+                      onClick={() => handleSort('status')}
+                      cursor="pointer"
+                    >
+                      Status{' '}
+                      <SortArrows
+                        columnKey="status"
+                        sortOrder={sortOrder}
+                      />
+                    </Th>
+                    <Th
+                      onClick={() => handleSort('launchDate')}
+                      cursor="pointer"
+                    >
+                      Launch Date{' '}
+                      <SortArrows
+                        columnKey="launchDate"
+                        sortOrder={sortOrder}
+                      />
+                    </Th>
+                    <Th
+                      onClick={() => handleSort('location')}
+                      cursor="pointer"
+                    >
+                      Location{' '}
+                      <SortArrows
+                        columnKey="location"
+                        sortOrder={sortOrder}
+                      />
+                    </Th>
+                    <Th
+                      onClick={() => handleSort('students')}
+                      cursor="pointer"
+                    >
+                      Students{' '}
+                      <SortArrows
+                        columnKey="students"
+                        sortOrder={sortOrder}
+                      />
+                    </Th>
+                    <Th
+                      onClick={() => handleSort('instruments')}
+                      cursor="pointer"
+                    >
+                      Instruments{' '}
+                      <SortArrows
+                        columnKey="instruments"
+                        sortOrder={sortOrder}
+                      />
+                    </Th>
+                    <Th
+                      onClick={() => handleSort('totalInstruments')}
+                      cursor="pointer"
+                    >
+                      Total Instruments{' '}
+                      <SortArrows
+                        columnKey="totalInstruments"
+                        sortOrder={sortOrder}
+                      />
+                    </Th>
                   </Tr>
-                ) : (
-                  tableData.map((p) => (
-                    <ExpandableRow
-                      key={p.id}
-                      p={p}
-                      onEdit={openEditForm}
-                    />
-                  ))
-                )}
-              </Tbody>
-            </Table>
+                </Thead>
+                <Tbody>
+                  {tableData.length === 0 && isLoading ? (
+                    <Tr>
+                      <Td
+                        colSpan={7}
+                        borderBottom="1px solid"
+                        borderColor="gray.200"
+                      >
+                        <Center py={8}>
+                          <Spinner size="lg" />
+                        </Center>
+                      </Td>
+                    </Tr>
+                  ) : (
+                    tableData.map((p) => (
+                      <ExpandableRow
+                        key={p.id}
+                        p={p}
+                        onEdit={openEditForm}
+                      />
+                    ))
+                  )}
+                </Tbody>
+              </Table>
+            )
+          ) : tableData.length === 0 && !isLoading ? (
+            <EmptyStateBadge variant="no-programs" />
           ) : (
             <CardView
               data={tableData}
@@ -660,22 +997,29 @@ function ProgramTable({ onStatsRefresh }) {
         rows.map(async (row) => {
           // TODO: make this more efficient with lazy loading
           const programId = row.id ?? row.programId;
-          const [playlists, programDirectors, regionalDirectors, media] =
-            await Promise.all([
-              backend.get(`/program/${programId}/playlists`),
-              backend
-                .get(`/program/${programId}/program-directors`)
-                .catch(() => ({ data: [] })),
-              backend
-                .get(`/program/${programId}/regional-directors`)
-                .catch(() => ({ data: [] })),
-              backend
-                .get(`/program/${programId}/media`)
-                .catch(() => ({ data: [] })),
-            ]);
+          const [
+            instrumentTypes,
+            playlists,
+            programDirectors,
+            regionalDirectors,
+            media,
+          ] = await Promise.all([
+            backend.get(`/program/${programId}/instruments`),
+            backend.get(`/program/${programId}/playlists`),
+            backend
+              .get(`/program/${programId}/program-directors`)
+              .catch(() => ({ data: [] })),
+            backend
+              .get(`/program/${programId}/regional-directors`)
+              .catch(() => ({ data: [] })),
+            backend
+              .get(`/program/${programId}/media`)
+              .catch(() => ({ data: [] })),
+          ]);
 
           return {
             ...row,
+            instrumentTypes: instrumentTypes?.data || [],
             playlists: playlists.data,
             programDirectors: programDirectors?.data || [],
             regionalDirectors: regionalDirectors?.data || [],

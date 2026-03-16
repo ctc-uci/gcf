@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import {
   Box,
   Button,
@@ -10,8 +11,9 @@ import {
   NumberInputStepper,
   Text,
 } from '@chakra-ui/react';
-import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+
 import { InstrumentSearchInput } from '@/components/common/InstrumentSearchInput';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
 export function InstrumentForm({ setFormData }) {
   const [instruments, setInstruments] = useState([]);
@@ -89,7 +91,10 @@ export function InstrumentForm({ setFormData }) {
       align="flex-start"
       wrap="wrap"
     >
-      <Box flex="1" minW="12rem">
+      <Box
+        flex="1"
+        minW="12rem"
+      >
         <InstrumentSearchInput
           instruments={instruments}
           value={searchQuery}
@@ -102,7 +107,11 @@ export function InstrumentForm({ setFormData }) {
           placeholder="Search instrument"
         />
         {selectedInstrument && (
-          <Text fontSize="sm" color="gray.600" mt={1}>
+          <Text
+            fontSize="sm"
+            color="gray.600"
+            mt={1}
+          >
             Selected: {selectedInstrument.name}
           </Text>
         )}
@@ -121,7 +130,10 @@ export function InstrumentForm({ setFormData }) {
           <NumberDecrementStepper />
         </NumberInputStepper>
       </NumberInput>
-      <Button onClick={handleSubmit} isDisabled={!selectedInstrument}>
+      <Button
+        onClick={handleSubmit}
+        isDisabled={!selectedInstrument}
+      >
         + Add
       </Button>
     </HStack>
