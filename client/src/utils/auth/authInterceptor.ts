@@ -1,6 +1,6 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance } from 'axios';
 
-import { refreshToken } from "./firebase";
+import { refreshToken } from './firebase';
 
 /**
  * Adds an interceptor to the provided Axios instance that handles authentication token refresh.
@@ -22,7 +22,7 @@ export const authInterceptor = (axiosInstance: AxiosInstance) => {
 
       const { status, data, config } = error.response;
 
-      if (status === 400 && data === "@verifyToken invalid access token") {
+      if (status === 400 && data === '@verifyToken invalid access token') {
         try {
           await refreshToken();
 

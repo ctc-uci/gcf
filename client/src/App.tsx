@@ -1,22 +1,27 @@
-import { Admin } from "@/components/admin/Admin";
-import { CatchAll } from "@/components/CatchAll";
-import Dashboard from "@/components/dashboard/Dashboard";
+import { Admin } from '@/components/admin/Admin';
+import { CatchAll } from '@/components/CatchAll';
+import Dashboard from '@/components/dashboard/Dashboard';
 // import { ProgramForm } from "@/components/dashboard/ProgramForm";
-import { Login } from "@/components/login/Login";
-import { Layout } from "@/components/navigation/Layout";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { Signup } from "@/components/signup/Signup";
-import { UpdatesPage } from "@/components/updates/UpdatesPage";
-import { Profile } from "@/components/profile/Profile";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { BackendProvider } from "@/contexts/BackendContext";
-import { RoleProvider } from "@/contexts/RoleContext";
-import { CookiesProvider } from "react-cookie";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { RegionsPage } from "./components/regions/RegionsPage";
+import { Login } from '@/components/login/Login';
+import { Layout } from '@/components/navigation/Layout';
+import { Profile } from '@/components/profile/Profile';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { Signup } from '@/components/signup/Signup';
+import { UpdatesPage } from '@/components/updates/UpdatesPage';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { BackendProvider } from '@/contexts/BackendContext';
+import { RoleProvider } from '@/contexts/RoleContext';
+import { CookiesProvider } from 'react-cookie';
+import {
+  Navigate,
+  Route,
+  BrowserRouter as Router,
+  Routes,
+} from 'react-router-dom';
 
-import { Account } from "./components/accounts/Account";
-import { Media } from "./components/media/Media";
+import { Account } from './components/accounts/Account';
+import { Media } from './components/media/Media';
+import { RegionsPage } from './components/regions/RegionsPage';
 
 const App = () => {
   return (
@@ -40,11 +45,20 @@ const App = () => {
                   element={<ProtectedRoute element={<Layout />} />}
                 >
                   <Route
+                    index
+                    element={
+                      <Navigate
+                        to="/dashboard"
+                        replace
+                      />
+                    }
+                  />
+                  <Route
                     path="admin"
                     element={
                       <ProtectedRoute
                         element={<Admin />}
-                        allowedRoles={["Admin"]}
+                        allowedRoles={['Admin']}
                       />
                     }
                   />
@@ -55,42 +69,53 @@ const App = () => {
                   />
 
                   <Route
-                    path={"account"}
+                    path={'account'}
                     element={
                       <ProtectedRoute
                         element={<Account />}
-                        allowedRoles={["Super Admin", "Admin", "Regional Director"]}
+                        allowedRoles={[
+                          'Super Admin',
+                          'Admin',
+                          'Regional Director',
+                        ]}
                       />
                     }
                   />
 
                   <Route
-                    path={"media"}
+                    path={'media'}
                     element={
                       <ProtectedRoute
                         element={<Media />}
-                        allowedRoles={["Program Director"]}
+                        allowedRoles={['Program Director']}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/regions"
+                    element={
+                      <ProtectedRoute
+                        element={<RegionsPage />}
+                        allowedRoles={['Admin']}
                       />
                     }
                   />
 
                   <Route
-                    path={"dashboard"}
+                    path={'dashboard'}
                     element={<Dashboard />}
                   />
 
                   <Route
-                    path="/regions"
-                    element={<RegionsPage />}
-                  />
-
-                  <Route
-                    path={"updates"}
+                    path={'updates'}
                     element={<UpdatesPage />}
                   />
                 </Route>
-                
-                <Route path="*" element={<ProtectedRoute element={<CatchAll />} />} />
+
+                <Route
+                  path="*"
+                  element={<ProtectedRoute element={<CatchAll />} />}
+                />
               </Routes>
             </Router>
           </RoleProvider>

@@ -1,39 +1,77 @@
-import { keysToCamel } from "@/common/utils";
-import express from "express";
+import { keysToCamel } from '@/common/utils';
+import express from 'express';
 
-import { db } from "../db/db-pgp";
+import { db } from '../db/db-pgp';
 
 const programRouter = express.Router();
 programRouter.use(express.json());
 
-programRouter.get("/", async (req, res) => {
+programRouter.get('/', async (req, res) => {
   try {
     const program = await db.query(`SELECT * FROM program`);
     res.status(200).json(keysToCamel(program));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-programRouter.get("/:id", async (req, res) => {
+programRouter.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
     const program = await db.query(`SELECT * FROM program WHERE id = $1`, [id]);
 
     if (program.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(program[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-programRouter.get("/get-program-name/:id", async (req, res) => {
+programRouter.get('/city/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const program = await db.query(`SELECT city FROM program WHERE id = $1`, [
+      id,
+    ]);
+
+    if (program.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(program[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+programRouter.get('/state/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const program = await db.query(`SELECT state FROM program WHERE id = $1`, [
+      id,
+    ]);
+
+    if (program.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(program[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+programRouter.get('/get-program-name/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -46,23 +84,24 @@ programRouter.get("/get-program-name/:id", async (req, res) => {
     );
 
     if (program.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(program[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-
-programRouter.post("/", async (req, res) => {
+programRouter.post('/', async (req, res) => {
   try {
     const {
       createdBy,
       name,
       country,
+      state,
+      city,
       title,
       description,
       primaryLanguage,
@@ -78,6 +117,8 @@ programRouter.post("/", async (req, res) => {
         name,
         date_created,
         country,
+        state,
+        city,
         title,
         description,
         primary_language,
@@ -86,7 +127,7 @@ programRouter.post("/", async (req, res) => {
         launch_date
       )
       VALUES (
-        $1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9
+        $1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11
       )
       RETURNING *;
       `,
@@ -94,6 +135,8 @@ programRouter.post("/", async (req, res) => {
         createdBy,
         name,
         country,
+        state,
+        city,
         title,
         description ?? null,
         primaryLanguage ?? null,
@@ -106,16 +149,18 @@ programRouter.post("/", async (req, res) => {
     res.status(201).json(keysToCamel(newProgram[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-programRouter.put("/:id", async (req, res) => {
+programRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const {
       name,
       country,
+      state,
+      city,
       title,
       description,
       primaryLanguage,
@@ -130,18 +175,22 @@ programRouter.put("/:id", async (req, res) => {
       SET
         name = COALESCE($1, name),
         country = COALESCE($2, country),
-        title = COALESCE($3, title),
-        description = COALESCE($4, description),
-        primary_language = COALESCE($5, primary_language),
-        partner_org = COALESCE($6, partner_org),
-        status = COALESCE($7, status),
-        launch_date = COALESCE($8, launch_date)
-      WHERE id = $9
+        state = COALESCE($3, state),
+        city = COALESCE($4, city),
+        title = COALESCE($5, title),
+        description = COALESCE($6, description),
+        primary_language = COALESCE($7, primary_language),
+        partner_org = COALESCE($8, partner_org),
+        status = COALESCE($9, status),
+        launch_date = COALESCE($10, launch_date)
+      WHERE id = $11
       RETURNING *;
       `,
       [
         name,
         country,
+        state,
+        city,
         title,
         description,
         primaryLanguage,
@@ -153,17 +202,17 @@ programRouter.put("/:id", async (req, res) => {
     );
 
     if (updatedProgram.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(updatedProgram[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-programRouter.delete("/:id", async (req, res) => {
+programRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -173,20 +222,20 @@ programRouter.delete("/:id", async (req, res) => {
     );
 
     if (deletedProgram.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(deletedProgram[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-programRouter.get("/:id/regional-directors", async (req, res) => {
+programRouter.get('/:id/regional-directors', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const result = await db.query(
       `
       SELECT 
@@ -206,7 +255,7 @@ programRouter.get("/:id/regional-directors", async (req, res) => {
       return res.status(200).json([]);
     }
 
-    const regional_directors = result.map(row => ({
+    const regional_directors = result.map((row) => ({
       userId: row.user_id,
       firstName: row.first_name,
       lastName: row.last_name,
@@ -215,11 +264,11 @@ programRouter.get("/:id/regional-directors", async (req, res) => {
     res.status(200).json(regional_directors);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-programRouter.get("/:id/playlists", async (req, res) => {
+programRouter.get('/:id/playlists', async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -231,66 +280,74 @@ programRouter.get("/:id/playlists", async (req, res) => {
     res.status(200).json(keysToCamel(playlists));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-programRouter.post("/:id/playlists", async (req, res) => {
+programRouter.post('/:id/playlists', async (req, res) => {
   try {
     const { id } = req.params;
-    const { link, name } = req.body;
+    const { link, name, instrumentId } = req.body;
 
     if (!link || !name) {
-      return res.status(400).json({ error: "link and name are required" });
+      return res.status(400).json({ error: 'link and name are required' });
+    }
+    if (instrumentId === null) {
+      return res.status(400).json({ error: 'instrumentId is required' });
     }
 
-    const normalizedLink = link.startsWith("http://") || link.startsWith("https://")
-      ? link
-      : `https://${link}`;
+    const normalizedLink =
+      link.startsWith('http://') || link.startsWith('https://')
+        ? link
+        : `https://${link}`;
 
     await db.query(
-      `INSERT INTO playlist (program_id, link, name) VALUES ($1, $2, $3)
-       ON CONFLICT (program_id, link) DO UPDATE SET name = EXCLUDED.name`,
-      [id, normalizedLink, name]
+      `INSERT INTO playlist (program_id, instrument_id, link, name)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (program_id, instrument_id, link) DO UPDATE SET name = EXCLUDED.name`,
+      [id, instrumentId, normalizedLink, name]
     );
 
     const [inserted] = await db.query(
-      `SELECT * FROM playlist WHERE program_id = $1 AND link = $2`,
-      [id, normalizedLink]
+      `SELECT * FROM playlist WHERE program_id = $1 AND instrument_id = $2 AND link = $3`,
+      [id, instrumentId, normalizedLink]
     );
     res.status(201).json(keysToCamel(inserted[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-programRouter.delete("/:id/playlists", async (req, res) => {
+programRouter.delete('/:id/playlists', async (req, res) => {
   try {
     const { id } = req.params;
-    const { link } = req.body;
+    const { link, instrumentId } = req.body;
 
     if (!link) {
-      return res.status(400).json({ error: "link is required" });
+      return res.status(400).json({ error: 'link is required' });
+    }
+    if (instrumentId === null) {
+      return res.status(400).json({ error: 'instrumentId is required' });
     }
 
     const result = await db.query(
-      `DELETE FROM playlist WHERE program_id = $1 AND link = $2 RETURNING *`,
-      [id, link]
+      `DELETE FROM playlist WHERE program_id = $1 AND instrument_id = $2 AND link = $3 RETURNING *`,
+      [id, instrumentId, link]
     );
 
     if (result.length === 0) {
-      return res.status(404).json({ error: "Playlist not found" });
+      return res.status(404).json({ error: 'Playlist not found' });
     }
     res.status(200).json(keysToCamel(result[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
 // aggregated instruments (by instrument) for a program
-programRouter.get("/:id/instruments", async (req, res) => {
+programRouter.get('/:id/instruments', async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -314,11 +371,11 @@ programRouter.get("/:id/instruments", async (req, res) => {
     res.status(200).json(keysToCamel(rows));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-programRouter.get("/:id/program-directors", async (req, res) => {
+programRouter.get('/:id/program-directors', async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -335,7 +392,7 @@ programRouter.get("/:id/program-directors", async (req, res) => {
       [id]
     );
 
-    const directors = result.map(row => ({
+    const directors = result.map((row) => ({
       userId: row.user_id,
       firstName: row.first_name,
       lastName: row.last_name,
@@ -344,10 +401,38 @@ programRouter.get("/:id/program-directors", async (req, res) => {
     res.status(200).json(directors);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
+programRouter.get('/:id/media', async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const result = await db.query(
+      `
+      SELECT m.id, m.s3_key, m.file_name, m.file_type, m.is_thumbnail, m.instrument_id
+      FROM media_change m
+      JOIN program_update pu ON m.update_id = pu.id
+      WHERE program_id = $1;
+      `,
+      [id]
+    );
+
+    const media = result.map((row) => ({
+      id: row.id,
+      s3_key: row.s3_key,
+      file_name: row.file_name,
+      file_type: row.file_type,
+      is_thumbnail: row.is_thumbnail,
+      instrument_id: row.instrument_id,
+    }));
+
+    res.status(200).json(media);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 export { programRouter };

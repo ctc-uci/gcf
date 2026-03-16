@@ -1,11 +1,14 @@
-import { keysToCamel } from "@/common/utils";
-import express from "express";
-import { admin } from "../config/firebase";
-import { db } from "../db/db-pgp";
+import { randomBytes } from 'crypto';
+
+import { keysToCamel } from '@/common/utils';
+import express from 'express';
+
+import { admin } from '../config/firebase';
+import { db } from '../db/db-pgp';
 
 const gcfUserRouter = express.Router();
 gcfUserRouter.use(express.json());
-gcfUserRouter.post("/", async (req, res) => {
+gcfUserRouter.post('/', async (req, res) => {
   try {
     const { id, role, first_name, last_name, created_by } = req.body;
 
@@ -18,33 +21,41 @@ gcfUserRouter.post("/", async (req, res) => {
     res.status(201).json(keysToCamel(newGcfUser[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-gcfUserRouter.get("/admin/get-user/:targetUserId", async (req, res) => {
+gcfUserRouter.get('/admin/get-user/:targetUserId', async (req, res) => {
   try {
-    const {targetUserId} = req.params;
+    const { targetUserId } = req.params;
     const user = await admin.auth().getUser(targetUserId);
-    res.status(200).json(
-      {
-        email: user.email
-      }
-    );
+    res.status(200).json({
+      email: user.email,
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-gcfUserRouter.post("/admin/create-user", async (req, res) => {
+gcfUserRouter.post('/admin/create-user', async (req, res) => {
   try {
-    const { email, password, firstName, lastName, role, currentUserId, programId, regionId } = req.body;
+    const {
+      email,
+      firstName,
+      lastName,
+      role,
+      currentUserId,
+      programId,
+      regionId,
+    } = req.body;
+
+    const tempPassword = randomBytes(16).toString('hex');
 
     const userRecord = await admin.auth().createUser({
       email: email,
-      password: password,
-      displayName: `${firstName} ${lastName}`
+      password: tempPassword,
+      displayName: `${firstName} ${lastName}`,
     });
 
     const firebaseUid = userRecord.uid;
@@ -72,35 +83,43 @@ gcfUserRouter.post("/admin/create-user", async (req, res) => {
       );
     }
 
-    res.status(201).json({ 
-      uid: firebaseUid, 
+    res.status(201).json({
+      uid: firebaseUid,
       user: keysToCamel(newGcfUser[0]),
-      message: 'User created successfully' 
+      message: 'User created successfully',
     });
-
   } catch (err) {
-    console.error("Error creating user:", err);
+    console.error('Error creating user:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-gcfUserRouter.put("/admin/update-user", async (req, res) => {
+gcfUserRouter.put('/admin/update-user', async (req, res) => {
   try {
-    const { email, password, firstName, lastName, role, targetId, programId, regionId } = req.body;
+    const {
+      email,
+      password,
+      firstName,
+      lastName,
+      role,
+      targetId,
+      programId,
+      regionId,
+    } = req.body;
 
     await admin.auth().updateUser(targetId, {
       email: email,
       password: password,
-      displayName: `${firstName} ${lastName}`
+      displayName: `${firstName} ${lastName}`,
     });
 
     const oldRoleResponse = await db.query(
       `SELECT role FROM gcf_user WHERE id = $1`,
       [targetId]
     );
-    
+
     const oldRole = oldRoleResponse[0].role;
-    
+
     const updatedGcfUser = await db.query(
       `UPDATE gcf_user SET 
         role =  COALESCE($1, role),
@@ -108,37 +127,36 @@ gcfUserRouter.put("/admin/update-user", async (req, res) => {
         last_name = COALESCE($3, last_name)
         WHERE id = $4
         RETURNING *;`,
-        [role, firstName, lastName, targetId]
+      [role, firstName, lastName, targetId]
     );
 
-    
     if (role !== oldRole) {
       if (oldRole === 'Program Director') {
         await db.query(
           `DELETE FROM program_director WHERE user_id = $1 RETURNING *`,
           [targetId]
-        )
+        );
       }
       if (oldRole === 'Regional Director') {
         await db.query(
           `DELETE FROM regional_director WHERE user_id = $1 RETURNING *`,
           [targetId]
-        )
+        );
       }
-      
+
       if (role === 'Program Director' && programId) {
         await db.query(
           `INSERT INTO program_director (user_id, program_id) 
           VALUES ($1, $2)`,
           [targetId, programId]
-        )
+        );
       }
       if (role === 'Regional Director' && regionId) {
         await db.query(
           `INSERT INTO regional_director (user_id, region_id) 
           VALUES ($1, $2)`,
           [targetId, regionId]
-        )
+        );
       }
     } else {
       // Update existing assignments if role hasn't changed
@@ -146,39 +164,38 @@ gcfUserRouter.put("/admin/update-user", async (req, res) => {
         await db.query(
           `UPDATE program_director SET program_id = $1 WHERE user_id = $2`,
           [programId, targetId]
-        )
+        );
       }
       if (role === 'Regional Director' && regionId) {
         await db.query(
           `UPDATE regional_director SET region_id = $1 WHERE user_id = $2`,
           [regionId, targetId]
-        )
+        );
       }
     }
-    
-    res.status(201).json({ 
-      uid: targetId, 
-      user: keysToCamel(updatedGcfUser[0]),
-      message: 'User updated successfully' 
-    });
 
+    res.status(201).json({
+      uid: targetId,
+      user: keysToCamel(updatedGcfUser[0]),
+      message: 'User updated successfully',
+    });
   } catch (err) {
-    console.error("Error creating user:", err);
+    console.error('Error creating user:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-gcfUserRouter.get("/", async (req, res) => {
+gcfUserRouter.get('/', async (req, res) => {
   try {
     const data = await db.query(`SELECT * FROM gcf_user`);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-gcfUserRouter.get("/role/:role", async (req, res) => {
+gcfUserRouter.get('/role/:role', async (req, res) => {
   try {
     const { role } = req.params;
     const gcfUser = await db.query(
@@ -186,27 +203,27 @@ gcfUserRouter.get("/role/:role", async (req, res) => {
       [role]
     );
 
-    if (gcfUser.length === 0){
-      return res.status(404).send("Item not found");
+    if (gcfUser.length === 0) {
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(gcfUser));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-gcfUserRouter.get("/:id/accounts", async (req, res) => {
+gcfUserRouter.get('/:id/accounts', async (req, res) => {
   try {
-    console.log("GET ACCOUNTS ROUTE HIT");
+    console.log('GET ACCOUNTS ROUTE HIT');
     const { id } = req.params;
     const { role } = req.query;
 
     let accounts;
 
     // Super Admin: view and edit all users and their associated information (including admins)
-    if (role === "Super Admin") {
+    if (role === 'Super Admin') {
       accounts = await db.query(
         `SELECT 
           u.id,
@@ -238,7 +255,7 @@ gcfUserRouter.get("/:id/accounts", async (req, res) => {
     }
 
     // Admin: RDs and PDs with their associated programs; CANNOT view or edit other Admins
-    if (role === "Admin") {
+    if (role === 'Admin') {
       accounts = await db.query(
         `SELECT 
           u.id,
@@ -270,7 +287,7 @@ gcfUserRouter.get("/:id/accounts", async (req, res) => {
       );
     }
     // Regional Director: only program directors in their region with their programs
-    else if (role === "Regional Director") {
+    else if (role === 'Regional Director') {
       accounts = await db.query(
         `SELECT 
           u.id,
@@ -315,11 +332,11 @@ gcfUserRouter.get("/:id/accounts", async (req, res) => {
     res.status(200).json(keysToCamel(accounts));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-gcfUserRouter.get("/:id", async (req, res) => {
+gcfUserRouter.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const gcfUser = await db.query(`SELECT ALL * FROM gcf_user WHERE id = $1`, [
@@ -327,17 +344,17 @@ gcfUserRouter.get("/:id", async (req, res) => {
     ]);
 
     if (gcfUser.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(gcfUser[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-gcfUserRouter.put("/:id", async (req, res) => {
+gcfUserRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { role, first_name, last_name } = req.body;
@@ -352,17 +369,17 @@ gcfUserRouter.put("/:id", async (req, res) => {
     );
 
     if (updatedGcfUser.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(updatedGcfUser[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
-gcfUserRouter.delete("/:id", async (req, res) => {
+gcfUserRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const deletedGcfUser = await db.query(
@@ -371,13 +388,23 @@ gcfUserRouter.delete("/:id", async (req, res) => {
     );
 
     if (deletedGcfUser.length === 0) {
-      return res.status(404).send("Item not found");
+      return res.status(404).send('Item not found');
     }
 
     res.status(200).json(keysToCamel(deletedGcfUser[0]));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+gcfUserRouter.post('/verify-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    await admin.auth().getUserByEmail(email);
+    res.status(200).send();
+  } catch (err) {
+    res.status(400).send(err.message);
   }
 });
 

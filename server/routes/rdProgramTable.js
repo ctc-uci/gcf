@@ -1,21 +1,23 @@
-import { keysToCamel } from "@/common/utils";
-import express from "express";
-import { db } from "../db/db-pgp";
+import { keysToCamel } from '@/common/utils';
+import express from 'express';
+
+import { db } from '../db/db-pgp';
 
 const rdProgramTableRouter = express.Router();
 rdProgramTableRouter.use(express.json());
 
 async function getDataByUserId(userId) {
-    const data = await db.query(
-        `SELECT
+  const data = await db.query(
+    `SELECT
             r.id AS region_id,
             r.name AS region_name,
-
+            p.city AS city,
+            p.state AS state, 
             p.id AS program_id,
             p.name AS program_name,
             p.status AS program_status,
             p.launch_date AS program_launch_date,
-
+            p.country AS country_id,
             c.name AS program_location,
 
             COALESCE(SUM(ec.enrollment_change), 0) - COALESCE(SUM(ec.graduated_change), 0) AS total_students,
@@ -40,24 +42,27 @@ async function getDataByUserId(userId) {
             p.id,
             p.name,
             p.status,
+            p.city,
+            p.state,
+            p.country,
             p.launch_date,
             c.name
         ORDER BY
             r.name,
             p.name;`,
-        [userId]
-    );
-    return data;
+    [userId]
+  );
+  return data;
 }
 
-rdProgramTableRouter.get("/:userId", async (req, res) => {
+rdProgramTableRouter.get('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const data = await getDataByUserId(userId);
     res.json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

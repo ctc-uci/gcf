@@ -1,6 +1,6 @@
-import { SimpleGrid, Text, VStack } from "@chakra-ui/react";
+import { SimpleGrid, Text, VStack } from '@chakra-ui/react';
 
-import { MediaCard } from "./MediaCard";
+import { MediaCard } from './MediaCard';
 
 export const MediaGrid = ({ mediaItems, programName }) => {
   let content;

@@ -1,14 +1,26 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Box, Center, Flex, Heading, Spinner } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  Flex,
+  Heading,
+  IconButton,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Spinner,
+} from '@chakra-ui/react';
 
-import { useAuthContext } from "@/contexts/hooks/useAuthContext";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
-import { useRoleContext } from "@/contexts/hooks/useRoleContext";
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 
-import { AccountsTable } from "./AccountsTable";
-import { AccountToolbar } from "./AccountToolbar";
-import { AccountForm } from "./AccountForm";
+import { applyFilters } from '../../contexts/hooks/TableFilter';
+import { AccountForm } from './AccountForm';
+import { AccountsTable, downloadAccountsAsCsv } from './AccountsTable';
+import { AccountToolbar } from './AccountToolbar';
 
 const getAccountsRoute = (role, userId) => {
   if (!userId) return null;
@@ -18,7 +30,6 @@ const getAccountsRoute = (role, userId) => {
     : `/gcf-users/${userId}/accounts`;
 };
 
-
 export const Account = () => {
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
@@ -27,9 +38,28 @@ export const Account = () => {
   const [users, setUsers] = useState([]);
   const [originalUsers, setOriginalUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false); 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [isCardView, setIsCardView] = useState(false);
+  const columns = [
+    {
+      key: 'fullName',
+      type: 'text',
+    },
+    {
+      key: 'email',
+      type: 'text',
+    },
+    {
+      key: 'role',
+      type: 'text',
+    },
+    {
+      key: 'programs',
+      type: 'list',
+    },
+  ];
 
   const { backend } = useBackendContext();
 
@@ -37,28 +67,29 @@ export const Account = () => {
     setIsLoading(true);
     const route = getAccountsRoute(role, userId);
     if (!route) {
-      console.error("No valid route for accounts. Missing userId or role.");
+      console.error('No valid route for accounts. Missing userId or role.');
       setIsLoading(false);
       return;
     }
     try {
       console.log(route);
       const response = await backend.get(route);
-      const rawData = response.data || []
-      const fetchedData = (rawData).map((item) => ({
+      const rawData = response.data || [];
+      const fetchedData = rawData.map((item) => ({
         id: item.id,
         firstName: item.firstName,
         lastName: item.lastName,
+        fullName: `${item.firstName} ${item.lastName}`,
         role: item.role,
         programs: Array.isArray(item.programs) ? item.programs : [],
-        email: item.email ?? "-",
-        password: "-",
+        email: item.email ?? '-',
+        password: '-',
       }));
 
       setUsers(fetchedData);
       setOriginalUsers(fetchedData);
     } catch (error) {
-      console.error("Error loading data:", error);
+      console.error('Error loading data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -67,6 +98,8 @@ export const Account = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const [activeFilters, setActiveFilters] = useState([]);
 
   return (
     <Box
@@ -77,7 +110,7 @@ export const Account = () => {
       <Flex
         mb={8}
         align="center"
-        wrap={{ base: "wrap", md: "nowrap" }}
+        wrap={{ base: 'wrap', md: 'nowrap' }}
         gap={4}
       >
         <Heading
@@ -88,10 +121,19 @@ export const Account = () => {
           Accounts
         </Heading>
 
-        <AccountToolbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNew = {() => {
-          setIsDrawerOpen(true);
-          setSelectedUser(null)
-        }}/>
+        <AccountToolbar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          columns={columns}
+          setActiveFilters={setActiveFilters}
+          resultCount={users.length}
+          onNew={() => {
+            setIsDrawerOpen(true);
+            setSelectedUser(null);
+          }}
+          setIsCardView={setIsCardView}
+          onDownload={() => downloadAccountsAsCsv(users)}
+        />
       </Flex>
 
       {isLoading ? (
@@ -103,17 +145,23 @@ export const Account = () => {
         </Center>
       ) : (
         <AccountsTable
-          data={users}
-          setData={setUsers}
           originalData={originalUsers}
           searchQuery={searchQuery}
-          onUpdate = {(user) => {
-            setSelectedUser(user)
-            setIsDrawerOpen(true)
+          activeFilters={activeFilters}
+          isCardView={isCardView}
+          onSave={() => fetchData()}
+          onUpdate={(user) => {
+            setSelectedUser(user);
+            setIsDrawerOpen(true);
           }}
         />
       )}
-      <AccountForm targetUser = {selectedUser} isOpen = { isDrawerOpen } onClose = {() => setIsDrawerOpen(false)} onSave = {() => fetchData()}></AccountForm>
+      <AccountForm
+        targetUser={selectedUser}
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={() => fetchData()}
+      ></AccountForm>
     </Box>
   );
 };
