@@ -7,6 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogOverlay,
+  Box,
   Button,
   Drawer,
   DrawerBody,
@@ -310,16 +311,25 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                 <MenuList
                   maxH="300px"
                   overflowY="auto"
+                  p={0}
                 >
-                  <Input
-                    placeholder="Search countries..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
-                    mx={2}
-                    width="90%"
-                    mb={2}
-                  />
+                  <Box
+                    position="sticky"
+                    top={0}
+                    bg="white"
+                    zIndex={1}
+                    p={2}
+                    borderBottom="1px solid"
+                    borderColor="gray.200"
+                  >
+                    <Input
+                      placeholder="Search countries..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      width="100%"
+                    />
+                  </Box>
                   {filteredCountries?.map((country) => (
                     <MenuItem
                       key={country.id}

@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Icon, Link, VStack } from '@chakra-ui/react';
 
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
-import { BsFillGearFill } from 'react-icons/bs';
+import { BsMap } from 'react-icons/bs';
 import { FaGuitar } from 'react-icons/fa';
 import { HiOutlineUser } from 'react-icons/hi';
 import { MdOutlineNotifications, MdPermMedia } from 'react-icons/md';
@@ -55,7 +55,7 @@ export const Sidebar = () => {
         name: 'Regions',
         icon: (
           <Icon
-            as={BsFillGearFill}
+            as={BsMap}
             boxSize="20px"
           />
         ),
