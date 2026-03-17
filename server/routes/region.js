@@ -16,18 +16,17 @@ regionRouter.get('/', async (req, res) => {
   }
 });
 
-regionRouter.get('/:id', async (req, res) => {
+regionRouter.get('/countries-by-region', async (req, res) => {
   try {
-    const { id } = req.params;
-    const region = await db.query(`SELECT ALL * FROM region WHERE id = $1`, [
-      id,
-    ]);
-
-    if (region.length === 0) {
-      return res.status(404).send('Item not found');
-    }
-
-    res.status(200).json(keysToCamel(region[0]));
+    const countries = await db.query(`SELECT * FROM country ORDER BY region_id, name`);
+    const countriesByRegion = countries.reduce((acc, country) => {
+      if (!acc[country.region_id]) {
+        acc[country.region_id] = [];
+      }
+      acc[country.region_id].push(country);
+      return acc;
+    }, {});
+    res.status(200).json(keysToCamel(countriesByRegion));
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');
@@ -45,6 +44,40 @@ regionRouter.get('/get-region-name/:id', async (req, res) => {
       WHERE gcf_user.id = $1`,
       [id]
     );
+
+    if (region.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(region[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+regionRouter.get('/:id/countries', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const countries = await db.query(
+      `SELECT * FROM country WHERE region_id = $1`,
+      [id]
+    );
+
+    res.status(200).json(keysToCamel(countries));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+regionRouter.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const region = await db.query(`SELECT ALL * FROM region WHERE id = $1`, [
+      id,
+    ]);
 
     if (region.length === 0) {
       return res.status(404).send('Item not found');
@@ -110,22 +143,6 @@ regionRouter.delete('/:id', async (req, res) => {
     }
 
     res.status(200).json(keysToCamel(deletedRegion[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-regionRouter.get('/:id/countries', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const countries = await db.query(
-      `SELECT * FROM country WHERE region_id = $1`,
-      [id]
-    );
-
-    res.status(200).json(keysToCamel(countries));
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');

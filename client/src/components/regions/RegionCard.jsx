@@ -15,10 +15,9 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { GrEdit } from 'react-icons/gr';
 import { MdAccountCircle } from 'react-icons/md';
 
-export const RegionCard = ({ region, onEdit }) => {
+export const RegionCard = ({ region, onEdit, countries }) => {
   const { backend } = useBackendContext();
   const [regionalDirector, setRegionalDirector] = useState(null);
-  const [countries, setCountries] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,20 +29,6 @@ export const RegionCard = ({ region, onEdit }) => {
         setRegionalDirector(regionalDirector);
       } catch (err) {
         console.error('Error fetching regional director:', err);
-      }
-    };
-
-    fetchData();
-  }, [region.id, backend]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await backend.get(`/region/${region.id}/countries/`);
-        const countryList = res.data ? res.data : [];
-        setCountries(countryList);
-      } catch (err) {
-        console.error('Error fetching countries:', err);
       }
     };
 
