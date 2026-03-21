@@ -41,6 +41,8 @@ import {
   HiOutlineSquares2X2,
 } from 'react-icons/hi2';
 
+import 'flag-icons/css/flag-icons.min.css';
+
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import {
@@ -68,18 +70,18 @@ function mapAdminRow(row) {
     title: row.title ?? row.name,
     status: row.status,
     launchDate: row.launchDate,
-    location: row.countryName ?? '',
+    location: row.countryName + ', ' + row.regionName,
     country: row.country,
+    iso_code: row.isoCode,
     city: row.city,
     state: row.state,
     students: row.students ?? 0,
-    instruments: row.instruments ?? 0,
+    instrumentsMap: row.instrumentsMap,
     totalInstruments: row.instruments ?? 0,
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
-
     media: row.media,
   };
 }
@@ -90,13 +92,14 @@ function mapRdRow(row) {
     title: row.programName,
     status: row.programStatus,
     launchDate: row.programLaunchDate,
-    location: row.programLocation ?? row.regionName ?? '',
+    location: row.programLocation + ', ' + row.regionName,
     country: row.countryId,
+    iso_code: row.isoCode,
     city: row.city,
     state: row.state,
     regionId: row.regionId,
     students: row.totalStudents ?? 0,
-    instruments: row.totalInstruments ?? 0,
+    instrumentsMap: row.instrumentsMap,
     totalInstruments: row.totalInstruments ?? 0,
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
@@ -125,9 +128,32 @@ function ExpandableRow({ p, onEdit }) {
         <Td>{p.title}</Td>
         <Td>{p.status}</Td>
         <Td>{p.launchDate}</Td>
-        <Td>{p.location}</Td>
+        <Td>
+          <span class={`fi fi-${p.iso_code?.toLowerCase()}`}></span>
+          {'  '}
+          {p.location}
+        </Td>
         <Td>{p.students}</Td>
-        <Td>{p.instruments}</Td>
+        <Td>
+          <VStack
+            align="start"
+            spacing={2}
+          >
+            {Array.isArray(p.instrumentsMap)
+              ? p.instrumentsMap.map((d, idx) => (
+                  <Box
+                    key={`${d.name}-${d.quantity}-${idx}`}
+                    bg="gray.200"
+                    px={3}
+                    py={1}
+                    borderRadius="full"
+                  >
+                    {d.name} {d.quantity}
+                  </Box>
+                ))
+              : null}
+          </VStack>
+        </Td>
         <Td>{p.totalInstruments}</Td>
       </Tr>
       <Tr>
@@ -306,13 +332,18 @@ function ProgramDisplay({
       'Program Directors',
       'Curriculum Links',
     ];
+    console.log(p.instrumentsMap);
     const rows = (tableData || []).map((p) => [
       escapeCsvValue(p.title),
       escapeCsvValue(p.status),
       escapeCsvValue(p.launchDate),
       escapeCsvValue(p.location),
       escapeCsvValue(p.students),
-      escapeCsvValue(p.instruments),
+      escapeCsvValue(
+        Array.isArray(p.instrumentsMap)
+          ? p.instrumentsMap.map((d) => `${d.name} ${d.quantity}`).join('; ')
+          : ''
+      ),
       escapeCsvValue(p.totalInstruments),
       escapeCsvValue(p.primaryLanguage),
       escapeCsvValue(
@@ -660,19 +691,27 @@ function ProgramTable({ onStatsRefresh }) {
         rows.map(async (row) => {
           // TODO: make this more efficient with lazy loading
           const programId = row.id ?? row.programId;
-          const [playlists, programDirectors, regionalDirectors, media] =
-            await Promise.all([
-              backend.get(`/program/${programId}/playlists`),
-              backend
-                .get(`/program/${programId}/program-directors`)
-                .catch(() => ({ data: [] })),
-              backend
-                .get(`/program/${programId}/regional-directors`)
-                .catch(() => ({ data: [] })),
-              backend
-                .get(`/program/${programId}/media`)
-                .catch(() => ({ data: [] })),
-            ]);
+          const [
+            playlists,
+            programDirectors,
+            regionalDirectors,
+            media,
+            instrumentsMap,
+          ] = await Promise.all([
+            backend.get(`/program/${programId}/playlists`),
+            backend
+              .get(`/program/${programId}/program-directors`)
+              .catch(() => ({ data: [] })),
+            backend
+              .get(`/program/${programId}/regional-directors`)
+              .catch(() => ({ data: [] })),
+            backend
+              .get(`/program/${programId}/media`)
+              .catch(() => ({ data: [] })),
+            backend
+              .get(`/program/${programId}/instruments`)
+              .catch(() => ({ data: [] })),
+          ]);
 
           return {
             ...row,
@@ -680,6 +719,7 @@ function ProgramTable({ onStatsRefresh }) {
             programDirectors: programDirectors?.data || [],
             regionalDirectors: regionalDirectors?.data || [],
             media: media?.data || [],
+            instrumentsMap: instrumentsMap?.data || [],
           };
         })
       );

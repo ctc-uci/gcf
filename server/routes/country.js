@@ -34,6 +34,24 @@ countryRouter.get('/:id', async (req, res) => {
   }
 });
 
+countryRouter.get('/:id/region', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const regionName = await db.query(
+      `SELECT r.name
+      FROM region as r
+      INNER JOIN country c ON c.region_id = r.id
+      WHERE c.id = $1`,
+      [id]
+    );
+
+    res.status(201).json(keysToCamel(regionName));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 countryRouter.post('/', async (req, res) => {
   try {
     const { region_id, name, last_modified, iso_code } = req.body;
