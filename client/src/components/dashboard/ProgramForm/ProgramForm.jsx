@@ -385,7 +385,6 @@ export const ProgramForm = ({
               file_name: mediaChange.file_name,
               file_type: mediaChange.file_type,
               is_thumbnail: false,
-              instrument_id: mediaChange.instrument_id || 50,
             });
           }
         }

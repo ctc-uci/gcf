@@ -6,15 +6,16 @@ import {
   Image,
   Spinner,
   Text,
-  VStack,
   useDisclosure,
+  VStack,
 } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
 import { MediaUploadModal } from '../media/MediaUploadModal';
+
 const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
 
 const fetchProgramData = async (backend, userId) => {
@@ -122,7 +123,12 @@ export const Profile = () => {
 
   if (loading) {
     return (
-      <Box h="100vh" display="flex" alignItems="center" justifyContent="center">
+      <Box
+        h="100vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
         <Spinner size="xl" />
       </Box>
     );
@@ -149,9 +155,22 @@ export const Profile = () => {
   }
 
   return (
-    <Box h="100vh" display="flex" alignItems="center" justifyContent="center">
-      <VStack spacing={8} align="center" p={4} w="100%">
-        <VStack spacing={4} align="center">
+    <Box
+      h="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <VStack
+        spacing={8}
+        align="center"
+        p={4}
+        w="100%"
+      >
+        <VStack
+          spacing={4}
+          align="center"
+        >
           <Image
             src={profilePicture}
             boxSize="300px"
@@ -160,14 +179,29 @@ export const Profile = () => {
             alt="Profile"
             onClick={onOpen}
           />
-          <Text fontSize="2xl" fontWeight="bold">
+          <Text
+            fontSize="2xl"
+            fontWeight="bold"
+          >
             {fullName}
           </Text>
         </VStack>
-        <VStack spacing="10px" align="flex-start" w="100%" maxW="624px">
+        <VStack
+          spacing="10px"
+          align="flex-start"
+          w="100%"
+          maxW="624px"
+        >
           {profileData.map(({ label, value }) => (
-            <HStack key={label} spacing={40}>
-              <Text w="80px" fontSize="lg" fontWeight="medium">
+            <HStack
+              key={label}
+              spacing={40}
+            >
+              <Text
+                w="80px"
+                fontSize="lg"
+                fontWeight="medium"
+              >
                 {label}
               </Text>
               <Text

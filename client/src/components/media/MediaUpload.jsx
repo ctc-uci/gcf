@@ -1,6 +1,8 @@
 import { useCallback } from 'react';
+
+import { Button, Center, Text, VStack } from '@chakra-ui/react';
+
 import { useDropzone } from 'react-dropzone';
-import { Text, Center, VStack, Button } from '@chakra-ui/react';
 
 export function MediaUpload({ onFileSelect, formOrigin }) {
   const onDrop = useCallback(

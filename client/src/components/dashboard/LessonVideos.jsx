@@ -1,25 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import {
   AspectRatio,
   Box,
+  Flex,
   Heading,
   HStack,
-  Text,
-  Flex,
   IconButton,
   Image,
-  Spinner,
   Skeleton,
+  Spinner,
+  Text,
 } from '@chakra-ui/react';
-import { FiFolder, FiPlay } from 'react-icons/fi';
-import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { getYouTubeEmbedUrl } from '@/utils/youtube';
+import { FiFolder, FiPlay } from 'react-icons/fi';
 
 import VideoPlayer from './VideoPlayer';
-import { getYouTubeEmbedUrl } from '@/utils/youtube';
 
 function LessonVideos({
   selectedPlaylist,
@@ -133,7 +133,11 @@ function LessonVideos({
 
   return (
     <Box>
-      <Heading size="lg" fontWeight="extrabold" mb={4}>
+      <Heading
+        size="lg"
+        fontWeight="extrabold"
+        mb={4}
+      >
         Lesson Videos
       </Heading>
       {!isLoading && playlists.length === 0 && (
@@ -141,13 +145,26 @@ function LessonVideos({
       )}
       {isLoading && (
         <Box m={5}>
-          <Flex align="center" gap={3} mb={4}>
-            <Spinner size="sm" color="blue.500" />
-            <Text color="gray.600" fontSize="sm">
+          <Flex
+            align="center"
+            gap={3}
+            mb={4}
+          >
+            <Spinner
+              size="sm"
+              color="blue.500"
+            />
+            <Text
+              color="gray.600"
+              fontSize="sm"
+            >
               Loading lesson videos...
             </Text>
           </Flex>
-          <HStack spacing={5} overflow="hidden">
+          <HStack
+            spacing={5}
+            overflow="hidden"
+          >
             {[1, 2, 3].map((i) => (
               <Skeleton
                 key={i}
@@ -164,7 +181,10 @@ function LessonVideos({
       )}
       {!isLoading &&
         playlistVideos.map((playlist, i) => (
-          <Box key={`${playlist.instrumentName}-${i}`} m={5}>
+          <Box
+            key={`${playlist.instrumentName}-${i}`}
+            m={5}
+          >
             <HStack
               bg="gray.100"
               w="fit-content"
@@ -173,11 +193,17 @@ function LessonVideos({
               borderTopRadius="md"
             >
               <FiFolder />
-              <Text fontWeight="bold" fontSize="lg">
+              <Text
+                fontWeight="bold"
+                fontSize="lg"
+              >
                 {playlist.instrumentName}
               </Text>
             </HStack>
-            <Box position="relative" w="fit-content">
+            <Box
+              position="relative"
+              w="fit-content"
+            >
               <IconButton
                 position="absolute"
                 left="-70px"
@@ -205,7 +231,10 @@ function LessonVideos({
                 p={5}
                 sx={{ '&::-webkit-scrollbar': { height: '8px' } }}
               >
-                <HStack spacing={5} w="max-content">
+                <HStack
+                  spacing={5}
+                  w="max-content"
+                >
                   {playlist.videos.map((video, index) => {
                     const snippet = video.snippet;
                     const thumbnail =
@@ -235,7 +264,10 @@ function LessonVideos({
                           borderRadius="2xl"
                           overflow="hidden"
                         >
-                          <AspectRatio ratio={16 / 9} w="100%">
+                          <AspectRatio
+                            ratio={16 / 9}
+                            w="100%"
+                          >
                             <Image src={thumbnail} />
                           </AspectRatio>
                           <Box
@@ -265,7 +297,11 @@ function LessonVideos({
                             justify="center"
                             bg="blackAlpha.300"
                           >
-                            <FiPlay fill="white" color="white" size={28} />
+                            <FiPlay
+                              fill="white"
+                              color="white"
+                              size={28}
+                            />
                           </Flex>
                         </Box>
                       </Box>

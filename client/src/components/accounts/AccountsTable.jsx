@@ -1,4 +1,3 @@
-
 import {
   Badge,
   Box,
@@ -42,8 +41,8 @@ export function downloadAccountsAsCsv(data) {
 }
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
-import { useMemo, useEffect, useState } from "react";
-import { applyFilters } from "../../contexts/hooks/TableFilter";
+import { useMemo, useEffect, useState } from 'react';
+import { applyFilters } from '../../contexts/hooks/TableFilter';
 
 export const AccountsTable = ({
   originalData,
@@ -54,9 +53,10 @@ export const AccountsTable = ({
   onUpdate,
 }) => {
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
-  const filteredData = useMemo(() =>
-    applyFilters(activeFilters, originalData ?? []),
-  [activeFilters, originalData]);
+  const filteredData = useMemo(
+    () => applyFilters(activeFilters, originalData ?? []),
+    [activeFilters, originalData]
+  );
 
   const displayData = useMemo(() => {
     if (!searchQuery) return filteredData;

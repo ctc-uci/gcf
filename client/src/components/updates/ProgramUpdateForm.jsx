@@ -26,8 +26,8 @@ import {
   useToast,
   VStack,
 } from '@chakra-ui/react';
-import { InstrumentSearchInput } from '@/components/common/InstrumentSearchInput';
 
+import { InstrumentSearchInput } from '@/components/common/InstrumentSearchInput';
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
@@ -548,7 +548,10 @@ export const ProgramUpdateForm = ({
         <DrawerOverlay />
         <DrawerContent>
           <HStack marginBottom="1em">
-            <DrawerCloseButton left="4" right="auto" />
+            <DrawerCloseButton
+              left="4"
+              right="auto"
+            />
             <Button
               colorScheme="teal"
               marginLeft="auto"
@@ -565,7 +568,11 @@ export const ProgramUpdateForm = ({
           </HStack>
 
           <DrawerBody>
-            <VStack spacing={4} align="stretch" marginLeft="1em">
+            <VStack
+              spacing={4}
+              align="stretch"
+              marginLeft="1em"
+            >
               <DrawerHeader padding="0 0">
                 {programUpdateId ? 'Edit Update' : 'Create New Update'}
               </DrawerHeader>
@@ -587,7 +594,10 @@ export const ProgramUpdateForm = ({
                 }
               >
                 {availablePrograms.map((program) => (
-                  <option key={program.id} value={program.id}>
+                  <option
+                    key={program.id}
+                    value={program.id}
+                  >
                     {program.name}
                   </option>
                 ))}
@@ -641,7 +651,10 @@ export const ProgramUpdateForm = ({
                 align="flex-start"
                 wrap="wrap"
               >
-                <Box flex="1" minW="12rem">
+                <Box
+                  flex="1"
+                  minW="12rem"
+                >
                   <InstrumentSearchInput
                     instruments={existingInstruments}
                     value={searchQuery}
@@ -665,7 +678,11 @@ export const ProgramUpdateForm = ({
                     placeholder="Search instrument"
                   />
                   {(selectedInstrument || newInstrumentName) && (
-                    <Text fontSize="sm" color="gray.600" mt={1}>
+                    <Text
+                      fontSize="sm"
+                      color="gray.600"
+                      mt={1}
+                    >
                       Selected: {selectedInstrument || newInstrumentName}
                     </Text>
                   )}
