@@ -32,22 +32,22 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { EmptyStateBadge } from '@/components/badges/EmptyStateBadge';
+import { FilterComponent } from '@/components/common/FilterComponent';
+import CardView from '@/components/dashboard/CardView';
+import { ProgramForm } from '@/components/dashboard/ProgramForm/index';
+import { SortArrows } from '@/components/tables/SortArrows';
 import { useTableSort } from '@/contexts/hooks/TableSort';
+import {
+  downloadCsv,
+  escapeCsvValue,
+  getFilenameTimestamp,
+} from '@/utils/downloadCsv';
 import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
 } from 'react-icons/hi2';
 
-import {
-  downloadCsv,
-  escapeCsvValue,
-  getFilenameTimestamp,
-} from '../../utils/downloadCsv';
-import { EmptyStateBadge } from '../badges/EmptyStateBadge';
-import CardView from '../CardView';
-import { FilterComponent } from '../common/FilterComponent';
-import { ProgramForm } from '../ProgramForm/index';
-import { SortArrows } from '../tables/SortArrows';
 import { ExpandableProgramRow } from './ExpandableProgramRow';
 import { formatLaunchDate, getRouteByRole } from './programTableMappers';
 import { STATUS_TAG_STYLES } from './programTableTagConstants';
