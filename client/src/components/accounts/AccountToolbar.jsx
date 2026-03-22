@@ -14,10 +14,10 @@ import {
   Text,
 } from '@chakra-ui/react';
 
-import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from "react-icons/fi";
-import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
+import { FiDownload, FiFilter, FiGrid, FiList, FiSearch } from 'react-icons/fi';
+import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 
-import { FilterComponent } from "../common/FilterComponent";
+import { FilterComponent } from '../common/FilterComponent';
 
 export const AccountToolbar = ({
   searchQuery,
@@ -34,10 +34,23 @@ export const AccountToolbar = ({
     setSearchQuery(event.target.value);
   }
   return (
-    <Flex width="100%" align="center" gap={2}>
-      <InputGroup maxW="300px" ml={{ base: 0, md: 4 }}>
-        <InputLeftElement pointerEvents="none" mt={-2}>
-          <Icon as={FiSearch} color="gray.400" />
+    <Flex
+      width="70vw"
+      align="center"
+      gap={2}
+    >
+      <InputGroup
+        maxW="300px"
+        ml={{ base: 0, md: 4 }}
+      >
+        <InputLeftElement
+          pointerEvents="none"
+          mt={-2}
+        >
+          <Icon
+            as={FiSearch}
+            color="gray.400"
+          />
         </InputLeftElement>
 
         <Input
@@ -113,13 +126,22 @@ export const AccountToolbar = ({
         borderRadius="md"
         fontWeight="normal"
         leftIcon={
-          <Text as="span" fontSize="lg">
+          <Text
+            as="span"
+            fontSize="lg"
+          >
             +
           </Text>
         }
         onClick={onNew}
+        bg="teal.500"
+        color="white"
+        transition="background-color 0.25s ease, transform 0.25s ease"
+        _hover={{
+          bg: 'teal.600',
+        }}
       >
-        New
+        New Account
       </Button>
     </Flex>
   );

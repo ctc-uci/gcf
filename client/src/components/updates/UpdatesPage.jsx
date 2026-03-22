@@ -32,7 +32,7 @@ export const UpdatesPage = () => {
         return response.data;
       } catch (error) {
         console.error(
-          "Request failed:",
+          'Request failed:',
           path,
           error.response?.status,
           error.message
@@ -63,7 +63,7 @@ export const UpdatesPage = () => {
     setIsProgramUpdatesLoading(true);
     try {
       const programUpdates = await fetchData(`program-updates/${userId}`);
-      const mappedProgram = (programUpdates || []).map(item => ({
+      const mappedProgram = (programUpdates || []).map((item) => ({
         ...item,
         fullName: `${item.firstName} ${item.lastName}`,
       }));
@@ -86,27 +86,26 @@ export const UpdatesPage = () => {
       try {
         if (role === 'Program Director') {
           const programUpdates = await fetchData(`program-updates/${userId}`);
-          const mappedProgram = (programUpdates || []).map(item => ({
+          const mappedProgram = (programUpdates || []).map((item) => ({
             ...item,
             fullName: `${item.firstName} ${item.lastName}`,
           }));
           setProgramUpdatesData(mappedProgram);
           setOriginalProgramUpdatesData(mappedProgram);
-        }
-        else {
+        } else {
           const [mediaUpdates, programUpdates] = await Promise.all([
             fetchMediaUpdatesForUser(),
             fetchData(`program-updates/${userId}`),
           ]);
-          const mappedMedia = (mediaUpdates || []).map(item => ({
+          const mappedMedia = (mediaUpdates || []).map((item) => ({
             ...item,
             fullName: `${item.firstName} ${item.lastName}`,
           }));
-          const mappedProgram = (programUpdates || []).map(item => ({
+          const mappedProgram = (programUpdates || []).map((item) => ({
             ...item,
             fullName: `${item.firstName} ${item.lastName}`,
           }));
-          setOriginalMediaUpdatesData(mappedMedia);  
+          setOriginalMediaUpdatesData(mappedMedia);
           setMediaUpdatesData(mappedMedia);
           setProgramUpdatesData(mappedProgram);
           setOriginalProgramUpdatesData(mappedProgram);
@@ -123,7 +122,10 @@ export const UpdatesPage = () => {
   if (isLoading) {
     return (
       <Center py={10}>
-        <Spinner size="xl" color="gray.500" />
+        <Spinner
+          size="xl"
+          color="gray.500"
+        />
       </Center>
     );
   }

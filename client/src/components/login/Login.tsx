@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   AbsoluteCenter,
@@ -14,6 +14,7 @@ import {
   Grid,
   GridItem,
   Heading,
+  IconButton,
   Image,
   Input,
   Stack,
@@ -25,9 +26,12 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { FaArrowLeft, FaGoogle } from 'react-icons/fa6';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
+import { CreatePassword } from './CreatePassword';
+import { ForgotPassword } from './ForgotPassword';
 import GcfGlobe from '/gcf_globe.png';
 import logo from '/logo.png';
 
@@ -39,8 +43,11 @@ const signinSchema = z.object({
 type SigninFormValues = z.infer<typeof signinSchema>;
 
 export const Login = () => {
+  const [isForgot, setIsForgot] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get('mode');
 
   const { login, handleRedirectResult } = useAuthContext();
   const { backend } = useBackendContext();
@@ -122,9 +129,15 @@ export const Login = () => {
         draggable="false"
       />
 
-      <Grid templateColumns="repeat(2, 1fr)" gap={5}>
+      <Grid
+        templateColumns="repeat(2, 1fr)"
+        gap={5}
+      >
         <GridItem>
-          <Box borderRight="3px solid" h="100vh">
+          <Box
+            borderRight="3px solid"
+            h="100vh"
+          >
             <AbsoluteCenter left="25%">
               <Text
                 as="b"
@@ -146,90 +159,137 @@ export const Login = () => {
             />
           </Box>
         </GridItem>
-
-        <GridItem>
-          <Box w="100%" mt="20%">
-            <Center>
-              <Heading as="u">Log In</Heading>
-            </Center>
-            <Center>
-              <form
-                onSubmit={handleSubmit(handleLogin)}
-                style={{ width: '70%' }}
-              >
-                <Stack spacing={7}>
-                  <FormControl isInvalid={!!errors.email} w={'100%'}>
-                    <FormLabel fontSize="lg">Email</FormLabel>
-                    <Center>
-                      <Input
-                        placeholder="Email"
-                        type="email"
-                        size={'lg'}
-                        {...register('email')}
-                        name="email"
-                        isRequired
-                        autoComplete="email"
-                        borderRadius="full"
-                        bg="gray.100"
-                      />
-                    </Center>
-                    <FormErrorMessage>
-                      {errors.email?.message?.toString()}
-                    </FormErrorMessage>
-                  </FormControl>
-                  <FormControl isInvalid={!!errors.password}>
-                    <FormLabel fontSize="lg">Password</FormLabel>
-                    <Center>
-                      <Input
-                        placeholder="Password"
-                        type="password"
-                        size={'lg'}
-                        {...register('password')}
-                        name="password"
-                        isRequired
-                        autoComplete="current-password"
-                        borderRadius="full"
-                        bg="gray.100"
-                      />
-                    </Center>
-                    <FormErrorMessage>
-                      {errors.password?.message?.toString()}
-                    </FormErrorMessage>
-                    <Flex gap="300px" mt="10px">
-                      <ChakraLink as={Link} to="/signup">
-                        <FormHelperText textDecoration="underline">
-                          Click here to sign up
-                        </FormHelperText>
-                      </ChakraLink>
-                      {/* TODO: Replace /signup with forgot password form */}
-                      <ChakraLink as={Link} to="/signup">
-                        <FormHelperText
-                          color="blue.400"
-                          textDecoration="underline"
-                        >
-                          Forgot Password?
-                        </FormHelperText>
-                      </ChakraLink>
-                    </Flex>
-                  </FormControl>
-                  <Center>
-                    <Button
-                      type="submit"
-                      size={'lg'}
-                      isDisabled={Object.keys(errors).length > 0}
-                      bg="black"
-                      color="white"
-                      borderRadius="full"
-                      w="200px"
+        {mode === 'resetPassword' ? (
+          <GridItem
+            position="relative"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <IconButton
+              aria-label="Back to login"
+              icon={<FaArrowLeft />}
+              position="absolute"
+              top={8}
+              left={8}
+              onClick={() => {
+                searchParams.delete('mode');
+                navigate({ search: searchParams.toString() });
+              }}
+              bg="gray.200"
+              borderRadius="md"
+              _hover={{ bg: 'gray.300' }}
+            />
+            <CreatePassword />
+          </GridItem>
+        ) : isForgot ? (
+          <GridItem
+            position="relative"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <IconButton
+              aria-label="Back to login"
+              icon={<FaArrowLeft />}
+              position="absolute"
+              top={8}
+              left={8}
+              onClick={() => setIsForgot(false)}
+              bg="gray.200"
+              borderRadius="md"
+              _hover={{ bg: 'gray.300' }}
+            />
+            <ForgotPassword setIsForgot={setIsForgot} />
+          </GridItem>
+        ) : (
+          <GridItem>
+            <Box
+              w="100%"
+              mt="20%"
+            >
+              <Center>
+                <Heading as="u">Log In</Heading>
+              </Center>
+              <Center>
+                <form
+                  onSubmit={handleSubmit(handleLogin)}
+                  style={{ width: '70%' }}
+                >
+                  <Stack spacing={7}>
+                    <FormControl
+                      isInvalid={!!errors.email}
+                      w={'100%'}
                     >
-                      Login
-                    </Button>
-                  </Center>
-                </Stack>
-              </form>
-            </Center>
-          </Box>
-        </GridItem>
+                      <FormLabel fontSize="lg">Email</FormLabel>
+                      <Center>
+                        <Input
+                          placeholder="Email"
+                          type="email"
+                          size={'lg'}
+                          {...register('email')}
+                          name="email"
+                          isRequired
+                          autoComplete="email"
+                          borderRadius="full"
+                          bg="gray.100"
+                        />
+                      </Center>
+                      <FormErrorMessage>
+                        {errors.email?.message?.toString()}
+                      </FormErrorMessage>
+                    </FormControl>
+                    <FormControl isInvalid={!!errors.password}>
+                      <FormLabel fontSize="lg">Password</FormLabel>
+                      <Center>
+                        <Input
+                          placeholder="Password"
+                          type="password"
+                          size={'lg'}
+                          {...register('password')}
+                          name="password"
+                          isRequired
+                          autoComplete="current-password"
+                          borderRadius="full"
+                          bg="gray.100"
+                        />
+                      </Center>
+                      <FormErrorMessage>
+                        {errors.password?.message?.toString()}
+                      </FormErrorMessage>
+                      <Flex
+                        gap="300px"
+                        mt="10px"
+                      >
+                        <ChakraLink onClick={() => setIsForgot(true)}>
+                          <FormHelperText
+                            color="blue.400"
+                            textDecoration="underline"
+                          >
+                            Forgot Password?
+                          </FormHelperText>
+                        </ChakraLink>
+                      </Flex>
+                    </FormControl>
+                    <Center>
+                      <Button
+                        type="submit"
+                        size={'lg'}
+                        isDisabled={Object.keys(errors).length > 0}
+                        bg="black"
+                        color="white"
+                        borderRadius="full"
+                        w="200px"
+                      >
+                        Login
+                      </Button>
+                    </Center>
+                  </Stack>
+                </form>
+              </Center>
+            </Box>
+          </GridItem>
+        )}
       </Grid>
     </Center>
   );

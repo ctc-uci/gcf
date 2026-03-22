@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   AddIcon,
@@ -28,18 +28,19 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
+
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
-import { applyFilters } from "../../contexts/hooks/TableFilter";
+import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
+
+import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
-import { FilterComponent } from "../common/FilterComponent";
+import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './ProgramUpdateForm';
-import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
-
 
 export function downloadProgramUpdatesAsCsv(data) {
   const headers = ['Time', 'Notes', 'Program', 'Author', 'Status'];
@@ -53,41 +54,38 @@ export function downloadProgramUpdatesAsCsv(data) {
   downloadCsv(headers, rows, `program-updates-${getFilenameTimestamp()}.csv`);
 }
 
-export const ProgramUpdatesTable = ({
-  originalData,
-  isLoading,
-  onSave,
-}) => {
-  const [searchQuery, setSearchQuery] = useState("");
+export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
+  const [searchQuery, setSearchQuery] = useState('');
   const columns = [
     {
-      key: "updateDate",
-      type: "date",
+      key: 'updateDate',
+      type: 'date',
     },
     {
-      key: "note",
-      type: "text",
+      key: 'note',
+      type: 'text',
     },
     {
-      key: "name",
-      type: "text",
+      key: 'name',
+      type: 'text',
     },
     {
-      key: "fullName",
-      type: "text",
+      key: 'fullName',
+      type: 'text',
     },
     {
-      key: "status",
-      type: "select",
-      options: ["Active", "Inactive"],
+      key: 'status',
+      type: 'select',
+      options: ['Active', 'Inactive'],
     },
   ];
   const [activeFilters, setActiveFilters] = useState([]);
-  const filteredData = useMemo(() => 
-    applyFilters(activeFilters, originalData),
-  [activeFilters, originalData]);
+  const filteredData = useMemo(
+    () => applyFilters(activeFilters, originalData),
+    [activeFilters, originalData]
+  );
 
-    const [selectedUpdate, setSelectedUpdate] = useState(null);
+  const [selectedUpdate, setSelectedUpdate] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const openEditForm = (update) => {
     setSelectedUpdate(update);
@@ -99,21 +97,20 @@ export const ProgramUpdatesTable = ({
   };
 
   const displayData = useMemo(() => {
-    if (searchQuery === "") {
+    if (searchQuery === '') {
       return filteredData;
     }
     return filteredData.filter(
-        (update) =>
-          update.updateDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          update.note.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          update.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          update.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          update.status.includes(searchQuery.toLowerCase())
-      );
+      (update) =>
+        update.updateDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        update.note.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        update.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        update.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        update.status.includes(searchQuery.toLowerCase())
+    );
   }, [searchQuery, filteredData]);
 
   const [sortedData, setSortedData] = useState(null);
-
 
   useEffect(() => {
     setSortedData(null);
@@ -134,10 +131,20 @@ export const ProgramUpdatesTable = ({
         onSave={onSave}
         programUpdateId={selectedUpdate?.id}
       />
-      <Box mt="30px" ml="10px">
-        <Flex gap={10} mb="20px" alignItems="center">
+      <Box
+        mt="30px"
+        ml="10px"
+      >
+        <Flex
+          gap={10}
+          mb="20px"
+          alignItems="center"
+        >
           <Heading>Program Updates</Heading>
-          <SearchIcon mt="10px" ml="10px" />
+          <SearchIcon
+            mt="10px"
+            ml="10px"
+          />
           <Input
             placeholder="Type to search"
             variant="flushed"
@@ -184,7 +191,7 @@ export const ProgramUpdatesTable = ({
             icon={<DownloadIcon />}
             size="sm"
             variant="ghost"
-            onClick={() => downloadMediaUpdatesAsCsv(tableData)}
+            onClick={() => downloadProgramUpdatesAsCsv(tableData)}
           />
           <Button
             size="sm"
@@ -199,58 +206,61 @@ export const ProgramUpdatesTable = ({
         </Flex>
 
         <Box position="relative">
-          <TableContainer overflowX="auto" maxW="100%">
+          <TableContainer
+            overflowX="auto"
+            maxW="100%"
+          >
             <Table variant="simple">
               <Thead>
                 {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
                 <Tr>
                   <Th
-                    onClick={() => handleSort("updateDate")}
+                    onClick={() => handleSort('updateDate')}
                     cursor="pointer"
                   >
-                    Time{" "}
+                    Time{' '}
                     <SortArrows
-                      columnKey={"updateDate"}
+                      columnKey={'updateDate'}
                       sortOrder={sortOrder}
                     />
                   </Th>
                   <Th
-                    onClick={() => handleSort("note")}
+                    onClick={() => handleSort('note')}
                     cursor="pointer"
                   >
-                    Notes{" "}
+                    Notes{' '}
                     <SortArrows
-                      columnKey={"note"}
+                      columnKey={'note'}
                       sortOrder={sortOrder}
                     />
                   </Th>
                   <Th
-                    onClick={() => handleSort("programName")}
+                    onClick={() => handleSort('programName')}
                     cursor="pointer"
                   >
-                    Program{" "}
+                    Program{' '}
                     <SortArrows
-                      columnKey={"programName"}
+                      columnKey={'programName'}
                       sortOrder={sortOrder}
                     />
                   </Th>
                   <Th
-                    onClick={() => handleSort("firstName")}
+                    onClick={() => handleSort('firstName')}
                     cursor="pointer"
                   >
-                    Author{" "}
+                    Author{' '}
                     <SortArrows
-                      columnKey={"firstName"}
+                      columnKey={'firstName'}
                       sortOrder={sortOrder}
                     />
                   </Th>
                   <Th
-                    onClick={() => handleSort("status")}
+                    onClick={() => handleSort('status')}
                     cursor="pointer"
                   >
-                    Status{" "}
+                    Status{' '}
                     <SortArrows
-                      columnKey={"status"}
+                      columnKey={'status'}
                       sortOrder={sortOrder}
                     />
                   </Th>
@@ -267,7 +277,11 @@ export const ProgramUpdatesTable = ({
                   </Tr>
                 ) : (
                   tableData.map((row) => (
-                    <Tr key={row.id} onClick={() => openEditForm(row)}>
+                    <Tr
+                      key={row.id}
+                      onClick={() => openEditForm(row)}
+                      cursor="pointer"
+                    >
                       <Td>{row.updateDate}</Td>
                       <Td>{row.note}</Td>
                       <Td>{row.name}</Td>

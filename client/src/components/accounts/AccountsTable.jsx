@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   Badge,
@@ -17,14 +18,16 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 
-import { FiEdit2, FiEyeOff } from 'react-icons/fi';
-
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { FiEdit2, FiEyeOff } from 'react-icons/fi';
 
+import { applyFilters } from '../../contexts/hooks/TableFilter';
+import { useTableSort } from '../../contexts/hooks/TableSort';
+import { SortArrows } from '../tables/SortArrows';
 import CardView from './CardView';
 
 export function downloadAccountsAsCsv(data) {
@@ -40,10 +43,6 @@ export function downloadAccountsAsCsv(data) {
   ]);
   downloadCsv(headers, rows, `accounts-${getFilenameTimestamp()}.csv`);
 }
-import { useTableSort } from '../../contexts/hooks/TableSort';
-import { SortArrows } from '../tables/SortArrows';
-import { useMemo, useEffect, useState } from "react";
-import { applyFilters } from "../../contexts/hooks/TableFilter";
 
 export const AccountsTable = ({
   originalData,
@@ -54,9 +53,10 @@ export const AccountsTable = ({
   onUpdate,
 }) => {
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
-  const filteredData = useMemo(() =>
-    applyFilters(activeFilters, originalData ?? []),
-  [activeFilters, originalData]);
+  const filteredData = useMemo(
+    () => applyFilters(activeFilters, originalData ?? []),
+    [activeFilters, originalData]
+  );
 
   const displayData = useMemo(() => {
     if (!searchQuery) return filteredData;
@@ -87,7 +87,10 @@ export const AccountsTable = ({
   return (
     <TableContainer>
       {!isCardView ? (
-        <Table variant="simple" size="md">
+        <Table
+          variant="simple"
+          size="md"
+        >
           <Thead>
             <Tr>
               <Th
@@ -99,7 +102,10 @@ export const AccountsTable = ({
                 fontWeight="bold"
               >
                 Name
-                <SortArrows columnKey="firstName" sortOrder={sortOrder} />
+                <SortArrows
+                  columnKey="firstName"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th
                 onClick={() => handleSort('email')}
@@ -110,7 +116,10 @@ export const AccountsTable = ({
                 fontWeight="bold"
               >
                 Email
-                <SortArrows columnKey="email" sortOrder={sortOrder} />
+                <SortArrows
+                  columnKey="email"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th
                 onClick={() => handleSort('password')}
@@ -121,7 +130,10 @@ export const AccountsTable = ({
                 fontWeight="bold"
               >
                 Password
-                <SortArrows columnKey="passsword" sortOrder={sortOrder} />
+                <SortArrows
+                  columnKey="passsword"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th
                 onClick={() => handleSort('role')}
@@ -132,7 +144,10 @@ export const AccountsTable = ({
                 fontWeight="bold"
               >
                 Type
-                <SortArrows columnKey="role" sortOrder={sortOrder} />
+                <SortArrows
+                  columnKey="role"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th
                 onClick={() => handleSort('programs')}
@@ -143,7 +158,10 @@ export const AccountsTable = ({
                 fontWeight="bold"
               >
                 Program(s)
-                <SortArrows columnKey="programs" sortOrder={sortOrder} />
+                <SortArrows
+                  columnKey="programs"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th width="50px"></Th>
             </Tr>
@@ -174,10 +192,18 @@ export const AccountsTable = ({
                 <Td>
                   <HStack spacing={2}>
                     {/* TODO: Update to utilize password field when data is available + hidden functionality */}
-                    <Text fontSize="lg" lineHeight="1" mt="6px">
+                    <Text
+                      fontSize="lg"
+                      lineHeight="1"
+                      mt="6px"
+                    >
                       ********
                     </Text>
-                    <Icon as={FiEyeOff} color="gray.500" cursor="pointer" />
+                    <Icon
+                      as={FiEyeOff}
+                      color="gray.500"
+                      cursor="pointer"
+                    />
                   </HStack>
                 </Td>
 
@@ -202,7 +228,10 @@ export const AccountsTable = ({
                     : '-'}
                 </Td>
 
-                <Td p={0} textAlign="right">
+                <Td
+                  p={0}
+                  textAlign="right"
+                >
                   <Box
                     className="action-group"
                     opacity={0}
@@ -227,7 +256,10 @@ export const AccountsTable = ({
           </Tbody>
         </Table>
       ) : (
-        <CardView data={data} onSave={onSave} />
+        <CardView
+          data={data}
+          onSave={onSave}
+        />
       )}
     </TableContainer>
   );

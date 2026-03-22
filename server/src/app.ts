@@ -15,6 +15,7 @@ import { rdProgramTableRouter } from '@/routes/rdProgramTable';
 import { regionRouter } from '@/routes/region';
 import { regionalDirectorRouter } from '@/routes/regionalDirector';
 import { updatesPermissionsRouter } from '@/routes/updatesPermissions';
+import { playlistCacheRouter } from '@/routes/playlistCache';
 import { usersRouter } from '@/routes/users';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -59,6 +60,8 @@ app.use('/mediaChange', mediaChangeRouter);
 app.use('/program', programRouter);
 app.use('/partners', partnerOrganizationRouter);
 app.use('/images', imagesRouter);
+app.use('/playlistCache', playlistCacheRouter);
+
 
 // Listening is moved to server.ts to enable importing app in tests
 export default app;

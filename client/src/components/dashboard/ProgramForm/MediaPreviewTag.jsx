@@ -1,6 +1,15 @@
-import { useEffect, useState } from "react";
-import { Box, Image, Spinner, Tag, TagCloseButton, TagLabel } from "@chakra-ui/react";
-import { useBackendContext } from "@/contexts/hooks/useBackendContext";
+import { useEffect, useState } from 'react';
+
+import {
+  Box,
+  Image,
+  Spinner,
+  Tag,
+  TagCloseButton,
+  TagLabel,
+} from '@chakra-ui/react';
+
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
 export function MediaPreviewTag({ item, onRemove }) {
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -19,7 +28,7 @@ export function MediaPreviewTag({ item, onRemove }) {
           setPreviewUrl(res.data.url);
         }
       } catch (error) {
-        console.error("Failed to fetch image URL:", error);
+        console.error('Failed to fetch image URL:', error);
       } finally {
         setIsLoading(false);
       }
@@ -28,10 +37,15 @@ export function MediaPreviewTag({ item, onRemove }) {
     fetchUrl();
   }, [item.s3_key, backend]);
 
-  const isVideo = item.file_type?.startsWith("video/");
+  const isVideo = item.file_type?.startsWith('video/');
 
   return (
-    <Tag maxW="250px" p={2} borderRadius="md" size="lg">
+    <Tag
+      maxW="250px"
+      p={2}
+      borderRadius="md"
+      size="lg"
+    >
       <Box
         w="2.5rem"
         h="2.5rem"
@@ -49,7 +63,7 @@ export function MediaPreviewTag({ item, onRemove }) {
         ) : isVideo ? (
           <video
             src={previewUrl}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             muted
             playsInline
           />
@@ -63,7 +77,10 @@ export function MediaPreviewTag({ item, onRemove }) {
         )}
       </Box>
 
-      <TagLabel isTruncated title={item.file_name}>
+      <TagLabel
+        isTruncated
+        title={item.file_name}
+      >
         {item.file_name}
       </TagLabel>
       <TagCloseButton onClick={onRemove} />

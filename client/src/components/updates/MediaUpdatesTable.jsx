@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { DownloadIcon, HamburgerIcon, SearchIcon } from '@chakra-ui/icons';
 import {
@@ -22,13 +22,14 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
-import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
+
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { FilterComponent } from '../common/FilterComponent';
@@ -47,7 +48,12 @@ export function downloadMediaUpdatesAsCsv(data) {
   downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
 }
 
-export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) => {
+export const MediaUpdatesTable = ({
+  data,
+  setData,
+  originalData,
+  isLoading,
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const columns = [
     {
@@ -110,10 +116,20 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
   const tableData = sortedData ?? displayData;
 
   return (
-    <Box mt="30px" ml="10px">
-      <Flex gap={10} mb="20px" align="center">
+    <Box
+      mt="30px"
+      ml="10px"
+    >
+      <Flex
+        gap={10}
+        mb="20px"
+        align="center"
+      >
         <Heading>Media Updates</Heading>
-        <SearchIcon mt="10px" ml="10px" />
+        <SearchIcon
+          mt="10px"
+          ml="10px"
+        />
         <Input
           placeholder="Type to search"
           variant="flushed"
@@ -130,7 +146,11 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
               variant="ghost"
             />
           </PopoverTrigger>
-          <PopoverContent w="800px" maxW="90vw" shadow="xl">
+          <PopoverContent
+            w="800px"
+            maxW="90vw"
+            shadow="xl"
+          >
             <FilterComponent
               columns={columns}
               onFilterChange={(filters) => {
@@ -139,7 +159,10 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
             />
           </PopoverContent>
         </Popover>
-        <Text fontSize="sm" color="gray.500">
+        <Text
+          fontSize="sm"
+          color="gray.500"
+        >
           Displaying {tableData.length} results
         </Text>
         <IconButton
@@ -157,28 +180,63 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
         />
       </Flex>
 
-      <TableContainer overflowX="auto" maxW="100%">
+      <TableContainer
+        overflowX="auto"
+        maxW="100%"
+      >
         <Table variant="simple">
           <Thead>
             {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
             <Tr>
-              <Th onClick={() => handleSort('updateDate')} cursor="pointer">
+              <Th
+                onClick={() => handleSort('updateDate')}
+                cursor="pointer"
+              >
                 Time{' '}
-                <SortArrows columnKey={'updateDate'} sortOrder={sortOrder} />{' '}
+                <SortArrows
+                  columnKey={'updateDate'}
+                  sortOrder={sortOrder}
+                />{' '}
               </Th>
-              <Th onClick={() => handleSort('note')} cursor="pointer">
-                Notes <SortArrows columnKey={'note'} sortOrder={sortOrder} />{' '}
+              <Th
+                onClick={() => handleSort('note')}
+                cursor="pointer"
+              >
+                Notes{' '}
+                <SortArrows
+                  columnKey={'note'}
+                  sortOrder={sortOrder}
+                />{' '}
               </Th>
-              <Th onClick={() => handleSort('programName')} cursor="pointer">
+              <Th
+                onClick={() => handleSort('programName')}
+                cursor="pointer"
+              >
                 Program{' '}
-                <SortArrows columnKey={'programName'} sortOrder={sortOrder} />{' '}
+                <SortArrows
+                  columnKey={'programName'}
+                  sortOrder={sortOrder}
+                />{' '}
               </Th>
-              <Th onClick={() => handleSort('firstName')} cursor="pointer">
+              <Th
+                onClick={() => handleSort('firstName')}
+                cursor="pointer"
+              >
                 Author{' '}
-                <SortArrows columnKey={'firstName'} sortOrder={sortOrder} />{' '}
+                <SortArrows
+                  columnKey={'firstName'}
+                  sortOrder={sortOrder}
+                />{' '}
               </Th>
-              <Th onClick={() => handleSort('status')} cursor="pointer">
-                Status <SortArrows columnKey={'status'} sortOrder={sortOrder} />{' '}
+              <Th
+                onClick={() => handleSort('status')}
+                cursor="pointer"
+              >
+                Status{' '}
+                <SortArrows
+                  columnKey={'status'}
+                  sortOrder={sortOrder}
+                />{' '}
               </Th>
             </Tr>
           </Thead>
