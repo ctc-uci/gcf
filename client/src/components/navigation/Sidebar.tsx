@@ -1,6 +1,7 @@
 import { Box, Button, Flex, Icon, Image, Link, VStack } from '@chakra-ui/react';
 
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { BsMap } from 'react-icons/bs';
 import { FaGuitar } from 'react-icons/fa';
 import { HiOutlineCog, HiOutlineUser } from 'react-icons/hi';
 import { MdOutlineNotifications, MdPermMedia } from 'react-icons/md';
@@ -51,12 +52,11 @@ export const Sidebar = () => {
         ),
         path: '/account',
       },
-      // TODO: just in case the regions table route is different
       {
         name: 'Regions',
         icon: (
           <Icon
-            as={HiOutlineCog}
+            as={BsMap}
             boxSize="20px"
           />
         ),
