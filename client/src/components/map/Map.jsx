@@ -1,26 +1,56 @@
 import { React, useEffect, useState } from 'react';
 
-import { Box, Heading, Text, VStack } from '@chakra-ui/react';
+import { Box, Heading, Text } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { FaRegArrowAltCircleLeft } from 'react-icons/fa';
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
+
+import CardView from './CardView.jsx';
 
 const geoUrl = '/map-data.json';
 
 export const Map = () => {
+  const [allCountries, setAllCountries] = useState([]);
   const [regions, setRegions] = useState([]);
+  const [hoverRegions, setHoverRegions] = useState(null);
+  const [programs, setPrograms] = useState([]);
   const { backend } = useBackendContext();
+
+  useEffect(() => {
+    const fetchAllCountries = async () => {
+      try {
+        const res = await backend.get('/country');
+        setAllCountries(res.data);
+      } catch (error) {
+        console.error('Error fetching countries:', error);
+      }
+    };
+    fetchAllCountries();
+  }, [backend]);
+
+  const getRegionFromIso = (iso) => {
+    const countries = allCountries.find((c) => c.isoCode === iso);
+    return countries ? countries.regionId : null;
+  };
 
   const handleCountry = async (geo) => {
     const iso = geo.id;
     try {
-      const countriesRes = await backend.get(`/country/iso/${iso}`);
-      const countriesData = countriesRes.data;
-
+      const countriesRegion = getRegionFromIso(iso);
       const regionsRes = await backend.get(
-        `/region/${countriesData.regionId}/countries`
+        `/region/${countriesRegion}/countries`
       );
+
       setRegions(regionsRes.data);
+
+      console.log(regions);
+      console.log(regions[0].regionId);
+
+      const programRes = await backend.get(
+        `/program/country/${countriesRegion}`
+      );
+      setPrograms(programRes.data);
     } catch (error) {
       console.error('Error fetching country or region data:', error);
     }
@@ -38,8 +68,7 @@ export const Map = () => {
           color="white"
           mb="5px"
         >
-          {' '}
-          Global Impact{' '}
+          Global Impact
         </Heading>
         <Text color="white"> Explore our Programs and Impact </Text>
       </Box>
@@ -48,40 +77,60 @@ export const Map = () => {
         boxShadow="md"
         borderWidth="1px"
         w="90%"
-        h="60%"
+        h="600px"
         mx="auto"
       >
-        <ComposableMap>
+        <ComposableMap style={{ height: '700px', width: '100%' }}>
           <Geographies geography={geoUrl}>
             {({ geographies }) =>
-              geographies.map((geo) => (
-                <Geography
-                  key={geo.rsmKey}
-                  geography={geo}
-                  onClick={() => handleCountry(geo)}
-                  style={{
-                    default: {
-                      fill: regions.some((r) => r.isoCode === geo.id)
-                        ? '#636363'
-                        : '#B3B3B3',
-                      outline: 'none',
-                    },
-                    hover: { fill: '#868686', outline: 'none' },
-                    pressed: { fill: '#636363', outline: 'none' },
-                  }}
-                />
-              ))
+              geographies.map((geo) => {
+                const regionId = getRegionFromIso(geo.id);
+                const isHovered = regionId && regionId === hoverRegions;
+                const isClicked = regions.some((r) => r.isoCode === geo.id);
+                return (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    onClick={() => handleCountry(geo)}
+                    onMouseEnter={() => setHoverRegions(regionId)}
+                    onMouseLeave={() => setHoverRegions(null)}
+                    style={{
+                      default: {
+                        fill: isHovered
+                          ? '#868686'
+                          : isClicked
+                            ? '#636363'
+                            : '#B3B3B3',
+                        outline: 'none',
+                      },
+                      hover: {
+                        fill: isHovered ? '#868686' : '#868686',
+                        outline: 'none',
+                        cursor: 'pointer',
+                      },
+                      pressed: { fill: '#636363', outline: 'none' },
+                    }}
+                  />
+                );
+              })
             }
           </Geographies>
         </ComposableMap>
       </Box>
-      <Heading
-        fontSize="xl"
-        mt="15px"
-      >
-        {' '}
-        Featured Programs{' '}
-      </Heading>
+      {programs && (
+        <>
+          <Heading
+            fontSize="xl"
+            mt="15px"
+          >
+            Featured Programs
+          </Heading>
+
+          {programs.map((region, index) => (
+            <CardView key={index} />
+          ))}
+        </>
+      )}
     </>
   );
 };

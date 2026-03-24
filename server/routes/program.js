@@ -33,6 +33,30 @@ programRouter.get('/:id', async (req, res) => {
   }
 });
 
+programRouter.get('/country/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const program = await db.query(
+      `
+      SELECT * FROM program AS p
+      INNER JOIN country AS c ON c.id = p.country
+      INNER JOIN region AS r ON r.id = c.region_id
+      WHERE r.id = $1`,
+      [id]
+    );
+
+    if (program.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(program[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 programRouter.get('/city/:id', async (req, res) => {
   try {
     const { id } = req.params;

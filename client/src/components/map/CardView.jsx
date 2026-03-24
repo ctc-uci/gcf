@@ -1,15 +1,33 @@
 import React from 'react';
 
-import { Card, CardBody, CardFooter, CardHeader } from '@chakra-ui/react';
+import {
+  Badge,
+  Card,
+  CardBody,
+  CardHeader,
+  Heading,
+  HStack,
+  Text,
+} from '@chakra-ui/react';
 
-const CardView = ({ title, country, instruments, students, started }) => {
+const CardView = ({ title, city, country, instruments, students, started }) => {
   return (
     <Card>
       <CardHeader>
+        <Badge>Placeholder</Badge>
         <Heading size="md">{title}</Heading>
+        <Text>
+          {city}, {country}
+        </Text>
       </CardHeader>
 
-      <CardBody></CardBody>
+      <CardBody>
+        <HStack>
+          <Text>{instruments}</Text>
+          <Text>{students}</Text>
+          <Text>{started}</Text>
+        </HStack>
+      </CardBody>
     </Card>
   );
 };
