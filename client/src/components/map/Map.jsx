@@ -1,6 +1,6 @@
 import { React, useEffect, useState } from 'react';
 
-import { Box, Heading, Text } from '@chakra-ui/react';
+import { Box, Heading, HStack, Text } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { FaRegArrowAltCircleLeft } from 'react-icons/fa';
@@ -45,12 +45,13 @@ export const Map = () => {
       setRegions(regionsRes.data);
 
       console.log(regions);
-      console.log(regions[0].regionId);
+      console.log(regionsRes.data[0].regionId);
 
       const programRes = await backend.get(
-        `/program/country/${countriesRegion}`
+        `/program/country/${regionsRes.data[0].regionId}`
       );
       setPrograms(programRes.data);
+      console.log(programs[0]);
     } catch (error) {
       console.error('Error fetching country or region data:', error);
     }
@@ -117,7 +118,7 @@ export const Map = () => {
           </Geographies>
         </ComposableMap>
       </Box>
-      {programs && (
+      {programs.length > 0 && (
         <>
           <Heading
             fontSize="xl"
@@ -126,9 +127,19 @@ export const Map = () => {
             Featured Programs
           </Heading>
 
-          {programs.map((region, index) => (
-            <CardView key={index} />
-          ))}
+          <HStack>
+            {programs.map((program, index) => (
+              <CardView
+                key={index}
+                programId={program.id}
+                title={program.title}
+                city={program.city}
+                country={program.country}
+                state={program.state}
+                status={program.status}
+              />
+            ))}
+          </HStack>
         </>
       )}
     </>
