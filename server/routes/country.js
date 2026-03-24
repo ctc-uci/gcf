@@ -112,4 +112,23 @@ countryRouter.delete('/:id/region/:region_id', async (req, res) => {
   }
 });
 
+countryRouter.get('/iso/:iso_code', async (req, res) => {
+  try {
+    const { iso_code } = req.params;
+    const country = await db.query(
+      `SELECT * FROM country WHERE iso_code = $1`,
+      [iso_code]
+    );
+
+    if (country.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(country[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 export { countryRouter };
