@@ -26,8 +26,8 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { FaArrowLeft, FaGoogle } from 'react-icons/fa6';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa6';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
 import { CreatePassword } from './CreatePassword';
