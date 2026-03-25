@@ -7,9 +7,11 @@ import {
   CardBody,
   CardHeader,
   Divider,
+  Flex,
   Heading,
   HStack,
   Icon,
+  Spacer,
   Text,
   VStack,
 } from '@chakra-ui/react';
@@ -77,9 +79,17 @@ const CardView = ({
 
   useEffect(() => {
     const fetchNames = async () => {
+      const allCountries = await backend.get('/country');
+      const matchingCountry = allCountries.data.find(
+        (c) => parseInt(c.id) === parseInt(country)
+      );
+      if (!matchingCountry || !matchingCountry.isoCode) return;
+
       const countries = await GetCountries();
       const foundCountry = countries.find(
-        (c) => parseInt(c.id) === parseInt(country)
+        (c) =>
+          String(c.iso3).toUpperCase() ===
+          String(matchingCountry.isoCode).toUpperCase()
       );
 
       if (foundCountry) {
@@ -100,7 +110,7 @@ const CardView = ({
       }
     };
     fetchNames();
-  }, [city, country, state]);
+  }, [city, country, state, backend]);
 
   return (
     <Card
@@ -109,10 +119,7 @@ const CardView = ({
       boxShadow="0px 4px 6px rgba(0, 0, 0, 0.2)"
     >
       <CardHeader>
-        <HStack
-          gap={20}
-          mb="10px"
-        >
+        <Flex mb="10px">
           <Badge
             bg="#2C7A7B"
             color="white"
@@ -120,26 +127,29 @@ const CardView = ({
             pl="8px"
             pr="8px"
           >
+            {/* TODO: assuming this is the partner organization */}
             Placeholder
           </Badge>
+          <Spacer />
           <Badge
-            bg="#E6FFFA"
-            color="#2C7A7B"
+            bg={status === 'Inactive' ? '#FEEBCB' : '#E6FFFA'}
+            color={status === 'Inactive' ? '#7B341E' : '#2C7A7B'}
             borderRadius="6px"
             pl="8px"
             pr="8px"
+            textTransform="none"
           >
             <HStack>
+              <Text>{status === 'Inactive' ? 'Developing' : 'Launched'}</Text>
               <Box
                 w="8px"
                 h="8px"
                 borderRadius="full"
-                bg="#2C7A7B"
+                bg={status === 'Inactive' ? '#7B341E' : '#2C7A7B'}
               />
-              <Text>{status}</Text>
             </HStack>
           </Badge>
-        </HStack>
+        </Flex>
         <Heading
           size="md"
           mb="5px"
@@ -148,7 +158,7 @@ const CardView = ({
           {title}
         </Heading>
         <Text fontSize="14px">
-          {flag} {cityName}, {countryName}
+          {flag} {cityName ? `${cityName}, ${countryName}` : countryName}
         </Text>
       </CardHeader>
 

@@ -153,9 +153,9 @@ export const Map = () => {
               mb="20px"
               gap={7}
             >
-              {programs.map((program, index) => (
+              {programs.map((program) => (
                 <CardView
-                  key={index}
+                  key={program.id}
                   programId={program.id}
                   title={program.title}
                   city={program.city}
