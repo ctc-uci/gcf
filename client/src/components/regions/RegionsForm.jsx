@@ -124,13 +124,13 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   }, [countries, region, regionalDirectors, backend]);
 
   const handleSelect = (country) => {
-    if (!selectedCountries.some((c) => c.iso2 === country.iso2)) {
+    if (!selectedCountries.some((c) => c.iso3 === country.iso3)) {
       setSelectedCountries((prev) => [...prev, country]);
     }
   };
 
-  const handleRemove = (iso2) => {
-    setSelectedCountries((prev) => prev.filter((c) => c.iso2 !== iso2));
+  const handleRemove = (iso3) => {
+    setSelectedCountries((prev) => prev.filter((c) => c.iso3 !== iso3));
   };
 
   const saveRegion = async () => {
@@ -179,7 +179,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
           backend.post('/country', {
             region_id: region.id,
             name: country.name,
-            iso_code: country.iso2,
+            iso_code: country.iso3,
             last_modified: new Date().toISOString(),
           })
         ),
@@ -205,7 +205,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
           backend.post('/country', {
             region_id: newRegionId,
             name: country.name,
-            iso_code: country.iso2,
+            iso_code: country.iso3,
             last_modified: new Date().toISOString(),
           })
         )
@@ -289,13 +289,13 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
               >
                 {selectedCountries.map((country) => (
                   <Tag
-                    key={country.iso2}
+                    key={country.iso3}
                     variant="solid"
                     colorScheme="gray"
                   >
                     <TagLabel>{country.name}</TagLabel>
                     <TagCloseButton
-                      onClick={() => handleRemove(country.iso2)}
+                      onClick={() => handleRemove(country.iso3)}
                     />
                   </Tag>
                 ))}

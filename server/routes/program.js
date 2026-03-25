@@ -33,6 +33,66 @@ programRouter.get('/:id', async (req, res) => {
   }
 });
 
+programRouter.get('/students/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const program = await db.query(
+      `
+      SELECT ec.enrollment_change, ec.graduated_change FROM program AS p
+      INNER JOIN program_update AS pu ON pu.program_id = p.id
+      INNER JOIN enrollment_change AS ec ON ec.update_id = pu.id
+      WHERE p.id = $1
+      `,
+      [id]
+    );
+
+    if (program.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(program));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+programRouter.get('/country/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const program = await db.query(
+      `
+      SELECT 
+        p.id,
+        p.city,
+        p.country,
+        p.launch_date,
+        p.state,
+        p.status,
+        p.title,
+        p.primary_language,
+        r.id AS region_id,
+        c.iso_code
+      FROM program AS p
+      INNER JOIN country AS c ON c.id = p.country
+      INNER JOIN region AS r ON r.id = c.region_id
+      WHERE r.id = $1`,
+      [id]
+    );
+
+    if (program.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(program));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 programRouter.get('/city/:id', async (req, res) => {
   try {
     const { id } = req.params;
