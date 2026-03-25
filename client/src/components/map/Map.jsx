@@ -14,6 +14,7 @@ export const Map = () => {
   const [allCountries, setAllCountries] = useState([]);
   const [regions, setRegions] = useState([]);
   const [hoverRegions, setHoverRegions] = useState(null);
+  const [display, setDisplay] = useState('block');
   const [programs, setPrograms] = useState([]);
   const { backend } = useBackendContext();
 
@@ -41,17 +42,23 @@ export const Map = () => {
       const regionsRes = await backend.get(
         `/region/${countriesRegion}/countries`
       );
-
+      if (regionsRes.data.length === 0) {
+        console.error('No regions found for the selected country.');
+        return;
+      }
+      setDisplay('none');
       setRegions(regionsRes.data);
 
-      console.log(regions);
-      console.log(regionsRes.data[0].regionId);
-
-      const programRes = await backend.get(
-        `/program/country/${regionsRes.data[0].regionId}`
-      );
-      setPrograms(programRes.data);
-      console.log(programs[0]);
+      try {
+        const programRes = await backend.get(
+          `/program/country/${regionsRes.data[0].regionId}`
+        );
+        setPrograms(programRes.data);
+      } catch (error) {
+        console.error('Error fetching programs for the region:', error);
+        setPrograms([]);
+        return;
+      }
     } catch (error) {
       console.error('Error fetching country or region data:', error);
     }
@@ -64,6 +71,7 @@ export const Map = () => {
         w="100%"
         p="20px"
         mb="30px"
+        display={display}
       >
         <Heading
           color="white"
@@ -92,7 +100,9 @@ export const Map = () => {
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
-                    onClick={() => handleCountry(geo)}
+                    onClick={() => {
+                      handleCountry(geo);
+                    }}
                     onMouseEnter={() => setHoverRegions(regionId)}
                     onMouseLeave={() => setHoverRegions(null)}
                     style={{
@@ -118,35 +128,55 @@ export const Map = () => {
           </Geographies>
         </ComposableMap>
       </Box>
-      {programs.length > 0 && (
+      {regions.length > 0 && (
         <>
           <HStack
             mt="15px"
             ml="25px"
             mb="10px"
           >
-            <Icon as={FaRegArrowAltCircleLeft} />
+            <Icon
+              as={FaRegArrowAltCircleLeft}
+              onClick={() => {
+                setPrograms([]);
+                setRegions([]);
+                setDisplay('block');
+              }}
+              cursor="pointer"
+            />
             <Heading fontSize="2xl">Featured Programs</Heading>
           </HStack>
 
-          <HStack
-            ml="28px"
-            mb="20px"
-            gap={7}
-          >
-            {programs.map((program, index) => (
-              <CardView
-                key={index}
-                programId={program.id}
-                title={program.title}
-                city={program.city}
-                country={program.country}
-                state={program.state}
-                status={program.status}
-                started={program.launchDate}
-              />
-            ))}
-          </HStack>
+          {programs.length > 0 ? (
+            <HStack
+              ml="28px"
+              mb="20px"
+              gap={7}
+            >
+              {programs.map((program, index) => (
+                <CardView
+                  key={index}
+                  programId={program.id}
+                  title={program.title}
+                  city={program.city}
+                  country={program.country}
+                  state={program.state}
+                  status={program.status}
+                  started={program.launchDate}
+                />
+              ))}
+            </HStack>
+          ) : (
+            <Text
+              ml="28px"
+              mb="20px"
+              fontSize="lg"
+              color="gray.600"
+              fontStyle="italic"
+            >
+              No Programs in this Region!
+            </Text>
+          )}
         </>
       )}
     </>

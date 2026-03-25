@@ -86,7 +86,6 @@ const CardView = ({
         setCountryName(foundCountry.name);
         setFlag(foundCountry.emoji);
         const states = await GetState(parseInt(foundCountry.id));
-        console.log(states);
         const foundState = states.find(
           (s) => parseInt(s.id) === parseInt(state)
         );
