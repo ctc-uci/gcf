@@ -1,6 +1,6 @@
 import { React, useEffect, useState } from 'react';
 
-import { Box, Heading, HStack, Text } from '@chakra-ui/react';
+import { Box, Heading, HStack, Icon, Text } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { FaRegArrowAltCircleLeft } from 'react-icons/fa';
@@ -77,7 +77,7 @@ export const Map = () => {
         borderRadius="md"
         boxShadow="md"
         borderWidth="1px"
-        w="90%"
+        w="96%"
         h="600px"
         mx="auto"
       >
@@ -120,14 +120,20 @@ export const Map = () => {
       </Box>
       {programs.length > 0 && (
         <>
-          <Heading
-            fontSize="xl"
+          <HStack
             mt="15px"
+            ml="25px"
+            mb="10px"
           >
-            Featured Programs
-          </Heading>
+            <Icon as={FaRegArrowAltCircleLeft} />
+            <Heading fontSize="2xl">Featured Programs</Heading>
+          </HStack>
 
-          <HStack>
+          <HStack
+            ml="28px"
+            mb="20px"
+            gap={7}
+          >
             {programs.map((program, index) => (
               <CardView
                 key={index}
@@ -137,6 +143,7 @@ export const Map = () => {
                 country={program.country}
                 state={program.state}
                 status={program.status}
+                started={program.launchDate}
               />
             ))}
           </HStack>
