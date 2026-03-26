@@ -37,6 +37,7 @@ export default function CreateUpdateInstrument({
   setWhatHappened,
   instrumentCount,
   setInstrumentCount,
+  programInstrumentCountForSelected,
   instruments,
   uploadedMedia,
   removeMedia,
@@ -135,6 +136,18 @@ export default function CreateUpdateInstrument({
             <NumberDecrementStepper />
           </NumberInputStepper>
         </NumberInput>
+        <Text color="teal.500" fontSize="sm" fontWeight="500" mt={2}>
+          {programInstrumentCountForSelected === null ? (
+            ''
+          ) : (
+            <>
+              Total {selectedInstrument}:{' '}
+              <Text as="span" fontWeight="bold">
+                {programInstrumentCountForSelected}
+              </Text>
+            </>
+          )}
+        </Text>
       </Box>
 
       <Box>

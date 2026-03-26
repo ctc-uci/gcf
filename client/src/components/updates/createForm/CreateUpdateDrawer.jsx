@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   Box,
@@ -117,6 +117,7 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
 
   const [instruments, setInstruments] = useState([]);
   const [programId, setProgramId] = useState(null);
+  const [instrumentCountsByName, setInstrumentCountsByName] = useState({});
 
   const studentCountEditedRef = useRef(false);
 
@@ -152,6 +153,32 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
     };
     fetchProgram();
   }, [backend, currentUser]);
+
+  useEffect(() => {
+    const fetchProgramInstrumentTotals = async () => {
+      if (!programId || !isOpen) return;
+      try {
+        const response = await backend.get(`/program/${programId}/instruments`);
+        const rows = response.data || [];
+        const map = {};
+        for (const row of rows) {
+          if (row.name != null) {
+            map[row.name] = Number(row.quantity ?? 0);
+          }
+        }
+        setInstrumentCountsByName(map);
+      } catch (error) {
+        console.error('Error fetching program instrument totals:', error);
+        setInstrumentCountsByName({});
+      }
+    };
+    fetchProgramInstrumentTotals();
+  }, [backend, programId, isOpen]);
+
+  const programInstrumentCountForSelected = useMemo(() => {
+    if (!selectedInstrument) return null;
+    return instrumentCountsByName[selectedInstrument] ?? 0;
+  }, [selectedInstrument, instrumentCountsByName]);
 
   useEffect(() => {
     const fetchProgramStats = async () => {
@@ -379,6 +406,9 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
                   setWhatHappened={setWhatHappened}
                   instrumentCount={instrumentCount}
                   setInstrumentCount={setInstrumentCount}
+                  programInstrumentCountForSelected={
+                    programInstrumentCountForSelected
+                  }
                   instruments={instruments}
                   uploadedMedia={uploadedMedia}
                   removeMedia={removeMedia}
