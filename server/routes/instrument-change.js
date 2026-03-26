@@ -8,15 +8,14 @@ instrumentChangeRouter.use(express.json());
 
 instrumentChangeRouter.post('/', async (req, res) => {
   try {
-    const { instrumentId, updateId, amountChanged } = req.body;
-    console.log('POST /instrument-changes body:', req.body);
+    const { instrumentId, updateId, amountChanged, special_request } = req.body;
 
     const newChange = await db.query(
       `INSERT INTO instrument_change
-        (instrument_id, update_id, amount_changed)
-       VALUES ($1, $2, $3)
+        (instrument_id, update_id, amount_changed, special_request)
+       VALUES ($1, $2, $3, $4)
        RETURNING *;`,
-      [instrumentId, updateId, amountChanged]
+      [instrumentId, updateId, amountChanged, special_request]
     );
 
     res.status(201).json(keysToCamel(newChange[0]));

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
@@ -120,40 +120,6 @@ export function useUpdatesPageData() {
     loadData();
   }, [userId, backend, fetchData, fetchMediaUpdatesForUser, role]);
 
-  const specialRequestsData = useMemo(
-    () => programUpdatesData.filter((item) => item.flagged),
-    [programUpdatesData]
-  );
-  const otherUpdatesData = useMemo(
-    () => programUpdatesData.filter((item) => !item.flagged),
-    [programUpdatesData]
-  );
-  const originalSpecialRequests = useMemo(
-    () => originalProgramUpdatesData.filter((item) => item.flagged),
-    [originalProgramUpdatesData]
-  );
-  const originalOtherUpdates = useMemo(
-    () => originalProgramUpdatesData.filter((item) => !item.flagged),
-    [originalProgramUpdatesData]
-  );
-
-  const mediaFlagged = useMemo(
-    () => mediaUpdatesData.filter((m) => m.flagged),
-    [mediaUpdatesData]
-  );
-  const mediaNotFlagged = useMemo(
-    () => mediaUpdatesData.filter((m) => !m.flagged),
-    [mediaUpdatesData]
-  );
-  const originalMediaFlagged = useMemo(
-    () => originalMediaUpdatesData.filter((m) => m.flagged),
-    [originalMediaUpdatesData]
-  );
-  const originalMediaNotFlagged = useMemo(
-    () => originalMediaUpdatesData.filter((m) => !m.flagged),
-    [originalMediaUpdatesData]
-  );
-
   return {
     userId,
     role,
@@ -168,13 +134,5 @@ export function useUpdatesPageData() {
     isLoading,
     isProgramUpdatesLoading,
     refetchProgramUpdates,
-    specialRequestsData,
-    otherUpdatesData,
-    originalSpecialRequests,
-    originalOtherUpdates,
-    mediaFlagged,
-    mediaNotFlagged,
-    originalMediaFlagged,
-    originalMediaNotFlagged,
   };
 }

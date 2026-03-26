@@ -20,7 +20,7 @@ function CountBadge({ count }) {
       ml={2}
       bg="gray.200"
       color="gray.600"
-      borderRadius="full"
+      borderRadius="0.33em"
       fontSize="xs"
       px={2}
     >

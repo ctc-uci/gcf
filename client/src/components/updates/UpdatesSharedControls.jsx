@@ -64,19 +64,6 @@ export function UpdatesFilterPopover({ columns, onFilterChange }) {
     </Popover>
   );
 }
-
-export function UpdatesSortButton() {
-  return (
-    <IconButton
-      aria-label="Sort"
-      icon={<HiArrowsUpDown />}
-      variant="ghost"
-      color="gray.500"
-      size="sm"
-    />
-  );
-}
-
 /** List / grid view toggle (visual only; wire actions when needed). */
 export function UpdatesViewModeToggle() {
   return (

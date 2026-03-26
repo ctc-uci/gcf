@@ -26,12 +26,11 @@ import { ChevronDownIcon, ChevronUpIcon, AddIcon } from '@chakra-ui/icons';
 import { FiDownload } from 'react-icons/fi';
 
 import { downloadProgramUpdatesAsCsv } from './ProgramUpdatesTable';
-import { CreateUpdateDrawer } from './CreateUpdateDrawer';
+import { CreateUpdateDrawer } from './createForm/CreateUpdateDrawer';
 import { UpdatesEmptyState } from './UpdatesEmptyState';
 import {
   UpdatesSearchInput,
   UpdatesFilterPopover,
-  UpdatesSortButton,
   UpdatesViewModeToggle,
 } from './UpdatesSharedControls';
 import { applyFilters } from '../../contexts/hooks/TableFilter';
@@ -130,6 +129,15 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           <Heading as="h1" size="lg" fontWeight="500">
             Updates
           </Heading>
+
+          <IconButton
+            icon={<FiDownload />}
+            variant="ghost"
+            size="sm"
+            aria-label="Download updates"
+            color="gray.500"
+            onClick={() => downloadProgramUpdatesAsCsv(data)}
+          />
         </HStack>
 
         <UpdatesSearchInput value={searchQuery} onChange={setSearchQuery} />
@@ -137,19 +145,11 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           columns={programDirectorFilterColumns}
           onFilterChange={setActiveFilters}
         />
-        <UpdatesSortButton />
         <UpdatesViewModeToggle />
 
-        <IconButton
-          icon={<FiDownload />}
-          variant="ghost"
-          size="sm"
-          aria-label="Download updates"
-          color="gray.500"
-          onClick={() => downloadProgramUpdatesAsCsv(data)}
-        />
-
         <Button
+          ml="auto"
+          flexShrink={0}
           bg="teal.500"
           color="white"
           _hover={{ bg: 'teal.600' }}
