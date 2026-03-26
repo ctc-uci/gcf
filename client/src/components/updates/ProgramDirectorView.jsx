@@ -72,7 +72,6 @@ const PDStatusBadge = ({ status }) => {
 
 export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeFilters, setActiveFilters] = useState([]);
   const createDrawerDisclosure = useDisclosure();
 
@@ -116,16 +115,7 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
   return (
     <Box p={8} bg="gray.50" minH="100vh" mx={-4} mt={0}>
       <Flex align="center" gap={4} mb={4} wrap="wrap">
-        <HStack
-          spacing={2}
-          cursor="pointer"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          <Icon
-            as={isCollapsed ? ChevronUpIcon : ChevronDownIcon}
-            boxSize={5}
-            color="gray.500"
-          />
+        <HStack spacing={2}>
           <Heading as="h1" size="lg" fontWeight="500">
             Updates
           </Heading>
@@ -162,137 +152,132 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
         </Button>
       </Flex>
 
-      {!isCollapsed && (
-        <Box position="relative" bg="white" borderRadius="xl" overflow="hidden">
-          {tableData.length === 0 && !isLoading ? (
-            <UpdatesEmptyState />
-          ) : (
-            <TableContainer overflowX="auto" maxW="100%">
-              <Table variant="simple">
-                <Thead>
+      <Box position="relative" bg="white" borderRadius="xl" overflow="hidden">
+        {tableData.length === 0 && !isLoading ? (
+          <UpdatesEmptyState />
+        ) : (
+          <TableContainer overflowX="auto" maxW="100%">
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th
+                    onClick={() => handleSort('updateDate')}
+                    cursor="pointer"
+                    color="gray.500"
+                    fontSize="xs"
+                    textTransform="uppercase"
+                    fontWeight="600"
+                  >
+                    Date
+                    <SortArrows columnKey="updateDate" sortOrder={sortOrder} />
+                  </Th>
+                  <Th
+                    onClick={() => handleSort('instrumentName')}
+                    cursor="pointer"
+                    color="gray.500"
+                    fontSize="xs"
+                    textTransform="uppercase"
+                    fontWeight="600"
+                  >
+                    Instrument
+                    <SortArrows
+                      columnKey="instrumentName"
+                      sortOrder={sortOrder}
+                    />
+                  </Th>
+                  <Th
+                    onClick={() => handleSort('status')}
+                    cursor="pointer"
+                    color="gray.500"
+                    fontSize="xs"
+                    textTransform="uppercase"
+                    fontWeight="600"
+                  >
+                    Status
+                    <SortArrows columnKey="status" sortOrder={sortOrder} />
+                  </Th>
+                  <Th
+                    onClick={() => handleSort('note')}
+                    cursor="pointer"
+                    color="gray.500"
+                    fontSize="xs"
+                    textTransform="uppercase"
+                    fontWeight="600"
+                  >
+                    Notes
+                    <SortArrows columnKey="note" sortOrder={sortOrder} />
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {isLoading && tableData.length === 0 ? (
                   <Tr>
-                    <Th
-                      onClick={() => handleSort('updateDate')}
-                      cursor="pointer"
-                      color="gray.500"
-                      fontSize="xs"
-                      textTransform="uppercase"
-                      fontWeight="600"
-                    >
-                      Date
-                      <SortArrows
-                        columnKey="updateDate"
-                        sortOrder={sortOrder}
-                      />
-                    </Th>
-                    <Th
-                      onClick={() => handleSort('instrumentName')}
-                      cursor="pointer"
-                      color="gray.500"
-                      fontSize="xs"
-                      textTransform="uppercase"
-                      fontWeight="600"
-                    >
-                      Instrument
-                      <SortArrows
-                        columnKey="instrumentName"
-                        sortOrder={sortOrder}
-                      />
-                    </Th>
-                    <Th
-                      onClick={() => handleSort('status')}
-                      cursor="pointer"
-                      color="gray.500"
-                      fontSize="xs"
-                      textTransform="uppercase"
-                      fontWeight="600"
-                    >
-                      Status
-                      <SortArrows columnKey="status" sortOrder={sortOrder} />
-                    </Th>
-                    <Th
-                      onClick={() => handleSort('note')}
-                      cursor="pointer"
-                      color="gray.500"
-                      fontSize="xs"
-                      textTransform="uppercase"
-                      fontWeight="600"
-                    >
-                      Notes
-                      <SortArrows columnKey="note" sortOrder={sortOrder} />
-                    </Th>
+                    <Td colSpan={4}>
+                      <Center py={8}>
+                        <Spinner size="lg" />
+                      </Center>
+                    </Td>
                   </Tr>
-                </Thead>
-                <Tbody>
-                  {isLoading && tableData.length === 0 ? (
-                    <Tr>
-                      <Td colSpan={4}>
-                        <Center py={8}>
-                          <Spinner size="lg" />
-                        </Center>
+                ) : (
+                  tableData.map((row) => (
+                    <Tr key={row.id} _hover={{ bg: 'gray.50' }}>
+                      <Td>
+                        <Text fontSize="sm" color="gray.700">
+                          {formatDate(row.updateDate)}
+                        </Text>
+                      </Td>
+                      <Td>
+                        <Badge
+                          bg="gray.100"
+                          color="gray.700"
+                          borderRadius="full"
+                          px={3}
+                          py={1}
+                          fontSize="xs"
+                          fontWeight="500"
+                        >
+                          {row.instrumentName || row.title || '—'}
+                        </Badge>
+                      </Td>
+                      <Td>
+                        <PDStatusBadge status={row.status} />
+                      </Td>
+                      <Td>
+                        <Textarea
+                          size="sm"
+                          variant="outline"
+                          borderColor="gray.200"
+                          borderRadius="md"
+                          placeholder="Notes"
+                          defaultValue={row.note || ''}
+                          minH="32px"
+                          h="32px"
+                          resize="vertical"
+                          fontSize="sm"
+                          _placeholder={{ color: 'gray.400' }}
+                        />
                       </Td>
                     </Tr>
-                  ) : (
-                    tableData.map((row) => (
-                      <Tr key={row.id} _hover={{ bg: 'gray.50' }}>
-                        <Td>
-                          <Text fontSize="sm" color="gray.700">
-                            {formatDate(row.updateDate)}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <Badge
-                            bg="gray.100"
-                            color="gray.700"
-                            borderRadius="full"
-                            px={3}
-                            py={1}
-                            fontSize="xs"
-                            fontWeight="500"
-                          >
-                            {row.instrumentName || row.title || '—'}
-                          </Badge>
-                        </Td>
-                        <Td>
-                          <PDStatusBadge status={row.status} />
-                        </Td>
-                        <Td>
-                          <Textarea
-                            size="sm"
-                            variant="outline"
-                            borderColor="gray.200"
-                            borderRadius="md"
-                            placeholder="Notes"
-                            defaultValue={row.note || ''}
-                            minH="32px"
-                            h="32px"
-                            resize="vertical"
-                            fontSize="sm"
-                            _placeholder={{ color: 'gray.400' }}
-                          />
-                        </Td>
-                      </Tr>
-                    ))
-                  )}
-                </Tbody>
-              </Table>
-            </TableContainer>
-          )}
-          {isLoading && tableData.length > 0 && (
-            <Box
-              position="absolute"
-              inset={0}
-              bg="whiteAlpha.800"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              zIndex={1}
-            >
-              <Spinner size="lg" />
-            </Box>
-          )}
-        </Box>
-      )}
+                  ))
+                )}
+              </Tbody>
+            </Table>
+          </TableContainer>
+        )}
+        {isLoading && tableData.length > 0 && (
+          <Box
+            position="absolute"
+            inset={0}
+            bg="whiteAlpha.800"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            zIndex={1}
+          >
+            <Spinner size="lg" />
+          </Box>
+        )}
+      </Box>
 
       <CreateUpdateDrawer
         isOpen={createDrawerDisclosure.isOpen}
