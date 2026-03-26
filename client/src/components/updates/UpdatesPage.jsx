@@ -22,7 +22,7 @@ import {
   downloadMediaUpdatesAsCsv,
 } from './MediaUpdatesTable';
 import { AccountUpdatesTable } from './AccountUpdatesTable';
-import { ProgramDirectorView } from './ProgramDirectorView';
+import { ProgramDirectorView } from './programDirectorView/ProgramDirectorView';
 import { UpdatesEmptyState } from './UpdatesEmptyState';
 import { UpdatesTabListWithBadges } from './UpdatesTabListWithBadges';
 import {

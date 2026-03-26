@@ -81,13 +81,54 @@ updatesPermissionsRouter.get('/program-updates/:id', async (req, res) => {
 
     const finalQuery = `SELECT
           program_update.id,
-          program_update.update_date, 
-          program_update.note, 
-          program.name, 
-          creator.first_name, 
-          creator.last_name, 
-          creator.role, 
-          program.status
+          program_update.title,
+          program_update.update_date,
+          program_update.note,
+          program.name,
+          creator.first_name,
+          creator.last_name,
+          creator.role,
+          program.status,
+          EXISTS (
+            SELECT 1 FROM instrument_change ic
+            WHERE ic.update_id = program_update.id
+          ) AS has_instrument_change,
+          EXISTS (
+            SELECT 1 FROM enrollment_change ec
+            WHERE ec.update_id = program_update.id
+          ) AS has_enrollment_change,
+          (
+            SELECT ec.enrollment_change
+            FROM enrollment_change ec
+            WHERE ec.update_id = program_update.id
+            ORDER BY ec.id DESC
+            LIMIT 1
+          ) AS enrollment_change,
+          (
+            SELECT ic.amount_changed
+            FROM instrument_change ic
+            WHERE ic.update_id = program_update.id
+            ORDER BY ic.id DESC
+            LIMIT 1
+          ) AS instrument_change,
+          (
+            SELECT ec.graduated_change
+            FROM enrollment_change ec
+            WHERE ec.update_id = program_update.id
+            ORDER BY ec.id DESC
+            LIMIT 1
+          ) AS graduated_change,
+          (
+            SELECT i.name
+            FROM instrument_change ic
+            INNER JOIN instrument i ON i.id = ic.instrument_id
+            WHERE ic.update_id = program_update.id
+          ) AS instrument_name,
+          EXISTS (
+            SELECT 1 FROM instrument_change ic
+            WHERE ic.update_id = program_update.id
+              AND ic.special_request IS TRUE
+          ) AS flagged
       FROM program_update
       INNER JOIN program ON program_update.program_id = program.id
       LEFT JOIN gcf_user AS creator ON creator.id = program.created_by
@@ -95,10 +136,6 @@ updatesPermissionsRouter.get('/program-updates/:id', async (req, res) => {
       ORDER BY program_update.update_date DESC;`;
 
     const data = await db.query(finalQuery, [id]);
-    if (data.length === 0) {
-      return res.status(404).send('Item not found');
-    }
-
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
