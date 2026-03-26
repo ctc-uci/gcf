@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Flex,
-  HStack,
   Heading,
   IconButton,
   Tab,
@@ -27,6 +26,11 @@ import {
 import { applyFilters } from '../../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../../contexts/hooks/TableSort';
 import { programDirectorFilterColumns } from '../updatesColumnConfig';
+import {
+  UPDATES_TAB_BASE_PROPS,
+  UPDATES_TAB_SELECTED_PROPS,
+  UpdatesTabCountBadge,
+} from '../UpdatesTabListWithBadges';
 import { ProgramDirectorUpdatesTable } from './ProgramDirectorUpdatesTable';
 
 export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
@@ -80,28 +84,23 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
   return (
     <Box p={8} bg="gray.50" minH="100vh" mx={-4} mt={0}>
       <Flex align="center" gap={4} mb={4} wrap="wrap">
-        <HStack spacing={2}>
-          <Heading as="h1" size="lg" fontWeight="500">
-            Updates
-          </Heading>
-
-          <IconButton
-            icon={<FiDownload />}
-            variant="ghost"
-            size="sm"
-            aria-label="Download updates"
-            color="gray.500"
-            onClick={() => downloadProgramUpdatesAsCsv(data)}
-          />
-        </HStack>
-
+        <Heading as="h1" size="lg" fontWeight="500">
+          Updates
+        </Heading>
+        <IconButton
+          icon={<FiDownload />}
+          variant="ghost"
+          size="sm"
+          aria-label="Download updates"
+          color="gray.500"
+          onClick={() => downloadProgramUpdatesAsCsv(data)}
+        />
         <UpdatesSearchInput value={searchQuery} onChange={setSearchQuery} />
         <UpdatesFilterPopover
           columns={programDirectorFilterColumns}
           onFilterChange={setActiveFilters}
         />
         <UpdatesViewModeToggle />
-
         <Button
           ml="auto"
           flexShrink={0}
@@ -113,16 +112,35 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           leftIcon={<AddIcon boxSize={3} />}
           onClick={createDrawerDisclosure.onOpen}
         >
-          New
+          New Update
         </Button>
       </Flex>
+
       <Tabs>
-        <TabList>
-          <Tab>Instrument</Tab>
-          <Tab>Student</Tab>
+        <TabList w="100%" display="flex" mt={4} mb={4} gap={0}>
+          <Tab
+            flex="1"
+            justifyContent="center"
+            _selected={UPDATES_TAB_SELECTED_PROPS}
+            {...UPDATES_TAB_BASE_PROPS}
+            mr={0}
+          >
+            Instrument
+            <UpdatesTabCountBadge count={instrumentRows.length} />
+          </Tab>
+          <Tab
+            flex="1"
+            justifyContent="center"
+            _selected={UPDATES_TAB_SELECTED_PROPS}
+            {...UPDATES_TAB_BASE_PROPS}
+            mr={0}
+          >
+            Student
+            <UpdatesTabCountBadge count={studentRows.length} />
+          </Tab>
         </TabList>
         <TabPanels>
-          <TabPanel>
+          <TabPanel p={0} pt={4}>
             <ProgramDirectorUpdatesTable
               variant="instrument"
               tableData={instrumentTableData}
@@ -131,7 +149,7 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
               sortOrder={instrumentSort.sortOrder}
             />
           </TabPanel>
-          <TabPanel>
+          <TabPanel p={0} pt={4}>
             <ProgramDirectorUpdatesTable
               variant="student"
               tableData={studentTableData}

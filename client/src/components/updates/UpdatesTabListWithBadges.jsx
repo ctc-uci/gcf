@@ -1,12 +1,12 @@
 import { Badge, Tab, TabList } from '@chakra-ui/react';
 
-const tabSelected = {
+export const UPDATES_TAB_SELECTED_PROPS = {
   color: 'black',
   borderBottom: '2px solid',
   borderColor: 'teal.400',
 };
 
-const tabBase = {
+export const UPDATES_TAB_BASE_PROPS = {
   color: 'gray.500',
   fontWeight: '500',
   pb: 2,
@@ -14,7 +14,7 @@ const tabBase = {
   mr: 6,
 };
 
-function CountBadge({ count }) {
+export function UpdatesTabCountBadge({ count }) {
   return (
     <Badge
       ml={2}
@@ -39,17 +39,17 @@ export function UpdatesTabListWithBadges({
 }) {
   return (
     <TabList>
-      <Tab _selected={tabSelected} {...tabBase}>
+      <Tab _selected={UPDATES_TAB_SELECTED_PROPS} {...UPDATES_TAB_BASE_PROPS}>
         Program
-        <CountBadge count={programCount} />
+        <UpdatesTabCountBadge count={programCount} />
       </Tab>
-      <Tab _selected={tabSelected} {...tabBase}>
+      <Tab _selected={UPDATES_TAB_SELECTED_PROPS} {...UPDATES_TAB_BASE_PROPS}>
         Media
-        <CountBadge count={mediaCount} />
+        <UpdatesTabCountBadge count={mediaCount} />
       </Tab>
-      <Tab _selected={tabSelected} {...tabBase}>
+      <Tab _selected={UPDATES_TAB_SELECTED_PROPS} {...UPDATES_TAB_BASE_PROPS}>
         Account
-        <CountBadge count={accountCount} />
+        <UpdatesTabCountBadge count={accountCount} />
       </Tab>
     </TabList>
   );
