@@ -153,7 +153,12 @@ updatesPermissionsRouter.get('/program-updates/:id', async (req, res) => {
           creator.first_name,
           creator.last_name,
           creator.role,
-          program.status
+          program.status,
+          EXISTS (
+            SELECT 1 FROM instrument_change ic
+            WHERE ic.update_id = program_update.id
+              AND ic.special_request IS TRUE
+          ) AS flagged
       FROM program_update
       INNER JOIN program ON program_update.program_id = program.id
       LEFT JOIN gcf_user AS creator ON creator.id = program.created_by

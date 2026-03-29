@@ -268,8 +268,8 @@ export const ProgramUpdatesTable = ({
                         <Icon
                           as={FiStar}
                           boxSize={4}
-                          color={row.flagged ? 'yellow.400' : 'gray.300'}
-                          fill={row.flagged ? 'yellow.400' : 'none'}
+                          color={row.flagged ? 'teal.500' : 'gray.300'}
+                          fill={row.flagged ? 'teal.500' : 'none'}
                         />
                       </Td>
                     )}
