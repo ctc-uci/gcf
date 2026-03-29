@@ -91,8 +91,6 @@ export const ProgramUpdateForm = ({
   const [notes, setNotes] = useState('');
   const [flagged, setFlagged] = useState(false);
   const [updateType, setUpdateType] = useState('');
-  const [instrumentName, setInstrumentName] = useState('');
-  const [reason, setReason] = useState('');
   const [programName, setProgramName] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [updateDateTime, setUpdateDateTime] = useState('');
@@ -125,8 +123,6 @@ export const ProgramUpdateForm = ({
       setQuantity(0);
       setFlagged(false);
       setUpdateType('');
-      setInstrumentName('');
-      setReason('');
       setProgramName('');
       setAuthorName('');
       setUpdateDateTime('');
@@ -250,8 +246,6 @@ export const ProgramUpdateForm = ({
         }
         setUpdateType(data.updateType || data.title || '');
         setFlagged(data.flagged || false);
-        setInstrumentName(data.instrumentName || '');
-        setReason(data.reason || '');
 
         try {
           const enrollmentResponse = await backend.get(
@@ -548,18 +542,6 @@ export const ProgramUpdateForm = ({
                     Update Type
                   </Text>
                   <Text>{isInstrumentUpdate ? 'Instrument' : 'Student'}</Text>
-                </GridItem>
-                <GridItem>
-                  <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-                    Instrument
-                  </Text>
-                  <Text>{instrumentName || ''}</Text>
-                </GridItem>
-                <GridItem>
-                  <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-                    Reason
-                  </Text>
-                  <Text>{reason || ''}</Text>
                 </GridItem>
               </Grid>
 
