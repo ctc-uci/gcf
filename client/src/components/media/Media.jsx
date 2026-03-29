@@ -11,6 +11,8 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { AddIcon } from '@chakra-ui/icons';
+
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
@@ -29,29 +31,28 @@ export const Media = () => {
   const [programId, setProgramId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const onUploadCompleteHandler = async (uploadedFiles,description) => {
+  const onUploadCompleteHandler = async (uploadedFiles, description) => {
     try {
       const updateDate = new Date().toISOString().split('T')[0];
-      const programUpdateResponse = await backend.post("/program-updates", {
-        title: "Media Upload",
+      const programUpdateResponse = await backend.post('/program-updates', {
+        title: 'Media Upload',
         program_id: programId,
         created_by: userId,
         update_date: updateDate,
-        note: description || "Media files uploaded",
-      });;
+        note: description || 'Media files uploaded',
+      });
 
       const updateId = programUpdateResponse.data.id;
 
       const newMediaItems = [];
       for (const file of uploadedFiles) {
-        const mediaChangeResponse = await backend.post("/mediaChange", {
+        const mediaChangeResponse = await backend.post('/mediaChange', {
           update_id: updateId,
           s3_key: file.s3_key,
           file_name: file.file_name,
-          file_type: file.file_type || "image",
+          file_type: file.file_type || 'image',
           is_thumbnail: false,
           description: file.description,
-          instrument_id: file.instrument_id,
         });
 
         const urlResponse = await backend.get(
@@ -62,7 +63,7 @@ export const Media = () => {
           id: mediaChangeResponse.data.id,
           s3_key: file.s3_key,
           file_name: file.file_name,
-          file_type: file.file_type || "image",
+          file_type: file.file_type || 'image',
           is_thumbnail: false,
           imageUrl: urlResponse.data.url,
         });
@@ -71,7 +72,7 @@ export const Media = () => {
       setMedia((prevMedia) => [...newMediaItems, ...prevMedia]);
       fetchData();
     } catch (error) {
-      console.error("Error saving uploaded files:", error);
+      console.error('Error saving uploaded files:', error);
     }
   };
 
@@ -130,18 +131,18 @@ export const Media = () => {
         <Box borderRadius="lg" p={8}>
           <VStack align="start" spacing={6} w="full">
             <Heading size="xl" color="gray.800">
-              {programName} Media
+              My Media
             </Heading>
 
             <Button
-              variant="outline"
-              bg="white"
-              borderColor="gray.800"
-              color="gray.800"
-              _hover={{ bg: 'gray.50' }}
+              size="sm"
+              leftIcon={<AddIcon />}
+              backgroundColor="teal.500"
+              color="white"
+              _hover={{ backgroundColor: 'teal.600' }}
               onClick={onOpen}
             >
-              + New
+              New
             </Button>
 
             <MediaGrid mediaItems={media} programName={programName} />

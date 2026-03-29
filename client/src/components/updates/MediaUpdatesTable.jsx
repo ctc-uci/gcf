@@ -47,7 +47,12 @@ export function downloadMediaUpdatesAsCsv(data) {
   downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
 }
 
-export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) => {
+export const MediaUpdatesTable = ({
+  data,
+  setData,
+  originalData,
+  isLoading,
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const columns = [
     {
@@ -164,21 +169,32 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
             <Tr>
               <Th onClick={() => handleSort('updateDate')} cursor="pointer">
                 Time{' '}
-                <SortArrows columnKey={'updateDate'} sortOrder={sortOrder} />{' '}
+                <SortArrows
+                  columnKey={'updateDate'}
+                  sortOrder={sortOrder}
+                />{' '}
               </Th>
               <Th onClick={() => handleSort('note')} cursor="pointer">
-                Notes <SortArrows columnKey={'note'} sortOrder={sortOrder} />{' '}
+                Notes{' '}
+                <SortArrows columnKey={'note'} sortOrder={sortOrder} />{' '}
               </Th>
               <Th onClick={() => handleSort('programName')} cursor="pointer">
                 Program{' '}
-                <SortArrows columnKey={'programName'} sortOrder={sortOrder} />{' '}
+                <SortArrows
+                  columnKey={'programName'}
+                  sortOrder={sortOrder}
+                />{' '}
               </Th>
               <Th onClick={() => handleSort('firstName')} cursor="pointer">
                 Author{' '}
-                <SortArrows columnKey={'firstName'} sortOrder={sortOrder} />{' '}
+                <SortArrows
+                  columnKey={'firstName'}
+                  sortOrder={sortOrder}
+                />{' '}
               </Th>
               <Th onClick={() => handleSort('status')} cursor="pointer">
-                Status <SortArrows columnKey={'status'} sortOrder={sortOrder} />{' '}
+                Status{' '}
+                <SortArrows columnKey={'status'} sortOrder={sortOrder} />{' '}
               </Th>
             </Tr>
           </Thead>

@@ -11,12 +11,13 @@ async function getDataByUserId(userId) {
     `SELECT
             r.id AS region_id,
             r.name AS region_name,
-
+            p.city AS city,
+            p.state AS state, 
             p.id AS program_id,
             p.name AS program_name,
             p.status AS program_status,
             p.launch_date AS program_launch_date,
-
+            p.country AS country_id,
             c.name AS program_location,
 
             COALESCE(SUM(ec.enrollment_change), 0) - COALESCE(SUM(ec.graduated_change), 0) AS total_students,
@@ -41,6 +42,9 @@ async function getDataByUserId(userId) {
             p.id,
             p.name,
             p.status,
+            p.city,
+            p.state,
+            p.country,
             p.launch_date,
             c.name
         ORDER BY

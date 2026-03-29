@@ -37,10 +37,10 @@ mediaChangeRouter.get('/:id', async (req, res) => {
 
 mediaChangeRouter.post('/', async (req, res) => {
   try {
-    const { update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id } = req.body;
+    const { update_id, s3_key, file_name, file_type, is_thumbnail } = req.body;
     const newMediaChange = await db.query(
-      `INSERT INTO media_change (update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id || null]
+      `INSERT INTO media_change (update_id, s3_key, file_name, file_type, is_thumbnail) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [update_id, s3_key, file_name, file_type, is_thumbnail]
     );
     res.status(201).json(keysToCamel(newMediaChange[0]));
   } catch (err) {
@@ -52,7 +52,7 @@ mediaChangeRouter.post('/', async (req, res) => {
 mediaChangeRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id } = req.body;
+    const { update_id, s3_key, file_name, file_type, is_thumbnail } = req.body;
     const updatedMediaChange = await db.query(
       `UPDATE media_change SET
         update_id = COALESCE($1, update_id),
@@ -60,10 +60,9 @@ mediaChangeRouter.put('/:id', async (req, res) => {
         file_name = COALESCE($3, file_name),
         file_type = COALESCE($4, file_type),
         is_thumbnail = COALESCE($5, is_thumbnail),
-        instrument_id = COALESCE($6, instrument_id)
-        WHERE id = $7
+        WHERE id = $6
         RETURNING *;`,
-      [update_id, s3_key, file_name, file_type, is_thumbnail, instrument_id, id]
+      [update_id, s3_key, file_name, file_type, is_thumbnail, id]
     );
 
     if (updatedMediaChange.length === 0) {
@@ -80,12 +79,14 @@ mediaChangeRouter.put('/:id', async (req, res) => {
 mediaChangeRouter.put('/:updateId/approve', async (req, res) => {
   try {
     const { updateId } = req.params;
-    const updated = await db.query(`
+    const updated = await db.query(
+      `
         UPDATE media_change SET status = 'Approved' WHERE update_id = $1 RETURNING *
-      `, [updateId]);
-    res.status(200).json(keysToCamel(updated))
-  }
-  catch (err) {
+      `,
+      [updateId]
+    );
+    res.status(200).json(keysToCamel(updated));
+  } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');
   }
@@ -94,28 +95,32 @@ mediaChangeRouter.put('/:updateId/approve', async (req, res) => {
 mediaChangeRouter.put('/:updateId/archive', async (req, res) => {
   try {
     const { updateId } = req.params;
-    const updated = await db.query(`
+    const updated = await db.query(
+      `
         UPDATE media_change SET status = 'Archived' WHERE update_id = $1 RETURNING *
-      `, [updateId]);
-    res.status(200).json(keysToCamel(updated))
-  }
-  catch (err) {
+      `,
+      [updateId]
+    );
+    res.status(200).json(keysToCamel(updated));
+  } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');
   }
 });
 
-mediaChangeRouter.delete("/:updateId/deny", async (req, res) => {
+mediaChangeRouter.delete('/:updateId/deny', async (req, res) => {
   try {
     const { updateId } = req.params;
-    const updated = await db.query(`
+    const updated = await db.query(
+      `
         DELETE FROM media_change WHERE update_id = $1 RETURNING *
-      `, [updateId]);
-    res.status(200).json(keysToCamel(updated))
-  }
-  catch (err) {
+      `,
+      [updateId]
+    );
+    res.status(200).json(keysToCamel(updated));
+  } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
@@ -167,7 +172,7 @@ mediaChangeRouter.get('/:userId/media', async (req, res) => {
       return res.status(200).json({
         media: [],
         programName: null,
-        programId: null
+        programId: null,
       });
     }
 
@@ -188,7 +193,7 @@ mediaChangeRouter.get('/:userId/media', async (req, res) => {
   }
 });
 
-mediaChangeRouter.get("/:userId/media-updates", async (req, res) => {
+mediaChangeRouter.get('/:userId/media-updates', async (req, res) => {
   try {
     const { userId } = req.params;
     const roleResult = await db.query(
@@ -196,17 +201,17 @@ mediaChangeRouter.get("/:userId/media-updates", async (req, res) => {
       [userId]
     );
 
-    if (roleResult.length === 0) return res.status(404).send("User not found");
+    if (roleResult.length === 0) return res.status(404).send('User not found');
 
     const role = roleResult[0].role;
 
-    if (role !== "Admin" && role !== "Regional Director") {
-      return res.status(403).send("Access denied");
+    if (role !== 'Admin' && role !== 'Regional Director') {
+      return res.status(403).send('Access denied');
     }
 
-    let filterJoin = "";
+    let filterJoin = '';
 
-    if (role === "Regional Director") {
+    if (role === 'Regional Director') {
       filterJoin = `
         INNER JOIN country ON program.country = country.id
         INNER JOIN region ON country.region_id = region.id
@@ -233,12 +238,12 @@ mediaChangeRouter.get("/:userId/media-updates", async (req, res) => {
       ) sub
       ORDER BY update_date DESC;
     `;
-    const queryParams = role === "Regional Director" ? [userId] : [];
+    const queryParams = role === 'Regional Director' ? [userId] : [];
     const data = await db.query(finalQuery, queryParams);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 

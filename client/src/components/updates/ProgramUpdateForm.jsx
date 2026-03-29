@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import {
+  Box,
   Button,
   Drawer,
   DrawerBody,
@@ -8,8 +9,6 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
-  FormControl,
-  FormLabel,
   HStack,
   Input,
   NumberDecrementStepper,
@@ -21,12 +20,14 @@ import {
   Tag,
   TagCloseButton,
   TagLabel,
+  Text,
   Textarea,
   useDisclosure,
   useToast,
   VStack,
 } from '@chakra-ui/react';
 
+import { InstrumentSearchInput } from '@/components/common/InstrumentSearchInput';
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
@@ -56,6 +57,7 @@ export const ProgramUpdateForm = ({
   const [enrollmentChangeId, setEnrollmentChangeId] = useState(null);
   const [notes, setNotes] = useState('');
 
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedInstrument, setSelectedInstrument] = useState('');
   const [newInstrumentName, setNewInstrumentName] = useState('');
   const [quantity, setQuantity] = useState(0);
@@ -81,7 +83,9 @@ export const ProgramUpdateForm = ({
       setAddedInstruments({});
       setOriginalInstruments({});
       setNewInstruments([]);
+      setSearchQuery('');
       setSelectedInstrument('');
+      setNewInstrumentName('');
       setQuantity(0);
     }
   }, [programUpdateId]);
@@ -265,6 +269,7 @@ export const ProgramUpdateForm = ({
       [selectedInstrument || newInstrumentName]: parseInt(quantity),
     }));
 
+    setSearchQuery('');
     setNewInstrumentName('');
     setSelectedInstrument('');
     setQuantity(0);
@@ -341,9 +346,7 @@ export const ProgramUpdateForm = ({
           const changeMeta = instrumentChangeMap[deletedName];
 
           if (changeMeta && changeMeta.changeId) {
-            const delRes = await backend.delete(
-              `/instrument-changes/${changeMeta.changeId}`
-            );
+            await backend.delete(`/instrument-changes/${changeMeta.changeId}`);
 
             setInstrumentChangeMap((prev) => {
               const p = { ...prev };
@@ -494,7 +497,9 @@ export const ProgramUpdateForm = ({
       setGraduatedNumber(null);
       setEnrollmentChangeId(null);
       setNotes('');
+      setSearchQuery('');
       setSelectedInstrument('');
+      setNewInstrumentName('');
       if (programUpdateId === null) {
         setAddedInstruments({});
         setOriginalInstruments({});
@@ -543,7 +548,10 @@ export const ProgramUpdateForm = ({
         <DrawerOverlay />
         <DrawerContent>
           <HStack marginBottom="1em">
-            <DrawerCloseButton left="4" right="auto" />
+            <DrawerCloseButton
+              left="4"
+              right="auto"
+            />
             <Button
               colorScheme="teal"
               marginLeft="auto"
@@ -560,7 +568,11 @@ export const ProgramUpdateForm = ({
           </HStack>
 
           <DrawerBody>
-            <VStack spacing={4} align="stretch" marginLeft="1em">
+            <VStack
+              spacing={4}
+              align="stretch"
+              marginLeft="1em"
+            >
               <DrawerHeader padding="0 0">
                 {programUpdateId ? 'Edit Update' : 'Create New Update'}
               </DrawerHeader>
@@ -582,7 +594,10 @@ export const ProgramUpdateForm = ({
                 }
               >
                 {availablePrograms.map((program) => (
-                  <option key={program.id} value={program.id}>
+                  <option
+                    key={program.id}
+                    value={program.id}
+                  >
                     {program.name}
                   </option>
                 ))}
@@ -633,18 +648,45 @@ export const ProgramUpdateForm = ({
                 padding="1"
                 borderRadius="md"
                 spacing={2}
+                align="flex-start"
+                wrap="wrap"
               >
-                <Select
-                  placeholder="Select Instrument"
-                  value={selectedInstrument}
-                  onChange={(e) => setSelectedInstrument(e.target.value)}
+                <Box
+                  flex="1"
+                  minW="12rem"
                 >
-                  {existingInstruments.map((instrument) => (
-                    <option key={instrument.id} value={instrument.name}>
-                      {instrument.name}
-                    </option>
-                  ))}
-                </Select>
+                  <InstrumentSearchInput
+                    instruments={existingInstruments}
+                    value={searchQuery}
+                    onChange={(val) => {
+                      setSearchQuery(val);
+                      if (val) {
+                        setSelectedInstrument('');
+                        setNewInstrumentName('');
+                      }
+                    }}
+                    onSelectExisting={(inst) => {
+                      setSelectedInstrument(inst.name);
+                      setNewInstrumentName('');
+                      setSearchQuery('');
+                    }}
+                    onCreateNew={(name) => {
+                      setNewInstrumentName(name.trim());
+                      setSelectedInstrument('');
+                      setSearchQuery('');
+                    }}
+                    placeholder="Search instrument"
+                  />
+                  {(selectedInstrument || newInstrumentName) && (
+                    <Text
+                      fontSize="sm"
+                      color="gray.600"
+                      mt={1}
+                    >
+                      Selected: {selectedInstrument || newInstrumentName}
+                    </Text>
+                  )}
+                </Box>
                 <NumberInput
                   step={1}
                   defaultValue={0}
@@ -659,7 +701,12 @@ export const ProgramUpdateForm = ({
                     <NumberDecrementStepper />
                   </NumberInputStepper>
                 </NumberInput>
-                <Button onClick={handleConfirmAddInstrument}>+ Add</Button>
+                <Button
+                  onClick={handleConfirmAddInstrument}
+                  isDisabled={!selectedInstrument && !newInstrumentName}
+                >
+                  + Add
+                </Button>
               </HStack>
 
               <HStack wrap="wrap">
