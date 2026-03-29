@@ -47,7 +47,7 @@ updatesPermissionsRouter.get('/media-updates/:id', async (req, res) => {
       ${filterJoin}
       ORDER BY program_update.update_date DESC;
     `;
-    const data = await db.query(finalQuery, [id]);
+    const data = await db.query(finalQuery, filterJoin ? [id] : []);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
@@ -102,6 +102,8 @@ updatesPermissionsRouter.get('/program-updates/pd/:id', async (req, res) => {
             FROM instrument_change ic
             INNER JOIN instrument i ON i.id = ic.instrument_id
             WHERE ic.update_id = program_update.id
+            ORDER BY ic.id DESC
+            LIMIT 1
           ) AS instrument_name,
           EXISTS (
             SELECT 1 FROM instrument_change ic
@@ -169,7 +171,7 @@ updatesPermissionsRouter.get('/program-updates/:id', async (req, res) => {
       ${filterJoin}
       ORDER BY program_update.update_date DESC;`;
 
-    const data = await db.query(finalQuery, [id]);
+    const data = await db.query(finalQuery, filterJoin ? [id] : []);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
