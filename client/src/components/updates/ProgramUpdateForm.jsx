@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import {
+  Avatar,
   Box,
   Button,
   Checkbox,
@@ -14,7 +15,6 @@ import {
   GridItem,
   HStack,
   Heading,
-  Icon,
   IconButton,
   Input,
   NumberDecrementStepper,
@@ -32,7 +32,32 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import { FiMaximize2, FiMinimize2, FiUser } from 'react-icons/fi';
+import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
+
+function formatUpdateDisplayDate(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const s = String(value).trim();
+  const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+  if (ymd && !/\d{1,2}:\d{2}/.test(s)) {
+    const [, y, mo, d] = ymd;
+    const dt = new Date(Number(y), Number(mo) - 1, Number(d));
+    if (Number.isNaN(dt.getTime())) return s;
+    return dt.toLocaleDateString(undefined, {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
+  const dt = new Date(s);
+  if (Number.isNaN(dt.getTime())) return s;
+  return dt.toLocaleString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
@@ -45,6 +70,7 @@ export const ProgramUpdateForm = ({
   onSave,
   programUpdateId = null,
   isInstrumentUpdate = null,
+  selectedUpdate = null,
 }) => {
   const disclosure = useDisclosure();
   const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
@@ -155,6 +181,18 @@ export const ProgramUpdateForm = ({
     const fetchProgramUpdate = async () => {
       if (programUpdateId === null) return;
       setIsLoading(true);
+      if (
+        selectedUpdate &&
+        String(selectedUpdate.id) === String(programUpdateId)
+      ) {
+        setProgramName(selectedUpdate.name || '');
+        setAuthorName(
+          [selectedUpdate.firstName, selectedUpdate.lastName]
+            .filter(Boolean)
+            .join(' ') || ''
+        );
+        setUpdateDateTime(selectedUpdate.updateDate || '');
+      }
       try {
         const response = await backend.get(
           `/program-updates/${programUpdateId}`
@@ -163,11 +201,53 @@ export const ProgramUpdateForm = ({
         setTitle(data.title || '');
         setNotes(data.note || '');
         setProgramId(parseInt(data.programId, 10));
-        setProgramName(data.programName || data.name || '');
-        setAuthorName(
-          [data.firstName, data.lastName].filter(Boolean).join(' ') || ''
-        );
         setUpdateDateTime(data.updateDate || '');
+
+        const pid = parseInt(data.programId, 10);
+        const listRow =
+          selectedUpdate &&
+          String(selectedUpdate.id) === String(programUpdateId)
+            ? {
+                name: selectedUpdate.name || '',
+                author: [selectedUpdate.firstName, selectedUpdate.lastName]
+                  .filter(Boolean)
+                  .join(' '),
+              }
+            : null;
+
+        if (listRow) {
+          setProgramName(listRow.name);
+          setAuthorName(listRow.author);
+        } else {
+          let resolvedProgramName = '';
+          let resolvedAuthorName = '';
+          const fetchGcfName = async (id) => {
+            if (id == null || id === '') return '';
+            try {
+              const userRes = await backend.get(`/gcf-users/${id}`);
+              return (
+                [userRes.data?.firstName, userRes.data?.lastName]
+                  .filter(Boolean)
+                  .join(' ') || ''
+              );
+            } catch {
+              return '';
+            }
+          };
+          try {
+            const progRes = await backend.get(`/program/${pid}`);
+            resolvedProgramName = progRes.data?.name || '';
+            const programCreatorId = progRes.data?.createdBy;
+            resolvedAuthorName = await fetchGcfName(programCreatorId);
+            if (!resolvedAuthorName && data.createdBy != null) {
+              resolvedAuthorName = await fetchGcfName(data.createdBy);
+            }
+          } catch (e) {
+            console.error('Error fetching program or author:', e);
+          }
+          setProgramName(resolvedProgramName);
+          setAuthorName(resolvedAuthorName);
+        }
         setUpdateType(data.updateType || data.title || '');
         setFlagged(data.flagged || false);
         setInstrumentName(data.instrumentName || '');
@@ -224,7 +304,7 @@ export const ProgramUpdateForm = ({
       }
     };
     fetchProgramUpdate();
-  }, [programUpdateId, existingInstruments, backend]);
+  }, [programUpdateId, existingInstruments, backend, selectedUpdate]);
 
   const removeInstrument = (name) => {
     setAddedInstruments((prev) => {
@@ -426,22 +506,27 @@ export const ProgramUpdateForm = ({
                   <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
                     Author
                   </Text>
-                  <HStack spacing={1}>
-                    <Icon as={FiUser} boxSize={4} color="gray.400" />
-                    <Text>{authorName || 'Name Name'}</Text>
+                  <HStack spacing={3}>
+                    <Avatar
+                      size="sm"
+                      name={authorName || undefined}
+                      bg="teal.500"
+                      color="white"
+                    />
+                    <Text>{authorName || '—'}</Text>
                   </HStack>
                 </GridItem>
                 <GridItem>
                   <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
                     Program
                   </Text>
-                  <Text>{programName || ''}</Text>
+                  <Text fontWeight="500">{programName || '—'}</Text>
                 </GridItem>
                 <GridItem>
                   <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
                     Time
                   </Text>
-                  <Text>{updateDateTime || ''}</Text>
+                  <Text>{formatUpdateDisplayDate(updateDateTime) || '—'}</Text>
                 </GridItem>
               </Grid>
               {isInstrumentUpdate && (
@@ -462,7 +547,7 @@ export const ProgramUpdateForm = ({
                   <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
                     Update Type
                   </Text>
-                  <Text>{updateType || title || 'Instrument'}</Text>
+                  <Text>{isInstrumentUpdate ? 'Instrument' : 'Student'}</Text>
                 </GridItem>
                 <GridItem>
                   <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
@@ -495,65 +580,75 @@ export const ProgramUpdateForm = ({
               </Box>
 
               <Divider />
+              {isInstrumentUpdate && (
+                <Box>
+                  <Heading size="md">Edit Update</Heading>
 
-              <Heading size="md">Edit Update</Heading>
-
-              <Box>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
-                  Instrument & Quantity
-                </Text>
-                <HStack wrap="wrap" spacing={2} mb={3}>
-                  {Object.entries(addedInstruments).map(([name, qty]) => (
-                    <Tag
-                      key={name}
-                      size="lg"
-                      borderRadius="md"
-                      variant="outline"
+                  <Box>
+                    <Text
+                      color="teal.500"
+                      fontSize="sm"
+                      fontWeight="500"
+                      mb={2}
                     >
-                      <TagLabel>
-                        {name} {qty}
-                      </TagLabel>
-                      <TagCloseButton onClick={() => removeInstrument(name)} />
-                    </Tag>
-                  ))}
-                </HStack>
-                <HStack spacing={2}>
-                  <Select
-                    placeholder="Select Instrument"
-                    value={selectedInstrument}
-                    onChange={(e) => setSelectedInstrument(e.target.value)}
-                    size="sm"
-                    maxW="200px"
-                  >
-                    {existingInstruments.map((instrument) => (
-                      <option key={instrument.id} value={instrument.name}>
-                        {instrument.name}
-                      </option>
-                    ))}
-                  </Select>
-                  <NumberInput
-                    step={1}
-                    min={0}
-                    width="80px"
-                    value={quantity}
-                    onChange={(v) => setQuantity(Number(v))}
-                    size="sm"
-                  >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleConfirmAddInstrument}
-                  >
-                    + Add
-                  </Button>
-                </HStack>
-              </Box>
+                      Instrument & Quantity
+                    </Text>
+                    <HStack wrap="wrap" spacing={2} mb={3}>
+                      {Object.entries(addedInstruments).map(([name, qty]) => (
+                        <Tag
+                          key={name}
+                          size="lg"
+                          borderRadius="md"
+                          variant="outline"
+                        >
+                          <TagLabel>
+                            {name} {qty}
+                          </TagLabel>
+                          <TagCloseButton
+                            onClick={() => removeInstrument(name)}
+                          />
+                        </Tag>
+                      ))}
+                    </HStack>
+                    <HStack spacing={2}>
+                      <Select
+                        placeholder="Select Instrument"
+                        value={selectedInstrument}
+                        onChange={(e) => setSelectedInstrument(e.target.value)}
+                        size="sm"
+                        maxW="200px"
+                      >
+                        {existingInstruments.map((instrument) => (
+                          <option key={instrument.id} value={instrument.name}>
+                            {instrument.name}
+                          </option>
+                        ))}
+                      </Select>
+                      <NumberInput
+                        step={1}
+                        min={0}
+                        width="80px"
+                        value={quantity}
+                        onChange={(v) => setQuantity(Number(v))}
+                        size="sm"
+                      >
+                        <NumberInputField />
+                        <NumberInputStepper>
+                          <NumberIncrementStepper />
+                          <NumberDecrementStepper />
+                        </NumberInputStepper>
+                      </NumberInput>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleConfirmAddInstrument}
+                      >
+                        + Add
+                      </Button>
+                    </HStack>
+                  </Box>
+                </Box>
+              )}
             </VStack>
           ) : (
             <VStack spacing={4} align="stretch" mt={4}>

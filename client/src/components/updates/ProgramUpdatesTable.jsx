@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 
 import {
+  Avatar,
   Badge,
   Box,
   Center,
@@ -148,6 +149,7 @@ export const ProgramUpdatesTable = ({
         onSave={onSave}
         programUpdateId={selectedUpdate?.id}
         isInstrumentUpdate={selectedUpdate?.isInstrumentUpdate}
+        selectedUpdate={selectedUpdate}
       />
 
       <Box position="relative">
@@ -294,9 +296,22 @@ export const ProgramUpdatesTable = ({
                       </Td>
                     )}
                     <Td>
-                      <HStack spacing={1}>
-                        <Icon as={FiUser} boxSize={4} color="gray.400" />
-                        <Text fontSize="sm">{row.firstName || 'Name'}</Text>
+                      <HStack spacing={2}>
+                        <Avatar
+                          size="xs"
+                          name={
+                            [row.firstName, row.lastName]
+                              .filter(Boolean)
+                              .join(' ') || undefined
+                          }
+                          bg="teal.500"
+                          color="white"
+                        />
+                        <Text fontSize="sm">
+                          {[row.firstName, row.lastName]
+                            .filter(Boolean)
+                            .join(' ') || '—'}
+                        </Text>
                       </HStack>
                     </Td>
                     <Td>
