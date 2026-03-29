@@ -147,6 +147,7 @@ export const ProgramUpdatesTable = ({
         }}
         onSave={onSave}
         programUpdateId={selectedUpdate?.id}
+        isInstrumentUpdate={selectedUpdate?.isInstrumentUpdate}
       />
 
       <Box position="relative">
@@ -275,7 +276,11 @@ export const ProgramUpdatesTable = ({
                     )}
                     {showFlagAndType && (
                       <Td>
-                        <TypeBadge type={row.updateType || row.title} />
+                        <TypeBadge
+                          type={
+                            row.isInstrumentUpdate ? 'Instrument' : 'Student'
+                          }
+                        />
                       </Td>
                     )}
                     <Td>

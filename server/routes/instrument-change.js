@@ -76,16 +76,17 @@ instrumentChangeRouter.get('/:id', async (req, res) => {
 instrumentChangeRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { instrumentId, updateId, amountChanged } = req.body;
+    const { instrumentId, updateId, amountChanged, special_request } = req.body;
 
     const updatedChange = await db.query(
       `UPDATE instrument_change SET
         instrument_id = COALESCE($1, instrument_id),
         update_id = COALESCE($2, update_id),
-        amount_changed = COALESCE($3, amount_changed)
-       WHERE id = $4
+        amount_changed = COALESCE($3, amount_changed),
+        special_request = COALESCE($4, special_request)
+       WHERE id = $5
        RETURNING *;`,
-      [instrumentId, updateId, amountChanged, id]
+      [instrumentId, updateId, amountChanged, special_request, id]
     );
 
     if (updatedChange.length === 0) {

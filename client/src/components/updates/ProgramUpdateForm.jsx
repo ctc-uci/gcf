@@ -44,6 +44,7 @@ export const ProgramUpdateForm = ({
   onClose: onCloseProp,
   onSave,
   programUpdateId = null,
+  isInstrumentUpdate = null,
 }) => {
   const disclosure = useDisclosure();
   const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
@@ -58,7 +59,6 @@ export const ProgramUpdateForm = ({
   const { role } = useRoleContext();
 
   const [title, setTitle] = useState('');
-  const [date, setDate] = useState('');
   const [enrollmentNumber, setEnrollmentNumber] = useState(null);
   const [graduatedNumber, setGraduatedNumber] = useState(null);
   const [enrollmentChangeId, setEnrollmentChangeId] = useState(null);
@@ -87,7 +87,6 @@ export const ProgramUpdateForm = ({
   useEffect(() => {
     if (!programUpdateId) {
       setTitle('');
-      setDate('');
       setNotes('');
       setProgramId('');
       setEnrollmentNumber(null);
@@ -162,7 +161,6 @@ export const ProgramUpdateForm = ({
         );
         const data = response.data;
         setTitle(data.title || '');
-        setDate(data.updateDate?.split('T')[0] || '');
         setNotes(data.note || '');
         setProgramId(parseInt(data.programId, 10));
         setProgramName(data.programName || data.name || '');
@@ -261,7 +259,7 @@ export const ProgramUpdateForm = ({
         title: title ? String(title).trim() : null,
         program_id: parseInt(programId, 10) || null,
         created_by: currentUser?.uid,
-        update_date: date ? String(date) : null,
+        update_date: new Date().toISOString(),
         note: notes ? String(notes).trim() : null,
       };
 
@@ -330,6 +328,17 @@ export const ProgramUpdateForm = ({
         }
       }
 
+      if (isInstrumentUpdate && updatedProgramUpdateId) {
+        const { data: rowsForThisProgramUpdate = [] } = await backend.get(
+          `/instrument-changes/update/${updatedProgramUpdateId}`
+        );
+        for (const row of rowsForThisProgramUpdate) {
+          await backend.put(`/instrument-changes/${row.id}`, {
+            special_request: flagged,
+          });
+        }
+      }
+
       // Handle enrollment
       if (enrollmentNumber !== null) {
         if (enrollmentChangeId) {
@@ -378,7 +387,6 @@ export const ProgramUpdateForm = ({
   };
 
   const drawerSize = isFullScreen ? 'full' : 'lg';
-
   return (
     <Drawer
       isOpen={isOpen}
@@ -436,19 +444,19 @@ export const ProgramUpdateForm = ({
                   <Text>{updateDateTime || ''}</Text>
                 </GridItem>
               </Grid>
-
-              <Box>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
-                  Flag
-                </Text>
-                <Checkbox
-                  isChecked={flagged}
-                  onChange={(e) => setFlagged(e.target.checked)}
-                >
-                  Yes, this is a special request
-                </Checkbox>
-              </Box>
-
+              {isInstrumentUpdate && (
+                <Box>
+                  <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
+                    Flag
+                  </Text>
+                  <Checkbox
+                    isChecked={flagged}
+                    onChange={(e) => setFlagged(e.target.checked)}
+                  >
+                    Yes, this is a special request
+                  </Checkbox>
+                </Box>
+              )}
               <Grid templateColumns="repeat(3, 1fr)" gap={6}>
                 <GridItem>
                   <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
@@ -578,17 +586,6 @@ export const ProgramUpdateForm = ({
                     </option>
                   ))}
                 </Select>
-              </Box>
-
-              <Box>
-                <Text fontWeight="500" mb={1}>
-                  Date
-                </Text>
-                <Input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                />
               </Box>
 
               <Box>

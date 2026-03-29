@@ -36,7 +36,7 @@ const CardView = ({ data, onSave: _onSave }) => {
       return () => {
         cancelled = true;
       };
-    }, [id]);
+    }, [id, backend]);
 
     return <Text fontSize="sm">{region}</Text>;
   };
