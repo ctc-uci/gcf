@@ -489,304 +489,144 @@ export const ProgramUpdateForm = ({
         </Box>
 
         <DrawerBody px={8} pb={24}>
-          {programUpdateId ? (
-            <VStack spacing={6} align="stretch">
-              <Heading size="md" mt={4}>
-                Update Information
-              </Heading>
+          <VStack spacing={6} align="stretch">
+            <Heading size="md" mt={4}>
+              Update Information
+            </Heading>
 
-              <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-                <GridItem>
-                  <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-                    Author
-                  </Text>
-                  <HStack spacing={3}>
-                    <Avatar
-                      size="sm"
-                      name={authorName || undefined}
-                      bg="teal.500"
-                      color="white"
-                    />
-                    <Text>{authorName || '—'}</Text>
-                  </HStack>
-                </GridItem>
-                <GridItem>
-                  <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-                    Program
-                  </Text>
-                  <Text fontWeight="500">{programName || '—'}</Text>
-                </GridItem>
-                <GridItem>
-                  <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-                    Time
-                  </Text>
-                  <Text>{formatUpdateDisplayDate(updateDateTime) || '—'}</Text>
-                </GridItem>
-              </Grid>
-              {isInstrumentUpdate && (
-                <Box>
-                  <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
-                    Flag
-                  </Text>
-                  <Checkbox
-                    isChecked={flagged}
-                    onChange={(e) => setFlagged(e.target.checked)}
-                  >
-                    Yes, this is a special request
-                  </Checkbox>
-                </Box>
-              )}
-              <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-                <GridItem>
-                  <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-                    Update Type
-                  </Text>
-                  <Text>{isInstrumentUpdate ? 'Instrument' : 'Student'}</Text>
-                </GridItem>
-              </Grid>
-
-              <Box>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
-                  Photos/Videos
+            <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+              <GridItem>
+                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+                  Author
                 </Text>
-                <Text color="gray.400" fontSize="sm">
-                  No media attached
-                </Text>
-              </Box>
-
-              <Box>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
-                  Note
-                </Text>
-                <Text>{notes || ''}</Text>
-              </Box>
-
-              <Divider />
-              {isInstrumentUpdate && (
-                <Box>
-                  <Heading size="md">Edit Update</Heading>
-
-                  <Box>
-                    <Text
-                      color="teal.500"
-                      fontSize="sm"
-                      fontWeight="500"
-                      mb={2}
-                    >
-                      Instrument & Quantity
-                    </Text>
-                    <HStack wrap="wrap" spacing={2} mb={3}>
-                      {Object.entries(addedInstruments).map(([name, qty]) => (
-                        <Tag
-                          key={name}
-                          size="lg"
-                          borderRadius="md"
-                          variant="outline"
-                        >
-                          <TagLabel>
-                            {name} {qty}
-                          </TagLabel>
-                          <TagCloseButton
-                            onClick={() => removeInstrument(name)}
-                          />
-                        </Tag>
-                      ))}
-                    </HStack>
-                    <HStack spacing={2}>
-                      <Select
-                        placeholder="Select Instrument"
-                        value={selectedInstrument}
-                        onChange={(e) => setSelectedInstrument(e.target.value)}
-                        size="sm"
-                        maxW="200px"
-                      >
-                        {existingInstruments.map((instrument) => (
-                          <option key={instrument.id} value={instrument.name}>
-                            {instrument.name}
-                          </option>
-                        ))}
-                      </Select>
-                      <NumberInput
-                        step={1}
-                        min={0}
-                        width="80px"
-                        value={quantity}
-                        onChange={(v) => setQuantity(Number(v))}
-                        size="sm"
-                      >
-                        <NumberInputField />
-                        <NumberInputStepper>
-                          <NumberIncrementStepper />
-                          <NumberDecrementStepper />
-                        </NumberInputStepper>
-                      </NumberInput>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={handleConfirmAddInstrument}
-                      >
-                        + Add
-                      </Button>
-                    </HStack>
-                  </Box>
-                </Box>
-              )}
-            </VStack>
-          ) : (
-            <VStack spacing={4} align="stretch" mt={4}>
-              <Heading size="md">Create New Update</Heading>
-
-              <Box>
-                <Text fontWeight="500" mb={1}>
-                  Title
-                </Text>
-                <Input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter Title Here"
-                />
-              </Box>
-
-              <Box>
-                <Text fontWeight="500" mb={1}>
+                <HStack spacing={3}>
+                  <Avatar
+                    size="sm"
+                    name={authorName || undefined}
+                    bg="teal.500"
+                    color="white"
+                  />
+                  <Text>{authorName || '—'}</Text>
+                </HStack>
+              </GridItem>
+              <GridItem>
+                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
                   Program
                 </Text>
-                <Select
-                  placeholder="Select Program"
-                  value={programId}
-                  onChange={(e) => setProgramId(e.target.value)}
-                  isDisabled={availablePrograms.length === 1}
-                >
-                  {availablePrograms.map((program) => (
-                    <option key={program.id} value={program.id}>
-                      {program.name}
-                    </option>
-                  ))}
-                </Select>
-              </Box>
-
-              <Box>
-                <Text fontWeight="500" mb={1}>
-                  # Students Currently Enrolled
+                <Text fontWeight="500">{programName || '—'}</Text>
+              </GridItem>
+              <GridItem>
+                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+                  Time
                 </Text>
-                <NumberInput
-                  min={0}
-                  value={enrollmentNumber || ''}
-                  onChange={(v) => setEnrollmentNumber(v ? parseInt(v) : null)}
-                >
-                  <NumberInputField placeholder="Enter # of Students Enrolled" />
-                  <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                  </NumberInputStepper>
-                </NumberInput>
-              </Box>
-
+                <Text>{formatUpdateDisplayDate(updateDateTime) || '—'}</Text>
+              </GridItem>
+            </Grid>
+            {isInstrumentUpdate && (
               <Box>
-                <Text fontWeight="500" mb={1}>
-                  # Students Graduated
+                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
+                  Flag
                 </Text>
-                <NumberInput
-                  min={0}
-                  value={graduatedNumber || ''}
-                  onChange={(v) => setGraduatedNumber(v ? parseInt(v) : null)}
+                <Checkbox
+                  isChecked={flagged}
+                  onChange={(e) => setFlagged(e.target.checked)}
                 >
-                  <NumberInputField placeholder="Enter # of Students Graduated" />
-                  <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                  </NumberInputStepper>
-                </NumberInput>
+                  Yes, this is a special request
+                </Checkbox>
               </Box>
-
-              <Box>
-                <Text fontWeight="500" mb={1}>
-                  Instrument(s) & Quantity
+            )}
+            <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+              <GridItem>
+                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+                  Update Type
                 </Text>
-                <HStack spacing={2} mb={2}>
-                  <Select
-                    placeholder="Select Instrument"
-                    value={selectedInstrument}
-                    onChange={(e) => setSelectedInstrument(e.target.value)}
-                    size="sm"
-                  >
-                    {existingInstruments.map((instrument) => (
-                      <option key={instrument.id} value={instrument.name}>
-                        {instrument.name}
-                      </option>
+                <Text>{isInstrumentUpdate ? 'Instrument' : 'Student'}</Text>
+              </GridItem>
+            </Grid>
+
+            <Box>
+              <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
+                Photos/Videos
+              </Text>
+              <Text color="gray.400" fontSize="sm">
+                No media attached
+              </Text>
+            </Box>
+
+            <Box>
+              <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
+                Note
+              </Text>
+              <Text>{notes || ''}</Text>
+            </Box>
+
+            <Divider />
+            {isInstrumentUpdate && (
+              <Box>
+                <Heading size="md">Edit Update</Heading>
+
+                <Box>
+                  <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
+                    Instrument & Quantity
+                  </Text>
+                  <HStack wrap="wrap" spacing={2} mb={3}>
+                    {Object.entries(addedInstruments).map(([name, qty]) => (
+                      <Tag
+                        key={name}
+                        size="lg"
+                        borderRadius="md"
+                        variant="outline"
+                      >
+                        <TagLabel>
+                          {name} {qty}
+                        </TagLabel>
+                        <TagCloseButton
+                          onClick={() => removeInstrument(name)}
+                        />
+                      </Tag>
                     ))}
-                  </Select>
-                  <NumberInput
-                    step={1}
-                    min={0}
-                    width="80px"
-                    value={quantity}
-                    onChange={(v) => setQuantity(Number(v))}
-                    size="sm"
-                  >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                  <Button size="sm" onClick={handleConfirmAddInstrument}>
-                    + Add
-                  </Button>
-                </HStack>
-                <HStack wrap="wrap">
-                  {Object.entries(addedInstruments).map(([name, qty]) => (
-                    <Tag key={name}>
-                      <TagLabel>
-                        {name}: {qty}
-                      </TagLabel>
-                      <TagCloseButton onClick={() => removeInstrument(name)} />
-                    </Tag>
-                  ))}
-                </HStack>
+                  </HStack>
+                  <HStack spacing={2}>
+                    <Select
+                      placeholder="Select Instrument"
+                      value={selectedInstrument}
+                      onChange={(e) => setSelectedInstrument(e.target.value)}
+                      size="sm"
+                      maxW="200px"
+                    >
+                      {existingInstruments.map((instrument) => (
+                        <option key={instrument.id} value={instrument.name}>
+                          {instrument.name}
+                        </option>
+                      ))}
+                    </Select>
+                    <NumberInput
+                      step={1}
+                      min={0}
+                      width="80px"
+                      value={quantity}
+                      onChange={(v) => setQuantity(Number(v))}
+                      size="sm"
+                    >
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleConfirmAddInstrument}
+                    >
+                      + Add
+                    </Button>
+                  </HStack>
+                </Box>
               </Box>
-
-              <Box>
-                <Text fontWeight="500" mb={1}>
-                  Notes
-                </Text>
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  minH="120px"
-                  placeholder="Enter notes"
-                />
-              </Box>
-            </VStack>
-          )}
+            )}
+          </VStack>
         </DrawerBody>
-
-        <Flex
-          position="absolute"
-          bottom={0}
-          left={0}
-          right={0}
-          bg="white"
-          borderTop="1px solid"
-          borderColor="gray.200"
-          px={8}
-          py={4}
-          justify="flex-end"
-          gap={3}
-        >
-          <Button variant="outline" onClick={onClose} isDisabled={isLoading}>
-            Keep as Unresolved
-          </Button>
-          <Button
-            bg="teal.500"
-            color="white"
-            _hover={{ bg: 'teal.600' }}
-            onClick={() => handleSubmit(true)}
-            isLoading={isLoading}
-          >
-            Save & Mark as Resolved
-          </Button>
-        </Flex>
       </DrawerContent>
     </Drawer>
   );

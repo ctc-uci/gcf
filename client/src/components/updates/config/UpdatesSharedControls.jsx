@@ -16,7 +16,7 @@ import {
 } from 'react-icons/hi2';
 import { BsGrid3X3Gap } from 'react-icons/bs';
 
-import { FilterComponent } from '../common/FilterComponent';
+import { FilterComponent } from '../../common/FilterComponent';
 
 const searchInputStyles = {
   placeholder: 'Search',

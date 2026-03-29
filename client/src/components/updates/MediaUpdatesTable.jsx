@@ -26,7 +26,7 @@ import {
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
-import { ReviewMediaUpdate } from './ReviewMediaUpdate';
+import { ReviewMediaUpdate } from './forms/ReviewMediaUpdate';
 
 export function downloadMediaUpdatesAsCsv(data) {
   const headers = ['Update Note', 'Status', 'Author', 'Program', 'Date'];

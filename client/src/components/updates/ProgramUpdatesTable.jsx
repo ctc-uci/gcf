@@ -26,7 +26,7 @@ import {
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
-import { ProgramUpdateForm } from './ProgramUpdateForm';
+import { ProgramUpdateForm } from './forms/ProgramUpdateForm';
 
 export function downloadProgramUpdatesAsCsv(data) {
   const headers = [

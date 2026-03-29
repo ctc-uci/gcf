@@ -20,7 +20,7 @@ import { FiUser } from 'react-icons/fi';
 
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
-import { AccountUpdateDrawer } from './AccountUpdateDrawer';
+import { AccountUpdateDrawer } from './forms/AccountUpdateDrawer';
 
 const StatusBadge = ({ status, adminName }) => {
   const hasAdmin = adminName && adminName.trim();

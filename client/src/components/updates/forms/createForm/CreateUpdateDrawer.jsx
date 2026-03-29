@@ -29,7 +29,7 @@ import {
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import { MediaUploadModal } from '../../media/MediaUploadModal';
+import { MediaUploadModal } from '../../../media/MediaUploadModal';
 import CreateUpdateInstrument from './CreateUpdateInstrument';
 import CreateUpdateStudent from './CreateUpdateStudent';
 

@@ -21,7 +21,7 @@ import {
 } from '@chakra-ui/react';
 import { FiDownload, FiMaximize2, FiMinimize2, FiUser } from 'react-icons/fi';
 
-import { useBackendContext } from '../../contexts/hooks/useBackendContext';
+import { useBackendContext } from '../../../contexts/hooks/useBackendContext';
 
 export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   const { backend } = useBackendContext();

@@ -17,20 +17,20 @@ import { AddIcon } from '@chakra-ui/icons';
 import { FiDownload } from 'react-icons/fi';
 
 import { downloadProgramUpdatesAsCsv } from '../ProgramUpdatesTable';
-import { CreateUpdateDrawer } from '../createForm/CreateUpdateDrawer';
+import { CreateUpdateDrawer } from '../forms/createForm/CreateUpdateDrawer';
 import {
   UpdatesSearchInput,
   UpdatesFilterPopover,
   UpdatesViewModeToggle,
-} from '../UpdatesSharedControls';
+} from '../config/UpdatesSharedControls';
 import { applyFilters } from '../../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../../contexts/hooks/TableSort';
-import { programDirectorFilterColumns } from '../updatesColumnConfig';
+import { programDirectorFilterColumns } from '../config/updatesColumnConfig';
 import {
   UPDATES_TAB_BASE_PROPS,
   UPDATES_TAB_SELECTED_PROPS,
   UpdatesTabCountBadge,
-} from '../UpdatesTabListWithBadges';
+} from '../config/UpdatesTabListWithBadges';
 import { ProgramDirectorUpdatesTable } from './ProgramDirectorUpdatesTable';
 
 export const ProgramDirectorView = ({ data, isLoading, onSave }) => {

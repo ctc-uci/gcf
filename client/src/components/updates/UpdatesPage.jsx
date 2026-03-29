@@ -30,13 +30,13 @@ import {
   UPDATES_TAB_BASE_PROPS,
   UPDATES_TAB_SELECTED_PROPS,
   UpdatesTabCountBadge,
-} from './UpdatesTabListWithBadges';
+} from './config/UpdatesTabListWithBadges';
 import {
   UpdatesSearchInput,
   UpdatesFilterPopover,
-} from './UpdatesSharedControls';
-import { programSectionColumns } from './updatesColumnConfig';
-import { useUpdatesPageData } from './useUpdatesPageData';
+} from './config/UpdatesSharedControls';
+import { programSectionColumns } from './config/updatesColumnConfig';
+import { useUpdatesPageData } from './config/useUpdatesPageData';
 
 export const UpdatesPage = () => {
   const {
