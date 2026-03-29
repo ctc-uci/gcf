@@ -9,6 +9,8 @@ import {
   Spinner,
   TabPanel,
   TabPanels,
+  TabList,
+  Tab,
   Tabs,
 } from '@chakra-ui/react';
 import { FiDownload } from 'react-icons/fi';
@@ -24,7 +26,11 @@ import {
 import { AccountUpdatesTable } from './AccountUpdatesTable';
 import { ProgramDirectorView } from './programDirectorView/ProgramDirectorView';
 import { UpdatesEmptyState } from './UpdatesEmptyState';
-import { UpdatesTabListWithBadges } from './UpdatesTabListWithBadges';
+import {
+  UPDATES_TAB_BASE_PROPS,
+  UPDATES_TAB_SELECTED_PROPS,
+  UpdatesTabCountBadge,
+} from './UpdatesTabListWithBadges';
 import {
   UpdatesSearchInput,
   UpdatesFilterPopover,
@@ -107,17 +113,34 @@ export const UpdatesPage = () => {
           size="sm"
           aria-label="Download updates"
           color="gray.500"
-          isDisabled={!canDownloadCurrentTab}
           onClick={handleDownload}
         />
       </Flex>
       <Tabs index={tabIndex} onChange={setTabIndex} variant="unstyled">
         <Flex gap={3} mt={4} mb={4} wrap="wrap">
-          <UpdatesTabListWithBadges
-            programCount={tabCounts.program}
-            mediaCount={tabCounts.media}
-            accountCount={tabCounts.account}
-          />
+          <TabList>
+            <Tab
+              _selected={UPDATES_TAB_SELECTED_PROPS}
+              {...UPDATES_TAB_BASE_PROPS}
+            >
+              Program
+              <UpdatesTabCountBadge count={tabCounts.program} />
+            </Tab>
+            <Tab
+              _selected={UPDATES_TAB_SELECTED_PROPS}
+              {...UPDATES_TAB_BASE_PROPS}
+            >
+              Media
+              <UpdatesTabCountBadge count={tabCounts.media} />
+            </Tab>
+            <Tab
+              _selected={UPDATES_TAB_SELECTED_PROPS}
+              {...UPDATES_TAB_BASE_PROPS}
+            >
+              Account
+              <UpdatesTabCountBadge count={tabCounts.account} />
+            </Tab>
+          </TabList>
           {adminSearchToolbar}
         </Flex>
 

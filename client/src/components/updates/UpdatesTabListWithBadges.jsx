@@ -28,29 +28,3 @@ export function UpdatesTabCountBadge({ count }) {
     </Badge>
   );
 }
-
-/**
- * Program / Media / Account tabs with item counts (Admin + Regional Director layouts).
- */
-export function UpdatesTabListWithBadges({
-  programCount,
-  mediaCount,
-  accountCount,
-}) {
-  return (
-    <TabList>
-      <Tab _selected={UPDATES_TAB_SELECTED_PROPS} {...UPDATES_TAB_BASE_PROPS}>
-        Program
-        <UpdatesTabCountBadge count={programCount} />
-      </Tab>
-      <Tab _selected={UPDATES_TAB_SELECTED_PROPS} {...UPDATES_TAB_BASE_PROPS}>
-        Media
-        <UpdatesTabCountBadge count={mediaCount} />
-      </Tab>
-      <Tab _selected={UPDATES_TAB_SELECTED_PROPS} {...UPDATES_TAB_BASE_PROPS}>
-        Account
-        <UpdatesTabCountBadge count={accountCount} />
-      </Tab>
-    </TabList>
-  );
-}

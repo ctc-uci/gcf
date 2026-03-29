@@ -70,6 +70,7 @@ export const MediaUpdatesTable = ({
   embedded = false,
   activeFilters: externalFilters,
 }) => {
+  console.log(data);
   const [internalFilters] = useState([]);
   const activeFilters = externalFilters ?? internalFilters;
 

@@ -71,7 +71,10 @@ export function useUpdatesPageData() {
   const refetchProgramUpdates = useCallback(async () => {
     setIsProgramUpdatesLoading(true);
     try {
-      const programUpdates = await fetchData(`program-updates/${userId}`);
+      const programUpdates =
+        role === 'Program Director'
+          ? await fetchData(`program-updates/pd/${userId}`)
+          : await fetchData(`program-updates/${userId}`);
       const mappedProgram = mapUpdatesWithFullName(programUpdates);
       setProgramUpdatesData(mappedProgram);
       setOriginalProgramUpdatesData(mappedProgram);
@@ -91,7 +94,9 @@ export function useUpdatesPageData() {
       setIsLoading(true);
       try {
         if (role === 'Program Director') {
-          const programUpdates = await fetchData(`program-updates/${userId}`);
+          const programUpdates = await fetchData(
+            `program-updates/pd/${userId}`
+          );
           const mappedProgram = mapUpdatesWithFullName(programUpdates);
           setProgramUpdatesData(mappedProgram);
           setOriginalProgramUpdatesData(mappedProgram);
