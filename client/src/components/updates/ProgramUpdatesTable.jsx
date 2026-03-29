@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   AddIcon,
@@ -28,17 +28,20 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
+
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
+
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
-import { ProgramUpdateForm } from './ProgramUpdateForm';
-import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
+import { CreateProgramUpdateForm } from './CreateProgramUpdateForm';
+import { EditProgramUpdateForm } from './EditProgramUpdateForm';
 
 export function downloadProgramUpdatesAsCsv(data) {
   const headers = ['Time', 'Notes', 'Program', 'Author', 'Status'];
@@ -119,20 +122,37 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
 
   return (
     <>
-      <ProgramUpdateForm
-        isOpen={isFormOpen}
-        onOpen={() => setIsFormOpen(true)}
+      <CreateProgramUpdateForm
+        isOpen={isFormOpen && !selectedUpdate}
         onClose={() => {
           setIsFormOpen(false);
           setSelectedUpdate(null);
         }}
         onSave={onSave}
-        programUpdateId={selectedUpdate?.id}
       />
-      <Box mt="30px" ml="10px">
-        <Flex gap={10} mb="20px" alignItems="center">
+      <EditProgramUpdateForm
+        isOpen={isFormOpen && !!selectedUpdate}
+        programUpdateId={selectedUpdate?.id ?? null}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedUpdate(null);
+        }}
+        onSave={onSave}
+      />
+      <Box
+        mt="30px"
+        ml="10px"
+      >
+        <Flex
+          gap={10}
+          mb="20px"
+          alignItems="center"
+        >
           <Heading>Program Updates</Heading>
-          <SearchIcon mt="10px" ml="10px" />
+          <SearchIcon
+            mt="10px"
+            ml="10px"
+          />
           <Input
             placeholder="Type to search"
             variant="flushed"
@@ -149,7 +169,11 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
                 variant="ghost"
               />
             </PopoverTrigger>
-            <PopoverContent w="800px" maxW="90vw" shadow="xl">
+            <PopoverContent
+              w="800px"
+              maxW="90vw"
+              shadow="xl"
+            >
               <FilterComponent
                 columns={columns}
                 onFilterChange={(filters) => {
@@ -158,7 +182,10 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
               />
             </PopoverContent>
           </Popover>
-          <Text fontSize="sm" color="gray.500">
+          <Text
+            fontSize="sm"
+            color="gray.500"
+          >
             Displaying {tableData.length} results
           </Text>
           <IconButton
@@ -187,21 +214,33 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
         </Flex>
 
         <Box position="relative">
-          <TableContainer overflowX="auto" maxW="100%">
+          <TableContainer
+            overflowX="auto"
+            maxW="100%"
+          >
             <Table variant="simple">
               <Thead>
                 {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
                 <Tr>
-                  <Th onClick={() => handleSort('updateDate')} cursor="pointer">
+                  <Th
+                    onClick={() => handleSort('updateDate')}
+                    cursor="pointer"
+                  >
                     Time{' '}
                     <SortArrows
                       columnKey={'updateDate'}
                       sortOrder={sortOrder}
                     />
                   </Th>
-                  <Th onClick={() => handleSort('note')} cursor="pointer">
+                  <Th
+                    onClick={() => handleSort('note')}
+                    cursor="pointer"
+                  >
                     Notes{' '}
-                    <SortArrows columnKey={'note'} sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey={'note'}
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                   <Th
                     onClick={() => handleSort('programName')}
@@ -213,13 +252,25 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
                       sortOrder={sortOrder}
                     />
                   </Th>
-                  <Th onClick={() => handleSort('firstName')} cursor="pointer">
+                  <Th
+                    onClick={() => handleSort('firstName')}
+                    cursor="pointer"
+                  >
                     Author{' '}
-                    <SortArrows columnKey={'firstName'} sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey={'firstName'}
+                      sortOrder={sortOrder}
+                    />
                   </Th>
-                  <Th onClick={() => handleSort('status')} cursor="pointer">
+                  <Th
+                    onClick={() => handleSort('status')}
+                    cursor="pointer"
+                  >
                     Status{' '}
-                    <SortArrows columnKey={'status'} sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey={'status'}
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                 </Tr>
               </Thead>
