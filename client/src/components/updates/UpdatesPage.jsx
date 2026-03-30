@@ -7,36 +7,37 @@ import {
   Heading,
   IconButton,
   Spinner,
+  Tab,
+  TabList,
   TabPanel,
   TabPanels,
-  TabList,
-  Tab,
   Tabs,
 } from '@chakra-ui/react';
+
+import { EmptyStateBadge } from '@/components/badges/EmptyStateBadge';
 import { FiDownload } from 'react-icons/fi';
 
-import {
-  ProgramUpdatesTable,
-  downloadProgramUpdatesAsCsv,
-} from './ProgramUpdatesTable';
-import {
-  MediaUpdatesTable,
-  downloadMediaUpdatesAsCsv,
-} from './MediaUpdatesTable';
 import { AccountUpdatesTable } from './AccountUpdatesTable';
-import { ProgramDirectorView } from './programDirectorView/ProgramDirectorView';
-import { UpdatesEmptyState } from './UpdatesEmptyState';
+import { programSectionColumns } from './config/updatesColumnConfig';
+import {
+  UpdatesFilterPopover,
+  UpdatesSearchInput,
+} from './config/UpdatesSharedControls';
 import {
   UPDATES_TAB_BASE_PROPS,
   UPDATES_TAB_SELECTED_PROPS,
   UpdatesTabCountBadge,
 } from './config/UpdatesTabListWithBadges';
-import {
-  UpdatesSearchInput,
-  UpdatesFilterPopover,
-} from './config/UpdatesSharedControls';
-import { programSectionColumns } from './config/updatesColumnConfig';
 import { useUpdatesPageData } from './config/useUpdatesPageData';
+import {
+  downloadMediaUpdatesAsCsv,
+  MediaUpdatesTable,
+} from './MediaUpdatesTable';
+import { ProgramDirectorView } from './programDirectorView/ProgramDirectorView';
+import {
+  downloadProgramUpdatesAsCsv,
+  ProgramUpdatesTable,
+} from './ProgramUpdatesTable';
 
 export const UpdatesPage = () => {
   const {
@@ -64,7 +65,10 @@ export const UpdatesPage = () => {
   if (isLoading) {
     return (
       <Center py={10}>
-        <Spinner size="xl" color="gray.500" />
+        <Spinner
+          size="xl"
+          color="gray.500"
+        />
       </Center>
     );
   }
@@ -92,8 +96,16 @@ export const UpdatesPage = () => {
   };
 
   const adminSearchToolbar = (
-    <Flex gap={3} mt={4} mb={4} wrap="wrap">
-      <UpdatesSearchInput value={searchQuery} onChange={setSearchQuery} />
+    <Flex
+      gap={3}
+      mt={4}
+      mb={4}
+      wrap="wrap"
+    >
+      <UpdatesSearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+      />
       <UpdatesFilterPopover
         columns={programSectionColumns}
         onFilterChange={() => {}}
@@ -102,9 +114,24 @@ export const UpdatesPage = () => {
   );
 
   return (
-    <Box p={8} bg="gray.50" minH="100vh" mx={-4} mt={0}>
-      <Flex align="center" gap={4} mb={4} wrap="wrap">
-        <Heading as="h1" size="lg" fontWeight="500">
+    <Box
+      p={8}
+      bg="gray.50"
+      minH="100vh"
+      mx={-4}
+      mt={0}
+    >
+      <Flex
+        align="center"
+        gap={4}
+        mb={4}
+        wrap="wrap"
+      >
+        <Heading
+          as="h1"
+          size="lg"
+          fontWeight="500"
+        >
           Updates
         </Heading>
         <IconButton
@@ -116,8 +143,17 @@ export const UpdatesPage = () => {
           onClick={handleDownload}
         />
       </Flex>
-      <Tabs index={tabIndex} onChange={setTabIndex} variant="unstyled">
-        <Flex gap={3} mt={4} mb={4} wrap="wrap">
+      <Tabs
+        index={tabIndex}
+        onChange={setTabIndex}
+        variant="unstyled"
+      >
+        <Flex
+          gap={3}
+          mt={4}
+          mb={4}
+          wrap="wrap"
+        >
           <TabList>
             <Tab
               _selected={UPDATES_TAB_SELECTED_PROPS}
@@ -145,11 +181,18 @@ export const UpdatesPage = () => {
         </Flex>
 
         <TabPanels>
-          <TabPanel p={0} pt={4}>
+          <TabPanel
+            p={0}
+            pt={4}
+          >
             {programUpdatesData.length === 0 ? (
-              <UpdatesEmptyState />
+              <EmptyStateBadge variant="no-updates" />
             ) : (
-              <Box bg="white" borderRadius="xl" overflow="hidden">
+              <Box
+                bg="white"
+                borderRadius="xl"
+                overflow="hidden"
+              >
                 <ProgramUpdatesTable
                   originalData={originalProgramUpdatesData}
                   isLoading={isProgramUpdatesLoading}
@@ -162,11 +205,18 @@ export const UpdatesPage = () => {
               </Box>
             )}
           </TabPanel>
-          <TabPanel p={0} pt={4}>
+          <TabPanel
+            p={0}
+            pt={4}
+          >
             {mediaUpdatesData.length === 0 ? (
-              <UpdatesEmptyState />
+              <EmptyStateBadge variant="no-updates" />
             ) : (
-              <Box bg="white" borderRadius="xl" overflow="hidden">
+              <Box
+                bg="white"
+                borderRadius="xl"
+                overflow="hidden"
+              >
                 <MediaUpdatesTable
                   data={mediaUpdatesData}
                   setData={setMediaUpdatesData}
@@ -178,11 +228,18 @@ export const UpdatesPage = () => {
               </Box>
             )}
           </TabPanel>
-          <TabPanel p={0} pt={4}>
+          <TabPanel
+            p={0}
+            pt={4}
+          >
             {accountUpdatesData.length === 0 ? (
-              <UpdatesEmptyState />
+              <EmptyStateBadge variant="no-updates" />
             ) : (
-              <Box bg="white" borderRadius="xl" overflow="hidden">
+              <Box
+                bg="white"
+                borderRadius="xl"
+                overflow="hidden"
+              >
                 <AccountUpdatesTable
                   data={accountUpdatesData}
                   originalData={originalAccountUpdatesData}

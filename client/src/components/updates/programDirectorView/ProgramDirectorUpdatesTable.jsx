@@ -15,10 +15,12 @@ import {
   Tr,
   VStack,
 } from '@chakra-ui/react';
+
+import { EmptyStateBadge } from '@/components/badges/EmptyStateBadge';
 import { FiStar } from 'react-icons/fi';
+
 import { SortArrows } from '../../tables/SortArrows';
 import { PDStatusBadge } from './PDStatusBadge';
-import { UpdatesEmptyState } from '../UpdatesEmptyState';
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
@@ -46,15 +48,24 @@ function EnrollmentChangeDetails({ row }) {
   const hasEnrollment = row.enrollmentChange != null;
   if (!hasEnrollment) {
     return (
-      <Text fontSize="sm" color="gray.700">
+      <Text
+        fontSize="sm"
+        color="gray.700"
+      >
         —
       </Text>
     );
   }
   return (
-    <VStack align="start" spacing={0.5}>
+    <VStack
+      align="start"
+      spacing={0.5}
+    >
       {hasEnrollment && (
-        <Text fontSize="sm" color="gray.700">
+        <Text
+          fontSize="sm"
+          color="gray.700"
+        >
           {formatChangeAmount(row.enrollmentChange)}
         </Text>
       )}
@@ -71,11 +82,19 @@ export const ProgramDirectorUpdatesTable = ({
 }) => {
   const colSpan = variant === 'student' ? 3 : 6;
   return (
-    <Box position="relative" bg="white" borderRadius="xl" overflow="hidden">
+    <Box
+      position="relative"
+      bg="white"
+      borderRadius="xl"
+      overflow="hidden"
+    >
       {tableData.length === 0 && !isLoading ? (
-        <UpdatesEmptyState />
+        <EmptyStateBadge variant="no-updates" />
       ) : (
-        <TableContainer overflowX="auto" maxW="100%">
+        <TableContainer
+          overflowX="auto"
+          maxW="100%"
+        >
           <Table variant="simple">
             <Thead>
               {variant === 'instrument' ? (
@@ -126,7 +145,10 @@ export const ProgramDirectorUpdatesTable = ({
                     fontWeight="600"
                   >
                     Update note
-                    <SortArrows columnKey="note" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="note"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                   <Th
                     onClick={() => handleSort('updateDate')}
@@ -137,7 +159,10 @@ export const ProgramDirectorUpdatesTable = ({
                     fontWeight="600"
                   >
                     Date
-                    <SortArrows columnKey="updateDate" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="updateDate"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                 </Tr>
               ) : (
@@ -151,7 +176,10 @@ export const ProgramDirectorUpdatesTable = ({
                     fontWeight="600"
                   >
                     Update note
-                    <SortArrows columnKey="note" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="note"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                   <Th
                     color="gray.500"
@@ -170,7 +198,10 @@ export const ProgramDirectorUpdatesTable = ({
                     fontWeight="600"
                   >
                     Date
-                    <SortArrows columnKey="updateDate" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="updateDate"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                 </Tr>
               )}
@@ -186,7 +217,10 @@ export const ProgramDirectorUpdatesTable = ({
                 </Tr>
               ) : (
                 tableData.map((row) => (
-                  <Tr key={row.id} _hover={{ bg: 'gray.50' }}>
+                  <Tr
+                    key={row.id}
+                    _hover={{ bg: 'gray.50' }}
+                  >
                     {variant === 'instrument' ? (
                       <>
                         <Td>
@@ -212,7 +246,10 @@ export const ProgramDirectorUpdatesTable = ({
                           </Badge>
                         </Td>
                         <Td>
-                          <Text fontSize="sm" color="gray.700">
+                          <Text
+                            fontSize="sm"
+                            color="gray.700"
+                          >
                             {formatChangeAmount(row.instrumentChange)}
                           </Text>
                         </Td>
@@ -232,7 +269,10 @@ export const ProgramDirectorUpdatesTable = ({
                           />
                         </Td>
                         <Td>
-                          <Text fontSize="sm" color="gray.700">
+                          <Text
+                            fontSize="sm"
+                            color="gray.700"
+                          >
                             {formatDate(row.updateDate)}
                           </Text>
                         </Td>
@@ -258,7 +298,10 @@ export const ProgramDirectorUpdatesTable = ({
                           <EnrollmentChangeDetails row={row} />
                         </Td>
                         <Td>
-                          <Text fontSize="sm" color="gray.700">
+                          <Text
+                            fontSize="sm"
+                            color="gray.700"
+                          >
                             {formatDate(row.updateDate)}
                           </Text>
                         </Td>
