@@ -25,6 +25,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   const updateId = update?.id;
   const [updates, setUpdates] = useState([]);
   const [mediaURLs, setMediaURLs] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(null);
 
   const handleApprove = async () => {
     if (updateId === null) return;
@@ -86,126 +87,138 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   }, [updateId, backend]);
 
   return (
-    <Drawer
-      isOpen={true}
-      onClose={onClose}
-      placement="right"
-      size="md"
-    >
-      <DrawerOverlay />
-      <DrawerContent>
-        <DrawerHeader>
-          <Flex
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Text
-              fontSize="xl"
-              fontWeight="bold"
-            >
-              Review Media Update
-            </Text>
+    <>
+      <Drawer
+        isOpen={true}
+        onClose={onClose}
+        placement="right"
+        size="md"
+      >
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerHeader>
             <Flex
-              gap={2}
+              justifyContent="space-between"
               alignItems="center"
             >
-              <Button onClick={handleApprove}>Approve</Button>
-              <Button onClick={handleArchive}>Archive</Button>
-              <Button onClick={handleDeny}>Deny</Button>
-              <CloseButton onClick={onClose} />
+              <Text
+                fontSize="xl"
+                fontWeight="bold"
+              >
+                Review Media Update
+              </Text>
+              <Flex
+                gap={2}
+                alignItems="center"
+              >
+                <Button onClick={handleApprove}>Approve</Button>
+                <Button onClick={handleArchive}>Archive</Button>
+                <Button onClick={handleDeny}>Deny</Button>
+                <CloseButton onClick={onClose} />
+              </Flex>
             </Flex>
-          </Flex>
-        </DrawerHeader>
+          </DrawerHeader>
 
-        <DrawerBody>
-          {message && (
-            <Alert
-              status="success"
-              mb={4}
-            >
-              <AlertIcon />
-              {message}
-            </Alert>
-          )}
+          <DrawerBody>
+            {message && (
+              <Alert
+                status="success"
+                mb={4}
+              >
+                <AlertIcon />
+                {message}
+              </Alert>
+            )}
 
-          <Flex
-            gap={4}
-            mb={6}
-          >
-            <Box
-              border="1px solid"
-              borderColor="gray.300"
-              borderRadius="md"
-              p={3}
-              flex={1}
+            <Flex
+              gap={4}
+              mb={6}
             >
-              <Text
-                fontWeight="bold"
-                mb={1}
-              >
-                Time
-              </Text>
-              <Text>{update?.updateDate ?? '—'}</Text>
-            </Box>
-            <Box
-              border="1px solid"
-              borderColor="gray.300"
-              borderRadius="md"
-              p={3}
-              flex={1}
-            >
-              <Text
-                fontWeight="bold"
-                mb={1}
-              >
-                Author
-              </Text>
-              <Text>
-                {update?.firstName} {update?.lastName}
-              </Text>
-            </Box>
-            <Box
-              border="1px solid"
-              borderColor="gray.300"
-              borderRadius="md"
-              p={3}
-              flex={1}
-            >
-              <Text
-                fontWeight="bold"
-                mb={1}
-              >
-                Program Name
-              </Text>
-              <Text>{update?.programName ?? '—'}</Text>
-            </Box>
-          </Flex>
-
-          <Text
-            fontWeight="bold"
-            mb={3}
-          >
-            Media
-          </Text>
-          <SimpleGrid
-            columns={3}
-            spacing={3}
-          >
-            {updates.map((item, i) => (
               <Box
-                key={item.id}
-                cursor="pointer"
+                border="1px solid"
+                borderColor="gray.300"
+                borderRadius="md"
+                p={3}
+                flex={1}
               >
-                <MediaCard
-                  file_name={item.fileName}
-                  file_type={item.fileType}
-                  imageUrl={mediaURLs[i]}
-                />
+                <Text
+                  fontWeight="bold"
+                  mb={1}
+                >
+                  Time
+                </Text>
+                <Text>{update?.updateDate ?? '—'}</Text>
               </Box>
-            ))}
-          </SimpleGrid>
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+              <Box
+                border="1px solid"
+                borderColor="gray.300"
+                borderRadius="md"
+                p={3}
+                flex={1}
+              >
+                <Text
+                  fontWeight="bold"
+                  mb={1}
+                >
+                  Author
+                </Text>
+                <Text>
+                  {update?.firstName} {update?.lastName}
+                </Text>
+              </Box>
+              <Box
+                border="1px solid"
+                borderColor="gray.300"
+                borderRadius="md"
+                p={3}
+                flex={1}
+              >
+                <Text
+                  fontWeight="bold"
+                  mb={1}
+                >
+                  Program Name
+                </Text>
+                <Text>{update?.programName ?? '—'}</Text>
+              </Box>
+            </Flex>
+
+            <Text
+              fontWeight="bold"
+              mb={3}
+            >
+              Media
+            </Text>
+            <SimpleGrid
+              columns={3}
+              spacing={3}
+            >
+              {updates.map((item, i) => (
+                <Box
+                  key={item.id}
+                  cursor="pointer"
+                  onClick={() => setSelectedIndex(i)}
+                >
+                  <MediaCard
+                    file_name={item.fileName}
+                    file_type={item.fileType}
+                    imageUrl={mediaURLs[i]}
+                  />
+                </Box>
+              ))}
+            </SimpleGrid>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+
+      {selectedIndex !== null && (
+        <MediaViewer
+          updates={updates}
+          mediaURLs={mediaURLs}
+          selectedIndex={selectedIndex}
+          onClose={() => setSelectedIndex(null)}
+        />
+      )}
+    </>
   );
 };
