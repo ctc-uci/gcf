@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 
 import {
   Box,
@@ -12,42 +12,77 @@ import {
   DrawerHeader,
   DrawerOverlay,
   Flex,
-  FormControl,
-  FormLabel,
   HStack,
   Icon,
-  Input,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
   Radio,
   RadioGroup,
-  Select,
   SimpleGrid,
-  Stack,
   Text,
-  Textarea,
   useToast,
   VStack,
 } from '@chakra-ui/react';
 
-import { InstrumentSearchInput } from '@/components/common/InstrumentSearchInput';
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
-import {
-  BsCalendarDate,
-  BsMusicNote,
-  BsMusicNoteBeamed,
-  BsTrophyFill,
-} from 'react-icons/bs';
-import { FaCamera, FaEdit, FaStar, FaTools } from 'react-icons/fa';
-import { FaUser, FaUserPlus, FaUserXmark } from 'react-icons/fa6';
-import { HiMiniUsers } from 'react-icons/hi2';
-import { IoMdClose } from 'react-icons/io';
-import { MdHelpOutline } from 'react-icons/md';
+import { BsMusicNote } from 'react-icons/bs';
+import { FaUser } from 'react-icons/fa6';
+
+import { InstrumentUpdateForm } from './InstrumentUpdateForm';
+import { StudentUpdateForm } from './StudentUpdateForm';
+
+const getCurrentDateString = () => new Date().toISOString().split('T')[0];
+
+const initialFormState = {
+  updateType: 'instrument',
+  programId: '',
+  instrumentEvent: 'broken',
+  otherEventDescription: '',
+  studentEvent: 'new_joined',
+  requiresAdminApproval: false,
+  adminApprovalDetails: '',
+  date: '',
+  enrollmentNumber: null,
+  graduatedNumber: null,
+  notes: '',
+  searchQuery: '',
+  selectedInstrument: '',
+  newInstrumentName: '',
+  quantity: 0,
+};
+
+function formReducer(state, action) {
+  switch (action.type) {
+    case 'SET_FIELD':
+      return { ...state, [action.field]: action.value };
+    case 'RESET':
+      return { ...initialFormState, date: getCurrentDateString() };
+    case 'RESET_AFTER_SUBMIT':
+      return {
+        ...state,
+        instrumentEvent: 'broken',
+        otherEventDescription: '',
+        date: getCurrentDateString(),
+        enrollmentNumber: null,
+        graduatedNumber: null,
+        notes: '',
+        searchQuery: '',
+        selectedInstrument: '',
+        newInstrumentName: '',
+        quantity: 0,
+      };
+    case 'RESET_INSTRUMENT_FIELDS':
+      return {
+        ...state,
+        searchQuery: '',
+        selectedInstrument: '',
+        newInstrumentName: '',
+        quantity: 0,
+      };
+    default:
+      return state;
+  }
+}
 
 export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
   const btnRef = useRef(null);
@@ -57,31 +92,23 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
   const { role } = useRoleContext();
   const { backend } = useBackendContext();
 
-  const [updateType, setUpdateType] = useState('instrument');
-  const [programId, setProgramId] = useState('');
+  const [formState, dispatch] = useReducer(formReducer, initialFormState);
   const [availablePrograms, setAvailablePrograms] = useState([]);
-
-  const [instrumentEvent, setInstrumentEvent] = useState('broken');
-  const [otherEventDescription, setOtherEventDescription] = useState('');
-
-  const [studentEvent, setStudentEvent] = useState('new_joined');
-  const [requiresAdminApproval, setRequiresAdminApproval] = useState(false);
-  const [adminApprovalDetails, setAdminApprovalDetails] = useState('');
-
-  const [date, setDate] = useState('');
-  const [enrollmentNumber, setEnrollmentNumber] = useState(null);
-  const [graduatedNumber, setGraduatedNumber] = useState(null);
-  const [notes, setNotes] = useState('');
-  const [mediaFiles, setMediaFiles] = useState(null);
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedInstrument, setSelectedInstrument] = useState('');
-  const [newInstrumentName, setNewInstrumentName] = useState('');
-  const [quantity, setQuantity] = useState(0);
-
   const [existingInstruments, setExistingInstruments] = useState([]);
+  const [programStudentCounts, setProgramStudentCounts] = useState({});
 
-  const getCurrentDateString = () => new Date().toISOString().split('T')[0];
+  const {
+    updateType,
+    programId,
+    instrumentEvent,
+    otherEventDescription,
+    enrollmentNumber,
+    graduatedNumber,
+    notes,
+    selectedInstrument,
+    newInstrumentName,
+    quantity,
+  } = formState;
 
   useEffect(() => {
     const fetchInstruments = async () => {
@@ -104,19 +131,31 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
     const fetchPrograms = async () => {
       try {
         let programs = [];
+        const counts = {};
         if (role === 'Program Director') {
-          const response = await backend.get(
-            `/program-directors/me/${currentUser?.uid}/program`
-          );
-          programs = response.data ? [response.data] : [];
+          const [programRes, statsRes] = await Promise.all([
+            backend.get(`/program-directors/me/${currentUser?.uid}/program`),
+            backend.get(`/program-directors/me/${currentUser?.uid}/stats`),
+          ]);
+          programs = programRes.data ? [programRes.data] : [];
+          if (programs.length === 1) {
+            counts[programs[0].id] = Number(statsRes.data?.students ?? 0);
+          }
         } else if (role === 'Regional Director') {
-          const response = await backend.get(
-            `/regional-directors/${currentUser?.uid}/programs`
-          );
-          programs = response.data || [];
+          const [programsRes, tableRes] = await Promise.all([
+            backend.get(`/regional-directors/${currentUser?.uid}/programs`),
+            backend.get(`/rdProgramTable/${currentUser?.uid}`),
+          ]);
+          programs = programsRes.data || [];
+          (tableRes.data || []).forEach((row) => {
+            counts[row.program_id] = Number(row.total_students ?? 0);
+          });
         } else if (role === 'Admin') {
-          const response = await backend.get(`/program`);
-          programs = response.data || [];
+          const response = await backend.get(`/admin/programs`);
+          programs = (response.data || []).map((p) => {
+            counts[p.id] = Number(p.students ?? 0);
+            return { id: p.id, name: p.name };
+          });
         } else {
           toast({
             title: 'Authorization error',
@@ -128,9 +167,14 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
           return;
         }
         setAvailablePrograms(programs);
+        setProgramStudentCounts(counts);
 
         if (programs.length === 1) {
-          setProgramId(programs[0].id);
+          dispatch({
+            type: 'SET_FIELD',
+            field: 'programId',
+            value: programs[0].id,
+          });
         }
       } catch (error) {
         console.error('Error fetching programs:', error);
@@ -145,41 +189,23 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
     };
 
     fetchPrograms();
-  }, [isOpen, role, currentUser, backend, toast]);
+  }, [isOpen, role, currentUser, backend]);
 
   useEffect(() => {
     if (!isOpen) {
       return;
     }
-    setUpdateType('instrument');
-    setInstrumentEvent('broken');
-    setOtherEventDescription('');
-    setStudentEvent('new_joined');
-    setRequiresAdminApproval(false);
-    setAdminApprovalDetails('');
-    setDate(getCurrentDateString());
-    setEnrollmentNumber(null);
-    setGraduatedNumber(null);
-    setNotes('');
-    setMediaFiles(null);
-    setSearchQuery('');
-    setSelectedInstrument('');
-    setNewInstrumentName('');
-    setQuantity(0);
-    setProgramId('');
+    dispatch({ type: 'RESET' });
   }, [isOpen]);
 
   useEffect(() => {
     if (updateType === 'student') {
-      setSearchQuery('');
-      setSelectedInstrument('');
-      setNewInstrumentName('');
-      setQuantity(0);
+      dispatch({ type: 'RESET_INSTRUMENT_FIELDS' });
     }
   }, [updateType]);
 
   const handleSubmit = async () => {
-    if (programId === null || programId === undefined || programId === '') {
+    if (!programId) {
       toast({
         title: 'Validation error',
         description: 'A program must be selected to create an update.',
@@ -245,7 +271,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
         };
       } else {
         programUpdateData = {
-          title: `Student Update - ${studentEvent.replace(/_/g, ' ')}`,
+          title: `Student Update - ${formState.studentEvent.replace(/_/g, ' ')}`,
           program_id: parseInt(programId, 10) || null,
           created_by: currentUser?.uid,
           update_date: getCurrentDateString(),
@@ -300,17 +326,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
         });
       }
 
-      setDate(getCurrentDateString());
-      setEnrollmentNumber(null);
-      setGraduatedNumber(null);
-      setNotes('');
-      setSearchQuery('');
-      setSelectedInstrument('');
-      setNewInstrumentName('');
-      setQuantity(0);
-      setInstrumentEvent('broken');
-      setOtherEventDescription('');
-      setMediaFiles(null);
+      dispatch({ type: 'RESET_AFTER_SUBMIT' });
 
       toast({
         title: 'Update created',
@@ -390,7 +406,6 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
             spacing={8}
             align="stretch"
           >
-            {/* What type of update */}
             <Box>
               <Text
                 fontWeight="semibold"
@@ -399,7 +414,9 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                 What type of update are you submitting today?
               </Text>
               <RadioGroup
-                onChange={setUpdateType}
+                onChange={(value) =>
+                  dispatch({ type: 'SET_FIELD', field: 'updateType', value })
+                }
                 value={updateType}
               >
                 <SimpleGrid
@@ -494,598 +511,22 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
               </RadioGroup>
             </Box>
 
-            {/* Instrument update fields */}
             {updateType === 'instrument' && (
-              <VStack
-                spacing={6}
-                align="stretch"
-              >
-                {/* Program selector — only shown when user has multiple programs */}
-                {availablePrograms.length > 1 && (
-                  <FormControl>
-                    <FormLabel fontWeight="semibold">
-                      Program{' '}
-                      <Text
-                        as="span"
-                        color="red.500"
-                      >
-                        *
-                      </Text>
-                    </FormLabel>
-                    <Select
-                      placeholder="Select Program"
-                      value={programId}
-                      onChange={(e) => setProgramId(e.target.value)}
-                      borderColor="gray.100"
-                    >
-                      {availablePrograms.map((program) => (
-                        <option
-                          key={program.id}
-                          value={program.id}
-                        >
-                          {program.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-
-                <FormControl>
-                  <FormLabel fontWeight="semibold">
-                    <HStack
-                      spacing={2}
-                      mb={1}
-                    >
-                      <Icon
-                        as={BsMusicNoteBeamed}
-                        color="black"
-                        boxSize={5}
-                      />
-                      <Text>
-                        Which instrument is this update about?{' '}
-                        <Text
-                          as="span"
-                          color="red.500"
-                        >
-                          *
-                        </Text>
-                      </Text>
-                    </HStack>
-                  </FormLabel>
-                  <FormLabel
-                    fontSize="sm"
-                    color="gray.600"
-                  >
-                    Select instrument{' '}
-                    <Text
-                      as="span"
-                      color="red.500"
-                    >
-                      *
-                    </Text>
-                  </FormLabel>
-                  <InstrumentSearchInput
-                    instruments={existingInstruments}
-                    value={searchQuery}
-                    onChange={(val) => {
-                      setSearchQuery(val);
-                      if (val) {
-                        setSelectedInstrument('');
-                        setNewInstrumentName('');
-                      }
-                    }}
-                    onSelectExisting={(inst) => {
-                      setSelectedInstrument(inst.name);
-                      setNewInstrumentName('');
-                      setSearchQuery('');
-                    }}
-                    onCreateNew={(name) => {
-                      setNewInstrumentName(name.trim());
-                      setSelectedInstrument('');
-                      setSearchQuery('');
-                    }}
-                    placeholder="Search instrument"
-                  />
-                  {(selectedInstrument || newInstrumentName) && (
-                    <Text
-                      fontSize="sm"
-                      color="gray.600"
-                      mt={1}
-                    >
-                      Selected: {selectedInstrument || newInstrumentName}
-                    </Text>
-                  )}
-                </FormControl>
-
-                {/* What happened */}
-                <Box>
-                  <Text
-                    fontWeight="semibold"
-                    mb={3}
-                  >
-                    What happened to this instrument?
-                  </Text>
-                  <RadioGroup
-                    onChange={setInstrumentEvent}
-                    value={instrumentEvent}
-                  >
-                    <Stack spacing={3}>
-                      <Radio
-                        value="broken"
-                        colorScheme="teal"
-                      >
-                        <HStack spacing={2}>
-                          <Icon
-                            as={IoMdClose}
-                            color="black"
-                          />
-                          <Text>Broken</Text>
-                        </HStack>
-                      </Radio>
-                      <Radio
-                        value="missing"
-                        colorScheme="teal"
-                      >
-                        <HStack spacing={2}>
-                          <Icon
-                            as={MdHelpOutline}
-                            color="black"
-                          />
-                          <Text>Missing</Text>
-                        </HStack>
-                      </Radio>
-                      <Radio
-                        value="new_donation"
-                        colorScheme="teal"
-                      >
-                        <HStack spacing={2}>
-                          <Icon
-                            as={BsMusicNote}
-                            color="black"
-                          />
-                          <Text>New / Donation</Text>
-                        </HStack>
-                      </Radio>
-                      <Radio
-                        value="needs_repair"
-                        colorScheme="teal"
-                      >
-                        <HStack spacing={2}>
-                          <Icon
-                            as={FaTools}
-                            color="black"
-                          />
-                          <Text>Needs repair</Text>
-                        </HStack>
-                      </Radio>
-                      <Radio
-                        value="other"
-                        colorScheme="teal"
-                      >
-                        <Text>Other (please explain below)</Text>
-                      </Radio>
-                    </Stack>
-                  </RadioGroup>
-                  {instrumentEvent === 'other' && (
-                    <Textarea
-                      mt={3}
-                      value={otherEventDescription}
-                      onChange={(e) => setOtherEventDescription(e.target.value)}
-                      placeholder="Describe what happened…"
-                      borderColor="gray.100"
-                    />
-                  )}
-                </Box>
-
-                <FormControl>
-                  <FormLabel fontWeight="semibold">
-                    <HStack
-                      spacing={2}
-                      mb={1}
-                    >
-                      <Icon
-                        as={BsMusicNoteBeamed}
-                        color="black"
-                        boxSize={5}
-                      />
-                      <Text>
-                        How many instruments are affected?{' '}
-                        <Text
-                          as="span"
-                          color="red.500"
-                        >
-                          *
-                        </Text>
-                      </Text>
-                    </HStack>
-                  </FormLabel>
-                  <FormLabel
-                    fontSize="sm"
-                    color="gray.600"
-                  >
-                    Number of instruments{' '}
-                    <Text
-                      as="span"
-                      color="red.500"
-                    >
-                      *
-                    </Text>
-                  </FormLabel>
-                  <NumberInput
-                    step={1}
-                    min={0}
-                    value={quantity}
-                    onChange={(valueString) => setQuantity(Number(valueString))}
-                  >
-                    <NumberInputField borderColor="gray.100" />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </FormControl>
-
-                <Box>
-                  <HStack
-                    spacing={2}
-                    mb={2}
-                  >
-                    <Icon
-                      as={FaCamera}
-                      color="black"
-                      boxSize={5}
-                    />
-                    <Text fontWeight="semibold">
-                      Do you want to add photos or videos?
-                    </Text>
-                  </HStack>
-                  <Text
-                    fontSize="sm"
-                    color="gray.600"
-                    mb={3}
-                  >
-                    This helps us understand the issue.
-                  </Text>
-                  <Input
-                    type="file"
-                    accept="image/*,video/*"
-                    multiple
-                    p={1}
-                    onChange={(e) => setMediaFiles(e.target.files)}
-                    borderColor="gray.100"
-                  />
-                  {mediaFiles?.length > 0 && (
-                    <Text
-                      fontSize="sm"
-                      color="gray.600"
-                      mt={2}
-                    >
-                      {mediaFiles.length} file(s) selected (not uploaded yet).
-                    </Text>
-                  )}
-                </Box>
-
-                {/* Admin help */}
-                <Box>
-                  <HStack
-                    spacing={2}
-                    mb={3}
-                  >
-                    <Icon
-                      as={FaStar}
-                      color="black"
-                      boxSize={4}
-                    />
-                    <Text fontWeight="semibold">
-                      Do you need admin help or approval for this?
-                    </Text>
-                  </HStack>
-                  <Radio
-                    isChecked={requiresAdminApproval}
-                    onChange={() =>
-                      setRequiresAdminApproval(!requiresAdminApproval)
-                    }
-                    colorScheme="teal"
-                  >
-                    Yes, this is a special request.
-                  </Radio>
-                  {requiresAdminApproval && (
-                    <Box mt={3}>
-                      <Text
-                        fontWeight="semibold"
-                        color="teal.600"
-                        mb={2}
-                      >
-                        What do you need?
-                      </Text>
-                      <Textarea
-                        value={adminApprovalDetails}
-                        onChange={(e) =>
-                          setAdminApprovalDetails(e.target.value)
-                        }
-                        placeholder="Example: replacement instruments or urgent repair"
-                        w="full"
-                        h="93px"
-                        minH="93px"
-                        maxH="93px"
-                        borderRadius="6px"
-                        borderWidth="1px"
-                        borderColor="gray.100"
-                        resize="none"
-                      />
-                    </Box>
-                  )}
-                </Box>
-
-                {/* Date picker */}
-                <Box>
-                  <HStack
-                    spacing={2}
-                    mb={3}
-                  >
-                    <Icon
-                      as={BsCalendarDate}
-                      color="black"
-                      boxSize={5}
-                    />
-                    <Text fontWeight="semibold">What is today's date?</Text>
-                  </HStack>
-                  <FormControl>
-                    <Input
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      borderColor="gray.100"
-                    />
-                  </FormControl>
-                </Box>
-              </VStack>
+              <InstrumentUpdateForm
+                formState={formState}
+                dispatch={dispatch}
+                availablePrograms={availablePrograms}
+                existingInstruments={existingInstruments}
+              />
             )}
 
             {updateType === 'student' && (
-              <VStack
-                spacing={6}
-                align="stretch"
-              >
-                {availablePrograms.length > 1 && (
-                  <FormControl>
-                    <FormLabel fontWeight="semibold">
-                      Program{' '}
-                      <Text
-                        as="span"
-                        color="red.500"
-                      >
-                        *
-                      </Text>
-                    </FormLabel>
-                    <Select
-                      placeholder="Select Program"
-                      value={programId}
-                      onChange={(e) => setProgramId(e.target.value)}
-                      borderColor="gray.100"
-                    >
-                      {availablePrograms.map((program) => (
-                        <option
-                          key={program.id}
-                          value={program.id}
-                        >
-                          {program.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-
-                <Box>
-                  <Text
-                    fontWeight="semibold"
-                    mb={3}
-                  >
-                    What happened to the students?
-                  </Text>
-                  <RadioGroup
-                    onChange={setStudentEvent}
-                    value={studentEvent}
-                  >
-                    <Stack spacing={3}>
-                      <Radio
-                        value="new_joined"
-                        colorScheme="teal"
-                      >
-                        <HStack spacing={2}>
-                          <Icon
-                            as={FaUserPlus}
-                            color="black"
-                          />
-                          <Text>New students joined</Text>
-                        </HStack>
-                      </Radio>
-                      <Radio
-                        value="graduated"
-                        colorScheme="teal"
-                      >
-                        <HStack spacing={2}>
-                          <Icon
-                            as={BsTrophyFill}
-                            color="black"
-                          />
-                          <Text>Graduated</Text>
-                        </HStack>
-                      </Radio>
-                      <Radio
-                        value="quit"
-                        colorScheme="teal"
-                      >
-                        <HStack spacing={2}>
-                          <Icon
-                            as={FaUserXmark}
-                            color="black"
-                          />
-                          <Text>Quit</Text>
-                        </HStack>
-                      </Radio>
-                      <Radio
-                        value="other"
-                        colorScheme="teal"
-                      >
-                        <Text>Other (please explain in note below)</Text>
-                      </Radio>
-                    </Stack>
-                  </RadioGroup>
-                </Box>
-
-                <Box>
-                  <HStack
-                    spacing={2}
-                    mb={3}
-                  >
-                    <Icon
-                      as={HiMiniUsers}
-                      color="black"
-                      boxSize={5}
-                    />
-                    <Text fontWeight="semibold">
-                      How many students are affected?
-                    </Text>
-                  </HStack>
-                  <FormControl>
-                    <FormLabel
-                      fontSize="sm"
-                      color="gray.600"
-                    >
-                      Number of students{' '}
-                      <Text
-                        as="span"
-                        color="red.500"
-                      >
-                        *
-                      </Text>
-                    </FormLabel>
-                    <NumberInput
-                      min={0}
-                      value={enrollmentNumber ?? ''}
-                      onChange={(value) =>
-                        setEnrollmentNumber(
-                          value !== '' && value !== undefined
-                            ? parseInt(String(value), 10)
-                            : null
-                        )
-                      }
-                    >
-                      <NumberInputField borderColor="gray.100" />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                  </FormControl>
-                </Box>
-
-                {/* Admin help */}
-                <Box>
-                  <HStack
-                    spacing={2}
-                    mb={3}
-                  >
-                    <Icon
-                      as={FaStar}
-                      color="black"
-                      boxSize={4}
-                    />
-                    <Text fontWeight="semibold">
-                      Do you need admin help or approval for this?
-                    </Text>
-                  </HStack>
-                  <Radio
-                    isChecked={requiresAdminApproval}
-                    onChange={() =>
-                      setRequiresAdminApproval(!requiresAdminApproval)
-                    }
-                    colorScheme="teal"
-                  >
-                    Yes, this is a special request.
-                  </Radio>
-                  {requiresAdminApproval && (
-                    <Box mt={3}>
-                      <Text
-                        fontWeight="semibold"
-                        color="teal.600"
-                        mb={2}
-                      >
-                        What do you need?
-                      </Text>
-                      <Textarea
-                        value={adminApprovalDetails}
-                        onChange={(e) =>
-                          setAdminApprovalDetails(e.target.value)
-                        }
-                        placeholder="Example: replacement instruments or urgent repair"
-                        w="full"
-                        h="93px"
-                        minH="93px"
-                        maxH="93px"
-                        borderRadius="6px"
-                        borderWidth="1px"
-                        borderColor="gray.100"
-                        resize="none"
-                      />
-                    </Box>
-                  )}
-                </Box>
-
-                {/* Date picker */}
-                <Box>
-                  <HStack
-                    spacing={2}
-                    mb={3}
-                  >
-                    <Icon
-                      as={BsCalendarDate}
-                      color="black"
-                      boxSize={5}
-                    />
-                    <Text fontWeight="semibold">What is today's date?</Text>
-                  </HStack>
-                  <FormControl>
-                    <Input
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      borderColor="gray.100"
-                    />
-                  </FormControl>
-                </Box>
-
-                {/* Add a note */}
-                <Box>
-                  <HStack
-                    spacing={2}
-                    mb={3}
-                  >
-                    <Icon
-                      as={FaEdit}
-                      color="black"
-                      boxSize={5}
-                    />
-                    <Text fontWeight="semibold">Add a note</Text>
-                  </HStack>
-                  <FormControl>
-                    <FormLabel
-                      fontSize="sm"
-                      color="gray.600"
-                    >
-                      Notes
-                    </FormLabel>
-                    <Textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      minH="120px"
-                      placeholder="Add notes"
-                      borderColor="gray.100"
-                    />
-                  </FormControl>
-                </Box>
-              </VStack>
+              <StudentUpdateForm
+                formState={formState}
+                dispatch={dispatch}
+                availablePrograms={availablePrograms}
+                programStudentCounts={programStudentCounts}
+              />
             )}
           </VStack>
         </DrawerBody>
