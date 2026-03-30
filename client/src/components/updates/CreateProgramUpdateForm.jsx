@@ -62,13 +62,12 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
   const [availablePrograms, setAvailablePrograms] = useState([]);
 
   const [instrumentEvent, setInstrumentEvent] = useState('broken');
-  const [otherDetail, setOtherDetail] = useState('');
+  const [otherEventDescription, setOtherEventDescription] = useState('');
 
   const [studentEvent, setStudentEvent] = useState('new_joined');
-  const [adminHelp, setAdminHelp] = useState(false);
-  const [adminHelpDetail, setAdminHelpDetail] = useState('');
+  const [requiresAdminApproval, setRequiresAdminApproval] = useState(false);
+  const [adminApprovalDetails, setAdminApprovalDetails] = useState('');
 
-  const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [enrollmentNumber, setEnrollmentNumber] = useState(null);
   const [graduatedNumber, setGraduatedNumber] = useState(null);
@@ -82,7 +81,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
 
   const [existingInstruments, setExistingInstruments] = useState([]);
 
-  const todayStr = () => new Date().toISOString().split('T')[0];
+  const getCurrentDateString = () => new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     const fetchInstruments = async () => {
@@ -154,12 +153,11 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
     }
     setUpdateType('instrument');
     setInstrumentEvent('broken');
-    setOtherDetail('');
+    setOtherEventDescription('');
     setStudentEvent('new_joined');
-    setAdminHelp(false);
-    setAdminHelpDetail('');
-    setTitle('');
-    setDate(todayStr());
+    setRequiresAdminApproval(false);
+    setAdminApprovalDetails('');
+    setDate(getCurrentDateString());
     setEnrollmentNumber(null);
     setGraduatedNumber(null);
     setNotes('');
@@ -236,13 +234,13 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
         const instrumentName = selectedInstrument || newInstrumentName;
         const eventLabel =
           instrumentEvent === 'other'
-            ? otherDetail.trim() || 'Other'
+            ? otherEventDescription.trim() || 'Other'
             : instrumentEvent.replace(/_/g, ' ');
         programUpdateData = {
           title: `${instrumentName} - ${eventLabel}`,
           program_id: parseInt(programId, 10) || null,
           created_by: currentUser?.uid,
-          update_date: todayStr(),
+          update_date: getCurrentDateString(),
           note: eventLabel,
         };
       } else {
@@ -250,7 +248,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
           title: `Student Update - ${studentEvent.replace(/_/g, ' ')}`,
           program_id: parseInt(programId, 10) || null,
           created_by: currentUser?.uid,
-          update_date: todayStr(),
+          update_date: getCurrentDateString(),
           note: notes ? String(notes).trim() : null,
         };
       }
@@ -302,8 +300,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
         });
       }
 
-      setTitle('');
-      setDate(todayStr());
+      setDate(getCurrentDateString());
       setEnrollmentNumber(null);
       setGraduatedNumber(null);
       setNotes('');
@@ -312,7 +309,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
       setNewInstrumentName('');
       setQuantity(0);
       setInstrumentEvent('broken');
-      setOtherDetail('');
+      setOtherEventDescription('');
       setMediaFiles(null);
 
       toast({
@@ -417,7 +414,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                     borderRadius="lg"
                     overflow="hidden"
                     borderColor={
-                      updateType === 'instrument' ? '#319795' : '#EDF2F7'
+                      updateType === 'instrument' ? 'teal.600' : 'gray.100'
                     }
                     bg="white"
                     transition="border-color 0.2s"
@@ -432,7 +429,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                         as={BsMusicNote}
                         boxSize={10}
                         color={
-                          updateType === 'instrument' ? '#319795' : '#718096'
+                          updateType === 'instrument' ? 'teal.600' : 'gray.500'
                         }
                         transition="color 0.2s"
                       />
@@ -442,23 +439,12 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       h="44px"
                       align="center"
                       justify="center"
-                      bg={updateType === 'instrument' ? '#E6FFFA' : '#EDF2F7'}
+                      bg={updateType === 'instrument' ? 'teal.50' : 'gray.100'}
                       transition="background 0.2s"
                     >
                       <Radio
                         value="instrument"
-                        colorScheme="gray"
-                        sx={{
-                          '& .chakra-radio__control': {
-                            borderWidth: '1px',
-                          },
-                          ...(updateType === 'instrument' && {
-                            '& .chakra-radio__control[data-checked]': {
-                              bg: '#319795',
-                              borderColor: '#319795',
-                            },
-                          }),
-                        }}
+                        colorScheme="teal"
                       />
                     </Flex>
                   </Box>
@@ -470,7 +456,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                     borderRadius="lg"
                     overflow="hidden"
                     borderColor={
-                      updateType === 'student' ? '#319795' : '#EDF2F7'
+                      updateType === 'student' ? 'teal.600' : 'gray.100'
                     }
                     bg="white"
                     transition="border-color 0.2s"
@@ -484,7 +470,9 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       <Icon
                         as={FaUser}
                         boxSize={10}
-                        color={updateType === 'student' ? '#319795' : '#718096'}
+                        color={
+                          updateType === 'student' ? 'teal.600' : 'gray.500'
+                        }
                         transition="color 0.2s"
                       />
                       <Text fontWeight="bold">Student Update</Text>
@@ -493,23 +481,12 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       h="44px"
                       align="center"
                       justify="center"
-                      bg={updateType === 'student' ? '#E6FFFA' : '#EDF2F7'}
+                      bg={updateType === 'student' ? 'teal.50' : 'gray.100'}
                       transition="background 0.2s"
                     >
                       <Radio
                         value="student"
-                        colorScheme="gray"
-                        sx={{
-                          '& .chakra-radio__control': {
-                            borderWidth: '1px',
-                          },
-                          ...(updateType === 'student' && {
-                            '& .chakra-radio__control[data-checked]': {
-                              bg: '#319795',
-                              borderColor: '#319795',
-                            },
-                          }),
-                        }}
+                        colorScheme="teal"
                       />
                     </Flex>
                   </Box>
@@ -539,7 +516,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       placeholder="Select Program"
                       value={programId}
                       onChange={(e) => setProgramId(e.target.value)}
-                      borderColor="#EDF2F7"
+                      borderColor="gray.100"
                     >
                       {availablePrograms.map((program) => (
                         <option
@@ -635,13 +612,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                     <Stack spacing={3}>
                       <Radio
                         value="broken"
-                        colorScheme="gray"
-                        sx={{
-                          '& .chakra-radio__control[data-checked]': {
-                            bg: '#319795',
-                            borderColor: '#319795',
-                          },
-                        }}
+                        colorScheme="teal"
                       >
                         <HStack spacing={2}>
                           <Icon
@@ -653,13 +624,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       </Radio>
                       <Radio
                         value="missing"
-                        colorScheme="gray"
-                        sx={{
-                          '& .chakra-radio__control[data-checked]': {
-                            bg: '#319795',
-                            borderColor: '#319795',
-                          },
-                        }}
+                        colorScheme="teal"
                       >
                         <HStack spacing={2}>
                           <Icon
@@ -671,13 +636,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       </Radio>
                       <Radio
                         value="new_donation"
-                        colorScheme="gray"
-                        sx={{
-                          '& .chakra-radio__control[data-checked]': {
-                            bg: '#319795',
-                            borderColor: '#319795',
-                          },
-                        }}
+                        colorScheme="teal"
                       >
                         <HStack spacing={2}>
                           <Icon
@@ -689,13 +648,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       </Radio>
                       <Radio
                         value="needs_repair"
-                        colorScheme="gray"
-                        sx={{
-                          '& .chakra-radio__control[data-checked]': {
-                            bg: '#319795',
-                            borderColor: '#319795',
-                          },
-                        }}
+                        colorScheme="teal"
                       >
                         <HStack spacing={2}>
                           <Icon
@@ -707,13 +660,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       </Radio>
                       <Radio
                         value="other"
-                        colorScheme="gray"
-                        sx={{
-                          '& .chakra-radio__control[data-checked]': {
-                            bg: '#319795',
-                            borderColor: '#319795',
-                          },
-                        }}
+                        colorScheme="teal"
                       >
                         <Text>Other (please explain below)</Text>
                       </Radio>
@@ -722,10 +669,10 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                   {instrumentEvent === 'other' && (
                     <Textarea
                       mt={3}
-                      value={otherDetail}
-                      onChange={(e) => setOtherDetail(e.target.value)}
+                      value={otherEventDescription}
+                      onChange={(e) => setOtherEventDescription(e.target.value)}
                       placeholder="Describe what happened…"
-                      borderColor="#EDF2F7"
+                      borderColor="gray.100"
                     />
                   )}
                 </Box>
@@ -770,7 +717,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                     value={quantity}
                     onChange={(valueString) => setQuantity(Number(valueString))}
                   >
-                    <NumberInputField borderColor="#EDF2F7" />
+                    <NumberInputField borderColor="gray.100" />
                     <NumberInputStepper>
                       <NumberIncrementStepper />
                       <NumberDecrementStepper />
@@ -805,7 +752,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                     multiple
                     p={1}
                     onChange={(e) => setMediaFiles(e.target.files)}
-                    borderColor="#EDF2F7"
+                    borderColor="gray.100"
                   />
                   {mediaFiles?.length > 0 && (
                     <Text
@@ -834,30 +781,28 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                     </Text>
                   </HStack>
                   <Radio
-                    isChecked={adminHelp}
-                    onChange={() => setAdminHelp(!adminHelp)}
-                    colorScheme="gray"
-                    sx={{
-                      '& .chakra-radio__control[data-checked]': {
-                        bg: '#319795',
-                        borderColor: '#319795',
-                      },
-                    }}
+                    isChecked={requiresAdminApproval}
+                    onChange={() =>
+                      setRequiresAdminApproval(!requiresAdminApproval)
+                    }
+                    colorScheme="teal"
                   >
                     Yes, this is a special request.
                   </Radio>
-                  {adminHelp && (
+                  {requiresAdminApproval && (
                     <Box mt={3}>
                       <Text
                         fontWeight="semibold"
-                        color="#319795"
+                        color="teal.600"
                         mb={2}
                       >
                         What do you need?
                       </Text>
                       <Textarea
-                        value={adminHelpDetail}
-                        onChange={(e) => setAdminHelpDetail(e.target.value)}
+                        value={adminApprovalDetails}
+                        onChange={(e) =>
+                          setAdminApprovalDetails(e.target.value)
+                        }
                         placeholder="Example: replacement instruments or urgent repair"
                         w="full"
                         h="93px"
@@ -865,7 +810,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                         maxH="93px"
                         borderRadius="6px"
                         borderWidth="1px"
-                        borderColor="#EDF2F7"
+                        borderColor="gray.100"
                         resize="none"
                       />
                     </Box>
@@ -890,7 +835,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      borderColor="#EDF2F7"
+                      borderColor="gray.100"
                     />
                   </FormControl>
                 </Box>
@@ -917,7 +862,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       placeholder="Select Program"
                       value={programId}
                       onChange={(e) => setProgramId(e.target.value)}
-                      borderColor="#EDF2F7"
+                      borderColor="gray.100"
                     >
                       {availablePrograms.map((program) => (
                         <option
@@ -945,13 +890,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                     <Stack spacing={3}>
                       <Radio
                         value="new_joined"
-                        colorScheme="gray"
-                        sx={{
-                          '& .chakra-radio__control[data-checked]': {
-                            bg: '#319795',
-                            borderColor: '#319795',
-                          },
-                        }}
+                        colorScheme="teal"
                       >
                         <HStack spacing={2}>
                           <Icon
@@ -963,13 +902,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       </Radio>
                       <Radio
                         value="graduated"
-                        colorScheme="gray"
-                        sx={{
-                          '& .chakra-radio__control[data-checked]': {
-                            bg: '#319795',
-                            borderColor: '#319795',
-                          },
-                        }}
+                        colorScheme="teal"
                       >
                         <HStack spacing={2}>
                           <Icon
@@ -981,13 +914,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       </Radio>
                       <Radio
                         value="quit"
-                        colorScheme="gray"
-                        sx={{
-                          '& .chakra-radio__control[data-checked]': {
-                            bg: '#319795',
-                            borderColor: '#319795',
-                          },
-                        }}
+                        colorScheme="teal"
                       >
                         <HStack spacing={2}>
                           <Icon
@@ -999,13 +926,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       </Radio>
                       <Radio
                         value="other"
-                        colorScheme="gray"
-                        sx={{
-                          '& .chakra-radio__control[data-checked]': {
-                            bg: '#319795',
-                            borderColor: '#319795',
-                          },
-                        }}
+                        colorScheme="teal"
                       >
                         <Text>Other (please explain in note below)</Text>
                       </Radio>
@@ -1051,7 +972,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                         )
                       }
                     >
-                      <NumberInputField borderColor="#EDF2F7" />
+                      <NumberInputField borderColor="gray.100" />
                       <NumberInputStepper>
                         <NumberIncrementStepper />
                         <NumberDecrementStepper />
@@ -1076,30 +997,28 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                     </Text>
                   </HStack>
                   <Radio
-                    isChecked={adminHelp}
-                    onChange={() => setAdminHelp(!adminHelp)}
-                    colorScheme="gray"
-                    sx={{
-                      '& .chakra-radio__control[data-checked]': {
-                        bg: '#319795',
-                        borderColor: '#319795',
-                      },
-                    }}
+                    isChecked={requiresAdminApproval}
+                    onChange={() =>
+                      setRequiresAdminApproval(!requiresAdminApproval)
+                    }
+                    colorScheme="teal"
                   >
                     Yes, this is a special request.
                   </Radio>
-                  {adminHelp && (
+                  {requiresAdminApproval && (
                     <Box mt={3}>
                       <Text
                         fontWeight="semibold"
-                        color="#319795"
+                        color="teal.600"
                         mb={2}
                       >
                         What do you need?
                       </Text>
                       <Textarea
-                        value={adminHelpDetail}
-                        onChange={(e) => setAdminHelpDetail(e.target.value)}
+                        value={adminApprovalDetails}
+                        onChange={(e) =>
+                          setAdminApprovalDetails(e.target.value)
+                        }
                         placeholder="Example: replacement instruments or urgent repair"
                         w="full"
                         h="93px"
@@ -1107,7 +1026,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                         maxH="93px"
                         borderRadius="6px"
                         borderWidth="1px"
-                        borderColor="#EDF2F7"
+                        borderColor="gray.100"
                         resize="none"
                       />
                     </Box>
@@ -1132,7 +1051,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      borderColor="#EDF2F7"
+                      borderColor="gray.100"
                     />
                   </FormControl>
                 </Box>
@@ -1162,7 +1081,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
                       onChange={(e) => setNotes(e.target.value)}
                       minH="120px"
                       placeholder="Add notes"
-                      borderColor="#EDF2F7"
+                      borderColor="gray.100"
                     />
                   </FormControl>
                 </Box>
@@ -1184,19 +1103,12 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
           >
             <Button
               variant="outline"
-              borderColor="#EDF2F7"
-              color="black"
-              bg="white"
-              _hover={{ bg: '#EDF2F7' }}
               onClick={onClose}
             >
               Cancel
             </Button>
             <Button
-              bg="#319795"
-              color="white"
-              _hover={{ bg: '#2a8785' }}
-              _active={{ bg: '#267a78' }}
+              colorScheme="teal"
               onClick={handleSubmit}
               isLoading={isLoading}
             >
