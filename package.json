@@ -15,16 +15,7 @@
     "test:client": "yarn workspace client test",
     "lint": "eslint . --fix",
     "format": "prettier --write .",
-    "fix": "yarn format && yarn lint --fix"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --fix"
-    ],
-    "*.{css,md,json}": [
-      "prettier --write"
-    ]
+    "fix": "yarn format && yarn lint"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
@@ -36,6 +27,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
+    "tsx": "^4.17.0",
     "typescript-eslint": "^8.1.0"
   },
   "workspaces": {
@@ -45,7 +37,11 @@
     ],
     "nohoist": [
       "**/firebase",
-      "**/firebase/**"
+      "**/firebase/**",
+      "**/patch-package",
+      "**/patch-package/**",
+      "**/postinstall-postinstall",
+      "**/postinstall-postinstall/**"
     ]
   },
   "packageManager": "yarn@1.22.22",

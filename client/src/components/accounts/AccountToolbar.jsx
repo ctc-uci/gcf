@@ -17,6 +17,7 @@ import {
 import { BsArrowDownUp } from 'react-icons/bs';
 import { FiGrid, FiList, FiPlus, FiSearch } from 'react-icons/fi';
 import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
+
 import { FilterComponent } from '../common/FilterComponent';
 
 export const AccountToolbar = ({
@@ -32,11 +33,22 @@ export const AccountToolbar = ({
   }
 
   return (
-    <Flex width="100%" align="center" gap={6}>
+    <Flex
+      width="100%"
+      align="center"
+      gap={6}
+    >
       <Spacer />
       <InputGroup w="280px">
-        <InputLeftElement pointerEvents="none" h="32px">
-          <Icon as={FiSearch} color="gray.600" boxSize="14px" />
+        <InputLeftElement
+          pointerEvents="none"
+          h="32px"
+        >
+          <Icon
+            as={FiSearch}
+            color="gray.600"
+            boxSize="14px"
+          />
         </InputLeftElement>
         <Input
           placeholder="Search"
@@ -53,7 +65,10 @@ export const AccountToolbar = ({
           value={searchQuery}
           onChange={handleSearchChange}
         />
-        <InputRightElement h="32px" w="32px">
+        <InputRightElement
+          h="32px"
+          w="32px"
+        >
           <Popover>
             <PopoverTrigger>
               <IconButton
@@ -68,7 +83,11 @@ export const AccountToolbar = ({
                 p={0}
               />
             </PopoverTrigger>
-            <PopoverContent w="800px" maxW="90vw" shadow="xl">
+            <PopoverContent
+              w="800px"
+              maxW="90vw"
+              shadow="xl"
+            >
               <FilterComponent
                 columns={columns}
                 onFilterChange={onFilterChange}
@@ -78,7 +97,10 @@ export const AccountToolbar = ({
         </InputRightElement>
       </InputGroup>
 
-      <HStack spacing={6} align="center">
+      <HStack
+        spacing={6}
+        align="center"
+      >
         <IconButton
           aria-label="Sort"
           icon={<BsArrowDownUp size={20} />}
@@ -89,7 +111,13 @@ export const AccountToolbar = ({
           minW="20px"
           p={0}
         />
-        <HStack w="48px" h="20px" spacing="4px" align="center" justify="center">
+        <HStack
+          w="48px"
+          h="20px"
+          spacing="4px"
+          align="center"
+          justify="center"
+        >
           <IconButton
             aria-label="List View"
             icon={<FiList size={20} />}
@@ -131,6 +159,12 @@ export const AccountToolbar = ({
         px={3}
         leftIcon={<FiPlus />}
         onClick={onNew}
+        bg="teal.500"
+        color="white"
+        transition="background-color 0.25s ease, transform 0.25s ease"
+        _hover={{
+          bg: 'teal.600',
+        }}
       >
         New Account
       </Button>

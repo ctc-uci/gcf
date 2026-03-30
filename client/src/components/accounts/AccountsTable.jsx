@@ -1,4 +1,5 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
 import {
   Avatar,
   Badge,
@@ -15,22 +16,21 @@ import {
   Th,
   Thead,
   Tr,
-  VStack,
   useColorModeValue,
+  VStack,
 } from '@chakra-ui/react';
-
-import { FiEdit2, FiUsers } from 'react-icons/fi';
 
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { FiEdit2, FiUsers } from 'react-icons/fi';
 
-import CardView from './CardView';
+import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
-import { applyFilters } from '../../contexts/hooks/TableFilter';
+import CardView from './CardView';
 
 export function downloadAccountsAsCsv(data) {
   const headers = [
@@ -78,7 +78,6 @@ export const AccountsTable = ({
   showCreatedBy = false,
 }) => {
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
-
   const filteredData = useMemo(
     () => applyFilters(activeFilters, originalData ?? []),
     [activeFilters, originalData]
@@ -123,7 +122,11 @@ export const AccountsTable = ({
             alignItems="center"
             justifyContent="center"
           >
-            <Icon as={FiUsers} boxSize={20} color="gray.300" />
+            <Icon
+              as={FiUsers}
+              boxSize={20}
+              color="gray.300"
+            />
           </Box>
           <Text
             color="gray.400"
@@ -141,10 +144,17 @@ export const AccountsTable = ({
   }
 
   return (
-    <Box bg="white" borderRadius="xl" overflow="hidden">
+    <Box
+      bg="white"
+      borderRadius="xl"
+      overflow="hidden"
+    >
       <TableContainer>
         {!isCardView ? (
-          <Table variant="simple" size="md">
+          <Table
+            variant="simple"
+            size="md"
+          >
             <Thead>
               <Tr>
                 <Th
@@ -157,7 +167,10 @@ export const AccountsTable = ({
                   letterSpacing="wider"
                 >
                   NAME
-                  <SortArrows columnKey="firstName" sortOrder={sortOrder} />
+                  <SortArrows
+                    columnKey="firstName"
+                    sortOrder={sortOrder}
+                  />
                 </Th>
                 <Th
                   onClick={() => handleSort('email')}
@@ -169,7 +182,10 @@ export const AccountsTable = ({
                   letterSpacing="wider"
                 >
                   EMAIL
-                  <SortArrows columnKey="email" sortOrder={sortOrder} />
+                  <SortArrows
+                    columnKey="email"
+                    sortOrder={sortOrder}
+                  />
                 </Th>
                 <Th
                   onClick={() => handleSort('programs')}
@@ -181,7 +197,10 @@ export const AccountsTable = ({
                   letterSpacing="wider"
                 >
                   PROGRAM / REGION
-                  <SortArrows columnKey="programs" sortOrder={sortOrder} />
+                  <SortArrows
+                    columnKey="programs"
+                    sortOrder={sortOrder}
+                  />
                 </Th>
                 <Th
                   onClick={() => handleSort('role')}
@@ -193,7 +212,10 @@ export const AccountsTable = ({
                   letterSpacing="wider"
                 >
                   ROLE
-                  <SortArrows columnKey="role" sortOrder={sortOrder} />
+                  <SortArrows
+                    columnKey="role"
+                    sortOrder={sortOrder}
+                  />
                 </Th>
                 {showCreatedBy && (
                   <Th
@@ -283,7 +305,10 @@ export const AccountsTable = ({
                     </Td>
                   )}
 
-                  <Td p={0} textAlign="right">
+                  <Td
+                    p={0}
+                    textAlign="right"
+                  >
                     <Box
                       className="action-group"
                       opacity={0}
@@ -308,7 +333,10 @@ export const AccountsTable = ({
             </Tbody>
           </Table>
         ) : (
-          <CardView data={tableData} onSave={onSave} />
+          <CardView
+            data={tableData}
+            onSave={onSave}
+          />
         )}
       </TableContainer>
     </Box>

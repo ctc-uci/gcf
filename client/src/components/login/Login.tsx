@@ -3,8 +3,6 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   Box,
   Button,
-  Center,
-  Link as ChakraLink,
   Flex,
   FormControl,
   FormErrorMessage,
@@ -12,6 +10,7 @@ import {
   Grid,
   GridItem,
   Heading,
+  IconButton,
   Image,
   Input,
   Stack,
@@ -23,10 +22,13 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
+import { FaArrowLeft } from 'react-icons/fa6';
 import { FiLogIn } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
+import { CreatePassword } from './CreatePassword';
+import { ForgotPassword } from './ForgotPassword';
 import GcfGlobe from '/gcf_globe.png';
 
 const signinSchema = z.object({
@@ -45,8 +47,11 @@ const welcomeTexts = [
 ];
 
 export const Login = () => {
+  const [isForgot, setIsForgot] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get('mode');
   const [textIndex, setTextIndex] = useState(0);
 
   const { login, handleRedirectResult } = useAuthContext();
@@ -62,6 +67,7 @@ export const Login = () => {
     mode: 'onBlur',
   });
 
+  // Welcome text cycling animation
   useEffect(() => {
     const interval = setInterval(() => {
       setTextIndex((prev) => (prev + 1) % welcomeTexts.length);
@@ -125,19 +131,27 @@ export const Login = () => {
   }, [backend, handleRedirectResult, navigate, toast]);
 
   return (
-    <Grid templateColumns="repeat(2, 1fr)" h="100vh">
-      <GridItem p="16px">
+    <Grid
+      templateColumns="repeat(2, 1fr)"
+      h="100vh"
+      overflow="hidden"
+    >
+      <GridItem>
         <Flex
           direction="column"
           align="center"
           justify="center"
           h="100%"
-          gap="120px"
           borderRight="none"
           position="relative"
           overflow="hidden"
         >
-          <Box h="60px" display="flex" alignItems="center">
+          <Box
+            mb={6}
+            h="60px"
+            display="flex"
+            alignItems="center"
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={textIndex}
@@ -150,112 +164,167 @@ export const Login = () => {
                   delay: textIndex === 0 ? 0 : undefined,
                 }}
               >
-                <Heading fontWeight="bold" fontSize="5xl" textAlign="center">
+                <Heading
+                  fontWeight="bold"
+                  fontSize="5xl"
+                  textAlign="center"
+                >
                   {welcomeTexts[textIndex]}
                 </Heading>
               </motion.div>
             </AnimatePresence>
           </Box>
-
           <Image
             src={GcfGlobe}
             alt="GCF Globe"
-            w="460px"
-            h="460px"
-            opacity={1}
-            draggable={false}
+            maxH="55%"
+            draggable="false"
           />
         </Flex>
       </GridItem>
-
-      <GridItem bg="#D6F1EF">
-        <Flex
-          direction="column"
-          align="center"
-          justify="center"
-          h="100%"
-          px={12}
+      {mode === 'resetPassword' ? (
+        <GridItem
+          position="relative"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          bg="#D6F1EF"
         >
-          <Box
-            bg="white"
-            borderRadius="xl"
-            p={10}
-            w="100%"
-            maxW="500px"
-            boxShadow="8px 16px 8px 0px #31979529"
+          <IconButton
+            aria-label="Back to login"
+            icon={<FaArrowLeft />}
+            position="absolute"
+            top={8}
+            left={8}
+            onClick={() => {
+              searchParams.delete('mode');
+              navigate({ search: searchParams.toString() });
+            }}
+            bg="gray.200"
+            borderRadius="md"
+            _hover={{ bg: 'gray.300' }}
+          />
+          <CreatePassword />
+        </GridItem>
+      ) : isForgot ? (
+        <GridItem
+          position="relative"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          bg="#D6F1EF"
+        >
+          <IconButton
+            aria-label="Back to login"
+            icon={<FaArrowLeft />}
+            position="absolute"
+            top={8}
+            left={8}
+            onClick={() => setIsForgot(false)}
+            bg="gray.200"
+            borderRadius="md"
+            _hover={{ bg: 'gray.300' }}
+          />
+          <ForgotPassword setIsForgot={setIsForgot} />
+        </GridItem>
+      ) : (
+        <GridItem bg="#D6F1EF">
+          <Flex
+            direction="column"
+            align="center"
+            justify="center"
+            h="100%"
+            px={12}
           >
-            <Heading fontWeight="bold" fontSize="3xl" mb={6}>
-              Login
-            </Heading>
+            <Box
+              bg="white"
+              borderRadius="xl"
+              p={10}
+              w="100%"
+              maxW="500px"
+              boxShadow="xl"
+            >
+              <Heading
+                fontWeight="bold"
+                fontSize="3xl"
+                mb={6}
+              >
+                Login
+              </Heading>
 
-            <form onSubmit={handleSubmit(handleLogin)}>
-              <Stack spacing={5}>
-                <FormControl isInvalid={!!errors.email}>
-                  <FormLabel fontWeight="bold">Email</FormLabel>
-                  <Input
-                    placeholder="Enter your email"
-                    type="email"
+              <form onSubmit={handleSubmit(handleLogin)}>
+                <Stack spacing={5}>
+                  <FormControl isInvalid={!!errors.email}>
+                    <FormLabel fontWeight="bold">Email</FormLabel>
+                    <Input
+                      placeholder="Enter your email"
+                      type="email"
+                      size="lg"
+                      {...register('email')}
+                      name="email"
+                      isRequired
+                      autoComplete="email"
+                      borderRadius="md"
+                      bg="gray.50"
+                    />
+                    <FormErrorMessage>
+                      {errors.email?.message?.toString()}
+                    </FormErrorMessage>
+                  </FormControl>
+
+                  <FormControl isInvalid={!!errors.password}>
+                    <FormLabel fontWeight="bold">Password</FormLabel>
+                    <Input
+                      placeholder="Password"
+                      type="password"
+                      size="lg"
+                      {...register('password')}
+                      name="password"
+                      isRequired
+                      autoComplete="current-password"
+                      borderRadius="md"
+                      bg="gray.50"
+                    />
+                    <FormErrorMessage>
+                      {errors.password?.message?.toString()}
+                    </FormErrorMessage>
+                  </FormControl>
+
+                  <Button
+                    type="submit"
                     size="lg"
-                    {...register('email')}
-                    name="email"
-                    isRequired
-                    autoComplete="email"
+                    isDisabled={Object.keys(errors).length > 0}
+                    bg="black"
+                    color="white"
                     borderRadius="md"
-                    bg="gray.50"
-                  />
-                  <FormErrorMessage>
-                    {errors.email?.message?.toString()}
-                  </FormErrorMessage>
-                </FormControl>
-
-                <FormControl isInvalid={!!errors.password}>
-                  <FormLabel fontWeight="bold">Password</FormLabel>
-                  <Input
-                    placeholder="Password"
-                    type="password"
-                    size="lg"
-                    {...register('password')}
-                    name="password"
-                    isRequired
-                    autoComplete="current-password"
-                    borderRadius="md"
-                    bg="gray.50"
-                  />
-                  <FormErrorMessage>
-                    {errors.password?.message?.toString()}
-                  </FormErrorMessage>
-                </FormControl>
-
-                <Button
-                  type="submit"
-                  size="lg"
-                  isDisabled={Object.keys(errors).length > 0}
-                  bg="black"
-                  color="white"
-                  borderRadius="md"
-                  w="100%"
-                  leftIcon={<FiLogIn />}
-                  _hover={{ bg: 'gray.800' }}
-                >
-                  Login
-                </Button>
-
-                <Center>
-                  {/* TODO: Replace /signup with forgot password form */}
-                  <ChakraLink
-                    as={Link}
-                    to="/signup"
-                    textDecoration="underline"
-                    color="gray.700"
+                    w="100%"
+                    _hover={{ bg: 'gray.800' }}
                   >
-                    Forgot password?
-                  </ChakraLink>
-                </Center>
-              </Stack>
-            </form>
-          </Box>
-        </Flex>
-      </GridItem>
+                    Login
+                  </Button>
+                  <Box textAlign="right">
+                    <Button
+                      type="button"
+                      variant="link"
+                      color="teal.900"
+                      fontSize="lg"
+                      fontWeight="normal"
+                      textDecoration="underline"
+                      p={0}
+                      h="auto"
+                      minH={0}
+                      lineHeight="normal"
+                      onClick={() => setIsForgot(true)}
+                    >
+                      Forgot Password?
+                    </Button>
+                  </Box>
+                </Stack>
+              </form>
+            </Box>
+          </Flex>
+        </GridItem>
+      )}
     </Grid>
   );
 };

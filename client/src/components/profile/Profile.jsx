@@ -16,14 +16,14 @@ import {
   Select,
   Spinner,
   Text,
-  VStack,
   useDisclosure,
   useToast,
+  VStack,
 } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import {
   FiCamera,
   FiCheck,
@@ -213,7 +213,12 @@ export const Profile = () => {
 
   if (loading) {
     return (
-      <Box h="100vh" display="flex" alignItems="center" justifyContent="center">
+      <Box
+        h="100vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
         <Spinner size="xl" />
       </Box>
     );
@@ -225,9 +230,19 @@ export const Profile = () => {
       : DEFAULT_PROFILE_IMAGE;
 
   return (
-    <Box p={10} position="relative" bg="gray.50" minH="94vh" mx={-4} mt={0}>
+    <Box
+      p={10}
+      position="relative"
+      bg="gray.50"
+      minH="94vh"
+      mx={-4}
+      mt={0}
+    >
       {!isEditing && (
-        <Flex justify="flex-end" mb={4}>
+        <Flex
+          justify="flex-end"
+          mb={4}
+        >
           <Button
             leftIcon={<FiEdit2 />}
             bg="teal.500"
@@ -243,8 +258,15 @@ export const Profile = () => {
 
       {isEditing && <Box h="52px" />}
 
-      <VStack spacing={8} align="center" w="100%">
-        <Box position="relative" display="inline-block">
+      <VStack
+        spacing={8}
+        align="center"
+        w="100%"
+      >
+        <Box
+          position="relative"
+          display="inline-block"
+        >
           <Image
             src={profilePicture}
             boxSize="200px"
@@ -269,10 +291,22 @@ export const Profile = () => {
           )}
         </Box>
 
-        <VStack spacing={6} align="flex-start" w="100%" maxW="700px">
-          <Grid templateColumns="repeat(2, 1fr)" gap={8} w="100%">
+        <VStack
+          spacing={6}
+          align="flex-start"
+          w="100%"
+          maxW="700px"
+        >
+          <Grid
+            templateColumns="repeat(2, 1fr)"
+            gap={8}
+            w="100%"
+          >
             <GridItem>
-              <Text fontWeight="bold" mb={1}>
+              <Text
+                fontWeight="bold"
+                mb={1}
+              >
                 First Name
               </Text>
               {isEditing ? (
@@ -285,7 +319,10 @@ export const Profile = () => {
               )}
             </GridItem>
             <GridItem>
-              <Text fontWeight="bold" mb={1}>
+              <Text
+                fontWeight="bold"
+                mb={1}
+              >
                 Last Name
               </Text>
               {isEditing ? (
@@ -301,7 +338,10 @@ export const Profile = () => {
 
           {role === 'Program Director' && (
             <FormControl>
-              <Text fontWeight="bold" mb={1}>
+              <Text
+                fontWeight="bold"
+                mb={1}
+              >
                 Bio
               </Text>
               {isEditing ? (
@@ -317,7 +357,10 @@ export const Profile = () => {
 
           {/* Email */}
           <FormControl>
-            <Text fontWeight="bold" mb={1}>
+            <Text
+              fontWeight="bold"
+              mb={1}
+            >
               Email
             </Text>
             {isEditing ? (
@@ -333,7 +376,10 @@ export const Profile = () => {
 
           {/* Password */}
           <FormControl>
-            <Text fontWeight="bold" mb={1}>
+            <Text
+              fontWeight="bold"
+              mb={1}
+            >
               Password
             </Text>
             {isEditing ? (
@@ -381,11 +427,17 @@ export const Profile = () => {
 
           {role === 'Regional Director' && roleSpecificData?.name && (
             <FormControl>
-              <Text fontWeight="bold" mb={1}>
+              <Text
+                fontWeight="bold"
+                mb={1}
+              >
                 Region
               </Text>
               {isEditing ? (
-                <Input value={roleSpecificData.name} isReadOnly />
+                <Input
+                  value={roleSpecificData.name}
+                  isReadOnly
+                />
               ) : (
                 <Text>{roleSpecificData.name}</Text>
               )}
@@ -394,11 +446,17 @@ export const Profile = () => {
 
           {role === 'Program Director' && roleSpecificData?.name && (
             <FormControl>
-              <Text fontWeight="bold" mb={1}>
+              <Text
+                fontWeight="bold"
+                mb={1}
+              >
                 Program
               </Text>
               {isEditing ? (
-                <Input value={roleSpecificData.name} isReadOnly />
+                <Input
+                  value={roleSpecificData.name}
+                  isReadOnly
+                />
               ) : (
                 <Text>{roleSpecificData.name}</Text>
               )}
@@ -406,7 +464,10 @@ export const Profile = () => {
           )}
 
           <FormControl>
-            <Text fontWeight="bold" mb={1}>
+            <Text
+              fontWeight="bold"
+              mb={1}
+            >
               Preferred Language
             </Text>
             {isEditing ? (
@@ -426,8 +487,16 @@ export const Profile = () => {
       </VStack>
 
       {isEditing && (
-        <Flex justify="flex-end" mt={8} gap={3}>
-          <Button leftIcon={<FiX />} variant="outline" onClick={handleCancel}>
+        <Flex
+          justify="flex-end"
+          mt={8}
+          gap={3}
+        >
+          <Button
+            leftIcon={<FiX />}
+            variant="outline"
+            onClick={handleCancel}
+          >
             Cancel
           </Button>
           <Button

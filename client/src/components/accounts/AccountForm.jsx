@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   Avatar,
@@ -15,8 +15,8 @@ import {
   FormLabel,
   Grid,
   GridItem,
-  HStack,
   Heading,
+  HStack,
   IconButton,
   Image,
   Input,
@@ -27,11 +27,15 @@ import {
   ModalContent,
   ModalOverlay,
   Select,
-  Text,
-  VStack,
   useDisclosure,
+  useToast,
+  VStack,
 } from '@chakra-ui/react';
 
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 import {
   FiCamera,
   FiEye,
@@ -41,9 +45,8 @@ import {
   FiTrash2,
 } from 'react-icons/fi';
 
-import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { FullscreenFlyoutButton } from '../FullscreenFlyoutButton';
+import { useFullscreenFlyout } from '../useFullScreenFlyout.js';
 
 const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
 const LABEL_COLOR = 'teal.600';
@@ -89,7 +92,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const exitModal = useDisclosure();
   const deleteModal = useDisclosure();
   const saveModal = useDisclosure();
-
+  const auth = getAuth();
+  const toast = useToast();
   const [formData, setFormData] = useState({ ...INITIAL_FORM_STATE });
   const [initialFormData, setInitialFormData] = useState({
     ...INITIAL_FORM_STATE,
@@ -327,7 +331,12 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       } else {
         await handleUpdateUser();
       }
-
+      toast({
+        title: 'User saved successfully!',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
       onSave();
       onClose();
     } catch (error) {
@@ -338,11 +347,22 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         errorMessage.includes('email-already-exists') ||
         errorMessage.includes('email address is already in use')
       ) {
-        alert(
-          'This email is already registered. Please use a different email address.'
-        );
+        toast({
+          title: 'Email already exists',
+          description:
+            'This email is already registered. Please use a different email address.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
       } else {
-        alert(`Error: ${errorMessage}`);
+        toast({
+          title: 'Error',
+          description: `Error: ${errorMessage}`,
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
       }
     } finally {
       setIsLoading(false);
@@ -354,31 +374,24 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       !formData.first_name ||
       !formData.last_name ||
       !formData.role ||
-      !formData.email ||
-      !formData.password
+      !formData.email
     ) {
       throw new Error('Please fill in all fields on the form.');
     }
 
     const userData = {
       email: formData.email,
-      password: formData.password,
       firstName: formData.first_name,
       lastName: formData.last_name,
       role: formData.role,
       currentUserId: userId,
-      programId: formData.programs.length > 0 ? formData.programs[0].id : null,
-      regionId: formData.regions.length > 0 ? formData.regions[0].id : null,
+      programId:
+        formData.programs.length > 0 ? Number(formData.programs[0].id) : null,
+      regionId:
+        formData.regions.length > 0 ? Number(formData.regions[0].id) : null,
     };
     await backend.post('/gcf-users/admin/create-user', userData);
-    await backend.post('/nodemailer', {
-      email: formData.email,
-      password: formData.password,
-      firstName: formData.first_name,
-      lastName: formData.last_name,
-      role: formData.role,
-      isNewAccount: true,
-    });
+    await sendPasswordResetEmail(auth, formData.email);
   };
 
   const handleUpdateUser = async () => {
@@ -397,22 +410,24 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       role: formData.role,
       currentUserId: userId,
       targetId: targetUserId,
-      programId: formData.programs.length > 0 ? formData.programs[0].id : null,
-      regionId: formData.regions.length > 0 ? formData.regions[0].id : null,
+      programId:
+        formData.programs.length > 0 ? Number(formData.programs[0].id) : null,
+      regionId:
+        formData.regions.length > 0 ? Number(formData.regions[0].id) : null,
     };
 
     if (formData.password && formData.password.trim().length > 0) {
       userData.password = formData.password;
     }
     await backend.put('/gcf-users/admin/update-user', userData);
-    await backend.post('/nodemailer', {
-      email: formData.email,
-      password: formData.password || null,
-      firstName: formData.first_name,
-      lastName: formData.last_name,
-      role: formData.role,
-      isNewAccount: false,
-    });
+    // await backend.post('/nodemailer', {
+    //   email: formData.email,
+    //   password: formData.password || null,
+    //   firstName: formData.first_name,
+    //   lastName: formData.last_name,
+    //   role: formData.role,
+    //   isNewAccount: false,
+    // });
   };
 
   const handleCloseWithCheck = () => {
@@ -458,7 +473,12 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
           flexDirection="column"
         >
           {/* Header */}
-          <Flex align="center" px={4} pt={3} pb={2}>
+          <Flex
+            align="center"
+            px={4}
+            pt={3}
+            pb={2}
+          >
             <IconButton
               icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
               aria-label={isFullScreen ? 'Minimize' : 'Expand'}
@@ -466,16 +486,33 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
               size="sm"
               onClick={() => setIsFullScreen(!isFullScreen)}
             />
-            <Text fontWeight="bold" fontSize="xl" flex={1} textAlign="center">
+            <Text
+              fontWeight="bold"
+              fontSize="xl"
+              flex={1}
+              textAlign="center"
+            >
               Account
             </Text>
             <Box w="32px" />
           </Flex>
           <Divider borderColor="gray.300" />
 
-          <DrawerBody flex={1} overflowY="auto" py={6} px={8}>
-            <VStack spacing={6} align="stretch">
-              <Heading as="h3" size="md" fontWeight="semibold">
+          <DrawerBody
+            flex={1}
+            overflowY="auto"
+            py={6}
+            px={8}
+          >
+            <VStack
+              spacing={6}
+              align="stretch"
+            >
+              <Heading
+                as="h3"
+                size="md"
+                fontWeight="semibold"
+              >
                 User Profile
               </Heading>
 
@@ -489,7 +526,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                   Profile Photo
                 </Text>
                 <Flex justify="center">
-                  <Box position="relative" display="inline-block">
+                  <Box
+                    position="relative"
+                    display="inline-block"
+                  >
                     <Image
                       src={DEFAULT_PROFILE_IMAGE}
                       boxSize="180px"
@@ -528,7 +568,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
               </Box>
 
               {/* First Name / Last Name */}
-              <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+              <Grid
+                templateColumns="repeat(2, 1fr)"
+                gap={4}
+              >
                 <GridItem>
                   <FormControl>
                     <FormLabel
@@ -537,7 +580,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       fontWeight="medium"
                     >
                       First Name{' '}
-                      <Text as="span" color="red.500">
+                      <Text
+                        as="span"
+                        color="red.500"
+                      >
                         *
                       </Text>
                     </FormLabel>
@@ -558,7 +604,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       fontWeight="medium"
                     >
                       Last Name{' '}
-                      <Text as="span" color="red.500">
+                      <Text
+                        as="span"
+                        color="red.500"
+                      >
                         *
                       </Text>
                     </FormLabel>
@@ -574,7 +623,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
               </Grid>
 
               {/* Email / Password */}
-              <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+              <Grid
+                templateColumns="repeat(2, 1fr)"
+                gap={4}
+              >
                 <GridItem>
                   <FormControl>
                     <FormLabel
@@ -583,7 +635,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       fontWeight="medium"
                     >
                       Email{' '}
-                      <Text as="span" color="red.500">
+                      <Text
+                        as="span"
+                        color="red.500"
+                      >
                         *
                       </Text>
                     </FormLabel>
@@ -604,7 +659,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       fontWeight="medium"
                     >
                       Password{' '}
-                      <Text as="span" color="red.500">
+                      <Text
+                        as="span"
+                        color="red.500"
+                      >
                         *
                       </Text>
                     </FormLabel>
@@ -631,7 +689,12 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 </GridItem>
               </Grid>
 
-              <Heading as="h3" size="md" fontWeight="semibold" mt={4}>
+              <Heading
+                as="h3"
+                size="md"
+                fontWeight="semibold"
+                mt={4}
+              >
                 Role & Access
               </Heading>
 
@@ -642,7 +705,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                   fontWeight="medium"
                 >
                   Role{' '}
-                  <Text as="span" color="red.500">
+                  <Text
+                    as="span"
+                    color="red.500"
+                  >
                     *
                   </Text>
                 </FormLabel>
@@ -676,7 +742,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     placeholder="Program Name"
                     value={
                       formData.programs.length > 0
-                        ? formData.programs[0].id
+                        ? String(formData.programs[0].id)
                         : ''
                     }
                     onChange={(e) => {
@@ -684,7 +750,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       if (!selectedProgramId) return;
 
                       const selectedProgram = currentPrograms?.find(
-                        (p) => p.id === selectedProgramId
+                        (p) => String(p.id) === String(selectedProgramId)
                       );
 
                       if (selectedProgram) {
@@ -696,7 +762,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     }}
                   >
                     {currentPrograms?.map((program) => (
-                      <option key={program.id} value={program.id}>
+                      <option
+                        key={program.id}
+                        value={program.id}
+                      >
                         {program.name}
                       </option>
                     ))}
@@ -716,14 +785,16 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                   <Select
                     placeholder="Region Name"
                     value={
-                      formData.regions.length > 0 ? formData.regions[0].id : ''
+                      formData.regions.length > 0
+                        ? String(formData.regions[0].id)
+                        : ''
                     }
                     onChange={(e) => {
                       const selectedRegionId = e.target.value;
                       if (!selectedRegionId) return;
 
                       const selectedRegion = currentRegions?.find(
-                        (r) => r.id == selectedRegionId
+                        (r) => String(r.id) === String(selectedRegionId)
                       );
 
                       if (selectedRegion) {
@@ -735,7 +806,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     }}
                   >
                     {currentRegions?.map((region) => (
-                      <option key={region.id} value={region.id}>
+                      <option
+                        key={region.id}
+                        value={region.id}
+                      >
                         {region.name}
                       </option>
                     ))}
@@ -744,7 +818,12 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
               )}
 
               {formData.role === 'Program Director' && (
-                <Heading as="h3" size="md" fontWeight="semibold" mt={4}>
+                <Heading
+                  as="h3"
+                  size="md"
+                  fontWeight="semibold"
+                  mt={4}
+                >
                   Additional Information
                 </Heading>
               )}
@@ -772,7 +851,13 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
           </DrawerBody>
 
           <Divider borderColor="gray.200" />
-          <Flex justify="space-between" align="center" px={8} py={4} bg="white">
+          <Flex
+            justify="space-between"
+            align="center"
+            px={8}
+            py={4}
+            bg="white"
+          >
             <Button
               variant="ghost"
               color="red.500"
@@ -783,7 +868,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
               Delete
             </Button>
             <HStack spacing={3}>
-              <Button variant="outline" onClick={handleCloseWithCheck}>
+              <Button
+                variant="outline"
+                onClick={handleCloseWithCheck}
+              >
                 Cancel
               </Button>
               <Button
@@ -800,18 +888,38 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         </DrawerContent>
       </Drawer>
 
-      <Modal isOpen={exitModal.isOpen} onClose={exitModal.onClose} isCentered>
+      <Modal
+        isOpen={exitModal.isOpen}
+        onClose={exitModal.onClose}
+        isCentered
+      >
         <ModalOverlay />
-        <ModalContent py={6} px={4}>
+        <ModalContent
+          py={6}
+          px={4}
+        >
           <ModalBody textAlign="center">
-            <Text fontWeight="bold" fontSize="lg" mb={2}>
+            <Text
+              fontWeight="bold"
+              fontSize="lg"
+              mb={2}
+            >
               Are you sure you want to exit?
             </Text>
-            <Text color="gray.500" mb={6}>
+            <Text
+              color="gray.500"
+              mb={6}
+            >
               All new updates made to this account will be lost.
             </Text>
-            <HStack spacing={3} justify="center">
-              <Button variant="outline" onClick={exitModal.onClose}>
+            <HStack
+              spacing={3}
+              justify="center"
+            >
+              <Button
+                variant="outline"
+                onClick={exitModal.onClose}
+              >
                 Continue Editing
               </Button>
               <Button
@@ -836,16 +944,32 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         isCentered
       >
         <ModalOverlay />
-        <ModalContent py={6} px={4}>
+        <ModalContent
+          py={6}
+          px={4}
+        >
           <ModalBody textAlign="center">
-            <Text fontWeight="bold" fontSize="lg" mb={2}>
+            <Text
+              fontWeight="bold"
+              fontSize="lg"
+              mb={2}
+            >
               Delete this account?
             </Text>
-            <Text color="gray.500" mb={6}>
+            <Text
+              color="gray.500"
+              mb={6}
+            >
               This action cannot be undone.
             </Text>
-            <HStack spacing={3} justify="center">
-              <Button variant="outline" onClick={deleteModal.onClose}>
+            <HStack
+              spacing={3}
+              justify="center"
+            >
+              <Button
+                variant="outline"
+                onClick={deleteModal.onClose}
+              >
                 Continue Editing
               </Button>
               <Button
@@ -868,13 +992,24 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         size="lg"
       >
         <ModalOverlay />
-        <ModalContent py={6} px={6}>
+        <ModalContent
+          py={6}
+          px={6}
+        >
           <ModalBody>
-            <Text fontWeight="bold" fontSize="lg" color="teal.600" mb={4}>
+            <Text
+              fontWeight="bold"
+              fontSize="lg"
+              color="teal.600"
+              mb={4}
+            >
               Changes Saved
             </Text>
 
-            <VStack spacing={3} align="stretch">
+            <VStack
+              spacing={3}
+              align="stretch"
+            >
               {changedFields.map((change, idx) => (
                 <Box key={idx}>
                   <Text
@@ -924,8 +1059,15 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
               ))}
             </VStack>
 
-            <HStack spacing={3} justify="center" mt={6}>
-              <Button variant="outline" onClick={saveModal.onClose}>
+            <HStack
+              spacing={3}
+              justify="center"
+              mt={6}
+            >
+              <Button
+                variant="outline"
+                onClick={saveModal.onClose}
+              >
                 Continue Editing
               </Button>
               <Button

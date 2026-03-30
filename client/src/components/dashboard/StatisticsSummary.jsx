@@ -12,25 +12,39 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import {
+  downloadCsv,
+  escapeCsvValue,
+  getFilenameTimestamp,
+} from '@/utils/downloadCsv';
 import { MdOutlineFileDownload } from 'react-icons/md';
 
 const StatBox = ({ label, number }) => {
   return (
     <Box
-      maxW="200px"
+      flex="1"
+      minW={0}
       p={6}
-      border="1px solid"
-      borderColor="gray.300"
-      bg="white"
-      color="black"
       borderRadius="md"
+      bgGradient="linear(to-r, gray.600, gray.400)"
+      color="white"
+      boxShadow="md"
       display="flex"
       flexDirection="column"
     >
-      <Box fontSize="xl" mb={4}>
+      <Box
+        fontSize="xl"
+        mb={4}
+        color="whiteAlpha.900"
+      >
         {label}
       </Box>
-      <Box fontSize="2xl">{number}</Box>
+      <Box
+        fontSize="4xl"
+        fontWeight="semibold"
+      >
+        {number}
+      </Box>
     </Box>
   );
 };
@@ -99,6 +113,17 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
   const [stats, setStats] = useState(initialStats);
   const [isLoading, setIsLoading] = useState(true);
 
+  const downloadDataAsCsv = () => {
+    const headers = stats.map((stat) => stat.label);
+    const rows = [stats.map((stat) => escapeCsvValue(stat.number))];
+
+    downloadCsv(
+      headers,
+      rows,
+      `statistics-summary-${getFilenameTimestamp()}.csv`
+    );
+  };
+
   useEffect(() => {
     if (roleLoading) return;
 
@@ -130,19 +155,31 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
 
   return (
     <Box as="section">
-      <VStack spacing={6} align="left">
+      <VStack
+        spacing={6}
+        align="left"
+      >
         <HStack>
           <Heading size="md">Statistics Summary</Heading>
           <IconButton
             aria-label="download"
             icon={<MdOutlineFileDownload />}
+            onClick={downloadDataAsCsv}
             size="sm"
             variant="ghost"
           />
         </HStack>
 
-        <Box position="relative">
-          <HStack spacing={6} minH="120px">
+        <Box
+          position="relative"
+          w="full"
+        >
+          <HStack
+            spacing={6}
+            minH="120px"
+            w="full"
+            align="stretch"
+          >
             {stats.map((stat) => (
               <StatBox
                 key={stat.label}
