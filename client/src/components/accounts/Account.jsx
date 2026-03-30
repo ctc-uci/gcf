@@ -1,29 +1,23 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
-import { 
-  Box, 
-  Center, 
-  Flex, 
-  Heading, 
-  Spinner,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+import {
+  Box,
+  Center,
+  Flex,
+  Heading,
+  HStack,
   IconButton,
- } from "@chakra-ui/react";
- import {
-  HiOutlineAdjustmentsHorizontal,
-} from "react-icons/hi2";
+  Spinner,
+} from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { FiDownload } from 'react-icons/fi';
 
-import { AccountForm } from "./AccountForm";
-import { AccountsTable, downloadAccountsAsCsv } from "./AccountsTable";
-import { AccountToolbar } from "./AccountToolbar";
-
-import { applyFilters } from "../../contexts/hooks/TableFilter"
+import { AccountForm } from './AccountForm';
+import { AccountsTable, downloadAccountsAsCsv } from './AccountsTable';
+import { AccountToolbar } from './AccountToolbar';
 
 const getAccountsRoute = (role, userId) => {
   if (!userId) return null;
@@ -41,26 +35,26 @@ export const Account = () => {
   const [users, setUsers] = useState([]);
   const [originalUsers, setOriginalUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isCardView, setIsCardView] = useState(false);
   const columns = [
     {
-      key: "fullName",
-      type: "text",
+      key: 'fullName',
+      type: 'text',
     },
     {
-      key: "email",
-      type: "text",
+      key: 'email',
+      type: 'text',
     },
     {
-      key: "role",
-      type: "text",
+      key: 'role',
+      type: 'text',
     },
     {
-      key: "programs",
-      type: "list",
+      key: 'programs',
+      type: 'list',
     },
   ];
 
@@ -85,7 +79,7 @@ export const Account = () => {
         role: item.role,
         programs: Array.isArray(item.programs) ? item.programs : [],
         email: item.email ?? '-',
-        password: '-',
+        createdBy: item.createdByName || item.createdBy || '',
       }));
 
       setUsers(fetchedData);
@@ -103,32 +97,58 @@ export const Account = () => {
 
   const [activeFilters, setActiveFilters] = useState([]);
 
-
   return (
-    <Box p={8} bg="white" minH="100vh">
-      <Flex mb={8} align="center" wrap={{ base: 'wrap', md: 'nowrap' }} gap={4}>
-        <Heading as="h1" size="lg" fontWeight="500">
-          Accounts
-        </Heading>
+    <Box
+      p={8}
+      bg="gray.50"
+      minH="94vh"
+      mx={-4}
+      mt={0}
+    >
+      <Flex
+        mb={8}
+        align="center"
+        wrap={{ base: 'wrap', md: 'nowrap' }}
+        gap={4}
+      >
+        <HStack spacing={2}>
+          <Heading
+            as="h1"
+            size="lg"
+            fontWeight="600"
+            color="blackAlpha.900"
+          >
+            Accounts
+          </Heading>
+          <IconButton
+            icon={<FiDownload size={20} />}
+            variant="ghost"
+            size="sm"
+            aria-label="Download accounts"
+            color="gray.600"
+            onClick={() => downloadAccountsAsCsv(users)}
+          />
+        </HStack>
 
         <AccountToolbar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          columns={columns}
-          setActiveFilters={setActiveFilters}
-          resultCount={users.length}
           onNew={() => {
             setIsDrawerOpen(true);
             setSelectedUser(null);
           }}
           setIsCardView={setIsCardView}
-          onDownload={() => downloadAccountsAsCsv(users)}
+          columns={columns}
+          onFilterChange={(filters) => setActiveFilters(filters)}
         />
       </Flex>
 
       {isLoading ? (
         <Center py={10}>
-          <Spinner size="xl" color="gray.500" />
+          <Spinner
+            size="xl"
+            color="gray.500"
+          />
         </Center>
       ) : (
         <AccountsTable
@@ -136,6 +156,7 @@ export const Account = () => {
           searchQuery={searchQuery}
           activeFilters={activeFilters}
           isCardView={isCardView}
+          showCreatedBy={role === 'Admin' || role === 'Super Admin'}
           onSave={() => fetchData()}
           onUpdate={(user) => {
             setSelectedUser(user);

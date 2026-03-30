@@ -8,15 +8,14 @@ instrumentChangeRouter.use(express.json());
 
 instrumentChangeRouter.post('/', async (req, res) => {
   try {
-    const { instrumentId, updateId, amountChanged, event_type, description } = req.body;
-    console.log('POST /instrument-changes body:', req.body);
+    const { instrumentId, updateId, amountChanged, special_request } = req.body;
 
     const newChange = await db.query(
       `INSERT INTO instrument_change
-        (instrument_id, update_id, amount_changed, event_type, description)
-       VALUES ($1, $2, $3, $4, $5)
+        (instrument_id, update_id, amount_changed, special_request)
+       VALUES ($1, $2, $3, $4)
        RETURNING *;`,
-      [instrumentId, updateId, amountChanged, event_type, description ?? null]
+      [instrumentId, updateId, amountChanged, special_request]
     );
 
     res.status(201).json(keysToCamel(newChange[0]));
@@ -77,18 +76,17 @@ instrumentChangeRouter.get('/:id', async (req, res) => {
 instrumentChangeRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { instrumentId, updateId, amountChanged, event_type, description } = req.body;
+    const { instrumentId, updateId, amountChanged, special_request } = req.body;
 
     const updatedChange = await db.query(
       `UPDATE instrument_change SET
         instrument_id = COALESCE($1, instrument_id),
         update_id = COALESCE($2, update_id),
         amount_changed = COALESCE($3, amount_changed),
-        event_type = COALESCE($4, event_type),
-        description = COALESCE($5, description)
-       WHERE id = $6
+        special_request = COALESCE($4, special_request)
+       WHERE id = $5
        RETURNING *;`,
-      [instrumentId, updateId, amountChanged, event_type, description, id]
+      [instrumentId, updateId, amountChanged, special_request, id]
     );
 
     if (updatedChange.length === 0) {
