@@ -308,6 +308,11 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
               instrumentId: instrument.id,
               updateId: updatedProgramUpdateId,
               amountChanged: quantity,
+              event_type: instrumentEvent,
+              description:
+                instrumentEvent === 'other'
+                  ? otherEventDescription.trim() || null
+                  : null,
             });
           } catch (error) {
             console.error(
@@ -323,6 +328,9 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
           update_id: updatedProgramUpdateId,
           enrollment_change: enrollmentNumber,
           graduated_change: graduatedNumber || 0,
+          event_type: formState.studentEvent,
+          description:
+            formState.studentEvent === 'other' ? notes.trim() || null : null,
         });
       }
 
