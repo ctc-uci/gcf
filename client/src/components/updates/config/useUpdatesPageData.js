@@ -83,7 +83,7 @@ export function useUpdatesPageData() {
     } finally {
       setIsProgramUpdatesLoading(false);
     }
-  }, [fetchData, userId]);
+  }, [fetchData, userId, role]);
 
   useEffect(() => {
     if (!userId || !backend) {

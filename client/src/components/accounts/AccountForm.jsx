@@ -27,6 +27,7 @@ import {
   ModalContent,
   ModalOverlay,
   Select,
+  Spacer,
   Text,
   useDisclosure,
   useToast,
@@ -45,9 +46,6 @@ import {
   FiMinimize2,
   FiTrash2,
 } from 'react-icons/fi';
-
-import { FullscreenFlyoutButton } from '../FullscreenFlyoutButton';
-import { useFullscreenFlyout } from '../useFullScreenFlyout.js';
 
 const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
 const LABEL_COLOR = 'teal.600';
@@ -275,7 +273,9 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
           const regionId = response.data.regionId;
 
           if (regionId && currentRegions) {
-            const region = currentRegions.find((r) => r.id === regionId);
+            const region = currentRegions.find(
+              (r) => String(r.id) === String(regionId)
+            );
             setFormData((prev) => ({
               ...prev,
               regions: region ? [region] : [],
@@ -306,7 +306,6 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     if (!formData.first_name.trim()) errors.first_name = true;
     if (!formData.last_name.trim()) errors.last_name = true;
     if (!formData.email.trim()) errors.email = true;
-    if (!targetUserId && !formData.password.trim()) errors.password = true;
     if (!formData.role) errors.role = true;
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -652,42 +651,50 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     />
                   </FormControl>
                 </GridItem>
-                <GridItem>
-                  <FormControl>
-                    <FormLabel
-                      color={LABEL_COLOR}
-                      fontSize="sm"
-                      fontWeight="medium"
-                    >
-                      Password{' '}
-                      <Text
-                        as="span"
-                        color="red.500"
+                {targetUserId ? (
+                  <GridItem>
+                    <FormControl>
+                      <FormLabel
+                        color={LABEL_COLOR}
+                        fontSize="sm"
+                        fontWeight="medium"
                       >
-                        *
-                      </Text>
-                    </FormLabel>
-                    <InputGroup>
-                      <Input
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="Password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        {...errorBorderProps('password')}
-                      />
-                      <InputRightElement>
-                        <IconButton
-                          icon={showPassword ? <FiEye /> : <FiEyeOff />}
-                          aria-label="Toggle password visibility"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowPassword(!showPassword)}
+                        Password
+                      </FormLabel>
+                      <InputGroup>
+                        <Input
+                          name="password"
+                          type={showPassword ? 'text' : 'password'}
+                          autoComplete="new-password"
+                          placeholder="Leave blank to keep current"
+                          value={formData.password}
+                          onChange={handleChange}
+                          {...errorBorderProps('password')}
                         />
-                      </InputRightElement>
-                    </InputGroup>
-                  </FormControl>
-                </GridItem>
+                        <InputRightElement>
+                          <IconButton
+                            icon={showPassword ? <FiEye /> : <FiEyeOff />}
+                            aria-label="Toggle password visibility"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowPassword(!showPassword)}
+                          />
+                        </InputRightElement>
+                      </InputGroup>
+                    </FormControl>
+                  </GridItem>
+                ) : (
+                  <GridItem>
+                    <Text
+                      fontSize="sm"
+                      color="gray.600"
+                      pt={8}
+                    >
+                      After you save, this user will receive an email with a
+                      link to set their password.
+                    </Text>
+                  </GridItem>
+                )}
               </Grid>
 
               <Heading
@@ -853,21 +860,23 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
 
           <Divider borderColor="gray.200" />
           <Flex
-            justify="space-between"
             align="center"
             px={8}
             py={4}
             bg="white"
           >
-            <Button
-              variant="ghost"
-              color="red.500"
-              leftIcon={<FiTrash2 />}
-              onClick={() => deleteModal.onOpen()}
-              fontWeight="normal"
-            >
-              Delete
-            </Button>
+            {targetUserId ? (
+              <Button
+                variant="ghost"
+                color="red.500"
+                leftIcon={<FiTrash2 />}
+                onClick={() => deleteModal.onOpen()}
+                fontWeight="normal"
+              >
+                Delete
+              </Button>
+            ) : null}
+            <Spacer />
             <HStack spacing={3}>
               <Button
                 variant="outline"
@@ -1004,7 +1013,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
               color="teal.600"
               mb={4}
             >
-              Changes Saved
+              Review changes
             </Text>
 
             <VStack
