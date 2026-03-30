@@ -22,7 +22,13 @@ programUpdateRouter.get('/:id', async (req, res) => {
     const { id } = req.params;
     const entry = await db.query(
       `
-            SELECT * FROM program_update 
+            SELECT *,
+            EXISTS (
+              SELECT 1 FROM instrument_change ic
+              WHERE ic.update_id = program_update.id
+                AND ic.special_request IS TRUE
+            ) AS flagged
+            FROM program_update 
             WHERE id = $1`,
       [id]
     );

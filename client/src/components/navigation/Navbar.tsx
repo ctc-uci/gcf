@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -11,9 +12,6 @@ import {
   Text,
 } from '@chakra-ui/react';
 
-const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
-import { ChevronDownIcon } from '@chakra-ui/icons';
-
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
@@ -21,6 +19,8 @@ import { HiOutlineLogout, HiOutlineUser } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 
 import { NAVBAR_HEIGHT } from './layoutConstants';
+
+const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
 
 export const Navbar = () => {
   const { role } = useRoleContext();
@@ -128,8 +128,16 @@ export const Navbar = () => {
       boxShadow="sm"
       bg="white"
     >
-      <Flex justify="space-between" w="100%" px="2vw" align="center">
-        <Text fontSize="2vh" fontWeight="bold">
+      <Flex
+        justify="space-between"
+        w="100%"
+        px="2vw"
+        align="center"
+      >
+        <Text
+          fontSize="2vh"
+          fontWeight="bold"
+        >
           {role === 'Super Admin' ? 'Super Admin Dashboard' : ''}
           {role === 'Admin' ? 'Admin Dashboard' : ''}
           {role === 'Regional Director' ? 'Regional Director Dashboard' : ''}
@@ -138,7 +146,10 @@ export const Navbar = () => {
           {role === 'Regional Director' ? `: ${region}` : ''}
         </Text>
 
-        <Flex gap={2} align="center">
+        <Flex
+          gap={2}
+          align="center"
+        >
           <Box position="relative">
             <Button
               bg="transparent"
@@ -157,7 +168,11 @@ export const Navbar = () => {
                 minW="160px"
                 transition="background-color 0.4s ease, border-radius 0.4s ease"
               >
-                <HStack spacing={3} justify="center" align="center">
+                <HStack
+                  spacing={3}
+                  justify="center"
+                  align="center"
+                >
                   <Image
                     src={profilePictureUrl ?? DEFAULT_PROFILE_IMAGE}
                     alt="Profile"
@@ -166,7 +181,10 @@ export const Navbar = () => {
                     borderRadius="full"
                     objectFit="cover"
                   />
-                  <Text fontSize="2vh" fontWeight="semibold">
+                  <Text
+                    fontSize="2vh"
+                    fontWeight="semibold"
+                  >
                     {userName || 'User'}
                   </Text>
                   <ChevronDownIcon
@@ -202,7 +220,12 @@ export const Navbar = () => {
                 >
                   <Button
                     onClick={() => navigate('/profile')}
-                    leftIcon={<Icon as={HiOutlineUser} boxSize="2vh" />}
+                    leftIcon={
+                      <Icon
+                        as={HiOutlineUser}
+                        boxSize="2vh"
+                      />
+                    }
                     w="100%"
                     justifyContent="flex-start"
                     variant="ghost"
@@ -213,7 +236,12 @@ export const Navbar = () => {
                   </Button>
                   <Button
                     onClick={handleLogout}
-                    leftIcon={<Icon as={HiOutlineLogout} boxSize="2vh" />}
+                    leftIcon={
+                      <Icon
+                        as={HiOutlineLogout}
+                        boxSize="2vh"
+                      />
+                    }
                     w="100%"
                     justifyContent="flex-start"
                     variant="ghost"
