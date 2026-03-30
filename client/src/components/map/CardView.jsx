@@ -84,17 +84,11 @@ const CardView = ({
 
   useEffect(() => {
     const fetchNames = async () => {
-      const allCountries = await backend.get('/country');
-      const matchingCountry = allCountries.data.find(
-        (c) => parseInt(c.id) === parseInt(country)
-      );
-      if (!matchingCountry || !matchingCountry.isoCode) return;
+      const fetchCountry = await backend.get(`/country/${country}`);
 
       const countries = await GetCountries();
       const foundCountry = countries.find(
-        (c) =>
-          String(c.iso3).toUpperCase() ===
-          String(matchingCountry.isoCode).toUpperCase()
+        (c) => String(c.iso3) === String(fetchCountry.data.isoCode)
       );
 
       if (foundCountry) {
