@@ -319,7 +319,7 @@ export const InstrumentUpdateForm = ({
           Add Media
         </Button>
       </Box>
-
+      {/* TODO: admin approval implementation */}
       <Box>
         <HStack
           spacing={2}
