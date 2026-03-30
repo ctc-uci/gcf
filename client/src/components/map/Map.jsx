@@ -17,6 +17,7 @@ const geoUrl = '/map-data.json';
 export const Map = () => {
   const [allCountries, setAllCountries] = useState([]);
   const [regions, setRegions] = useState([]);
+  const [regionName, setRegionName] = useState('');
   const [hoverRegions, setHoverRegions] = useState(null);
   const [display, setDisplay] = useState('block');
   const [programs, setPrograms] = useState([]);
@@ -69,6 +70,16 @@ export const Map = () => {
       } catch (error) {
         console.error('Error fetching programs for the region:', error);
         setPrograms([]);
+        return;
+      }
+
+      try {
+        const region = await backend.get(
+          `/region/${regionsRes.data[0].regionId}`
+        );
+        setRegionName(region.data.name);
+      } catch (error) {
+        console.error('Error fetching region name', error);
         return;
       }
     } catch (error) {
@@ -161,7 +172,9 @@ export const Map = () => {
                 cursor="pointer"
                 boxSize={6}
               />
-              <Heading fontSize="2xl">Featured Programs</Heading>
+              <Heading fontSize="2xl">
+                Featured Programs in {regionName}
+              </Heading>
             </HStack>
 
             {programs.length > 0 && (
