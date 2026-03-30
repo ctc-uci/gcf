@@ -159,12 +159,7 @@ export const AccountToolbar = ({
         px={3}
         leftIcon={<FiPlus />}
         onClick={onNew}
-        bg="teal.500"
-        color="white"
         transition="background-color 0.25s ease, transform 0.25s ease"
-        _hover={{
-          bg: 'teal.600',
-        }}
       >
         New Account
       </Button>
