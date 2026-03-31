@@ -27,14 +27,11 @@ import { ProgramSelector } from './ProgramSelector';
 
 export const StudentUpdateForm = ({
   formState,
-  dispatch,
+  setFormState,
   availablePrograms,
   programStudentCounts,
 }) => {
   const { programId, studentEvent, enrollmentNumber, date, notes } = formState;
-
-  const set = (field) => (value) =>
-    dispatch({ type: 'SET_FIELD', field, value });
 
   return (
     <VStack
@@ -44,7 +41,9 @@ export const StudentUpdateForm = ({
       <ProgramSelector
         availablePrograms={availablePrograms}
         programId={programId}
-        onChange={set('programId')}
+        onChange={(value) =>
+          setFormState((prev) => ({ ...prev, programId: value }))
+        }
       />
 
       <Box>
@@ -55,7 +54,9 @@ export const StudentUpdateForm = ({
           What happened to the students?
         </Text>
         <RadioGroup
-          onChange={set('studentEvent')}
+          onChange={(value) =>
+            setFormState((prev) => ({ ...prev, studentEvent: value }))
+          }
           value={studentEvent}
         >
           <Stack spacing={3}>
@@ -134,11 +135,13 @@ export const StudentUpdateForm = ({
             min={0}
             value={enrollmentNumber ?? ''}
             onChange={(value) =>
-              set('enrollmentNumber')(
-                value !== '' && value !== undefined
-                  ? parseInt(String(value), 10)
-                  : null
-              )
+              setFormState((prev) => ({
+                ...prev,
+                enrollmentNumber:
+                  value !== '' && value !== undefined
+                    ? parseInt(String(value), 10)
+                    : null,
+              }))
             }
           >
             <NumberInputField
@@ -196,7 +199,9 @@ export const StudentUpdateForm = ({
           <Input
             type="date"
             value={date}
-            onChange={(e) => set('date')(e.target.value)}
+            onChange={(e) =>
+              setFormState((prev) => ({ ...prev, date: e.target.value }))
+            }
             borderColor="gray.100"
           />
         </FormControl>
@@ -223,7 +228,9 @@ export const StudentUpdateForm = ({
           </FormLabel>
           <Textarea
             value={notes}
-            onChange={(e) => set('notes')(e.target.value)}
+            onChange={(e) =>
+              setFormState((prev) => ({ ...prev, notes: e.target.value }))
+            }
             minH="120px"
             placeholder="Add notes"
             borderColor="gray.100"

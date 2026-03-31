@@ -292,11 +292,17 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
             whatHappened === 'New / Donation'
               ? instrumentCount
               : -1 * instrumentCount;
+          const whatHappenedToEventType = {
+            Broken: 'broken',
+            Missing: 'missing',
+            'New / Donation': 'new_donation',
+            'Needs repair': 'needs_repair',
+          };
           await backend.post('/instrument-changes', {
             instrumentId: instrument.id,
             updateId: newUpdateId,
             amountChanged: instrumentDelta,
-            special_request: needsAdminHelp,
+            event_type: whatHappenedToEventType[whatHappened] ?? 'other',
           });
         }
       }
@@ -310,6 +316,7 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
             update_id: newUpdateId,
             enrollment_change: enrollmentDelta,
             graduated_change: 0,
+            event_type: 'other',
           });
         }
       }

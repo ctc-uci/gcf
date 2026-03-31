@@ -4,5 +4,5 @@ CREATE TABLE program_update (
   program_id  BIGINT REFERENCES program (id) NOT NULL,
   created_by  BIGINT REFERENCES "user" (id)  NOT NULL,
   update_date DATE                           NOT NULL,
-  note        TEXT                           NOT NULL
+  note        TEXT
 );

@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   Box,
@@ -31,8 +31,6 @@ import { FaUser } from 'react-icons/fa6';
 import { InstrumentUpdateForm } from './InstrumentUpdateForm';
 import { StudentUpdateForm } from './StudentUpdateForm';
 
-const getCurrentDateString = () => new Date().toISOString().split('T')[0];
-
 const initialFormState = {
   updateType: 'instrument',
   programId: '',
@@ -51,39 +49,6 @@ const initialFormState = {
   quantity: 0,
 };
 
-function formReducer(state, action) {
-  switch (action.type) {
-    case 'SET_FIELD':
-      return { ...state, [action.field]: action.value };
-    case 'RESET':
-      return { ...initialFormState, date: getCurrentDateString() };
-    case 'RESET_AFTER_SUBMIT':
-      return {
-        ...state,
-        instrumentEvent: 'broken',
-        otherEventDescription: '',
-        date: getCurrentDateString(),
-        enrollmentNumber: null,
-        graduatedNumber: null,
-        notes: '',
-        searchQuery: '',
-        selectedInstrument: '',
-        newInstrumentName: '',
-        quantity: 0,
-      };
-    case 'RESET_INSTRUMENT_FIELDS':
-      return {
-        ...state,
-        searchQuery: '',
-        selectedInstrument: '',
-        newInstrumentName: '',
-        quantity: 0,
-      };
-    default:
-      return state;
-  }
-}
-
 export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
   const btnRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,7 +57,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
   const { role } = useRoleContext();
   const { backend } = useBackendContext();
 
-  const [formState, dispatch] = useReducer(formReducer, initialFormState);
+  const [formState, setFormState] = useState(initialFormState);
   const [availablePrograms, setAvailablePrograms] = useState([]);
   const [existingInstruments, setExistingInstruments] = useState([]);
   const [programStudentCounts, setProgramStudentCounts] = useState({});
@@ -102,6 +67,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
     programId,
     instrumentEvent,
     otherEventDescription,
+    date,
     enrollmentNumber,
     graduatedNumber,
     notes,
@@ -133,28 +99,22 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
         let programs = [];
         const counts = {};
         if (role === 'Program Director') {
-          const [programRes, statsRes] = await Promise.all([
+          const [programResponse, statsResponse] = await Promise.all([
             backend.get(`/program-directors/me/${currentUser?.uid}/program`),
             backend.get(`/program-directors/me/${currentUser?.uid}/stats`),
           ]);
-          programs = programRes.data ? [programRes.data] : [];
+          programs = programResponse.data ? [programResponse.data] : [];
           if (programs.length === 1) {
-            counts[programs[0].id] = Number(statsRes.data?.students ?? 0);
+            counts[programs[0].id] = Number(statsResponse.data?.students ?? 0);
           }
         } else if (role === 'Regional Director') {
-          const [programsRes, tableRes] = await Promise.all([
+          const [programsResponse, tableResponse] = await Promise.all([
             backend.get(`/regional-directors/${currentUser?.uid}/programs`),
             backend.get(`/rdProgramTable/${currentUser?.uid}`),
           ]);
-          programs = programsRes.data || [];
-          (tableRes.data || []).forEach((row) => {
+          programs = programsResponse.data || [];
+          (tableResponse.data || []).forEach((row) => {
             counts[row.program_id] = Number(row.total_students ?? 0);
-          });
-        } else if (role === 'Admin') {
-          const response = await backend.get(`/admin/programs`);
-          programs = (response.data || []).map((p) => {
-            counts[p.id] = Number(p.students ?? 0);
-            return { id: p.id, name: p.name };
           });
         } else {
           toast({
@@ -170,11 +130,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
         setProgramStudentCounts(counts);
 
         if (programs.length === 1) {
-          dispatch({
-            type: 'SET_FIELD',
-            field: 'programId',
-            value: programs[0].id,
-          });
+          setFormState((prev) => ({ ...prev, programId: programs[0].id }));
         }
       } catch (error) {
         console.error('Error fetching programs:', error);
@@ -195,12 +151,18 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
     if (!isOpen) {
       return;
     }
-    dispatch({ type: 'RESET' });
+    setFormState({ ...initialFormState });
   }, [isOpen]);
 
   useEffect(() => {
     if (updateType === 'student') {
-      dispatch({ type: 'RESET_INSTRUMENT_FIELDS' });
+      setFormState((prev) => ({
+        ...prev,
+        searchQuery: '',
+        selectedInstrument: '',
+        newInstrumentName: '',
+        quantity: 0,
+      }));
     }
   }, [updateType]);
 
@@ -216,7 +178,28 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
       return;
     }
 
+    if (!date) {
+      toast({
+        title: 'Validation error',
+        description: 'Please select a date.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
     if (updateType === 'student') {
+      if (enrollmentNumber === null || enrollmentNumber <= 0) {
+        toast({
+          title: 'Validation error',
+          description: 'Please enter the number of students affected.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      }
       if (!notes.trim()) {
         toast({
           title: 'Validation error',
@@ -266,7 +249,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
           title: `${instrumentName} - ${eventLabel}`,
           program_id: parseInt(programId, 10) || null,
           created_by: currentUser?.uid,
-          update_date: getCurrentDateString(),
+          update_date: date,
           note: eventLabel,
         };
       } else {
@@ -274,7 +257,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
           title: `Student Update - ${formState.studentEvent.replace(/_/g, ' ')}`,
           program_id: parseInt(programId, 10) || null,
           created_by: currentUser?.uid,
-          update_date: getCurrentDateString(),
+          update_date: date,
           note: notes ? String(notes).trim() : null,
         };
       }
@@ -300,7 +283,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
         setExistingInstruments(instrumentsResponse.data);
 
         const instrument = instrumentsResponse.data.find(
-          (instr) => instr.name === instrumentName
+          (instrument) => instrument.name === instrumentName
         );
         if (instrument) {
           try {
@@ -334,7 +317,19 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
         });
       }
 
-      dispatch({ type: 'RESET_AFTER_SUBMIT' });
+      setFormState((prev) => ({
+        ...prev,
+        instrumentEvent: 'broken',
+        otherEventDescription: '',
+        date: '',
+        enrollmentNumber: null,
+        graduatedNumber: null,
+        notes: '',
+        searchQuery: '',
+        selectedInstrument: '',
+        newInstrumentName: '',
+        quantity: 0,
+      }));
 
       toast({
         title: 'Update created',
@@ -356,7 +351,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
         title: 'Failed to save',
         description: statusCode ? `${message} (${statusCode})` : message,
         status: 'error',
-        duration: 7000,
+        duration: 5000,
         isClosable: true,
       });
     } finally {
@@ -423,7 +418,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
               </Text>
               <RadioGroup
                 onChange={(value) =>
-                  dispatch({ type: 'SET_FIELD', field: 'updateType', value })
+                  setFormState((prev) => ({ ...prev, updateType: value }))
                 }
                 value={updateType}
               >
@@ -522,7 +517,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
             {updateType === 'instrument' && (
               <InstrumentUpdateForm
                 formState={formState}
-                dispatch={dispatch}
+                setFormState={setFormState}
                 availablePrograms={availablePrograms}
                 existingInstruments={existingInstruments}
               />
@@ -531,7 +526,7 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
             {updateType === 'student' && (
               <StudentUpdateForm
                 formState={formState}
-                dispatch={dispatch}
+                setFormState={setFormState}
                 availablePrograms={availablePrograms}
                 programStudentCounts={programStudentCounts}
               />

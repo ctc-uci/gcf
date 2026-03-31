@@ -34,7 +34,7 @@ import { ProgramSelector } from './ProgramSelector';
 
 export const InstrumentUpdateForm = ({
   formState,
-  dispatch,
+  setFormState,
   availablePrograms,
   existingInstruments,
 }) => {
@@ -51,9 +51,6 @@ export const InstrumentUpdateForm = ({
     date,
   } = formState;
 
-  const set = (field) => (value) =>
-    dispatch({ type: 'SET_FIELD', field, value });
-
   return (
     <VStack
       spacing={6}
@@ -62,7 +59,9 @@ export const InstrumentUpdateForm = ({
       <ProgramSelector
         availablePrograms={availablePrograms}
         programId={programId}
-        onChange={set('programId')}
+        onChange={(value) =>
+          setFormState((prev) => ({ ...prev, programId: value }))
+        }
       />
 
       <FormControl>
@@ -102,46 +101,33 @@ export const InstrumentUpdateForm = ({
         <InstrumentSearchInput
           instruments={existingInstruments}
           value={searchQuery}
-          onChange={(val) => {
-            set('searchQuery')(val);
-            if (val) {
-              dispatch({
-                type: 'SET_FIELD',
-                field: 'selectedInstrument',
-                value: '',
-              });
-              dispatch({
-                type: 'SET_FIELD',
-                field: 'newInstrumentName',
-                value: '',
-              });
+          onChange={(searchValue) => {
+            if (searchValue) {
+              setFormState((prev) => ({
+                ...prev,
+                searchQuery: searchValue,
+                selectedInstrument: '',
+                newInstrumentName: '',
+              }));
+            } else {
+              setFormState((prev) => ({ ...prev, searchQuery: searchValue }));
             }
           }}
-          onSelectExisting={(inst) => {
-            dispatch({
-              type: 'SET_FIELD',
-              field: 'selectedInstrument',
-              value: inst.name,
-            });
-            dispatch({
-              type: 'SET_FIELD',
-              field: 'newInstrumentName',
-              value: '',
-            });
-            dispatch({ type: 'SET_FIELD', field: 'searchQuery', value: '' });
+          onSelectExisting={(instrument) => {
+            setFormState((prev) => ({
+              ...prev,
+              selectedInstrument: instrument.name,
+              newInstrumentName: '',
+              searchQuery: '',
+            }));
           }}
           onCreateNew={(name) => {
-            dispatch({
-              type: 'SET_FIELD',
-              field: 'newInstrumentName',
-              value: name.trim(),
-            });
-            dispatch({
-              type: 'SET_FIELD',
-              field: 'selectedInstrument',
-              value: '',
-            });
-            dispatch({ type: 'SET_FIELD', field: 'searchQuery', value: '' });
+            setFormState((prev) => ({
+              ...prev,
+              newInstrumentName: name.trim(),
+              selectedInstrument: '',
+              searchQuery: '',
+            }));
           }}
           placeholder="Search instrument"
         />
@@ -164,7 +150,9 @@ export const InstrumentUpdateForm = ({
           What happened to this instrument?
         </Text>
         <RadioGroup
-          onChange={set('instrumentEvent')}
+          onChange={(value) =>
+            setFormState((prev) => ({ ...prev, instrumentEvent: value }))
+          }
           value={instrumentEvent}
         >
           <Stack spacing={3}>
@@ -228,7 +216,12 @@ export const InstrumentUpdateForm = ({
           <Textarea
             mt={3}
             value={otherEventDescription}
-            onChange={(e) => set('otherEventDescription')(e.target.value)}
+            onChange={(e) =>
+              setFormState((prev) => ({
+                ...prev,
+                otherEventDescription: e.target.value,
+              }))
+            }
             placeholder="Describe what happened…"
             borderColor="gray.100"
           />
@@ -272,8 +265,10 @@ export const InstrumentUpdateForm = ({
         <NumberInput
           step={1}
           min={0}
-          value={quantity || ''}
-          onChange={(valueString) => set('quantity')(Number(valueString))}
+          value={quantity ?? ''}
+          onChange={(valueString) =>
+            setFormState((prev) => ({ ...prev, quantity: Number(valueString) }))
+          }
         >
           <NumberInputField
             borderColor="gray.100"
@@ -336,7 +331,12 @@ export const InstrumentUpdateForm = ({
         </HStack>
         <Radio
           isChecked={requiresAdminApproval}
-          onChange={() => set('requiresAdminApproval')(!requiresAdminApproval)}
+          onChange={() =>
+            setFormState((prev) => ({
+              ...prev,
+              requiresAdminApproval: !prev.requiresAdminApproval,
+            }))
+          }
           colorScheme="teal"
         >
           Yes, this is a special request.
@@ -358,7 +358,12 @@ export const InstrumentUpdateForm = ({
             </Text>
             <Textarea
               value={adminApprovalDetails}
-              onChange={(e) => set('adminApprovalDetails')(e.target.value)}
+              onChange={(e) =>
+                setFormState((prev) => ({
+                  ...prev,
+                  adminApprovalDetails: e.target.value,
+                }))
+              }
               placeholder="Example: replacement instruments or urgent repair"
               w="full"
               h="93px"
@@ -402,7 +407,9 @@ export const InstrumentUpdateForm = ({
           <Input
             type="date"
             value={date}
-            onChange={(e) => set('date')(e.target.value)}
+            onChange={(e) =>
+              setFormState((prev) => ({ ...prev, date: e.target.value }))
+            }
             borderColor="gray.100"
           />
         </FormControl>
