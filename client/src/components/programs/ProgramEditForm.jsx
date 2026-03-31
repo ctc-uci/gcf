@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import {
+  Box,
   Button,
   Card,
   CardBody,
@@ -17,7 +18,6 @@ import {
   NumberInputField,
   NumberInputStepper,
   Select,
-  Spacer,
   Tag,
   TagCloseButton,
   TagLabel,
@@ -25,13 +25,13 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { PartnerOrganizationField } from '@/components/partners/PartnerOrganizationField';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
 export const ProgramUpdateEditForm = ({ programUpdateId }) => {
   const { backend } = useBackendContext();
 
   const [isAddingInstrument, setIsAddingInstrument] = useState(false);
-  const [isAddingLanguage, setIsAddingLanguage] = useState(false);
   const [isAddingRegionalDirector, setIsAddingRegionalDirector] =
     useState(false);
   const [instruments, setInstruments] = useState([]);
@@ -46,9 +46,15 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
   const [enrollmentNumber, setEnrollmentNumber] = useState(null);
   const [graduatedNumber, setGraduatedNumber] = useState(null);
   const [newInstruments, setNewInstruments] = useState([]);
-  const [existingInstruments, setExistingInstruments] = useState([]);
-  const [title, setTitle] = useState('');
-  const [date, setDate] = useState('');
+
+  /**
+   * Legacy / unused state from earlier iterations.
+   * Keeping these commented out for easy revert, per request.
+   */
+  // const [isAddingLanguage, setIsAddingLanguage] = useState(false);
+  // const [existingInstruments, setExistingInstruments] = useState([]);
+  // const [title, setTitle] = useState('');
+  // const [date, setDate] = useState('');
 
   const [form, setForm] = useState({
     id: '',
@@ -174,7 +180,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
       setInstruments(instrumentResponse);
     };
     program_data();
-  }, [programUpdateId]);
+  }, [programUpdateId, backend]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -266,10 +272,14 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         //playlist_link: form.playlist_link,
       };
 
-      const programUpdateData = {
-        title: form.title,
-        updateDate: new Date().toISOString().slice(0, 10),
-      };
+      /**
+       * Legacy / unused payload from earlier iterations.
+       * Keeping commented out for easy revert, per request.
+       */
+      // const programUpdateData = {
+      //   title: form.title,
+      //   updateDate: new Date().toISOString().slice(0, 10),
+      // };
 
       console.log('New instruments to add:', newInstruments);
       try {
@@ -288,7 +298,8 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
 
       const instrumentsRes = await backend.get('/instruments');
       const instrumentsData = instrumentsRes.data;
-      setExistingInstruments(instrumentsData);
+      // Legacy: previously stored this in state; not needed for current flow
+      // setExistingInstruments(instrumentsData);
 
       if (Object.keys(addedInstruments).length > 0) {
         const instrumentChanges = Object.entries(addedInstruments).map(
@@ -325,15 +336,18 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
       }
       await backend.put(`/program/${form.id}`, programData);
 
-      const instrumentNameToId = new Map(
-        instruments.map((i) => [i.name, i.id])
-      );
-
-      const rows = Object.entries(addedInstruments).map(([name, qty]) => ({
-        instrumentId: instrumentNameToId.get(name),
-        updateId: programUpdateId,
-        amountChanged: qty,
-      }));
+      /**
+       * Legacy / unused mapping from earlier iterations.
+       * Keeping commented out for easy revert, per request.
+       */
+      // const instrumentNameToId = new Map(
+      //   instruments.map((i) => [i.name, i.id])
+      // );
+      // const rows = Object.entries(addedInstruments).map(([name, qty]) => ({
+      //   instrumentId: instrumentNameToId.get(name),
+      //   updateId: programUpdateId,
+      //   amountChanged: qty,
+      // }));
 
       if (enrollmentNumber !== null && graduatedNumber !== null) {
         console.log('Sending enrollment change:', {
@@ -354,47 +368,107 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         console.log('Enrollment change saved');
       }
 
-      const addInstrument = async () => {
-        const name = newInstrumentName.trim();
-
-        try {
-          await backend.post('/instruments', { name });
-
-          const instrumentsData = (await backend.get('/instruments')).data;
-          setInstruments(instrumentsData);
-
-          setNewInstrumentName('');
-          return name;
-        } catch (error) {
-          const status = error?.response?.status;
-          throw new Error(
-            `Instrument request failed: ${status ?? 'network/unknown'}`
-          );
-        }
-      };
+      /**
+       * Legacy / unused helper from earlier iterations.
+       * Keeping commented out for easy revert, per request.
+       */
+      // const addInstrument = async () => {
+      //   const name = newInstrumentName.trim();
+      //
+      //   try {
+      //     await backend.post('/instruments', { name });
+      //
+      //     const instrumentsData = (await backend.get('/instruments')).data;
+      //     setInstruments(instrumentsData);
+      //
+      //     setNewInstrumentName('');
+      //     return name;
+      //   } catch (error) {
+      //     const status = error?.response?.status;
+      //     throw new Error(
+      //       `Instrument request failed: ${status ?? 'network/unknown'}`
+      //     );
+      //   }
+      // };
     } catch (err) {
       console.error('Save failed:', err);
     }
   };
+
+  /**
+   * Legacy JSX (pre hi-fi grouping) kept for easy revert.
+   * NOTE: This is intentionally commented out per request.
+   */
+  // const legacyRender = (
+  //   <VStack p={8} width="35%" borderWidth="1px" borderColor="lightblue">
+  //     <Heading size="md" textAlign="center">
+  //       Program
+  //     </Heading>
+  //     <Divider w="110%" mb={4}></Divider>
+  //     {programUpdateId && (
+  //       <>
+  //         <Card bg="gray.100">
+  //           <CardHeader pt={6} pb={0}>
+  //             <Heading size="sm">Update Notes</Heading>
+  //           </CardHeader>
+  //           <CardBody py={1}>
+  //             <Text placeholder="None">{form.note}</Text>
+  //           </CardBody>
+  //         </Card>
+  //         <FormControl isRequired>
+  //           <FormLabel fontWeight="normal" color="gray">
+  //             Title
+  //           </FormLabel>
+  //           <Input
+  //             name="title"
+  //             type="text"
+  //             placeholder="Enter Title Here"
+  //             bg="gray.100"
+  //             value={form.title}
+  //             onChange={handleChange}
+  //           />
+  //         </FormControl>
+  //       </>
+  //     )}
+  //     {/* ... remainder omitted ... */}
+  //   </VStack>
+  // );
   return (
-    <VStack p={8} width="35%" borderWidth="1px" borderColor="lightblue">
-      <Heading size="md" textAlign="center">
+    <VStack
+      p={8}
+      width="35%"
+      borderWidth="1px"
+      borderColor="lightblue"
+      align="stretch"
+      spacing={6}
+    >
+      <Heading
+        size="md"
+        textAlign="center"
+      >
         Program
       </Heading>
-      <Divider w="110%" mb={4}></Divider>
+      <Divider />
+
       {programUpdateId && (
         <>
-          <Card bg="gray.100">
-            <CardHeader pt={6} pb={0}>
+          <Card bg="gray.50">
+            <CardHeader
+              pt={4}
+              pb={2}
+            >
               <Heading size="sm">Update Notes</Heading>
             </CardHeader>
-            <CardBody py={1}>
+            <CardBody py={2}>
               <Text placeholder="None">{form.note}</Text>
             </CardBody>
           </Card>
           <FormControl isRequired>
-            <FormLabel fontWeight="normal" color="gray">
-              Title
+            <FormLabel
+              fontWeight="normal"
+              color="gray"
+            >
+              Update Title
             </FormLabel>
             <Input
               name="title"
@@ -405,207 +479,350 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
               onChange={handleChange}
             />
           </FormControl>
+          <Divider />
         </>
       )}
-      <FormControl isRequired>
-        <FormLabel size="sm">Program Name</FormLabel>
-        <Input
-          name="program_name"
-          placeholder="Program Name"
-          value={form.program_name}
-          onChange={handleChange}
-        />
-      </FormControl>
-      <FormControl isRequired>
-        <FormLabel>Status</FormLabel>
-        <Select
-          name="program_status"
-          value={form.program_status}
-          onChange={handleChange}
-          placeholder="Select Status"
+
+      {/* General Information */}
+      <Box>
+        <Heading
+          size="sm"
+          mb={2}
         >
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-        </Select>
-      </FormControl>
-      <FormControl isRequired>
-        <FormLabel>Launch Date</FormLabel>
-        <Input
-          name="launch_date"
-          type="date"
-          placeholder="Select Date"
-          value={form.launch_date}
-          onChange={handleChange}
-        />
-      </FormControl>
-      <FormControl isRequired>
-        <FormLabel>Location</FormLabel>
-        <Select
-          name="country"
-          placeholder="Select Location"
-          onChange={handleChange}
-          value={form.country}
+          General Information
+        </Heading>
+        <VStack
+          align="stretch"
+          spacing={3}
         >
-          {countries.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl>
-        <FormLabel fontWeight="normal" color="gray">
-          # Students currently enrolled
-        </FormLabel>
-        <NumberInput
-          width="30%"
-          value={enrollmentNumber ?? ''}
-          onChange={(value) =>
-            setEnrollmentNumber(value ? parseInt(value) : null)
-          }
-        >
-          <NumberInputField bg="gray.100"></NumberInputField>
-        </NumberInput>
-      </FormControl>
-      <FormControl>
-        <FormLabel fontWeight="normal" color="gray">
-          # Students graduated
-        </FormLabel>
-        <NumberInput
-          width="30%"
-          value={graduatedNumber ?? ''}
-          onChange={(value) =>
-            setGraduatedNumber(value ? parseInt(value) : null)
-          }
-        >
-          <NumberInputField bg="gray.100"></NumberInputField>
-        </NumberInput>
-      </FormControl>
-      <FormControl>
-        <FormLabel>Instruments & Quantity</FormLabel>
-        {!isAddingInstrument && (
-          <Button onClick={() => setIsAddingInstrument(true)}>+ Add</Button>
-        )}
-        {isAddingInstrument && (
-          <HStack>
+          <FormControl isRequired>
+            <FormLabel size="sm">Program Name</FormLabel>
+            <Input
+              name="program_name"
+              placeholder="Enter Program Title"
+              value={form.program_name}
+              onChange={handleChange}
+            />
+          </FormControl>
+
+          <PartnerOrganizationField
+            valueId={form.partner_org}
+            onChangeId={(id) =>
+              setForm((prev) => ({
+                ...prev,
+                partner_org: String(id),
+              }))
+            }
+          />
+
+          <FormControl isRequired>
+            <FormLabel size="sm">Status</FormLabel>
             <Select
-              name="instrument"
-              placeholder="Select Instrument"
-              onChange={(e) => {
-                setSelectedInstrument(e.target.value);
-                setNewInstrumentName('');
-              }}
-              value={selectedInstrument}
+              name="program_status"
+              value={form.program_status}
+              onChange={handleChange}
+              placeholder="Select Status"
             >
-              {instruments.map((instrument) => (
-                <option key={instrument.id} value={instrument.name}>
-                  {instrument.name}
+              <option value="Active">Launched</option>
+              <option value="Inactive">Developing</option>
+            </Select>
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel size="sm">Launch Date</FormLabel>
+            <Input
+              name="launch_date"
+              type="date"
+              placeholder="MM/DD/YYYY"
+              value={form.launch_date}
+              onChange={handleChange}
+            />
+          </FormControl>
+        </VStack>
+      </Box>
+
+      {/* Location & Language */}
+      <Box>
+        <Heading
+          size="sm"
+          mb={2}
+        >
+          Location &amp; Language
+        </Heading>
+        <VStack
+          align="stretch"
+          spacing={3}
+        >
+          <FormControl isRequired>
+            <FormLabel size="sm">Location</FormLabel>
+            <Select
+              name="country"
+              placeholder="Select Country"
+              onChange={handleChange}
+              value={form.country}
+            >
+              {countries.map((c) => (
+                <option
+                  key={c.id}
+                  value={c.id}
+                >
+                  {c.name}
                 </option>
               ))}
             </Select>
+          </FormControl>
+
+          <FormControl>
+            <FormLabel size="sm">Primary Language</FormLabel>
             <Input
-              placeholder="Or type a new instrument"
-              value={newInstrumentName}
-              onChange={(e) => {
-                setNewInstrumentName(e.target.value);
-                setSelectedInstrument('');
-              }}
+              name="primary_language"
+              placeholder="Enter Language"
+              value={form.primary_language}
+              onChange={handleChange}
             />
-            <NumberInput
-              value={quantity}
-              min={0}
-              onChange={(_, valueAsNumber) => {
-                setQuantity(valueAsNumber || 0);
-              }}
+          </FormControl>
+        </VStack>
+      </Box>
+
+      {/* Students & Instruments */}
+      <Box>
+        <Heading
+          size="sm"
+          mb={2}
+        >
+          Students &amp; Instruments
+        </Heading>
+        <VStack
+          align="stretch"
+          spacing={3}
+        >
+          <FormControl>
+            <FormLabel
+              fontWeight="normal"
+              color="gray"
             >
-              <NumberInputField />
+              Current Students
+            </FormLabel>
+            <NumberInput
+              width="50%"
+              value={enrollmentNumber ?? ''}
+              onChange={(value) =>
+                setEnrollmentNumber(value ? parseInt(value) : null)
+              }
+            >
+              <NumberInputField bg="gray.100" />
               <NumberInputStepper>
                 <NumberIncrementStepper />
                 <NumberDecrementStepper />
               </NumberInputStepper>
             </NumberInput>
-            <Button
-              onClick={() => {
-                handleAddInstrumentAndQuantity();
-                setIsAddingInstrument(false);
-              }}
+          </FormControl>
+
+          <FormControl>
+            <FormLabel
+              fontWeight="normal"
+              color="gray"
             >
-              + Add
-            </Button>
-          </HStack>
-        )}
-      </FormControl>
-      {Object.keys(addedInstruments).length > 0 && (
-        <HStack width="100%" flexWrap="wrap" spacing={2}>
-          {Object.entries(addedInstruments).map(([name, quantity]) => (
-            <Tag key={name} size="lg" bg="gray.200">
-              <TagLabel>
-                {name} - {quantity}
-              </TagLabel>
-              <TagCloseButton onClick={() => removeInstrument(name)} />
-            </Tag>
-          ))}
-        </HStack>
-      )}
-      <FormControl>
-        <FormLabel>Primary Language</FormLabel>
-        <HStack>
-          <Input
-            name="primary_language"
-            placeholder="Language"
-            value={form.primary_language}
-            onChange={handleChange}
-          />
-        </HStack>
-      </FormControl>
-      <FormControl>
-        <FormLabel>Regional Director(s)</FormLabel>
-        {!isAddingRegionalDirector && (
-          <Button onClick={() => setIsAddingRegionalDirector(true)}>
-            + Add
-          </Button>
-        )}
-        {isAddingRegionalDirector && (
-          <HStack>
-            <Select
-              name="regional_director"
-              placeholder="Select Regional Director(s)"
-              onChange={(e) => setSelectedRegionalDirector(e.target.value)}
-              value={selectedRegionalDirector}
+              Graduated Students
+            </FormLabel>
+            <NumberInput
+              width="50%"
+              value={graduatedNumber ?? ''}
+              onChange={(value) =>
+                setGraduatedNumber(value ? parseInt(value) : null)
+              }
             >
-              {regionalDirectors.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.firstName} {user.lastName}
-                </option>
+              <NumberInputField bg="gray.100" />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>Instrument(s) &amp; Quantity</FormLabel>
+            {!isAddingInstrument && (
+              <Button
+                size="sm"
+                onClick={() => setIsAddingInstrument(true)}
+              >
+                + Add
+              </Button>
+            )}
+            {isAddingInstrument && (
+              <HStack
+                align="flex-end"
+                spacing={3}
+              >
+                <Select
+                  name="instrument"
+                  placeholder="Select Instrument"
+                  onChange={(e) => {
+                    setSelectedInstrument(e.target.value);
+                    setNewInstrumentName('');
+                  }}
+                  value={selectedInstrument}
+                >
+                  {instruments.map((instrument) => (
+                    <option
+                      key={instrument.id}
+                      value={instrument.name}
+                    >
+                      {instrument.name}
+                    </option>
+                  ))}
+                </Select>
+                <Input
+                  placeholder="Or type a new instrument"
+                  value={newInstrumentName}
+                  onChange={(e) => {
+                    setNewInstrumentName(e.target.value);
+                    setSelectedInstrument('');
+                  }}
+                />
+                <NumberInput
+                  value={quantity}
+                  min={0}
+                  onChange={(_, valueAsNumber) => {
+                    setQuantity(valueAsNumber || 0);
+                  }}
+                >
+                  <NumberInputField />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    handleAddInstrumentAndQuantity();
+                    setIsAddingInstrument(false);
+                  }}
+                >
+                  + Add
+                </Button>
+              </HStack>
+            )}
+          </FormControl>
+
+          {Object.keys(addedInstruments).length > 0 && (
+            <HStack
+              width="100%"
+              flexWrap="wrap"
+              spacing={2}
+            >
+              {Object.entries(addedInstruments).map(([name, quantity]) => (
+                <Tag
+                  key={name}
+                  size="lg"
+                  bg="gray.200"
+                >
+                  <TagLabel>
+                    {name} - {quantity}
+                  </TagLabel>
+                  <TagCloseButton onClick={() => removeInstrument(name)} />
+                </Tag>
               ))}
-            </Select>
-            <Button
-              onClick={() => {
-                handleAddRegionalDirector();
-                setIsAddingRegionalDirector(false);
-              }}
+            </HStack>
+          )}
+        </VStack>
+      </Box>
+
+      {/* Assigned Directors */}
+      <Box>
+        <Heading
+          size="sm"
+          mb={2}
+        >
+          Assigned Directors
+        </Heading>
+        <VStack
+          align="stretch"
+          spacing={3}
+        >
+          <FormControl>
+            <FormLabel>Regional Director(s)</FormLabel>
+            {!isAddingRegionalDirector && (
+              <Button
+                size="sm"
+                onClick={() => setIsAddingRegionalDirector(true)}
+              >
+                + Add
+              </Button>
+            )}
+            {isAddingRegionalDirector && (
+              <HStack>
+                <Select
+                  name="regional_director"
+                  placeholder="Select Regional Director(s)"
+                  onChange={(e) => setSelectedRegionalDirector(e.target.value)}
+                  value={selectedRegionalDirector}
+                >
+                  {regionalDirectors.map((user) => (
+                    <option
+                      key={user.id}
+                      value={user.id}
+                    >
+                      {user.firstName} {user.lastName}
+                    </option>
+                  ))}
+                </Select>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    handleAddRegionalDirector();
+                    setIsAddingRegionalDirector(false);
+                  }}
+                >
+                  + Add
+                </Button>
+              </HStack>
+            )}
+          </FormControl>
+
+          {Object.keys(regionalDirectors).length > 0 && (
+            <HStack
+              width="100%"
+              flexWrap="wrap"
+              spacing={2}
             >
-              + Add
-            </Button>
-          </HStack>
-        )}
-      </FormControl>
-      {Object.keys(regionalDirectors).length > 0 && (
-        <HStack width="100%" flexWrap="wrap" spacing={2}>
-          {Object.entries(addedRegionalDirectors).map(([id, name]) => (
-            <Tag key={id} size="lg" bg="gray.200">
-              <TagLabel>{name}</TagLabel>
-              <TagCloseButton onClick={() => removeRegionalDirector(id)} />
-            </Tag>
-          ))}
+              {Object.entries(addedRegionalDirectors).map(([id, name]) => (
+                <Tag
+                  key={id}
+                  size="lg"
+                  bg="gray.200"
+                >
+                  <TagLabel>{name}</TagLabel>
+                  <TagCloseButton onClick={() => removeRegionalDirector(id)} />
+                </Tag>
+              ))}
+            </HStack>
+          )}
+        </VStack>
+      </Box>
+
+      <Divider />
+      <HStack
+        w="100%"
+        justify="space-between"
+      >
+        <Button
+          variant="ghost"
+          colorScheme="red"
+        >
+          Delete
+        </Button>
+        <HStack spacing={3}>
+          <Button variant="ghost">Cancel</Button>
+          <Button
+            colorScheme="teal"
+            onClick={handleSubmit}
+          >
+            Save Changes
+          </Button>
         </HStack>
-      )}
-      <Divider w="110%"></Divider>
-      <HStack w="100%">
-        <Button>Delete</Button>
-        <Spacer />
-        <Button>Cancel</Button>
-        <Button onClick={handleSubmit}>Save Changes</Button>
       </HStack>
     </VStack>
   );

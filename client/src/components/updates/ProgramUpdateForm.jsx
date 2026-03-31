@@ -27,7 +27,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
-import { InstrumentSearchInput } from '@/components/common/InstrumentSearchInput';
+import { SearchInput } from '@/components/common/SearchInput';
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
@@ -655,8 +655,8 @@ export const ProgramUpdateForm = ({
                   flex="1"
                   minW="12rem"
                 >
-                  <InstrumentSearchInput
-                    instruments={existingInstruments}
+                  <SearchInput
+                    items={existingInstruments}
                     value={searchQuery}
                     onChange={(val) => {
                       setSearchQuery(val);

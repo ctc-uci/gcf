@@ -10,8 +10,8 @@ import {
   useOutsideClick,
 } from '@chakra-ui/react';
 
-export function InstrumentSearchInput({
-  instruments = [],
+export function SearchInput({
+  items = [],
   value,
   onChange,
   onSelectExisting,
@@ -28,11 +28,11 @@ export function InstrumentSearchInput({
 
   const searchLower = (value || '').trim().toLowerCase();
   const filtered = searchLower
-    ? instruments.filter((inst) =>
+    ? items.filter((inst) =>
         (inst.name || '').toLowerCase().includes(searchLower)
       )
-    : instruments;
-  const exactMatch = instruments.some(
+    : items;
+  const exactMatch = items.some(
     (inst) => (inst.name || '').toLowerCase() === searchLower
   );
   const canAddNew = searchLower.length > 0 && !exactMatch;
@@ -87,16 +87,16 @@ export function InstrumentSearchInput({
             spacing={0}
             py={1}
           >
-            {filtered.map((instrument) => (
+            {filtered.map((item) => (
               <ListItem
-                key={instrument.id}
+                key={item.id}
                 px={3}
                 py={2}
                 cursor="pointer"
                 _hover={{ bg: 'gray.100' }}
-                onClick={() => handleSelectExisting(instrument)}
+                onClick={() => handleSelectExisting(item)}
               >
-                {instrument.name}
+                {item.name}
               </ListItem>
             ))}
             {canAddNew && (

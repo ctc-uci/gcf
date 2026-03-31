@@ -12,7 +12,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 
-import { InstrumentSearchInput } from '@/components/common/InstrumentSearchInput';
+import { SearchInput } from '@/components/common/SearchInput';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
 export function InstrumentForm({ setFormData }) {
@@ -95,8 +95,8 @@ export function InstrumentForm({ setFormData }) {
         flex="1"
         minW="12rem"
       >
-        <InstrumentSearchInput
-          instruments={instruments}
+        <SearchInput
+          items={instruments}
           value={searchQuery}
           onChange={(val) => {
             setSearchQuery(val);
