@@ -20,15 +20,11 @@ import {
 } from '@chakra-ui/react';
 
 import { InstrumentSearchInput } from '@/components/common/InstrumentSearchInput';
-import {
-  BsCalendarDate,
-  BsMusicNoteBeamed,
-  BsMusicNoteList,
-  BsPlusLg,
-} from 'react-icons/bs';
-import { FaStar, FaTools } from 'react-icons/fa';
-import { IoMdClose, IoMdPhotos } from 'react-icons/io';
-import { MdOutlineQuestionMark } from 'react-icons/md';
+import { BsCalendarDate, BsMusicNoteList, BsPlusLg } from 'react-icons/bs';
+import { FaStar } from 'react-icons/fa';
+import { FaScrewdriverWrench } from 'react-icons/fa6';
+import { IoIosMusicalNotes, IoMdClose, IoMdPhotos } from 'react-icons/io';
+import { MdQuestionMark } from 'react-icons/md';
 
 import { ProgramSelector } from './ProgramSelector';
 
@@ -71,7 +67,7 @@ export const InstrumentUpdateForm = ({
             mb={1}
           >
             <Icon
-              as={BsMusicNoteBeamed}
+              as={IoIosMusicalNotes}
               color="black"
               boxSize={5}
             />
@@ -174,7 +170,7 @@ export const InstrumentUpdateForm = ({
             >
               <HStack spacing={2}>
                 <Icon
-                  as={MdOutlineQuestionMark}
+                  as={MdQuestionMark}
                   color="black"
                 />
                 <Text>Missing</Text>
@@ -198,7 +194,7 @@ export const InstrumentUpdateForm = ({
             >
               <HStack spacing={2}>
                 <Icon
-                  as={FaTools}
+                  as={FaScrewdriverWrench}
                   color="black"
                 />
                 <Text>Needs repair</Text>
@@ -235,7 +231,7 @@ export const InstrumentUpdateForm = ({
             mb={1}
           >
             <Icon
-              as={BsMusicNoteBeamed}
+              as={IoIosMusicalNotes}
               color="black"
               boxSize={5}
             />

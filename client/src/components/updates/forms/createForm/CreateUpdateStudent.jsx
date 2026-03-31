@@ -1,8 +1,5 @@
 import {
   Box,
-  Button,
-  Checkbox,
-  CloseButton,
   Heading,
   HStack,
   Icon,
@@ -11,25 +8,96 @@ import {
   NumberInput,
   NumberInputField,
   NumberInputStepper,
+  Radio,
+  RadioGroup,
   Text,
   Textarea,
+  VStack,
 } from '@chakra-ui/react';
 
-import { FiCamera, FiEdit3, FiStar, FiUsers } from 'react-icons/fi';
+import { BsPencilSquare } from 'react-icons/bs';
+import { FaTrophy, FaUserTimes } from 'react-icons/fa';
+import { FiUserPlus, FiUsers } from 'react-icons/fi';
 
 export default function CreateUpdateStudent({
   studentCount,
   setStudentCount,
-  uploadedMedia,
-  removeMedia,
-  onOpenMediaUpload,
-  needsAdminHelp,
-  setNeedsAdminHelp,
+  whatHappened,
+  setWhatHappened,
+  programEnrollmentCount,
   notes,
   setNotes,
 }) {
   return (
     <>
+      <Box>
+        <Heading
+          size="sm"
+          fontWeight="600"
+          mb={3}
+        >
+          What happened to the students?{' '}
+          <Text
+            as="span"
+            color="red.500"
+          >
+            *
+          </Text>
+        </Heading>
+        <RadioGroup
+          value={whatHappened}
+          onChange={setWhatHappened}
+        >
+          <VStack
+            align="start"
+            spacing={2}
+          >
+            <Radio
+              value="new_students_joined"
+              colorScheme="teal"
+            >
+              <HStack spacing={2}>
+                <Icon
+                  as={FiUserPlus}
+                  boxSize={4}
+                />
+                <Text>New students joined</Text>
+              </HStack>
+            </Radio>
+            <Radio
+              value="graduated"
+              colorScheme="teal"
+            >
+              <HStack spacing={2}>
+                <Icon
+                  as={FaTrophy}
+                  boxSize={4}
+                />
+                <Text>Graduated</Text>
+              </HStack>
+            </Radio>
+            <Radio
+              value="quit"
+              colorScheme="teal"
+            >
+              <HStack spacing={2}>
+                <Icon
+                  as={FaUserTimes}
+                  boxSize={4}
+                />
+                <Text>Quit</Text>
+              </HStack>
+            </Radio>
+            <Radio
+              value="other"
+              colorScheme="teal"
+            >
+              <Text>Other (please explain in note below)</Text>
+            </Radio>
+          </VStack>
+        </RadioGroup>
+      </Box>
+
       <Box>
         <HStack
           spacing={2}
@@ -43,7 +111,7 @@ export default function CreateUpdateStudent({
             size="sm"
             fontWeight="600"
           >
-            How many students are currently enrolled?
+            How many students are affected?
           </Heading>
         </HStack>
         <Text
@@ -63,90 +131,28 @@ export default function CreateUpdateStudent({
         <NumberInput
           min={0}
           value={studentCount}
-          onChange={(v) => setStudentCount(v)}
+          onChange={(v) => setStudentCount(parseInt(v, 10) || 0)}
         >
-          <NumberInputField />
+          <NumberInputField placeholder="0" />
           <NumberInputStepper>
             <NumberIncrementStepper />
             <NumberDecrementStepper />
           </NumberInputStepper>
         </NumberInput>
-      </Box>
-
-      <Box>
-        <HStack
-          spacing={2}
-          mb={1}
-        >
-          <Icon
-            as={FiCamera}
-            boxSize={4}
-          />
-          <Heading
-            size="sm"
-            fontWeight="600"
-          >
-            Do you want to add photos or videos?
-          </Heading>
-        </HStack>
         <Text
           color="teal.500"
           fontSize="sm"
-          mb={2}
+          fontWeight="500"
+          mt={2}
         >
-          Optional for documentation
-        </Text>
-        {uploadedMedia.length > 0 && (
-          <HStack
-            spacing={2}
-            wrap="wrap"
-            mb={2}
+          Total current students:{' '}
+          <Text
+            as="span"
+            fontWeight="bold"
           >
-            {uploadedMedia.map((media, idx) => (
-              <Box
-                key={idx}
-                position="relative"
-              >
-                <Box
-                  boxSize="80px"
-                  bg="gray.100"
-                  borderRadius="md"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Text
-                    fontSize="xs"
-                    textAlign="center"
-                    px={1}
-                  >
-                    {media.file_name}
-                  </Text>
-                </Box>
-                <CloseButton
-                  size="sm"
-                  position="absolute"
-                  top={-1}
-                  right={-1}
-                  bg="red.500"
-                  color="white"
-                  borderRadius="full"
-                  _hover={{ bg: 'red.600' }}
-                  onClick={() => removeMedia(idx)}
-                />
-              </Box>
-            ))}
-          </HStack>
-        )}
-        <Button
-          variant="outline"
-          borderColor="teal.500"
-          color="teal.500"
-          size="sm"
-          onClick={onOpenMediaUpload}
-        >
-          + Upload Media
-        </Button>
+            {programEnrollmentCount}
+          </Text>
+        </Text>
       </Box>
 
       <Box>
@@ -155,7 +161,7 @@ export default function CreateUpdateStudent({
           mb={1}
         >
           <Icon
-            as={FiEdit3}
+            as={BsPencilSquare}
             boxSize={4}
           />
           <Heading

@@ -21,13 +21,9 @@ import {
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import {
-  FiMaximize2,
-  FiMinimize2,
-  FiMusic,
-  FiTrash2,
-  FiUser,
-} from 'react-icons/fi';
+import { FaUser } from 'react-icons/fa6';
+import { FiMaximize2, FiMinimize2, FiTrash2 } from 'react-icons/fi';
+import { IoMusicalNoteSharp } from 'react-icons/io5';
 
 import { MediaUploadModal } from '../../../media/MediaUploadModal';
 import CreateUpdateInstrument from './CreateUpdateInstrument';
@@ -125,10 +121,10 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
   const [instrumentCount, setInstrumentCount] = useState(0);
 
   const [studentCount, setStudentCount] = useState(0);
+  const [studentWhatHappened, setStudentWhatHappened] = useState('');
   const [programEnrollmentCount, setProgramEnrollmentCount] = useState(0);
 
   const [notes, setNotes] = useState('');
-  const [needsAdminHelp, setNeedsAdminHelp] = useState(false);
   const [uploadedMedia, setUploadedMedia] = useState([]);
 
   const [instruments, setInstruments] = useState([]);
@@ -205,7 +201,6 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
         );
         const n = Number(response.data?.students ?? 0);
         setProgramEnrollmentCount(n);
-        setStudentCount(n);
       } catch (error) {
         console.error('Error fetching program stats:', error);
       }
@@ -219,8 +214,8 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
     setWhatHappened('');
     setInstrumentCount(0);
     setStudentCount(programEnrollmentCount);
+    setStudentWhatHappened('');
     setNotes('');
-    setNeedsAdminHelp(false);
     setUploadedMedia([]);
     setIsFullScreen(false);
   };
@@ -298,11 +293,14 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
             'New / Donation': 'new_donation',
             'Needs repair': 'needs_repair',
           };
+          const instrumentEventType =
+            whatHappenedToEventType[whatHappened] ?? 'other';
           await backend.post('/instrument-changes', {
             instrumentId: instrument.id,
             updateId: newUpdateId,
             amountChanged: instrumentDelta,
-            event_type: whatHappenedToEventType[whatHappened] ?? 'other',
+            event_type: instrumentEventType,
+            description: instrumentEventType === 'other' ? notes || null : null,
           });
         }
       }
@@ -316,7 +314,8 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
             update_id: newUpdateId,
             enrollment_change: enrollmentDelta,
             graduated_change: 0,
-            event_type: 'other',
+            event_type: studentWhatHappened || 'other',
+            description: notes || null,
           });
         }
       }
@@ -434,13 +433,13 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
                   alignItems="stretch"
                 >
                   <UpdateTypeOptionCard
-                    icon={FiMusic}
+                    icon={IoMusicalNoteSharp}
                     label="Instrument Update"
                     isSelected={updateType === 'instrument'}
                     onSelect={() => setUpdateType('instrument')}
                   />
                   <UpdateTypeOptionCard
-                    icon={FiUser}
+                    icon={FaUser}
                     label="Student Update"
                     isSelected={updateType === 'student'}
                     onSelect={() => setUpdateType('student')}
@@ -463,21 +462,16 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
                   uploadedMedia={uploadedMedia}
                   removeMedia={removeMedia}
                   mediaUploadDisclosure={mediaUploadDisclosure}
-                  needsAdminHelp={needsAdminHelp}
-                  setNeedsAdminHelp={setNeedsAdminHelp}
                   notes={notes}
                   setNotes={setNotes}
                 />
               ) : (
                 <CreateUpdateStudent
                   studentCount={studentCount}
-                  setStudentCount={(v) => {
-                    studentCountEditedRef.current = true;
-                    setStudentCount(v);
-                  }}
-                  uploadedMedia={uploadedMedia}
-                  removeMedia={removeMedia}
-                  onOpenMediaUpload={mediaUploadDisclosure.onOpen}
+                  setStudentCount={setStudentCount}
+                  whatHappened={studentWhatHappened}
+                  setWhatHappened={setStudentWhatHappened}
+                  programEnrollmentCount={programEnrollmentCount}
                   notes={notes}
                   setNotes={setNotes}
                 />
