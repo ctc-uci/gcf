@@ -97,11 +97,12 @@
   },
   "login": {
     "welcome": [
-      "欢迎！",
-      "卡里布！",
-      "¡别安韦尼多！",
+      "Welcome!",
+      "¡Bienvenido!",
+      "Bienvenue!",
       "欢迎!",
-      "各位好！"
+      "Karibu!",
+      "Willkommen!"
     ],
     "gcfGlobeAlt": "全球气候基金",
     "backToLogin": "返回登录",

@@ -35,4 +35,7 @@ void initI18n().then(() => {
       </CookiesProvider>
     </StrictMode>
   );
+})
+.catch((err) => {
+    console.error('Failed to initialize i18n:', err);
 });

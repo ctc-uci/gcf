@@ -220,13 +220,22 @@ export const Profile = () => {
     if (!currentUser?.uid) return;
 
     try {
-      await backend.patch(`/gcf-users/${currentUser.uid}/preferred-language`, {
-        preferredLanguage: formData.language,
-      });
+      await Promise.all([
+        backend.patch(`/gcf-users/${currentUser.uid}/preferred-language`, {
+          preferredLanguage: formData.language,
+        }),
+        backend.put(`/gcf-users/${currentUser.uid}`, {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+        }),
+      ]);
+
       await i18n.changeLanguage(formData.language);
       setGcfUser((prev) => ({
         ...prev,
         preferredLanguage: formData.language,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
       }));
 
       const now = new Date();

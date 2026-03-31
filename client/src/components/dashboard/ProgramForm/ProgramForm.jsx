@@ -163,7 +163,7 @@ export const ProgramForm = ({
               .filter((p) => p.link && p.instrumentId != null)
               .map((p) => ({
                 link: p.link,
-                name: p.name || t('programForm.playlistDefault'),
+                name: p.name || 'Playlist',
                 instrumentId: p.instrumentId ?? p.instrument_id,
                 instrumentName: p.instrumentName ?? p.instrument_name ?? '',
               }))
@@ -199,7 +199,7 @@ export const ProgramForm = ({
       );
     }
     loadProgramRegionData();
-  }, [program?.id, backend, t]);
+  }, [program, backend]);
 
   useEffect(() => {
     if (isOpen) {
@@ -296,7 +296,7 @@ export const ProgramForm = ({
         ) {
           await backend.post(`/program/${programId}/playlists`, {
             link: playlist.link,
-            name: playlist.name || t('programForm.playlistDefault'),
+            name: playlist.name || 'Playlist',
             instrumentId: playlist.instrumentId,
           });
         }

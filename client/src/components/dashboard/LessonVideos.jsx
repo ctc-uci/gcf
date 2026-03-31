@@ -160,7 +160,7 @@ function LessonVideos({
               color="gray.600"
               fontSize="sm"
             >
-              Loading lesson videos...
+              {t('lessonVideos.loading')}
             </Text>
           </Flex>
           <HStack

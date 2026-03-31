@@ -96,7 +96,14 @@
     "passwordsNoMatch": "Passwords do not match"
   },
   "login": {
-    "welcome": ["Welcome!", "Karibu!", "¡Bienvenido!", "欢迎!", "Willkommen!"],
+    "welcome": [
+      "Welcome!",
+      "¡Bienvenido!",
+      "Bienvenue!",
+      "欢迎!",
+      "Karibu!",
+      "Willkommen!"
+    ],
     "gcfGlobeAlt": "GCF Globe",
     "backToLogin": "Back to login",
     "title": "Login",

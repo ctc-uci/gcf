@@ -32,17 +32,15 @@ type SignupFormValues = {
 
 export const Signup = () => {
   const { t } = useTranslation();
-  const signupSchema = useMemo(
-    () =>
+  const signupSchema = 
       z.object({
         email: z.string().email(t('validation.invalidEmail')),
         password: z.string().min(6, t('validation.passwordMin')),
         role: z.enum(['Regional Director', 'Program Director', 'Admin'], {
           required_error: t('validation.selectRole'),
         }),
-      }),
-    [t]
-  );
+  });
+  type SignupFormValues = z.infer<typeof signupSchema>;
   const navigate = useNavigate();
   const toast = useToast();
   const { signup, handleRedirectResult } = useAuthContext();

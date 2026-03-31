@@ -131,7 +131,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     if (formData.password && formData.password !== initialFormData.password) {
       changes.push({
         label: t('accountForm.fieldPassword'),
-        old: formData.password || mask,
+        old: initialFormData.password || mask,
         new: mask,
       });
     }

@@ -98,9 +98,10 @@
   "login": {
     "welcome": [
       "Welcome!",
-      "Karibu!",
       "¡Bienvenido!",
+      "Bienvenue!",
       "欢迎!",
+      "Karibu!",
       "Willkommen!"
     ],
     "gcfGlobeAlt": "Globe GCF",
