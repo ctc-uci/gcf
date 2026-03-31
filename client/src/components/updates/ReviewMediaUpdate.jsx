@@ -18,6 +18,7 @@ import {
 
 import { useBackendContext } from '../../contexts/hooks/useBackendContext';
 import { MediaCard } from '../media/MediaCard';
+import { MediaViewer } from './MediaViewer';
 
 export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   const { backend } = useBackendContext();
@@ -26,6 +27,8 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   const [updates, setUpdates] = useState([]);
   const [mediaURLs, setMediaURLs] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(null);
+
+
 
   const handleApprove = async () => {
     if (updateId === null) return;
@@ -199,7 +202,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                   cursor="pointer"
                   onClick={() => setSelectedIndex(i)}
                 >
-                  <MediaCard
+                  <MediaCard onClick={() => setSelectedIndex(i)}
                     file_name={item.fileName}
                     file_type={item.fileType}
                     imageUrl={mediaURLs[i]}
