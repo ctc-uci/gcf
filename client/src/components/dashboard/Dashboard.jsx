@@ -29,7 +29,7 @@ const Dashboard = () => {
 
       <Box
         as="section"
-        w="fit-content"
+        w="100%"
       >
         {(role === 'Super Admin' ||
           role === 'Admin' ||

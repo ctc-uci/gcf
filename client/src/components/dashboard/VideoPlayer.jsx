@@ -23,13 +23,14 @@ import { useTranslation } from 'react-i18next';
 
 function VideoPlayer({
   playlist,
-  playlistName: playlistNameProp,
+  playlistName,
   videos,
   selectedVideo,
   onBack,
   setSelectedVideo,
 }) {
   const [isOpen, setIsOpen] = useState(true);
+  const { t } = useTranslation();
   return (
     <HStack
       align="flex-start"
