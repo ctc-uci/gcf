@@ -15,6 +15,7 @@ import {
 } from '@chakra-ui/react';
 
 import { EmptyStateBadge } from '@/components/badges/EmptyStateBadge';
+import { useTranslation } from 'react-i18next';
 import { FiDownload } from 'react-icons/fi';
 
 import { AccountUpdatesTable } from './AccountUpdatesTable';
@@ -40,6 +41,7 @@ import {
 } from './ProgramUpdatesTable';
 
 export const UpdatesPage = () => {
+  const { t } = useTranslation();
   const {
     role,
     programUpdatesData,
@@ -58,8 +60,8 @@ export const UpdatesPage = () => {
   const [tabIndex, setTabIndex] = useState(0);
 
   const handleDownload = () => {
-    if (tabIndex === 0) downloadProgramUpdatesAsCsv(programUpdatesData);
-    else if (tabIndex === 1) downloadMediaUpdatesAsCsv(mediaUpdatesData);
+    if (tabIndex === 0) downloadProgramUpdatesAsCsv(programUpdatesData, t);
+    else if (tabIndex === 1) downloadMediaUpdatesAsCsv(mediaUpdatesData, t);
   };
 
   if (isLoading) {
@@ -132,13 +134,13 @@ export const UpdatesPage = () => {
           size="lg"
           fontWeight="500"
         >
-          Updates
+          {t('updates.pageTitle')}
         </Heading>
         <IconButton
           icon={<FiDownload />}
           variant="ghost"
           size="sm"
-          aria-label="Download updates"
+          aria-label={t('updates.downloadAria')}
           color="gray.500"
           onClick={handleDownload}
         />
@@ -159,21 +161,21 @@ export const UpdatesPage = () => {
               _selected={UPDATES_TAB_SELECTED_PROPS}
               {...UPDATES_TAB_BASE_PROPS}
             >
-              Program
+              {t('updates.tabProgram')}
               <UpdatesTabCountBadge count={tabCounts.program} />
             </Tab>
             <Tab
               _selected={UPDATES_TAB_SELECTED_PROPS}
               {...UPDATES_TAB_BASE_PROPS}
             >
-              Media
+              {t('updates.tabMedia')}
               <UpdatesTabCountBadge count={tabCounts.media} />
             </Tab>
             <Tab
               _selected={UPDATES_TAB_SELECTED_PROPS}
               {...UPDATES_TAB_BASE_PROPS}
             >
-              Account
+              {t('updates.tabAccount')}
               <UpdatesTabCountBadge count={tabCounts.account} />
             </Tab>
           </TabList>

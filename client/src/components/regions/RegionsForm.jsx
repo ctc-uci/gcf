@@ -34,9 +34,11 @@ import {
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { GetCountries } from 'react-country-state-city';
+import { useTranslation } from 'react-i18next';
 import { BsArrowsAngleContract, BsArrowsAngleExpand } from 'react-icons/bs';
 
 const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
   const [regionalDirectors, setRegionalDirectors] = useState([]);
   const [countries, setCountries] = useState([]);
@@ -239,7 +241,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
               <BsArrowsAngleContract />
             )}
           </Button>
-          {region ? 'Edit Region' : 'New Region'}
+          {region ? t('regions.editRegion') : t('regions.newRegionTitle')}
         </DrawerHeader>
         <DrawerBody>
           <VStack spacing={4}>
@@ -247,10 +249,10 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
               isRequired
               isInvalid={regionNameError}
             >
-              <FormLabel>Region Name</FormLabel>
+              <FormLabel>{t('regions.regionName')}</FormLabel>
               <Input
                 type="text"
-                placeholder="Enter region name"
+                placeholder={t('regions.regionNamePlaceholder')}
                 value={regionName}
                 onChange={(e) => {
                   setRegionName(e.target.value);
@@ -258,14 +260,16 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                 }}
               />
               {regionNameError && (
-                <FormErrorMessage>Region name is required.</FormErrorMessage>
+                <FormErrorMessage>
+                  {t('regions.regionNameRequired')}
+                </FormErrorMessage>
               )}
             </FormControl>
 
             <FormControl>
-              <FormLabel>Regional Director</FormLabel>
+              <FormLabel>{t('regions.regionalDirector')}</FormLabel>
               <Select
-                placeholder="Select a director"
+                placeholder={t('regions.directorPlaceholder')}
                 value={selectedDirector}
                 onChange={(e) => setSelectedDirector(e.target.value)}
               >
@@ -281,7 +285,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
             </FormControl>
 
             <FormControl>
-              <FormLabel>Assigned Countries</FormLabel>
+              <FormLabel>{t('regions.assignedCountries')}</FormLabel>
               <Flex
                 wrap="wrap"
                 gap={2}
@@ -306,7 +310,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                   variant="outline"
                   size="sm"
                 >
-                  + Add
+                  {t('common.add')}
                 </MenuButton>
                 <MenuList
                   maxH="300px"
@@ -323,7 +327,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                     borderColor="gray.200"
                   >
                     <Input
-                      placeholder="Search countries..."
+                      placeholder={t('regions.searchCountries')}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
@@ -354,7 +358,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                   variant="ghost"
                   onClick={() => setIsDeleteDialogOpen(true)}
                 >
-                  Delete
+                  {t('common.delete')}
                 </Button>
               )}
               <Flex gap={2}>
@@ -362,7 +366,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                   variant="outline"
                   onClick={() => setIsCancelDialogOpen(true)}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   colorScheme="teal"
@@ -371,7 +375,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                     try {
                       await saveRegion();
                       toast({
-                        title: 'Successfully saved region',
+                        title: t('regions.toastSaved'),
                         status: 'success',
                         duration: 5000,
                         isClosable: true,
@@ -380,7 +384,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                     } catch (err) {
                       console.error('Error saving region:', err);
                       toast({
-                        title: 'Error saving region',
+                        title: t('regions.toastErrorSave'),
                         description: err.response?.data?.message || err.message,
                         status: 'error',
                         duration: 5000,
@@ -389,7 +393,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                     }
                   }}
                 >
-                  Save
+                  {t('common.save')}
                 </Button>
               </Flex>
             </Flex>
@@ -404,14 +408,14 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                     fontSize="lg"
                     fontWeight="bold"
                   >
-                    Delete Region
+                    {t('regions.deleteRegionTitle')}
                   </AlertDialogHeader>
                   <AlertDialogBody>
-                    Are you sure you want to delete this region?
+                    {t('regions.deleteRegionBody')}
                   </AlertDialogBody>
                   <AlertDialogFooter>
                     <Button onClick={() => setIsDeleteDialogOpen(false)}>
-                      Cancel
+                      {t('common.cancel')}
                     </Button>
                     <Button
                       colorScheme="red"
@@ -419,7 +423,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                         try {
                           await backend.delete(`/region/${region.id}`);
                           toast({
-                            title: 'Region successfully deleted',
+                            title: t('regions.toastDeleted'),
                             status: 'success',
                             duration: 5000,
                             isClosable: true,
@@ -432,7 +436,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                       }}
                       ml={3}
                     >
-                      Delete
+                      {t('common.delete')}
                     </Button>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -449,11 +453,9 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                     fontSize="lg"
                     fontWeight="bold"
                   >
-                    Unsaved Changes
+                    {t('regions.unsavedTitle')}
                   </AlertDialogHeader>
-                  <AlertDialogBody>
-                    Are you sure you want to exit? You have unsaved changes.
-                  </AlertDialogBody>
+                  <AlertDialogBody>{t('regions.unsavedBody')}</AlertDialogBody>
                   <AlertDialogFooter>
                     <Button
                       isDisabled={!regionName.trim()}
@@ -461,7 +463,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                         try {
                           await saveRegion();
                           toast({
-                            title: 'Successfully saved region',
+                            title: t('regions.toastSaved'),
                             status: 'success',
                             duration: 5000,
                             isClosable: true,
@@ -471,7 +473,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                         } catch (err) {
                           console.error('Error saving region:', err);
                           toast({
-                            title: 'Error saving region',
+                            title: t('regions.toastErrorSave'),
                             description:
                               err.response?.data?.message || err.message,
                             status: 'error',
@@ -481,7 +483,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                         }
                       }}
                     >
-                      Save & Exit
+                      {t('regions.saveExit')}
                     </Button>
                     <Button
                       colorScheme="red"
@@ -491,7 +493,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                       }}
                       ml={3}
                     >
-                      Exit Without Saving
+                      {t('common.exitWithoutSaving')}
                     </Button>
                   </AlertDialogFooter>
                 </AlertDialogContent>

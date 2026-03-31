@@ -11,10 +11,12 @@ import {
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 
 import { MediaPreview } from './MediaPreview';
 
 export function MediaPreviewList({ files, onComplete, formOrigin }) {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
   const toast = useToast();
   const [isUploading, setIsUploading] = useState(false);
@@ -82,8 +84,8 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
       onComplete(results, description);
 
       toast({
-        title: 'Upload successful.',
-        description: `All files have been uploaded to the server.`,
+        title: t('mediaPreviewList.toastSuccessTitle'),
+        description: t('mediaPreviewList.toastSuccessDesc'),
         status: 'success',
         duration: 5000,
         isClosable: true,
@@ -93,8 +95,8 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
       console.error('Upload failed:', error);
 
       toast({
-        title: 'Upload failed.',
-        description: 'There was an error uploading 1 of more of your files.',
+        title: t('mediaPreviewList.toastErrorTitle'),
+        description: t('mediaPreviewList.toastErrorDesc'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -118,7 +120,7 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
           color="gray.500"
           fontWeight="bold"
         >
-          Uploaded Files
+          {t('mediaPreviewList.uploadedFiles')}
         </FormLabel>
         {files.map((file, i) => (
           <MediaPreview
@@ -136,7 +138,7 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
             fontWeight="normal"
             mb={1}
           >
-            Notes
+            {t('mediaPreviewList.notesLabel')}
           </FormLabel>
           <Textarea
             border="2px solid"
@@ -144,7 +146,7 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
             borderColor="gray.100"
             rows={3}
             value={description}
-            placeholder="Add Notes"
+            placeholder={t('mediaPreviewList.notesPlaceholder')}
             onChange={(e) => setDescription(e.target.value)}
           />
         </FormControl>
@@ -158,10 +160,10 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
           bg="gray.50"
           fontWeight="normal"
           isLoading={isUploading}
-          loadingText="Uploading..."
+          loadingText={t('common.uploading')}
           onClick={handleFullUploadProcess}
         >
-          Upload
+          {t('common.upload')}
         </Button>
       </Center>
     </VStack>

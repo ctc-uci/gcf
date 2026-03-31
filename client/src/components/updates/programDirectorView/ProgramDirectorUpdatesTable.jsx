@@ -17,6 +17,7 @@ import {
 } from '@chakra-ui/react';
 
 import { EmptyStateBadge } from '@/components/badges/EmptyStateBadge';
+import { useTranslation } from 'react-i18next';
 import { FiStar } from 'react-icons/fi';
 
 import { SortArrows } from '../../tables/SortArrows';
@@ -33,18 +34,18 @@ function formatDate(dateStr) {
   });
 }
 
-function formatChangeAmount(value) {
-  if (value === null || value === undefined || value === '') return '—';
+function formatChangeAmount(value, dash) {
+  if (value === null || value === undefined || value === '') return dash;
   const n = Number(value);
   if (Number.isNaN(n)) return String(value);
   return n > 0 ? `+${n}` : String(n);
 }
 
-function displayInstrumentName(row) {
-  return row.instrumentName || row.title || '—';
+function displayInstrumentName(row, dash) {
+  return row.instrumentName || row.title || dash;
 }
 
-function EnrollmentChangeDetails({ row }) {
+function EnrollmentChangeDetails({ row, dash }) {
   const hasEnrollment = row.enrollmentChange != null;
   if (!hasEnrollment) {
     return (
@@ -52,7 +53,7 @@ function EnrollmentChangeDetails({ row }) {
         fontSize="sm"
         color="gray.700"
       >
-        —
+        {dash}
       </Text>
     );
   }
@@ -66,7 +67,7 @@ function EnrollmentChangeDetails({ row }) {
           fontSize="sm"
           color="gray.700"
         >
-          {formatChangeAmount(row.enrollmentChange)}
+          {formatChangeAmount(row.enrollmentChange, dash)}
         </Text>
       )}
     </VStack>
@@ -80,6 +81,8 @@ export const ProgramDirectorUpdatesTable = ({
   sortOrder,
   variant = 'instrument',
 }) => {
+  const { t } = useTranslation();
+  const dash = t('common.emDash');
   const colSpan = variant === 'student' ? 3 : 6;
   return (
     <Box
@@ -106,7 +109,7 @@ export const ProgramDirectorUpdatesTable = ({
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    Flag
+                    {t('updates.colFlag')}
                   </Th>
                   <Th
                     onClick={() => handleSort('instrumentName')}
@@ -116,7 +119,7 @@ export const ProgramDirectorUpdatesTable = ({
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    Instrument
+                    {t('updates.pdColInstrument')}
                     <SortArrows
                       columnKey="instrumentName"
                       sortOrder={sortOrder}
@@ -130,7 +133,7 @@ export const ProgramDirectorUpdatesTable = ({
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    Change amount
+                    {t('updates.pdColChangeAmount')}
                     <SortArrows
                       columnKey="instrumentChange"
                       sortOrder={sortOrder}
@@ -144,7 +147,7 @@ export const ProgramDirectorUpdatesTable = ({
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    Update note
+                    {t('updates.pdColUpdateNote')}
                     <SortArrows
                       columnKey="note"
                       sortOrder={sortOrder}
@@ -158,7 +161,7 @@ export const ProgramDirectorUpdatesTable = ({
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    Date
+                    {t('updates.pdColDate')}
                     <SortArrows
                       columnKey="updateDate"
                       sortOrder={sortOrder}
@@ -175,7 +178,7 @@ export const ProgramDirectorUpdatesTable = ({
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    Update note
+                    {t('updates.pdColUpdateNote')}
                     <SortArrows
                       columnKey="note"
                       sortOrder={sortOrder}
@@ -187,7 +190,7 @@ export const ProgramDirectorUpdatesTable = ({
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    Change amount
+                    {t('updates.pdColChangeAmount')}
                   </Th>
                   <Th
                     onClick={() => handleSort('updateDate')}
@@ -197,7 +200,7 @@ export const ProgramDirectorUpdatesTable = ({
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    Date
+                    {t('updates.pdColDate')}
                     <SortArrows
                       columnKey="updateDate"
                       sortOrder={sortOrder}
@@ -242,7 +245,7 @@ export const ProgramDirectorUpdatesTable = ({
                             fontSize="xs"
                             fontWeight="500"
                           >
-                            {displayInstrumentName(row)}
+                            {displayInstrumentName(row, dash)}
                           </Badge>
                         </Td>
                         <Td>
@@ -250,7 +253,7 @@ export const ProgramDirectorUpdatesTable = ({
                             fontSize="sm"
                             color="gray.700"
                           >
-                            {formatChangeAmount(row.instrumentChange)}
+                            {formatChangeAmount(row.instrumentChange, dash)}
                           </Text>
                         </Td>
                         <Td>
@@ -259,7 +262,7 @@ export const ProgramDirectorUpdatesTable = ({
                             variant="outline"
                             borderColor="gray.200"
                             borderRadius="md"
-                            placeholder="Notes"
+                            placeholder={t('common.placeholderNotes')}
                             defaultValue={row.note || ''}
                             minH="32px"
                             h="32px"
@@ -285,7 +288,7 @@ export const ProgramDirectorUpdatesTable = ({
                             variant="outline"
                             borderColor="gray.200"
                             borderRadius="md"
-                            placeholder="Notes"
+                            placeholder={t('common.placeholderNotes')}
                             defaultValue={row.note || ''}
                             minH="32px"
                             h="32px"
@@ -295,7 +298,10 @@ export const ProgramDirectorUpdatesTable = ({
                           />
                         </Td>
                         <Td>
-                          <EnrollmentChangeDetails row={row} />
+                          <EnrollmentChangeDetails
+                            row={row}
+                            dash={dash}
+                          />
                         </Td>
                         <Td>
                           <Text

@@ -1,45 +1,48 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   Avatar,
   Badge,
   Box,
   Center,
+  HStack,
   Icon,
   Spinner,
   Table,
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
-  HStack,
-  Text,
 } from '@chakra-ui/react';
-import { FiStar, FiUser } from 'react-icons/fi';
+
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { useTranslation } from 'react-i18next';
+import { FiStar, FiUser } from 'react-icons/fi';
+
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './forms/ProgramUpdateForm';
 
-export function downloadProgramUpdatesAsCsv(data) {
+export function downloadProgramUpdatesAsCsv(data, t) {
   const headers = [
-    'Flag',
-    'Type',
-    'Update Note',
-    'Status',
-    'Author',
-    'Program',
-    'Date',
+    t('updates.csvFlag'),
+    t('updates.csvType'),
+    t('updates.csvUpdateNote'),
+    t('updates.csvStatus'),
+    t('updates.csvAuthor'),
+    t('updates.csvProgram'),
+    t('updates.csvDate'),
   ];
   const rows = (data || []).map((row) => [
-    escapeCsvValue(row.flagged ? 'Flagged' : ''),
+    escapeCsvValue(row.flagged ? t('updates.csvFlagged') : ''),
     escapeCsvValue(row.updateType || row.title || ''),
     escapeCsvValue(row.note),
     escapeCsvValue(row.status),
@@ -51,6 +54,7 @@ export function downloadProgramUpdatesAsCsv(data) {
 }
 
 const StatusBadge = ({ status }) => {
+  const { t } = useTranslation();
   const isResolved =
     status?.toLowerCase() === 'resolved' || status?.toLowerCase() === 'active';
   return (
@@ -64,14 +68,14 @@ const StatusBadge = ({ status }) => {
       fontWeight="500"
       textTransform="capitalize"
     >
-      {isResolved ? 'Resolved' : 'Unresolved'}
+      {isResolved ? t('common.resolved') : t('common.unresolved')}
     </Badge>
   );
 };
 
 const TypeBadge = ({ type }) => {
-  const label = type || 'Student';
-  const isInstrument = label.toLowerCase() === 'instrument';
+  const { t } = useTranslation();
+  const isInstrument = (type || '').toLowerCase() === 'instrument';
   return (
     <Badge
       variant="outline"
@@ -85,7 +89,7 @@ const TypeBadge = ({ type }) => {
       fontWeight="500"
       textTransform="capitalize"
     >
-      {label}
+      {isInstrument ? t('updates.typeInstrument') : t('updates.typeStudent')}
     </Badge>
   );
 };
@@ -100,6 +104,7 @@ export const ProgramUpdatesTable = ({
   showFlagAndType = false,
   activeFilters: externalFilters,
 }) => {
+  const { t } = useTranslation();
   const [internalFilters] = useState([]);
   const activeFilters = externalFilters ?? internalFilters;
   const filteredData = useMemo(
@@ -153,7 +158,10 @@ export const ProgramUpdatesTable = ({
       />
 
       <Box position="relative">
-        <TableContainer overflowX="auto" maxW="100%">
+        <TableContainer
+          overflowX="auto"
+          maxW="100%"
+        >
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -167,8 +175,11 @@ export const ProgramUpdatesTable = ({
                     fontWeight="600"
                     w="60px"
                   >
-                    Flag
-                    <SortArrows columnKey="flagged" sortOrder={sortOrder} />
+                    {t('updates.colFlag')}
+                    <SortArrows
+                      columnKey="flagged"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                 )}
                 {showFlagAndType && (
@@ -180,8 +191,11 @@ export const ProgramUpdatesTable = ({
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    Type
-                    <SortArrows columnKey="updateType" sortOrder={sortOrder} />
+                    {t('updates.colType')}
+                    <SortArrows
+                      columnKey="updateType"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                 )}
                 <Th
@@ -192,8 +206,11 @@ export const ProgramUpdatesTable = ({
                   textTransform="uppercase"
                   fontWeight="600"
                 >
-                  Update Note
-                  <SortArrows columnKey="note" sortOrder={sortOrder} />
+                  {t('updates.colUpdateNote')}
+                  <SortArrows
+                    columnKey="note"
+                    sortOrder={sortOrder}
+                  />
                 </Th>
                 {(showStatus || showFlagAndType) && (
                   <Th
@@ -204,8 +221,11 @@ export const ProgramUpdatesTable = ({
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    Status
-                    <SortArrows columnKey="status" sortOrder={sortOrder} />
+                    {t('updates.colStatus')}
+                    <SortArrows
+                      columnKey="status"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                 )}
                 <Th
@@ -216,8 +236,11 @@ export const ProgramUpdatesTable = ({
                   textTransform="uppercase"
                   fontWeight="600"
                 >
-                  Author
-                  <SortArrows columnKey="firstName" sortOrder={sortOrder} />
+                  {t('updates.colAuthor')}
+                  <SortArrows
+                    columnKey="firstName"
+                    sortOrder={sortOrder}
+                  />
                 </Th>
                 <Th
                   onClick={() => handleSort('name')}
@@ -227,8 +250,11 @@ export const ProgramUpdatesTable = ({
                   textTransform="uppercase"
                   fontWeight="600"
                 >
-                  Program
-                  <SortArrows columnKey="name" sortOrder={sortOrder} />
+                  {t('updates.colProgram')}
+                  <SortArrows
+                    columnKey="name"
+                    sortOrder={sortOrder}
+                  />
                 </Th>
                 <Th
                   onClick={() => handleSort('updateDate')}
@@ -238,8 +264,11 @@ export const ProgramUpdatesTable = ({
                   textTransform="uppercase"
                   fontWeight="600"
                 >
-                  Date
-                  <SortArrows columnKey="updateDate" sortOrder={sortOrder} />
+                  {t('updates.colDate')}
+                  <SortArrows
+                    columnKey="updateDate"
+                    sortOrder={sortOrder}
+                  />
                 </Th>
               </Tr>
             </Thead>
@@ -280,14 +309,17 @@ export const ProgramUpdatesTable = ({
                       <Td>
                         <TypeBadge
                           type={
-                            row.isInstrumentUpdate ? 'Instrument' : 'Student'
+                            row.isInstrumentUpdate ? 'instrument' : 'student'
                           }
                         />
                       </Td>
                     )}
                     <Td>
-                      <Text noOfLines={1} maxW="400px">
-                        {row.note || 'Note about the program...'}
+                      <Text
+                        noOfLines={1}
+                        maxW="400px"
+                      >
+                        {row.note || t('updates.programNotePlaceholder')}
                       </Text>
                     </Td>
                     {(showStatus || showFlagAndType) && (
@@ -310,17 +342,23 @@ export const ProgramUpdatesTable = ({
                         <Text fontSize="sm">
                           {[row.firstName, row.lastName]
                             .filter(Boolean)
-                            .join(' ') || '—'}
+                            .join(' ') || t('common.emDash')}
                         </Text>
                       </HStack>
                     </Td>
                     <Td>
-                      <Text fontSize="sm" fontWeight="500">
+                      <Text
+                        fontSize="sm"
+                        fontWeight="500"
+                      >
                         {row.name || ''}
                       </Text>
                     </Td>
                     <Td>
-                      <Text fontSize="sm" color="gray.600">
+                      <Text
+                        fontSize="sm"
+                        color="gray.600"
+                      >
                         {row.updateDate || ''}
                       </Text>
                     </Td>

@@ -1,15 +1,17 @@
 import { Button, HStack, useDisclosure } from '@chakra-ui/react';
 
 import { MediaUploadModal } from '@/components/media/MediaUploadModal';
+import { useTranslation } from 'react-i18next';
 
 import { MediaPreviewTag } from './MediaPreviewTag';
 
 export function MediaUploadForm({ onUploadComplete, uploadedMedia, onRemove }) {
+  const { t } = useTranslation();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <>
-      <Button onClick={onOpen}> + Add </Button>
+      <Button onClick={onOpen}>{t('mediaUploadForm.add')}</Button>
       <MediaUploadModal
         isOpen={isOpen}
         onClose={onClose}

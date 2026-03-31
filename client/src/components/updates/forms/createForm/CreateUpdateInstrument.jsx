@@ -19,6 +19,8 @@ import {
   Textarea,
   VStack,
 } from '@chakra-ui/react';
+
+import { useTranslation } from 'react-i18next';
 import {
   FiCamera,
   FiCornerDownRight,
@@ -47,28 +49,49 @@ export default function CreateUpdateInstrument({
   notes,
   setNotes,
 }) {
+  const { t } = useTranslation();
   return (
     <>
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiMusic} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
-            Which instrument is this update about?
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiMusic}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
+            {t('updates.whichInstrument')}
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-          Select instrument{' '}
-          <Text as="span" color="red.500">
-            *
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          fontWeight="500"
+          mb={1}
+        >
+          {t('updates.selectInstrument')}{' '}
+          <Text
+            as="span"
+            color="red.500"
+          >
+            {t('common.requiredStar')}
           </Text>
         </Text>
         <Select
-          placeholder="Select Instrument"
+          placeholder={t('updates.selectInstrumentPh')}
           value={selectedInstrument}
           onChange={(e) => setSelectedInstrument(e.target.value)}
         >
           {(instruments || []).map((inst) => (
-            <option key={inst.id} value={inst.name}>
+            <option
+              key={inst.id}
+              value={inst.name}
+            >
               {inst.name}
             </option>
           ))}
@@ -76,53 +99,92 @@ export default function CreateUpdateInstrument({
       </Box>
 
       <Box>
-        <Heading size="sm" fontWeight="600" mb={3}>
-          What happened to this instrument?
+        <Heading
+          size="sm"
+          fontWeight="600"
+          mb={3}
+        >
+          {t('updates.whatHappened')}
         </Heading>
-        <RadioGroup value={whatHappened} onChange={setWhatHappened}>
-          <VStack align="start" spacing={2}>
+        <RadioGroup
+          value={whatHappened}
+          onChange={setWhatHappened}
+        >
+          <VStack
+            align="start"
+            spacing={2}
+          >
             <Radio value="Broken">
               <HStack spacing={2}>
-                <Icon as={FiX} boxSize={4} />
-                <Text>Broken</Text>
+                <Icon
+                  as={FiX}
+                  boxSize={4}
+                />
+                <Text>{t('updates.broken')}</Text>
               </HStack>
             </Radio>
             <Radio value="Missing">
               <HStack spacing={2}>
-                <Icon as={FiHelpCircle} boxSize={4} />
-                <Text>Missing</Text>
+                <Icon
+                  as={FiHelpCircle}
+                  boxSize={4}
+                />
+                <Text>{t('updates.missing')}</Text>
               </HStack>
             </Radio>
             <Radio value="New / Donation">
               <HStack spacing={2}>
-                <Icon as={FiCornerDownRight} boxSize={4} />
-                <Text>New / Donation</Text>
+                <Icon
+                  as={FiCornerDownRight}
+                  boxSize={4}
+                />
+                <Text>{t('updates.newDonation')}</Text>
               </HStack>
             </Radio>
             <Radio value="Needs repair">
               <HStack spacing={2}>
-                <Icon as={FiTool} boxSize={4} />
-                <Text>Needs repair</Text>
+                <Icon
+                  as={FiTool}
+                  boxSize={4}
+                />
+                <Text>{t('updates.needsRepair')}</Text>
               </HStack>
             </Radio>
             <Radio value="Other">
-              <Text>Other (please explain in note below)</Text>
+              <Text>{t('updates.otherExplain')}</Text>
             </Radio>
           </VStack>
         </RadioGroup>
       </Box>
 
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiMusic} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
-            How many instruments are affected?
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiMusic}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
+            {t('updates.howManyAffected')}
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-          Number of instruments{' '}
-          <Text as="span" color="red.500">
-            *
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          fontWeight="500"
+          mb={1}
+        >
+          {t('updates.numberOfInstruments')}{' '}
+          <Text
+            as="span"
+            color="red.500"
+          >
+            {t('common.requiredStar')}
           </Text>
         </Text>
         <NumberInput
@@ -136,13 +198,21 @@ export default function CreateUpdateInstrument({
             <NumberDecrementStepper />
           </NumberInputStepper>
         </NumberInput>
-        <Text color="teal.500" fontSize="sm" fontWeight="500" mt={2}>
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          fontWeight="500"
+          mt={2}
+        >
           {programInstrumentCountForSelected === null ? (
             ''
           ) : (
             <>
-              Total {selectedInstrument}:{' '}
-              <Text as="span" fontWeight="bold">
+              {t('common.totalLabel', { name: selectedInstrument })}{' '}
+              <Text
+                as="span"
+                fontWeight="bold"
+              >
                 {programInstrumentCountForSelected}
               </Text>
             </>
@@ -151,19 +221,39 @@ export default function CreateUpdateInstrument({
       </Box>
 
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiCamera} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
-            Do you want to add photos or videos?
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiCamera}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
+            {t('updates.photosVideosInstrument')}
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" mb={2}>
-          This helps us understand the issue.
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          mb={2}
+        >
+          {t('updates.photosHelp')}
         </Text>
         {uploadedMedia.length > 0 && (
-          <HStack spacing={2} wrap="wrap" mb={2}>
+          <HStack
+            spacing={2}
+            wrap="wrap"
+            mb={2}
+          >
             {uploadedMedia.map((media, idx) => (
-              <Box key={idx} position="relative">
+              <Box
+                key={idx}
+                position="relative"
+              >
                 {media.file_type?.startsWith('image/') ? (
                   <Image
                     src={media.previewUrl || ''}
@@ -182,7 +272,11 @@ export default function CreateUpdateInstrument({
                     alignItems="center"
                     justifyContent="center"
                   >
-                    <Text fontSize="xs" textAlign="center" px={1}>
+                    <Text
+                      fontSize="xs"
+                      textAlign="center"
+                      px={1}
+                    >
                       {media.file_name}
                     </Text>
                   </Box>
@@ -198,7 +292,11 @@ export default function CreateUpdateInstrument({
                   _hover={{ bg: 'red.600' }}
                   onClick={() => removeMedia(idx)}
                 />
-                <Text fontSize="xs" noOfLines={1} maxW="80px">
+                <Text
+                  fontSize="xs"
+                  noOfLines={1}
+                  maxW="80px"
+                >
                   {media.file_name}
                 </Text>
               </Box>
@@ -212,15 +310,24 @@ export default function CreateUpdateInstrument({
           size="sm"
           onClick={mediaUploadDisclosure.onOpen}
         >
-          + Upload Media
+          {t('updates.uploadMedia')}
         </Button>
       </Box>
 
       <Box>
-        <HStack spacing={2} mb={2}>
-          <Icon as={FiStar} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
-            Do you need admin help or approval for this?
+        <HStack
+          spacing={2}
+          mb={2}
+        >
+          <Icon
+            as={FiStar}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
+            {t('updates.adminHelpHeading')}
           </Heading>
         </HStack>
         <Checkbox
@@ -228,24 +335,38 @@ export default function CreateUpdateInstrument({
           onChange={(e) => setNeedsAdminHelp(e.target.checked)}
           colorScheme="teal"
         >
-          Yes, this is a special request
+          {t('updates.specialRequest')}
         </Checkbox>
       </Box>
 
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiEdit3} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
-            Add a note
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiEdit3}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
+            {t('updates.addNoteHeading')}
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-          Notes
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          fontWeight="500"
+          mb={1}
+        >
+          {t('common.notes')}
         </Text>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Add notes"
+          placeholder={t('updates.addNotesPlaceholder')}
           minH="100px"
         />
       </Box>

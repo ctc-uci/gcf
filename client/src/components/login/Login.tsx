@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   Box,
@@ -19,34 +19,39 @@ import {
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import i18n, { isAppLocale } from '@/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { FaArrowLeft } from 'react-icons/fa6';
-import { FiLogIn } from 'react-icons/fi';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
 import { CreatePassword } from './CreatePassword';
 import { ForgotPassword } from './ForgotPassword';
+import { LoginLanguageSelect } from './LoginLanguageSelect';
 import GcfGlobe from '/gcf_globe.png';
 
-const signinSchema = z.object({
-  email: z.string().email('Incorrect Email'),
-  password: z.string().min(6, 'Incorrect Password'),
-});
-
-type SigninFormValues = z.infer<typeof signinSchema>;
-
-const welcomeTexts = [
-  'Welcome!',
-  'Karibu!',
-  '¡Bienvenido!',
-  '欢迎!',
-  'Willkommen!',
-];
+type SigninFormValues = {
+  email: string;
+  password: string;
+};
 
 export const Login = () => {
+  const { t } = useTranslation();
+  const welcomeTexts = useMemo(
+    () => t('login.welcome', { returnObjects: true }) as string[],
+    [t]
+  );
+  const signinSchema = useMemo(
+    () =>
+      z.object({
+        email: z.string().email(t('validation.incorrectEmail')),
+        password: z.string().min(6, t('validation.incorrectPassword')),
+      }),
+    [t]
+  );
   const [isForgot, setIsForgot] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
@@ -69,59 +74,79 @@ export const Login = () => {
 
   // Welcome text cycling animation
   useEffect(() => {
+    if (welcomeTexts.length === 0) return;
     const interval = setInterval(() => {
       setTextIndex((prev) => (prev + 1) % welcomeTexts.length);
     }, 1300); // 1000ms display + 300ms animation
     return () => clearInterval(interval);
-  }, []);
+  }, [welcomeTexts.length]);
 
   const toastLoginError = useCallback(
     (msg: string) => {
       toast({
-        title: 'Could not login!',
+        title: t('login.toastCouldNotLogin'),
         description: msg,
         status: 'error',
         variant: 'subtle',
         position: 'bottom-right',
       });
     },
-    [toast]
+    [toast, t]
   );
 
   const handleLogin = async (data: SigninFormValues) => {
     try {
-      await login({
+      const cred = await login({
         email: data.email,
         password: data.password,
       });
 
+      try {
+        const { data: userRow } = await backend.get(
+          `/gcf-users/${cred.user.uid}`
+        );
+        if (
+          userRow?.preferredLanguage &&
+          isAppLocale(String(userRow.preferredLanguage))
+        ) {
+          await i18n.changeLanguage(String(userRow.preferredLanguage));
+        }
+      } catch {
+        /* keep locale from login screen */
+      }
+
       navigate('/dashboard/1');
-    } catch (err) {
-      const errorCode = err.code;
+    } catch (err: unknown) {
+      const errorCode =
+        err && typeof err === 'object' && 'code' in err
+          ? (err as { code?: string }).code
+          : undefined;
 
       switch (errorCode) {
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
         case 'auth/invalid-email':
         case 'auth/user-not-found':
-          setError('email', { message: 'Incorrect Email' });
-          setError('password', { message: 'Incorrect Password' });
-          toastLoginError('Incorrect Login Information');
+          setError('email', { message: t('validation.incorrectEmail') });
+          setError('password', { message: t('validation.incorrectPassword') });
+          toastLoginError(t('login.incorrectLogin'));
           break;
         case 'auth/unverified-email':
-          toastLoginError('Please verify your email address.');
+          toastLoginError(t('login.verifyEmail'));
           break;
         case 'auth/user-disabled':
-          toastLoginError('This account has been disabled.');
+          toastLoginError(t('login.accountDisabled'));
           break;
         case 'auth/too-many-requests':
-          toastLoginError('Too many attempts. Please try again later.');
+          toastLoginError(t('login.tooManyRequests'));
           break;
         case 'auth/user-signed-out':
-          toastLoginError('You have been signed out. Please sign in again.');
+          toastLoginError(t('login.signedOut'));
           break;
         default:
-          toastLoginError(err.message);
+          toastLoginError(
+            err instanceof Error ? err.message : t('signup.errorTitle')
+          );
       }
     }
   };
@@ -132,10 +157,19 @@ export const Login = () => {
 
   return (
     <Grid
+      position="relative"
       templateColumns="repeat(2, 1fr)"
       h="100vh"
       overflow="hidden"
     >
+      <Box
+        position="absolute"
+        top={4}
+        right={6}
+        zIndex={20}
+      >
+        <LoginLanguageSelect />
+      </Box>
       <GridItem>
         <Flex
           direction="column"
@@ -176,7 +210,7 @@ export const Login = () => {
           </Box>
           <Image
             src={GcfGlobe}
-            alt="GCF Globe"
+            alt={t('login.gcfGlobeAlt')}
             maxH="55%"
             draggable="false"
           />
@@ -191,7 +225,7 @@ export const Login = () => {
           bg="#D6F1EF"
         >
           <IconButton
-            aria-label="Back to login"
+            aria-label={t('login.backToLogin')}
             icon={<FaArrowLeft />}
             position="absolute"
             top={8}
@@ -215,7 +249,7 @@ export const Login = () => {
           bg="#D6F1EF"
         >
           <IconButton
-            aria-label="Back to login"
+            aria-label={t('login.backToLogin')}
             icon={<FaArrowLeft />}
             position="absolute"
             top={8}
@@ -249,15 +283,15 @@ export const Login = () => {
                 fontSize="3xl"
                 mb={6}
               >
-                Login
+                {t('login.title')}
               </Heading>
 
               <form onSubmit={handleSubmit(handleLogin)}>
                 <Stack spacing={5}>
                   <FormControl isInvalid={!!errors.email}>
-                    <FormLabel fontWeight="bold">Email</FormLabel>
+                    <FormLabel fontWeight="bold">{t('common.email')}</FormLabel>
                     <Input
-                      placeholder="Enter your email"
+                      placeholder={t('login.emailPlaceholder')}
                       type="email"
                       size="lg"
                       {...register('email')}
@@ -273,9 +307,11 @@ export const Login = () => {
                   </FormControl>
 
                   <FormControl isInvalid={!!errors.password}>
-                    <FormLabel fontWeight="bold">Password</FormLabel>
+                    <FormLabel fontWeight="bold">
+                      {t('common.password')}
+                    </FormLabel>
                     <Input
-                      placeholder="Password"
+                      placeholder={t('login.passwordPlaceholder')}
                       type="password"
                       size="lg"
                       {...register('password')}
@@ -300,7 +336,7 @@ export const Login = () => {
                     w="100%"
                     _hover={{ bg: 'gray.800' }}
                   >
-                    Login
+                    {t('common.login')}
                   </Button>
                   <Box textAlign="right">
                     <Button
@@ -316,7 +352,7 @@ export const Login = () => {
                       lineHeight="normal"
                       onClick={() => setIsForgot(true)}
                     >
-                      Forgot Password?
+                      {t('login.forgotPassword')}
                     </Button>
                   </Box>
                 </Stack>

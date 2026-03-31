@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { AddIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -13,27 +14,29 @@ import {
   Tabs,
   useDisclosure,
 } from '@chakra-ui/react';
-import { AddIcon } from '@chakra-ui/icons';
+
+import { useTranslation } from 'react-i18next';
 import { FiDownload } from 'react-icons/fi';
 
-import { downloadProgramUpdatesAsCsv } from '../ProgramUpdatesTable';
-import { CreateUpdateDrawer } from '../forms/createForm/CreateUpdateDrawer';
-import {
-  UpdatesSearchInput,
-  UpdatesFilterPopover,
-  UpdatesViewModeToggle,
-} from '../config/UpdatesSharedControls';
 import { applyFilters } from '../../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../../contexts/hooks/TableSort';
 import { programDirectorFilterColumns } from '../config/updatesColumnConfig';
+import {
+  UpdatesFilterPopover,
+  UpdatesSearchInput,
+  UpdatesViewModeToggle,
+} from '../config/UpdatesSharedControls';
 import {
   UPDATES_TAB_BASE_PROPS,
   UPDATES_TAB_SELECTED_PROPS,
   UpdatesTabCountBadge,
 } from '../config/UpdatesTabListWithBadges';
+import { CreateUpdateDrawer } from '../forms/createForm/CreateUpdateDrawer';
+import { downloadProgramUpdatesAsCsv } from '../ProgramUpdatesTable';
 import { ProgramDirectorUpdatesTable } from './ProgramDirectorUpdatesTable';
 
 export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState([]);
   const createDrawerDisclosure = useDisclosure();
@@ -82,20 +85,38 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
   const studentTableData = studentSorted ?? studentRows;
 
   return (
-    <Box p={8} bg="gray.50" minH="100vh" mx={-4} mt={0}>
-      <Flex align="center" gap={4} mb={4} wrap="wrap">
-        <Heading as="h1" size="lg" fontWeight="500">
-          Updates
+    <Box
+      p={8}
+      bg="gray.50"
+      minH="100vh"
+      mx={-4}
+      mt={0}
+    >
+      <Flex
+        align="center"
+        gap={4}
+        mb={4}
+        wrap="wrap"
+      >
+        <Heading
+          as="h1"
+          size="lg"
+          fontWeight="500"
+        >
+          {t('updates.pageTitle')}
         </Heading>
         <IconButton
           icon={<FiDownload />}
           variant="ghost"
           size="sm"
-          aria-label="Download updates"
+          aria-label={t('updates.downloadAria')}
           color="gray.500"
-          onClick={() => downloadProgramUpdatesAsCsv(data)}
+          onClick={() => downloadProgramUpdatesAsCsv(data, t)}
         />
-        <UpdatesSearchInput value={searchQuery} onChange={setSearchQuery} />
+        <UpdatesSearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
         <UpdatesFilterPopover
           columns={programDirectorFilterColumns}
           onFilterChange={setActiveFilters}
@@ -112,12 +133,18 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           leftIcon={<AddIcon boxSize={3} />}
           onClick={createDrawerDisclosure.onOpen}
         >
-          New Update
+          {t('updates.newUpdate')}
         </Button>
       </Flex>
 
       <Tabs>
-        <TabList w="100%" display="flex" mt={4} mb={4} gap={0}>
+        <TabList
+          w="100%"
+          display="flex"
+          mt={4}
+          mb={4}
+          gap={0}
+        >
           <Tab
             flex="1"
             justifyContent="center"
@@ -125,7 +152,7 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
             {...UPDATES_TAB_BASE_PROPS}
             mr={0}
           >
-            Instrument
+            {t('updates.tabInstrument')}
             <UpdatesTabCountBadge count={instrumentRows.length} />
           </Tab>
           <Tab
@@ -135,12 +162,15 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
             {...UPDATES_TAB_BASE_PROPS}
             mr={0}
           >
-            Student
+            {t('updates.tabStudent')}
             <UpdatesTabCountBadge count={studentRows.length} />
           </Tab>
         </TabList>
         <TabPanels>
-          <TabPanel p={0} pt={4}>
+          <TabPanel
+            p={0}
+            pt={4}
+          >
             <ProgramDirectorUpdatesTable
               variant="instrument"
               tableData={instrumentTableData}
@@ -149,7 +179,10 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
               sortOrder={instrumentSort.sortOrder}
             />
           </TabPanel>
-          <TabPanel p={0} pt={4}>
+          <TabPanel
+            p={0}
+            pt={4}
+          >
             <ProgramDirectorUpdatesTable
               variant="student"
               tableData={studentTableData}

@@ -12,6 +12,8 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
+
 import { MediaPreviewList } from './MediaPreviewList';
 import { MediaUpload } from './MediaUpload';
 
@@ -21,6 +23,7 @@ export function MediaUploadModal({
   onUploadComplete,
   formOrigin,
 }) {
+  const { t } = useTranslation();
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   const handleClose = () => {
@@ -54,7 +57,7 @@ export function MediaUploadModal({
             left="15px"
             top="15px"
             onClick={() => setSelectedFiles([])}
-            aria-label="Back"
+            aria-label={t('mediaUploadModal.back')}
           />
         )}
         <ModalCloseButton
@@ -68,7 +71,7 @@ export function MediaUploadModal({
           fontWeight="normal"
           mt={2}
         >
-          Upload Media
+          {t('mediaUploadModal.title')}
         </ModalHeader>
 
         <ModalBody>

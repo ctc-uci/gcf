@@ -19,10 +19,11 @@ import {
 } from '@chakra-ui/react';
 
 import { getYouTubeEmbedUrl } from '@/utils/youtube';
+import { useTranslation } from 'react-i18next';
 
 function VideoPlayer({
   playlist,
-  playlistName = 'Playlist',
+  playlistName: playlistNameProp,
   videos,
   selectedVideo,
   onBack,
@@ -50,7 +51,7 @@ function VideoPlayer({
           bg="teal.500"
           onClick={onBack}
         >
-          Back
+          {t('common.back')}
         </Button>
         <Box
           overflow="hidden"

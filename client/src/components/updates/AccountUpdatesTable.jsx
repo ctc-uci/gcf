@@ -1,5 +1,5 @@
 //TODO: check this again
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   Badge,
@@ -17,6 +17,8 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
+
+import { useTranslation } from 'react-i18next';
 import { FiUser } from 'react-icons/fi';
 
 import { useTableSort } from '../../contexts/hooks/TableSort';
@@ -24,6 +26,7 @@ import { SortArrows } from '../tables/SortArrows';
 import { AccountUpdateDrawer } from './forms/AccountUpdateDrawer';
 
 const StatusBadge = ({ status, adminName }) => {
+  const { t } = useTranslation();
   const hasAdmin = adminName && adminName.trim();
   const isResolved =
     status?.toLowerCase() === 'resolved' || status?.toLowerCase() === 'active';
@@ -61,7 +64,7 @@ const StatusBadge = ({ status, adminName }) => {
       fontWeight="500"
       textTransform="capitalize"
     >
-      {isResolved ? 'Resolved' : 'Unresolved'}
+      {isResolved ? t('common.resolved') : t('common.unresolved')}
     </Badge>
   );
 };
@@ -72,6 +75,7 @@ export const AccountUpdatesTable = ({
   isLoading = false,
   searchQuery = '',
 }) => {
+  const { t } = useTranslation();
   const sourceData = data ?? originalData ?? [];
 
   const displayData = useMemo(() => {
@@ -98,7 +102,10 @@ export const AccountUpdatesTable = ({
 
   return (
     <Box position="relative">
-      <TableContainer overflowX="auto" maxW="100%">
+      <TableContainer
+        overflowX="auto"
+        maxW="100%"
+      >
         <Table variant="simple">
           <Thead>
             <Tr>
@@ -110,8 +117,11 @@ export const AccountUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Update Note
-                <SortArrows columnKey="note" sortOrder={sortOrder} />
+                {t('updates.colUpdateNote')}
+                <SortArrows
+                  columnKey="note"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th
                 onClick={() => handleSort('status')}
@@ -121,8 +131,11 @@ export const AccountUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Status
-                <SortArrows columnKey="status" sortOrder={sortOrder} />
+                {t('updates.colStatus')}
+                <SortArrows
+                  columnKey="status"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th
                 onClick={() => handleSort('firstName')}
@@ -132,8 +145,11 @@ export const AccountUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Author
-                <SortArrows columnKey="firstName" sortOrder={sortOrder} />
+                {t('updates.colAuthor')}
+                <SortArrows
+                  columnKey="firstName"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th
                 onClick={() => handleSort('programName')}
@@ -143,8 +159,11 @@ export const AccountUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Program
-                <SortArrows columnKey="programName" sortOrder={sortOrder} />
+                {t('updates.colProgram')}
+                <SortArrows
+                  columnKey="programName"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th
                 onClick={() => handleSort('updateDate')}
@@ -154,8 +173,11 @@ export const AccountUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Date
-                <SortArrows columnKey="updateDate" sortOrder={sortOrder} />
+                {t('updates.colDate')}
+                <SortArrows
+                  columnKey="updateDate"
+                  sortOrder={sortOrder}
+                />
               </Th>
             </Tr>
           </Thead>
@@ -177,8 +199,11 @@ export const AccountUpdatesTable = ({
                   onClick={() => setSelectedUpdate(row)}
                 >
                   <Td>
-                    <Text noOfLines={1} maxW="400px">
-                      {row.note || 'Account password changed.'}
+                    <Text
+                      noOfLines={1}
+                      maxW="400px"
+                    >
+                      {row.note || t('updates.accountNotePlaceholder')}
                     </Text>
                   </Td>
                   <Td>
@@ -189,19 +214,29 @@ export const AccountUpdatesTable = ({
                   </Td>
                   <Td>
                     <HStack spacing={1}>
-                      <Icon as={FiUser} boxSize={4} color="gray.400" />
+                      <Icon
+                        as={FiUser}
+                        boxSize={4}
+                        color="gray.400"
+                      />
                       <Text fontSize="sm">
-                        {row.authorName || row.firstName || 'Name'}
+                        {row.authorName || row.firstName || t('common.name')}
                       </Text>
                     </HStack>
                   </Td>
                   <Td>
-                    <Text fontSize="sm" fontWeight="500">
+                    <Text
+                      fontSize="sm"
+                      fontWeight="500"
+                    >
                       {row.programName || ''}
                     </Text>
                   </Td>
                   <Td>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text
+                      fontSize="sm"
+                      color="gray.600"
+                    >
                       {row.updateDate || ''}
                     </Text>
                   </Td>

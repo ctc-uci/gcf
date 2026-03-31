@@ -1,4 +1,4 @@
-import { EditIcon } from "@chakra-ui/icons";
+import { EditIcon } from '@chakra-ui/icons';
 import {
   Badge,
   Box,
@@ -14,17 +14,20 @@ import {
   Image,
   Text,
   VStack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-import GcfGlobe from "/gcf_globe.png";
+import { useTranslation } from 'react-i18next';
+
+import GcfGlobe from '/gcf_globe.png';
 
 const CardView = ({ data, openEditForm }) => {
+  const { t } = useTranslation();
   return (
     <Grid
       templateColumns={{
-        base: "repeat(1, 1fr)",
-        md: "repeat(2, 1fr)",
-        lg: "repeat(3, 1fr)",
+        base: 'repeat(1, 1fr)',
+        md: 'repeat(2, 1fr)',
+        lg: 'repeat(3, 1fr)',
       }}
       gap={6}
     >
@@ -46,7 +49,7 @@ const CardView = ({ data, openEditForm }) => {
                 right={2}
               >
                 <IconButton
-                  aria-label="edit"
+                  aria-label={t('common.edit')}
                   icon={<EditIcon />}
                   size="sm"
                   variant="ghost"
@@ -66,7 +69,7 @@ const CardView = ({ data, openEditForm }) => {
                   h={300}
                   position="absolute"
                   draggable="false"
-                  alt="GCF Globe"
+                  alt={t('programCard.gcfGlobeAlt')}
                 />
               </Center>
               <Box
@@ -80,7 +83,7 @@ const CardView = ({ data, openEditForm }) => {
                   bg="#808080"
                   color="white"
                 >
-                  {p.students} Students
+                  {t('programCard.studentsCount', { count: p.students })}
                 </Badge>
               </Box>
             </CardBody>

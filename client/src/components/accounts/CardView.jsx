@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
 import {
   Badge,
   Card,
@@ -14,10 +15,12 @@ import {
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 
 import GcfGlobe from '/gcf_globe.png';
 
 const CardView = ({ data, onSave: _onSave }) => {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
 
   const RegionText = ({ id }) => {
@@ -53,8 +56,15 @@ const CardView = ({ data, onSave: _onSave }) => {
       >
         {data.map((a) => (
           <GridItem key={a.id}>
-            <Card w="auto" borderRadius="12px" bg="#EDF2F7">
-              <CardHeader py={3} px={4}>
+            <Card
+              w="auto"
+              borderRadius="12px"
+              bg="#EDF2F7"
+            >
+              <CardHeader
+                py={3}
+                px={4}
+              >
                 <Badge
                   borderRadius="6px"
                   py="6px"
@@ -81,21 +91,36 @@ const CardView = ({ data, onSave: _onSave }) => {
                   objectFit="contain"
                   objectPosition="top"
                   draggable="false"
-                  alt="GCF Globe"
+                  alt={t('programCard.gcfGlobeAlt')}
                 />
               </CardBody>
-              <CardFooter bg="white" h="88px" py="18px" px="24px">
-                <VStack align="stretch" spacing={3}>
-                  <Text fontSize="lg" color="black">
+              <CardFooter
+                bg="white"
+                h="88px"
+                py="18px"
+                px="24px"
+              >
+                <VStack
+                  align="stretch"
+                  spacing={3}
+                >
+                  <Text
+                    fontSize="lg"
+                    color="black"
+                  >
                     {a.firstName} {a.lastName}
                   </Text>
-                  <Flex gap={3} flexWrap="wrap" align="center">
+                  <Flex
+                    gap={3}
+                    flexWrap="wrap"
+                    align="center"
+                  >
                     {a.role === 'Regional Director' ? (
                       <RegionText id={a.id} />
                     ) : (
                       (a.programs?.length
                         ? a.programs
-                        : ['Assigned Program']
+                        : [t('assignedProgramFallback')]
                       ).map((p) => (
                         <Text
                           key={p}

@@ -26,8 +26,10 @@ import {
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 
 export const ProgramUpdateEditForm = ({ programUpdateId }) => {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
 
   const [isAddingInstrument, setIsAddingInstrument] = useState(false);
@@ -377,29 +379,46 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
     }
   };
   return (
-    <VStack p={8} width="35%" borderWidth="1px" borderColor="lightblue">
-      <Heading size="md" textAlign="center">
-        Program
+    <VStack
+      p={8}
+      width="35%"
+      borderWidth="1px"
+      borderColor="lightblue"
+    >
+      <Heading
+        size="md"
+        textAlign="center"
+      >
+        {t('programEditForm.heading')}
       </Heading>
-      <Divider w="110%" mb={4}></Divider>
+      <Divider
+        w="110%"
+        mb={4}
+      ></Divider>
       {programUpdateId && (
         <>
           <Card bg="gray.100">
-            <CardHeader pt={6} pb={0}>
-              <Heading size="sm">Update Notes</Heading>
+            <CardHeader
+              pt={6}
+              pb={0}
+            >
+              <Heading size="sm">{t('programEditForm.updateNotes')}</Heading>
             </CardHeader>
             <CardBody py={1}>
-              <Text placeholder="None">{form.note}</Text>
+              <Text placeholder={t('common.na')}>{form.note}</Text>
             </CardBody>
           </Card>
           <FormControl isRequired>
-            <FormLabel fontWeight="normal" color="gray">
-              Title
+            <FormLabel
+              fontWeight="normal"
+              color="gray"
+            >
+              {t('programEditForm.title')}
             </FormLabel>
             <Input
               name="title"
               type="text"
-              placeholder="Enter Title Here"
+              placeholder={t('programEditForm.titlePlaceholder')}
               bg="gray.100"
               value={form.title}
               onChange={handleChange}
@@ -408,54 +427,60 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         </>
       )}
       <FormControl isRequired>
-        <FormLabel size="sm">Program Name</FormLabel>
+        <FormLabel size="sm">{t('programEditForm.programName')}</FormLabel>
         <Input
           name="program_name"
-          placeholder="Program Name"
+          placeholder={t('programEditForm.programName')}
           value={form.program_name}
           onChange={handleChange}
         />
       </FormControl>
       <FormControl isRequired>
-        <FormLabel>Status</FormLabel>
+        <FormLabel>{t('programEditForm.status')}</FormLabel>
         <Select
           name="program_status"
           value={form.program_status}
           onChange={handleChange}
-          placeholder="Select Status"
+          placeholder={t('programEditForm.selectStatus')}
         >
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
+          <option value="Active">{t('programEditForm.active')}</option>
+          <option value="Inactive">{t('programEditForm.inactive')}</option>
         </Select>
       </FormControl>
       <FormControl isRequired>
-        <FormLabel>Launch Date</FormLabel>
+        <FormLabel>{t('programEditForm.launchDate')}</FormLabel>
         <Input
           name="launch_date"
           type="date"
-          placeholder="Select Date"
+          placeholder={t('programEditForm.selectDate')}
           value={form.launch_date}
           onChange={handleChange}
         />
       </FormControl>
       <FormControl isRequired>
-        <FormLabel>Location</FormLabel>
+        <FormLabel>{t('programEditForm.location')}</FormLabel>
         <Select
           name="country"
-          placeholder="Select Location"
+          placeholder={t('programEditForm.selectLocation')}
           onChange={handleChange}
           value={form.country}
         >
           {countries.map((c) => (
-            <option key={c.id} value={c.id}>
+            <option
+              key={c.id}
+              value={c.id}
+            >
               {c.name}
             </option>
           ))}
         </Select>
       </FormControl>
       <FormControl>
-        <FormLabel fontWeight="normal" color="gray">
-          # Students currently enrolled
+        <FormLabel
+          fontWeight="normal"
+          color="gray"
+        >
+          {t('programEditForm.studentsEnrolled')}
         </FormLabel>
         <NumberInput
           width="30%"
@@ -468,8 +493,11 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         </NumberInput>
       </FormControl>
       <FormControl>
-        <FormLabel fontWeight="normal" color="gray">
-          # Students graduated
+        <FormLabel
+          fontWeight="normal"
+          color="gray"
+        >
+          {t('programEditForm.studentsGraduated')}
         </FormLabel>
         <NumberInput
           width="30%"
@@ -482,15 +510,17 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         </NumberInput>
       </FormControl>
       <FormControl>
-        <FormLabel>Instruments & Quantity</FormLabel>
+        <FormLabel>{t('programEditForm.instrumentsQuantity')}</FormLabel>
         {!isAddingInstrument && (
-          <Button onClick={() => setIsAddingInstrument(true)}>+ Add</Button>
+          <Button onClick={() => setIsAddingInstrument(true)}>
+            {t('common.add')}
+          </Button>
         )}
         {isAddingInstrument && (
           <HStack>
             <Select
               name="instrument"
-              placeholder="Select Instrument"
+              placeholder={t('programEditForm.selectInstrument')}
               onChange={(e) => {
                 setSelectedInstrument(e.target.value);
                 setNewInstrumentName('');
@@ -498,13 +528,16 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
               value={selectedInstrument}
             >
               {instruments.map((instrument) => (
-                <option key={instrument.id} value={instrument.name}>
+                <option
+                  key={instrument.id}
+                  value={instrument.name}
+                >
                   {instrument.name}
                 </option>
               ))}
             </Select>
             <Input
-              placeholder="Or type a new instrument"
+              placeholder={t('programEditForm.newInstrumentPlaceholder')}
               value={newInstrumentName}
               onChange={(e) => {
                 setNewInstrumentName(e.target.value);
@@ -530,15 +563,23 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
                 setIsAddingInstrument(false);
               }}
             >
-              + Add
+              {t('common.add')}
             </Button>
           </HStack>
         )}
       </FormControl>
       {Object.keys(addedInstruments).length > 0 && (
-        <HStack width="100%" flexWrap="wrap" spacing={2}>
+        <HStack
+          width="100%"
+          flexWrap="wrap"
+          spacing={2}
+        >
           {Object.entries(addedInstruments).map(([name, quantity]) => (
-            <Tag key={name} size="lg" bg="gray.200">
+            <Tag
+              key={name}
+              size="lg"
+              bg="gray.200"
+            >
               <TagLabel>
                 {name} - {quantity}
               </TagLabel>
@@ -548,33 +589,36 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         </HStack>
       )}
       <FormControl>
-        <FormLabel>Primary Language</FormLabel>
+        <FormLabel>{t('programEditForm.primaryLanguage')}</FormLabel>
         <HStack>
           <Input
             name="primary_language"
-            placeholder="Language"
+            placeholder={t('programEditForm.languagePlaceholder')}
             value={form.primary_language}
             onChange={handleChange}
           />
         </HStack>
       </FormControl>
       <FormControl>
-        <FormLabel>Regional Director(s)</FormLabel>
+        <FormLabel>{t('programEditForm.regionalDirectors')}</FormLabel>
         {!isAddingRegionalDirector && (
           <Button onClick={() => setIsAddingRegionalDirector(true)}>
-            + Add
+            {t('common.add')}
           </Button>
         )}
         {isAddingRegionalDirector && (
           <HStack>
             <Select
               name="regional_director"
-              placeholder="Select Regional Director(s)"
+              placeholder={t('programEditForm.selectRDPlaceholder')}
               onChange={(e) => setSelectedRegionalDirector(e.target.value)}
               value={selectedRegionalDirector}
             >
               {regionalDirectors.map((user) => (
-                <option key={user.id} value={user.id}>
+                <option
+                  key={user.id}
+                  value={user.id}
+                >
                   {user.firstName} {user.lastName}
                 </option>
               ))}
@@ -585,15 +629,23 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
                 setIsAddingRegionalDirector(false);
               }}
             >
-              + Add
+              {t('common.add')}
             </Button>
           </HStack>
         )}
       </FormControl>
       {Object.keys(regionalDirectors).length > 0 && (
-        <HStack width="100%" flexWrap="wrap" spacing={2}>
+        <HStack
+          width="100%"
+          flexWrap="wrap"
+          spacing={2}
+        >
           {Object.entries(addedRegionalDirectors).map(([id, name]) => (
-            <Tag key={id} size="lg" bg="gray.200">
+            <Tag
+              key={id}
+              size="lg"
+              bg="gray.200"
+            >
               <TagLabel>{name}</TagLabel>
               <TagCloseButton onClick={() => removeRegionalDirector(id)} />
             </Tag>
@@ -602,10 +654,12 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
       )}
       <Divider w="110%"></Divider>
       <HStack w="100%">
-        <Button>Delete</Button>
+        <Button>{t('common.delete')}</Button>
         <Spacer />
-        <Button>Cancel</Button>
-        <Button onClick={handleSubmit}>Save Changes</Button>
+        <Button>{t('common.cancel')}</Button>
+        <Button onClick={handleSubmit}>
+          {t('programEditForm.saveChanges')}
+        </Button>
       </HStack>
     </VStack>
   );

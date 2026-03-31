@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Checkbox,
   CloseButton,
   Heading,
   HStack,
@@ -14,7 +13,9 @@ import {
   Text,
   Textarea,
 } from '@chakra-ui/react';
-import { FiCamera, FiEdit3, FiStar, FiUsers } from 'react-icons/fi';
+
+import { useTranslation } from 'react-i18next';
+import { FiCamera, FiEdit3, FiUsers } from 'react-icons/fi';
 
 export default function CreateUpdateStudent({
   studentCount,
@@ -22,24 +23,40 @@ export default function CreateUpdateStudent({
   uploadedMedia,
   removeMedia,
   onOpenMediaUpload,
-  needsAdminHelp,
-  setNeedsAdminHelp,
   notes,
   setNotes,
 }) {
+  const { t } = useTranslation();
   return (
     <>
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiUsers} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
-            How many students are currently enrolled?
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiUsers}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
+            {t('updates.createStudentHeading')}
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-          Number of students{' '}
-          <Text as="span" color="red.500">
-            *
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          fontWeight="500"
+          mb={1}
+        >
+          {t('updates.numberOfStudents')}{' '}
+          <Text
+            as="span"
+            color="red.500"
+          >
+            {t('common.requiredStar')}
           </Text>
         </Text>
         <NumberInput
@@ -56,19 +73,39 @@ export default function CreateUpdateStudent({
       </Box>
 
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiCamera} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
-            Do you want to add photos or videos?
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiCamera}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
+            {t('updates.photosVideosStudent')}
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" mb={2}>
-          Optional for documentation
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          mb={2}
+        >
+          {t('common.optional')}
         </Text>
         {uploadedMedia.length > 0 && (
-          <HStack spacing={2} wrap="wrap" mb={2}>
+          <HStack
+            spacing={2}
+            wrap="wrap"
+            mb={2}
+          >
             {uploadedMedia.map((media, idx) => (
-              <Box key={idx} position="relative">
+              <Box
+                key={idx}
+                position="relative"
+              >
                 <Box
                   boxSize="80px"
                   bg="gray.100"
@@ -77,7 +114,11 @@ export default function CreateUpdateStudent({
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <Text fontSize="xs" textAlign="center" px={1}>
+                  <Text
+                    fontSize="xs"
+                    textAlign="center"
+                    px={1}
+                  >
                     {media.file_name}
                   </Text>
                 </Box>
@@ -103,24 +144,38 @@ export default function CreateUpdateStudent({
           size="sm"
           onClick={onOpenMediaUpload}
         >
-          + Upload Media
+          {t('updates.uploadMedia')}
         </Button>
       </Box>
 
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiEdit3} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
-            Add a note
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiEdit3}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
+            {t('updates.addNoteHeading')}
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-          Notes
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          fontWeight="500"
+          mb={1}
+        >
+          {t('common.notes')}
         </Text>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Add notes"
+          placeholder={t('updates.addNotesPlaceholder')}
           minH="100px"
         />
       </Box>

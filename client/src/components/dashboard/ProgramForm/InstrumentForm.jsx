@@ -14,8 +14,10 @@ import {
 
 import { InstrumentSearchInput } from '@/components/common/InstrumentSearchInput';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 
 export function InstrumentForm({ setFormData }) {
+  const { t } = useTranslation();
   const [instruments, setInstruments] = useState([]);
   const [quantity, setQuantity] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -104,7 +106,6 @@ export function InstrumentForm({ setFormData }) {
           }}
           onSelectExisting={(inst) => setSelectedInstrument(inst)}
           onCreateNew={handleCreateNewInstrument}
-          placeholder="Search instrument"
         />
         {selectedInstrument && (
           <Text
@@ -112,7 +113,7 @@ export function InstrumentForm({ setFormData }) {
             color="gray.600"
             mt={1}
           >
-            Selected: {selectedInstrument.name}
+            {t('instruments.selected', { name: selectedInstrument.name })}
           </Text>
         )}
       </Box>
@@ -134,7 +135,7 @@ export function InstrumentForm({ setFormData }) {
         onClick={handleSubmit}
         isDisabled={!selectedInstrument}
       >
-        + Add
+        {t('common.add')}
       </Button>
     </HStack>
   );

@@ -25,6 +25,7 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { useTranslation } from 'react-i18next';
 import { FiEdit2, FiUsers } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
@@ -32,13 +33,13 @@ import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
 import CardView from './CardView';
 
-export function downloadAccountsAsCsv(data) {
+export function downloadAccountsAsCsv(data, t) {
   const headers = [
-    'First Name',
-    'Last Name',
-    'Email',
-    'Role',
-    'Program / Region',
+    t('accounts.csvFirstName'),
+    t('accounts.csvLastName'),
+    t('accounts.csvEmail'),
+    t('accounts.csvRole'),
+    t('accounts.csvProgramRegion'),
   ];
   const rows = (data || []).map((user) => [
     escapeCsvValue(user.firstName),
@@ -77,6 +78,7 @@ export const AccountsTable = ({
   onUpdate,
   showCreatedBy = false,
 }) => {
+  const { t } = useTranslation();
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
   const filteredData = useMemo(
     () => applyFilters(activeFilters, originalData ?? []),
@@ -135,8 +137,7 @@ export const AccountsTable = ({
             maxW="250px"
             lineHeight="tall"
           >
-            No accounts have been created yet. Click &quot;New Account&quot; to
-            get started.
+            {t('accounts.noAccountsYet')}
           </Text>
         </VStack>
       </Center>
@@ -166,7 +167,7 @@ export const AccountsTable = ({
                   fontWeight="semibold"
                   letterSpacing="wider"
                 >
-                  NAME
+                  {t('accounts.colName')}
                   <SortArrows
                     columnKey="firstName"
                     sortOrder={sortOrder}
@@ -181,7 +182,7 @@ export const AccountsTable = ({
                   fontWeight="semibold"
                   letterSpacing="wider"
                 >
-                  EMAIL
+                  {t('accounts.colEmail')}
                   <SortArrows
                     columnKey="email"
                     sortOrder={sortOrder}
@@ -196,7 +197,7 @@ export const AccountsTable = ({
                   fontWeight="semibold"
                   letterSpacing="wider"
                 >
-                  PROGRAM / REGION
+                  {t('accounts.colProgramRegion')}
                   <SortArrows
                     columnKey="programs"
                     sortOrder={sortOrder}
@@ -211,7 +212,7 @@ export const AccountsTable = ({
                   fontWeight="semibold"
                   letterSpacing="wider"
                 >
-                  ROLE
+                  {t('accounts.colRole')}
                   <SortArrows
                     columnKey="role"
                     sortOrder={sortOrder}
@@ -225,7 +226,7 @@ export const AccountsTable = ({
                     fontWeight="semibold"
                     letterSpacing="wider"
                   >
-                    CREATED BY
+                    {t('accounts.colCreatedBy')}
                   </Th>
                 )}
                 <Th width="80px"></Th>
@@ -272,7 +273,7 @@ export const AccountsTable = ({
                         fontWeight="bold"
                         fontSize="xs"
                       >
-                        NOT ASSIGNED
+                        {t('common.notAssigned')}
                       </Badge>
                     )}
                   </Td>
@@ -324,7 +325,7 @@ export const AccountsTable = ({
                         bg="white"
                         onClick={() => onUpdate(user)}
                       >
-                        Edit
+                        {t('common.edit')}
                       </Button>
                     </Box>
                   </Td>

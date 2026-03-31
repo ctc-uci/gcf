@@ -13,8 +13,8 @@ import {
   Flex,
   Grid,
   GridItem,
-  HStack,
   Heading,
+  HStack,
   IconButton,
   Input,
   NumberDecrementStepper,
@@ -28,10 +28,15 @@ import {
   TagLabel,
   Text,
   Textarea,
-  VStack,
   useDisclosure,
   useToast,
+  VStack,
 } from '@chakra-ui/react';
+
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { useTranslation } from 'react-i18next';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 function formatUpdateDisplayDate(value) {
@@ -59,10 +64,6 @@ function formatUpdateDisplayDate(value) {
   });
 }
 
-import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import { useRoleContext } from '@/contexts/hooks/useRoleContext';
-
 export const ProgramUpdateForm = ({
   isOpen: isOpenProp,
   onOpen: onOpenProp,
@@ -72,6 +73,7 @@ export const ProgramUpdateForm = ({
   isInstrumentUpdate = null,
   selectedUpdate = null,
 }) => {
+  const { t } = useTranslation();
   const disclosure = useDisclosure();
   const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
   const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
@@ -432,10 +434,12 @@ export const ProgramUpdateForm = ({
       }
 
       toast({
-        title: programUpdateId ? 'Update saved' : 'Update created',
+        title: programUpdateId
+          ? t('updates.savedTitle')
+          : t('updates.createdTitleToast'),
         description: programUpdateId
-          ? 'Program update was updated successfully.'
-          : 'Program update was created successfully.',
+          ? t('updates.savedDesc')
+          : t('updates.programUpdateCreatedDesc'),
         status: 'success',
         duration: 5000,
         isClosable: true,
@@ -446,11 +450,11 @@ export const ProgramUpdateForm = ({
     } catch (error) {
       console.error('Error submitting program update:', error);
       toast({
-        title: 'Failed to save',
+        title: t('updates.failedSaveTitle'),
         description:
           error?.response?.data?.message ??
           error?.message ??
-          'Something went wrong.',
+          t('updates.failedSaveDesc'),
         status: 'error',
         duration: 7000,
         isClosable: true,
@@ -471,33 +475,67 @@ export const ProgramUpdateForm = ({
     >
       <DrawerOverlay />
       <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
-        <Flex position="absolute" top={3} left={3} zIndex={1}>
+        <Flex
+          position="absolute"
+          top={3}
+          left={3}
+          zIndex={1}
+        >
           <IconButton
             icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
-            aria-label={isFullScreen ? 'Minimize' : 'Expand'}
+            aria-label={
+              isFullScreen
+                ? t('fullscreenFlyout.minimize')
+                : t('fullscreenFlyout.expand')
+            }
             variant="ghost"
             size="sm"
             onClick={() => setIsFullScreen(!isFullScreen)}
           />
         </Flex>
 
-        <Box pt={6} pb={2} px={8}>
-          <Text fontSize="xl" fontWeight="600" textAlign="center">
-            Program Update
+        <Box
+          pt={6}
+          pb={2}
+          px={8}
+        >
+          <Text
+            fontSize="xl"
+            fontWeight="600"
+            textAlign="center"
+          >
+            {t('updates.programUpdateTitle')}
           </Text>
           <Divider mt={3} />
         </Box>
 
-        <DrawerBody px={8} pb={24}>
-          <VStack spacing={6} align="stretch">
-            <Heading size="md" mt={4}>
-              Update Information
+        <DrawerBody
+          px={8}
+          pb={24}
+        >
+          <VStack
+            spacing={6}
+            align="stretch"
+          >
+            <Heading
+              size="md"
+              mt={4}
+            >
+              {t('updates.updateInformation')}
             </Heading>
 
-            <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+            <Grid
+              templateColumns="repeat(3, 1fr)"
+              gap={6}
+            >
               <GridItem>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-                  Author
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
+                  {t('updates.colAuthor')}
                 </Text>
                 <HStack spacing={3}>
                   <Avatar
@@ -506,56 +544,101 @@ export const ProgramUpdateForm = ({
                     bg="teal.500"
                     color="white"
                   />
-                  <Text>{authorName || '—'}</Text>
+                  <Text>{authorName || t('common.emDash')}</Text>
                 </HStack>
               </GridItem>
               <GridItem>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-                  Program
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
+                  {t('updates.colProgram')}
                 </Text>
-                <Text fontWeight="500">{programName || '—'}</Text>
+                <Text fontWeight="500">
+                  {programName || t('common.emDash')}
+                </Text>
               </GridItem>
               <GridItem>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-                  Time
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
+                  {t('common.time')}
                 </Text>
-                <Text>{formatUpdateDisplayDate(updateDateTime) || '—'}</Text>
+                <Text>
+                  {formatUpdateDisplayDate(updateDateTime) ||
+                    t('common.emDash')}
+                </Text>
               </GridItem>
             </Grid>
             {isInstrumentUpdate && (
               <Box>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
-                  Flag
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={2}
+                >
+                  {t('updates.flagLabel')}
                 </Text>
                 <Checkbox
                   isChecked={flagged}
                   onChange={(e) => setFlagged(e.target.checked)}
                 >
-                  Yes, this is a special request
+                  {t('updates.specialRequest')}
                 </Checkbox>
               </Box>
             )}
-            <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+            <Grid
+              templateColumns="repeat(3, 1fr)"
+              gap={6}
+            >
               <GridItem>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
-                  Update Type
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
+                  {t('updates.updateType')}
                 </Text>
-                <Text>{isInstrumentUpdate ? 'Instrument' : 'Student'}</Text>
+                <Text>
+                  {isInstrumentUpdate
+                    ? t('updates.typeInstrument')
+                    : t('updates.typeStudent')}
+                </Text>
               </GridItem>
             </Grid>
 
             <Box>
-              <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
-                Photos/Videos
+              <Text
+                color="teal.500"
+                fontSize="sm"
+                fontWeight="500"
+                mb={2}
+              >
+                {t('updates.photosVideos')}
               </Text>
-              <Text color="gray.400" fontSize="sm">
-                No media attached
+              <Text
+                color="gray.400"
+                fontSize="sm"
+              >
+                {t('updates.noMediaAttached')}
               </Text>
             </Box>
 
             <Box>
-              <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
-                Note
+              <Text
+                color="teal.500"
+                fontSize="sm"
+                fontWeight="500"
+                mb={2}
+              >
+                {t('common.note')}
               </Text>
               <Text>{notes || ''}</Text>
             </Box>
@@ -563,13 +646,22 @@ export const ProgramUpdateForm = ({
             <Divider />
             {isInstrumentUpdate && (
               <Box>
-                <Heading size="md">Edit Update</Heading>
+                <Heading size="md">{t('updates.editUpdate')}</Heading>
 
                 <Box>
-                  <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
-                    Instrument & Quantity
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={2}
+                  >
+                    {t('updates.instrumentQuantity')}
                   </Text>
-                  <HStack wrap="wrap" spacing={2} mb={3}>
+                  <HStack
+                    wrap="wrap"
+                    spacing={2}
+                    mb={3}
+                  >
                     {Object.entries(addedInstruments).map(([name, qty]) => (
                       <Tag
                         key={name}
@@ -588,14 +680,17 @@ export const ProgramUpdateForm = ({
                   </HStack>
                   <HStack spacing={2}>
                     <Select
-                      placeholder="Select Instrument"
+                      placeholder={t('updates.selectInstrumentPh')}
                       value={selectedInstrument}
                       onChange={(e) => setSelectedInstrument(e.target.value)}
                       size="sm"
                       maxW="200px"
                     >
                       {existingInstruments.map((instrument) => (
-                        <option key={instrument.id} value={instrument.name}>
+                        <option
+                          key={instrument.id}
+                          value={instrument.name}
+                        >
                           {instrument.name}
                         </option>
                       ))}
@@ -619,7 +714,7 @@ export const ProgramUpdateForm = ({
                       variant="outline"
                       onClick={handleConfirmAddInstrument}
                     >
-                      + Add
+                      {t('common.add')}
                     </Button>
                   </HStack>
                 </Box>

@@ -17,6 +17,7 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { getYouTubeEmbedUrl } from '@/utils/youtube';
+import { useTranslation } from 'react-i18next';
 import { FiFolder, FiPlay } from 'react-icons/fi';
 
 import VideoPlayer from './VideoPlayer';
@@ -27,6 +28,7 @@ function LessonVideos({
   selectedVideo,
   setSelectedVideo,
 }) {
+  const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const userId = currentUser.uid;
 
@@ -138,10 +140,10 @@ function LessonVideos({
         fontWeight="extrabold"
         mb={4}
       >
-        Lesson Videos
+        {t('lessonVideos.title')}
       </Heading>
       {!isLoading && playlists.length === 0 && (
-        <Text color="gray.500">No lesson videos available</Text>
+        <Text color="gray.500">{t('lessonVideos.empty')}</Text>
       )}
       {isLoading && (
         <Box m={5}>
@@ -215,7 +217,7 @@ function LessonVideos({
                 size="lg"
                 color="gray.400"
                 onClick={() => handlePrev(playlist.instrumentName)}
-                aria-label="Scroll left"
+                aria-label={t('lessonVideos.scrollLeft')}
               />
               <Box
                 ref={(el) => {
@@ -320,7 +322,7 @@ function LessonVideos({
                 size="lg"
                 color="gray.400"
                 onClick={() => handleNext(playlist.instrumentName)}
-                aria-label="Scroll right"
+                aria-label={t('lessonVideos.scrollRight')}
               />
             </Box>
           </Box>
