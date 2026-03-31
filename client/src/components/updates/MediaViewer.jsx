@@ -3,6 +3,7 @@ import {
   Box,
   CloseButton,
   Flex,
+  IconButton,
   Image,
   Modal,
   ModalContent,
@@ -10,6 +11,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { MediaCard } from '@/components/media/MediaCard';
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 
 export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
   const [current, setCurrent] = useState(selectedIndex);
@@ -67,6 +69,40 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
             file_type={item?.fileType}
             imageUrl={url}
           />
+
+          {/* Prev / Next arrows */}
+          {updates.length > 1 && (
+            <>
+              <IconButton
+                icon={<ChevronLeftIcon boxSize={6} />}
+                aria-label="Previous"
+                position="absolute"
+                left={3}
+                top="50%"
+                transform="translateY(-50%)"
+                onClick={goPrev}
+                bg="blackAlpha.500"
+                color="white"
+                _hover={{ bg: 'blackAlpha.700' }}
+                borderRadius="full"
+                size="sm"
+              />
+              <IconButton
+                icon={<ChevronRightIcon boxSize={6} />}
+                aria-label="Next"
+                position="absolute"
+                right={3}
+                top="50%"
+                transform="translateY(-50%)"
+                onClick={goNext}
+                bg="blackAlpha.500"
+                color="white"
+                _hover={{ bg: 'blackAlpha.700' }}
+                borderRadius="full"
+                size="sm"
+              />
+            </>
+          )}
 
         </Box>
 
