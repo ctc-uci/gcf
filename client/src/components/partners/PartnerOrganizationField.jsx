@@ -58,7 +58,13 @@ export function PartnerOrganizationField({
 
   return (
     <FormControl isRequired>
-      <FormLabel>{label}</FormLabel>
+      <FormLabel
+        size="sm"
+        fontWeight="normal"
+        color="gray"
+      >
+        {label}
+      </FormLabel>
       <Box>
         <SearchInput
           items={partnerOrgs}
@@ -72,7 +78,7 @@ export function PartnerOrganizationField({
             handleCreateNew(name);
             setSearchQuery('');
           }}
-          placeholder="Search or add partner organization"
+          placeholder="Enter Partner Organization"
         />
         {selected && (
           <Text
