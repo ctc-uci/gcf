@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   Button,
@@ -15,7 +15,6 @@ import {
   NumberInput,
   NumberInputField,
   NumberInputStepper,
-  Select,
   Tag,
   TagCloseButton,
   TagLabel,
@@ -25,6 +24,8 @@ import {
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import ISO6391 from 'iso-639-1';
+import ReactSelect from 'react-select';
 
 import { CurriculumLinkForm } from './CurriculumLinkForm';
 import { InstrumentForm } from './InstrumentForm';
@@ -67,11 +68,22 @@ export const ProgramForm = ({
     state: null,
     students: 0,
     instruments: {},
-    language: null,
+    languages: [],
     programDirectors: [],
     curriculumLinks: [],
     media: [],
   });
+  const languageOptions = useMemo(
+    () =>
+      ISO6391.getAllCodes()
+        .map((code) => ({
+          value: code.toLowerCase(),
+          label: ISO6391.getName(code),
+        }))
+        .filter((option) => option.label)
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    []
+  );
 
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -88,7 +100,7 @@ export const ProgramForm = ({
           city: null,
           students: 0,
           instruments: {},
-          language: null,
+          languages: [],
           programDirectors: [],
           curriculumLinks: [],
           media: [],
@@ -142,6 +154,26 @@ export const ProgramForm = ({
         console.error('Error fetching program instruments:', err);
       }
 
+      const normalizedLanguages = (() => {
+        if (Array.isArray(program.languages)) {
+          return [
+            ...new Set(
+              program.languages
+                .map((value) => String(value).trim().toLowerCase())
+                .filter((value) => ISO6391.validate(value))
+            ),
+          ];
+        }
+        const existingValue = program.primaryLanguage;
+        if (!existingValue) return [];
+        const trimmedValue = String(existingValue).trim();
+        if (ISO6391.validate(trimmedValue.toLowerCase())) {
+          return [trimmedValue.toLowerCase()];
+        }
+        const mappedCode = ISO6391.getCode(trimmedValue);
+        return mappedCode ? [mappedCode.toLowerCase()] : [];
+      })();
+
       setFormState({
         status: program.status ?? null,
         programName: program.title ?? '',
@@ -152,7 +184,7 @@ export const ProgramForm = ({
         country: program.country ?? null,
         students: program.students ?? 0,
         instruments: instrumentMap,
-        language: program.primaryLanguage?.toLowerCase() ?? null,
+        languages: normalizedLanguages,
 
         programDirectors: mappedProgramDirectors,
 
@@ -229,8 +261,8 @@ export const ProgramForm = ({
     setFormState({ ...formState, students: numStudents });
   }
 
-  function handleLanguageChange(langChange) {
-    setFormState({ ...formState, language: langChange });
+  function handleLanguageChange(languageChanges) {
+    setFormState({ ...formState, languages: languageChanges });
   }
 
   const handleMediaChange = (newMediaFiles) => {
@@ -251,7 +283,7 @@ export const ProgramForm = ({
         state: formState.state,
         city: formState.city,
         students: formState.students ?? 0,
-        primaryLanguage: formState.language,
+        languages: formState.languages ?? [],
         partnerOrg: 1,
         createdBy: currentUser?.uid || currentUser?.id,
         description: '',
@@ -549,17 +581,20 @@ export const ProgramForm = ({
                   )}
                 </HStack>
                 <h3>Language</h3>
-                <Select
+                <ReactSelect
                   placeholder="Language"
-                  value={formState.language || ''}
-                  onChange={(e) => handleLanguageChange(e.target.value)}
-                >
-                  <option value="english">English</option>
-                  <option value="spanish">Spanish</option>
-                  <option value="french">French</option>
-                  <option value="arabic">Arabic</option>
-                  <option value="mandarin">Mandarin</option>
-                </Select>
+                  isMulti
+                  closeMenuOnSelect={false}
+                  options={languageOptions}
+                  value={languageOptions.filter((option) =>
+                    (formState.languages ?? []).includes(option.value)
+                  )}
+                  onChange={(selectedOptions) =>
+                    handleLanguageChange(
+                      (selectedOptions ?? []).map((option) => option.value)
+                    )
+                  }
+                />
                 <h3>Program Directors</h3>
                 <HStack wrap="wrap">
                   <ProgramDirectorForm
