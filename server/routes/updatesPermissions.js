@@ -114,6 +114,7 @@ updatesPermissionsRouter.get('/program-updates/pd/:id', async (req, res) => {
       INNER JOIN program ON program_update.program_id = program.id
       LEFT JOIN gcf_user AS creator ON creator.id = program.created_by
       INNER JOIN program_director ON program_director.program_id = program.id AND program_director.user_id = $1
+      WHERE program_update.show_on_table = TRUE
       ORDER BY program_update.update_date DESC;`;
 
     const data = await db.query(finalQuery, [id]);
@@ -169,6 +170,7 @@ updatesPermissionsRouter.get('/program-updates/:id', async (req, res) => {
       INNER JOIN program ON program_update.program_id = program.id
       LEFT JOIN gcf_user AS creator ON creator.id = program.created_by
       ${filterJoin}
+      WHERE program_update.show_on_table = TRUE
       ORDER BY program_update.update_date DESC;`;
 
     const data = await db.query(finalQuery, filterJoin ? [id] : []);
