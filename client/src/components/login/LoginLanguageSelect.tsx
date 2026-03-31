@@ -8,7 +8,7 @@ const LOCALE_META: { code: AppLocale; labelKey: string; flag: string }[] = [
   { code: 'en', labelKey: 'languageSelector.english', flag: '🇺🇸' },
   { code: 'es', labelKey: 'languageSelector.spanish', flag: '🇪🇸' },
   { code: 'fr', labelKey: 'languageSelector.french', flag: '🇫🇷' },
-  { code: 'ch', labelKey: 'languageSelector.chinese', flag: '🇨🇳' },
+  { code: 'zh', labelKey: 'languageSelector.chinese', flag: '🇨🇳' },
 ];
 
 export function LoginLanguageSelect() {

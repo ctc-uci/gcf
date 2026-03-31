@@ -97,11 +97,11 @@
   },
   "login": {
     "welcome": [
-      "¡Bienvenido!",
+      "Welcome!",
       "Karibu!",
       "¡Bienvenido!",
       "欢迎!",
-      "¡Bienvenido!"
+      "Willkommen!"
     ],
     "gcfGlobeAlt": "Globo del GCF",
     "backToLogin": "Volver a iniciar sesión",
@@ -182,7 +182,7 @@
     "langEnglish": "🇺🇸 Inglés",
     "langSpanish": "🇪🇸 Español",
     "langFrench": "🇫🇷 Francés",
-    "langChinese": "🇨🇳 chino",
+    "langChinese": "🇨🇳 Chino",
     "changePassword": "Cambiar la contraseña",
     "togglePassword": "Alternar visibilidad de contraseña",
     "invalidInfoTitle": "¡Información no válida!",

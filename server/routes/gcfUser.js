@@ -335,7 +335,7 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
   }
 });
 
-const ALLOWED_PREFERRED_LANGUAGES = new Set(['en', 'es', 'fr', 'ch']);
+const ALLOWED_PREFERRED_LANGUAGES = new Set(['en', 'es', 'fr', 'zh']);
 
 function normalizePreferredLanguage(raw) {
   if (raw == null) return '';

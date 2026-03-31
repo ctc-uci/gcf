@@ -97,7 +97,7 @@ export const Profile = () => {
         return t('profile.langSpanish');
       case 'fr':
         return t('profile.langFrench');
-      case 'ch':
+      case 'zh':
         return t('profile.langChinese');
       default:
         return t('profile.langEnglish');

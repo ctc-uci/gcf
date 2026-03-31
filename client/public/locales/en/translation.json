@@ -412,7 +412,7 @@
     "toastSuccessTitle": "Upload successful.",
     "toastSuccessDesc": "All files have been uploaded to the server.",
     "toastErrorTitle": "Upload failed.",
-    "toastErrorDesc": "There was an error uploading 1 of more of your files."
+    "toastErrorDesc": "There was an error uploading 1 or more of your files."
   },
   "regions": {
     "pageTitle": "Regions",

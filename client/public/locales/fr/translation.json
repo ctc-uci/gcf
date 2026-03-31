@@ -6,7 +6,7 @@
     "edit": "Modifier",
     "submit": "Soumettre",
     "search": "Recherche",
-    "back": "Dos",
+    "back": "Retour",
     "expand": "Développer",
     "minimize": "Minimiser",
     "user": "Utilisateur",
@@ -42,7 +42,7 @@
     "note": "Note",
     "time": "Temps",
     "flag": "Drapeau",
-    "type": "Taper",
+    "type": "Type",
     "continueEditing": "Continuer la modification",
     "exitWithoutSaving": "Quitter sans sauvegarder",
     "confirmChanges": "Confirmer les modifications",
@@ -97,7 +97,7 @@
   },
   "login": {
     "welcome": [
-      "Accueillir!",
+      "Welcome!",
       "Karibu!",
       "¡Bienvenido!",
       "欢迎!",

@@ -1,8 +1,8 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// NOTE: The on-disk locale folder for "Chinese" is `public/locales/ch/*`.
-export const APP_LOCALES = ['en', 'es', 'fr', 'ch'] as const;
+// NOTE: The on-disk locale folder for "Chinese" is `public/locales/zh/*`.
+export const APP_LOCALES = ['en', 'es', 'fr', 'zh'] as const;
 export type AppLocale = (typeof APP_LOCALES)[number];
 
 export function isAppLocale(value: string): value is AppLocale {
@@ -30,7 +30,7 @@ async function fetchTranslation(
   return res.json() as Promise<Record<string, unknown>>;
 }
 
-/** Loads locale bundles from public/locales/{en,es,fr,ch}/translation.json */
+/** Loads locale bundles from public/locales/{en,es,fr,zh}/translation.json */
 export async function initI18n(): Promise<void> {
   const initial = getStoredLocale();
 

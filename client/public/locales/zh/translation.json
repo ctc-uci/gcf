@@ -1,13 +1,13 @@
 {
   "common": {
-    "save": "节省",
+    "save": "保存",
     "cancel": "取消",
     "delete": "删除",
     "edit": "编辑",
     "submit": "提交",
     "search": "搜索",
     "back": "后退",
-    "expand": "扩张",
+    "expand": "展开",
     "minimize": "最小化",
     "user": "用户",
     "na": "不适用",
@@ -20,7 +20,7 @@
     "login": "登录",
     "signup": "报名",
     "new": "新的",
-    "profile": "轮廓",
+    "profile": "个人资料",
     "logOut": "退出",
     "add": "+ 添加",
     "addFilter": "+ 添加过滤器",
@@ -30,7 +30,7 @@
     "no": "不",
     "name": "姓名",
     "date": "日期",
-    "status": "地位",
+    "status": "状态",
     "author": "作者",
     "program": "程序",
     "region": "地区",
@@ -81,7 +81,7 @@
     "tableView": "表格视图",
     "cardView": "卡片视图",
     "filter": "筛选",
-    "sort": "种类",
+    "sort": "排序",
     "listView": "列表视图",
     "gridView": "网格视图",
     "listViewAria": "列表视图",
@@ -173,7 +173,7 @@
     "english": "英语",
     "spanish": "西班牙语",
     "french": "法语",
-    "chinese": "中国人"
+    "chinese": "中文"
   },
   "profile": {
     "uploadPhoto": "上传照片",
