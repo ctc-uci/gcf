@@ -19,6 +19,8 @@ export function getRouteByRole(role, userId) {
 }
 
 export function mapAdminRow(row) {
+  const languages = Array.isArray(row.languages) ? row.languages : [];
+
   return {
     id: row.id,
     title: row.title ?? row.name,
@@ -34,6 +36,7 @@ export function mapAdminRow(row) {
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
     playlists: row.playlists,
+    languages,
     primaryLanguage: row.primaryLanguage,
 
     media: row.media,
@@ -41,6 +44,8 @@ export function mapAdminRow(row) {
 }
 
 export function mapRdRow(row) {
+  const languages = Array.isArray(row.languages) ? row.languages : [];
+
   return {
     id: row.programId,
     title: row.programName,
@@ -57,6 +62,7 @@ export function mapRdRow(row) {
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
     playlists: row.playlists,
+    languages,
     primaryLanguage: row.primaryLanguage,
     media: row.media,
   };

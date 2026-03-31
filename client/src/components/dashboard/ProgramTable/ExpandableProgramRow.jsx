@@ -11,12 +11,21 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import ISO6391 from 'iso-639-1';
+
 import { formatLaunchDate } from './programTableMappers';
 import { getInstrumentTagStyle } from './programTableTagConstants';
 import { StatusTag } from './StatusTag';
 
 export function ExpandableProgramRow({ p, onEdit }) {
   const { isOpen, onToggle } = useDisclosure();
+  const languageCodes = Array.isArray(p.languages) ? p.languages : [];
+
+  const languageLabel = languageCodes.length
+    ? languageCodes
+        .map((code) => ISO6391.getName(String(code).toLowerCase()) || code)
+        .join(', ')
+    : '';
 
   return (
     <>
@@ -93,7 +102,7 @@ export function ExpandableProgramRow({ p, onEdit }) {
                   >
                     Language:
                   </Box>
-                  <Box>{p.primaryLanguage ?? '-'}</Box>
+                  <Box>{languageLabel}</Box>
                 </Box>
                 <Box
                   flex="1"

@@ -6,6 +6,22 @@ import { db } from '../db/db-pgp';
 const programRouter = express.Router();
 programRouter.use(express.json());
 
+function normalizeLanguages(languages, primaryLanguage) {
+  const candidateCodes = Array.isArray(languages)
+    ? languages
+    : primaryLanguage
+      ? [primaryLanguage]
+      : [];
+
+  return [
+    ...new Set(
+      candidateCodes
+        .map((value) => String(value).trim().toLowerCase())
+        .filter((value) => /^[a-z]{2}$/.test(value))
+    ),
+  ];
+}
+
 programRouter.get('/', async (req, res) => {
   try {
     const program = await db.query(`SELECT * FROM program`);
@@ -104,11 +120,13 @@ programRouter.post('/', async (req, res) => {
       city,
       title,
       description,
+      languages,
       primaryLanguage,
       partnerOrg,
       status,
       launchDate,
     } = req.body;
+    const normalizedLanguages = normalizeLanguages(languages, primaryLanguage);
 
     const newProgram = await db.query(
       `
@@ -121,7 +139,7 @@ programRouter.post('/', async (req, res) => {
         city,
         title,
         description,
-        primary_language,
+        languages,
         partner_org,
         status,
         launch_date
@@ -139,7 +157,7 @@ programRouter.post('/', async (req, res) => {
         city,
         title,
         description ?? null,
-        primaryLanguage ?? null,
+        normalizedLanguages.length > 0 ? normalizedLanguages : null,
         partnerOrg,
         status,
         launchDate,
@@ -163,11 +181,13 @@ programRouter.put('/:id', async (req, res) => {
       city,
       title,
       description,
+      languages,
       primaryLanguage,
       partnerOrg,
       status,
       launchDate,
     } = req.body;
+    const normalizedLanguages = normalizeLanguages(languages, primaryLanguage);
 
     const updatedProgram = await db.query(
       `
@@ -179,7 +199,7 @@ programRouter.put('/:id', async (req, res) => {
         city = COALESCE($4, city),
         title = COALESCE($5, title),
         description = COALESCE($6, description),
-        primary_language = COALESCE($7, primary_language),
+        languages = COALESCE($7, languages),
         partner_org = COALESCE($8, partner_org),
         status = COALESCE($9, status),
         launch_date = COALESCE($10, launch_date)
@@ -193,7 +213,7 @@ programRouter.put('/:id', async (req, res) => {
         city,
         title,
         description,
-        primaryLanguage,
+        normalizedLanguages.length > 0 ? normalizedLanguages : null,
         partnerOrg,
         status,
         launchDate,

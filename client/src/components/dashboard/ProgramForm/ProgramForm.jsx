@@ -68,7 +68,7 @@ export const ProgramForm = ({
     state: null,
     students: 0,
     instruments: {},
-    language: null,
+    languages: [],
     programDirectors: [],
     curriculumLinks: [],
     media: [],
@@ -100,7 +100,7 @@ export const ProgramForm = ({
           city: null,
           students: 0,
           instruments: {},
-          language: null,
+          languages: [],
           programDirectors: [],
           curriculumLinks: [],
           media: [],
@@ -154,15 +154,24 @@ export const ProgramForm = ({
         console.error('Error fetching program instruments:', err);
       }
 
-      const normalizedPrimaryLanguage = (() => {
+      const normalizedLanguages = (() => {
+        if (Array.isArray(program.languages)) {
+          return [
+            ...new Set(
+              program.languages
+                .map((value) => String(value).trim().toLowerCase())
+                .filter((value) => ISO6391.validate(value))
+            ),
+          ];
+        }
         const existingValue = program.primaryLanguage;
-        if (!existingValue) return null;
+        if (!existingValue) return [];
         const trimmedValue = String(existingValue).trim();
         if (ISO6391.validate(trimmedValue.toLowerCase())) {
-          return trimmedValue.toLowerCase();
+          return [trimmedValue.toLowerCase()];
         }
         const mappedCode = ISO6391.getCode(trimmedValue);
-        return mappedCode ? mappedCode.toLowerCase() : null;
+        return mappedCode ? [mappedCode.toLowerCase()] : [];
       })();
 
       setFormState({
@@ -175,7 +184,7 @@ export const ProgramForm = ({
         country: program.country ?? null,
         students: program.students ?? 0,
         instruments: instrumentMap,
-        language: normalizedPrimaryLanguage,
+        languages: normalizedLanguages,
 
         programDirectors: mappedProgramDirectors,
 
@@ -252,8 +261,8 @@ export const ProgramForm = ({
     setFormState({ ...formState, students: numStudents });
   }
 
-  function handleLanguageChange(langChange) {
-    setFormState({ ...formState, language: langChange });
+  function handleLanguageChange(languageChanges) {
+    setFormState({ ...formState, languages: languageChanges });
   }
 
   const handleMediaChange = (newMediaFiles) => {
@@ -274,7 +283,7 @@ export const ProgramForm = ({
         state: formState.state,
         city: formState.city,
         students: formState.students ?? 0,
-        primaryLanguage: formState.language,
+        languages: formState.languages ?? [],
         partnerOrg: 1,
         createdBy: currentUser?.uid || currentUser?.id,
         description: '',
@@ -574,15 +583,16 @@ export const ProgramForm = ({
                 <h3>Language</h3>
                 <ReactSelect
                   placeholder="Language"
-                  isClearable
+                  isMulti
+                  closeMenuOnSelect={false}
                   options={languageOptions}
-                  value={
-                    languageOptions.find(
-                      (option) => option.value === formState.language
-                    ) ?? null
-                  }
-                  onChange={(selectedOption) =>
-                    handleLanguageChange(selectedOption?.value ?? null)
+                  value={languageOptions.filter((option) =>
+                    (formState.languages ?? []).includes(option.value)
+                  )}
+                  onChange={(selectedOptions) =>
+                    handleLanguageChange(
+                      (selectedOptions ?? []).map((option) => option.value)
+                    )
                   }
                 />
                 <h3>Program Directors</h3>

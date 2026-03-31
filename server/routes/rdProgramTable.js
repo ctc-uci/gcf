@@ -19,6 +19,7 @@ async function getDataByUserId(userId) {
             p.launch_date AS program_launch_date,
             p.country AS country_id,
             c.name AS program_location,
+            p.languages AS languages,
 
             COALESCE(SUM(ec.enrollment_change), 0) - COALESCE(SUM(ec.graduated_change), 0) AS total_students,
             COALESCE(SUM(ic.amount_changed), 0) AS total_instruments
@@ -46,6 +47,7 @@ async function getDataByUserId(userId) {
             p.state,
             p.country,
             p.launch_date,
+            p.languages,
             c.name
         ORDER BY
             r.name,
