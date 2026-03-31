@@ -115,7 +115,7 @@ export default function CreateUpdateStudent({
           </Heading>
         </HStack>
         <Text
-          color="teal.500"
+          color="gray.500"
           fontSize="sm"
           fontWeight="500"
           mb={1}
@@ -172,7 +172,7 @@ export default function CreateUpdateStudent({
           </Heading>
         </HStack>
         <Text
-          color="teal.500"
+          color="gray.500"
           fontSize="sm"
           fontWeight="500"
           mb={1}
