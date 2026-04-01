@@ -306,14 +306,15 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
       }
 
       if (updateType === 'student') {
-        const reported = parseInt(String(studentCount), 10);
-        const newTotal = Number.isNaN(reported) ? 0 : reported;
-        const enrollmentDelta = newTotal - programEnrollmentCount;
+        const affected = parseInt(String(studentCount), 10);
+        const count = Number.isNaN(affected) ? 0 : affected;
+        const isPositive = studentWhatHappened === 'new_students_joined';
+        const enrollmentDelta = isPositive ? count : -count;
         if (enrollmentDelta !== 0) {
           await backend.post('/enrollmentChange', {
             update_id: newUpdateId,
             enrollment_change: enrollmentDelta,
-            graduated_change: 0,
+            graduated_change: studentWhatHappened === 'graduated' ? count : 0,
             event_type: studentWhatHappened || 'other',
             description: notes || null,
           });
