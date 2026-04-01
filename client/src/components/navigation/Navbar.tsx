@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
@@ -10,6 +10,7 @@ import {
   Icon,
   Image,
   Text,
+  useOutsideClick,
 } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
@@ -37,12 +38,19 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useOutsideClick({
+    ref: menuRef,
+    handler: () => setIsMenuOpen(false),
+  });
 
   const handleMenuToggle = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
   const handleLogout = async () => {
+    setIsMenuOpen(false);
     await logout();
     navigate('/login');
   };
@@ -152,7 +160,10 @@ export const Navbar = () => {
           gap={2}
           align="center"
         >
-          <Box position="relative">
+          <Box
+            ref={menuRef}
+            position="relative"
+          >
             <Button
               bg="transparent"
               p={0}
@@ -221,7 +232,10 @@ export const Navbar = () => {
                   w="100%"
                 >
                   <Button
-                    onClick={() => navigate('/profile')}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate('/profile');
+                    }}
                     leftIcon={
                       <Icon
                         as={HiOutlineUser}
