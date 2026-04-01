@@ -200,16 +200,6 @@ export const CreateProgramUpdateForm = ({ isOpen, onClose, onSave }) => {
         });
         return;
       }
-      if (!notes.trim()) {
-        toast({
-          title: 'Validation error',
-          description: 'Please add a note.',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-        return;
-      }
     }
 
     if (updateType === 'instrument') {
