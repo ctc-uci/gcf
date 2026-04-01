@@ -138,6 +138,7 @@ export const Account = () => {
             setSelectedUser(null);
           }}
           setIsCardView={setIsCardView}
+          isCardView={isCardView}
           columns={columns}
           onFilterChange={(filters) => setActiveFilters(filters)}
         />
