@@ -131,7 +131,8 @@ export const Map = () => {
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleCountry(geo);
                     }}
                     onMouseEnter={() => setHoverRegions(regionId)}
