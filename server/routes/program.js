@@ -58,7 +58,7 @@ programRouter.get('/students/:id', async (req, res) => {
   }
 });
 
-programRouter.get('/country/:id', async (req, res) => {
+programRouter.get('/region/:id', async (req, res) => {
   try {
     const { id } = req.params;
 

@@ -68,7 +68,7 @@ export const Map = () => {
 
       try {
         const programRes = await backend.get(
-          `/program/country/${regionsRes.data[0].regionId}`
+          `/program/region/${regionsRes.data[0].regionId}`
         );
         setPrograms(programRes.data);
       } catch (error) {
@@ -84,7 +84,6 @@ export const Map = () => {
         setRegionName(region.data.name);
       } catch (error) {
         console.error('Error fetching region name', error);
-        return;
       }
     } catch (error) {
       console.error('Error fetching country or region data:', error);
@@ -147,7 +146,7 @@ export const Map = () => {
                         outline: 'none',
                       },
                       hover: {
-                        fill: isHovered ? '#868686' : '#868686',
+                        fill: '#868686',
                         outline: 'none',
                         cursor: 'pointer',
                       },

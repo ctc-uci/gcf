@@ -84,28 +84,32 @@ const CardView = ({
 
   useEffect(() => {
     const fetchNames = async () => {
-      const fetchCountry = await backend.get(`/country/${country}`);
+      try {
+        const fetchCountry = await backend.get(`/country/${country}`);
 
-      const countries = await GetCountries();
-      const foundCountry = countries.find(
-        (c) => String(c.iso3) === String(fetchCountry.data.isoCode)
-      );
-
-      if (foundCountry) {
-        setCountryName(foundCountry.name);
-        setFlag(foundCountry.emoji);
-        const states = await GetState(parseInt(foundCountry.id));
-        const foundState = states.find(
-          (s) => parseInt(s.id) === parseInt(state)
+        const countries = await GetCountries();
+        const foundCountry = countries.find(
+          (c) => String(c.iso3) === String(fetchCountry.data.isoCode)
         );
 
-        if (foundState) {
-          const cities = await GetCity(foundCountry.id, foundState.id);
-          const foundCity = cities.find(
-            (c) => parseInt(c.id) === parseInt(city)
+        if (foundCountry) {
+          setCountryName(foundCountry.name);
+          setFlag(foundCountry.emoji);
+          const states = await GetState(parseInt(foundCountry.id));
+          const foundState = states.find(
+            (s) => parseInt(s.id) === parseInt(state)
           );
-          if (foundCity) setCityName(foundCity.name);
+
+          if (foundState) {
+            const cities = await GetCity(foundCountry.id, foundState.id);
+            const foundCity = cities.find(
+              (c) => parseInt(c.id) === parseInt(city)
+            );
+            if (foundCity) setCityName(foundCity.name);
+          }
         }
+      } catch (error) {
+        console.error('Error fetching location data: ', error);
       }
     };
     fetchNames();
