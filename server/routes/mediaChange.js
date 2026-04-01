@@ -205,8 +205,8 @@ mediaChangeRouter.get('/:userId/media-updates', async (req, res) => {
 
     const role = roleResult[0].role;
 
-    if (role !== 'Admin' && role !== 'Regional Director') {
-      return res.status(403).send('Access denied');
+    if (role !== "Super Admin" && role !== "Admin" && role !== "Regional Director") {
+      return res.status(403).send("Access denied");
     }
 
     let filterJoin = '';

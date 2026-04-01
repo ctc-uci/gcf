@@ -1,23 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  AddIcon,
-  DownloadIcon,
-  HamburgerIcon,
-  SearchIcon,
-} from '@chakra-ui/icons';
-import {
+  Avatar,
   Badge,
   Box,
-  Button,
   Center,
-  Flex,
-  Heading,
-  IconButton,
-  Input,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+  HStack,
+  Icon,
   Spinner,
   Table,
   TableContainer,
@@ -34,52 +23,88 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { FiStar, FiUser } from 'react-icons/fi';
 import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
-import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
-import { ProgramUpdateForm } from './ProgramUpdateForm';
+import { ProgramUpdateForm } from './forms/ProgramUpdateForm';
 
 export function downloadProgramUpdatesAsCsv(data) {
-  const headers = ['Time', 'Notes', 'Program', 'Author', 'Status'];
+  const headers = [
+    'Flag',
+    'Type',
+    'Update Note',
+    'Status',
+    'Author',
+    'Program',
+    'Date',
+  ];
   const rows = (data || []).map((row) => [
-    escapeCsvValue(row.updateDate),
+    escapeCsvValue(row.flagged ? 'Flagged' : ''),
+    escapeCsvValue(row.updateType || row.title || ''),
     escapeCsvValue(row.note),
-    escapeCsvValue(row.name),
-    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
     escapeCsvValue(row.status),
+    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
+    escapeCsvValue(row.name),
+    escapeCsvValue(row.updateDate),
   ]);
   downloadCsv(headers, rows, `program-updates-${getFilenameTimestamp()}.csv`);
 }
 
-export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const columns = [
-    {
-      key: 'updateDate',
-      type: 'date',
-    },
-    {
-      key: 'note',
-      type: 'text',
-    },
-    {
-      key: 'name',
-      type: 'text',
-    },
-    {
-      key: 'fullName',
-      type: 'text',
-    },
-    {
-      key: 'status',
-      type: 'select',
-      options: ['Active', 'Inactive'],
-    },
-  ];
-  const [activeFilters, setActiveFilters] = useState([]);
+const StatusBadge = ({ status }) => {
+  const isResolved =
+    status?.toLowerCase() === 'resolved' || status?.toLowerCase() === 'active';
+  return (
+    <Badge
+      bg={isResolved ? 'gray.100' : 'red.100'}
+      color={isResolved ? 'gray.700' : 'red.700'}
+      borderRadius="md"
+      px={2}
+      py={0.5}
+      fontSize="xs"
+      fontWeight="500"
+      textTransform="capitalize"
+    >
+      {isResolved ? 'Resolved' : 'Unresolved'}
+    </Badge>
+  );
+};
+
+const TypeBadge = ({ type }) => {
+  const label = type || 'Student';
+  const isInstrument = label.toLowerCase() === 'instrument';
+  return (
+    <Badge
+      variant="outline"
+      borderColor={isInstrument ? 'teal.300' : 'teal.200'}
+      color={isInstrument ? 'teal.600' : 'teal.500'}
+      bg="white"
+      borderRadius="md"
+      px={2}
+      py={0.5}
+      fontSize="xs"
+      fontWeight="500"
+      textTransform="capitalize"
+    >
+      {label}
+    </Badge>
+  );
+};
+
+export const ProgramUpdatesTable = ({
+  originalData,
+  isLoading,
+  onSave,
+  searchQuery = '',
+  embedded = false,
+  showStatus = false,
+  showFlagAndType = false,
+  activeFilters: externalFilters,
+}) => {
+  const [internalFilters] = useState([]);
+  const activeFilters = externalFilters ?? internalFilters;
   const filteredData = useMemo(
     () => applyFilters(activeFilters, originalData),
     [activeFilters, originalData]
@@ -87,26 +112,22 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
 
   const [selectedUpdate, setSelectedUpdate] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+
   const openEditForm = (update) => {
     setSelectedUpdate(update);
     setIsFormOpen(true);
   };
 
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
-  };
-
   const displayData = useMemo(() => {
-    if (searchQuery === '') {
-      return filteredData;
-    }
+    if (!searchQuery) return filteredData;
+    const q = searchQuery.toLowerCase();
     return filteredData.filter(
       (update) =>
-        update.updateDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        update.note.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        update.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        update.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        update.status.includes(searchQuery.toLowerCase())
+        (update.note || '').toLowerCase().includes(q) ||
+        (update.name || '').toLowerCase().includes(q) ||
+        (update.fullName || '').toLowerCase().includes(q) ||
+        (update.status || '').toLowerCase().includes(q) ||
+        (update.updateDate || '').toLowerCase().includes(q)
     );
   }, [searchQuery, filteredData]);
 
@@ -130,187 +151,234 @@ export const ProgramUpdatesTable = ({ originalData, isLoading, onSave }) => {
         }}
         onSave={onSave}
         programUpdateId={selectedUpdate?.id}
+        isInstrumentUpdate={selectedUpdate?.isInstrumentUpdate}
+        selectedUpdate={selectedUpdate}
       />
-      <Box
-        mt="30px"
-        ml="10px"
-      >
-        <Flex
-          gap={10}
-          mb="20px"
-          alignItems="center"
-        >
-          <Heading>Program Updates</Heading>
-          <SearchIcon
-            mt="10px"
-            ml="10px"
-          />
-          <Input
-            placeholder="Type to search"
-            variant="flushed"
-            w="200px"
-            value={searchQuery}
-            onChange={handleSearch}
-          />
-          <Popover>
-            <PopoverTrigger>
-              <IconButton
-                aria-label="filter"
-                icon={<HiOutlineAdjustmentsHorizontal />}
-                size="sm"
-                variant="ghost"
-              />
-            </PopoverTrigger>
-            <PopoverContent
-              w="800px"
-              maxW="90vw"
-              shadow="xl"
-            >
-              <FilterComponent
-                columns={columns}
-                onFilterChange={(filters) => {
-                  setActiveFilters(filters);
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-          <Text
-            fontSize="sm"
-            color="gray.500"
-          >
-            Displaying {tableData.length} results
-          </Text>
-          <IconButton
-            aria-label="menu"
-            icon={<HamburgerIcon />}
-            size="sm"
-            variant="ghost"
-          />
-          <IconButton
-            aria-label="Download"
-            icon={<DownloadIcon />}
-            size="sm"
-            variant="ghost"
-            onClick={() => downloadProgramUpdatesAsCsv(tableData)}
-          />
-          <Button
-            size="sm"
-            rightIcon={<AddIcon />}
-            onClick={() => {
-              openEditForm(null);
-            }}
-            ml="auto"
-          >
-            New
-          </Button>
-        </Flex>
 
-        <Box position="relative">
-          <TableContainer
-            overflowX="auto"
-            maxW="100%"
-          >
-            <Table variant="simple">
-              <Thead>
-                {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
-                <Tr>
+      <Box position="relative">
+        <TableContainer
+          overflowX="auto"
+          maxW="100%"
+        >
+          <Table variant="simple">
+            <Thead>
+              <Tr>
+                {showFlagAndType && (
                   <Th
-                    onClick={() => handleSort('updateDate')}
+                    onClick={() => handleSort('flagged')}
                     cursor="pointer"
+                    color="gray.500"
+                    fontSize="xs"
+                    textTransform="uppercase"
+                    fontWeight="600"
+                    w="60px"
                   >
-                    Time{' '}
+                    Flag
                     <SortArrows
-                      columnKey={'updateDate'}
+                      columnKey="flagged"
                       sortOrder={sortOrder}
                     />
                   </Th>
+                )}
+                {showFlagAndType && (
                   <Th
-                    onClick={() => handleSort('note')}
+                    onClick={() => handleSort('updateType')}
                     cursor="pointer"
+                    color="gray.500"
+                    fontSize="xs"
+                    textTransform="uppercase"
+                    fontWeight="600"
                   >
-                    Notes{' '}
+                    Type
                     <SortArrows
-                      columnKey={'note'}
+                      columnKey="updateType"
                       sortOrder={sortOrder}
                     />
                   </Th>
-                  <Th
-                    onClick={() => handleSort('programName')}
-                    cursor="pointer"
-                  >
-                    Program{' '}
-                    <SortArrows
-                      columnKey={'programName'}
-                      sortOrder={sortOrder}
-                    />
-                  </Th>
-                  <Th
-                    onClick={() => handleSort('firstName')}
-                    cursor="pointer"
-                  >
-                    Author{' '}
-                    <SortArrows
-                      columnKey={'firstName'}
-                      sortOrder={sortOrder}
-                    />
-                  </Th>
+                )}
+                <Th
+                  onClick={() => handleSort('note')}
+                  cursor="pointer"
+                  color="gray.500"
+                  fontSize="xs"
+                  textTransform="uppercase"
+                  fontWeight="600"
+                >
+                  Update Note
+                  <SortArrows
+                    columnKey="note"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                {(showStatus || showFlagAndType) && (
                   <Th
                     onClick={() => handleSort('status')}
                     cursor="pointer"
+                    color="gray.500"
+                    fontSize="xs"
+                    textTransform="uppercase"
+                    fontWeight="600"
                   >
-                    Status{' '}
+                    Status
                     <SortArrows
-                      columnKey={'status'}
+                      columnKey="status"
                       sortOrder={sortOrder}
                     />
                   </Th>
+                )}
+                <Th
+                  onClick={() => handleSort('firstName')}
+                  cursor="pointer"
+                  color="gray.500"
+                  fontSize="xs"
+                  textTransform="uppercase"
+                  fontWeight="600"
+                >
+                  Author
+                  <SortArrows
+                    columnKey="firstName"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort('name')}
+                  cursor="pointer"
+                  color="gray.500"
+                  fontSize="xs"
+                  textTransform="uppercase"
+                  fontWeight="600"
+                >
+                  Program
+                  <SortArrows
+                    columnKey="name"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort('updateDate')}
+                  cursor="pointer"
+                  color="gray.500"
+                  fontSize="xs"
+                  textTransform="uppercase"
+                  fontWeight="600"
+                >
+                  Date
+                  <SortArrows
+                    columnKey="updateDate"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {tableData.length === 0 && isLoading ? (
+                <Tr>
+                  <Td
+                    colSpan={
+                      4 +
+                      (showStatus || showFlagAndType ? 1 : 0) +
+                      (showFlagAndType ? 2 : 0)
+                    }
+                  >
+                    <Center py={8}>
+                      <Spinner size="lg" />
+                    </Center>
+                  </Td>
                 </Tr>
-              </Thead>
-              <Tbody>
-                {tableData.length === 0 && isLoading ? (
-                  <Tr>
-                    <Td colSpan={5}>
-                      <Center py={8}>
-                        <Spinner size="lg" />
-                      </Center>
+              ) : (
+                tableData.map((row) => (
+                  <Tr
+                    key={row.id}
+                    onClick={() => openEditForm(row)}
+                    cursor="pointer"
+                    _hover={{ bg: 'gray.50' }}
+                  >
+                    {showFlagAndType && (
+                      <Td>
+                        <Icon
+                          as={FiStar}
+                          boxSize={4}
+                          color={row.flagged ? 'teal.500' : 'gray.300'}
+                          fill={row.flagged ? 'teal.500' : 'none'}
+                        />
+                      </Td>
+                    )}
+                    {showFlagAndType && (
+                      <Td>
+                        <TypeBadge
+                          type={
+                            row.isInstrumentUpdate ? 'Instrument' : 'Student'
+                          }
+                        />
+                      </Td>
+                    )}
+                    <Td>
+                      <Text
+                        noOfLines={1}
+                        maxW="400px"
+                      >
+                        {row.note || 'Note about the program...'}
+                      </Text>
+                    </Td>
+                    {(showStatus || showFlagAndType) && (
+                      <Td>
+                        <StatusBadge status={row.status} />
+                      </Td>
+                    )}
+                    <Td>
+                      <HStack spacing={2}>
+                        <Avatar
+                          size="xs"
+                          name={
+                            [row.firstName, row.lastName]
+                              .filter(Boolean)
+                              .join(' ') || undefined
+                          }
+                          bg="teal.500"
+                          color="white"
+                        />
+                        <Text fontSize="sm">
+                          {[row.firstName, row.lastName]
+                            .filter(Boolean)
+                            .join(' ') || '—'}
+                        </Text>
+                      </HStack>
+                    </Td>
+                    <Td>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="500"
+                      >
+                        {row.name || ''}
+                      </Text>
+                    </Td>
+                    <Td>
+                      <Text
+                        fontSize="sm"
+                        color="gray.600"
+                      >
+                        {row.updateDate || ''}
+                      </Text>
                     </Td>
                   </Tr>
-                ) : (
-                  tableData.map((row) => (
-                    <Tr
-                      key={row.id}
-                      onClick={() => openEditForm(row)}
-                      cursor="pointer"
-                    >
-                      <Td>{row.updateDate}</Td>
-                      <Td>{row.note}</Td>
-                      <Td>{row.name}</Td>
-                      <Td>
-                        {row.firstName} {row.lastName}
-                      </Td>
-                      <Td>
-                        <Badge>{row.status}</Badge>
-                      </Td>
-                    </Tr>
-                  ))
-                )}
-              </Tbody>
-            </Table>
-          </TableContainer>
-          {isLoading && tableData.length > 0 && (
-            <Box
-              position="absolute"
-              inset={0}
-              bg="whiteAlpha.800"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              zIndex={1}
-            >
-              <Spinner size="lg" />
-            </Box>
-          )}
-        </Box>
+                ))
+              )}
+            </Tbody>
+          </Table>
+        </TableContainer>
+        {isLoading && tableData.length > 0 && (
+          <Box
+            position="absolute"
+            inset={0}
+            bg="whiteAlpha.800"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            zIndex={1}
+          >
+            <Spinner size="lg" />
+          </Box>
+        )}
       </Box>
     </>
   );
