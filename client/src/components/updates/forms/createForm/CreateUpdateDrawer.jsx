@@ -308,7 +308,7 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
       if (updateType === 'student') {
         const affected = parseInt(String(studentCount), 10);
         const count = Number.isNaN(affected) ? 0 : affected;
-        const isPositive = studentWhatHappened === 'new_students_joined';
+        const isPositive = studentWhatHappened === 'new_joined';
         const enrollmentDelta = isPositive ? count : -count;
         if (enrollmentDelta !== 0) {
           await backend.post('/enrollmentChange', {

@@ -53,7 +53,7 @@ export default function CreateUpdateStudent({
             spacing={2}
           >
             <Radio
-              value="new_students_joined"
+              value="new_joined"
               colorScheme="teal"
             >
               <HStack spacing={2}>
