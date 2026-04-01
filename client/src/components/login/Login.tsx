@@ -23,7 +23,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { FaArrowLeft } from 'react-icons/fa6';
-import { FiLogIn } from 'react-icons/fi';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
