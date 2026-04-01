@@ -438,14 +438,6 @@ export function ProgramDisplay({
             >
               Displaying {tableData.length} results
             </Text>
-            <IconButton
-              aria-label="download"
-              icon={<DownloadIcon />}
-              size="sm"
-              variant="ghost"
-              ml={2}
-              onClick={downloadDataAsCsv}
-            />
             <Button
               size="sm"
               leftIcon={<AddIcon />}
