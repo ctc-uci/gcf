@@ -111,6 +111,11 @@ export const Map = () => {
         w="96%"
         h="600px"
         mx="auto"
+        onClick={() => {
+          setPrograms([]);
+          setRegions([]);
+          setDisplay('block');
+        }}
       >
         <ComposableMap style={{ height: '700px', width: '100%' }}>
           <Geographies geography={geoUrl}>
