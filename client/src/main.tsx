@@ -37,5 +37,20 @@ void initI18n().then(() => {
   );
 })
 .catch((err) => {
-    console.error('Failed to initialize i18n:', err);
+  console.error('Failed to initialize i18n:', err);
+  createRoot(rootEl).render(
+    <StrictMode>
+      <CookiesProvider>
+        <BackendProvider>
+          <AuthProvider>
+            <RoleProvider>
+              <ChakraProvider theme={theme}>
+                <App />
+              </ChakraProvider>
+            </RoleProvider>
+          </AuthProvider>
+        </BackendProvider>
+      </CookiesProvider>
+    </StrictMode>
+  );
 });
