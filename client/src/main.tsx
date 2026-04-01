@@ -19,38 +19,24 @@ const theme = extendTheme({ colors });
 
 const rootEl = document.getElementById('root')!;
 
-void initI18n().then(() => {
-  createRoot(rootEl).render(
-    <StrictMode>
-      <CookiesProvider>
-        <BackendProvider>
-          <AuthProvider>
-            <RoleProvider>
-              <ChakraProvider theme={theme}>
-                <App />
-              </ChakraProvider>
-            </RoleProvider>
-          </AuthProvider>
-        </BackendProvider>
-      </CookiesProvider>
-    </StrictMode>
-  );
-})
-.catch((err) => {
-  console.error('Failed to initialize i18n:', err);
-  createRoot(rootEl).render(
-    <StrictMode>
-      <CookiesProvider>
-        <BackendProvider>
-          <AuthProvider>
-            <RoleProvider>
-              <ChakraProvider theme={theme}>
-                <App />
-              </ChakraProvider>
-            </RoleProvider>
-          </AuthProvider>
-        </BackendProvider>
-      </CookiesProvider>
-    </StrictMode>
-  );
-});
+void initI18n()
+  .catch((err) => {
+    console.error('Failed to initialize i18n:', err);
+  })
+  .finally(() => {
+    createRoot(rootEl).render(
+      <StrictMode>
+        <CookiesProvider>
+          <BackendProvider>
+            <AuthProvider>
+              <RoleProvider>
+                <ChakraProvider theme={theme}>
+                  <App />
+                </ChakraProvider>
+              </RoleProvider>
+            </AuthProvider>
+          </BackendProvider>
+        </CookiesProvider>
+      </StrictMode>
+    );
+  });
