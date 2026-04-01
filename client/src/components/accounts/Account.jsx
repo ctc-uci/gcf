@@ -4,16 +4,16 @@ import {
   Box,
   Center,
   Flex,
-  HStack,
   Heading,
+  HStack,
   IconButton,
   Spinner,
 } from '@chakra-ui/react';
-import { FiDownload } from 'react-icons/fi';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { FiDownload } from 'react-icons/fi';
 
 import { AccountForm } from './AccountForm';
 import { AccountsTable, downloadAccountsAsCsv } from './AccountsTable';
@@ -98,10 +98,26 @@ export const Account = () => {
   const [activeFilters, setActiveFilters] = useState([]);
 
   return (
-    <Box p={8} bg="gray.50" minH="94vh" mx={-4} mt={0}>
-      <Flex mb={8} align="center" wrap={{ base: 'wrap', md: 'nowrap' }} gap={4}>
+    <Box
+      p={8}
+      bg="gray.50"
+      minH="94vh"
+      mx={-4}
+      mt={0}
+    >
+      <Flex
+        mb={8}
+        align="center"
+        wrap={{ base: 'wrap', md: 'nowrap' }}
+        gap={4}
+      >
         <HStack spacing={2}>
-          <Heading as="h1" size="lg" fontWeight="600" color="blackAlpha.900">
+          <Heading
+            as="h1"
+            size="lg"
+            fontWeight="600"
+            color="blackAlpha.900"
+          >
             Accounts
           </Heading>
           <IconButton
@@ -122,6 +138,7 @@ export const Account = () => {
             setSelectedUser(null);
           }}
           setIsCardView={setIsCardView}
+          isCardView={isCardView}
           columns={columns}
           onFilterChange={(filters) => setActiveFilters(filters)}
         />
@@ -129,7 +146,10 @@ export const Account = () => {
 
       {isLoading ? (
         <Center py={10}>
-          <Spinner size="xl" color="gray.500" />
+          <Spinner
+            size="xl"
+            color="gray.500"
+          />
         </Center>
       ) : (
         <AccountsTable

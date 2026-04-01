@@ -1,3 +1,4 @@
+import { HamburgerIcon } from '@chakra-ui/icons';
 import {
   Button,
   Flex,
@@ -16,7 +17,10 @@ import {
 
 import { BsArrowDownUp } from 'react-icons/bs';
 import { FiGrid, FiList, FiPlus, FiSearch } from 'react-icons/fi';
-import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
+import {
+  HiOutlineAdjustmentsHorizontal,
+  HiOutlineSquares2X2,
+} from 'react-icons/hi2';
 
 import { FilterComponent } from '../common/FilterComponent';
 
@@ -25,6 +29,7 @@ export const AccountToolbar = ({
   setSearchQuery,
   onNew,
   setIsCardView,
+  isCardView,
   columns,
   onFilterChange,
 }) => {
@@ -120,9 +125,9 @@ export const AccountToolbar = ({
         >
           <IconButton
             aria-label="List View"
-            icon={<FiList size={20} />}
+            icon={<HamburgerIcon />}
             variant="ghost"
-            color="teal.500"
+            color={isCardView ? 'gray.600' : 'teal.500'}
             size="sm"
             minW="auto"
             h="20px"
@@ -132,9 +137,9 @@ export const AccountToolbar = ({
           />
           <IconButton
             aria-label="Grid View"
-            icon={<FiGrid size={20} />}
+            icon={<HiOutlineSquares2X2 />}
             variant="ghost"
-            color="gray.600"
+            color={!isCardView ? 'gray.600' : 'teal.500'}
             size="sm"
             minW="auto"
             h="20px"
