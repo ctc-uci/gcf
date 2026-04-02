@@ -28,8 +28,6 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   const [mediaURLs, setMediaURLs] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(null);
 
-
-
   const handleApprove = async () => {
     if (updateId === null || updateId === undefined) return;
     try {
@@ -76,7 +74,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
 
   useEffect(() => {
     if (!updateId) return;
-    
+
     const fetchMedia = async () => {
       const mediaChanges = await backend.get(`/mediaChange/update/${updateId}`);
       setUpdates(mediaChanges.data);
@@ -204,7 +202,8 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                   cursor="pointer"
                   onClick={() => setSelectedIndex(i)}
                 >
-                  <MediaCard onClick={() => setSelectedIndex(i)}
+                  <MediaCard
+                    onClick={() => setSelectedIndex(i)}
                     file_name={item.fileName}
                     file_type={item.fileType}
                     imageUrl={mediaURLs[i]}

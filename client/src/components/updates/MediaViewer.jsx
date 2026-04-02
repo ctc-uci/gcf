@@ -1,4 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import {
   Box,
   CloseButton,
@@ -10,8 +12,8 @@ import {
   ModalOverlay,
   Text,
 } from '@chakra-ui/react';
+
 import { MediaCard } from '@/components/media/MediaCard';
-import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 
 export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
   const [current, setCurrent] = useState(selectedIndex);
@@ -20,9 +22,14 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
     setCurrent(selectedIndex);
   }, [selectedIndex]);
 
-  const goNext = useCallback(() => setCurrent((prev) => (prev + 1) % updates.length), [updates.length]);
-  const goPrev = useCallback(() => setCurrent((prev) => (prev - 1 + updates.length) % updates.length), [updates.length]);
-
+  const goNext = useCallback(
+    () => setCurrent((prev) => (prev + 1) % updates.length),
+    [updates.length]
+  );
+  const goPrev = useCallback(
+    () => setCurrent((prev) => (prev - 1 + updates.length) % updates.length),
+    [updates.length]
+  );
   const item = updates[current];
   const url = mediaURLs[current];
 
@@ -37,8 +44,16 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
   }, [goNext, goPrev, onClose]);
 
   return (
-    <Modal isOpen={true} onClose={onClose} isCentered size="3xl">
-      <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(4px)" />
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      isCentered
+      size="3xl"
+    >
+      <ModalOverlay
+        bg="blackAlpha.700"
+        backdropFilter="blur(4px)"
+      />
       <ModalContent
         bg="white"
         borderRadius="2xl"
@@ -47,7 +62,6 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
         maxW="680px"
         mx={4}
       >
-        {/* Header */}
         <Flex
           px={5}
           py={4}
@@ -56,21 +70,32 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
           borderBottom="1px solid"
           borderColor="gray.100"
         >
-          <Text fontWeight="700" fontSize="lg" color="gray.800">
-            Map Settings
+          <Text
+            fontWeight="700"
+            fontSize="lg"
+            color="gray.800"
+          >
+            Media Viewer
           </Text>
-          <CloseButton onClick={onClose} size="md" color="gray.500" />
+          <CloseButton
+            onClick={onClose}
+            size="md"
+            color="gray.500"
+          />
         </Flex>
 
-        {/* Main media display */}
-        <Box position="relative" bg="gray.900" px={4} py={3}>
+        <Box
+          position="relative"
+          bg="gray.900"
+          px={4}
+          py={3}
+        >
           <MediaCard
             file_name={item?.fileName}
             file_type={item?.fileType}
             imageUrl={url}
           />
 
-          {/* Prev / Next arrows */}
           {updates.length > 1 && (
             <>
               <IconButton
@@ -103,20 +128,29 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
               />
             </>
           )}
-
         </Box>
 
-        {/* Media info (defaults to hardcoded values) */}
-        <Box px={5} pt={4} pb={2}>
-          <Text fontWeight="700" fontSize="md" color="gray.800">
+        <Box
+          px={5}
+          pt={4}
+          pb={2}
+        >
+          <Text
+            fontWeight="700"
+            fontSize="md"
+            color="gray.800"
+          >
             {item?.fileName ?? 'Media Title'}
           </Text>
-          <Text fontSize="sm" color="gray.500" mt={0.5}>
+          <Text
+            fontSize="sm"
+            color="gray.500"
+            mt={0.5}
+          >
             {item?.description ?? 'Video Description'}
           </Text>
         </Box>
 
-        {/* Thumbnail strip */}
         {updates.length > 1 && (
           <Flex
             px={5}
@@ -126,7 +160,10 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
             overflowX="auto"
             css={{
               '&::-webkit-scrollbar': { height: '4px' },
-              '&::-webkit-scrollbar-thumb': { background: '#CBD5E0', borderRadius: '4px' },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#CBD5E0',
+                borderRadius: '4px',
+              },
             }}
           >
             {updates.map((thumb, i) => (

@@ -256,9 +256,7 @@ mediaChangeRouter.get('/update/:updateId', async (req, res) => {
     );
 
     res.status(200).json(keysToCamel(data))
-  }
-
-  catch {
+  } catch (err){
     console.error(err);
     res.status(500).send('Internal Server Error')
   }
