@@ -1,4 +1,3 @@
-import { verifyToken } from '@/middleware';
 import { adminRouter } from '@/routes/admin';
 import { countryRouter } from '@/routes/country';
 import { enrollmentChangeRouter } from '@/routes/enrollmentChange';

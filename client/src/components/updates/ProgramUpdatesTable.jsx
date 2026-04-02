@@ -18,39 +18,12 @@ import {
   Tr,
 } from '@chakra-ui/react';
 
-import {
-  downloadCsv,
-  escapeCsvValue,
-  getFilenameTimestamp,
-} from '@/utils/downloadCsv';
-import { FiStar, FiUser } from 'react-icons/fi';
+import { FiStar } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './forms/ProgramUpdateForm';
-
-export function downloadProgramUpdatesAsCsv(data) {
-  const headers = [
-    'Flag',
-    'Type',
-    'Update Note',
-    'Status',
-    'Author',
-    'Program',
-    'Date',
-  ];
-  const rows = (data || []).map((row) => [
-    escapeCsvValue(row.flagged ? 'Flagged' : ''),
-    escapeCsvValue(row.updateType || row.title || ''),
-    escapeCsvValue(row.note),
-    escapeCsvValue(row.status),
-    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
-    escapeCsvValue(row.name),
-    escapeCsvValue(row.updateDate),
-  ]);
-  downloadCsv(headers, rows, `program-updates-${getFilenameTimestamp()}.csv`);
-}
 
 const StatusBadge = ({ status }) => {
   const isResolved =
@@ -97,7 +70,6 @@ export const ProgramUpdatesTable = ({
   isLoading,
   onSave,
   searchQuery = '',
-  embedded = false,
   showStatus = false,
   showFlagAndType = false,
   activeFilters: externalFilters,
