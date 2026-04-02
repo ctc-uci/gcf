@@ -232,7 +232,7 @@ mediaChangeRouter.get('/:userId/media-updates', async (req, res) => {
         FROM program_update
         INNER JOIN media_change ON media_change.update_id = program_update.id
         INNER JOIN program ON program_update.program_id = program.id
-        LEFT JOIN gcf_user AS creator ON creator.id = program.created_by
+        LEFT JOIN gcf_user AS creator ON creator.id = program_update.created_by
         ${filterJoin}
         ORDER BY program_update.id, media_change.id
       ) sub
