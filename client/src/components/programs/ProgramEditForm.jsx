@@ -38,10 +38,13 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
   const [newInstrumentName, setNewInstrumentName] = useState('');
   const [currentRegionalDirectors, setCurrentRegionalDirectors] = useState([]);
   const [programDirectorOptions, setProgramDirectorOptions] = useState([]);
+  const [initialProgramDirectorIds, setInitialProgramDirectorIds] = useState(
+    []
+  );
   const [selectedProgramDirectorId, setSelectedProgramDirectorId] =
     useState('');
-  const [enrollmentNumber, setEnrollmentNumber] = useState(null);
-  const [graduatedNumber, setGraduatedNumber] = useState(null);
+  const [enrollmentNumber, setEnrollmentNumber] = useState(0);
+  const [graduatedNumber, setGraduatedNumber] = useState(0);
   const [newInstruments, setNewInstruments] = useState([]);
   const [form, setForm] = useState({
     id: '',
@@ -68,7 +71,8 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
       instrumentChangeResponse,
       enrollmentChangeResponse,
       regionalDirectorsResponse,
-      programDirectorsResponse;
+      programDirectorsResponse,
+      programDirectorNamesResponse;
     const program_data = async () => {
       try {
         programUpdateResponse = await backend
@@ -89,6 +93,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
           enrollmentChangeResponse,
           regionalDirectorsResponse,
           programDirectorsResponse,
+          programDirectorNamesResponse,
         ] = await Promise.all([
           backend.get(`/program/${program_id}`).then((r) => r.data),
           backend.get(`/country`).then((r) => r.data),
@@ -105,6 +110,9 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
           backend
             .get(`/program/${program_id}/program-directors`)
             .then((r) => r.data),
+          backend
+            .get('/program-directors/program-director-names')
+            .then((r) => r.data),
         ]);
       } catch (error) {
         console.error(
@@ -120,11 +128,11 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
           : null;
 
       if (latestEnrollmentChange) {
-        setEnrollmentNumber(latestEnrollmentChange.enrollmentChange ?? null);
-        setGraduatedNumber(latestEnrollmentChange.graduatedChange ?? null);
+        setEnrollmentNumber(latestEnrollmentChange.enrollmentChange ?? 0);
+        setGraduatedNumber(latestEnrollmentChange.graduatedChange ?? 0);
       } else {
-        setEnrollmentNumber(null);
-        setGraduatedNumber(null);
+        setEnrollmentNumber(0);
+        setGraduatedNumber(0);
       }
 
       const match = new Map(instrumentResponse.map((i) => [i.id, i.name]));
@@ -164,9 +172,22 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
       const programDirectorsArray = Array.isArray(programDirectorsResponse)
         ? programDirectorsResponse
         : [];
-      setProgramDirectorOptions(programDirectorsArray);
+      setInitialProgramDirectorIds(
+        programDirectorsArray
+          .map((d) => d.userId)
+          .filter((id) => id !== null && id !== undefined)
+      );
+      const namesList = Array.isArray(programDirectorNamesResponse)
+        ? programDirectorNamesResponse
+        : [];
+      const uniqueNames = Array.from(
+        new Map(namesList.map((d) => [d.userId, d])).values()
+      );
+      setProgramDirectorOptions(uniqueNames);
       if (programDirectorsArray.length > 0) {
         setSelectedProgramDirectorId(String(programDirectorsArray[0].userId));
+      } else {
+        setSelectedProgramDirectorId('');
       }
       setCountries(countryResponse);
       setInstruments(instrumentResponse);
@@ -292,24 +313,62 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
       }
       await backend.put(`/program/${form.id}`, programData);
 
-      if (enrollmentNumber !== null && graduatedNumber !== null) {
-        console.log('Sending enrollment change:', {
+      const programId = form.id;
+      const selectedDirectorNum =
+        selectedProgramDirectorId === '' ||
+        selectedProgramDirectorId === null ||
+        selectedProgramDirectorId === undefined
+          ? null
+          : Number(selectedProgramDirectorId);
+
+      if (selectedDirectorNum !== null && !Number.isNaN(selectedDirectorNum)) {
+        for (const uid of initialProgramDirectorIds) {
+          if (uid !== selectedDirectorNum) {
+            try {
+              await backend.delete(`/program-directors/${uid}`);
+            } catch (error) {
+              console.error('DELETE /program-directors failed:', error);
+            }
+          }
+        }
+        if (!initialProgramDirectorIds.includes(selectedDirectorNum)) {
+          try {
+            await backend.post('/program-directors', {
+              userId: selectedDirectorNum,
+              programId,
+            });
+          } catch (error) {
+            console.error('POST /program-directors failed:', error);
+          }
+        }
+        setInitialProgramDirectorIds([selectedDirectorNum]);
+      } else if (selectedDirectorNum === null) {
+        for (const uid of initialProgramDirectorIds) {
+          try {
+            await backend.delete(`/program-directors/${uid}`);
+          } catch (error) {
+            console.error('DELETE /program-directors failed:', error);
+          }
+        }
+        setInitialProgramDirectorIds([]);
+      }
+
+      console.log('Sending enrollment change:', {
+        update_id: programUpdateId,
+        enrollment_change: enrollmentNumber,
+        graduated_change: graduatedNumber,
+      });
+
+      try {
+        await backend.post('/enrollmentChange', {
           update_id: programUpdateId,
           enrollment_change: enrollmentNumber,
           graduated_change: graduatedNumber,
         });
-
-        try {
-          await backend.post('/enrollmentChange', {
-            update_id: programUpdateId,
-            enrollment_change: enrollmentNumber,
-            graduated_change: graduatedNumber,
-          });
-        } catch (error) {
-          console.error('POST /enrollmentChange failed:', error);
-        }
-        console.log('Enrollment change saved');
+      } catch (error) {
+        console.error('POST /enrollmentChange failed:', error);
       }
+      console.log('Enrollment change saved');
     } catch (err) {
       console.error('Save failed:', err);
     }
@@ -484,10 +543,11 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
             </FormLabel>
             <NumberInput
               width="100%"
-              value={enrollmentNumber ?? 0}
-              onChange={(value) =>
-                setEnrollmentNumber(value ? parseInt(value) : null)
-              }
+              value={enrollmentNumber}
+              onChange={(value) => {
+                const n = parseInt(value, 10);
+                setEnrollmentNumber(Number.isNaN(n) ? 0 : n);
+              }}
             >
               <NumberInputField bg="gray.100" />
               <NumberInputStepper>
@@ -506,10 +566,11 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
             </FormLabel>
             <NumberInput
               width="100%"
-              value={graduatedNumber ?? 0}
-              onChange={(value) =>
-                setGraduatedNumber(value ? parseInt(value) : null)
-              }
+              value={graduatedNumber}
+              onChange={(value) => {
+                const n = parseInt(value, 10);
+                setGraduatedNumber(Number.isNaN(n) ? 0 : n);
+              }}
             >
               <NumberInputField bg="gray.100" />
               <NumberInputStepper>

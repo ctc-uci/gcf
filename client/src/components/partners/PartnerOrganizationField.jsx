@@ -19,7 +19,7 @@ export function PartnerOrganizationField({
       valueId === null || valueId === undefined || valueId === ''
         ? null
         : Number(valueId);
-    if (!idNum) return null;
+    if (idNum === null || Number.isNaN(idNum)) return null;
     return partnerOrgs.find((p) => Number(p.id) === idNum) ?? null;
   }, [valueId, partnerOrgs]);
 
