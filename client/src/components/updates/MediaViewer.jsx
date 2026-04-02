@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Box,
   CloseButton,
@@ -20,8 +20,8 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
     setCurrent(selectedIndex);
   }, [selectedIndex]);
 
-  const goNext = () => setCurrent((prev) => (prev + 1) % updates.length);
-  const goPrev = () => setCurrent((prev) => (prev - 1 + updates.length) % updates.length);
+  const goNext = useCallback(() => setCurrent((prev) => (prev + 1) % updates.length), [updates.length]);
+  const goPrev = useCallback(() => setCurrent((prev) => (prev - 1 + updates.length) % updates.length), [updates.length]);
 
   const item = updates[current];
   const url = mediaURLs[current];
