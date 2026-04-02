@@ -121,7 +121,9 @@ export const Navbar = () => {
     <Flex
       height={NAVBAR_HEIGHT}
       align="center"
-      w="80vw"
+      w="100%"
+      maxW="100%"
+      minW={0}
       px={6}
       py={6}
       borderRadius="xl"
@@ -131,12 +133,17 @@ export const Navbar = () => {
       <Flex
         justify="space-between"
         w="100%"
-        px="2vw"
+        minW={0}
+        px={{ base: 2, md: '2vw' }}
         align="center"
+        gap={3}
       >
         <Text
           fontSize="2vh"
           fontWeight="bold"
+          noOfLines={1}
+          minW={0}
+          flexShrink={1}
         >
           {role === 'Super Admin' ? 'Super Admin Dashboard' : ''}
           {role === 'Admin' ? 'Admin Dashboard' : ''}

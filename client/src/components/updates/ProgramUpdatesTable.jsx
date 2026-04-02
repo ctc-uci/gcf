@@ -24,7 +24,6 @@ import {
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
 import { FiStar, FiUser } from 'react-icons/fi';
-import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';

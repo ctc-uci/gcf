@@ -102,16 +102,25 @@ export const Account = () => {
       p={8}
       bg="gray.50"
       minH="94vh"
-      mx={-4}
       mt={0}
+      w="100%"
+      maxW="100%"
+      minW={0}
     >
       <Flex
         mb={8}
         align="center"
-        wrap={{ base: 'wrap', md: 'nowrap' }}
-        gap={4}
+        justify="space-between"
+        wrap="wrap"
+        gap={3}
+        rowGap={3}
+        w="100%"
+        minW={0}
       >
-        <HStack spacing={2}>
+        <HStack
+          spacing={2}
+          flexShrink={0}
+        >
           <Heading
             as="h1"
             size="lg"
@@ -130,18 +139,24 @@ export const Account = () => {
           />
         </HStack>
 
-        <AccountToolbar
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          onNew={() => {
-            setIsDrawerOpen(true);
-            setSelectedUser(null);
-          }}
-          setIsCardView={setIsCardView}
-          isCardView={isCardView}
-          columns={columns}
-          onFilterChange={(filters) => setActiveFilters(filters)}
-        />
+        <Box
+          flex="1"
+          minW={0}
+          ml={{ base: 0, md: 4 }}
+        >
+          <AccountToolbar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            onNew={() => {
+              setIsDrawerOpen(true);
+              setSelectedUser(null);
+            }}
+            setIsCardView={setIsCardView}
+            isCardView={isCardView}
+            columns={columns}
+            onFilterChange={(filters) => setActiveFilters(filters)}
+          />
+        </Box>
       </Flex>
 
       {isLoading ? (

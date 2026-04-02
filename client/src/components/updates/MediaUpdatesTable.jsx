@@ -1,11 +1,12 @@
+//TODO: check this again
 import { useEffect, useMemo, useState } from 'react';
 
 import {
+  Avatar,
   Badge,
   Box,
   Center,
   HStack,
-  Icon,
   Spinner,
   Table,
   TableContainer,
@@ -22,20 +23,23 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
-import { FiUser } from 'react-icons/fi';
-import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
 import { ReviewMediaUpdate } from './forms/ReviewMediaUpdate';
 
+const authorDisplayName = (row) =>
+  [row.firstName, row.lastName].filter(Boolean).join(' ').trim() ||
+  row.fullName?.trim() ||
+  '';
+
 export function downloadMediaUpdatesAsCsv(data) {
   const headers = ['Update Note', 'Status', 'Author', 'Program', 'Date'];
   const rows = (data || []).map((row) => [
     escapeCsvValue(row.note),
     escapeCsvValue(row.status),
-    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
+    escapeCsvValue(authorDisplayName(row)),
     escapeCsvValue(row.programName),
     escapeCsvValue(row.updateDate),
   ]);
@@ -69,7 +73,7 @@ export const MediaUpdatesTable = ({
   originalData,
   isLoading,
   searchQuery = '',
-  embedded = false,
+  embedded: _embedded = false,
   activeFilters: externalFilters,
 }) => {
   const [internalFilters] = useState([]);
@@ -85,14 +89,16 @@ export const MediaUpdatesTable = ({
   const displayData = useMemo(() => {
     if (!searchQuery) return filteredData;
     const q = searchQuery.toLowerCase();
-    return filteredData.filter(
-      (update) =>
+    return filteredData.filter((update) => {
+      const author = (authorDisplayName(update) || '').toLowerCase();
+      return (
         (update.note || '').toLowerCase().includes(q) ||
         (update.programName || '').toLowerCase().includes(q) ||
-        (update.fullName || '').toLowerCase().includes(q) ||
+        author.includes(q) ||
         (update.status || '').toLowerCase().includes(q) ||
         (update.updateDate || '').toLowerCase().includes(q)
-    );
+      );
+    });
   }, [searchQuery, filteredData]);
 
   const [sortedData, setSortedData] = useState(null);
@@ -143,7 +149,7 @@ export const MediaUpdatesTable = ({
                 />
               </Th>
               <Th
-                onClick={() => handleSort('firstName')}
+                onClick={() => handleSort('fullName')}
                 cursor="pointer"
                 color="gray.500"
                 fontSize="xs"
@@ -152,7 +158,7 @@ export const MediaUpdatesTable = ({
               >
                 Author
                 <SortArrows
-                  columnKey="firstName"
+                  columnKey="fullName"
                   sortOrder={sortOrder}
                 />
               </Th>
@@ -215,13 +221,14 @@ export const MediaUpdatesTable = ({
                     <StatusBadge status={row.status} />
                   </Td>
                   <Td>
-                    <HStack spacing={1}>
-                      <Icon
-                        as={FiUser}
-                        boxSize={4}
-                        color="gray.400"
+                    <HStack spacing={2}>
+                      <Avatar
+                        size="xs"
+                        name={authorDisplayName(row) || undefined}
+                        bg="teal.500"
+                        color="white"
                       />
-                      <Text fontSize="sm">{row.firstName || 'Name'}</Text>
+                      <Text fontSize="sm">{authorDisplayName(row) || '—'}</Text>
                     </HStack>
                   </Td>
                   <Td>

@@ -43,7 +43,7 @@ updatesPermissionsRouter.get('/media-updates/:id', async (req, res) => {
       FROM program_update
       INNER JOIN media_change ON media_change.update_id = program_update.id
       INNER JOIN program ON program_update.program_id = program.id
-      LEFT JOIN gcf_user AS creator ON creator.id = program.created_by
+      LEFT JOIN gcf_user AS creator ON creator.id = program_update.created_by
       ${filterJoin}
       ORDER BY program_update.update_date DESC;
     `;
@@ -112,8 +112,9 @@ updatesPermissionsRouter.get('/program-updates/pd/:id', async (req, res) => {
           ) AS flagged
       FROM program_update
       INNER JOIN program ON program_update.program_id = program.id
-      LEFT JOIN gcf_user AS creator ON creator.id = program.created_by
+      LEFT JOIN gcf_user AS creator ON creator.id = program_update.created_by
       INNER JOIN program_director ON program_director.program_id = program.id AND program_director.user_id = $1
+      WHERE program_update.show_on_table = TRUE
       ORDER BY program_update.update_date DESC;`;
 
     const data = await db.query(finalQuery, [id]);
@@ -167,8 +168,9 @@ updatesPermissionsRouter.get('/program-updates/:id', async (req, res) => {
           ) AS is_instrument_update
       FROM program_update
       INNER JOIN program ON program_update.program_id = program.id
-      LEFT JOIN gcf_user AS creator ON creator.id = program.created_by
+      LEFT JOIN gcf_user AS creator ON creator.id = program_update.created_by
       ${filterJoin}
+      WHERE program_update.show_on_table = TRUE
       ORDER BY program_update.update_date DESC;`;
 
     const data = await db.query(finalQuery, filterJoin ? [id] : []);

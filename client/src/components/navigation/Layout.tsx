@@ -10,12 +10,16 @@ export const Layout = () => {
     <Flex
       bg="gray.50"
       minHeight="100vh"
+      minW={0}
+      w="100%"
+      maxW="100%"
       padding={6}
       gap={6}
     >
       <Sidebar />
       <Box
         flex="1"
+        minW={0}
         display="flex"
         flexDirection="column"
       >
@@ -24,6 +28,7 @@ export const Layout = () => {
           as="main"
           mt={6}
           flex="1"
+          minW={0}
         >
           <Outlet />
         </Box>

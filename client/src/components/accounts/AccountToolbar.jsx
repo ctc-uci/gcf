@@ -16,7 +16,7 @@ import {
 } from '@chakra-ui/react';
 
 import { BsArrowDownUp } from 'react-icons/bs';
-import { FiGrid, FiList, FiPlus, FiSearch } from 'react-icons/fi';
+import { FiPlus, FiSearch } from 'react-icons/fi';
 import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
@@ -39,12 +39,21 @@ export const AccountToolbar = ({
 
   return (
     <Flex
-      width="100%"
+      w="100%"
+      minW={0}
       align="center"
+      flexWrap={{ base: 'wrap', md: 'nowrap' }}
+      justify={{ base: 'flex-end', md: 'flex-start' }}
       gap={6}
+      rowGap={3}
     >
-      <Spacer />
-      <InputGroup w="280px">
+      <Spacer minW={0} />
+      <InputGroup
+        w="100%"
+        maxW="280px"
+        minW={0}
+        flexShrink={1}
+      >
         <InputLeftElement
           pointerEvents="none"
           h="32px"
@@ -150,9 +159,10 @@ export const AccountToolbar = ({
         </HStack>
       </HStack>
 
-      <Spacer />
+      <Spacer minW={0} />
 
       <Button
+        flexShrink={0}
         bg="teal.500"
         color="white"
         _hover={{ bg: 'teal.600' }}
