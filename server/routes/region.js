@@ -18,7 +18,9 @@ regionRouter.get('/', async (req, res) => {
 
 regionRouter.get('/countries-by-region', async (req, res) => {
   try {
-    const countries = await db.query(`SELECT * FROM country ORDER BY region_id, name`);
+    const countries = await db.query(
+      `SELECT * FROM country ORDER BY region_id, name`
+    );
     const countriesByRegion = countries.reduce((acc, country) => {
       if (!acc[country.region_id]) {
         acc[country.region_id] = [];
@@ -59,10 +61,14 @@ regionRouter.get('/get-region-name/:id', async (req, res) => {
 regionRouter.get('/:id/countries', async (req, res) => {
   try {
     const { id } = req.params;
+    const regionId = parseInt(id, 10);
+    if (Number.isNaN(regionId)) {
+      return res.status(400).json({ error: 'Invalid region id' });
+    }
 
     const countries = await db.query(
       `SELECT * FROM country WHERE region_id = $1`,
-      [id]
+      [regionId]
     );
 
     res.status(200).json(keysToCamel(countries));

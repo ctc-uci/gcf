@@ -12,11 +12,10 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Spacer,
 } from '@chakra-ui/react';
 
 import { BsArrowDownUp } from 'react-icons/bs';
-import { FiGrid, FiList, FiPlus, FiSearch } from 'react-icons/fi';
+import { FiPlus, FiSearch } from 'react-icons/fi';
 import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
@@ -39,90 +38,96 @@ export const AccountToolbar = ({
 
   return (
     <Flex
-      width="100%"
+      w="100%"
       align="center"
-      gap={6}
+      justify="space-between"
+      flexWrap="wrap"
+      gap={2}
+      rowGap={2}
+      minW={0}
     >
-      <Spacer />
-      <InputGroup w="280px">
-        <InputLeftElement
-          pointerEvents="none"
-          h="32px"
-        >
-          <Icon
-            as={FiSearch}
-            color="gray.600"
-            boxSize="14px"
-          />
-        </InputLeftElement>
-        <Input
-          placeholder="Search"
-          bg="white"
-          border="1px solid"
-          borderColor="gray.200"
-          borderRadius="4px"
-          h="32px"
-          fontSize="sm"
-          _focus={{ borderColor: 'gray.400' }}
-          _placeholder={{ color: 'gray.400' }}
-          pl={8}
-          pr={9}
-          value={searchQuery}
-          onChange={handleSearchChange}
-        />
-        <InputRightElement
-          h="32px"
-          w="32px"
-        >
-          <Popover>
-            <PopoverTrigger>
-              <IconButton
-                aria-label="Filter"
-                icon={<HiOutlineAdjustmentsHorizontal size={18} />}
-                variant="ghost"
-                color="gray.600"
-                size="sm"
-                minW="auto"
-                h="24px"
-                w="24px"
-                p={0}
-              />
-            </PopoverTrigger>
-            <PopoverContent
-              w="800px"
-              maxW="90vw"
-              shadow="xl"
-            >
-              <FilterComponent
-                columns={columns}
-                onFilterChange={onFilterChange}
-              />
-            </PopoverContent>
-          </Popover>
-        </InputRightElement>
-      </InputGroup>
-
       <HStack
-        spacing={6}
+        spacing={{ base: 2, md: 3 }}
         align="center"
+        flexShrink={0}
+        flexWrap="wrap"
       >
-        <IconButton
-          aria-label="Sort"
-          icon={<BsArrowDownUp size={20} />}
-          variant="ghost"
-          color="gray.600"
-          w="20px"
-          h="20px"
-          minW="20px"
-          p={0}
-        />
-        <HStack
-          w="48px"
-          h="20px"
-          spacing="4px"
-          align="center"
-          justify="center"
+        <InputGroup
+          w={{ base: 'min(100%, 220px)', sm: '220px' }}
+          flexShrink={0}
         >
+          <InputLeftElement
+            pointerEvents="none"
+            h="32px"
+          >
+            <Icon
+              as={FiSearch}
+              color="gray.600"
+              boxSize="14px"
+            />
+          </InputLeftElement>
+          <Input
+            placeholder="Search"
+            bg="white"
+            border="1px solid"
+            borderColor="gray.200"
+            borderRadius="4px"
+            h="32px"
+            fontSize="sm"
+            _focus={{ borderColor: 'gray.400' }}
+            _placeholder={{ color: 'gray.400' }}
+            pl={8}
+            pr={9}
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+          <InputRightElement
+            h="32px"
+            w="32px"
+          >
+            <Popover>
+              <PopoverTrigger>
+                <IconButton
+                  aria-label="Filter"
+                  icon={<HiOutlineAdjustmentsHorizontal size={18} />}
+                  variant="ghost"
+                  color="gray.600"
+                  size="sm"
+                  minW="auto"
+                  h="24px"
+                  w="24px"
+                  p={0}
+                />
+              </PopoverTrigger>
+              <PopoverContent
+                w="800px"
+                maxW="90vw"
+                shadow="xl"
+              >
+                <FilterComponent
+                  columns={columns}
+                  onFilterChange={onFilterChange}
+                />
+              </PopoverContent>
+            </Popover>
+          </InputRightElement>
+        </InputGroup>
+
+        <HStack
+          spacing={1}
+          align="center"
+          flexShrink={0}
+        >
+          <IconButton
+            aria-label="Sort"
+            icon={<BsArrowDownUp size={20} />}
+            variant="ghost"
+            color="gray.600"
+            w="20px"
+            h="20px"
+            minW="20px"
+            p={0}
+          />
           <IconButton
             aria-label="List View"
             icon={<HamburgerIcon />}
@@ -150,8 +155,6 @@ export const AccountToolbar = ({
         </HStack>
       </HStack>
 
-      <Spacer />
-
       <Button
         bg="teal.500"
         color="white"
@@ -165,6 +168,7 @@ export const AccountToolbar = ({
         leftIcon={<FiPlus />}
         onClick={onNew}
         transition="background-color 0.25s ease, transform 0.25s ease"
+        flexShrink={0}
       >
         New Account
       </Button>

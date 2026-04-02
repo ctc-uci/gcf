@@ -16,6 +16,7 @@ export const Layout = () => {
       <Sidebar />
       <Box
         flex="1"
+        minW={0}
         display="flex"
         flexDirection="column"
       >
@@ -24,6 +25,7 @@ export const Layout = () => {
           as="main"
           mt={6}
           flex="1"
+          minW={0}
         >
           <Outlet />
         </Box>
