@@ -392,6 +392,57 @@ export const CreateUpdateDrawer = ({
       return;
     }
 
+    // Prevent decrementing an instrument/students if goes over the current total
+    const isInstrumentDecrement =
+      Boolean(selectedInstrument) &&
+      updateType === 'instrument' &&
+      Boolean(whatHappened) &&
+      whatHappened !== 'New / Donation';
+
+    if (isInstrumentDecrement && selectedInstrument) {
+      const currentTotal =
+        programInstrumentCountForSelected ??
+        instrumentCountsByName[selectedInstrument] ??
+        0;
+      const n = Number(instrumentCount) || 0;
+      if (n > currentTotal) {
+        toast({
+          title: 'Cannot save',
+          description:
+            currentTotal <= 0
+              ? `There are no ${selectedInstrument} instruments on record. You cannot remove more than you have.`
+              : `You cannot report more (${n}) than the current total (${currentTotal}) for ${selectedInstrument}.`,
+          status: 'error',
+          duration: 7000,
+          isClosable: true,
+        });
+        return;
+      }
+    }
+
+    const isStudentDecrement =
+      updateType === 'student' &&
+      Boolean(studentWhatHappened) &&
+      studentWhatHappened !== 'new_joined';
+
+    if (isStudentDecrement) {
+      const currentTotal = Number(programEnrollmentCount) || 0;
+      const n = Number(studentCount) || 0;
+      if (n > currentTotal) {
+        toast({
+          title: 'Cannot save',
+          description:
+            currentTotal <= 0
+              ? 'There are no students on record. You cannot remove more than you have.'
+              : `You cannot report more students (${n}) than the current total (${currentTotal}).`,
+          status: 'error',
+          duration: 7000,
+          isClosable: true,
+        });
+        return;
+      }
+    }
+
     const whatHappenedToEventType = {
       Broken: 'broken',
       Missing: 'missing',
