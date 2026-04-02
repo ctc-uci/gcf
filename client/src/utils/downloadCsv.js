@@ -4,9 +4,9 @@
  */
 
 export function escapeCsvValue(val) {
-  if (val == null) return '';
+  if (val == null) return "";
   const s = String(val);
-  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+  if (s.includes(",") || s.includes('"') || s.includes("\n")) {
     return `"${s.replace(/"/g, '""')}"`;
   }
   return s;
@@ -18,7 +18,7 @@ export function escapeCsvValue(val) {
  */
 export function getFilenameTimestamp() {
   const d = new Date();
-  const pad = (n) => String(n).padStart(2, '0');
+  const pad = (n) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
 }
 
@@ -30,12 +30,10 @@ export function getFilenameTimestamp() {
  */
 export function downloadCsv(headers, rows, filename) {
   if (!rows || rows.length === 0) return;
-  const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join(
-    '\n'
-  );
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   a.click();

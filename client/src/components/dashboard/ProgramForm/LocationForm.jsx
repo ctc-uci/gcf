@@ -21,46 +21,6 @@ const STATELESS_COUNTRIES = new Set([
   66, // El Salvador
 ]);
 
-/**
- * Backend stores `iso_code` (see RegionsForm: usually ISO2). Older rows may use ISO3 or vary by name.
- * react-country-state-city needs the library's numeric country id for GetState/GetCity.
- */
-function findLibraryCountry(libraryCountries, backendCountry) {
-  if (!backendCountry || !libraryCountries?.length) return null;
-
-  const rawCode = backendCountry.isoCode;
-  const code =
-    rawCode === null || rawCode === undefined
-      ? ''
-      : String(rawCode).trim().toUpperCase();
-  const nameNorm = String(backendCountry.name ?? '')
-    .trim()
-    .toLowerCase();
-
-  if (code.length === 2) {
-    const match = libraryCountries.find(
-      (c) => String(c.iso2).toUpperCase() === code
-    );
-    if (match) return match;
-  }
-  if (code.length === 3) {
-    const match = libraryCountries.find(
-      (c) => String(c.iso3).toUpperCase() === code
-    );
-    if (match) return match;
-  }
-  if (nameNorm) {
-    const match = libraryCountries.find(
-      (c) =>
-        String(c.name ?? '')
-          .trim()
-          .toLowerCase() === nameNorm
-    );
-    if (match) return match;
-  }
-  return null;
-}
-
 export function LocationForm({ formState, setFormData }) {
   const { backend } = useBackendContext();
   const { currentUser } = useAuthContext();
@@ -77,23 +37,17 @@ export function LocationForm({ formState, setFormData }) {
   const selectedBackendCountry = formState.country
     ? countriesList.find((c) => Number(c.id) === Number(formState.country))
     : null;
-  const libraryCountry = findLibraryCountry(
-    libraryCountries,
-    selectedBackendCountry
-  );
-  const libraryCountryId =
-    libraryCountry !== null &&
-    libraryCountry !== undefined &&
-    libraryCountry.id !== null &&
-    libraryCountry.id !== undefined
-      ? Number(libraryCountry.id)
-      : null;
+  const isoCode = selectedBackendCountry?.isoCode ?? null;
+  const libraryCountry = isoCode
+    ? libraryCountries.find(
+        (c) => String(c.iso2).toUpperCase() === String(isoCode).toUpperCase()
+      )
+    : null;
+  const libraryCountryId = libraryCountry?.id ?? null;
 
   // Use library country id with hardcoded set (library's ids for countries that have no states)
   const isStateless =
-    libraryCountryId !== null &&
-    Number.isFinite(libraryCountryId) &&
-    STATELESS_COUNTRIES.has(libraryCountryId);
+    libraryCountryId != null && STATELESS_COUNTRIES.has(libraryCountryId);
 
   useEffect(() => {
     async function getRegions() {
@@ -128,15 +82,9 @@ export function LocationForm({ formState, setFormData }) {
 
   useEffect(() => {
     async function getCountries() {
-      const raw = formState.regionId;
-      const regionIdNum =
-        raw === null || raw === undefined || raw === '' ? null : Number(raw);
-      if (regionIdNum === null || Number.isNaN(regionIdNum)) {
-        setCountriesList([]);
-        return;
-      }
       try {
-        const response = await backend.get(`/region/${regionIdNum}/countries`);
+        const id = formState.regionId;
+        const response = await backend.get(`/region/${id}/countries`);
         setCountriesList(response.data);
       } catch (error) {
         console.error('Error fetching countries:', error);
@@ -146,8 +94,8 @@ export function LocationForm({ formState, setFormData }) {
   }, [formState.regionId, backend, role, userId]);
 
   useEffect(() => {
-    if (libraryCountryId !== null && Number.isFinite(libraryCountryId)) {
-      GetState(libraryCountryId).then((result) => {
+    if (libraryCountryId != null) {
+      GetState(parseInt(libraryCountryId, 10)).then((result) => {
         setStateList(result ?? []);
       });
     } else {
@@ -156,13 +104,16 @@ export function LocationForm({ formState, setFormData }) {
   }, [libraryCountryId]);
 
   useEffect(() => {
-    if (libraryCountryId !== null && formState.state) {
+    if (libraryCountryId != null && formState.state) {
       const selectedState = stateList.find(
-        (state) => Number(state.id) === Number(formState.state)
+        (state) => state.id === formState.state
       );
 
       if (selectedState?.hasCities) {
-        GetCity(libraryCountryId, Number(selectedState.id)).then((result) => {
+        GetCity(
+          parseInt(libraryCountryId, 10),
+          parseInt(selectedState.id, 10)
+        ).then((result) => {
           setCityList(result ?? []);
         });
       } else {
@@ -174,17 +125,7 @@ export function LocationForm({ formState, setFormData }) {
   }, [libraryCountryId, formState.state, stateList]);
 
   function handleRegionChange(selectedRegion) {
-    const regionId =
-      selectedRegion === '' ||
-      selectedRegion === null ||
-      selectedRegion === undefined
-        ? null
-        : Number(selectedRegion);
-    setFormData({
-      ...formState,
-      regionId: Number.isNaN(regionId) ? null : regionId,
-      country: null,
-    });
+    setFormData({ ...formState, regionId: selectedRegion, country: null });
   }
 
   function handleCountryChange(countryId) {

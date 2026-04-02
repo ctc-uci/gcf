@@ -1,11 +1,12 @@
 import { useState } from 'react';
 
 export function useFullscreenFlyout() {
-  const [isFullScreen, setIsFullScreen] = useState(false);
+    const [isFullScreen, setIsFullScreen] = useState(false);
 
-  const toggleFullScreen = () => {
-    setIsFullScreen((prev) => !prev);
-  };
+    const toggleFullScreen = () => {
+        setIsFullScreen(prev => !prev);
+    };
 
-  return [isFullScreen, toggleFullScreen];
+    return [ isFullScreen, toggleFullScreen ];
+
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 import {
   Box,
@@ -8,65 +8,68 @@ import {
   Input,
   Select,
   Text,
-  VStack,
-} from '@chakra-ui/react';
+  VStack
+} from "@chakra-ui/react";
 
-import { HiOutlineTrash } from 'react-icons/hi2';
+import { HiOutlineTrash } from "react-icons/hi2";
 
 const OPERATIONS = {
   text: [
-    { label: 'contains', value: 'contains' },
-    { label: 'equal to', value: 'equals' },
-    { label: 'does not contain', value: 'does_not_contain' },
+    { label: "contains", value: "contains" },
+    { label: "equal to", value: "equals" },
+    { label: "does not contain", value: "does_not_contain" },
   ],
   number: [
-    { label: 'equal to', value: 'equals' },
-    { label: 'greater than', value: 'gt' },
-    { label: 'less than', value: 'lt' },
-    { label: 'greater than or equal', value: 'gte' },
-    { label: 'less than or equal', value: 'lte' },
+    { label: "equal to", value: "equals" },
+    { label: "greater than", value: "gt" },
+    { label: "less than", value: "lt" },
+    { label: "greater than or equal", value: "gte" },
+    { label: "less than or equal", value: "lte" },
   ],
   date: [
-    { label: 'is', value: 'is' },
-    { label: 'before', value: 'before' },
-    { label: 'after', value: 'after' },
+    { label: "is", value: "is" },
+    { label: "before", value: "before" },
+    { label: "after", value: "after" },
   ],
   select: [
-    { label: 'is', value: 'equals' },
-    { label: 'is not', value: 'is_not' },
+    { label: "is", value: "equals" },
+    { label: "is not", value: "is_not" },
   ],
-  list: [{ label: 'contains', value: 'contains_item' }],
+  list: [
+  { label: "contains", value: "contains_item" },
+],
 };
 
-function FilterComponent({ columns = [], onFilterChange }) {
-  const createDefaultFilter = () => {
-    const defaultCol = columns[0];
-    const defaultOps = defaultCol
-      ? OPERATIONS[defaultCol.type] || OPERATIONS.text
-      : OPERATIONS.text;
 
-    return {
-      id: crypto.randomUUID(),
-      logic: 'and', // Used for rows > 0
-      column: defaultCol?.key || '',
-      operation: defaultOps[0]?.value || '',
-      value: '',
+  function FilterComponent({ columns = [], onFilterChange }) {
+    const createDefaultFilter = () => {
+      const defaultCol = columns[0];
+      const defaultOps = defaultCol
+        ? OPERATIONS[defaultCol.type] || OPERATIONS.text
+        : OPERATIONS.text;
+
+      return {
+        id: crypto.randomUUID(),
+        logic: "and", // Used for rows > 0
+        column: defaultCol?.key || "",
+        operation: defaultOps[0]?.value || "",
+        value: "",
+      };
     };
-  };
 
-  const [filters, setFilters] = useState([]);
-  const lastFilter = filters[filters.length - 1];
-  const isLastFilterIncomplete = lastFilter && lastFilter.value === '';
+    const [filters, setFilters] = useState([]);
+    const lastFilter = filters[filters.length - 1];
+    const isLastFilterIncomplete = lastFilter && lastFilter.value === "";
 
-  useEffect(() => {
-    if (onFilterChange) {
-      onFilterChange(filters);
-    }
-  }, [filters, onFilterChange]);
+    useEffect(() => {
+      if (onFilterChange) {
+        onFilterChange(filters);
+      }
+    }, [filters, onFilterChange]);
 
-  const addFilter = () => {
-    setFilters([...filters, createDefaultFilter()]);
-  };
+    const addFilter = () => {
+      setFilters([...filters, createDefaultFilter()]);
+    };
 
   const removeFilter = (id) => {
     setFilters(filters.filter((f) => f.id !== id));
@@ -79,14 +82,14 @@ function FilterComponent({ columns = [], onFilterChange }) {
 
         const updatedFilter = { ...filter, [field]: newValue };
 
-        if (field === 'column') {
+        if (field === "column") {
           const selectedCol = columns.find((c) => c.key === newValue);
           const availableOps = selectedCol
             ? OPERATIONS[selectedCol.type] || OPERATIONS.text
             : OPERATIONS.text;
 
-          updatedFilter.operation = availableOps[0]?.value || '';
-          updatedFilter.value = '';
+          updatedFilter.operation = availableOps[0]?.value || "";
+          updatedFilter.value = "";
         }
 
         return updatedFilter;
@@ -105,12 +108,12 @@ function FilterComponent({ columns = [], onFilterChange }) {
       );
 
     switch (columnConfig.type) {
-      case 'select':
+      case "select":
         return (
           <Select
             flex="1"
             value={filter.value}
-            onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
+            onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
           >
             <option value="">Select option...</option>
             {columnConfig.options?.map((opt) => (
@@ -123,26 +126,26 @@ function FilterComponent({ columns = [], onFilterChange }) {
             ))}
           </Select>
         );
-      case 'date':
+      case "date":
         return (
           <Input
             flex="1"
             type="date"
             value={filter.value}
-            onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
+            onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
           />
         );
-      case 'number':
+      case "number":
         return (
           <Input
             flex="1"
             type="number"
             placeholder="0"
             value={filter.value}
-            onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
+            onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
           />
         );
-      case 'text':
+      case "text":
       default:
         return (
           <Input
@@ -150,17 +153,17 @@ function FilterComponent({ columns = [], onFilterChange }) {
             type="text"
             placeholder="Enter value..."
             value={filter.value}
-            onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
+            onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
           />
         );
-      case 'list':
+      case "list":
         return (
           <Input
             flex="1"
             type="text"
             placeholder="Enter value..."
             value={filter.value}
-            onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
+            onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
           />
         );
     }
@@ -216,7 +219,7 @@ function FilterComponent({ columns = [], onFilterChange }) {
                       size="md"
                       value={filter.logic}
                       onChange={(e) =>
-                        updateFilter(filter.id, 'logic', e.target.value)
+                        updateFilter(filter.id, "logic", e.target.value)
                       }
                     >
                       <option value="and">And</option>
@@ -229,7 +232,7 @@ function FilterComponent({ columns = [], onFilterChange }) {
                   flex="1"
                   value={filter.column}
                   onChange={(e) =>
-                    updateFilter(filter.id, 'column', e.target.value)
+                    updateFilter(filter.id, "column", e.target.value)
                   }
                 >
                   {columns.map((col) => (
@@ -238,7 +241,7 @@ function FilterComponent({ columns = [], onFilterChange }) {
                       value={col.key}
                     >
                       {col.key
-                        .replace(/([A-Z])/g, ' $1')
+                        .replace(/([A-Z])/g, " $1")
                         .replace(/^./, (str) => str.toUpperCase())}
                     </option>
                   ))}
@@ -248,7 +251,7 @@ function FilterComponent({ columns = [], onFilterChange }) {
                   flex="1"
                   value={filter.operation}
                   onChange={(e) =>
-                    updateFilter(filter.id, 'operation', e.target.value)
+                    updateFilter(filter.id, "operation", e.target.value)
                   }
                 >
                   {availableOps.map((op) => (
@@ -269,7 +272,7 @@ function FilterComponent({ columns = [], onFilterChange }) {
                   variant="ghost"
                   colorScheme="gray"
                   color="gray.400"
-                  _hover={{ color: 'red.500', bg: 'red.50' }}
+                  _hover={{ color: "red.500", bg: "red.50" }}
                   onClick={() => removeFilter(filter.id)}
                   title="Remove filter"
                 />
