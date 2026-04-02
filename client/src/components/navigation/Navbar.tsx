@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
@@ -10,6 +10,7 @@ import {
   Icon,
   Image,
   Text,
+  useOutsideClick,
 } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
@@ -37,12 +38,19 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useOutsideClick({
+    ref: menuRef,
+    handler: () => setIsMenuOpen(false),
+  });
 
   const handleMenuToggle = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
   const handleLogout = async () => {
+    setIsMenuOpen(false);
     await logout();
     navigate('/login');
   };
@@ -113,7 +121,7 @@ export const Navbar = () => {
       }
     };
     loadData();
-  }, [userId, backend, role]);
+  }, [userId, backend, role, currentUser?.displayName]);
 
   const triggerBg = isMenuOpen || isHovered ? 'gray.300' : 'transparent';
 
@@ -156,8 +164,12 @@ export const Navbar = () => {
         <Flex
           gap={2}
           align="center"
+          flexShrink={0}
         >
-          <Box position="relative">
+          <Box
+            ref={menuRef}
+            position="relative"
+          >
             <Button
               bg="transparent"
               p={0}
@@ -173,12 +185,14 @@ export const Navbar = () => {
                 bg={triggerBg}
                 borderRadius={isMenuOpen ? '20px 20px 0 0' : '20px'}
                 minW="160px"
+                maxW={{ base: 'min(200px, 40vw)', md: '280px' }}
                 transition="background-color 0.4s ease, border-radius 0.4s ease"
               >
                 <HStack
                   spacing={3}
                   justify="center"
                   align="center"
+                  minW={0}
                 >
                   <Image
                     src={profilePictureUrl ?? DEFAULT_PROFILE_IMAGE}
@@ -187,15 +201,21 @@ export const Navbar = () => {
                     h="28px"
                     borderRadius="full"
                     objectFit="cover"
+                    flexShrink={0}
                   />
                   <Text
                     fontSize="2vh"
                     fontWeight="semibold"
+                    noOfLines={1}
+                    minW={0}
+                    flex="1"
+                    textAlign="center"
                   >
                     {userName || 'User'}
                   </Text>
                   <ChevronDownIcon
                     boxSize={4}
+                    flexShrink={0}
                     transition="transform 0.4s ease"
                     transform={isMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)'}
                   />
@@ -226,7 +246,10 @@ export const Navbar = () => {
                   w="100%"
                 >
                   <Button
-                    onClick={() => navigate('/profile')}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate('/profile');
+                    }}
                     leftIcon={
                       <Icon
                         as={HiOutlineUser}
