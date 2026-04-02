@@ -165,12 +165,6 @@ export const CreateUpdateDrawer = ({
   const [programId, setProgramId] = useState(null);
   const [instrumentCountsByName, setInstrumentCountsByName] = useState({});
 
-  const studentCountEditedRef = useRef(false);
-
-  useEffect(() => {
-    if (isOpen) studentCountEditedRef.current = false;
-  }, [isOpen]);
-
   useEffect(() => {
     const fetchInstruments = async () => {
       try {
@@ -352,7 +346,7 @@ export const CreateUpdateDrawer = ({
     setSelectedInstrument('');
     setWhatHappened('');
     setInstrumentCount(0);
-    setStudentCount(programEnrollmentCount);
+    setStudentCount(0);
     setStudentWhatHappened('');
     setNotes('');
     setUploadedMedia([]);
