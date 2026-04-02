@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
 import {
   Badge,
   Card,
@@ -53,8 +54,15 @@ const CardView = ({ data, onSave: _onSave }) => {
       >
         {data.map((a) => (
           <GridItem key={a.id}>
-            <Card w="auto" borderRadius="12px" bg="#EDF2F7">
-              <CardHeader py={3} px={4}>
+            <Card
+              w="auto"
+              borderRadius="12px"
+              bg="#EDF2F7"
+            >
+              <CardHeader
+                py={3}
+                px={4}
+              >
                 <Badge
                   borderRadius="6px"
                   py="6px"
@@ -84,12 +92,27 @@ const CardView = ({ data, onSave: _onSave }) => {
                   alt="GCF Globe"
                 />
               </CardBody>
-              <CardFooter bg="white" h="88px" py="18px" px="24px">
-                <VStack align="stretch" spacing={3}>
-                  <Text fontSize="lg" color="black">
+              <CardFooter
+                bg="white"
+                h="88px"
+                py="18px"
+                px="24px"
+              >
+                <VStack
+                  align="stretch"
+                  spacing={3}
+                >
+                  <Text
+                    fontSize="lg"
+                    color="black"
+                  >
                     {a.firstName} {a.lastName}
                   </Text>
-                  <Flex gap={3} flexWrap="wrap" align="center">
+                  <Flex
+                    gap={3}
+                    flexWrap="wrap"
+                    align="center"
+                  >
                     {a.role === 'Regional Director' ? (
                       <RegionText id={a.id} />
                     ) : (

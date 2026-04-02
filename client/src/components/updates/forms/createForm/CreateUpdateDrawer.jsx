@@ -9,16 +9,18 @@ import {
   DrawerContent,
   DrawerOverlay,
   Flex,
-  HStack,
   Heading,
+  HStack,
   Icon,
   IconButton,
   Text,
-  VStack,
   useDisclosure,
   useToast,
+  VStack,
 } from '@chakra-ui/react';
 
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import {
   FiMaximize2,
   FiMinimize2,
@@ -27,8 +29,6 @@ import {
   FiUser,
 } from 'react-icons/fi';
 
-import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { MediaUploadModal } from '../../../media/MediaUploadModal';
 import CreateUpdateInstrument from './CreateUpdateInstrument';
 import CreateUpdateStudent from './CreateUpdateStudent';
@@ -51,14 +51,23 @@ const UpdateTypeOptionCard = ({ icon, label, isSelected, onSelect }) => {
       textAlign="center"
       transition="all 0.2s"
     >
-      <Box flex={5} p={6} gap={0} alignItems="center" justifyContent="center">
+      <Box
+        flex={5}
+        p={6}
+        gap={0}
+        alignItems="center"
+        justifyContent="center"
+      >
         <Box mt={3}>
           <Icon
             as={icon}
             boxSize={8}
             color={isSelected ? 'teal.600' : 'gray.500'}
           />
-          <Text fontWeight="bold" fontSize="sm">
+          <Text
+            fontWeight="bold"
+            fontSize="sm"
+          >
             {label}
           </Text>
         </Box>
@@ -85,7 +94,14 @@ const UpdateTypeOptionCard = ({ icon, label, isSelected, onSelect }) => {
           alignItems="center"
           justifyContent="center"
         >
-          {isSelected && <Box w="8px" h="8px" borderRadius="full" bg="white" />}
+          {isSelected && (
+            <Box
+              w="8px"
+              h="8px"
+              borderRadius="full"
+              bg="white"
+            />
+          )}
         </Box>
       </Box>
     </Box>
@@ -359,7 +375,12 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
           borderBottomLeftRadius="xl"
           overflow="hidden"
         >
-          <Flex position="absolute" top={3} left={3} zIndex={1}>
+          <Flex
+            position="absolute"
+            top={3}
+            left={3}
+            zIndex={1}
+          >
             <IconButton
               icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
               aria-label={isFullScreen ? 'Minimize' : 'Expand'}
@@ -369,20 +390,42 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
             />
           </Flex>
 
-          <Box pt={6} pb={2} px={8}>
-            <Text fontSize="xl" fontWeight="600" textAlign="center">
+          <Box
+            pt={6}
+            pb={2}
+            px={8}
+          >
+            <Text
+              fontSize="xl"
+              fontWeight="600"
+              textAlign="center"
+            >
               Create New Update
             </Text>
             <Divider mt={3} />
           </Box>
 
-          <DrawerBody px={8} pb={24}>
-            <VStack spacing={6} align="stretch" mt={4}>
+          <DrawerBody
+            px={8}
+            pb={24}
+          >
+            <VStack
+              spacing={6}
+              align="stretch"
+              mt={4}
+            >
               <Box>
-                <Heading size="sm" fontWeight="600" mb={3}>
+                <Heading
+                  size="sm"
+                  fontWeight="600"
+                  mb={3}
+                >
                   What type of update are you submitting today?
                 </Heading>
-                <HStack spacing={4} alignItems="stretch">
+                <HStack
+                  spacing={4}
+                  alignItems="stretch"
+                >
                   <UpdateTypeOptionCard
                     icon={FiMusic}
                     label="Instrument Update"
@@ -455,7 +498,12 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
               onClick={handleDelete}
               isDisabled={isLoading}
             >
-              <Icon as={FiTrash2} boxSize={4} mr={1} /> Delete
+              <Icon
+                as={FiTrash2}
+                boxSize={4}
+                mr={1}
+              />{' '}
+              Delete
             </Button>
             <HStack spacing={3}>
               <Button

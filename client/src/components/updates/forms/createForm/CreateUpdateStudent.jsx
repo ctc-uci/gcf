@@ -14,6 +14,7 @@ import {
   Text,
   Textarea,
 } from '@chakra-ui/react';
+
 import { FiCamera, FiEdit3, FiStar, FiUsers } from 'react-icons/fi';
 
 export default function CreateUpdateStudent({
@@ -30,15 +31,32 @@ export default function CreateUpdateStudent({
   return (
     <>
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiUsers} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiUsers}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
             How many students are currently enrolled?
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          fontWeight="500"
+          mb={1}
+        >
           Number of students{' '}
-          <Text as="span" color="red.500">
+          <Text
+            as="span"
+            color="red.500"
+          >
             *
           </Text>
         </Text>
@@ -56,19 +74,39 @@ export default function CreateUpdateStudent({
       </Box>
 
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiCamera} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiCamera}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
             Do you want to add photos or videos?
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" mb={2}>
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          mb={2}
+        >
           Optional for documentation
         </Text>
         {uploadedMedia.length > 0 && (
-          <HStack spacing={2} wrap="wrap" mb={2}>
+          <HStack
+            spacing={2}
+            wrap="wrap"
+            mb={2}
+          >
             {uploadedMedia.map((media, idx) => (
-              <Box key={idx} position="relative">
+              <Box
+                key={idx}
+                position="relative"
+              >
                 <Box
                   boxSize="80px"
                   bg="gray.100"
@@ -77,7 +115,11 @@ export default function CreateUpdateStudent({
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <Text fontSize="xs" textAlign="center" px={1}>
+                  <Text
+                    fontSize="xs"
+                    textAlign="center"
+                    px={1}
+                  >
                     {media.file_name}
                   </Text>
                 </Box>
@@ -108,13 +150,27 @@ export default function CreateUpdateStudent({
       </Box>
 
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiEdit3} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiEdit3}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
             Add a note
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          fontWeight="500"
+          mb={1}
+        >
           Notes
         </Text>
         <Textarea

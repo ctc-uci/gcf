@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { AddIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -13,24 +14,24 @@ import {
   Tabs,
   useDisclosure,
 } from '@chakra-ui/react';
-import { AddIcon } from '@chakra-ui/icons';
+
 import { FiDownload } from 'react-icons/fi';
 
-import { downloadProgramUpdatesAsCsv } from '../ProgramUpdatesTable';
-import { CreateUpdateDrawer } from '../forms/createForm/CreateUpdateDrawer';
-import {
-  UpdatesSearchInput,
-  UpdatesFilterPopover,
-  UpdatesViewModeToggle,
-} from '../config/UpdatesSharedControls';
 import { applyFilters } from '../../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../../contexts/hooks/TableSort';
 import { programDirectorFilterColumns } from '../config/updatesColumnConfig';
+import {
+  UpdatesFilterPopover,
+  UpdatesSearchInput,
+  UpdatesViewModeToggle,
+} from '../config/UpdatesSharedControls';
 import {
   UPDATES_TAB_BASE_PROPS,
   UPDATES_TAB_SELECTED_PROPS,
   UpdatesTabCountBadge,
 } from '../config/UpdatesTabListWithBadges';
+import { CreateUpdateDrawer } from '../forms/createForm/CreateUpdateDrawer';
+import { downloadProgramUpdatesAsCsv } from '../ProgramUpdatesTable';
 import { ProgramDirectorUpdatesTable } from './ProgramDirectorUpdatesTable';
 
 export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
@@ -82,9 +83,24 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
   const studentTableData = studentSorted ?? studentRows;
 
   return (
-    <Box p={8} bg="gray.50" minH="100vh" mx={-4} mt={0}>
-      <Flex align="center" gap={4} mb={4} wrap="wrap">
-        <Heading as="h1" size="lg" fontWeight="500">
+    <Box
+      p={8}
+      bg="gray.50"
+      minH="100vh"
+      mx={-4}
+      mt={0}
+    >
+      <Flex
+        align="center"
+        gap={4}
+        mb={4}
+        wrap="wrap"
+      >
+        <Heading
+          as="h1"
+          size="lg"
+          fontWeight="500"
+        >
           Updates
         </Heading>
         <IconButton
@@ -95,7 +111,10 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           color="gray.500"
           onClick={() => downloadProgramUpdatesAsCsv(data)}
         />
-        <UpdatesSearchInput value={searchQuery} onChange={setSearchQuery} />
+        <UpdatesSearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
         <UpdatesFilterPopover
           columns={programDirectorFilterColumns}
           onFilterChange={setActiveFilters}
@@ -117,7 +136,13 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
       </Flex>
 
       <Tabs>
-        <TabList w="100%" display="flex" mt={4} mb={4} gap={0}>
+        <TabList
+          w="100%"
+          display="flex"
+          mt={4}
+          mb={4}
+          gap={0}
+        >
           <Tab
             flex="1"
             justifyContent="center"
@@ -140,7 +165,10 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           </Tab>
         </TabList>
         <TabPanels>
-          <TabPanel p={0} pt={4}>
+          <TabPanel
+            p={0}
+            pt={4}
+          >
             <ProgramDirectorUpdatesTable
               variant="instrument"
               tableData={instrumentTableData}
@@ -149,7 +177,10 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
               sortOrder={instrumentSort.sortOrder}
             />
           </TabPanel>
-          <TabPanel p={0} pt={4}>
+          <TabPanel
+            p={0}
+            pt={4}
+          >
             <ProgramDirectorUpdatesTable
               variant="student"
               tableData={studentTableData}

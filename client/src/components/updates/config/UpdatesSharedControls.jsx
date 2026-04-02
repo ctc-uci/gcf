@@ -9,12 +9,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@chakra-ui/react';
-import { FiSearch, FiList } from 'react-icons/fi';
-import {
-  HiOutlineAdjustmentsHorizontal,
-  HiArrowsUpDown,
-} from 'react-icons/hi2';
+
 import { BsGrid3X3Gap } from 'react-icons/bs';
+import { FiList, FiSearch } from 'react-icons/fi';
+import {
+  HiArrowsUpDown,
+  HiOutlineAdjustmentsHorizontal,
+} from 'react-icons/hi2';
 
 import { FilterComponent } from '../../common/FilterComponent';
 
@@ -34,8 +35,15 @@ const searchInputStyles = {
 export function UpdatesSearchInput({ value, onChange, maxW = '200px' }) {
   return (
     <InputGroup maxW={maxW}>
-      <InputLeftElement pointerEvents="none" h="32px">
-        <Icon as={FiSearch} color="gray.400" boxSize="14px" />
+      <InputLeftElement
+        pointerEvents="none"
+        h="32px"
+      >
+        <Icon
+          as={FiSearch}
+          color="gray.400"
+          boxSize="14px"
+        />
       </InputLeftElement>
       <Input
         {...searchInputStyles}
@@ -58,8 +66,15 @@ export function UpdatesFilterPopover({ columns, onFilterChange }) {
           size="sm"
         />
       </PopoverTrigger>
-      <PopoverContent w="800px" maxW="90vw" shadow="xl">
-        <FilterComponent columns={columns} onFilterChange={onFilterChange} />
+      <PopoverContent
+        w="800px"
+        maxW="90vw"
+        shadow="xl"
+      >
+        <FilterComponent
+          columns={columns}
+          onFilterChange={onFilterChange}
+        />
       </PopoverContent>
     </Popover>
   );

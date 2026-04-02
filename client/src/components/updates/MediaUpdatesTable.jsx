@@ -1,5 +1,5 @@
 //TODO: check this again
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   Badge,
@@ -17,13 +17,14 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
-import { FiUser } from 'react-icons/fi';
 
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { FiUser } from 'react-icons/fi';
+
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
@@ -106,7 +107,10 @@ export const MediaUpdatesTable = ({
 
   return (
     <Box position="relative">
-      <TableContainer overflowX="auto" maxW="100%">
+      <TableContainer
+        overflowX="auto"
+        maxW="100%"
+      >
         <Table variant="simple">
           <Thead>
             <Tr>
@@ -119,7 +123,10 @@ export const MediaUpdatesTable = ({
                 fontWeight="600"
               >
                 Update Note
-                <SortArrows columnKey="note" sortOrder={sortOrder} />
+                <SortArrows
+                  columnKey="note"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th
                 onClick={() => handleSort('status')}
@@ -130,7 +137,10 @@ export const MediaUpdatesTable = ({
                 fontWeight="600"
               >
                 Status
-                <SortArrows columnKey="status" sortOrder={sortOrder} />
+                <SortArrows
+                  columnKey="status"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th
                 onClick={() => handleSort('firstName')}
@@ -141,7 +151,10 @@ export const MediaUpdatesTable = ({
                 fontWeight="600"
               >
                 Author
-                <SortArrows columnKey="firstName" sortOrder={sortOrder} />
+                <SortArrows
+                  columnKey="firstName"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th
                 onClick={() => handleSort('programName')}
@@ -152,7 +165,10 @@ export const MediaUpdatesTable = ({
                 fontWeight="600"
               >
                 Program
-                <SortArrows columnKey="programName" sortOrder={sortOrder} />
+                <SortArrows
+                  columnKey="programName"
+                  sortOrder={sortOrder}
+                />
               </Th>
               <Th
                 onClick={() => handleSort('updateDate')}
@@ -163,7 +179,10 @@ export const MediaUpdatesTable = ({
                 fontWeight="600"
               >
                 Date
-                <SortArrows columnKey="updateDate" sortOrder={sortOrder} />
+                <SortArrows
+                  columnKey="updateDate"
+                  sortOrder={sortOrder}
+                />
               </Th>
             </Tr>
           </Thead>
@@ -185,7 +204,10 @@ export const MediaUpdatesTable = ({
                   onClick={() => setSelectedUpdate(row)}
                 >
                   <Td>
-                    <Text noOfLines={1} maxW="400px">
+                    <Text
+                      noOfLines={1}
+                      maxW="400px"
+                    >
                       {row.note || 'Note about the program...'}
                     </Text>
                   </Td>
@@ -194,17 +216,27 @@ export const MediaUpdatesTable = ({
                   </Td>
                   <Td>
                     <HStack spacing={1}>
-                      <Icon as={FiUser} boxSize={4} color="gray.400" />
+                      <Icon
+                        as={FiUser}
+                        boxSize={4}
+                        color="gray.400"
+                      />
                       <Text fontSize="sm">{row.firstName || 'Name'}</Text>
                     </HStack>
                   </Td>
                   <Td>
-                    <Text fontSize="sm" fontWeight="500">
+                    <Text
+                      fontSize="sm"
+                      fontWeight="500"
+                    >
                       {row.programName || ''}
                     </Text>
                   </Td>
                   <Td>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text
+                      fontSize="sm"
+                      color="gray.600"
+                    >
                       {row.updateDate || ''}
                     </Text>
                   </Td>

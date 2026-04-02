@@ -12,14 +12,15 @@ import {
   DrawerContent,
   DrawerOverlay,
   Flex,
-  HStack,
   Heading,
+  HStack,
   Icon,
   IconButton,
   Image,
   Text,
   VStack,
 } from '@chakra-ui/react';
+
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 const DiffField = ({ label, oldValue, newValue }) => {
@@ -28,12 +29,21 @@ const DiffField = ({ label, oldValue, newValue }) => {
 
   return (
     <Box>
-      <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+      <Text
+        color="teal.500"
+        fontSize="sm"
+        fontWeight="500"
+        mb={1}
+      >
         {label}
       </Text>
       {hasChange ? (
         <HStack spacing={2}>
-          <Text as="span" textDecoration="line-through" color="gray.500">
+          <Text
+            as="span"
+            textDecoration="line-through"
+            color="gray.500"
+          >
             {oldValue}
           </Text>
           <Text as="span">{newValue}</Text>
@@ -50,7 +60,12 @@ const RoleDiffField = ({ oldRole, newRole }) => {
 
   return (
     <Box>
-      <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+      <Text
+        color="teal.500"
+        fontSize="sm"
+        fontWeight="500"
+        mb={1}
+      >
         Role
       </Text>
       <HStack spacing={2}>
@@ -65,7 +80,13 @@ const RoleDiffField = ({ oldRole, newRole }) => {
           </Badge>
         )}
         {newRole && (
-          <Badge bg="teal.500" color="white" borderRadius="md" px={2} py={0.5}>
+          <Badge
+            bg="teal.500"
+            color="white"
+            borderRadius="md"
+            px={2}
+            py={0.5}
+          >
             {newRole}
           </Badge>
         )}
@@ -93,7 +114,12 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
       <DrawerOverlay />
       <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
         {/* Expand/Minimize toggle */}
-        <Flex position="absolute" top={3} left={3} zIndex={1}>
+        <Flex
+          position="absolute"
+          top={3}
+          left={3}
+          zIndex={1}
+        >
           <IconButton
             icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
             aria-label={isFullScreen ? 'Minimize' : 'Expand'}
@@ -104,18 +130,38 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
         </Flex>
 
         {/* Header */}
-        <Box pt={6} pb={2} px={8}>
-          <Text fontSize="xl" fontWeight="600" textAlign="center">
+        <Box
+          pt={6}
+          pb={2}
+          px={8}
+        >
+          <Text
+            fontSize="xl"
+            fontWeight="600"
+            textAlign="center"
+          >
             Account Update
           </Text>
           <Divider mt={3} />
         </Box>
 
-        <DrawerBody px={8} pb={24}>
-          <VStack spacing={5} align="stretch" mt={6}>
+        <DrawerBody
+          px={8}
+          pb={24}
+        >
+          <VStack
+            spacing={5}
+            align="stretch"
+            mt={6}
+          >
             {(oldPicture || newPicture) && (
               <Box>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={2}
+                >
                   Profile Picture
                 </Text>
                 <HStack spacing={4}>
@@ -203,7 +249,10 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
           justify="flex-end"
           gap={3}
         >
-          <Button variant="outline" onClick={onClose}>
+          <Button
+            variant="outline"
+            onClick={onClose}
+          >
             Keep as Unresolved
           </Button>
           <Button

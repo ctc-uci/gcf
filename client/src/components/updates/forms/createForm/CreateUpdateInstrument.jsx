@@ -19,6 +19,7 @@ import {
   Textarea,
   VStack,
 } from '@chakra-ui/react';
+
 import {
   FiCamera,
   FiCornerDownRight,
@@ -50,15 +51,32 @@ export default function CreateUpdateInstrument({
   return (
     <>
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiMusic} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiMusic}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
             Which instrument is this update about?
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          fontWeight="500"
+          mb={1}
+        >
           Select instrument{' '}
-          <Text as="span" color="red.500">
+          <Text
+            as="span"
+            color="red.500"
+          >
             *
           </Text>
         </Text>
@@ -68,7 +86,10 @@ export default function CreateUpdateInstrument({
           onChange={(e) => setSelectedInstrument(e.target.value)}
         >
           {(instruments || []).map((inst) => (
-            <option key={inst.id} value={inst.name}>
+            <option
+              key={inst.id}
+              value={inst.name}
+            >
               {inst.name}
             </option>
           ))}
@@ -76,32 +97,54 @@ export default function CreateUpdateInstrument({
       </Box>
 
       <Box>
-        <Heading size="sm" fontWeight="600" mb={3}>
+        <Heading
+          size="sm"
+          fontWeight="600"
+          mb={3}
+        >
           What happened to this instrument?
         </Heading>
-        <RadioGroup value={whatHappened} onChange={setWhatHappened}>
-          <VStack align="start" spacing={2}>
+        <RadioGroup
+          value={whatHappened}
+          onChange={setWhatHappened}
+        >
+          <VStack
+            align="start"
+            spacing={2}
+          >
             <Radio value="Broken">
               <HStack spacing={2}>
-                <Icon as={FiX} boxSize={4} />
+                <Icon
+                  as={FiX}
+                  boxSize={4}
+                />
                 <Text>Broken</Text>
               </HStack>
             </Radio>
             <Radio value="Missing">
               <HStack spacing={2}>
-                <Icon as={FiHelpCircle} boxSize={4} />
+                <Icon
+                  as={FiHelpCircle}
+                  boxSize={4}
+                />
                 <Text>Missing</Text>
               </HStack>
             </Radio>
             <Radio value="New / Donation">
               <HStack spacing={2}>
-                <Icon as={FiCornerDownRight} boxSize={4} />
+                <Icon
+                  as={FiCornerDownRight}
+                  boxSize={4}
+                />
                 <Text>New / Donation</Text>
               </HStack>
             </Radio>
             <Radio value="Needs repair">
               <HStack spacing={2}>
-                <Icon as={FiTool} boxSize={4} />
+                <Icon
+                  as={FiTool}
+                  boxSize={4}
+                />
                 <Text>Needs repair</Text>
               </HStack>
             </Radio>
@@ -113,15 +156,32 @@ export default function CreateUpdateInstrument({
       </Box>
 
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiMusic} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiMusic}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
             How many instruments are affected?
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          fontWeight="500"
+          mb={1}
+        >
           Number of instruments{' '}
-          <Text as="span" color="red.500">
+          <Text
+            as="span"
+            color="red.500"
+          >
             *
           </Text>
         </Text>
@@ -136,13 +196,21 @@ export default function CreateUpdateInstrument({
             <NumberDecrementStepper />
           </NumberInputStepper>
         </NumberInput>
-        <Text color="teal.500" fontSize="sm" fontWeight="500" mt={2}>
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          fontWeight="500"
+          mt={2}
+        >
           {programInstrumentCountForSelected === null ? (
             ''
           ) : (
             <>
               Total {selectedInstrument}:{' '}
-              <Text as="span" fontWeight="bold">
+              <Text
+                as="span"
+                fontWeight="bold"
+              >
                 {programInstrumentCountForSelected}
               </Text>
             </>
@@ -151,19 +219,39 @@ export default function CreateUpdateInstrument({
       </Box>
 
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiCamera} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiCamera}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
             Do you want to add photos or videos?
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" mb={2}>
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          mb={2}
+        >
           This helps us understand the issue.
         </Text>
         {uploadedMedia.length > 0 && (
-          <HStack spacing={2} wrap="wrap" mb={2}>
+          <HStack
+            spacing={2}
+            wrap="wrap"
+            mb={2}
+          >
             {uploadedMedia.map((media, idx) => (
-              <Box key={idx} position="relative">
+              <Box
+                key={idx}
+                position="relative"
+              >
                 {media.file_type?.startsWith('image/') ? (
                   <Image
                     src={media.previewUrl || ''}
@@ -182,7 +270,11 @@ export default function CreateUpdateInstrument({
                     alignItems="center"
                     justifyContent="center"
                   >
-                    <Text fontSize="xs" textAlign="center" px={1}>
+                    <Text
+                      fontSize="xs"
+                      textAlign="center"
+                      px={1}
+                    >
                       {media.file_name}
                     </Text>
                   </Box>
@@ -198,7 +290,11 @@ export default function CreateUpdateInstrument({
                   _hover={{ bg: 'red.600' }}
                   onClick={() => removeMedia(idx)}
                 />
-                <Text fontSize="xs" noOfLines={1} maxW="80px">
+                <Text
+                  fontSize="xs"
+                  noOfLines={1}
+                  maxW="80px"
+                >
                   {media.file_name}
                 </Text>
               </Box>
@@ -217,9 +313,18 @@ export default function CreateUpdateInstrument({
       </Box>
 
       <Box>
-        <HStack spacing={2} mb={2}>
-          <Icon as={FiStar} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
+        <HStack
+          spacing={2}
+          mb={2}
+        >
+          <Icon
+            as={FiStar}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
             Do you need admin help or approval for this?
           </Heading>
         </HStack>
@@ -233,13 +338,27 @@ export default function CreateUpdateInstrument({
       </Box>
 
       <Box>
-        <HStack spacing={2} mb={1}>
-          <Icon as={FiEdit3} boxSize={4} />
-          <Heading size="sm" fontWeight="600">
+        <HStack
+          spacing={2}
+          mb={1}
+        >
+          <Icon
+            as={FiEdit3}
+            boxSize={4}
+          />
+          <Heading
+            size="sm"
+            fontWeight="600"
+          >
             Add a note
           </Heading>
         </HStack>
-        <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+        <Text
+          color="teal.500"
+          fontSize="sm"
+          fontWeight="500"
+          mb={1}
+        >
           Notes
         </Text>
         <Textarea

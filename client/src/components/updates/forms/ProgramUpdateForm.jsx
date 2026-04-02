@@ -13,8 +13,8 @@ import {
   Flex,
   Grid,
   GridItem,
-  HStack,
   Heading,
+  HStack,
   IconButton,
   Input,
   NumberDecrementStepper,
@@ -28,10 +28,14 @@ import {
   TagLabel,
   Text,
   Textarea,
-  VStack,
   useDisclosure,
   useToast,
+  VStack,
 } from '@chakra-ui/react';
+
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 function formatUpdateDisplayDate(value) {
@@ -58,10 +62,6 @@ function formatUpdateDisplayDate(value) {
     year: 'numeric',
   });
 }
-
-import { useAuthContext } from '@/contexts/hooks/useAuthContext';
-import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
 export const ProgramUpdateForm = ({
   isOpen: isOpenProp,
@@ -471,7 +471,12 @@ export const ProgramUpdateForm = ({
     >
       <DrawerOverlay />
       <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
-        <Flex position="absolute" top={3} left={3} zIndex={1}>
+        <Flex
+          position="absolute"
+          top={3}
+          left={3}
+          zIndex={1}
+        >
           <IconButton
             icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
             aria-label={isFullScreen ? 'Minimize' : 'Expand'}
@@ -481,22 +486,47 @@ export const ProgramUpdateForm = ({
           />
         </Flex>
 
-        <Box pt={6} pb={2} px={8}>
-          <Text fontSize="xl" fontWeight="600" textAlign="center">
+        <Box
+          pt={6}
+          pb={2}
+          px={8}
+        >
+          <Text
+            fontSize="xl"
+            fontWeight="600"
+            textAlign="center"
+          >
             Program Update
           </Text>
           <Divider mt={3} />
         </Box>
 
-        <DrawerBody px={8} pb={24}>
-          <VStack spacing={6} align="stretch">
-            <Heading size="md" mt={4}>
+        <DrawerBody
+          px={8}
+          pb={24}
+        >
+          <VStack
+            spacing={6}
+            align="stretch"
+          >
+            <Heading
+              size="md"
+              mt={4}
+            >
               Update Information
             </Heading>
 
-            <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+            <Grid
+              templateColumns="repeat(3, 1fr)"
+              gap={6}
+            >
               <GridItem>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
                   Author
                 </Text>
                 <HStack spacing={3}>
@@ -510,13 +540,23 @@ export const ProgramUpdateForm = ({
                 </HStack>
               </GridItem>
               <GridItem>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
                   Program
                 </Text>
                 <Text fontWeight="500">{programName || '—'}</Text>
               </GridItem>
               <GridItem>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
                   Time
                 </Text>
                 <Text>{formatUpdateDisplayDate(updateDateTime) || '—'}</Text>
@@ -524,7 +564,12 @@ export const ProgramUpdateForm = ({
             </Grid>
             {isInstrumentUpdate && (
               <Box>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={2}
+                >
                   Flag
                 </Text>
                 <Checkbox
@@ -535,9 +580,17 @@ export const ProgramUpdateForm = ({
                 </Checkbox>
               </Box>
             )}
-            <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+            <Grid
+              templateColumns="repeat(3, 1fr)"
+              gap={6}
+            >
               <GridItem>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
                   Update Type
                 </Text>
                 <Text>{isInstrumentUpdate ? 'Instrument' : 'Student'}</Text>
@@ -545,16 +598,29 @@ export const ProgramUpdateForm = ({
             </Grid>
 
             <Box>
-              <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
+              <Text
+                color="teal.500"
+                fontSize="sm"
+                fontWeight="500"
+                mb={2}
+              >
                 Photos/Videos
               </Text>
-              <Text color="gray.400" fontSize="sm">
+              <Text
+                color="gray.400"
+                fontSize="sm"
+              >
                 No media attached
               </Text>
             </Box>
 
             <Box>
-              <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
+              <Text
+                color="teal.500"
+                fontSize="sm"
+                fontWeight="500"
+                mb={2}
+              >
                 Note
               </Text>
               <Text>{notes || ''}</Text>
@@ -566,10 +632,19 @@ export const ProgramUpdateForm = ({
                 <Heading size="md">Edit Update</Heading>
 
                 <Box>
-                  <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={2}
+                  >
                     Instrument & Quantity
                   </Text>
-                  <HStack wrap="wrap" spacing={2} mb={3}>
+                  <HStack
+                    wrap="wrap"
+                    spacing={2}
+                    mb={3}
+                  >
                     {Object.entries(addedInstruments).map(([name, qty]) => (
                       <Tag
                         key={name}
@@ -595,7 +670,10 @@ export const ProgramUpdateForm = ({
                       maxW="200px"
                     >
                       {existingInstruments.map((instrument) => (
-                        <option key={instrument.id} value={instrument.name}>
+                        <option
+                          key={instrument.id}
+                          value={instrument.name}
+                        >
                           {instrument.name}
                         </option>
                       ))}

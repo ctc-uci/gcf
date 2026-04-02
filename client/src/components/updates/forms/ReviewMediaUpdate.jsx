@@ -20,6 +20,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
+
 import { FiDownload, FiMaximize2, FiMinimize2, FiUser } from 'react-icons/fi';
 
 import { useBackendContext } from '../../../contexts/hooks/useBackendContext';
@@ -63,7 +64,12 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
     >
       <DrawerOverlay />
       <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
-        <Flex position="absolute" top={3} left={3} zIndex={1}>
+        <Flex
+          position="absolute"
+          top={3}
+          left={3}
+          zIndex={1}
+        >
           <IconButton
             icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
             aria-label={isFullScreen ? 'Minimize' : 'Expand'}
@@ -73,35 +79,72 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
           />
         </Flex>
 
-        <Box pt={6} pb={2} px={8}>
-          <Text fontSize="xl" fontWeight="600" textAlign="center">
+        <Box
+          pt={6}
+          pb={2}
+          px={8}
+        >
+          <Text
+            fontSize="xl"
+            fontWeight="600"
+            textAlign="center"
+          >
             Media Update
           </Text>
           <Divider mt={3} />
         </Box>
 
-        <DrawerBody px={8} pb={24}>
-          <VStack spacing={6} align="stretch" mt={4}>
-            <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+        <DrawerBody
+          px={8}
+          pb={24}
+        >
+          <VStack
+            spacing={6}
+            align="stretch"
+            mt={4}
+          >
+            <Grid
+              templateColumns="repeat(3, 1fr)"
+              gap={6}
+            >
               <GridItem>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
                   Author
                 </Text>
                 <HStack spacing={1}>
-                  <Icon as={FiUser} boxSize={4} color="gray.400" />
+                  <Icon
+                    as={FiUser}
+                    boxSize={4}
+                    color="gray.400"
+                  />
                   <Text>
                     {update?.firstName} {update?.lastName}
                   </Text>
                 </HStack>
               </GridItem>
               <GridItem>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
                   Program
                 </Text>
                 <Text>{update?.programName ?? ''}</Text>
               </GridItem>
               <GridItem>
-                <Text color="teal.500" fontSize="sm" fontWeight="500" mb={1}>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
                   Time
                 </Text>
                 <Text>{update?.updateDate ?? ''}</Text>
@@ -109,18 +152,30 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
             </Grid>
 
             <Box>
-              <Text color="teal.500" fontSize="sm" fontWeight="500" mb={2}>
+              <Text
+                color="teal.500"
+                fontSize="sm"
+                fontWeight="500"
+                mb={2}
+              >
                 Note
               </Text>
               <Text>{update?.note || ''}</Text>
             </Box>
 
             <Box>
-              <Text fontSize="lg" fontWeight="600" mb={3}>
+              <Text
+                fontSize="lg"
+                fontWeight="600"
+                mb={3}
+              >
                 Media
               </Text>
               {mediaItems.length > 0 ? (
-                <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} spacing={4}>
+                <SimpleGrid
+                  columns={{ base: 2, md: 3, lg: 4 }}
+                  spacing={4}
+                >
                   {mediaItems.map((item, idx) => (
                     <Box key={idx}>
                       <Box
@@ -162,14 +217,20 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                           _hover={{ bg: 'blackAlpha.800' }}
                         />
                       </Box>
-                      <Text fontSize="sm" mt={1}>
+                      <Text
+                        fontSize="sm"
+                        mt={1}
+                      >
                         {item.title || item.fileName || 'Video Title'}
                       </Text>
                     </Box>
                   ))}
                 </SimpleGrid>
               ) : (
-                <Text color="gray.400" fontSize="sm">
+                <Text
+                  color="gray.400"
+                  fontSize="sm"
+                >
                   No media attached
                 </Text>
               )}
@@ -190,7 +251,10 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
           justify="flex-end"
           gap={3}
         >
-          <Button variant="outline" onClick={handleKeepUnresolved}>
+          <Button
+            variant="outline"
+            onClick={handleKeepUnresolved}
+          >
             Keep as Unresolved
           </Button>
           <Button

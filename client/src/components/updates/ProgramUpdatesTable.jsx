@@ -1,28 +1,30 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   Avatar,
   Badge,
   Box,
   Center,
+  HStack,
   Icon,
   Spinner,
   Table,
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
-  HStack,
-  Text,
 } from '@chakra-ui/react';
-import { FiStar, FiUser } from 'react-icons/fi';
+
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { FiStar, FiUser } from 'react-icons/fi';
+
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
@@ -153,7 +155,10 @@ export const ProgramUpdatesTable = ({
       />
 
       <Box position="relative">
-        <TableContainer overflowX="auto" maxW="100%">
+        <TableContainer
+          overflowX="auto"
+          maxW="100%"
+        >
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -168,7 +173,10 @@ export const ProgramUpdatesTable = ({
                     w="60px"
                   >
                     Flag
-                    <SortArrows columnKey="flagged" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="flagged"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                 )}
                 {showFlagAndType && (
@@ -181,7 +189,10 @@ export const ProgramUpdatesTable = ({
                     fontWeight="600"
                   >
                     Type
-                    <SortArrows columnKey="updateType" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="updateType"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                 )}
                 <Th
@@ -193,7 +204,10 @@ export const ProgramUpdatesTable = ({
                   fontWeight="600"
                 >
                   Update Note
-                  <SortArrows columnKey="note" sortOrder={sortOrder} />
+                  <SortArrows
+                    columnKey="note"
+                    sortOrder={sortOrder}
+                  />
                 </Th>
                 {(showStatus || showFlagAndType) && (
                   <Th
@@ -205,7 +219,10 @@ export const ProgramUpdatesTable = ({
                     fontWeight="600"
                   >
                     Status
-                    <SortArrows columnKey="status" sortOrder={sortOrder} />
+                    <SortArrows
+                      columnKey="status"
+                      sortOrder={sortOrder}
+                    />
                   </Th>
                 )}
                 <Th
@@ -217,7 +234,10 @@ export const ProgramUpdatesTable = ({
                   fontWeight="600"
                 >
                   Author
-                  <SortArrows columnKey="firstName" sortOrder={sortOrder} />
+                  <SortArrows
+                    columnKey="firstName"
+                    sortOrder={sortOrder}
+                  />
                 </Th>
                 <Th
                   onClick={() => handleSort('name')}
@@ -228,7 +248,10 @@ export const ProgramUpdatesTable = ({
                   fontWeight="600"
                 >
                   Program
-                  <SortArrows columnKey="name" sortOrder={sortOrder} />
+                  <SortArrows
+                    columnKey="name"
+                    sortOrder={sortOrder}
+                  />
                 </Th>
                 <Th
                   onClick={() => handleSort('updateDate')}
@@ -239,7 +262,10 @@ export const ProgramUpdatesTable = ({
                   fontWeight="600"
                 >
                   Date
-                  <SortArrows columnKey="updateDate" sortOrder={sortOrder} />
+                  <SortArrows
+                    columnKey="updateDate"
+                    sortOrder={sortOrder}
+                  />
                 </Th>
               </Tr>
             </Thead>
@@ -286,7 +312,10 @@ export const ProgramUpdatesTable = ({
                       </Td>
                     )}
                     <Td>
-                      <Text noOfLines={1} maxW="400px">
+                      <Text
+                        noOfLines={1}
+                        maxW="400px"
+                      >
                         {row.note || 'Note about the program...'}
                       </Text>
                     </Td>
@@ -315,12 +344,18 @@ export const ProgramUpdatesTable = ({
                       </HStack>
                     </Td>
                     <Td>
-                      <Text fontSize="sm" fontWeight="500">
+                      <Text
+                        fontSize="sm"
+                        fontWeight="500"
+                      >
                         {row.name || ''}
                       </Text>
                     </Td>
                     <Td>
-                      <Text fontSize="sm" color="gray.600">
+                      <Text
+                        fontSize="sm"
+                        color="gray.600"
+                      >
                         {row.updateDate || ''}
                       </Text>
                     </Td>

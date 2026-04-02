@@ -377,15 +377,29 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
     }
   };
   return (
-    <VStack p={8} width="35%" borderWidth="1px" borderColor="lightblue">
-      <Heading size="md" textAlign="center">
+    <VStack
+      p={8}
+      width="35%"
+      borderWidth="1px"
+      borderColor="lightblue"
+    >
+      <Heading
+        size="md"
+        textAlign="center"
+      >
         Program
       </Heading>
-      <Divider w="110%" mb={4}></Divider>
+      <Divider
+        w="110%"
+        mb={4}
+      ></Divider>
       {programUpdateId && (
         <>
           <Card bg="gray.100">
-            <CardHeader pt={6} pb={0}>
+            <CardHeader
+              pt={6}
+              pb={0}
+            >
               <Heading size="sm">Update Notes</Heading>
             </CardHeader>
             <CardBody py={1}>
@@ -393,7 +407,10 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
             </CardBody>
           </Card>
           <FormControl isRequired>
-            <FormLabel fontWeight="normal" color="gray">
+            <FormLabel
+              fontWeight="normal"
+              color="gray"
+            >
               Title
             </FormLabel>
             <Input
@@ -447,14 +464,20 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
           value={form.country}
         >
           {countries.map((c) => (
-            <option key={c.id} value={c.id}>
+            <option
+              key={c.id}
+              value={c.id}
+            >
               {c.name}
             </option>
           ))}
         </Select>
       </FormControl>
       <FormControl>
-        <FormLabel fontWeight="normal" color="gray">
+        <FormLabel
+          fontWeight="normal"
+          color="gray"
+        >
           # Students currently enrolled
         </FormLabel>
         <NumberInput
@@ -468,7 +491,10 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         </NumberInput>
       </FormControl>
       <FormControl>
-        <FormLabel fontWeight="normal" color="gray">
+        <FormLabel
+          fontWeight="normal"
+          color="gray"
+        >
           # Students graduated
         </FormLabel>
         <NumberInput
@@ -498,7 +524,10 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
               value={selectedInstrument}
             >
               {instruments.map((instrument) => (
-                <option key={instrument.id} value={instrument.name}>
+                <option
+                  key={instrument.id}
+                  value={instrument.name}
+                >
                   {instrument.name}
                 </option>
               ))}
@@ -536,9 +565,17 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         )}
       </FormControl>
       {Object.keys(addedInstruments).length > 0 && (
-        <HStack width="100%" flexWrap="wrap" spacing={2}>
+        <HStack
+          width="100%"
+          flexWrap="wrap"
+          spacing={2}
+        >
           {Object.entries(addedInstruments).map(([name, quantity]) => (
-            <Tag key={name} size="lg" bg="gray.200">
+            <Tag
+              key={name}
+              size="lg"
+              bg="gray.200"
+            >
               <TagLabel>
                 {name} - {quantity}
               </TagLabel>
@@ -574,7 +611,10 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
               value={selectedRegionalDirector}
             >
               {regionalDirectors.map((user) => (
-                <option key={user.id} value={user.id}>
+                <option
+                  key={user.id}
+                  value={user.id}
+                >
                   {user.firstName} {user.lastName}
                 </option>
               ))}
@@ -591,9 +631,17 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         )}
       </FormControl>
       {Object.keys(regionalDirectors).length > 0 && (
-        <HStack width="100%" flexWrap="wrap" spacing={2}>
+        <HStack
+          width="100%"
+          flexWrap="wrap"
+          spacing={2}
+        >
           {Object.entries(addedRegionalDirectors).map(([id, name]) => (
-            <Tag key={id} size="lg" bg="gray.200">
+            <Tag
+              key={id}
+              size="lg"
+              bg="gray.200"
+            >
               <TagLabel>{name}</TagLabel>
               <TagCloseButton onClick={() => removeRegionalDirector(id)} />
             </Tag>
