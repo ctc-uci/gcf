@@ -31,7 +31,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
 
 
   const handleApprove = async () => {
-    if (updateId === null) return;
+    if (updateId == null) return;
     try {
       await backend.put(`/mediaChange/${updateId}/approve`);
       onUpdate((prev) =>
@@ -47,7 +47,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   };
 
   const handleArchive = async () => {
-    if (updateId === null) return;
+    if (updateId == null) return;
     try {
       await backend.put(`/mediaChange/${updateId}/archive`);
       onUpdate((prev) =>
@@ -63,7 +63,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   };
 
   const handleDeny = async () => {
-    if (updateId === null) return;
+    if (updateId == null) return;
     try {
       await backend.delete(`/mediaChange/${updateId}/deny`);
       onUpdate((prev) => prev.filter((row) => row.id !== updateId));
