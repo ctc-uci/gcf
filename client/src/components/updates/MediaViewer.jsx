@@ -34,7 +34,7 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-}, [goNext, goPrev, onClose]);
+  }, [goNext, goPrev, onClose]);
 
   return (
     <Modal isOpen={true} onClose={onClose} isCentered size="3xl">
