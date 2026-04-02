@@ -178,7 +178,7 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
         const rows = response.data || [];
         const map = {};
         for (const row of rows) {
-          if (row.name != null) {
+          if (row.name !== null) {
             map[row.name] = Number(row.quantity ?? 0);
           }
         }
@@ -288,7 +288,7 @@ export const CreateUpdateDrawer = ({ isOpen, onClose, onSave }) => {
             i.name === selectedInstrument || String(i.id) === selectedInstrument
         );
         if (instrument) {
-          let instrumentDelta =
+          const instrumentDelta =
             whatHappened === 'New / Donation'
               ? instrumentCount
               : -1 * instrumentCount;

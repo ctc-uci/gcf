@@ -16,7 +16,6 @@ import { rdProgramTableRouter } from '@/routes/rdProgramTable';
 import { regionRouter } from '@/routes/region';
 import { regionalDirectorRouter } from '@/routes/regionalDirector';
 import { updatesPermissionsRouter } from '@/routes/updatesPermissions';
-import { usersRouter } from '@/routes/users';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
