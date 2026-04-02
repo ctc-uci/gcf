@@ -325,7 +325,9 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
         for (const uid of initialProgramDirectorIds) {
           if (uid !== selectedDirectorNum) {
             try {
-              await backend.delete(`/program-directors/${uid}`);
+              await backend.delete(`/program-directors/${uid}`, {
+                params: { programId },
+              });
             } catch (error) {
               console.error('DELETE /program-directors failed:', error);
             }
@@ -345,7 +347,9 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
       } else if (selectedDirectorNum === null) {
         for (const uid of initialProgramDirectorIds) {
           try {
-            await backend.delete(`/program-directors/${uid}`);
+            await backend.delete(`/program-directors/${uid}`, {
+              params: { programId },
+            });
           } catch (error) {
             console.error('DELETE /program-directors failed:', error);
           }

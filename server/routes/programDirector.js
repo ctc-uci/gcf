@@ -202,14 +202,21 @@ directorRouter.put('/:userId', async (req, res) => {
   }
 });
 
-// delete a program director
+// delete a program director assignment for one program (composite PK is user_id + program_id)
 directorRouter.delete('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
+    const programId = req.query.programId;
+
+    if (programId === undefined || programId === null || programId === '') {
+      return res.status(400).json({
+        error: 'programId query parameter is required',
+      });
+    }
 
     const director = await db.query(
-      'DELETE FROM program_director WHERE user_id = $1 RETURNING *',
-      [userId]
+      'DELETE FROM program_director WHERE user_id = $1 AND program_id = $2 RETURNING *',
+      [userId, programId]
     );
 
     res.status(200).json(keysToCamel(director));
