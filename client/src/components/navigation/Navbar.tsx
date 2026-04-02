@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
@@ -10,7 +10,6 @@ import {
   Icon,
   Image,
   Text,
-  useOutsideClick,
 } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
@@ -38,19 +37,12 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useOutsideClick({
-    ref: menuRef,
-    handler: () => setIsMenuOpen(false),
-  });
 
   const handleMenuToggle = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
   const handleLogout = async () => {
-    setIsMenuOpen(false);
     await logout();
     navigate('/login');
   };
@@ -129,9 +121,7 @@ export const Navbar = () => {
     <Flex
       height={NAVBAR_HEIGHT}
       align="center"
-      w="100%"
-      maxW="100%"
-      minW={0}
+      w="80vw"
       px={6}
       py={6}
       borderRadius="xl"
@@ -160,10 +150,7 @@ export const Navbar = () => {
           gap={2}
           align="center"
         >
-          <Box
-            ref={menuRef}
-            position="relative"
-          >
+          <Box position="relative">
             <Button
               bg="transparent"
               p={0}
@@ -232,10 +219,7 @@ export const Navbar = () => {
                   w="100%"
                 >
                   <Button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      navigate('/profile');
-                    }}
+                    onClick={() => navigate('/profile')}
                     leftIcon={
                       <Icon
                         as={HiOutlineUser}

@@ -1,4 +1,4 @@
-import { EditIcon } from '@chakra-ui/icons';
+import { EditIcon } from "@chakra-ui/icons";
 import {
   Badge,
   Box,
@@ -14,17 +14,17 @@ import {
   Image,
   Text,
   VStack,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
-import GcfGlobe from '/gcf_globe.png';
+import GcfGlobe from "/gcf_globe.png";
 
 const CardView = ({ data, openEditForm }) => {
   return (
     <Grid
       templateColumns={{
-        base: 'repeat(1, 1fr)',
-        md: 'repeat(2, 1fr)',
-        lg: 'repeat(3, 1fr)',
+        base: "repeat(1, 1fr)",
+        md: "repeat(2, 1fr)",
+        lg: "repeat(3, 1fr)",
       }}
       gap={6}
     >

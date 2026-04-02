@@ -20,8 +20,7 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
-        run:
-          npm exec --workspaces -- npx rimraf node_modules && npx rimraf
+        run: npm exec --workspaces -- npx rimraf node_modules && npx rimraf
           node_modules && yarn install --frozen-lockfile
 
       - name: Build React project

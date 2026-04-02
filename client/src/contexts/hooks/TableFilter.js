@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-const str = (v) => (v ?? '').toString();
+const str = (v) => (v ?? "").toString();
 
 const OPERATION_FUNCTIONS = {
   contains: (dataVal, filterVal) =>
@@ -18,9 +18,7 @@ const OPERATION_FUNCTIONS = {
   before: (dataVal, filterVal) => new Date(dataVal) < new Date(filterVal),
   after: (dataVal, filterVal) => new Date(dataVal) > new Date(filterVal),
   contains_item: (dataVal, filterVal) =>
-    dataVal.some((item) =>
-      str(item).toLowerCase().includes(str(filterVal).toLowerCase())
-    ),
+    dataVal.some(item => str(item).toLowerCase().includes(str(filterVal).toLowerCase())),
 };
 
 export function applyFilters(filters, data) {
@@ -29,7 +27,7 @@ export function applyFilters(filters, data) {
   filters.forEach((filter, index) => {
     if (!filter.value) return;
     const func = OPERATION_FUNCTIONS[filter.operation];
-    if (filter.logic === 'and' || index === 0) {
+    if (filter.logic === "and" || index === 0) {
       resultData = resultData.filter((row) => {
         const dataVal = row[filter.column];
         return func(dataVal, filter.value);
