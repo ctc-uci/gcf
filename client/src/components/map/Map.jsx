@@ -53,7 +53,6 @@ export const Map = () => {
     try {
       const countriesRegion = getRegionFromIso(iso);
       if (!countriesRegion) {
-        console.error('No region found for the ISO code:', iso);
         return;
       }
       const regionsRes = await backend.get(
