@@ -18,12 +18,6 @@ import {
   Tr,
 } from '@chakra-ui/react';
 
-import {
-  downloadCsv,
-  escapeCsvValue,
-  getFilenameTimestamp,
-} from '@/utils/downloadCsv';
-
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
@@ -33,18 +27,6 @@ const authorDisplayName = (row) =>
   [row.firstName, row.lastName].filter(Boolean).join(' ').trim() ||
   row.fullName?.trim() ||
   '';
-
-export function downloadMediaUpdatesAsCsv(data) {
-  const headers = ['Update Note', 'Status', 'Author', 'Program', 'Date'];
-  const rows = (data || []).map((row) => [
-    escapeCsvValue(row.note),
-    escapeCsvValue(row.status),
-    escapeCsvValue(authorDisplayName(row)),
-    escapeCsvValue(row.programName),
-    escapeCsvValue(row.updateDate),
-  ]);
-  downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
-}
 
 const StatusBadge = ({ status }) => {
   const isResolved =
@@ -79,11 +61,9 @@ export const MediaUpdatesTable = ({
   const [internalFilters] = useState([]);
   const activeFilters = externalFilters ?? internalFilters;
 
-  const sourceData = data ?? originalData ?? [];
-
   const filteredData = useMemo(
-    () => applyFilters(activeFilters, sourceData),
-    [activeFilters, sourceData]
+    () => applyFilters(activeFilters, data ?? originalData ?? []),
+    [activeFilters, data, originalData]
   );
 
   const displayData = useMemo(() => {

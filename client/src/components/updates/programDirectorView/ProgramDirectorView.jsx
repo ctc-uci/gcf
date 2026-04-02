@@ -30,8 +30,8 @@ import {
   UPDATES_TAB_SELECTED_PROPS,
   UpdatesTabCountBadge,
 } from '../config/UpdatesTabListWithBadges';
+import { downloadProgramUpdatesAsCsv } from '../downloadProgramUpdatesAsCsv';
 import { CreateUpdateDrawer } from '../forms/createForm/CreateUpdateDrawer';
-import { downloadProgramUpdatesAsCsv } from '../ProgramUpdatesTable';
 import { ProgramDirectorUpdatesTable } from './ProgramDirectorUpdatesTable';
 
 export const ProgramDirectorView = ({ data, isLoading, onSave }) => {

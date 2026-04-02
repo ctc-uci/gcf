@@ -29,15 +29,11 @@ import {
   UpdatesTabCountBadge,
 } from './config/UpdatesTabListWithBadges';
 import { useUpdatesPageData } from './config/useUpdatesPageData';
-import {
-  downloadMediaUpdatesAsCsv,
-  MediaUpdatesTable,
-} from './MediaUpdatesTable';
+import { downloadMediaUpdatesAsCsv } from './downloadMediaUpdatesAsCsv';
+import { downloadProgramUpdatesAsCsv } from './downloadProgramUpdatesAsCsv';
+import { MediaUpdatesTable } from './MediaUpdatesTable';
 import { ProgramDirectorView } from './programDirectorView/ProgramDirectorView';
-import {
-  downloadProgramUpdatesAsCsv,
-  ProgramUpdatesTable,
-} from './ProgramUpdatesTable';
+import { ProgramUpdatesTable } from './ProgramUpdatesTable';
 
 export const UpdatesPage = () => {
   const {
