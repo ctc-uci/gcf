@@ -3,7 +3,7 @@ import { Box, Button, Flex, Icon, Image, Link, VStack } from '@chakra-ui/react';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { BsMap } from 'react-icons/bs';
 import { FaGuitar } from 'react-icons/fa';
-import { HiOutlineCog, HiOutlineUser } from 'react-icons/hi';
+import { HiOutlineUser } from 'react-icons/hi';
 import { MdOutlineNotifications, MdPermMedia } from 'react-icons/md';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 
