@@ -1,0 +1,270 @@
+//TODO: check this again
+
+import { useState } from 'react';
+
+import {
+  Badge,
+  Box,
+  Button,
+  Divider,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerOverlay,
+  Flex,
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  Image,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
+
+import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
+
+const DiffField = ({ label, oldValue, newValue }) => {
+  if (!oldValue && !newValue) return null;
+  const hasChange = oldValue && newValue && oldValue !== newValue;
+
+  return (
+    <Box>
+      <Text
+        color="teal.500"
+        fontSize="sm"
+        fontWeight="500"
+        mb={1}
+      >
+        {label}
+      </Text>
+      {hasChange ? (
+        <HStack spacing={2}>
+          <Text
+            as="span"
+            textDecoration="line-through"
+            color="gray.500"
+          >
+            {oldValue}
+          </Text>
+          <Text as="span">{newValue}</Text>
+        </HStack>
+      ) : (
+        <Text>{newValue || oldValue || ''}</Text>
+      )}
+    </Box>
+  );
+};
+
+const RoleDiffField = ({ oldRole, newRole }) => {
+  const hasChange = oldRole && newRole && oldRole !== newRole;
+
+  return (
+    <Box>
+      <Text
+        color="teal.500"
+        fontSize="sm"
+        fontWeight="500"
+        mb={1}
+      >
+        Role
+      </Text>
+      <HStack spacing={2}>
+        {hasChange && oldRole && (
+          <Badge
+            variant="outline"
+            textDecoration="line-through"
+            color="gray.400"
+            borderColor="gray.300"
+          >
+            {oldRole}
+          </Badge>
+        )}
+        {newRole && (
+          <Badge
+            bg="teal.500"
+            color="white"
+            borderRadius="md"
+            px={2}
+            py={0.5}
+          >
+            {newRole}
+          </Badge>
+        )}
+      </HStack>
+    </Box>
+  );
+};
+
+export const AccountUpdateDrawer = ({ update, onClose }) => {
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  if (!update) return null;
+
+  const changes = update.changes || {};
+  const oldPicture = changes.oldPicture || update.oldPicture;
+  const newPicture = changes.newPicture || update.newPicture;
+
+  return (
+    <Drawer
+      isOpen={true}
+      onClose={onClose}
+      placement="right"
+      size={isFullScreen ? 'full' : 'lg'}
+    >
+      <DrawerOverlay />
+      <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
+        {/* Expand/Minimize toggle */}
+        <Flex
+          position="absolute"
+          top={3}
+          left={3}
+          zIndex={1}
+        >
+          <IconButton
+            icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
+            aria-label={isFullScreen ? 'Minimize' : 'Expand'}
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsFullScreen(!isFullScreen)}
+          />
+        </Flex>
+
+        {/* Header */}
+        <Box
+          pt={6}
+          pb={2}
+          px={8}
+        >
+          <Text
+            fontSize="xl"
+            fontWeight="600"
+            textAlign="center"
+          >
+            Account Update
+          </Text>
+          <Divider mt={3} />
+        </Box>
+
+        <DrawerBody
+          px={8}
+          pb={24}
+        >
+          <VStack
+            spacing={5}
+            align="stretch"
+            mt={6}
+          >
+            {(oldPicture || newPicture) && (
+              <Box>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={2}
+                >
+                  Profile Picture
+                </Text>
+                <HStack spacing={4}>
+                  {oldPicture && (
+                    <Image
+                      src={oldPicture}
+                      boxSize="120px"
+                      borderRadius="full"
+                      objectFit="cover"
+                      alt="Old profile"
+                    />
+                  )}
+                  {newPicture && (
+                    <Image
+                      src={newPicture}
+                      boxSize="120px"
+                      borderRadius="full"
+                      objectFit="cover"
+                      alt="New profile"
+                    />
+                  )}
+                </HStack>
+              </Box>
+            )}
+
+            {/* Diff Fields */}
+            <DiffField
+              label="First Name"
+              oldValue={changes.oldFirstName}
+              newValue={changes.newFirstName}
+            />
+            <DiffField
+              label="Last Name"
+              oldValue={changes.oldLastName}
+              newValue={changes.newLastName}
+            />
+            <DiffField
+              label="Email"
+              oldValue={changes.oldEmail}
+              newValue={changes.newEmail}
+            />
+            <DiffField
+              label="Password"
+              oldValue={changes.oldPassword}
+              newValue={changes.newPassword}
+            />
+
+            <RoleDiffField
+              oldRole={changes.oldRole}
+              newRole={changes.newRole}
+            />
+
+            <DiffField
+              label="Program"
+              oldValue={changes.oldProgram}
+              newValue={changes.newProgram}
+            />
+            <DiffField
+              label="Region"
+              oldValue={changes.oldRegion}
+              newValue={changes.newRegion}
+            />
+            <DiffField
+              label="Biography"
+              oldValue={changes.oldBio}
+              newValue={changes.newBio}
+            />
+
+            <Divider />
+
+            <Heading size="md">Edit Updates</Heading>
+          </VStack>
+        </DrawerBody>
+
+        <Flex
+          position="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          bg="white"
+          borderTop="1px solid"
+          borderColor="gray.200"
+          px={8}
+          py={4}
+          justify="flex-end"
+          gap={3}
+        >
+          <Button
+            variant="outline"
+            onClick={onClose}
+          >
+            Keep as Unresolved
+          </Button>
+          <Button
+            bg="teal.500"
+            color="white"
+            _hover={{ bg: 'teal.600' }}
+            onClick={onClose}
+          >
+            Save & Mark as Resolved
+          </Button>
+        </Flex>
+      </DrawerContent>
+    </Drawer>
+  );
+};

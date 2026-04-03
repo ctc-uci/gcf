@@ -101,6 +101,7 @@ export const CreatePassword = () => {
       <Heading
         fontSize="3xl"
         mb={6}
+        fontWeight="bold"
       >
         Create Password
       </Heading>
@@ -108,7 +109,7 @@ export const CreatePassword = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={5}>
           <FormControl isInvalid={!!errors.newPassword}>
-            <FormLabel fontSize="md">New Password</FormLabel>
+            <FormLabel fontWeight="bold">New Password</FormLabel>
             <Input
               type="password"
               placeholder="***********"
@@ -124,7 +125,7 @@ export const CreatePassword = () => {
           </FormControl>
 
           <FormControl isInvalid={!!errors.confirmPassword}>
-            <FormLabel fontSize="md">Confirm Password</FormLabel>
+            <FormLabel fontWeight="bold">Confirm Password</FormLabel>
             <Input
               type="password"
               placeholder="***********"

@@ -2,11 +2,11 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  Avatar,
   Badge,
   Box,
   Center,
   HStack,
+  Icon,
   Spinner,
   Table,
   TableContainer,
@@ -18,21 +18,39 @@ import {
   Tr,
 } from '@chakra-ui/react';
 
-import { applyFilters } from '../../contexts/hooks/TableFilter';
+import { FiUser } from 'react-icons/fi';
+
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
-import { ReviewMediaUpdate } from './forms/ReviewMediaUpdate';
+import { AccountUpdateDrawer } from './forms/AccountUpdateDrawer';
 
-const authorDisplayName = (row) =>
-  [row.firstName, row.lastName].filter(Boolean).join(' ').trim() ||
-  row.fullName?.trim() ||
-  '';
-
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status, adminName }) => {
+  const hasAdmin = adminName && adminName.trim();
   const isResolved =
-    status?.toLowerCase() === 'resolved' ||
-    status?.toLowerCase() === 'approved' ||
-    status?.toLowerCase() === 'active';
+    status?.toLowerCase() === 'resolved' || status?.toLowerCase() === 'active';
+
+  if (hasAdmin) {
+    return (
+      <HStack spacing={1}>
+        <Icon
+          as={FiUser}
+          boxSize={3}
+          color={isResolved ? 'gray.500' : 'teal.500'}
+        />
+        <Text
+          fontSize="xs"
+          bg={isResolved ? 'transparent' : 'teal.50'}
+          color={isResolved ? 'gray.600' : 'teal.600'}
+          borderRadius="md"
+          px={isResolved ? 0 : 2}
+          py={0.5}
+        >
+          {adminName}
+        </Text>
+      </HStack>
+    );
+  }
+
   return (
     <Badge
       bg={isResolved ? 'gray.100' : 'red.100'}
@@ -49,37 +67,25 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-export const MediaUpdatesTable = ({
-  data,
-  setData,
-  originalData,
-  isLoading,
+export const AccountUpdatesTable = ({
+  data = [],
+  originalData = [],
+  isLoading = false,
   searchQuery = '',
-  embedded: _embedded = false,
-  activeFilters: externalFilters,
 }) => {
-  const [internalFilters] = useState([]);
-  const activeFilters = externalFilters ?? internalFilters;
-
-  const filteredData = useMemo(
-    () => applyFilters(activeFilters, data ?? originalData ?? []),
-    [activeFilters, data, originalData]
-  );
+  const sourceData = data ?? originalData ?? [];
 
   const displayData = useMemo(() => {
-    if (!searchQuery) return filteredData;
+    if (!searchQuery) return sourceData;
     const q = searchQuery.toLowerCase();
-    return filteredData.filter((update) => {
-      const author = (authorDisplayName(update) || '').toLowerCase();
-      return (
+    return sourceData.filter(
+      (update) =>
         (update.note || '').toLowerCase().includes(q) ||
         (update.programName || '').toLowerCase().includes(q) ||
-        author.includes(q) ||
-        (update.status || '').toLowerCase().includes(q) ||
+        (update.fullName || '').toLowerCase().includes(q) ||
         (update.updateDate || '').toLowerCase().includes(q)
-      );
-    });
-  }, [searchQuery, filteredData]);
+    );
+  }, [searchQuery, sourceData]);
 
   const [sortedData, setSortedData] = useState(null);
   const [selectedUpdate, setSelectedUpdate] = useState(null);
@@ -129,7 +135,7 @@ export const MediaUpdatesTable = ({
                 />
               </Th>
               <Th
-                onClick={() => handleSort('fullName')}
+                onClick={() => handleSort('firstName')}
                 cursor="pointer"
                 color="gray.500"
                 fontSize="xs"
@@ -138,7 +144,7 @@ export const MediaUpdatesTable = ({
               >
                 Author
                 <SortArrows
-                  columnKey="fullName"
+                  columnKey="firstName"
                   sortOrder={sortOrder}
                 />
               </Th>
@@ -194,21 +200,25 @@ export const MediaUpdatesTable = ({
                       noOfLines={1}
                       maxW="400px"
                     >
-                      {row.note || 'Note about the program...'}
+                      {row.note || 'Account password changed.'}
                     </Text>
                   </Td>
                   <Td>
-                    <StatusBadge status={row.status} />
+                    <StatusBadge
+                      status={row.status}
+                      adminName={row.resolvedBy}
+                    />
                   </Td>
                   <Td>
-                    <HStack spacing={2}>
-                      <Avatar
-                        size="xs"
-                        name={authorDisplayName(row) || undefined}
-                        bg="teal.500"
-                        color="white"
+                    <HStack spacing={1}>
+                      <Icon
+                        as={FiUser}
+                        boxSize={4}
+                        color="gray.400"
                       />
-                      <Text fontSize="sm">{authorDisplayName(row) || '—'}</Text>
+                      <Text fontSize="sm">
+                        {row.authorName || row.firstName || 'Name'}
+                      </Text>
                     </HStack>
                   </Td>
                   <Td>
@@ -234,10 +244,9 @@ export const MediaUpdatesTable = ({
         </Table>
       </TableContainer>
       {selectedUpdate && (
-        <ReviewMediaUpdate
+        <AccountUpdateDrawer
           update={selectedUpdate}
           onClose={() => setSelectedUpdate(null)}
-          onUpdate={setData}
         />
       )}
     </Box>

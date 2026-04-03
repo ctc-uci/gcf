@@ -7,11 +7,29 @@ import { Sidebar } from './Sidebar';
 
 export const Layout = () => {
   return (
-    <Flex bg="gray.50" minHeight="100vh" padding={6} gap={6}>
+    <Flex
+      bg="gray.50"
+      minHeight="100vh"
+      minW={0}
+      w="100%"
+      maxW="100%"
+      padding={6}
+      gap={6}
+    >
       <Sidebar />
-      <Box flex="1" display="flex" flexDirection="column">
+      <Box
+        flex="1"
+        minW={0}
+        display="flex"
+        flexDirection="column"
+      >
         <Navbar />
-        <Box as="main" mt={6} flex="1">
+        <Box
+          as="main"
+          mt={6}
+          flex="1"
+          minW={0}
+        >
           <Outlet />
         </Box>
       </Box>
