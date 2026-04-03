@@ -59,15 +59,20 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
     if (!updateId) return;
 
     const fetchMedia = async () => {
-      const mediaChanges = await backend.get(`/mediaChange/update/${updateId}`);
-      setUpdates(mediaChanges.data);
+      try {
+        const mediaChanges = await backend.get(`/mediaChange/update/${updateId}`);
+        const data = mediaChanges.data;
 
-      const response = await Promise.all(
-        mediaChanges.data.map((media_change) =>
-          backend.get(`/images/url/${media_change.s3Key}`)
-        )
-      );
-      setMediaURLs(response.map((r) => r.data.url));
+        const response = await Promise.all(
+          data.map((media_change) =>
+            backend.get(`/images/url/${media_change.s3Key}`)
+          )
+        );
+        setUpdates(data);
+        setMediaURLs(response.map((r) => r.data.url));
+      } catch (err) {
+        console.error('Failed to fetch media:', err);
+      }
     };
     fetchMedia();
   }, [updateId, backend]);
