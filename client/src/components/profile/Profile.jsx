@@ -192,7 +192,7 @@ export const Profile = () => {
       email: currentUser?.email || '',
       language: prefLang,
       bio: gcfUser.bio || '',
-      // TODO: add bio column to gcf user schema and are they only allowed to add it in profile or will it be needed elsewhere
+      // TODO: add Bio column to gcf_user schema and add here
     });
     setIsEditing(true);
   };

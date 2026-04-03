@@ -350,13 +350,21 @@ export const ProgramForm = ({
       const hasInstrumentChange = instrumentChanges.length > 0;
       const hasMediaChange = mediaChanges.length > 0;
 
-      if (hasStudentChange || hasInstrumentChange || hasMediaChange) {
+      const isNewProgram = !program;
+
+      if (
+        isNewProgram ||
+        hasStudentChange ||
+        hasInstrumentChange ||
+        hasMediaChange
+      ) {
         const updateResponse = await backend.post(`/program-updates`, {
-          title: 'update program stats',
+          title: isNewProgram ? 'Program Created' : 'update program stats',
           program_id: programId,
           created_by: currentUser?.uid || currentUser?.id,
           update_date: new Date().toISOString(),
-          note: 'Program update',
+          note: isNewProgram ? 'Program Created' : 'Program update',
+          show_on_table: isNewProgram,
         });
 
         const updateId = updateResponse.data.id;
@@ -366,6 +374,7 @@ export const ProgramForm = ({
             update_id: updateId,
             enrollment_change: studentCountChange,
             graduated_change: 0,
+            event_type: 'other',
           });
         }
 
@@ -375,6 +384,7 @@ export const ProgramForm = ({
               instrumentId: instrumentChange.instrumentId,
               updateId,
               amountChanged: instrumentChange.amountChanged,
+              event_type: 'other',
             });
           }
         }

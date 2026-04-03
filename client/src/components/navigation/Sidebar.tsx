@@ -11,6 +11,34 @@ import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { SIDEBAR_WIDTH } from './layoutConstants';
 import logo from '/logo.png';
 
+import { useEffect, useRef } from 'react';
+
+const AutoFitText = ({ children }) => {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    
+    el.style.fontSize = '1rem';
+    const ratio = el.clientWidth / el.scrollWidth;
+    if (ratio < 1) {
+      el.style.fontSize = `${Math.max(ratio, 0.6)}rem`;
+    }
+  }, [children]);
+
+  return (
+    <Box
+      ref={ref}
+      whiteSpace="nowrap"
+      overflow="hidden"
+      width="100%"
+    >
+      {children}
+    </Box>
+  );
+};
+
 export const Sidebar = () => {
   const { t } = useTranslation();
   const { role } = useRoleContext();
@@ -196,13 +224,14 @@ export const Sidebar = () => {
                   px={6}
                   py={5}
                   borderRadius="xl"
+                  fontSize="clamp(0.6rem, 1vw, 1rem)"
                   transition="background-color 0.4s ease, transform 0.4s ease"
                   _hover={{
                     bg: isActive ? 'teal.600' : 'gray.100',
                     transform: 'translateX(2px)',
                   }}
                 >
-                  {item.name}
+                  <AutoFitText>{item.name}</AutoFitText>
                 </Button>
               </Link>
             );

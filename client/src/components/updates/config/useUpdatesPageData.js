@@ -5,10 +5,13 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 
 const mapUpdatesWithFullName = (items) => {
-  return (items || []).map((item) => ({
-    ...item,
-    fullName: `${item.firstName} ${item.lastName}`,
-  }));
+  return (items || []).map((item) => {
+    const fullName = [item.firstName, item.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    return { ...item, fullName };
+  });
 };
 
 /**

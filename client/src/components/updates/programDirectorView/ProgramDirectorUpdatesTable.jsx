@@ -9,7 +9,6 @@ import {
   Tbody,
   Td,
   Text,
-  Textarea,
   Th,
   Thead,
   Tr,
@@ -21,7 +20,6 @@ import { useTranslation } from 'react-i18next';
 import { FiStar } from 'react-icons/fi';
 
 import { SortArrows } from '../../tables/SortArrows';
-import { PDStatusBadge } from './PDStatusBadge';
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
@@ -80,10 +78,11 @@ export const ProgramDirectorUpdatesTable = ({
   handleSort,
   sortOrder,
   variant = 'instrument',
+  onRowClick,
 }) => {
   const { t } = useTranslation();
   const dash = t('common.emDash');
-  const colSpan = variant === 'student' ? 3 : 6;
+  const colSpan = variant === 'student' ? 3 : 5;
   return (
     <Box
       position="relative"
@@ -223,6 +222,8 @@ export const ProgramDirectorUpdatesTable = ({
                   <Tr
                     key={row.id}
                     _hover={{ bg: 'gray.50' }}
+                    cursor={onRowClick ? 'pointer' : undefined}
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
                   >
                     {variant === 'instrument' ? (
                       <>
@@ -257,19 +258,13 @@ export const ProgramDirectorUpdatesTable = ({
                           </Text>
                         </Td>
                         <Td>
-                          <Textarea
-                            size="sm"
-                            variant="outline"
-                            borderColor="gray.200"
-                            borderRadius="md"
-                            placeholder={t('common.placeholderNotes')}
-                            defaultValue={row.note || ''}
-                            minH="32px"
-                            h="32px"
-                            resize="vertical"
+                          <Text
                             fontSize="sm"
-                            _placeholder={{ color: 'gray.400' }}
-                          />
+                            color="gray.700"
+                            noOfLines={3}
+                          >
+                            {row.note || '—'}
+                          </Text>
                         </Td>
                         <Td>
                           <Text
@@ -283,19 +278,13 @@ export const ProgramDirectorUpdatesTable = ({
                     ) : (
                       <>
                         <Td>
-                          <Textarea
-                            size="sm"
-                            variant="outline"
-                            borderColor="gray.200"
-                            borderRadius="md"
-                            placeholder={t('common.placeholderNotes')}
-                            defaultValue={row.note || ''}
-                            minH="32px"
-                            h="32px"
-                            resize="vertical"
+                          <Text
                             fontSize="sm"
-                            _placeholder={{ color: 'gray.400' }}
-                          />
+                            color="gray.700"
+                            noOfLines={3}
+                          >
+                            {row.note || '—'}
+                          </Text>
                         </Td>
                         <Td>
                           <EnrollmentChangeDetails

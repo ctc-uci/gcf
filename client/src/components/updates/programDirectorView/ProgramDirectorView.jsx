@@ -31,15 +31,35 @@ import {
   UPDATES_TAB_SELECTED_PROPS,
   UpdatesTabCountBadge,
 } from '../config/UpdatesTabListWithBadges';
+import { downloadProgramUpdatesAsCsv } from '../downloadProgramUpdatesAsCsv';
 import { CreateUpdateDrawer } from '../forms/createForm/CreateUpdateDrawer';
-import { downloadProgramUpdatesAsCsv } from '../ProgramUpdatesTable';
 import { ProgramDirectorUpdatesTable } from './ProgramDirectorUpdatesTable';
 
 export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState([]);
-  const createDrawerDisclosure = useDisclosure();
+  const updateDrawerDisclosure = useDisclosure();
+  const [drawerDraft, setDrawerDraft] = useState(null);
+
+  const openCreateUpdate = () => {
+    setDrawerDraft(null);
+    updateDrawerDisclosure.onOpen();
+  };
+
+  const openEditUpdate = (row, variant) => {
+    setDrawerDraft({
+      id: row.id,
+      variant,
+      instrumentName: row.instrumentName ?? null,
+    });
+    updateDrawerDisclosure.onOpen();
+  };
+
+  const handleUpdateDrawerClose = () => {
+    setDrawerDraft(null);
+    updateDrawerDisclosure.onClose();
+  };
 
   const filteredData = useMemo(
     () => applyFilters(activeFilters, data),
@@ -131,7 +151,7 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           size="sm"
           borderRadius="md"
           leftIcon={<AddIcon boxSize={3} />}
-          onClick={createDrawerDisclosure.onOpen}
+          onClick={openCreateUpdate}
         >
           {t('updates.newUpdate')}
         </Button>
@@ -177,6 +197,7 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
               isLoading={isLoading}
               handleSort={instrumentSort.handleSort}
               sortOrder={instrumentSort.sortOrder}
+              onRowClick={(row) => openEditUpdate(row, 'instrument')}
             />
           </TabPanel>
           <TabPanel
@@ -189,15 +210,19 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
               isLoading={isLoading}
               handleSort={studentSort.handleSort}
               sortOrder={studentSort.sortOrder}
+              onRowClick={(row) => openEditUpdate(row, 'student')}
             />
           </TabPanel>
         </TabPanels>
       </Tabs>
 
       <CreateUpdateDrawer
-        isOpen={createDrawerDisclosure.isOpen}
-        onClose={createDrawerDisclosure.onClose}
+        isOpen={updateDrawerDisclosure.isOpen}
+        onClose={handleUpdateDrawerClose}
         onSave={onSave}
+        editProgramUpdateId={drawerDraft?.id ?? null}
+        editVariant={drawerDraft?.variant ?? null}
+        editInstrumentName={drawerDraft?.instrumentName ?? null}
       />
     </Box>
   );

@@ -99,7 +99,6 @@ export const ProgramUpdatesTable = ({
   isLoading,
   onSave,
   searchQuery = '',
-  embedded = false,
   showStatus = false,
   showFlagAndType = false,
   activeFilters: externalFilters,

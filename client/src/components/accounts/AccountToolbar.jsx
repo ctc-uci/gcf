@@ -1,3 +1,4 @@
+import { HamburgerIcon } from '@chakra-ui/icons';
 import {
   Button,
   Flex,
@@ -16,8 +17,11 @@ import {
 
 import { useTranslation } from 'react-i18next';
 import { BsArrowDownUp } from 'react-icons/bs';
-import { FiGrid, FiList, FiPlus, FiSearch } from 'react-icons/fi';
-import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
+import { FiPlus, FiSearch } from 'react-icons/fi';
+import {
+  HiOutlineAdjustmentsHorizontal,
+  HiOutlineSquares2X2,
+} from 'react-icons/hi2';
 
 import { FilterComponent } from '../common/FilterComponent';
 
@@ -26,6 +30,7 @@ export const AccountToolbar = ({
   setSearchQuery,
   onNew,
   setIsCardView,
+  isCardView,
   columns,
   onFilterChange,
 }) => {
@@ -36,12 +41,21 @@ export const AccountToolbar = ({
 
   return (
     <Flex
-      width="100%"
+      w="100%"
+      minW={0}
       align="center"
+      flexWrap={{ base: 'wrap', md: 'nowrap' }}
+      justify={{ base: 'flex-end', md: 'flex-start' }}
       gap={6}
+      rowGap={3}
     >
-      <Spacer />
-      <InputGroup w="280px">
+      <Spacer minW={0} />
+      <InputGroup
+        w="100%"
+        maxW="280px"
+        minW={0}
+        flexShrink={1}
+      >
         <InputLeftElement
           pointerEvents="none"
           h="32px"
@@ -122,9 +136,9 @@ export const AccountToolbar = ({
         >
           <IconButton
             aria-label={t('common.listView')}
-            icon={<FiList size={20} />}
+            icon={<HamburgerIcon />}
             variant="ghost"
-            color="teal.500"
+            color={isCardView ? 'gray.600' : 'teal.500'}
             size="sm"
             minW="auto"
             h="20px"
@@ -134,9 +148,9 @@ export const AccountToolbar = ({
           />
           <IconButton
             aria-label={t('common.gridView')}
-            icon={<FiGrid size={20} />}
+            icon={<HiOutlineSquares2X2 />}
             variant="ghost"
-            color="gray.600"
+            color={!isCardView ? 'gray.600' : 'teal.500'}
             size="sm"
             minW="auto"
             h="20px"
@@ -147,9 +161,10 @@ export const AccountToolbar = ({
         </HStack>
       </HStack>
 
-      <Spacer />
+      <Spacer minW={0} />
 
       <Button
+        flexShrink={0}
         bg="teal.500"
         color="white"
         _hover={{ bg: 'teal.600' }}

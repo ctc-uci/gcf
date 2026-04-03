@@ -28,7 +28,6 @@ import {
   Th,
   Thead,
   Tr,
-  useDisclosure,
   VStack,
 } from '@chakra-ui/react';
 
@@ -56,7 +55,7 @@ import { STATUS_TAG_STYLES } from './programTableTagConstants';
 export function ProgramDisplay({
   originalData,
   searchQuery,
-  setSearchQuery: _setSearchQuery,
+  setSearchQuery,
   isLoading,
   role,
   userId,
@@ -144,7 +143,6 @@ export function ProgramDisplay({
   const [filterStatus, setFilterStatus] = useState('');
   const [filterLocation, setFilterLocation] = useState('');
   const [filterInstruments, setFilterInstruments] = useState('');
-  const filtersDisclosure = useDisclosure();
 
   const filterBySearchPanel = useMemo(() => {
     let data = originalData ?? [];
@@ -244,40 +242,57 @@ export function ProgramDisplay({
             />
           </HStack>
           <HStack spacing={2}>
-            <Popover
-              isOpen={filtersDisclosure.isOpen}
-              onClose={filtersDisclosure.onClose}
-              placement="bottom-start"
+            <InputGroup
+              size="sm"
+              maxW="200px"
             >
+              <InputLeftElement pointerEvents="none">
+                <Search2Icon
+                  color="gray.400"
+                  boxSize={4}
+                />
+              </InputLeftElement>
+              <Input
+                pl={8}
+                placeholder="Search programs"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                bg="white"
+                borderColor="gray.200"
+              />
+            </InputGroup>
+
+            <IconButton
+              aria-label="table view"
+              icon={<HamburgerIcon />}
+              size="sm"
+              variant="ghost"
+              onClick={() => setIsCardView(false)}
+            />
+            <Divider
+              orientation="vertical"
+              h="20px"
+              borderWidth="1px"
+            />
+            <IconButton
+              aria-label="card view"
+              icon={<HiOutlineSquares2X2 />}
+              size="sm"
+              variant="ghost"
+              onClick={() => setIsCardView(true)}
+            />
+
+            <Popover placement="bottom-end">
               <PopoverTrigger>
-                <HStack
-                  spacing={2}
-                  as="button"
-                  type="button"
-                  border="1px solid"
-                  borderColor="gray.200"
-                  borderRadius="md"
-                  px={3}
-                  py={2}
-                  bg="white"
-                  _hover={{ borderColor: 'gray.300' }}
-                  onClick={filtersDisclosure.onOpen}
-                  w="200px"
-                  justifyContent="flex-start"
-                >
-                  <Search2Icon />
-                  <Text
-                    fontSize="sm"
-                    color="gray.500"
-                    flex={1}
-                    textAlign="left"
-                  >
-                    {t('common.search')}
-                  </Text>
-                </HStack>
+                <IconButton
+                  aria-label="Filters"
+                  icon={<HiOutlineAdjustmentsHorizontal />}
+                  size="sm"
+                  variant="ghost"
+                />
               </PopoverTrigger>
               <PopoverContent
-                w="400px"
+                w={_activeFilters.length > 0 ? '800px' : '400px'}
                 maxW="90vw"
                 shadow="xl"
               >
@@ -287,11 +302,12 @@ export function ProgramDisplay({
                     fontSize="lg"
                     mb={4}
                   >
-                    {t('programsTable.filters')}
+                    Quick filters
                   </Text>
                   <VStack
                     align="stretch"
                     spacing={4}
+                    mb={6}
                   >
                     <Box>
                       <Text
@@ -373,7 +389,7 @@ export function ProgramDisplay({
                         </InputLeftElement>
                         <Input
                           pl={8}
-                          placeholder={t('programsTable.searchLocations')}
+                          placeholder="Filter by location"
                           value={filterLocation}
                           onChange={(e) => setFilterLocation(e.target.value)}
                         />
@@ -396,55 +412,26 @@ export function ProgramDisplay({
                         </InputLeftElement>
                         <Input
                           pl={8}
-                          placeholder={t('programsTable.searchInstruments')}
+                          placeholder="Filter by instrument"
                           value={filterInstruments}
                           onChange={(e) => setFilterInstruments(e.target.value)}
                         />
                       </InputGroup>
                     </Box>
                   </VStack>
+                  <Divider mb={4} />
+                  <Text
+                    fontWeight="bold"
+                    fontSize="lg"
+                    mb={4}
+                  >
+                    Advanced filters
+                  </Text>
+                  <FilterComponent
+                    columns={columns}
+                    onFilterChange={(filters) => setActiveFilters(filters)}
+                  />
                 </Box>
-              </PopoverContent>
-            </Popover>
-
-            <IconButton
-              aria-label={t('common.tableView')}
-              icon={<HamburgerIcon />}
-              size="sm"
-              variant="ghost"
-              onClick={() => setIsCardView(false)}
-            />
-            <Divider
-              orientation="vertical"
-              h="20px"
-              borderWidth="1px"
-            />
-            <IconButton
-              aria-label={t('common.cardView')}
-              icon={<HiOutlineSquares2X2 />}
-              size="sm"
-              variant="ghost"
-              onClick={() => setIsCardView(true)}
-            />
-
-            <Popover>
-              <PopoverTrigger>
-                <IconButton
-                  aria-label={t('common.filter')}
-                  icon={<HiOutlineAdjustmentsHorizontal />}
-                  size="sm"
-                  variant="ghost"
-                />
-              </PopoverTrigger>
-              <PopoverContent
-                w="800px"
-                maxW="90vw"
-                shadow="xl"
-              >
-                <FilterComponent
-                  columns={columns}
-                  onFilterChange={(filters) => setActiveFilters(filters)}
-                />
               </PopoverContent>
             </Popover>
             <Text
@@ -455,14 +442,6 @@ export function ProgramDisplay({
                 count: tableData.length,
               })}
             </Text>
-            <IconButton
-              aria-label={t('common.download')}
-              icon={<DownloadIcon />}
-              size="sm"
-              variant="ghost"
-              ml={2}
-              onClick={downloadDataAsCsv}
-            />
             <Button
               size="sm"
               leftIcon={<AddIcon />}

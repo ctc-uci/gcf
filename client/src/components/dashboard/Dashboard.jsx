@@ -21,7 +21,7 @@ const Dashboard = () => {
       gap={6}
       as="main"
       p={10}
-      w
+      w="100%"
     >
       {!selectedPlaylist && (
         <StatisticsSummary refreshTrigger={statsRefreshTrigger} />
@@ -30,6 +30,7 @@ const Dashboard = () => {
       <Box
         as="section"
         w="100%"
+        maxW="100%"
       >
         {(role === 'Super Admin' ||
           role === 'Admin' ||

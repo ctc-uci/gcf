@@ -1,5 +1,4 @@
-//TODO: check this again
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Box,
@@ -15,7 +14,6 @@ import {
   HStack,
   Icon,
   IconButton,
-  Image,
   SimpleGrid,
   Text,
   VStack,
@@ -25,6 +23,8 @@ import { useTranslation } from 'react-i18next';
 import { FiDownload, FiMaximize2, FiMinimize2, FiUser } from 'react-icons/fi';
 
 import { useBackendContext } from '../../../contexts/hooks/useBackendContext';
+import { MediaCard } from '../../media/MediaCard';
+import { MediaViewer } from '../MediaViewer';
 
 export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   const { t } = useTranslation();
@@ -32,13 +32,15 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const updateId = update?.id;
-
+  const [updates, setUpdates] = useState([]);
+  const [mediaURLs, setMediaURLs] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(null);
   const handleKeepUnresolved = () => {
     onClose();
   };
 
   const handleMarkResolved = async () => {
-    if (updateId == null) return;
+    if (updateId === null || updateId === undefined) return;
     setIsLoading(true);
     try {
       await backend.put(`/mediaChange/${updateId}/approve`);
@@ -55,9 +57,30 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
     }
   };
 
-  const mediaItems = update?.media || [];
+  useEffect(() => {
+    if (!updateId) return;
+
+    const fetchMedia = async () => {
+      try {
+        const mediaChanges = await backend.get(`/mediaChange/update/${updateId}`);
+        const data = mediaChanges.data;
+
+        const response = await Promise.all(
+          data.map((media_change) =>
+            backend.get(`/images/url/${media_change.s3Key}`)
+          )
+        );
+        setUpdates(data);
+        setMediaURLs(response.map((r) => r.data.url));
+      } catch (err) {
+        console.error('Failed to fetch media:', err);
+      }
+    };
+    fetchMedia();
+  }, [updateId, backend]);
 
   return (
+    <>
     <Drawer
       isOpen={true}
       onClose={onClose}
@@ -169,114 +192,93 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
               <Text>{update?.note || ''}</Text>
             </Box>
 
-            <Box>
-              <Text
-                fontSize="lg"
-                fontWeight="600"
-                mb={3}
-              >
-                {t('updates.mediaSection')}
-              </Text>
-              {mediaItems.length > 0 ? (
-                <SimpleGrid
-                  columns={{ base: 2, md: 3, lg: 4 }}
-                  spacing={4}
-                >
-                  {mediaItems.map((item, idx) => (
-                    <Box key={idx}>
-                      <Box
-                        position="relative"
-                        borderRadius="md"
-                        overflow="hidden"
-                        bg="gray.100"
-                      >
-                        <Image
-                          src={item.url || item.thumbnailUrl}
-                          alt={
-                            item.title ||
-                            t('updates.mediaAlt', { idx: idx + 1 })
-                          }
-                          w="100%"
-                          h="120px"
-                          objectFit="cover"
-                        />
-                        {item.duration && (
-                          <Text
-                            position="absolute"
-                            bottom={1}
-                            right={1}
-                            bg="blackAlpha.700"
-                            color="white"
-                            fontSize="xs"
-                            px={1}
-                            borderRadius="sm"
-                          >
-                            {item.duration}
-                          </Text>
-                        )}
-                        <IconButton
-                          icon={<FiDownload />}
-                          aria-label={t('updates.reviewMediaDownloadAria')}
-                          position="absolute"
-                          bottom={1}
-                          left={1}
-                          size="xs"
-                          bg="blackAlpha.600"
-                          color="white"
-                          _hover={{ bg: 'blackAlpha.800' }}
-                        />
-                      </Box>
-                      <Text
-                        fontSize="sm"
-                        mt={1}
-                      >
-                        {item.title || item.fileName || t('common.videoTitle')}
-                      </Text>
-                    </Box>
-                  ))}
-                </SimpleGrid>
-              ) : (
+              <Box>
                 <Text
-                  color="gray.400"
-                  fontSize="sm"
+                  fontSize="lg"
+                  fontWeight="600"
+                  mb={3}
                 >
-                  {t('updates.noMediaAttached')}
+                  {t('updates.mediaSection')}
                 </Text>
-              )}
-            </Box>
-          </VStack>
-        </DrawerBody>
+                {updates.length > 0 ? (
+                  <SimpleGrid
+                    columns={{ base: 2, md: 3, lg: 4 }}
+                    spacing={4}
+                  >
+                    {updates.map((item, idx) => (
+                      <Box
+                        key={idx}
+                        onClick={() => setSelectedIndex(idx)}
+                      >
+                        <Box
+                          position="relative"
+                          borderRadius="md"
+                          overflow="hidden"
+                          bg="gray.100"
+                        >
+                          <MediaCard
+                            file_name={item.fileName}
+                            file_type={item.fileType}
+                            imageUrl={mediaURLs[idx]}
+                          />
+                        </Box>
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+                ) : (
+                  <Text
+                    color="gray.400"
+                    fontSize="sm"
+                  >
+                    {t('updates.noMediaAttached')}
+                  </Text>
+                )}
+              </Box>
+            </VStack>
+          </DrawerBody>
 
-        <Flex
-          position="absolute"
-          bottom={0}
-          left={0}
-          right={0}
-          bg="white"
-          borderTop="1px solid"
-          borderColor="gray.200"
-          px={8}
-          py={4}
-          justify="flex-end"
-          gap={3}
-        >
-          <Button
-            variant="outline"
-            onClick={handleKeepUnresolved}
+          <Flex
+            position="absolute"
+            bottom={0}
+            left={0}
+            right={0}
+            bg="white"
+            borderTop="1px solid"
+            borderColor="gray.200"
+            px={8}
+            py={4}
+            justify="flex-end"
+            gap={3}
           >
-            {t('common.keepUnresolved')}
-          </Button>
-          <Button
-            bg="teal.500"
-            color="white"
-            _hover={{ bg: 'teal.600' }}
-            onClick={handleMarkResolved}
-            isLoading={isLoading}
-          >
-            {t('common.saveMarkResolved')}
-          </Button>
-        </Flex>
-      </DrawerContent>
-    </Drawer>
+            <Button
+           
+              variant="outline"
+           
+              onClick={handleKeepUnresolved}
+          
+            >
+              {t('common.keepUnresolved')}
+            </Button>
+            <Button
+              bg="teal.500"
+              color="white"
+              _hover={{ bg: 'teal.600' }}
+              onClick={handleMarkResolved}
+              isLoading={isLoading}
+            >
+              {t('common.saveMarkResolved')}
+            </Button>
+          </Flex>
+        </DrawerContent>
+      </Drawer>
+      {selectedIndex !== null && (
+        <MediaViewer
+          updates={updates}
+          mediaURLs={mediaURLs}
+          selectedIndex={selectedIndex}
+          onClose={() => setSelectedIndex(null)}
+        />
+      )}
+    </>
   );
 };

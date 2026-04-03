@@ -149,8 +149,10 @@ export const AccountsTable = ({
       bg="white"
       borderRadius="xl"
       overflow="hidden"
+      minW={0}
+      maxW="100%"
     >
-      <TableContainer>
+      <TableContainer maxW="100%">
         {!isCardView ? (
           <Table
             variant="simple"

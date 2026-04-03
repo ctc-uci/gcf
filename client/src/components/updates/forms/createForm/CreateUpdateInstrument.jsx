@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import {
   Box,
   Button,
@@ -21,6 +23,9 @@ import {
 } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
+
+import { BsMusicNoteList, BsPencilSquare } from 'react-icons/bs';
+import { FaScrewdriverWrench } from 'react-icons/fa6';
 import {
   FiCamera,
   FiCornerDownRight,
@@ -31,6 +36,8 @@ import {
   FiTool,
   FiX,
 } from 'react-icons/fi';
+import { IoIosMusicalNotes, IoMdPhotos } from 'react-icons/io';
+import { MdQuestionMark } from 'react-icons/md';
 
 export default function CreateUpdateInstrument({
   selectedInstrument,
@@ -44,11 +51,11 @@ export default function CreateUpdateInstrument({
   uploadedMedia,
   removeMedia,
   mediaUploadDisclosure,
-  needsAdminHelp,
-  setNeedsAdminHelp,
   notes,
   setNotes,
 }) {
+  const [needsAdminHelp, setNeedsAdminHelp] = useState(false);
+
   const { t } = useTranslation();
   return (
     <>
@@ -58,7 +65,7 @@ export default function CreateUpdateInstrument({
           mb={1}
         >
           <Icon
-            as={FiMusic}
+            as={IoIosMusicalNotes}
             boxSize={4}
           />
           <Heading
@@ -69,7 +76,7 @@ export default function CreateUpdateInstrument({
           </Heading>
         </HStack>
         <Text
-          color="teal.500"
+          color="gray.500"
           fontSize="sm"
           fontWeight="500"
           mb={1}
@@ -126,7 +133,7 @@ export default function CreateUpdateInstrument({
             <Radio value="Missing">
               <HStack spacing={2}>
                 <Icon
-                  as={FiHelpCircle}
+                  as={MdQuestionMark}
                   boxSize={4}
                 />
                 <Text>{t('updates.missing')}</Text>
@@ -135,7 +142,7 @@ export default function CreateUpdateInstrument({
             <Radio value="New / Donation">
               <HStack spacing={2}>
                 <Icon
-                  as={FiCornerDownRight}
+                  as={BsMusicNoteList}
                   boxSize={4}
                 />
                 <Text>{t('updates.newDonation')}</Text>
@@ -144,7 +151,7 @@ export default function CreateUpdateInstrument({
             <Radio value="Needs repair">
               <HStack spacing={2}>
                 <Icon
-                  as={FiTool}
+                  as={FaScrewdriverWrench}
                   boxSize={4}
                 />
                 <Text>{t('updates.needsRepair')}</Text>
@@ -163,7 +170,7 @@ export default function CreateUpdateInstrument({
           mb={1}
         >
           <Icon
-            as={FiMusic}
+            as={IoIosMusicalNotes}
             boxSize={4}
           />
           <Heading
@@ -174,7 +181,7 @@ export default function CreateUpdateInstrument({
           </Heading>
         </HStack>
         <Text
-          color="teal.500"
+          color="gray.500"
           fontSize="sm"
           fontWeight="500"
           mb={1}
@@ -226,7 +233,7 @@ export default function CreateUpdateInstrument({
           mb={1}
         >
           <Icon
-            as={FiCamera}
+            as={IoMdPhotos}
             boxSize={4}
           />
           <Heading
@@ -237,11 +244,11 @@ export default function CreateUpdateInstrument({
           </Heading>
         </HStack>
         <Text
-          color="teal.500"
+          color="gray.500"
           fontSize="sm"
           mb={2}
         >
-          {t('updates.photosHelp')}
+           {t('updates.photosHelp')}
         </Text>
         {uploadedMedia.length > 0 && (
           <HStack
@@ -345,7 +352,7 @@ export default function CreateUpdateInstrument({
           mb={1}
         >
           <Icon
-            as={FiEdit3}
+            as={BsPencilSquare}
             boxSize={4}
           />
           <Heading
@@ -356,7 +363,7 @@ export default function CreateUpdateInstrument({
           </Heading>
         </HStack>
         <Text
-          color="teal.500"
+          color="gray.500"
           fontSize="sm"
           fontWeight="500"
           mb={1}

@@ -23,8 +23,7 @@ import { useTranslation } from 'react-i18next';
 
 function VideoPlayer({
   playlist,
-  playlistName,
-  videos,
+  playlistName = 'Playlist',
   selectedVideo,
   onBack,
   setSelectedVideo,
@@ -36,9 +35,11 @@ function VideoPlayer({
       align="flex-start"
       spacing={0}
       w="100%"
+      maxW="100%"
     >
       <VStack
         flex={1}
+        minW={0}
         align="flex-start"
         mr={8}
       >
@@ -65,8 +66,11 @@ function VideoPlayer({
             overflow="hidden"
           >
             <iframe
+              title={selectedVideo?.snippet?.title ?? 'Lesson video'}
               src={getYouTubeEmbedUrl(selectedVideo)}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
+              style={{ border: 0, width: '100%', height: '100%' }}
             />
           </AspectRatio>
           <Heading

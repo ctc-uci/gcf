@@ -125,7 +125,6 @@ function LessonVideos({
       <VideoPlayer
         playlist={selectedPlaylist.videos}
         playlistName={selectedPlaylist.instrumentName}
-        videos={playlistVideos}
         selectedVideo={selectedVideo}
         onBack={() => setSelectedPlaylist(null)}
         setSelectedVideo={setSelectedVideo}
