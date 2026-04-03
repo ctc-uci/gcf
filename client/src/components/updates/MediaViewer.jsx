@@ -189,6 +189,7 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
                     <video
                       src={mediaURLs[i]}
                       muted
+                      preload="metadata"
                       style={{
                         width: '100%',
                         height: '100%',
