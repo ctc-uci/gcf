@@ -40,14 +40,14 @@ export function LocationForm({ formState, setFormData }) {
   const isoCode = selectedBackendCountry?.isoCode ?? null;
   const libraryCountry = isoCode
     ? libraryCountries.find(
-        (c) => String(c.iso2).toUpperCase() === String(isoCode).toUpperCase()
+        (c) => String(c.iso3).toUpperCase() === String(isoCode).toUpperCase()
       )
     : null;
   const libraryCountryId = libraryCountry?.id ?? null;
 
   // Use library country id with hardcoded set (library's ids for countries that have no states)
   const isStateless =
-    libraryCountryId != null && STATELESS_COUNTRIES.has(libraryCountryId);
+    libraryCountryId !== null && STATELESS_COUNTRIES.has(libraryCountryId);
 
   useEffect(() => {
     async function getRegions() {
@@ -94,7 +94,7 @@ export function LocationForm({ formState, setFormData }) {
   }, [formState.regionId, backend, role, userId]);
 
   useEffect(() => {
-    if (libraryCountryId != null) {
+    if (libraryCountryId !== null) {
       GetState(parseInt(libraryCountryId, 10)).then((result) => {
         setStateList(result ?? []);
       });
@@ -104,7 +104,7 @@ export function LocationForm({ formState, setFormData }) {
   }, [libraryCountryId]);
 
   useEffect(() => {
-    if (libraryCountryId != null && formState.state) {
+    if (libraryCountryId !== null && formState.state) {
       const selectedState = stateList.find(
         (state) => state.id === formState.state
       );

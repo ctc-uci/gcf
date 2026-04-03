@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Button,
@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+
 import { MediaPreview } from './MediaPreview';
 
 export function MediaPreviewList({ files, onComplete, formOrigin }) {
@@ -105,9 +106,18 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
   };
 
   return (
-    <VStack spacing={6} align="stretch">
-      <VStack spacing={0} align="stretch">
-        <FormLabel color="gray.500" fontWeight="bold">
+    <VStack
+      spacing={6}
+      align="stretch"
+    >
+      <VStack
+        spacing={0}
+        align="stretch"
+      >
+        <FormLabel
+          color="gray.500"
+          fontWeight="bold"
+        >
           Uploaded Files
         </FormLabel>
         {files.map((file, i) => (
@@ -121,7 +131,11 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
       </VStack>
       {formOrigin !== 'profile' && (
         <FormControl>
-          <FormLabel color="gray.500" fontWeight="normal" mb={1}>
+          <FormLabel
+            color="gray.500"
+            fontWeight="normal"
+            mb={1}
+          >
             Notes
           </FormLabel>
           <Textarea

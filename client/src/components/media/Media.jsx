@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { AddIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -10,8 +11,6 @@ import {
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
-
-import { AddIcon } from '@chakra-ui/icons';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
@@ -127,10 +126,23 @@ export const Media = () => {
 
   return (
     <Box minH="100vh">
-      <Container maxW="container.xl" py={8}>
-        <Box borderRadius="lg" p={8}>
-          <VStack align="start" spacing={6} w="full">
-            <Heading size="xl" color="gray.800">
+      <Container
+        maxW="container.xl"
+        py={8}
+      >
+        <Box
+          borderRadius="lg"
+          p={8}
+        >
+          <VStack
+            align="start"
+            spacing={6}
+            w="full"
+          >
+            <Heading
+              size="xl"
+              color="gray.800"
+            >
               My Media
             </Heading>
 
@@ -145,7 +157,10 @@ export const Media = () => {
               New
             </Button>
 
-            <MediaGrid mediaItems={media} programName={programName} />
+            <MediaGrid
+              mediaItems={media}
+              programName={programName}
+            />
           </VStack>
         </Box>
       </Container>
