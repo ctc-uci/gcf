@@ -57,9 +57,10 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
       <ModalContent
         bg="white"
         borderRadius="2xl"
-        overflow="hidden"
+        overflow="auto"
         boxShadow="2xl"
-        maxW="680px"
+        maxW="900px"
+        maxH="90vh"
         mx={4}
       >
         <Flex
@@ -94,6 +95,7 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
             file_name={item?.fileName}
             file_type={item?.fileType}
             imageUrl={url}
+            height={{ base: '38vh', md: '56vh' }}
           />
 
           {updates.length > 1 && (
@@ -147,7 +149,7 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
             color="gray.500"
             mt={0.5}
           >
-            {item?.description ?? 'Video Description'}
+            {item?.description ?? ''}
           </Text>
         </Box>
 
@@ -166,46 +168,63 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
               },
             }}
           >
-            {updates.map((thumb, i) => (
-              <Box
-                key={thumb.id}
-                flexShrink={0}
-                cursor="pointer"
-                onClick={() => setCurrent(i)}
-                borderRadius="md"
-                overflow="hidden"
-                border="2px solid"
-                borderColor={i === current ? 'teal.400' : 'transparent'}
-                transition="border-color 0.15s"
-                position="relative"
-                w="90px"
-                h="64px"
-              >
-                <Image
-                  src={mediaURLs[i]}
-                  alt={thumb.fileName}
-                  w="100%"
-                  h="100%"
-                  objectFit="cover"
-                  opacity={i === current ? 1 : 0.7}
-                  transition="opacity 0.15s"
-                  _hover={{ opacity: 1 }}
-                />
-                <Text
-                  position="absolute"
-                  bottom={1}
-                  left={1}
-                  right={1}
-                  fontSize="9px"
-                  fontWeight="600"
-                  color="white"
-                  noOfLines={1}
-                  textShadow="0 1px 3px rgba(0,0,0,0.8)"
+            {updates.map((thumb, i) => {
+              const isVideo = thumb.fileType?.startsWith('video');
+              return (
+                <Box
+                  key={thumb.id}
+                  flexShrink={0}
+                  cursor="pointer"
+                  onClick={() => setCurrent(i)}
+                  borderRadius="md"
+                  overflow="hidden"
+                  border="2px solid"
+                  borderColor={i === current ? 'teal.400' : 'transparent'}
+                  transition="border-color 0.15s"
+                  position="relative"
+                  w="90px"
+                  h="64px"
                 >
-                  {thumb.fileName ?? 'Media Title'}
-                </Text>
-              </Box>
-            ))}
+                  {isVideo ? (
+                    <video
+                      src={mediaURLs[i]}
+                      muted
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        opacity: i === current ? 1 : 0.7,
+                        transition: 'opacity 0.15s',
+                      }}
+                    />
+                  ) : (
+                    <Image
+                      src={mediaURLs[i]}
+                      alt={thumb.fileName}
+                      w="100%"
+                      h="100%"
+                      objectFit="cover"
+                      opacity={i === current ? 1 : 0.7}
+                      transition="opacity 0.15s"
+                      _hover={{ opacity: 1 }}
+                    />
+                  )}
+                  <Text
+                    position="absolute"
+                    bottom={1}
+                    left={1}
+                    right={1}
+                    fontSize="9px"
+                    fontWeight="600"
+                    color="white"
+                    noOfLines={1}
+                    textShadow="0 1px 3px rgba(0,0,0,0.8)"
+                  >
+                    {thumb.fileName ?? 'Media Title'}
+                  </Text>
+                </Box>
+              );
+            })}
           </Flex>
         )}
       </ModalContent>
