@@ -247,4 +247,19 @@ mediaChangeRouter.get('/:userId/media-updates', async (req, res) => {
   }
 });
 
+mediaChangeRouter.get('/update/:updateId', async (req, res) => {
+  try {
+    const { updateId } = req.params;
+    const data = await db.query (
+      `SELECT * FROM media_change WHERE update_id = $1`,
+      [updateId]
+    );
+
+    res.status(200).json(keysToCamel(data))
+  } catch (err){
+    console.error(err);
+    res.status(500).send('Internal Server Error')
+  }
+})
+
 export { mediaChangeRouter };

@@ -20,7 +20,7 @@ import {
 
 // @ts-ignore JS module without TypeScript types
 import { Account } from './components/accounts/Account';
-// @ts-ignore JS module without TypeScript types
+import { Map } from './components/map/Map';
 import { Media } from './components/media/Media';
 import { RegionsPage } from './components/regions/RegionsPage';
 
@@ -40,7 +40,10 @@ const App = () => {
                   path="/signup"
                   element={<Signup />}
                 />
-
+                <Route
+                  path="/map"
+                  element={<Map />}
+                />
                 <Route
                   path="/"
                   element={<ProtectedRoute element={<Layout />} />}

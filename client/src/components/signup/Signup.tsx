@@ -76,12 +76,21 @@ export const Signup = () => {
   }, [backend, handleRedirectResult, navigate, toast]);
 
   return (
-    <VStack spacing={8} sx={{ width: 300, marginX: 'auto' }}>
+    <VStack
+      spacing={8}
+      sx={{ width: 300, marginX: 'auto' }}
+    >
       <Heading>Signup</Heading>
 
-      <form onSubmit={handleSubmit(handleSignup)} style={{ width: '100%' }}>
+      <form
+        onSubmit={handleSubmit(handleSignup)}
+        style={{ width: '100%' }}
+      >
         <Stack spacing={2}>
-          <FormControl isInvalid={!!errors.email} w={'100%'}>
+          <FormControl
+            isInvalid={!!errors.email}
+            w={'100%'}
+          >
             <Center>
               <Input
                 placeholder="Email"
@@ -131,7 +140,10 @@ export const Signup = () => {
             <FormErrorMessage>
               {errors.role?.message?.toString()}
             </FormErrorMessage>
-            <ChakraLink as={Link} to="/login">
+            <ChakraLink
+              as={Link}
+              to="/login"
+            >
               <FormHelperText>Click here to login</FormHelperText>
             </ChakraLink>
           </FormControl>

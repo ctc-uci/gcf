@@ -4,13 +4,18 @@ import { Box, Center, Image } from '@chakra-ui/react';
 
 import gcf_globe from '/gcf_globe.png';
 
-export const MediaCard = ({ file_name, file_type, imageUrl }) => {
+export const MediaCard = ({
+  file_name,
+  file_type,
+  imageUrl,
+  height = '200px',
+}) => {
   const [isLoading, setIsLoading] = useState(true);
   const isVideo = file_type?.startsWith('video');
 
   return (
     <Box
-      h="200px"
+      h={height}
       borderRadius="md"
       overflow="hidden"
     >

@@ -40,7 +40,7 @@ export function LocationForm({ formState, setFormData }) {
   const isoCode = selectedBackendCountry?.isoCode ?? null;
   const libraryCountry = isoCode
     ? libraryCountries.find(
-        (c) => String(c.iso2).toUpperCase() === String(isoCode).toUpperCase()
+        (c) => String(c.iso3).toUpperCase() === String(isoCode).toUpperCase()
       )
     : null;
   const libraryCountryId = libraryCountry?.id ?? null;
