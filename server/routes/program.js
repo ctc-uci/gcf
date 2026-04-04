@@ -455,6 +455,10 @@ programRouter.get('/:id/partner-organization', async (req, res) => {
       [id]
     );
 
+    if (result.length === 0) {
+      return res.status(404).send('Partner organization not found');
+    }
+
     res.status(200).json(result[0].name);
   } catch (err) {
     console.error(err);

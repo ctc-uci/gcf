@@ -282,7 +282,7 @@ const FrontCardView = ({ p, openEditForm, onClick }) => {
             icon={<EditIcon />}
             size="sm"
             variant="ghost"
-            onClick={() => openEditForm(p)}
+            onClick={(e) => { e.stopPropagation(); openEditForm(p); }}
             bg="#808080"
             borderRadius="full"
             color="white"

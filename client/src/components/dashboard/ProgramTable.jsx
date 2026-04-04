@@ -749,7 +749,7 @@ function ProgramTable({ onStatsRefresh }) {
               .catch(() => ({ data: [] })),
             backend
               .get(`/program/${programId}/partner-organization`)
-              .catch(() => ({ data })),
+              .catch(() => ({ data: [] })),
           ]);
 
           return {
