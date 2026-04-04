@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   Box,
@@ -15,14 +15,8 @@ import {
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 import ReactSelect from 'react-select';
-
-/** Mock city options until a real city source is wired up. */
-const MOCK_CITY_OPTIONS = [
-  { value: 'mock-city-1', label: 'Example City A (mock)' },
-  { value: 'mock-city-2', label: 'Example City B (mock)' },
-  { value: 'mock-city-3', label: 'Example City C (mock)' },
-];
 
 /**
  * Location & Language: country (DB) and city (mock dropdown); languages behind + Add.
@@ -33,9 +27,19 @@ export function LocationLanguageSection({
   languageOptions,
   onLanguagesChange,
 }) {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
   const [countriesList, setCountriesList] = useState([]);
   const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
+
+  const mockCityOptions = useMemo(
+    () => [
+      { value: 'mock-city-1', label: t('programForm.mockCityExampleA') },
+      { value: 'mock-city-2', label: t('programForm.mockCityExampleB') },
+      { value: 'mock-city-3', label: t('programForm.mockCityExampleC') },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     async function getAllCountries() {
@@ -92,7 +96,7 @@ export function LocationLanguageSection({
         fontWeight="semibold"
         mb={3}
       >
-        Location &amp; Language
+        {t('programForm.locationAndLanguage')}
       </Heading>
 
       <VStack
@@ -106,7 +110,7 @@ export function LocationLanguageSection({
             color="gray"
             mb={2}
           >
-            Location
+            {t('programForm.locationRowLabel')}
           </FormLabel>
           <HStack
             align="flex-start"
@@ -114,7 +118,7 @@ export function LocationLanguageSection({
           >
             <FormControl flex={1}>
               <Select
-                placeholder="Enter Country"
+                placeholder={t('programForm.enterCountry')}
                 value={
                   formState.country !== null &&
                   formState.country !== undefined &&
@@ -136,11 +140,11 @@ export function LocationLanguageSection({
             </FormControl>
             <FormControl flex={1}>
               <Select
-                placeholder="Enter City"
+                placeholder={t('programForm.enterCity')}
                 value={formState.mockCity ?? ''}
                 onChange={handleMockCityChange}
               >
-                {MOCK_CITY_OPTIONS.map((opt) => (
+                {mockCityOptions.map((opt) => (
                   <option
                     key={opt.value || 'empty'}
                     value={opt.value}
@@ -159,7 +163,7 @@ export function LocationLanguageSection({
             fontWeight="normal"
             color="gray"
           >
-            Language
+            {t('programForm.language')}
           </FormLabel>
           {languageTags.length > 0 && (
             <HStack
@@ -185,13 +189,13 @@ export function LocationLanguageSection({
               variant="outline"
               onClick={() => setLanguagePickerOpen(true)}
             >
-              + Add
+              {t('common.add')}
             </Button>
           )}
           {languagePickerOpen && (
             <Box mt={2}>
               <ReactSelect
-                placeholder="Language"
+                placeholder={t('programForm.languagePlaceholder')}
                 isMulti
                 closeMenuOnSelect={false}
                 options={languageOptions}
@@ -210,7 +214,7 @@ export function LocationLanguageSection({
                 mt={2}
                 onClick={() => setLanguagePickerOpen(false)}
               >
-                Done
+                {t('programForm.done')}
               </Button>
             </Box>
           )}

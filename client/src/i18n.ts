@@ -9,18 +9,10 @@ export function isAppLocale(value: string): value is AppLocale {
   return (APP_LOCALES as readonly string[]).includes(value);
 }
 
-/** Map `zh-CN`, `en-US`, etc. to our app codes (`zh`, `en`, …). */
-export function toAppLocale(lng: string | undefined | null): AppLocale | null {
-  if (lng == null || lng === '') return null;
-  const base = String(lng).split('-')[0]!.toLowerCase();
-  return isAppLocale(base) ? base : null;
-}
-
 function getStoredLocale(): AppLocale {
   try {
     const stored = localStorage.getItem('i18nextLng');
-    const normalized = toAppLocale(stored ?? undefined);
-    if (normalized) return normalized;
+    if (stored && isAppLocale(stored)) return stored;
   } catch {
     /* ignore */
   }
@@ -51,21 +43,7 @@ export async function initI18n(): Promise<void> {
     react: {
       bindI18n: 'languageChanged loaded',
     },
-    load: 'languageOnly',
-    cleanCode: true,
   });
-
-  if (typeof window !== 'undefined') {
-    i18n.on('languageChanged', (lng) => {
-      const code = toAppLocale(lng);
-      if (!code) return;
-      try {
-        localStorage.setItem('i18nextLng', code);
-      } catch {
-        /* ignore */
-      }
-    });
-  }
 
   for (const code of APP_LOCALES) {
     try {

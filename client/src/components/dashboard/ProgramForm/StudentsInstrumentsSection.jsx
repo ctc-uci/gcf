@@ -21,8 +21,10 @@ import {
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 
 export function StudentsInstrumentsSection({ formState, setFormData }) {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
   const [instruments, setInstruments] = useState([]);
   const [isAddingInstrument, setIsAddingInstrument] = useState(false);
@@ -127,7 +129,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
         fontWeight="semibold"
         mb={3}
       >
-        Students &amp; Instruments
+        {t('programForm.studentsAndInstruments')}
       </Heading>
       <VStack
         align="stretch"
@@ -138,7 +140,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
             fontWeight="normal"
             color="gray"
           >
-            Current Students
+            {t('programForm.currentStudents')}
           </FormLabel>
           <NumberInput
             width="100%"
@@ -165,7 +167,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
             fontWeight="normal"
             color="gray"
           >
-            Graduated Students
+            {t('programForm.graduatedStudentsLabel')}
           </FormLabel>
           <NumberInput
             width="100%"
@@ -192,7 +194,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
             fontWeight="normal"
             color="gray"
           >
-            Instrument &amp; Quantity
+            {t('programForm.instrumentAndQuantity')}
           </FormLabel>
           {!isAddingInstrument && (
             <Button
@@ -200,7 +202,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
               variant="outline"
               onClick={() => setIsAddingInstrument(true)}
             >
-              + Add
+              {t('common.add')}
             </Button>
           )}
           {isAddingInstrument && (
@@ -210,7 +212,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
               flexWrap="wrap"
             >
               <Select
-                placeholder="Select Instrument"
+                placeholder={t('programForm.selectInstrument')}
                 onChange={(e) => {
                   setSelectedInstrument(e.target.value);
                   setNewInstrumentName('');
@@ -228,7 +230,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
                 ))}
               </Select>
               <Input
-                placeholder="Or type a new instrument"
+                placeholder={t('programForm.orTypeNewInstrument')}
                 value={newInstrumentName}
                 onChange={(e) => {
                   setNewInstrumentName(e.target.value);
@@ -258,7 +260,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
                   if (added) setIsAddingInstrument(false);
                 }}
               >
-                + Add
+                {t('common.add')}
               </Button>
             </HStack>
           )}
@@ -278,7 +280,10 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
                   bg="gray.200"
                 >
                   <TagLabel>
-                    {data.name} - {data.quantity}
+                    {t('programForm.instrumentQuantityPair', {
+                      name: data.name,
+                      qty: data.quantity,
+                    })}
                   </TagLabel>
                   <TagCloseButton
                     onClick={() => removeInstrument(instrumentId)}

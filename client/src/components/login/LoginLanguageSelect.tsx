@@ -1,12 +1,8 @@
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { Box, HStack, Select, Text } from '@chakra-ui/react';
 
-import { toAppLocale, type AppLocale } from '@/i18n';
+import { APP_LOCALES, type AppLocale } from '@/i18n';
 import { useTranslation } from 'react-i18next';
-
-type Props = {
-  onUserPickedLocale?: () => void;
-};
 
 const LOCALE_META: { code: AppLocale; labelKey: string; flag: string }[] = [
   { code: 'en', labelKey: 'languageSelector.english', flag: '🇺🇸' },
@@ -15,9 +11,11 @@ const LOCALE_META: { code: AppLocale; labelKey: string; flag: string }[] = [
   { code: 'zh', labelKey: 'languageSelector.chinese', flag: '🇨🇳' },
 ];
 
-export function LoginLanguageSelect({ onUserPickedLocale }: Props) {
+export function LoginLanguageSelect() {
   const { t, i18n: i18nInstance } = useTranslation();
-  const value: AppLocale = toAppLocale(i18nInstance.language) ?? 'en';
+  const value = APP_LOCALES.includes(i18nInstance.language as AppLocale)
+    ? (i18nInstance.language as AppLocale)
+    : 'en';
 
   return (
     <HStack
@@ -47,7 +45,6 @@ export function LoginLanguageSelect({ onUserPickedLocale }: Props) {
           icon={<ChevronDownIcon color="gray.600" />}
           onChange={(e) => {
             const next = e.target.value as AppLocale;
-            onUserPickedLocale?.();
             void i18nInstance.changeLanguage(next);
           }}
           sx={{ pl: 2, pr: 6 }}

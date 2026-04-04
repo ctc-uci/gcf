@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 
 import { DirectorAvatar } from './DirectorAvatar';
 
@@ -21,6 +22,7 @@ export function AssignedDirectorsSection({
   formState,
   setFormData,
 }) {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
   const [nameOptions, setNameOptions] = useState([]);
 
@@ -85,7 +87,7 @@ export function AssignedDirectorsSection({
         fontWeight="semibold"
         mb={3}
       >
-        Assigned Directors
+        {t('programForm.assignedDirectors')}
       </Heading>
       <VStack
         align="stretch"
@@ -97,7 +99,7 @@ export function AssignedDirectorsSection({
             fontWeight="normal"
             color="gray"
           >
-            Regional Director(s)
+            {t('programForm.regionalDirectors')}
           </FormLabel>
           {regional.length > 0 ? (
             <VStack
@@ -107,7 +109,7 @@ export function AssignedDirectorsSection({
               {regional.map((d) => {
                 const label =
                   `${d.firstName ?? ''} ${d.lastName ?? ''}`.trim() ||
-                  'Regional Director';
+                  t('programForm.directorFallbackRegional');
                 return (
                   <HStack
                     key={d.userId}
@@ -127,7 +129,7 @@ export function AssignedDirectorsSection({
               fontSize="sm"
               color="gray.500"
             >
-              No regional directors listed for this program&apos;s region.
+              {t('programForm.noRegionalDirectorsForRegion')}
             </Text>
           )}
         </FormControl>
@@ -138,7 +140,7 @@ export function AssignedDirectorsSection({
             fontWeight="normal"
             color="gray"
           >
-            Program Director
+            {t('programForm.programDirector')}
           </FormLabel>
           <HStack
             align="stretch"
@@ -159,7 +161,7 @@ export function AssignedDirectorsSection({
             >
               <DirectorAvatar
                 picture={selected?.picture}
-                name={selectedLabel || 'Program Director'}
+                name={selectedLabel || t('programForm.directorFallbackProgram')}
                 boxSize="32px"
               />
             </Box>
@@ -171,7 +173,7 @@ export function AssignedDirectorsSection({
               minH="40px"
               py={2}
               pr={2}
-              placeholder="Select Program Director"
+              placeholder={t('programForm.selectProgramDirector')}
               value={
                 selected?.userId != null && selected.userId !== ''
                   ? String(selected.userId)
@@ -188,7 +190,7 @@ export function AssignedDirectorsSection({
                   key={director.userId}
                 >
                   {`${director.firstName ?? ''} ${director.lastName ?? ''}`.trim() ||
-                    'Program Director'}
+                    t('programForm.directorFallbackProgram')}
                 </option>
               ))}
             </Select>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   Box,
@@ -19,7 +19,7 @@ import {
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import i18n, { isAppLocale, toAppLocale } from '@/i18n';
+import i18n, { isAppLocale } from '@/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -53,7 +53,6 @@ export const Login = () => {
     [t]
   );
   const [isForgot, setIsForgot] = useState(false);
-  const loginPageLocaleChangedRef = useRef(false);
   const navigate = useNavigate();
   const toast = useToast();
   const [searchParams] = useSearchParams();
@@ -106,19 +105,7 @@ export const Login = () => {
         const { data: userRow } = await backend.get(
           `/gcf-users/${cred.user.uid}`
         );
-        if (loginPageLocaleChangedRef.current) {
-          const lng = toAppLocale(i18n.language);
-          if (lng) {
-            try {
-              await backend.patch(
-                `/gcf-users/${cred.user.uid}/preferred-language`,
-                { preferredLanguage: lng }
-              );
-            } catch {
-              /* still keep UI locale from login picker */
-            }
-          }
-        } else if (
+        if (
           userRow?.preferredLanguage &&
           isAppLocale(String(userRow.preferredLanguage))
         ) {
@@ -181,11 +168,7 @@ export const Login = () => {
         right={6}
         zIndex={20}
       >
-        <LoginLanguageSelect
-          onUserPickedLocale={() => {
-            loginPageLocaleChangedRef.current = true;
-          }}
-        />
+        <LoginLanguageSelect />
       </Box>
       <GridItem>
         <Flex

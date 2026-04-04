@@ -591,7 +591,7 @@ export const ProgramForm = ({
                     fontWeight="semibold"
                     mb={3}
                   >
-                    General Information
+                    {t('programForm.generalInformation')}
                   </Heading>
                   <VStack
                     align="stretch"
@@ -603,10 +603,10 @@ export const ProgramForm = ({
                         fontWeight="normal"
                         color="gray"
                       >
-                        Program Name
+                        {t('programForm.programName')}
                       </FormLabel>
                       <Input
-                        placeholder="Enter Program Title"
+                        placeholder={t('programForm.enterProgramTitle')}
                         value={formState.programName || ''}
                         onChange={(e) =>
                           handleProgramNameChange(e.target.value)
@@ -615,7 +615,7 @@ export const ProgramForm = ({
                     </FormControl>
 
                     <PartnerOrganizationField
-                      label="Partner Organization Name"
+                      label={t('programForm.partnerOrgName')}
                       valueId={formState.partnerOrg}
                       onChangeId={(id) =>
                         setFormState((prev) => ({
@@ -635,7 +635,7 @@ export const ProgramForm = ({
                           }))
                         }
                       >
-                        Show Partner Organization on Map
+                        {t('programForm.showPartnerOnMap')}
                       </Checkbox>
                       {/* TODO: Implement persistence and map behavior for showPartnerOrgOnMap (API + map layer). */}
                     </FormControl>
@@ -646,17 +646,21 @@ export const ProgramForm = ({
                         fontWeight="normal"
                         color="gray"
                       >
-                        Status
+                        {t('programForm.status')}
                       </FormLabel>
                       <Select
                         value={formState.status ?? ''}
                         onChange={(e) =>
                           handleProgramStatusChange(e.target.value)
                         }
-                        placeholder="Select Status"
+                        placeholder={t('programForm.selectStatus')}
                       >
-                        <option value="Active">Launched</option>
-                        <option value="Inactive">Developing</option>
+                        <option value="Active">
+                          {t('programForm.launched')}
+                        </option>
+                        <option value="Inactive">
+                          {t('programForm.developing')}
+                        </option>
                       </Select>
                     </FormControl>
 
@@ -666,11 +670,11 @@ export const ProgramForm = ({
                         fontWeight="normal"
                         color="gray"
                       >
-                        Launch Date
+                        {t('programForm.launchDate')}
                       </FormLabel>
                       <Input
                         type="date"
-                        placeholder="MM/DD/YYYY"
+                        placeholder={t('programForm.datePlaceholder')}
                         value={formState.launchDate || ''}
                         onChange={(e) =>
                           handleProgramLaunchDateChange(e.target.value)
@@ -718,7 +722,7 @@ export const ProgramForm = ({
                   size="md"
                   fontWeight="semibold"
                 >
-                  Media
+                  {t('programForm.mediaHeading')}
                 </Heading>
                 <Text
                   fontSize="sm"
@@ -729,7 +733,7 @@ export const ProgramForm = ({
                   variant="outline"
                   onClick={mediaUploadModal.onOpen}
                 >
-                  + Add
+                  {t('common.add')}
                 </Button>
                 <HStack
                   wrap="wrap"

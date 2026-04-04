@@ -13,6 +13,8 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
+
 import { CurriculumLinkForm } from './CurriculumLinkForm';
 import { MediaPreviewTag } from './MediaPreviewTag';
 
@@ -27,6 +29,7 @@ export function ResourcesSection({
   onOpenMediaModal,
   onSeeAllMedia,
 }) {
+  const { t } = useTranslation();
   const [showCurriculumAdd, setShowCurriculumAdd] = useState(false);
 
   return (
@@ -36,7 +39,7 @@ export function ResourcesSection({
         fontWeight="semibold"
         mb={3}
       >
-        Resources
+        {t('programForm.resourcesSectionTitle')}
       </Heading>
       <VStack
         align="stretch"
@@ -48,7 +51,7 @@ export function ResourcesSection({
             fontWeight="normal"
             color="gray"
           >
-            Curriculum Link
+            {t('programForm.curriculumLinkLabel')}
           </FormLabel>
           {!showCurriculumAdd && (
             <Button
@@ -56,7 +59,7 @@ export function ResourcesSection({
               variant="outline"
               onClick={() => setShowCurriculumAdd(true)}
             >
-              + Add
+              {t('common.add')}
             </Button>
           )}
           {showCurriculumAdd && (
@@ -76,7 +79,7 @@ export function ResourcesSection({
                 alignSelf="flex-start"
                 onClick={() => setShowCurriculumAdd(false)}
               >
-                Done
+                {t('programForm.done')}
               </Button>
             </VStack>
           )}
@@ -132,14 +135,14 @@ export function ResourcesSection({
             fontWeight="normal"
             color="gray"
           >
-            Files
+            {t('programForm.files')}
           </FormLabel>
           <Button
             size="sm"
             variant="outline"
             onClick={onOpenMediaModal}
           >
-            + Add
+            {t('common.add')}
           </Button>
           {(formState.media ?? []).length > 0 && (
             <HStack
@@ -182,14 +185,14 @@ export function ResourcesSection({
             fontWeight="normal"
             color="gray"
           >
-            Media
+            {t('programForm.mediaHeading')}
           </FormLabel>
           <Button
             size="sm"
             variant="outline"
             onClick={onSeeAllMedia}
           >
-            See All Media
+            {t('programForm.seeAllMedia')}
           </Button>
         </FormControl>
       </VStack>
