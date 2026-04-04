@@ -65,12 +65,7 @@ programRouter.get('/:id/enrollment-aggregates', async (req, res) => {
     );
 
     const row = result[0] ?? { sum_enrollment: 0, sum_graduated: 0 };
-    res.status(200).json(
-      keysToCamel({
-        sumEnrollment: row.sum_enrollment,
-        sumGraduated: row.sum_graduated,
-      })
-    );
+    res.status(200).json(keysToCamel(row));
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');

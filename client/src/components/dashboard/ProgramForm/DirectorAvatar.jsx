@@ -44,6 +44,7 @@ export function DirectorAvatar({ picture, name = '', boxSize = '36px' }) {
     <Image
       src={src}
       alt={displayName}
+      fallbackSrc={DEFAULT_PROFILE_IMAGE}
       boxSize={boxSize}
       borderRadius="full"
       objectFit="cover"

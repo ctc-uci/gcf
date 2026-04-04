@@ -154,7 +154,20 @@ export function ResourcesSection({
                   onRemove={() => {
                     setFormData((prev) => ({
                       ...prev,
-                      media: prev.media.filter((_, idx) => idx !== i),
+                      media: (prev.media ?? []).filter((m) => {
+                        if (
+                          item.id !== null &&
+                          item.id !== undefined &&
+                          m.id !== null &&
+                          m.id !== undefined
+                        ) {
+                          return Number(m.id) !== Number(item.id);
+                        }
+                        if (item.s3_key && m.s3_key) {
+                          return m.s3_key !== item.s3_key;
+                        }
+                        return m !== item;
+                      }),
                     }));
                   }}
                 />

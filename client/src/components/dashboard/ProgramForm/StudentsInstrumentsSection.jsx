@@ -28,7 +28,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
   const [isAddingInstrument, setIsAddingInstrument] = useState(false);
   const [selectedInstrument, setSelectedInstrument] = useState('');
   const [newInstrumentName, setNewInstrumentName] = useState('');
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,7 +61,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
     let resolvedName = instrumentName;
 
     if (chosen) {
-      const found = instruments.find((i) => i.name === chosen);
+      const found = instruments.find((i) => String(i.id) === chosen);
       if (found) {
         instrumentId = found.id;
         resolvedName = found.name;
@@ -106,7 +106,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
 
     setSelectedInstrument('');
     setNewInstrumentName('');
-    setQuantity(0);
+    setQuantity(1);
     return true;
   }
 
@@ -221,7 +221,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
                 {instruments.map((instrument) => (
                   <option
                     key={instrument.id}
-                    value={instrument.name}
+                    value={String(instrument.id)}
                   >
                     {instrument.name}
                   </option>
@@ -238,10 +238,10 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
               />
               <NumberInput
                 value={quantity}
-                min={0}
+                min={1}
                 onChange={(value) => {
                   const n = parseInt(value, 10);
-                  setQuantity(Number.isNaN(n) ? 0 : n);
+                  setQuantity(Number.isNaN(n) ? 1 : n);
                 }}
               >
                 <NumberInputField />

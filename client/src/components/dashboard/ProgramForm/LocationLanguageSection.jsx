@@ -19,7 +19,6 @@ import ReactSelect from 'react-select';
 
 /** Mock city options until a real city source is wired up. */
 const MOCK_CITY_OPTIONS = [
-  { value: '', label: 'Select City' },
   { value: 'mock-city-1', label: 'Example City A (mock)' },
   { value: 'mock-city-2', label: 'Example City B (mock)' },
   { value: 'mock-city-3', label: 'Example City C (mock)' },
@@ -125,7 +124,6 @@ export function LocationLanguageSection({
                 }
                 onChange={handleCountryChange}
               >
-                <option value="">Select Country</option>
                 {countriesList.map((c) => (
                   <option
                     key={c.id}

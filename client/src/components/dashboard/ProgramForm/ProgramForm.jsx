@@ -231,8 +231,8 @@ export const ProgramForm = ({
               .filter(
                 (p) =>
                   p.link &&
-                  p.instrumentId !== null &&
-                  p.instrumentId !== undefined
+                  ((p.instrumentId !== null && p.instrumentId !== undefined) ||
+                    (p.instrument_id !== null && p.instrument_id !== undefined))
               )
               .map((p) => ({
                 link: p.link,
