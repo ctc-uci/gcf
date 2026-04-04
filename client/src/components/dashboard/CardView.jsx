@@ -171,6 +171,7 @@ const BackCardView = ({ p, onClick }) => {
                 <span key={`${d.name}-${idx}`}>
                   {d.link ? (
                     <Link
+                      onClick={(e) => e.stopPropagation()}
                       href={d.link}
                       isExternal
                       color="teal.500"
