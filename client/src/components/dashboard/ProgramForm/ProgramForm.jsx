@@ -26,6 +26,7 @@ import { PartnerOrganizationField } from '@/components/partners/PartnerOrganizat
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import ISO6391 from 'iso-639-1';
+import { useTranslation } from 'react-i18next';
 
 import { AssignedDirectorsSection } from './AssignedDirectorsSection';
 import { LocationLanguageSection } from './LocationLanguageSection';
@@ -40,6 +41,7 @@ export const ProgramForm = ({
   onSave,
   program,
 }) => {
+  const { t } = useTranslation();
   const disclosure = useDisclosure();
   const mediaUploadModal = useDisclosure();
 
@@ -275,7 +277,7 @@ export const ProgramForm = ({
       );
     }
     loadProgramRegionData();
-  }, [program?.id, backend]);
+  }, [program, backend]);
 
   useEffect(() => {
     if (isOpen) {
@@ -447,13 +449,21 @@ export const ProgramForm = ({
       const hasInstrumentChange = instrumentChanges.length > 0;
       const hasMediaChange = mediaChanges.length > 0;
 
-      if (hasStudentChange || hasInstrumentChange || hasMediaChange) {
+      const isNewProgram = !program;
+
+      if (
+        isNewProgram ||
+        hasStudentChange ||
+        hasInstrumentChange ||
+        hasMediaChange
+      ) {
         const updateResponse = await backend.post(`/program-updates`, {
-          title: 'update program stats',
+          title: isNewProgram ? 'Program Created' : 'update program stats',
           program_id: programId,
           created_by: currentUser?.uid || currentUser?.id,
           update_date: new Date().toISOString(),
-          note: 'Program update',
+          note: isNewProgram ? 'Program Created' : 'Program update',
+          show_on_table: isNewProgram,
         });
 
         const updateId = updateResponse.data.id;
@@ -463,6 +473,7 @@ export const ProgramForm = ({
             update_id: updateId,
             enrollment_change: enrollmentDelta,
             graduated_change: graduatedDelta,
+            event_type: 'other',
           });
         }
 
@@ -472,6 +483,7 @@ export const ProgramForm = ({
               instrumentId: instrumentChange.instrumentId,
               updateId,
               amountChanged: instrumentChange.amountChanged,
+              event_type: 'other',
             });
           }
         }
@@ -522,7 +534,7 @@ export const ProgramForm = ({
             onClick={handleSave}
           >
             {' '}
-            Save{' '}
+            {t('common.save')}{' '}
           </Button>
         </HStack>
 
@@ -537,7 +549,7 @@ export const ProgramForm = ({
               textAlign="center"
               w="full"
             >
-              Program
+              {t('programForm.drawerTitle')}
             </DrawerHeader>
             <HStack
               w="full"
@@ -554,7 +566,7 @@ export const ProgramForm = ({
                 borderColor={activeTab === 'overview' ? 'teal.500' : 'gray.200'}
                 _hover={{ bg: 'gray.50' }}
               >
-                Overview
+                {t('programForm.overview')}
               </Button>
 
               <Button
@@ -567,7 +579,7 @@ export const ProgramForm = ({
                 borderColor={activeTab === 'media' ? 'teal.500' : 'gray.200'}
                 _hover={{ bg: 'gray.50' }}
               >
-                Media
+                {t('programForm.mediaTab')}
               </Button>
             </HStack>
 

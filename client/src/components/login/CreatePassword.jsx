@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import {
   Box,
@@ -16,23 +16,26 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { confirmPasswordReset, getAuth } from 'firebase/auth';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { MdOutlineSubdirectoryArrowRight } from 'react-icons/md';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
-const createPasswordSchema = z
-  .object({
-    newPassword: z
-      .string()
-      .min(6, 'Password must be at least 6 characters long'),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
-
 export const CreatePassword = () => {
+  const { t } = useTranslation();
+  const createPasswordSchema = useMemo(
+    () =>
+      z
+        .object({
+          newPassword: z.string().min(6, t('validation.passwordMin')),
+          confirmPassword: z.string(),
+        })
+        .refine((data) => data.newPassword === data.confirmPassword, {
+          message: t('validation.passwordsNoMatch'),
+          path: ['confirmPassword'],
+        }),
+    [t]
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
@@ -53,8 +56,8 @@ export const CreatePassword = () => {
   const onSubmit = async (data) => {
     if (!oobCode) {
       toast({
-        title: 'Invalid Link',
-        description: 'The password reset link is missing or malformed.',
+        title: t('createPassword.invalidLinkTitle'),
+        description: t('createPassword.invalidLinkDesc'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -67,8 +70,8 @@ export const CreatePassword = () => {
       await confirmPasswordReset(auth, oobCode, data.newPassword);
 
       toast({
-        title: 'Success!',
-        description: 'Your password has been reset. Please log in.',
+        title: t('createPassword.successTitle'),
+        description: t('createPassword.successDesc'),
         status: 'success',
         duration: 5000,
         isClosable: true,
@@ -78,8 +81,8 @@ export const CreatePassword = () => {
       navigate('/login');
     } catch (error) {
       toast({
-        title: 'Could not create password!',
-        description: error.message || 'Passwords do not match',
+        title: t('createPassword.errorTitle'),
+        description: error.message || t('validation.passwordsNoMatch'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -101,17 +104,20 @@ export const CreatePassword = () => {
       <Heading
         fontSize="3xl"
         mb={6}
+        fontWeight="bold"
       >
-        Create Password
+        {t('createPassword.title')}
       </Heading>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={5}>
           <FormControl isInvalid={!!errors.newPassword}>
-            <FormLabel fontSize="md">New Password</FormLabel>
+            <FormLabel fontWeight="bold">
+              {t('createPassword.newPassword')}
+            </FormLabel>
             <Input
               type="password"
-              placeholder="***********"
+              placeholder={t('createPassword.passwordDots')}
               {...register('newPassword')}
               size="lg"
               borderRadius="6px"
@@ -124,10 +130,12 @@ export const CreatePassword = () => {
           </FormControl>
 
           <FormControl isInvalid={!!errors.confirmPassword}>
-            <FormLabel fontSize="md">Confirm Password</FormLabel>
+            <FormLabel fontWeight="bold">
+              {t('createPassword.confirmPassword')}
+            </FormLabel>
             <Input
               type="password"
-              placeholder="***********"
+              placeholder={t('createPassword.passwordDots')}
               {...register('confirmPassword')}
               size="lg"
               borderRadius="6px"
@@ -151,7 +159,7 @@ export const CreatePassword = () => {
             _hover={{ bg: 'gray.800' }}
           >
             <MdOutlineSubdirectoryArrowRight style={{ marginRight: '8px' }} />{' '}
-            Submit
+            {t('common.submit')}
           </Button>
 
           <Box
@@ -164,7 +172,7 @@ export const CreatePassword = () => {
               fontSize="sm"
               onClick={() => navigate('/login?mode=forgotPassword')}
             >
-              Forgot password?
+              {t('createPassword.forgotLink')}
             </ChakraLink>
           </Box>
         </Stack>

@@ -24,9 +24,11 @@ import {
 
 import { PartnerOrganizationField } from '@/components/partners/PartnerOrganizationField';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 import { FaTrash, FaUserCircle } from 'react-icons/fa';
 
 export const ProgramUpdateEditForm = ({ programUpdateId }) => {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
 
   const [isAddingInstrument, setIsAddingInstrument] = useState(false);
@@ -791,7 +793,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
               size="sm"
               variant="outline"
             >
-              + Add
+              {t('common.add')}
             </Button>
           </FormControl>
 

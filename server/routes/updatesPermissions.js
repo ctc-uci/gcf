@@ -43,10 +43,80 @@ updatesPermissionsRouter.get('/media-updates/:id', async (req, res) => {
       FROM program_update
       INNER JOIN media_change ON media_change.update_id = program_update.id
       INNER JOIN program ON program_update.program_id = program.id
-      LEFT JOIN gcf_user AS creator ON creator.id = program.created_by
+      LEFT JOIN gcf_user AS creator ON creator.id = program_update.created_by
       ${filterJoin}
       ORDER BY program_update.update_date DESC;
     `;
+    const data = await db.query(finalQuery, filterJoin ? [id] : []);
+    res.status(200).json(keysToCamel(data));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+updatesPermissionsRouter.get('/program-updates/pd/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const finalQuery = `SELECT
+          program_update.id,
+          program_update.title,
+          program_update.update_date,
+          program_update.note,
+          program.name,
+          creator.first_name,
+          creator.last_name,
+          creator.role,
+          program.status,
+          EXISTS (
+            SELECT 1 FROM instrument_change ic
+            WHERE ic.update_id = program_update.id
+          ) AS has_instrument_change,
+          EXISTS (
+            SELECT 1 FROM enrollment_change ec
+            WHERE ec.update_id = program_update.id
+          ) AS has_enrollment_change,
+          (
+            SELECT ec.enrollment_change
+            FROM enrollment_change ec
+            WHERE ec.update_id = program_update.id
+            ORDER BY ec.id DESC
+            LIMIT 1
+          ) AS enrollment_change,
+          (
+            SELECT ic.amount_changed
+            FROM instrument_change ic
+            WHERE ic.update_id = program_update.id
+            ORDER BY ic.id DESC
+            LIMIT 1
+          ) AS instrument_change,
+          (
+            SELECT ec.graduated_change
+            FROM enrollment_change ec
+            WHERE ec.update_id = program_update.id
+            ORDER BY ec.id DESC
+            LIMIT 1
+          ) AS graduated_change,
+          (
+            SELECT i.name
+            FROM instrument_change ic
+            INNER JOIN instrument i ON i.id = ic.instrument_id
+            WHERE ic.update_id = program_update.id
+            ORDER BY ic.id DESC
+            LIMIT 1
+          ) AS instrument_name,
+          EXISTS (
+            SELECT 1 FROM instrument_change ic
+            WHERE ic.update_id = program_update.id
+              AND ic.special_request IS TRUE
+          ) AS flagged
+      FROM program_update
+      INNER JOIN program ON program_update.program_id = program.id
+      LEFT JOIN gcf_user AS creator ON creator.id = program_update.created_by
+      INNER JOIN program_director ON program_director.program_id = program.id AND program_director.user_id = $1
+      WHERE program_update.show_on_table = TRUE
+      ORDER BY program_update.update_date DESC;`;
+
     const data = await db.query(finalQuery, [id]);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
@@ -73,32 +143,37 @@ updatesPermissionsRouter.get('/program-updates/:id', async (req, res) => {
         INNER JOIN country ON program.country = country.id
         INNER JOIN region ON country.region_id = region.id
         INNER JOIN regional_director ON regional_director.region_id = region.id AND regional_director.user_id = $1`;
-    } else if (role === 'Program Director') {
-      filterJoin = `INNER JOIN program_director ON program_director.program_id = program.id AND program_director.user_id = $1`;
     } else if (role !== 'Admin' && role !== 'Super Admin') {
       return res.status(403).send('Access denied');
     }
 
     const finalQuery = `SELECT
           program_update.id,
-          program_update.update_date, 
-          program_update.note, 
-          program.name, 
-          creator.first_name, 
-          creator.last_name, 
-          creator.role, 
-          program.status
+          program_update.title,
+          program_update.update_date,
+          program_update.note,
+          program.name,
+          creator.first_name,
+          creator.last_name,
+          creator.role,
+          program.status,
+          EXISTS (
+            SELECT 1 FROM instrument_change ic
+            WHERE ic.update_id = program_update.id
+              AND ic.special_request IS TRUE
+          ) AS flagged,
+          EXISTS (
+            SELECT 1 FROM instrument_change ic
+            WHERE ic.update_id = program_update.id
+          ) AS is_instrument_update
       FROM program_update
       INNER JOIN program ON program_update.program_id = program.id
-      LEFT JOIN gcf_user AS creator ON creator.id = program.created_by
+      LEFT JOIN gcf_user AS creator ON creator.id = program_update.created_by
       ${filterJoin}
+      WHERE program_update.show_on_table = TRUE
       ORDER BY program_update.update_date DESC;`;
 
-    const data = await db.query(finalQuery, [id]);
-    if (data.length === 0) {
-      return res.status(404).send('Item not found');
-    }
-
+    const data = await db.query(finalQuery, filterJoin ? [id] : []);
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);

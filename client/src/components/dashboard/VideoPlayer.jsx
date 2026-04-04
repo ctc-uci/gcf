@@ -19,24 +19,27 @@ import {
 } from '@chakra-ui/react';
 
 import { getYouTubeEmbedUrl } from '@/utils/youtube';
+import { useTranslation } from 'react-i18next';
 
 function VideoPlayer({
   playlist,
   playlistName = 'Playlist',
-  videos,
   selectedVideo,
   onBack,
   setSelectedVideo,
 }) {
   const [isOpen, setIsOpen] = useState(true);
+  const { t } = useTranslation();
   return (
     <HStack
       align="flex-start"
       spacing={0}
       w="100%"
+      maxW="100%"
     >
       <VStack
         flex={1}
+        minW={0}
         align="flex-start"
         mr={8}
       >
@@ -50,7 +53,7 @@ function VideoPlayer({
           bg="teal.500"
           onClick={onBack}
         >
-          Back
+          {t('common.back')}
         </Button>
         <Box
           overflow="hidden"
@@ -63,8 +66,11 @@ function VideoPlayer({
             overflow="hidden"
           >
             <iframe
+              title={selectedVideo?.snippet?.title ?? 'Lesson video'}
               src={getYouTubeEmbedUrl(selectedVideo)}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
+              style={{ border: 0, width: '100%', height: '100%' }}
             />
           </AspectRatio>
           <Heading

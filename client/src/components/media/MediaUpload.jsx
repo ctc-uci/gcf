@@ -3,8 +3,10 @@ import { useCallback } from 'react';
 import { Button, Center, Text, VStack } from '@chakra-ui/react';
 
 import { useDropzone } from 'react-dropzone';
+import { useTranslation } from 'react-i18next';
 
 export function MediaUpload({ onFileSelect, formOrigin }) {
+  const { t } = useTranslation();
   const onDrop = useCallback(
     (acceptedFiles) => {
       onFileSelect(acceptedFiles);
@@ -32,8 +34,8 @@ export function MediaUpload({ onFileSelect, formOrigin }) {
     >
       <input {...getInputProps()} />
       <VStack>
-        <Text as="b">Drag and drop files here</Text>
-        <Text>OR</Text>
+        <Text as="b">{t('mediaUpload.dragDrop')}</Text>
+        <Text>{t('mediaUpload.or')}</Text>
         <Button
           onClick={open}
           color="#2C7A7B"
@@ -42,7 +44,7 @@ export function MediaUpload({ onFileSelect, formOrigin }) {
           height="50px"
           borderColor="#2C7A7B"
         >
-          Browse Files
+          {t('mediaUpload.browse')}
         </Button>
       </VStack>
     </Center>

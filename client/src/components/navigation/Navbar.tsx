@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
+import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -9,20 +10,22 @@ import {
   Icon,
   Image,
   Text,
+  useOutsideClick,
 } from '@chakra-ui/react';
-
-const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
-import { ChevronDownIcon } from '@chakra-ui/icons';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { useTranslation } from 'react-i18next';
 import { HiOutlineLogout, HiOutlineUser } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 
 import { NAVBAR_HEIGHT } from './layoutConstants';
 
+const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
+
 export const Navbar = () => {
+  const { t } = useTranslation();
   const { role } = useRoleContext();
   const { logout } = useAuthContext();
   const { currentUser } = useAuthContext();
@@ -37,12 +40,19 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useOutsideClick({
+    ref: menuRef,
+    handler: () => setIsMenuOpen(false),
+  });
 
   const handleMenuToggle = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
   const handleLogout = async () => {
+    setIsMenuOpen(false);
     await logout();
     navigate('/login');
   };
@@ -113,7 +123,7 @@ export const Navbar = () => {
       }
     };
     loadData();
-  }, [userId, backend, role]);
+  }, [userId, backend, role, currentUser?.displayName]);
 
   const triggerBg = isMenuOpen || isHovered ? 'gray.300' : 'transparent';
 
@@ -121,25 +131,51 @@ export const Navbar = () => {
     <Flex
       height={NAVBAR_HEIGHT}
       align="center"
-      w="80vw"
+      w="100%"
+      maxW="100%"
+      minW={0}
       px={6}
       py={6}
       borderRadius="xl"
       boxShadow="sm"
       bg="white"
     >
-      <Flex justify="space-between" w="100%" px="2vw" align="center">
-        <Text fontSize="2vh" fontWeight="bold">
-          {role === 'Super Admin' ? 'Super Admin Dashboard' : ''}
-          {role === 'Admin' ? 'Admin Dashboard' : ''}
-          {role === 'Regional Director' ? 'Regional Director Dashboard' : ''}
+      <Flex
+        justify="space-between"
+        w="100%"
+        minW={0}
+        px={{ base: 2, md: '2vw' }}
+        align="center"
+        gap={3}
+      >
+        <Text
+          fontSize="2vh"
+          fontWeight="bold"
+          noOfLines={1}
+          minW={0}
+          flexShrink={1}
+        >
+          {role === 'Super Admin' ? t('navbar.superAdminDashboard') : ''}
+          {role === 'Admin' ? t('navbar.adminDashboard') : ''}
+          {role === 'Regional Director'
+            ? t('navbar.regionalDirectorDashboard')
+            : ''}
           {role === 'Program Director' ? `${project}` : ''}
 
-          {role === 'Regional Director' ? `: ${region}` : ''}
+          {role === 'Regional Director'
+            ? t('navbar.regionPrefix', { region })
+            : ''}
         </Text>
 
-        <Flex gap={2} align="center">
-          <Box position="relative">
+        <Flex
+          gap={2}
+          align="center"
+          flexShrink={0}
+        >
+          <Box
+            ref={menuRef}
+            position="relative"
+          >
             <Button
               bg="transparent"
               p={0}
@@ -155,22 +191,37 @@ export const Navbar = () => {
                 bg={triggerBg}
                 borderRadius={isMenuOpen ? '20px 20px 0 0' : '20px'}
                 minW="160px"
+                maxW={{ base: 'min(200px, 40vw)', md: '280px' }}
                 transition="background-color 0.4s ease, border-radius 0.4s ease"
               >
-                <HStack spacing={3} justify="center" align="center">
+                <HStack
+                  spacing={3}
+                  justify="center"
+                  align="center"
+                  minW={0}
+                >
                   <Image
                     src={profilePictureUrl ?? DEFAULT_PROFILE_IMAGE}
-                    alt="Profile"
+                    alt={t('navbar.profileAlt')}
                     w="28px"
                     h="28px"
                     borderRadius="full"
                     objectFit="cover"
+                    flexShrink={0}
                   />
-                  <Text fontSize="2vh" fontWeight="semibold">
-                    {userName || 'User'}
+                  <Text
+                    fontSize="2vh"
+                    fontWeight="semibold"
+                    noOfLines={1}
+                    minW={0}
+                    flex="1"
+                    textAlign="center"
+                  >
+                    {userName || t('common.user')}
                   </Text>
                   <ChevronDownIcon
                     boxSize={4}
+                    flexShrink={0}
                     transition="transform 0.4s ease"
                     transform={isMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)'}
                   />
@@ -201,26 +252,39 @@ export const Navbar = () => {
                   w="100%"
                 >
                   <Button
-                    onClick={() => navigate('/profile')}
-                    leftIcon={<Icon as={HiOutlineUser} boxSize="2vh" />}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate('/profile');
+                    }}
+                    leftIcon={
+                      <Icon
+                        as={HiOutlineUser}
+                        boxSize="2vh"
+                      />
+                    }
                     w="100%"
                     justifyContent="flex-start"
                     variant="ghost"
                     bg="transparent"
                     _hover={{ bg: 'gray.400' }}
                   >
-                    <Text fontSize="2vh">Profile</Text>
+                    <Text fontSize="2vh">{t('common.profile')}</Text>
                   </Button>
                   <Button
                     onClick={handleLogout}
-                    leftIcon={<Icon as={HiOutlineLogout} boxSize="2vh" />}
+                    leftIcon={
+                      <Icon
+                        as={HiOutlineLogout}
+                        boxSize="2vh"
+                      />
+                    }
                     w="100%"
                     justifyContent="flex-start"
                     variant="ghost"
                     bg="transparent"
                     _hover={{ bg: 'gray.400' }}
                   >
-                    <Text fontSize="2vh">Log Out</Text>
+                    <Text fontSize="2vh">{t('common.logOut')}</Text>
                   </Button>
                 </Box>
               </Collapse>

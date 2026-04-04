@@ -1,4 +1,6 @@
 import { Box, Center, Icon, Text, VStack } from '@chakra-ui/react';
+
+import { useTranslation } from 'react-i18next';
 import { FiBell, FiUsers } from 'react-icons/fi';
 import { HiOutlineMusicalNote } from 'react-icons/hi2';
 import { IoHomeOutline } from 'react-icons/io5';
@@ -6,17 +8,15 @@ import { IoHomeOutline } from 'react-icons/io5';
 const BADGE_CONFIG = {
   'no-accounts': {
     icon: FiUsers,
-    message:
-      "No accounts have been created yet. Click 'New Account' to get started.",
+    messageKey: 'emptyState.noAccounts',
   },
   'no-programs': {
     icon: HiOutlineMusicalNote,
-    message:
-      "No programs have been created yet. Click 'New Program' to get started.",
+    messageKey: 'emptyState.noPrograms',
   },
   'no-updates': {
     icon: FiBell,
-    message: 'No updates have been made yet.',
+    messageKey: 'emptyState.noUpdates',
   },
 };
 
@@ -25,6 +25,7 @@ const BADGE_CONFIG = {
  * @param {'no-accounts' | 'no-programs' | 'no-updates'} variant
  */
 export function EmptyStateBadge({ variant = 'no-updates' }) {
+  const { t } = useTranslation();
   const config = BADGE_CONFIG[variant];
   if (!config) return null;
 
@@ -39,7 +40,12 @@ export function EmptyStateBadge({ variant = 'no-updates' }) {
   };
 
   return (
-    <Center minH="60vh" w="100%" py={12} px={4}>
+    <Center
+      minH="60vh"
+      w="100%"
+      py={12}
+      px={4}
+    >
       <Box
         w={size}
         h={size}
@@ -48,7 +54,10 @@ export function EmptyStateBadge({ variant = 'no-updates' }) {
         bg="gray.100"
         overflow="hidden"
       >
-        <Center w="100%" h="100%">
+        <Center
+          w="100%"
+          h="100%"
+        >
           <VStack
             spacing={{ base: 4, md: 5 }}
             align="center"
@@ -70,7 +79,7 @@ export function EmptyStateBadge({ variant = 'no-updates' }) {
               wordBreak="break-word"
               overflowWrap="break-word"
             >
-              {config.message}
+              {t(config.messageKey)}
             </Text>
           </VStack>
         </Center>

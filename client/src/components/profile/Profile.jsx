@@ -2,17 +2,38 @@ import { useCallback, useEffect, useState } from 'react';
 
 import {
   Box,
+  Button,
+  Flex,
+  FormControl,
+  Grid,
+  GridItem,
   HStack,
+  IconButton,
   Image,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Select,
   Spinner,
   Text,
   useDisclosure,
+  useToast,
   VStack,
 } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import i18n, { APP_LOCALES, isAppLocale } from '@/i18n';
+import { useTranslation } from 'react-i18next';
+import {
+  FiCamera,
+  FiCheck,
+  FiEdit2,
+  FiEye,
+  FiEyeOff,
+  FiX,
+} from 'react-icons/fi';
 
 import { MediaUploadModal } from '../media/MediaUploadModal';
 
@@ -47,15 +68,41 @@ const fetchRegionData = async (backend, userId) => {
 };
 
 export const Profile = () => {
+  const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
   const { backend } = useBackendContext();
+  const toast = useToast();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [gcfUser, setGcfUser] = useState(null);
   const [roleSpecificData, setRoleSpecificData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    language: 'en',
+    bio: '',
+  });
+
+  const localeLabel = (code) => {
+    const c = isAppLocale(String(code)) ? code : 'en';
+    switch (c) {
+      case 'es':
+        return t('profile.langSpanish');
+      case 'fr':
+        return t('profile.langFrench');
+      case 'zh':
+        return t('profile.langChinese');
+      default:
+        return t('profile.langEnglish');
+    }
+  };
 
   const fetchUserData = useCallback(async () => {
     if (!currentUser?.uid) {
@@ -79,6 +126,19 @@ export const Profile = () => {
       }
 
       setGcfUser(userData);
+      const prefLang =
+        userData.preferredLanguage &&
+        isAppLocale(String(userData.preferredLanguage))
+          ? String(userData.preferredLanguage)
+          : 'en';
+      setFormData({
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || '',
+        email: currentUser?.email || '',
+        language: prefLang,
+        bio: userData.bio || '',
+      });
+
       if (role === 'Program Director') {
         const programData = await fetchProgramData(backend, userData.id);
         setRoleSpecificData(programData);
@@ -101,7 +161,6 @@ export const Profile = () => {
     if (!uploadedFiles?.length) return;
 
     const key = uploadedFiles[0].s3_key;
-    console.log('Uploading S3 Key:', key);
 
     try {
       const urlResponse = await backend.get(
@@ -119,6 +178,102 @@ export const Profile = () => {
     } catch (err) {
       console.error('Error saving profile picture:', err);
     }
+  };
+
+  const handleEdit = () => {
+    const prefLang =
+      gcfUser.preferredLanguage &&
+      isAppLocale(String(gcfUser.preferredLanguage))
+        ? String(gcfUser.preferredLanguage)
+        : 'en';
+    setFormData({
+      firstName: gcfUser.firstName || '',
+      lastName: gcfUser.lastName || '',
+      email: currentUser?.email || '',
+      language: prefLang,
+      bio: gcfUser.bio || '',
+      // TODO: add Bio column to gcf_user schema and add here
+    });
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setShowPassword(false);
+  };
+
+  const handleSave = async () => {
+    if (
+      !formData.firstName.trim() ||
+      !formData.lastName.trim() ||
+      !formData.email.trim()
+    ) {
+      toast({
+        title: t('profile.invalidInfoTitle'),
+        description: t('profile.invalidInfoDesc'),
+        status: 'error',
+        variant: 'subtle',
+        position: 'bottom-right',
+      });
+      return;
+    }
+
+    if (!currentUser?.uid) return;
+
+    try {
+      await Promise.all([
+        backend.patch(`/gcf-users/${currentUser.uid}/preferred-language`, {
+          preferredLanguage: formData.language,
+        }),
+        backend.put(`/gcf-users/${currentUser.uid}`, {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+        }),
+      ]);
+
+      await i18n.changeLanguage(formData.language);
+      setGcfUser((prev) => ({
+        ...prev,
+        preferredLanguage: formData.language,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      }));
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString(i18n.language || 'en', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZoneName: 'short',
+      });
+
+      toast({
+        title: t('profile.savedTitle'),
+        description: t('profile.savedDesc', { time: timeStr }),
+        status: 'success',
+        variant: 'subtle',
+        position: 'bottom-right',
+      });
+
+      setIsEditing(false);
+      setShowPassword(false);
+    } catch (err) {
+      console.error('Error saving profile language:', err);
+      toast({
+        title: t('signup.errorTitle'),
+        description:
+          err.response?.data?.error ??
+          err.message ??
+          t('updates.failedSaveDesc'),
+        status: 'error',
+        variant: 'subtle',
+        position: 'bottom-right',
+      });
+    }
+  };
+
+  const handleInputChange = (field) => (e) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   if (loading) {
@@ -139,91 +294,293 @@ export const Profile = () => {
       ? gcfUser.picture
       : DEFAULT_PROFILE_IMAGE;
 
-  const fullName =
-    `${gcfUser.firstName || ''} ${gcfUser.lastName || ''}`.trim() || 'User';
-  const email = currentUser?.email || '';
-
-  const profileData = [
-    { label: 'Email', value: email },
-    { label: 'Role', value: role || '' },
-  ];
-
-  if (role === 'Program Director' && roleSpecificData?.name) {
-    profileData.push({ label: 'Program', value: roleSpecificData.name });
-  } else if (role === 'Regional Director' && roleSpecificData?.name) {
-    profileData.push({ label: 'Region', value: roleSpecificData.name });
-  }
-
   return (
     <Box
-      h="100vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
+      p={10}
+      position="relative"
+      bg="gray.50"
+      minH="94vh"
+      mx={-4}
+      mt={0}
     >
+      {!isEditing && (
+        <Flex
+          justify="flex-end"
+          mb={4}
+        >
+          <Button
+            leftIcon={<FiEdit2 />}
+            bg="teal.500"
+            color="white"
+            borderRadius="md"
+            _hover={{ bg: 'teal.600' }}
+            onClick={handleEdit}
+          >
+            {t('profile.edit')}
+          </Button>
+        </Flex>
+      )}
+
+      {isEditing && <Box h="52px" />}
+
       <VStack
         spacing={8}
         align="center"
-        p={4}
         w="100%"
       >
-        <VStack
-          spacing={4}
-          align="center"
+        <Box
+          position="relative"
+          display="inline-block"
         >
           <Image
             src={profilePicture}
-            boxSize="300px"
+            boxSize="200px"
             borderRadius="full"
             fit="cover"
-            alt="Profile"
-            onClick={onOpen}
+            alt={t('accountForm.profileAlt')}
           />
-          <Text
-            fontSize="2xl"
-            fontWeight="bold"
-          >
-            {fullName}
-          </Text>
-        </VStack>
+          {isEditing && (
+            <IconButton
+              icon={<FiCamera />}
+              aria-label={t('profile.uploadPhoto')}
+              borderRadius="full"
+              size="sm"
+              bg="white"
+              boxShadow="md"
+              position="absolute"
+              bottom={2}
+              right={2}
+              onClick={onOpen}
+              _hover={{ bg: 'gray.100' }}
+            />
+          )}
+        </Box>
+
         <VStack
-          spacing="10px"
+          spacing={6}
           align="flex-start"
           w="100%"
-          maxW="624px"
+          maxW="700px"
         >
-          {profileData.map(({ label, value }) => (
-            <HStack
-              key={label}
-              spacing={40}
+          <Grid
+            templateColumns="repeat(2, 1fr)"
+            gap={8}
+            w="100%"
+          >
+            <GridItem>
+              <Text
+                fontWeight="bold"
+                mb={1}
+              >
+                {t('common.firstName')}
+              </Text>
+              {isEditing ? (
+                <Input
+                  value={formData.firstName}
+                  onChange={handleInputChange('firstName')}
+                />
+              ) : (
+                <Text>{gcfUser.firstName || ''}</Text>
+              )}
+            </GridItem>
+            <GridItem>
+              <Text
+                fontWeight="bold"
+                mb={1}
+              >
+                {t('common.lastName')}
+              </Text>
+              {isEditing ? (
+                <Input
+                  value={formData.lastName}
+                  onChange={handleInputChange('lastName')}
+                />
+              ) : (
+                <Text>{gcfUser.lastName || ''}</Text>
+              )}
+            </GridItem>
+          </Grid>
+
+          {role === 'Program Director' && (
+            <FormControl>
+              <Text
+                fontWeight="bold"
+                mb={1}
+              >
+                {t('profile.bio')}
+              </Text>
+              {isEditing ? (
+                <Input
+                  value={formData.bio || ''}
+                  onChange={handleInputChange('bio')}
+                />
+              ) : (
+                <Text>{gcfUser.bio || ''}</Text>
+              )}
+            </FormControl>
+          )}
+
+          {/* Email */}
+          <FormControl>
+            <Text
+              fontWeight="bold"
+              mb={1}
             >
+              {t('common.email')}
+            </Text>
+            {isEditing ? (
+              <Input
+                value={formData.email}
+                onChange={handleInputChange('email')}
+                type="email"
+              />
+            ) : (
+              <Text>{currentUser?.email || ''}</Text>
+            )}
+          </FormControl>
+
+          {/* Password */}
+          <FormControl>
+            <Text
+              fontWeight="bold"
+              mb={1}
+            >
+              {t('common.password')}
+            </Text>
+            {isEditing ? (
+              <>
+                <InputGroup>
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    value="********"
+                    isReadOnly
+                  />
+                  <InputRightElement>
+                    <IconButton
+                      icon={showPassword ? <FiEye /> : <FiEyeOff />}
+                      aria-label={t('profile.togglePassword')}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowPassword(!showPassword)}
+                    />
+                  </InputRightElement>
+                </InputGroup>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  mt={1}
+                  cursor="pointer"
+                  _hover={{ textDecoration: 'underline' }}
+                >
+                  {t('profile.changePassword')}
+                </Text>
+              </>
+            ) : (
+              <HStack>
+                <Text>********</Text>
+                {(role === 'Admin' || role === 'Super Admin') && (
+                  <IconButton
+                    icon={<FiEyeOff />}
+                    aria-label={t('profile.togglePassword')}
+                    variant="ghost"
+                    size="sm"
+                  />
+                )}
+              </HStack>
+            )}
+          </FormControl>
+
+          {role === 'Regional Director' && roleSpecificData?.name && (
+            <FormControl>
               <Text
-                w="80px"
-                fontSize="lg"
-                fontWeight="medium"
+                fontWeight="bold"
+                mb={1}
               >
-                {label}
+                {t('common.region')}
               </Text>
+              {isEditing ? (
+                <Input
+                  value={roleSpecificData.name}
+                  isReadOnly
+                />
+              ) : (
+                <Text>{roleSpecificData.name}</Text>
+              )}
+            </FormControl>
+          )}
+
+          {role === 'Program Director' && roleSpecificData?.name && (
+            <FormControl>
               <Text
-                bg="#D9D9D9"
-                w="504px"
-                h="47px"
-                pt="6px"
-                pr="86px"
-                pb="6px"
-                pl="86px"
-                borderRadius="35px"
-                textAlign="center"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
+                fontWeight="bold"
+                mb={1}
               >
-                {value}
+                {t('common.program')}
               </Text>
-            </HStack>
-          ))}
+              {isEditing ? (
+                <Input
+                  value={roleSpecificData.name}
+                  isReadOnly
+                />
+              ) : (
+                <Text>{roleSpecificData.name}</Text>
+              )}
+            </FormControl>
+          )}
+
+          <FormControl>
+            <Text
+              fontWeight="bold"
+              mb={1}
+            >
+              {t('profile.preferredLanguage')}
+            </Text>
+            {isEditing ? (
+              <Select
+                value={formData.language}
+                onChange={handleInputChange('language')}
+              >
+                {APP_LOCALES.map((code) => (
+                  <option
+                    key={code}
+                    value={code}
+                  >
+                    {localeLabel(code)}
+                  </option>
+                ))}
+              </Select>
+            ) : (
+              <Text>{localeLabel(gcfUser?.preferredLanguage)}</Text>
+            )}
+          </FormControl>
         </VStack>
       </VStack>
+
+      {isEditing && (
+        <Flex
+          justify="flex-end"
+          mt={8}
+          gap={3}
+        >
+          <Button
+            leftIcon={<FiX />}
+            variant="outline"
+            onClick={handleCancel}
+          >
+            {t('common.cancel')}
+          </Button>
+          <Button
+            leftIcon={<FiCheck />}
+            bg="teal.500"
+            color="white"
+            _hover={{ bg: 'teal.600' }}
+            onClick={handleSave}
+          >
+            {t('common.save')}
+          </Button>
+        </Flex>
+      )}
+
       <MediaUploadModal
         isOpen={isOpen}
         onClose={onClose}

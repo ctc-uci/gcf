@@ -205,8 +205,8 @@ mediaChangeRouter.get('/:userId/media-updates', async (req, res) => {
 
     const role = roleResult[0].role;
 
-    if (role !== 'Admin' && role !== 'Regional Director') {
-      return res.status(403).send('Access denied');
+    if (role !== "Super Admin" && role !== "Admin" && role !== "Regional Director") {
+      return res.status(403).send("Access denied");
     }
 
     let filterJoin = '';
@@ -232,7 +232,7 @@ mediaChangeRouter.get('/:userId/media-updates', async (req, res) => {
         FROM program_update
         INNER JOIN media_change ON media_change.update_id = program_update.id
         INNER JOIN program ON program_update.program_id = program.id
-        LEFT JOIN gcf_user AS creator ON creator.id = program.created_by
+        LEFT JOIN gcf_user AS creator ON creator.id = program_update.created_by
         ${filterJoin}
         ORDER BY program_update.id, media_change.id
       ) sub
@@ -246,5 +246,20 @@ mediaChangeRouter.get('/:userId/media-updates', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
+mediaChangeRouter.get('/update/:updateId', async (req, res) => {
+  try {
+    const { updateId } = req.params;
+    const data = await db.query (
+      `SELECT * FROM media_change WHERE update_id = $1`,
+      [updateId]
+    );
+
+    res.status(200).json(keysToCamel(data))
+  } catch (err){
+    console.error(err);
+    res.status(500).send('Internal Server Error')
+  }
+})
 
 export { mediaChangeRouter };
