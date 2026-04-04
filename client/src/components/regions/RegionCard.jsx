@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import 'flag-icons/css/flag-icons.min.css';
+
 import {
   Box,
   Button,
@@ -14,6 +16,8 @@ import {
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { GrEdit } from 'react-icons/gr';
 import { MdAccountCircle } from 'react-icons/md';
+
+import { isoCodeToFlagIconCode } from '../../utils/isoCodeToFlagIconCode';
 
 export const RegionCard = ({ region, onEdit, countries }) => {
   const { backend } = useBackendContext();
@@ -94,9 +98,23 @@ export const RegionCard = ({ region, onEdit, countries }) => {
           {countries.length === 0 ? (
             <Text>No countries assigned</Text>
           ) : (
-            countries.map((country) => (
-              <Text key={country.id}>{country.name}</Text>
-            ))
+            countries.map((country) => {
+              const flagCode = isoCodeToFlagIconCode(country.isoCode);
+              return (
+                <Text key={country.id}>
+                  {flagCode ? (
+                    <>
+                      <span
+                        className={`fi fi-${flagCode}`}
+                        aria-hidden="true"
+                      />
+                      {'  '}
+                    </>
+                  ) : null}
+                  {country.name}
+                </Text>
+              );
+            })
           )}
         </Box>
       </CardBody>

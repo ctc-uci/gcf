@@ -52,6 +52,7 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '../../utils/downloadCsv';
+import { isoCodeToFlagIconCode } from '../../utils/isoCodeToFlagIconCode';
 import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
 import CardView from './CardView';
@@ -114,9 +115,10 @@ function mapRdRow(row) {
     title: row.programName,
     status: row.programStatus,
     launchDate: row.programLaunchDate,
-    location: row.programLocation && row.regionName
-      ? `${row.programLocation}, ${row.regionName}`
-      : row.programLocation ?? row.regionName ?? '',
+    location:
+      row.programLocation && row.regionName
+        ? `${row.programLocation}, ${row.regionName}`
+        : (row.programLocation ?? row.regionName ?? ''),
     country: row.countryId,
     languages: row.languages,
     isoCode: row.isoCode,
@@ -143,6 +145,7 @@ const MAP_BY_ROLE = {
 
 function ExpandableRow({ p, onEdit }) {
   const { isOpen, onToggle } = useDisclosure();
+  const flagCode = isoCodeToFlagIconCode(p.isoCode);
 
   return (
     <>
@@ -155,8 +158,15 @@ function ExpandableRow({ p, onEdit }) {
         <Td>{p.status}</Td>
         <Td>{p.launchDate}</Td>
         <Td>
-          <span className={`fi fi-${p.isoCode?.toLowerCase()}`}></span>
-          {'  '}
+          {flagCode ? (
+            <>
+              <span
+                className={`fi fi-${flagCode}`}
+                aria-hidden="true"
+              />
+              {'  '}
+            </>
+          ) : null}
           {p.location}
         </Td>
         <Td>{p.students}</Td>

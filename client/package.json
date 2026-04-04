@@ -25,6 +25,7 @@
     "axios": "^1.13.5",
     "firebase": "10.12.5",
     "flag-icons": "^7.5.0",
+    "i18n-iso-countries": "^7.13.0",
     "framer-motion": "^11.3.27",
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
