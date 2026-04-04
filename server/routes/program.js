@@ -186,7 +186,7 @@ programRouter.put('/:id', async (req, res) => {
         primary_language = COALESCE($7, primary_language),
         partner_org = COALESCE($8, partner_org),
         status = COALESCE($9, status),
-        launch_date = COALESCE($10, launch_date)
+        launch_date = COALESCE($10, launch_date),
         languages = COALESCE($11, languages)
       WHERE id = $12
       RETURNING *;
