@@ -49,6 +49,34 @@ programRouter.get('/:id', async (req, res) => {
   }
 });
 
+/** Cumulative enrollment_change and graduated_change totals for a program (via program_update). */
+programRouter.get('/:id/enrollment-aggregates', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await db.query(
+      `SELECT
+         COALESCE(SUM(ec.enrollment_change), 0) AS sum_enrollment,
+         COALESCE(SUM(ec.graduated_change), 0) AS sum_graduated
+       FROM enrollment_change ec
+       INNER JOIN program_update pu ON pu.id = ec.update_id
+       WHERE pu.program_id = $1`,
+      [id]
+    );
+
+    const row = result[0] ?? { sum_enrollment: 0, sum_graduated: 0 };
+    res.status(200).json(
+      keysToCamel({
+        sumEnrollment: row.sum_enrollment,
+        sumGraduated: row.sum_graduated,
+      })
+    );
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 programRouter.get('/city/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -261,7 +289,8 @@ programRouter.get('/:id/regional-directors', async (req, res) => {
       SELECT 
         u.id AS user_id,
         u.first_name,
-        u.last_name
+        u.last_name,
+        u.picture
       FROM program p
       JOIN country c ON p.country = c.id
       JOIN regional_director rd ON c.region_id = rd.region_id
@@ -279,6 +308,7 @@ programRouter.get('/:id/regional-directors', async (req, res) => {
       userId: row.user_id,
       firstName: row.first_name,
       lastName: row.last_name,
+      picture: row.picture,
     }));
 
     res.status(200).json(regional_directors);
@@ -404,7 +434,8 @@ programRouter.get('/:id/program-directors', async (req, res) => {
       SELECT 
         u.id AS user_id,
         u.first_name,
-        u.last_name
+        u.last_name,
+        u.picture
       FROM program_director pd
       JOIN gcf_user u ON pd.user_id = u.id
       WHERE pd.program_id = $1
@@ -416,6 +447,7 @@ programRouter.get('/:id/program-directors', async (req, res) => {
       userId: row.user_id,
       firstName: row.first_name,
       lastName: row.last_name,
+      picture: row.picture,
     }));
 
     res.status(200).json(directors);

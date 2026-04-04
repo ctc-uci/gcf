@@ -35,7 +35,8 @@ export function SearchInput({
   const exactMatch = items.some(
     (inst) => (inst.name || '').toLowerCase() === searchLower
   );
-  const canAddNew = searchLower.length > 0 && !exactMatch;
+  const canAddNew =
+    typeof onCreateNew === 'function' && searchLower.length > 0 && !exactMatch;
 
   const handleSelectExisting = (instrument) => {
     onSelectExisting?.(instrument);

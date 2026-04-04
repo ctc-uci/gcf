@@ -158,7 +158,7 @@ directorRouter.get('/', async (req, res) => {
 directorRouter.get('/program-director-names', async (req, res) => {
   try {
     const director_names = await db.query(
-      `SELECT pd.user_id, gu.first_name, gu.last_name
+      `SELECT pd.user_id, gu.first_name, gu.last_name, gu.picture
              FROM gcf_user as gu
                 INNER JOIN program_director AS pd ON pd.user_id = gu.id
              ORDER BY gu.first_name ASC, gu.last_name ASC`
