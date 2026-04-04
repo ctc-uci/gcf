@@ -43,6 +43,8 @@ import {
 
 import 'flag-icons/css/flag-icons.min.css';
 
+import { GetCity } from 'react-country-state-city';
+
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import {
@@ -64,22 +66,42 @@ const getRouteByRole = (role, userId) => {
   return routes[role];
 };
 
+async function getCityNameByCode(countryCode, stateCode, cityCode) {
+  const countryId = parseInt(countryCode);
+  const stateId = parseInt(stateCode);
+  const cityId = parseInt(cityCode);
+
+  const cities = await GetCity(countryId, stateId);
+  console.log('Available cities:', cities);
+  console.log('Got cities for:', { countryCode, stateCode, cityCode });
+  if (!cities || !Array.isArray(cities)) {
+    return '';
+  }
+  const city = cities.find((c) => c.id === cityId);
+  return city ? city.name : '';
+}
 function mapAdminRow(row) {
+  const location = row.cityName
+    ? `${row.cityName}, ${row.countryName}`
+    : row.countryName;
+
   return {
     id: row.id,
     title: row.title ?? row.name,
     status: row.status,
     launchDate: row.launchDate,
-    location: row.countryName + ', ' + row.regionName,
+    location: location,
     country: row.country,
-    iso_code: row.isoCode,
+    isoCode: row.isoCode,
     city: row.city,
     state: row.state,
     students: row.students ?? 0,
+    languages: row.languages,
     instrumentsMap: row.instrumentsMap,
     totalInstruments: row.instruments ?? 0,
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
+    partnerOrgName: row.partnerOrgName,
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
     media: row.media,
@@ -94,7 +116,8 @@ function mapRdRow(row) {
     launchDate: row.programLaunchDate,
     location: row.programLocation + ', ' + row.regionName,
     country: row.countryId,
-    iso_code: row.isoCode,
+    languages: row.languages,
+    isoCode: row.isoCode,
     city: row.city,
     state: row.state,
     regionId: row.regionId,
@@ -103,6 +126,7 @@ function mapRdRow(row) {
     totalInstruments: row.totalInstruments ?? 0,
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
+    partnerOrgName: row.partnerOrgName,
     playlists: row.playlists,
     primaryLanguage: row.primaryLanguage,
     media: row.media,
@@ -129,7 +153,7 @@ function ExpandableRow({ p, onEdit }) {
         <Td>{p.status}</Td>
         <Td>{p.launchDate}</Td>
         <Td>
-          <span class={`fi fi-${p.iso_code?.toLowerCase()}`}></span>
+          <span className={`fi fi-${p.isoCode?.toLowerCase()}`}></span>
           {'  '}
           {p.location}
         </Td>
@@ -332,7 +356,7 @@ function ProgramDisplay({
       'Program Directors',
       'Curriculum Links',
     ];
-    console.log(p.instrumentsMap);
+
     const rows = (tableData || []).map((p) => [
       escapeCsvValue(p.title),
       escapeCsvValue(p.status),
@@ -691,12 +715,18 @@ function ProgramTable({ onStatsRefresh }) {
         rows.map(async (row) => {
           // TODO: make this more efficient with lazy loading
           const programId = row.id ?? row.programId;
+          const cityName = await getCityNameByCode(
+            row.country,
+            row.state,
+            row.city
+          );
           const [
             playlists,
             programDirectors,
             regionalDirectors,
             media,
             instrumentsMap,
+            partnerOrgName,
           ] = await Promise.all([
             backend.get(`/program/${programId}/playlists`),
             backend
@@ -711,15 +741,20 @@ function ProgramTable({ onStatsRefresh }) {
             backend
               .get(`/program/${programId}/instruments`)
               .catch(() => ({ data: [] })),
+            backend
+              .get(`/program/${programId}/partner-organization`)
+              .catch(() => ({ data })),
           ]);
 
           return {
             ...row,
+            cityName: cityName,
             playlists: playlists.data,
             programDirectors: programDirectors?.data || [],
             regionalDirectors: regionalDirectors?.data || [],
             media: media?.data || [],
             instrumentsMap: instrumentsMap?.data || [],
+            partnerOrgName: partnerOrgName?.data || [],
           };
         })
       );
