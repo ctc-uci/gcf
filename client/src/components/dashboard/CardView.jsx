@@ -171,6 +171,7 @@ const BackCardView = ({ p, onClick }) => {
                 <span key={`${d.name}-${idx}`}>
                   {d.link ? (
                     <Link
+                      onClick={(e) => e.stopPropagation()}
                       href={d.link}
                       isExternal
                       color="teal.500"
@@ -281,7 +282,7 @@ const FrontCardView = ({ p, openEditForm, onClick }) => {
             icon={<EditIcon />}
             size="sm"
             variant="ghost"
-            onClick={() => openEditForm(p)}
+            onClick={(e) => { e.stopPropagation(); openEditForm(p); }}
             bg="#808080"
             borderRadius="full"
             color="white"

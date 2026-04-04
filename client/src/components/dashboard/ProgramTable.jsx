@@ -114,7 +114,9 @@ function mapRdRow(row) {
     title: row.programName,
     status: row.programStatus,
     launchDate: row.programLaunchDate,
-    location: row.programLocation + ', ' + row.regionName,
+    location: row.programLocation && row.regionName
+      ? `${row.programLocation}, ${row.regionName}`
+      : row.programLocation ?? row.regionName ?? '',
     country: row.countryId,
     languages: row.languages,
     isoCode: row.isoCode,
@@ -747,7 +749,7 @@ function ProgramTable({ onStatsRefresh }) {
               .catch(() => ({ data: [] })),
             backend
               .get(`/program/${programId}/partner-organization`)
-              .catch(() => ({ data })),
+              .catch(() => ({ data: [] })),
           ]);
 
           return {
