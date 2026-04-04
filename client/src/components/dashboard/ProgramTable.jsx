@@ -72,8 +72,7 @@ async function getCityNameByCode(countryCode, stateCode, cityCode) {
   const cityId = parseInt(cityCode);
 
   const cities = await GetCity(countryId, stateId);
-  console.log('Available cities:', cities);
-  console.log('Got cities for:', { countryCode, stateCode, cityCode });
+
   if (!cities || !Array.isArray(cities)) {
     return '';
   }
