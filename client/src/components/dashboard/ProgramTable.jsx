@@ -92,6 +92,7 @@ function mapAdminRow(row) {
     launchDate: row.launchDate,
     location: location,
     country: row.country,
+    regionName: row.regionName,
     isoCode: row.isoCode,
     city: row.city,
     state: row.state,
@@ -437,6 +438,8 @@ function ProgramDisplay({
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;
 
+  const [flippedId, setFlippedId] = useState(null);
+
   if (!getRouteByRole(role, userId)) return null;
 
   return (
@@ -493,7 +496,7 @@ function ProgramDisplay({
               aria-label="menu"
               icon={<HamburgerIcon />}
               size="sm"
-              variant="ghost"
+              variant={isCardView ? 'ghost' : 'solid'}
               onClick={() => setIsCardView(false)}
             />
             <Divider
@@ -504,7 +507,7 @@ function ProgramDisplay({
               aria-label="search"
               icon={<HiOutlineSquares2X2 />}
               size="sm"
-              variant="ghost"
+              variant={isCardView ? 'solid' : 'ghost'}
               onClick={() => setIsCardView(true)}
             />
             <Popover>
@@ -657,6 +660,8 @@ function ProgramDisplay({
           ) : (
             <CardView
               data={tableData}
+              flippedId={flippedId}
+              setFlippedId={setFlippedId}
               openEditForm={openEditForm}
             />
           )}
