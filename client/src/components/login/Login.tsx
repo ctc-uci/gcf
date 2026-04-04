@@ -115,7 +115,7 @@ export const Login = () => {
         /* keep locale from login screen */
       }
 
-      navigate('/dashboard/1');
+      navigate('/dashboard/');
     } catch (err: unknown) {
       const errorCode =
         err && typeof err === 'object' && 'code' in err
