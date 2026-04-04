@@ -1,6 +1,9 @@
 import { Badge } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
+
 export const PDStatusBadge = ({ status }) => {
+  const { t } = useTranslation();
   const s = (status || '').toLowerCase();
   let bg = 'gray.100';
   let color = 'gray.700';
@@ -27,7 +30,7 @@ export const PDStatusBadge = ({ status }) => {
       fontWeight="500"
       textTransform="capitalize"
     >
-      {status || 'Pending'}
+      {status || t('common.pending')}
     </Badge>
   );
 };

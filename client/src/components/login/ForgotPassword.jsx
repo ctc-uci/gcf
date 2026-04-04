@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 
 import {
   Box,
@@ -15,16 +15,21 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { MdOutlineSubdirectoryArrowRight } from 'react-icons/md';
 import { z } from 'zod';
 
 import { BackendContext } from '../../contexts/BackendContext';
 
-const forgotSchema = z.object({
-  email: z.string().email('Incorrect Email'),
-});
-
 export const ForgotPassword = ({ setIsForgot }) => {
+  const { t } = useTranslation();
+  const forgotSchema = useMemo(
+    () =>
+      z.object({
+        email: z.string().email(t('validation.incorrectEmail')),
+      }),
+    [t]
+  );
   const [, setSubmitted] = useState(false);
   const { backend } = useContext(BackendContext);
   const [errorMessage, setErrorMessage] = useState('');
@@ -48,8 +53,8 @@ export const ForgotPassword = ({ setIsForgot }) => {
       await sendPasswordResetEmail(auth, email);
       setSubmitted(true);
       toast({
-        title: 'Email sent successfully!',
-        description: 'Please check your email',
+        title: t('forgotPassword.emailSentTitle'),
+        description: t('forgotPassword.emailSentDesc'),
         status: 'success',
         duration: 5000,
         isClosable: true,
@@ -58,10 +63,10 @@ export const ForgotPassword = ({ setIsForgot }) => {
 
       setIsForgot(false);
     } catch {
-      setErrorMessage('Invalid Email');
+      setErrorMessage(t('forgotPassword.invalidEmail'));
       toast({
-        title: 'Email not found!',
-        description: 'Please check your email address',
+        title: t('forgotPassword.emailNotFoundTitle'),
+        description: t('forgotPassword.emailNotFoundDesc'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -88,14 +93,14 @@ export const ForgotPassword = ({ setIsForgot }) => {
         fontSize="3xl"
         mb={6}
       >
-        Forgot Password?
+        {t('forgotPassword.title')}
       </Heading>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={5}>
           <FormControl isInvalid={!!errors.email || !!errorMessage}>
-            <FormLabel fontWeight="bold">Email</FormLabel>
+            <FormLabel fontWeight="bold">{t('common.email')}</FormLabel>
             <Input
-              placeholder="Enter your email"
+              placeholder={t('login.emailPlaceholder')}
               type="email"
               size="lg"
               autoComplete="email"
@@ -119,7 +124,7 @@ export const ForgotPassword = ({ setIsForgot }) => {
             w="full"
             _hover={{ bg: 'gray.800' }}
           >
-            Submit
+            {t('common.submit')}
           </Button>
         </Stack>
       </form>

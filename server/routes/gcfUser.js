@@ -1,6 +1,8 @@
+import { randomBytes } from 'crypto';
+
 import { keysToCamel } from '@/common/utils';
 import express from 'express';
-import { randomBytes } from 'crypto';
+
 import { admin } from '../config/firebase';
 import { db } from '../db/db-pgp';
 
@@ -330,6 +332,53 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');
+  }
+});
+
+const ALLOWED_PREFERRED_LANGUAGES = new Set(['en', 'es', 'fr', 'zh']);
+
+function normalizePreferredLanguage(raw) {
+  if (raw == null) return '';
+  const s = String(raw).trim().toLowerCase();
+  // custom filtering here if needed
+  return s;
+}
+
+gcfUserRouter.patch('/:id/preferred-language', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ error: 'Invalid user id' });
+    }
+
+    const tokenUid = res.locals.decodedToken?.uid;
+    if (tokenUid != null && tokenUid !== id) {
+      return res.status(403).json({
+        error: "Cannot change another user's language preference",
+      });
+    }
+
+    const lang = normalizePreferredLanguage(
+      req.body.preferredLanguage ?? req.body.preferred_language
+    );
+    if (!ALLOWED_PREFERRED_LANGUAGES.has(lang)) {
+      return res.status(400).json({
+        error: 'Invalid preferredLanguage',
+        allowed: [...ALLOWED_PREFERRED_LANGUAGES],
+      });
+    }
+
+    const updated = await db.query(
+      `UPDATE gcf_user SET preferred_language = $1 WHERE id = $2 RETURNING *`,
+      [lang, id]
+    );
+    if (updated.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json(keysToCamel(updated[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 

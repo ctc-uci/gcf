@@ -21,6 +21,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 const DiffField = ({ label, oldValue, newValue }) => {
@@ -56,6 +57,7 @@ const DiffField = ({ label, oldValue, newValue }) => {
 };
 
 const RoleDiffField = ({ oldRole, newRole }) => {
+  const { t } = useTranslation();
   const hasChange = oldRole && newRole && oldRole !== newRole;
 
   return (
@@ -66,7 +68,7 @@ const RoleDiffField = ({ oldRole, newRole }) => {
         fontWeight="500"
         mb={1}
       >
-        Role
+        {t('common.role')}
       </Text>
       <HStack spacing={2}>
         {hasChange && oldRole && (
@@ -96,6 +98,7 @@ const RoleDiffField = ({ oldRole, newRole }) => {
 };
 
 export const AccountUpdateDrawer = ({ update, onClose }) => {
+  const { t } = useTranslation();
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   if (!update) return null;
@@ -122,7 +125,11 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
         >
           <IconButton
             icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
-            aria-label={isFullScreen ? 'Minimize' : 'Expand'}
+            aria-label={
+              isFullScreen
+                ? t('fullscreenFlyout.minimize')
+                : t('fullscreenFlyout.expand')
+            }
             variant="ghost"
             size="sm"
             onClick={() => setIsFullScreen(!isFullScreen)}
@@ -140,7 +147,7 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
             fontWeight="600"
             textAlign="center"
           >
-            Account Update
+            {t('common.accountUpdate')}
           </Text>
           <Divider mt={3} />
         </Box>
@@ -162,7 +169,7 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
                   fontWeight="500"
                   mb={2}
                 >
-                  Profile Picture
+                  {t('common.profilePicture')}
                 </Text>
                 <HStack spacing={4}>
                   {oldPicture && (
@@ -171,7 +178,7 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
                       boxSize="120px"
                       borderRadius="full"
                       objectFit="cover"
-                      alt="Old profile"
+                      alt={t('common.oldProfile')}
                     />
                   )}
                   {newPicture && (
@@ -180,7 +187,7 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
                       boxSize="120px"
                       borderRadius="full"
                       objectFit="cover"
-                      alt="New profile"
+                      alt={t('common.newProfile')}
                     />
                   )}
                 </HStack>
@@ -189,22 +196,22 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
 
             {/* Diff Fields */}
             <DiffField
-              label="First Name"
+              label={t('common.firstName')}
               oldValue={changes.oldFirstName}
               newValue={changes.newFirstName}
             />
             <DiffField
-              label="Last Name"
+              label={t('common.lastName')}
               oldValue={changes.oldLastName}
               newValue={changes.newLastName}
             />
             <DiffField
-              label="Email"
+              label={t('common.email')}
               oldValue={changes.oldEmail}
               newValue={changes.newEmail}
             />
             <DiffField
-              label="Password"
+              label={t('common.password')}
               oldValue={changes.oldPassword}
               newValue={changes.newPassword}
             />
@@ -215,24 +222,24 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
             />
 
             <DiffField
-              label="Program"
+              label={t('common.program')}
               oldValue={changes.oldProgram}
               newValue={changes.newProgram}
             />
             <DiffField
-              label="Region"
+              label={t('common.region')}
               oldValue={changes.oldRegion}
               newValue={changes.newRegion}
             />
             <DiffField
-              label="Biography"
+              label={t('common.biography')}
               oldValue={changes.oldBio}
               newValue={changes.newBio}
             />
 
             <Divider />
 
-            <Heading size="md">Edit Updates</Heading>
+            <Heading size="md">{t('common.editUpdates')}</Heading>
           </VStack>
         </DrawerBody>
 
@@ -253,7 +260,7 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
             variant="outline"
             onClick={onClose}
           >
-            Keep as Unresolved
+            {t('common.keepUnresolved')}
           </Button>
           <Button
             bg="teal.500"
@@ -261,7 +268,7 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
             _hover={{ bg: 'teal.600' }}
             onClick={onClose}
           >
-            Save & Mark as Resolved
+            {t('common.saveMarkResolved')}
           </Button>
         </Flex>
       </DrawerContent>

@@ -23,8 +23,16 @@ import {
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
+import {
+  FiMaximize2,
+  FiMinimize2,
+  FiMusic,
+  FiTrash2,
+  FiUser,
+} from 'react-icons/fi';
+
 import { FaUser } from 'react-icons/fa6';
-import { FiMaximize2, FiMinimize2, FiTrash2 } from 'react-icons/fi';
 import { IoMusicalNoteSharp } from 'react-icons/io5';
 
 import { MediaUploadModal } from '../../../media/MediaUploadModal';
@@ -132,6 +140,7 @@ export const CreateUpdateDrawer = ({
   editVariant = null,
   editInstrumentName = null,
 }) => {
+  const { t } = useTranslation();
   const btnRef = useRef(null);
   const { currentUser } = useAuthContext();
   const { backend } = useBackendContext();
@@ -376,9 +385,8 @@ export const CreateUpdateDrawer = ({
   const handleSave = async () => {
     if (!programId) {
       toast({
-        title: 'Cannot save update',
-        description:
-          'Your program could not be loaded. Refresh the page and try again.',
+        title: t('updates.cannotSaveTitle'),
+        description: t('updates.cannotSaveDesc'),
         status: 'error',
         duration: 7000,
         isClosable: true,
@@ -602,8 +610,8 @@ export const CreateUpdateDrawer = ({
       });
 
       toast({
-        title: 'New Update Created',
-        description: `The updates to your program have been saved at ${timeStr}.`,
+        title: t('updates.createdTitle'),
+        description: t('updates.createdDesc', { time: timeStr }),
         status: 'info',
         duration: 5000,
         isClosable: true,
@@ -615,8 +623,9 @@ export const CreateUpdateDrawer = ({
     } catch (error) {
       console.error('Error saving program update:', error);
       toast({
-        title: isEditMode ? 'Failed to save update' : 'Failed to create update',
-        description: error?.response?.data?.message ?? 'Something went wrong.',
+        title: t('updates.failedCreateTitle'),
+        description:
+          error?.response?.data?.message ?? t('updates.failedSaveDesc'),
         status: 'error',
         duration: 7000,
         isClosable: true,
@@ -652,7 +661,11 @@ export const CreateUpdateDrawer = ({
           >
             <IconButton
               icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
-              aria-label={isFullScreen ? 'Minimize' : 'Expand'}
+              aria-label={
+                isFullScreen
+                  ? t('fullscreenFlyout.minimize')
+                  : t('fullscreenFlyout.expand')
+              }
               variant="ghost"
               size="sm"
               onClick={() => setIsFullScreen(!isFullScreen)}
@@ -669,7 +682,7 @@ export const CreateUpdateDrawer = ({
               fontWeight="600"
               textAlign="center"
             >
-              {isEditMode ? 'Edit Update' : 'Create New Update'}
+              {isEditMode ? 'Edit Update' : t('updates.createDrawerTitle')}
             </Text>
             <Divider mt={3} />
           </Box>
@@ -700,7 +713,7 @@ export const CreateUpdateDrawer = ({
                 >
                   {isEditMode
                     ? 'Update type'
-                    : 'What type of update are you submitting today?'}
+                    : t('updates.createTypeQuestion')}
                 </Heading>
                 {isEditMode ? (
                   <Text
@@ -718,13 +731,13 @@ export const CreateUpdateDrawer = ({
                   >
                     <UpdateTypeOptionCard
                       icon={IoMusicalNoteSharp}
-                      label="Instrument Update"
+                      label={t('updates.instrumentUpdateCard')}
                       isSelected={updateType === 'instrument'}
                       onSelect={() => setUpdateType('instrument')}
                     />
                     <UpdateTypeOptionCard
                       icon={FaUser}
-                      label="Student Update"
+                      label={t('updates.studentUpdateCard')}
                       isSelected={updateType === 'student'}
                       onSelect={() => setUpdateType('student')}
                     />
@@ -790,7 +803,7 @@ export const CreateUpdateDrawer = ({
                   boxSize={4}
                   mr={1}
                 />{' '}
-                Delete
+                 {t('updates.deleteDraft')}
               </Button>
             ) : (
               <Box aria-hidden />
@@ -801,7 +814,7 @@ export const CreateUpdateDrawer = ({
                 onClick={handleClose}
                 isDisabled={isLoading || isEditLoading}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 bg="teal.500"
@@ -810,7 +823,7 @@ export const CreateUpdateDrawer = ({
                 onClick={handleSave}
                 isLoading={isLoading || isEditLoading}
               >
-                Save
+                {t('common.save')}
               </Button>
             </HStack>
           </Flex>

@@ -17,9 +17,11 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { useTranslation } from 'react-i18next';
 import { MdOutlineFileDownload } from 'react-icons/md';
 
-const StatBox = ({ label, number }) => {
+const StatBox = ({ labelKey, number }) => {
+  const { t } = useTranslation();
   return (
     <Box
       flex="1"
@@ -37,7 +39,7 @@ const StatBox = ({ label, number }) => {
         mb={4}
         color="whiteAlpha.900"
       >
-        {label}
+        {t(labelKey)}
       </Box>
       <Box
         fontSize="4xl"
@@ -58,43 +60,46 @@ const getRouteByRole = (role, userId) => {
   return routes[role];
 };
 
-const STAT_LABELS_BY_ROLE = {
+const STAT_LABEL_KEYS_BY_ROLE = {
   Admin: [
-    { label: 'Programs', number: 0 },
-    { label: 'Students', number: 0 },
-    { label: 'Instruments', number: 0 },
+    { labelKey: 'statistics.programs', number: 0 },
+    { labelKey: 'statistics.students', number: 0 },
+    { labelKey: 'statistics.instruments', number: 0 },
   ],
   'Regional Director': [
-    { label: 'Programs', number: 0 },
-    { label: 'Students', number: 0 },
-    { label: 'Instruments', number: 0 },
+    { labelKey: 'statistics.programs', number: 0 },
+    { labelKey: 'statistics.students', number: 0 },
+    { labelKey: 'statistics.instruments', number: 0 },
   ],
   'Program Director': [
-    { label: 'Current Enrollment', number: 0 },
-    { label: 'Instruments Donated', number: 0 },
+    { labelKey: 'statistics.currentEnrollment', number: 0 },
+    { labelKey: 'statistics.instrumentsDonated', number: 0 },
   ],
 };
 
 function statsFromAdminData(data) {
   return [
-    { label: 'Programs', number: data?.totalPrograms ?? 0 },
-    { label: 'Students', number: data?.totalStudents ?? 0 },
-    { label: 'Instruments', number: data?.totalInstruments ?? 0 },
+    { labelKey: 'statistics.programs', number: data?.totalPrograms ?? 0 },
+    { labelKey: 'statistics.students', number: data?.totalStudents ?? 0 },
+    { labelKey: 'statistics.instruments', number: data?.totalInstruments ?? 0 },
   ];
 }
 
 function statsFromRdData(data) {
   return [
-    { label: 'Programs', number: data?.totalPrograms ?? 0 },
-    { label: 'Students', number: data?.totalStudents ?? 0 },
-    { label: 'Instruments', number: data?.totalInstruments ?? 0 },
+    { labelKey: 'statistics.programs', number: data?.totalPrograms ?? 0 },
+    { labelKey: 'statistics.students', number: data?.totalStudents ?? 0 },
+    { labelKey: 'statistics.instruments', number: data?.totalInstruments ?? 0 },
   ];
 }
 
 function statsFromPdData(data) {
   return [
-    { label: 'Current Enrollment', number: data?.students ?? 0 },
-    { label: 'Instruments Donated', number: data?.instruments ?? 0 },
+    { labelKey: 'statistics.currentEnrollment', number: data?.students ?? 0 },
+    {
+      labelKey: 'statistics.instrumentsDonated',
+      number: data?.instruments ?? 0,
+    },
   ];
 }
 
@@ -105,16 +110,18 @@ const STATS_FROM_RESPONSE = {
 };
 
 const StatisticsSummary = ({ refreshTrigger = 0 }) => {
+  const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { role: role, loading: roleLoading } = useRoleContext();
   const { backend } = useBackendContext();
-  const initialStats = STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.Admin;
+  const initialStats =
+    STAT_LABEL_KEYS_BY_ROLE[role] ?? STAT_LABEL_KEYS_BY_ROLE.Admin;
   const [stats, setStats] = useState(initialStats);
   const [isLoading, setIsLoading] = useState(true);
 
   const downloadDataAsCsv = () => {
-    const headers = stats.map((stat) => stat.label);
+    const headers = stats.map((stat) => t(stat.labelKey));
     const rows = [stats.map((stat) => escapeCsvValue(stat.number))];
 
     downloadCsv(
@@ -135,7 +142,7 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
       return;
     }
 
-    setStats(STAT_LABELS_BY_ROLE[role] ?? STAT_LABELS_BY_ROLE.Admin);
+    setStats(STAT_LABEL_KEYS_BY_ROLE[role] ?? STAT_LABEL_KEYS_BY_ROLE.Admin);
 
     const fetchData = async () => {
       setIsLoading(true);
@@ -160,9 +167,9 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
         align="left"
       >
         <HStack>
-          <Heading size="md">Statistics Summary</Heading>
+          <Heading size="md">{t('statistics.title')}</Heading>
           <IconButton
-            aria-label="download"
+            aria-label={t('statistics.downloadAria')}
             icon={<MdOutlineFileDownload />}
             onClick={downloadDataAsCsv}
             size="sm"
@@ -182,8 +189,8 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
           >
             {stats.map((stat) => (
               <StatBox
-                key={stat.label}
-                label={stat.label}
+                key={stat.labelKey}
+                labelKey={stat.labelKey}
                 number={stat.number}
               />
             ))}

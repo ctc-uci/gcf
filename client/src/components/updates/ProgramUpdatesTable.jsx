@@ -18,14 +18,43 @@ import {
   Tr,
 } from '@chakra-ui/react';
 
-import { FiStar } from 'react-icons/fi';
+import {
+  downloadCsv,
+  escapeCsvValue,
+  getFilenameTimestamp,
+} from '@/utils/downloadCsv';
+import { useTranslation } from 'react-i18next';
+import { FiStar, FiUser } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './forms/ProgramUpdateForm';
 
+export function downloadProgramUpdatesAsCsv(data, t) {
+  const headers = [
+    t('updates.csvFlag'),
+    t('updates.csvType'),
+    t('updates.csvUpdateNote'),
+    t('updates.csvStatus'),
+    t('updates.csvAuthor'),
+    t('updates.csvProgram'),
+    t('updates.csvDate'),
+  ];
+  const rows = (data || []).map((row) => [
+    escapeCsvValue(row.flagged ? t('updates.csvFlagged') : ''),
+    escapeCsvValue(row.updateType || row.title || ''),
+    escapeCsvValue(row.note),
+    escapeCsvValue(row.status),
+    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
+    escapeCsvValue(row.name),
+    escapeCsvValue(row.updateDate),
+  ]);
+  downloadCsv(headers, rows, `program-updates-${getFilenameTimestamp()}.csv`);
+}
+
 const StatusBadge = ({ status }) => {
+  const { t } = useTranslation();
   const isResolved =
     status?.toLowerCase() === 'resolved' || status?.toLowerCase() === 'active';
   return (
@@ -39,14 +68,14 @@ const StatusBadge = ({ status }) => {
       fontWeight="500"
       textTransform="capitalize"
     >
-      {isResolved ? 'Resolved' : 'Unresolved'}
+      {isResolved ? t('common.resolved') : t('common.unresolved')}
     </Badge>
   );
 };
 
 const TypeBadge = ({ type }) => {
-  const label = type || 'Student';
-  const isInstrument = label.toLowerCase() === 'instrument';
+  const { t } = useTranslation();
+  const isInstrument = (type || '').toLowerCase() === 'instrument';
   return (
     <Badge
       variant="outline"
@@ -60,7 +89,7 @@ const TypeBadge = ({ type }) => {
       fontWeight="500"
       textTransform="capitalize"
     >
-      {label}
+      {isInstrument ? t('updates.typeInstrument') : t('updates.typeStudent')}
     </Badge>
   );
 };
@@ -74,6 +103,7 @@ export const ProgramUpdatesTable = ({
   showFlagAndType = false,
   activeFilters: externalFilters,
 }) => {
+  const { t } = useTranslation();
   const [internalFilters] = useState([]);
   const activeFilters = externalFilters ?? internalFilters;
   const filteredData = useMemo(
@@ -144,7 +174,7 @@ export const ProgramUpdatesTable = ({
                     fontWeight="600"
                     w="60px"
                   >
-                    Flag
+                    {t('updates.colFlag')}
                     <SortArrows
                       columnKey="flagged"
                       sortOrder={sortOrder}
@@ -160,7 +190,7 @@ export const ProgramUpdatesTable = ({
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    Type
+                    {t('updates.colType')}
                     <SortArrows
                       columnKey="updateType"
                       sortOrder={sortOrder}
@@ -175,7 +205,7 @@ export const ProgramUpdatesTable = ({
                   textTransform="uppercase"
                   fontWeight="600"
                 >
-                  Update Note
+                  {t('updates.colUpdateNote')}
                   <SortArrows
                     columnKey="note"
                     sortOrder={sortOrder}
@@ -190,7 +220,7 @@ export const ProgramUpdatesTable = ({
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    Status
+                    {t('updates.colStatus')}
                     <SortArrows
                       columnKey="status"
                       sortOrder={sortOrder}
@@ -205,7 +235,7 @@ export const ProgramUpdatesTable = ({
                   textTransform="uppercase"
                   fontWeight="600"
                 >
-                  Author
+                  {t('updates.colAuthor')}
                   <SortArrows
                     columnKey="firstName"
                     sortOrder={sortOrder}
@@ -219,7 +249,7 @@ export const ProgramUpdatesTable = ({
                   textTransform="uppercase"
                   fontWeight="600"
                 >
-                  Program
+                  {t('updates.colProgram')}
                   <SortArrows
                     columnKey="name"
                     sortOrder={sortOrder}
@@ -233,7 +263,7 @@ export const ProgramUpdatesTable = ({
                   textTransform="uppercase"
                   fontWeight="600"
                 >
-                  Date
+                  {t('updates.colDate')}
                   <SortArrows
                     columnKey="updateDate"
                     sortOrder={sortOrder}
@@ -278,7 +308,7 @@ export const ProgramUpdatesTable = ({
                       <Td>
                         <TypeBadge
                           type={
-                            row.isInstrumentUpdate ? 'Instrument' : 'Student'
+                            row.isInstrumentUpdate ? 'instrument' : 'student'
                           }
                         />
                       </Td>
@@ -288,7 +318,7 @@ export const ProgramUpdatesTable = ({
                         noOfLines={1}
                         maxW="400px"
                       >
-                        {row.note || 'Note about the program...'}
+                        {row.note || t('updates.programNotePlaceholder')}
                       </Text>
                     </Td>
                     {(showStatus || showFlagAndType) && (
@@ -311,7 +341,7 @@ export const ProgramUpdatesTable = ({
                         <Text fontSize="sm">
                           {[row.firstName, row.lastName]
                             .filter(Boolean)
-                            .join(' ') || '—'}
+                            .join(' ') || t('common.emDash')}
                         </Text>
                       </HStack>
                     </Td>

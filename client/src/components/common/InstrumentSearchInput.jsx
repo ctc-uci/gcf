@@ -10,14 +10,18 @@ import {
   useOutsideClick,
 } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
+
 export function InstrumentSearchInput({
   instruments = [],
   value,
   onChange,
   onSelectExisting,
   onCreateNew,
-  placeholder = 'Search instrument',
+  placeholder: placeholderProp,
 }) {
+  const { t } = useTranslation();
+  const placeholder = placeholderProp ?? t('instruments.searchPlaceholder');
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -114,7 +118,7 @@ export function InstrumentSearchInput({
                   align="center"
                 >
                   <Text>+</Text>
-                  <Text>Add new &quot;{value.trim()}&quot;</Text>
+                  <Text>{t('instruments.addNew', { name: value.trim() })}</Text>
                 </HStack>
               </ListItem>
             )}

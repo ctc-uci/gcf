@@ -9,6 +9,8 @@ import 'react-country-state-city/dist/react-country-state-city.css';
 
 import { Grid, GridItem, Select } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
+
 const STATELESS_COUNTRIES = new Set([
   145, // Monaco
   238, // Vatican City
@@ -22,6 +24,7 @@ const STATELESS_COUNTRIES = new Set([
 ]);
 
 export function LocationForm({ formState, setFormData }) {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
@@ -157,7 +160,7 @@ export function LocationForm({ formState, setFormData }) {
       <GridItem>
         <Select
           onChange={(e) => handleRegionChange(e.target.value)}
-          placeholder="Select region..."
+          placeholder={t('locationForm.selectRegion')}
           value={formState.regionId || ''}
         >
           {regionList.map((_region) => (
@@ -175,7 +178,7 @@ export function LocationForm({ formState, setFormData }) {
         {formState.regionId && (
           <Select
             onChange={(e) => handleCountryChange(e.target.value)}
-            placeholder="Select country..."
+            placeholder={t('locationForm.selectCountry')}
             value={formState.country || ''}
           >
             {countriesList.map((_country) => (
@@ -196,7 +199,9 @@ export function LocationForm({ formState, setFormData }) {
             onChange={(e) => handleStateChange(e.target.value)}
             value={formState.state || ''}
             placeholder={
-              isStateless ? 'Select city...' : 'Select state/province...'
+              isStateless
+                ? t('locationForm.selectCity')
+                : t('locationForm.selectState')
             }
           >
             {stateList.map((_state) => (
@@ -216,7 +221,7 @@ export function LocationForm({ formState, setFormData }) {
           <Select
             onChange={(e) => handleCityChange(e.target.value)}
             value={formState.city || ''}
-            placeholder="Select city..."
+            placeholder={t('locationForm.selectCity')}
           >
             {cityList.map((_city) => (
               <option

@@ -1,11 +1,26 @@
 import { Box } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
+
 import { STATUS_TAG_STYLES } from './programTableTagConstants';
 
 export function StatusTag({ status }) {
+  const { t } = useTranslation();
   const normalized = String(status ?? '').toLowerCase();
-  const style = STATUS_TAG_STYLES[normalized] ?? {
-    label: status ?? '—',
+  const mapKey =
+    normalized === 'launched' || normalized === 'active'
+      ? 'active'
+      : normalized === 'developing' || normalized === 'inactive'
+        ? 'inactive'
+        : null;
+  const style = mapKey != null ? STATUS_TAG_STYLES[mapKey] : null;
+  const label =
+    mapKey === 'active'
+      ? t('programStatus.launched')
+      : mapKey === 'inactive'
+        ? t('programStatus.developing')
+        : (status ?? t('common.emDash'));
+  const colors = style ?? {
     bg: 'gray.100',
     color: 'gray.700',
   };
@@ -18,10 +33,10 @@ export function StatusTag({ status }) {
       borderRadius="md"
       fontSize="sm"
       fontWeight="medium"
-      bg={style.bg}
-      color={style.color}
+      bg={colors.bg}
+      color={colors.color}
     >
-      {style.label}
+      {label}
     </Box>
   );
 }

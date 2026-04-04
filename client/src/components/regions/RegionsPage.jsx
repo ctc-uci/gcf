@@ -4,8 +4,10 @@ import { Box, Button, Flex, Text } from '@chakra-ui/react';
 
 import RegionsForm from '@/components/regions/RegionsForm';
 import { RegionsGrid } from '@/components/regions/RegionsGrid';
+import { useTranslation } from 'react-i18next';
 
 export const RegionsPage = () => {
+  const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -37,7 +39,7 @@ export const RegionsPage = () => {
           fontSize="2xl"
           fontWeight="semibold"
         >
-          Regions
+          {t('regions.pageTitle')}
         </Text>
         <Button
           size="sm"
@@ -51,7 +53,7 @@ export const RegionsPage = () => {
           }}
           onClick={handleNewRegion}
         >
-          + New Region
+          {t('regions.newRegion')}
         </Button>
       </Flex>
 

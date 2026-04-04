@@ -19,13 +19,15 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
-import { FiMaximize2, FiMinimize2, FiUser } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
+import { FiDownload, FiMaximize2, FiMinimize2, FiUser } from 'react-icons/fi';
 
 import { useBackendContext } from '../../../contexts/hooks/useBackendContext';
 import { MediaCard } from '../../media/MediaCard';
 import { MediaViewer } from '../MediaViewer';
 
 export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -79,112 +81,116 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
 
   return (
     <>
-      <Drawer
-        isOpen={true}
-        onClose={onClose}
-        placement="right"
-        size={isFullScreen ? 'full' : 'lg'}
-      >
-        <DrawerOverlay />
-        <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
-          <Flex
-            position="absolute"
-            top={3}
-            left={3}
-            zIndex={1}
-          >
-            <IconButton
-              icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
-              aria-label={isFullScreen ? 'Minimize' : 'Expand'}
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsFullScreen(!isFullScreen)}
-            />
-          </Flex>
+    <Drawer
+      isOpen={true}
+      onClose={onClose}
+      placement="right"
+      size={isFullScreen ? 'full' : 'lg'}
+    >
+      <DrawerOverlay />
+      <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
+        <Flex
+          position="absolute"
+          top={3}
+          left={3}
+          zIndex={1}
+        >
+          <IconButton
+            icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
+            aria-label={
+              isFullScreen
+                ? t('fullscreenFlyout.minimize')
+                : t('fullscreenFlyout.expand')
+            }
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsFullScreen(!isFullScreen)}
+          />
+        </Flex>
 
-          <Box
-            pt={6}
-            pb={2}
-            px={8}
+        <Box
+          pt={6}
+          pb={2}
+          px={8}
+        >
+          <Text
+            fontSize="xl"
+            fontWeight="600"
+            textAlign="center"
           >
-            <Text
-              fontSize="xl"
-              fontWeight="600"
-              textAlign="center"
+            {t('updates.mediaUpdateTitle')}
+          </Text>
+          <Divider mt={3} />
+        </Box>
+
+        <DrawerBody
+          px={8}
+          pb={24}
+        >
+          <VStack
+            spacing={6}
+            align="stretch"
+            mt={4}
+          >
+            <Grid
+              templateColumns="repeat(3, 1fr)"
+              gap={6}
             >
-              Media Update
-            </Text>
-            <Divider mt={3} />
-          </Box>
-
-          <DrawerBody
-            px={8}
-            pb={24}
-          >
-            <VStack
-              spacing={6}
-              align="stretch"
-              mt={4}
-            >
-              <Grid
-                templateColumns="repeat(3, 1fr)"
-                gap={6}
-              >
-                <GridItem>
-                  <Text
-                    color="teal.500"
-                    fontSize="sm"
-                    fontWeight="500"
-                    mb={1}
-                  >
-                    Author
-                  </Text>
-                  <HStack spacing={1}>
-                    <Icon
-                      as={FiUser}
-                      boxSize={4}
-                      color="gray.400"
-                    />
-                    <Text>
-                      {update?.firstName} {update?.lastName}
-                    </Text>
-                  </HStack>
-                </GridItem>
-                <GridItem>
-                  <Text
-                    color="teal.500"
-                    fontSize="sm"
-                    fontWeight="500"
-                    mb={1}
-                  >
-                    Program
-                  </Text>
-                  <Text>{update?.programName ?? ''}</Text>
-                </GridItem>
-                <GridItem>
-                  <Text
-                    color="teal.500"
-                    fontSize="sm"
-                    fontWeight="500"
-                    mb={1}
-                  >
-                    Time
-                  </Text>
-                  <Text>{update?.updateDate ?? ''}</Text>
-                </GridItem>
-              </Grid>
-
-              <Box>
+              <GridItem>
                 <Text
                   color="teal.500"
                   fontSize="sm"
                   fontWeight="500"
-                  mb={2}
+                  mb={1}
                 >
-                  Note
+                  {t('updates.colAuthor')}
                 </Text>
-                <Text>{update?.note || ''}</Text>
-              </Box>
+                <HStack spacing={1}>
+                  <Icon
+                    as={FiUser}
+                    boxSize={4}
+                    color="gray.400"
+                  />
+                  <Text>
+                    {update?.firstName} {update?.lastName}
+                  </Text>
+                </HStack>
+              </GridItem>
+              <GridItem>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
+                  {t('updates.colProgram')}
+                </Text>
+                <Text>{update?.programName ?? ''}</Text>
+              </GridItem>
+              <GridItem>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={1}
+                >
+                  {t('common.time')}
+                </Text>
+                <Text>{update?.updateDate ?? ''}</Text>
+              </GridItem>
+            </Grid>
+
+            <Box>
+              <Text
+                color="teal.500"
+                fontSize="sm"
+                fontWeight="500"
+                mb={2}
+              >
+                {t('common.note')}
+              </Text>
+              <Text>{update?.note || ''}</Text>
+            </Box>
 
               <Box>
                 <Text
@@ -192,7 +198,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                   fontWeight="600"
                   mb={3}
                 >
-                  Media
+                  {t('updates.mediaSection')}
                 </Text>
                 {updates.length > 0 ? (
                   <SimpleGrid
@@ -224,7 +230,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                     color="gray.400"
                     fontSize="sm"
                   >
-                    No media attached
+                    {t('updates.noMediaAttached')}
                   </Text>
                 )}
               </Box>
@@ -245,10 +251,13 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
             gap={3}
           >
             <Button
+           
               variant="outline"
+           
               onClick={handleKeepUnresolved}
+          
             >
-              Keep as Unresolved
+              {t('common.keepUnresolved')}
             </Button>
             <Button
               bg="teal.500"
@@ -257,7 +266,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
               onClick={handleMarkResolved}
               isLoading={isLoading}
             >
-              Save & Mark as Resolved
+              {t('common.saveMarkResolved')}
             </Button>
           </Flex>
         </DrawerContent>
