@@ -10,9 +10,12 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
+
 import gcf_globe from '/gcf_globe.png';
 
 export function MediaPreview({ file, title, onTitleChange }) {
+  const { t } = useTranslation();
   const previewUrl = useMemo(() => {
     return URL.createObjectURL(file);
   }, [file]);
@@ -32,7 +35,7 @@ export function MediaPreview({ file, title, onTitleChange }) {
           ) : (
             <Image
               src={previewUrl}
-              alt="Preview"
+              alt={t('mediaPreview.previewAlt')}
               w="100%"
               h="100%"
               objectFit="contain"
@@ -40,7 +43,7 @@ export function MediaPreview({ file, title, onTitleChange }) {
                 <Center h="100%">
                   <Image
                     src={gcf_globe}
-                    alt="Loading..."
+                    alt={t('mediaPreview.loadingAlt')}
                     w="40px"
                   />
                 </Center>
@@ -55,7 +58,7 @@ export function MediaPreview({ file, title, onTitleChange }) {
             borderRadius="md"
             borderColor="gray.100"
             value={title ?? ''}
-            placeholder="Add Title"
+            placeholder={t('mediaPreview.titlePlaceholder')}
             onChange={(e) => onTitleChange(e.target.value)}
           />
         </FormControl>

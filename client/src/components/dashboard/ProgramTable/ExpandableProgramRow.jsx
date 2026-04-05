@@ -13,7 +13,7 @@ import {
 
 import 'flag-icons/css/flag-icons.min.css';
 
-import { GetCity } from 'react-country-state-city';
+import { useTranslation } from 'react-i18next';
 
 import { isoCodeToFlagIconCode } from '../../../utils/isoCodeToFlagIconCode';
 import { formatLaunchDate } from './programTableMappers';
@@ -21,6 +21,7 @@ import { getInstrumentTagStyle } from './programTableTagConstants';
 import { StatusTag } from './StatusTag';
 
 export function ExpandableProgramRow({ p, onEdit }) {
+  const { t } = useTranslation();
   const { isOpen, onToggle } = useDisclosure();
   const flagCode = isoCodeToFlagIconCode(p.isoCode);
   return (
@@ -94,7 +95,7 @@ export function ExpandableProgramRow({ p, onEdit }) {
                     fontWeight="semibold"
                     pb="2"
                   >
-                    Language:
+                    {t('expandableProgramRow.language')}
                   </Box>
                   <Box>{p.primaryLanguage ?? '-'}</Box>
                 </Box>
@@ -107,7 +108,7 @@ export function ExpandableProgramRow({ p, onEdit }) {
                     fontWeight="semibold"
                     pb="2"
                   >
-                    Regional Director(s)
+                    {t('expandableProgramRow.regionalDirectors')}
                   </Box>
                   <Box>
                     <VStack
@@ -142,7 +143,7 @@ export function ExpandableProgramRow({ p, onEdit }) {
                     fontWeight="semibold"
                     pb="2"
                   >
-                    Program Director(s)
+                    {t('expandableProgramRow.programDirectors')}
                   </Box>
                   <Box>
                     <VStack
@@ -177,7 +178,7 @@ export function ExpandableProgramRow({ p, onEdit }) {
                     fontWeight="semibold"
                     pb="2"
                   >
-                    Curriculum Link(s)
+                    {t('expandableProgramRow.curriculumLinks')}
                   </Box>
                   <Box>
                     {Array.isArray(p.playlists)
@@ -210,7 +211,7 @@ export function ExpandableProgramRow({ p, onEdit }) {
                 }}
                 leftIcon={<EditIcon />}
               >
-                Update
+                {t('expandableProgramRow.update')}
               </Button>
             </Box>
           </Collapse>

@@ -15,6 +15,7 @@ import {
   Spacer,
 } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
 import { BsArrowDownUp } from 'react-icons/bs';
 import { FiPlus, FiSearch } from 'react-icons/fi';
 import {
@@ -33,6 +34,7 @@ export const AccountToolbar = ({
   columns,
   onFilterChange,
 }) => {
+  const { t } = useTranslation();
   function handleSearchChange(event) {
     setSearchQuery(event.target.value);
   }
@@ -65,7 +67,7 @@ export const AccountToolbar = ({
           />
         </InputLeftElement>
         <Input
-          placeholder="Search"
+          placeholder={t('common.search')}
           bg="white"
           border="1px solid"
           borderColor="gray.200"
@@ -86,7 +88,7 @@ export const AccountToolbar = ({
           <Popover>
             <PopoverTrigger>
               <IconButton
-                aria-label="Filter"
+                aria-label={t('common.filter')}
                 icon={<HiOutlineAdjustmentsHorizontal size={18} />}
                 variant="ghost"
                 color="gray.600"
@@ -116,7 +118,7 @@ export const AccountToolbar = ({
         align="center"
       >
         <IconButton
-          aria-label="Sort"
+          aria-label={t('common.sort')}
           icon={<BsArrowDownUp size={20} />}
           variant="ghost"
           color="gray.600"
@@ -133,7 +135,7 @@ export const AccountToolbar = ({
           justify="center"
         >
           <IconButton
-            aria-label="List View"
+            aria-label={t('common.listView')}
             icon={<HamburgerIcon />}
             variant="ghost"
             color={isCardView ? 'gray.600' : 'teal.500'}
@@ -145,7 +147,7 @@ export const AccountToolbar = ({
             onClick={() => setIsCardView(false)}
           />
           <IconButton
-            aria-label="Grid View"
+            aria-label={t('common.gridView')}
             icon={<HiOutlineSquares2X2 />}
             variant="ghost"
             color={!isCardView ? 'gray.600' : 'teal.500'}
@@ -176,7 +178,7 @@ export const AccountToolbar = ({
         onClick={onNew}
         transition="background-color 0.25s ease, transform 0.25s ease"
       >
-        New Account
+        {t('accounts.newAccount')}
       </Button>
     </Flex>
   );

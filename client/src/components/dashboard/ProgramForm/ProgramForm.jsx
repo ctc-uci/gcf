@@ -25,6 +25,7 @@ import {
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 
 import { CurriculumLinkForm } from './CurriculumLinkForm';
 import { InstrumentForm } from './InstrumentForm';
@@ -39,6 +40,7 @@ export const ProgramForm = ({
   onSave,
   program,
 }) => {
+  const { t } = useTranslation();
   const disclosure = useDisclosure();
 
   const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
@@ -197,7 +199,7 @@ export const ProgramForm = ({
       );
     }
     loadProgramRegionData();
-  }, [program?.id, backend]);
+  }, [program, backend]);
 
   useEffect(() => {
     if (isOpen) {
@@ -433,7 +435,7 @@ export const ProgramForm = ({
             onClick={handleSave}
           >
             {' '}
-            Save{' '}
+            {t('common.save')}{' '}
           </Button>
         </HStack>
 
@@ -443,7 +445,9 @@ export const ProgramForm = ({
             align="stretch"
             marginLeft="1em"
           >
-            <DrawerHeader padding="0 0">Program</DrawerHeader>
+            <DrawerHeader padding="0 0">
+              {t('programForm.drawerTitle')}
+            </DrawerHeader>
             <HStack
               w="full"
               spacing={0}
@@ -459,7 +463,7 @@ export const ProgramForm = ({
                 borderColor={activeTab === 'overview' ? 'teal.500' : 'gray.200'}
                 _hover={{ bg: 'gray.50' }}
               >
-                Overview
+                {t('programForm.overview')}
               </Button>
 
               <Button
@@ -472,13 +476,13 @@ export const ProgramForm = ({
                 borderColor={activeTab === 'media' ? 'teal.500' : 'gray.200'}
                 _hover={{ bg: 'gray.50' }}
               >
-                Media
+                {t('programForm.mediaTab')}
               </Button>
             </HStack>
 
             {activeTab === 'overview' && (
               <>
-                <h3>Status</h3>
+                <h3>{t('programForm.status')}</h3>
                 <HStack>
                   <Button
                     onClick={() => handleProgramStatusChange('Inactive')}
@@ -486,7 +490,7 @@ export const ProgramForm = ({
                       formState.status === 'Inactive' ? 'teal' : undefined
                     }
                   >
-                    Developing
+                    {t('programForm.developing')}
                   </Button>
                   <Button
                     onClick={() => handleProgramStatusChange('Active')}
@@ -494,43 +498,45 @@ export const ProgramForm = ({
                       formState.status === 'Active' ? 'teal' : undefined
                     }
                   >
-                    Launched
+                    {t('programForm.launched')}
                   </Button>
                 </HStack>
-                <h3>Program Name</h3>
+                <h3>{t('programForm.programName')}</h3>
                 <Input
-                  placeholder="Enter Program Name"
+                  placeholder={t('programForm.programNamePlaceholder')}
                   value={formState.programName || ''}
                   onChange={(e) => handleProgramNameChange(e.target.value)}
                 />
-                <h3>Launch Date</h3>
+                <h3>{t('programForm.launchDate')}</h3>
                 <Input
                   type="date"
-                  placeholder="MM/DD/YYYY"
+                  placeholder={t('programForm.datePlaceholder')}
                   value={formState.launchDate || ''}
                   onChange={(e) =>
                     handleProgramLaunchDateChange(e.target.value)
                   }
                 />
-                <h3>Location</h3>
+                <h3>{t('programForm.location')}</h3>
                 <LocationForm
                   formState={formState}
                   setFormData={setFormState}
                 />
-                <h3>Students</h3>
+                <h3>{t('programForm.students')}</h3>
                 <NumberInput
                   min={0}
                   value={formState.students}
                   onChange={(e) => handleStudentNumberChange(Number(e))}
                 >
-                  <NumberInputField placeholder="Enter # of Students" />
+                  <NumberInputField
+                    placeholder={t('programForm.studentsPlaceholder')}
+                  />
                   <NumberInputStepper>
                     <NumberIncrementStepper />
                     <NumberDecrementStepper />
                   </NumberInputStepper>
                 </NumberInput>
 
-                <h3> Instrument(s) & Quantity </h3>
+                <h3>{t('programForm.instrumentsQuantity')}</h3>
                 <HStack wrap="wrap">
                   <InstrumentForm setFormData={setFormState} />
 
@@ -558,19 +564,25 @@ export const ProgramForm = ({
                     )
                   )}
                 </HStack>
-                <h3>Language</h3>
+                <h3>{t('programForm.language')}</h3>
                 <Select
-                  placeholder="Language"
+                  placeholder={t('programForm.languagePlaceholder')}
                   value={formState.language || ''}
                   onChange={(e) => handleLanguageChange(e.target.value)}
                 >
-                  <option value="english">English</option>
-                  <option value="spanish">Spanish</option>
-                  <option value="french">French</option>
-                  <option value="arabic">Arabic</option>
-                  <option value="mandarin">Mandarin</option>
+                  <option value="english">
+                    {t('programForm.langEnglish')}
+                  </option>
+                  <option value="spanish">
+                    {t('programForm.langSpanish')}
+                  </option>
+                  <option value="french">{t('programForm.langFrench')}</option>
+                  <option value="arabic">{t('programForm.langArabic')}</option>
+                  <option value="mandarin">
+                    {t('programForm.langMandarin')}
+                  </option>
                 </Select>
-                <h3>Program Directors</h3>
+                <h3>{t('programForm.programDirectors')}</h3>
                 <HStack wrap="wrap">
                   <ProgramDirectorForm
                     formState={formState}
@@ -593,7 +605,7 @@ export const ProgramForm = ({
                   ))}
                 </HStack>
 
-                <h3>Curriculum Links</h3>
+                <h3>{t('programForm.curriculumLinks')}</h3>
                 <CurriculumLinkForm
                   formState={formState}
                   setFormData={setFormState}
@@ -640,7 +652,7 @@ export const ProgramForm = ({
 
             {activeTab === 'media' && (
               <>
-                <h4>Media</h4>
+                <h4>{t('programForm.mediaHeading')}</h4>
                 <MediaUploadForm
                   onUploadComplete={handleMediaChange}
                   uploadedMedia={formState.media}

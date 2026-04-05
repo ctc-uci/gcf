@@ -9,12 +9,15 @@ import {
   Select,
 } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
+
 export function CurriculumLinkForm({
   formState,
   setFormData,
   programId,
   backend,
 }) {
+  const { t } = useTranslation();
   const [link, setLink] = useState('');
   const [display, setDisplay] = useState('');
   const [selectedInstrumentId, setSelectedInstrumentId] = useState('');
@@ -87,7 +90,9 @@ export function CurriculumLinkForm({
         ...(prevData.curriculumLinks ?? []),
         {
           link: validLink,
-          name: (display || 'Playlist').trim() || 'Playlist',
+          name:
+            (display || t('programForm.playlistDefault')).trim() ||
+            t('programForm.playlistDefault'),
           instrumentId,
           instrumentName,
         },
@@ -108,9 +113,11 @@ export function CurriculumLinkForm({
         flex="1"
         minW="120px"
       >
-        <FormLabel fontSize="sm">Instrument</FormLabel>
+        <FormLabel fontSize="sm">
+          {t('curriculumLinkForm.instrument')}
+        </FormLabel>
         <Select
-          placeholder="Select instrument"
+          placeholder={t('curriculumLinkForm.selectInstrument')}
           value={selectedInstrumentId}
           onChange={(e) => setSelectedInstrumentId(e.target.value)}
           isDisabled={instrumentsLoading}
@@ -130,9 +137,9 @@ export function CurriculumLinkForm({
         flex="1"
         minW="160px"
       >
-        <FormLabel fontSize="sm">Link</FormLabel>
+        <FormLabel fontSize="sm">{t('curriculumLinkForm.link')}</FormLabel>
         <Input
-          placeholder="Link"
+          placeholder={t('curriculumLinkForm.linkPlaceholder')}
           value={link || ''}
           onChange={(e) => setLink(e.target.value)}
         />
@@ -141,9 +148,11 @@ export function CurriculumLinkForm({
         flex="1"
         minW="140px"
       >
-        <FormLabel fontSize="sm">Display Name</FormLabel>
+        <FormLabel fontSize="sm">
+          {t('curriculumLinkForm.displayName')}
+        </FormLabel>
         <Input
-          placeholder="Display Name"
+          placeholder={t('curriculumLinkForm.displayNamePlaceholder')}
           value={display || ''}
           onChange={(e) => setDisplay(e.target.value)}
         />
@@ -152,7 +161,7 @@ export function CurriculumLinkForm({
         onClick={handleSubmit}
         isDisabled={!selectedInstrumentId}
       >
-        + Add
+        {t('common.add')}
       </Button>
     </HStack>
   );

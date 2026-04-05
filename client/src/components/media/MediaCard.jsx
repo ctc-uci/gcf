@@ -2,6 +2,8 @@ import { useState } from 'react';
 
 import { Box, Center, Image } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
+
 import gcf_globe from '/gcf_globe.png';
 
 export const MediaCard = ({
@@ -10,6 +12,7 @@ export const MediaCard = ({
   imageUrl,
   height = '200px',
 }) => {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const isVideo = file_type?.startsWith('video');
 
@@ -23,7 +26,7 @@ export const MediaCard = ({
         <Center h="100%">
           <Image
             src={gcf_globe}
-            alt="Loading..."
+            alt={t('mediaCard.loadingAlt')}
             w="50px"
           />
         </Center>

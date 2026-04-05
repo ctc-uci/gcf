@@ -38,6 +38,7 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import { useTranslation } from 'react-i18next';
 import {
   FiCamera,
   FiEye,
@@ -75,6 +76,7 @@ const INITIAL_FORM_STATE = {
 };
 
 export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
+  const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const { backend } = useBackendContext();
   const { role } = useRoleContext();
@@ -103,38 +105,39 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   }, [formData, initialFormData]);
 
   const changedFields = useMemo(() => {
+    const mask = t('accountForm.passwordMaskStars');
     const changes = [];
     if (formData.first_name !== initialFormData.first_name) {
       changes.push({
-        label: 'First Name',
+        label: t('accountForm.fieldFirstName'),
         old: initialFormData.first_name,
         new: formData.first_name,
       });
     }
     if (formData.last_name !== initialFormData.last_name) {
       changes.push({
-        label: 'Last Name',
+        label: t('accountForm.fieldLastName'),
         old: initialFormData.last_name,
         new: formData.last_name,
       });
     }
     if (formData.email !== initialFormData.email) {
       changes.push({
-        label: 'Email',
+        label: t('accountForm.fieldEmail'),
         old: initialFormData.email,
         new: formData.email,
       });
     }
     if (formData.password && formData.password !== initialFormData.password) {
       changes.push({
-        label: 'Password',
-        old: initialFormData.password || '********',
-        new: '********',
+        label: t('accountForm.fieldPassword'),
+        old: initialFormData.password || mask,
+        new: mask,
       });
     }
     if (formData.role !== initialFormData.role) {
       changes.push({
-        label: 'Role',
+        label: t('accountForm.fieldRole'),
         old: initialFormData.role,
         new: formData.role,
         isBadge: true,
@@ -148,7 +151,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       formData.programs.length > 0 ? formData.programs[0]?.name : '';
     if (oldProgram !== newProgram) {
       changes.push({
-        label: 'Program',
+        label: t('accountForm.fieldProgram'),
         old: oldProgram || '',
         new: newProgram || '',
       });
@@ -161,13 +164,13 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       formData.regions.length > 0 ? formData.regions[0]?.name : '';
     if (oldRegion !== newRegion) {
       changes.push({
-        label: 'Region',
+        label: t('accountForm.fieldRegion'),
         old: oldRegion || '',
         new: newRegion || '',
       });
     }
     return changes;
-  }, [formData, initialFormData]);
+  }, [formData, initialFormData, t]);
 
   // Reset form when drawer opens
   useEffect(() => {
@@ -332,7 +335,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         await handleUpdateUser();
       }
       toast({
-        title: 'User saved successfully!',
+        title: t('accountForm.saveSuccess'),
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -348,17 +351,18 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         errorMessage.includes('email address is already in use')
       ) {
         toast({
-          title: 'Email already exists',
-          description:
-            'This email is already registered. Please use a different email address.',
+          title: t('accountForm.emailExistsTitle'),
+          description: t('accountForm.emailExistsDesc'),
           status: 'error',
           duration: 3000,
           isClosable: true,
         });
       } else {
         toast({
-          title: 'Error',
-          description: `Error: ${errorMessage}`,
+          title: t('accountForm.errorTitle'),
+          description: t('accountForm.errorWithMessage', {
+            message: errorMessage,
+          }),
           status: 'error',
           duration: 3000,
           isClosable: true,
@@ -376,7 +380,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       !formData.role ||
       !formData.email
     ) {
-      throw new Error('Please fill in all fields on the form.');
+      throw new Error(t('accountForm.fillAllFields'));
     }
 
     const userData = {
@@ -401,7 +405,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       !formData.role ||
       !formData.email
     ) {
-      throw new Error('Please fill in all fields on the form.');
+      throw new Error(t('accountForm.fillAllFields'));
     }
     const userData = {
       email: formData.email,
@@ -447,7 +451,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
 
   const createdByName =
     currentUser?.displayName ||
-    `${currentUser?.email?.split('@')[0] || 'Unknown'}`;
+    `${currentUser?.email?.split('@')[0] || t('common.unknownUser')}`;
 
   const errorBorderProps = (field) =>
     validationErrors[field]
@@ -481,7 +485,11 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
           >
             <IconButton
               icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
-              aria-label={isFullScreen ? 'Minimize' : 'Expand'}
+              aria-label={
+                isFullScreen
+                  ? t('fullscreenFlyout.minimize')
+                  : t('fullscreenFlyout.expand')
+              }
               variant="ghost"
               size="sm"
               onClick={() => setIsFullScreen(!isFullScreen)}
@@ -492,7 +500,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
               flex={1}
               textAlign="center"
             >
-              Account
+              {t('accountForm.drawerTitle')}
             </Text>
             <Box w="32px" />
           </Flex>
@@ -513,7 +521,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 size="md"
                 fontWeight="semibold"
               >
-                User Profile
+                {t('accountForm.userProfile')}
               </Heading>
 
               <Box>
@@ -523,7 +531,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                   fontWeight="medium"
                   mb={3}
                 >
-                  Profile Photo
+                  {t('accountForm.profilePhoto')}
                 </Text>
                 <Flex justify="center">
                   <Box
@@ -535,7 +543,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       boxSize="180px"
                       borderRadius="full"
                       fit="cover"
-                      alt="Profile"
+                      alt={t('accountForm.profileAlt')}
                       bg="gray.200"
                       fallback={
                         <Avatar
@@ -553,7 +561,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     />
                     <IconButton
                       icon={<FiCamera />}
-                      aria-label="Upload photo"
+                      aria-label={t('profile.uploadPhoto')}
                       borderRadius="full"
                       size="sm"
                       bg="white"
@@ -579,7 +587,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       fontSize="sm"
                       fontWeight="medium"
                     >
-                      First Name{' '}
+                      {t('accountForm.fieldFirstName')}{' '}
                       <Text
                         as="span"
                         color="red.500"
@@ -589,7 +597,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     </FormLabel>
                     <Input
                       name="first_name"
-                      placeholder="First Name"
+                      placeholder={t('accountForm.fieldFirstName')}
                       value={formData.first_name}
                       onChange={handleChange}
                       {...errorBorderProps('first_name')}
@@ -603,7 +611,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       fontSize="sm"
                       fontWeight="medium"
                     >
-                      Last Name{' '}
+                      {t('accountForm.fieldLastName')}{' '}
                       <Text
                         as="span"
                         color="red.500"
@@ -613,7 +621,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     </FormLabel>
                     <Input
                       name="last_name"
-                      placeholder="Last Name"
+                      placeholder={t('accountForm.fieldLastName')}
                       value={formData.last_name}
                       onChange={handleChange}
                       {...errorBorderProps('last_name')}
@@ -634,7 +642,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       fontSize="sm"
                       fontWeight="medium"
                     >
-                      Email{' '}
+                      {t('accountForm.fieldEmail')}{' '}
                       <Text
                         as="span"
                         color="red.500"
@@ -644,7 +652,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     </FormLabel>
                     <Input
                       name="email"
-                      placeholder="Email Address"
+                      placeholder={t('accountForm.emailAddressPlaceholder')}
                       value={formData.email}
                       onChange={handleChange}
                       {...errorBorderProps('email')}
@@ -659,14 +667,14 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                         fontSize="sm"
                         fontWeight="medium"
                       >
-                        Password
+                        {t('accountForm.fieldPassword')}
                       </FormLabel>
                       <InputGroup>
                         <Input
                           name="password"
                           type={showPassword ? 'text' : 'password'}
                           autoComplete="new-password"
-                          placeholder="Leave blank to keep current"
+                          placeholder={t('accountForm.passwordLeaveBlank')}
                           value={formData.password}
                           onChange={handleChange}
                           {...errorBorderProps('password')}
@@ -674,7 +682,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                         <InputRightElement>
                           <IconButton
                             icon={showPassword ? <FiEye /> : <FiEyeOff />}
-                            aria-label="Toggle password visibility"
+                            aria-label={t('profile.togglePassword')}
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowPassword(!showPassword)}
@@ -690,8 +698,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                       color="gray.600"
                       pt={8}
                     >
-                      After you save, this user will receive an email with a
-                      link to set their password.
+                      {t('accountForm.passwordEmailNote')}
                     </Text>
                   </GridItem>
                 )}
@@ -703,7 +710,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 fontWeight="semibold"
                 mt={4}
               >
-                Role & Access
+                {t('accountForm.roleAccess')}
               </Heading>
 
               <FormControl>
@@ -712,7 +719,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                   fontSize="sm"
                   fontWeight="medium"
                 >
-                  Role{' '}
+                  {t('accountForm.fieldRole')}{' '}
                   <Text
                     as="span"
                     color="red.500"
@@ -722,18 +729,22 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 </FormLabel>
                 <Select
                   name="role"
-                  placeholder="Role"
+                  placeholder={t('accountForm.rolePlaceholder')}
                   value={formData.role}
                   onChange={handleChange}
                   {...errorBorderProps('role')}
                 >
                   {role === 'Super Admin' && (
-                    <option value="Admin">Admin</option>
+                    <option value="Admin">{t('signup.roleAdmin')}</option>
                   )}
                   {(role === 'Admin' || role === 'Super Admin') && (
-                    <option value="Regional Director">Regional Director</option>
+                    <option value="Regional Director">
+                      {t('signup.roleRegionalDirector')}
+                    </option>
                   )}
-                  <option value="Program Director">Program Director</option>
+                  <option value="Program Director">
+                    {t('signup.roleProgramDirector')}
+                  </option>
                 </Select>
               </FormControl>
 
@@ -744,10 +755,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     fontSize="sm"
                     fontWeight="medium"
                   >
-                    Assigned Program
+                    {t('accountForm.assignedProgram')}
                   </FormLabel>
                   <Select
-                    placeholder="Program Name"
+                    placeholder={t('accountForm.programNamePlaceholder')}
                     value={
                       formData.programs.length > 0
                         ? String(formData.programs[0].id)
@@ -788,10 +799,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                     fontSize="sm"
                     fontWeight="medium"
                   >
-                    Assigned Region
+                    {t('accountForm.assignedRegion')}
                   </FormLabel>
                   <Select
-                    placeholder="Region Name"
+                    placeholder={t('accountForm.regionNamePlaceholder')}
                     value={
                       formData.regions.length > 0
                         ? String(formData.regions[0].id)
@@ -832,7 +843,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                   fontWeight="semibold"
                   mt={4}
                 >
-                  Additional Information
+                  {t('accountForm.additionalInfo')}
                 </Heading>
               )}
 
@@ -843,7 +854,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                   fontWeight="medium"
                   mb={2}
                 >
-                  Created by
+                  {t('accountForm.createdBy')}
                 </Text>
                 <HStack spacing={2}>
                   <Avatar
@@ -873,7 +884,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 onClick={() => deleteModal.onOpen()}
                 fontWeight="normal"
               >
-                Delete
+                {t('common.delete')}
               </Button>
             ) : null}
             <Spacer />
@@ -882,7 +893,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 variant="outline"
                 onClick={handleCloseWithCheck}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 bg="teal.500"
@@ -891,7 +902,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 onClick={handleSaveClick}
                 isLoading={isLoading}
               >
-                Save
+                {t('common.save')}
               </Button>
             </HStack>
           </Flex>
@@ -914,13 +925,13 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
               fontSize="lg"
               mb={2}
             >
-              Are you sure you want to exit?
+              {t('accountForm.exitTitle')}
             </Text>
             <Text
               color="gray.500"
               mb={6}
             >
-              All new updates made to this account will be lost.
+              {t('accountForm.exitDesc')}
             </Text>
             <HStack
               spacing={3}
@@ -930,7 +941,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 variant="outline"
                 onClick={exitModal.onClose}
               >
-                Continue Editing
+                {t('common.continueEditing')}
               </Button>
               <Button
                 bg="red.500"
@@ -941,7 +952,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                   onClose();
                 }}
               >
-                Exit Without Saving
+                {t('common.exitWithoutSaving')}
               </Button>
             </HStack>
           </ModalBody>
@@ -964,13 +975,13 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
               fontSize="lg"
               mb={2}
             >
-              Delete this account?
+              {t('accountForm.deleteTitle')}
             </Text>
             <Text
               color="gray.500"
               mb={6}
             >
-              This action cannot be undone.
+              {t('accountForm.deleteDesc')}
             </Text>
             <HStack
               spacing={3}
@@ -980,7 +991,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 variant="outline"
                 onClick={deleteModal.onClose}
               >
-                Continue Editing
+                {t('common.continueEditing')}
               </Button>
               <Button
                 bg="red.500"
@@ -988,7 +999,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 _hover={{ bg: 'red.600' }}
                 onClick={confirmDelete}
               >
-                Delete Account
+                {t('accountForm.deleteAccount')}
               </Button>
             </HStack>
           </ModalBody>
@@ -1013,7 +1024,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
               color="teal.600"
               mb={4}
             >
-              Review changes
+              {t('common.reviewChanges')}
             </Text>
 
             <VStack
@@ -1078,7 +1089,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 variant="outline"
                 onClick={saveModal.onClose}
               >
-                Continue Editing
+                {t('common.continueEditing')}
               </Button>
               <Button
                 bg="teal.500"
@@ -1087,7 +1098,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
                 onClick={handleSubmit}
                 isLoading={isLoading}
               >
-                Confirm Changes
+                {t('common.confirmChanges')}
               </Button>
             </HStack>
           </ModalBody>

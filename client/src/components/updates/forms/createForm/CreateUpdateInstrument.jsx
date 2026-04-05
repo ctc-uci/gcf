@@ -22,9 +22,19 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
 import { BsMusicNoteList, BsPencilSquare } from 'react-icons/bs';
 import { FaScrewdriverWrench } from 'react-icons/fa6';
-import { FiStar, FiX } from 'react-icons/fi';
+import {
+  FiCamera,
+  FiCornerDownRight,
+  FiEdit3,
+  FiHelpCircle,
+  FiMusic,
+  FiStar,
+  FiTool,
+  FiX,
+} from 'react-icons/fi';
 import { IoIosMusicalNotes, IoMdPhotos } from 'react-icons/io';
 import { MdQuestionMark } from 'react-icons/md';
 
@@ -45,6 +55,7 @@ export default function CreateUpdateInstrument({
 }) {
   const [needsAdminHelp, setNeedsAdminHelp] = useState(false);
 
+  const { t } = useTranslation();
   return (
     <>
       <Box>
@@ -60,7 +71,7 @@ export default function CreateUpdateInstrument({
             size="sm"
             fontWeight="600"
           >
-            Which instrument is this update about?
+            {t('updates.whichInstrument')}
           </Heading>
         </HStack>
         <Text
@@ -69,16 +80,16 @@ export default function CreateUpdateInstrument({
           fontWeight="500"
           mb={1}
         >
-          Select instrument{' '}
+          {t('updates.selectInstrument')}{' '}
           <Text
             as="span"
             color="red.500"
           >
-            *
+            {t('common.requiredStar')}
           </Text>
         </Text>
         <Select
-          placeholder="Select Instrument"
+          placeholder={t('updates.selectInstrumentPh')}
           value={selectedInstrument}
           onChange={(e) => setSelectedInstrument(e.target.value)}
         >
@@ -99,7 +110,7 @@ export default function CreateUpdateInstrument({
           fontWeight="600"
           mb={3}
         >
-          What happened to this instrument?
+          {t('updates.whatHappened')}
         </Heading>
         <RadioGroup
           value={whatHappened}
@@ -115,7 +126,7 @@ export default function CreateUpdateInstrument({
                   as={FiX}
                   boxSize={4}
                 />
-                <Text>Broken</Text>
+                <Text>{t('updates.broken')}</Text>
               </HStack>
             </Radio>
             <Radio value="Missing">
@@ -124,7 +135,7 @@ export default function CreateUpdateInstrument({
                   as={MdQuestionMark}
                   boxSize={4}
                 />
-                <Text>Missing</Text>
+                <Text>{t('updates.missing')}</Text>
               </HStack>
             </Radio>
             <Radio value="New / Donation">
@@ -133,7 +144,7 @@ export default function CreateUpdateInstrument({
                   as={BsMusicNoteList}
                   boxSize={4}
                 />
-                <Text>New / Donation</Text>
+                <Text>{t('updates.newDonation')}</Text>
               </HStack>
             </Radio>
             <Radio value="Needs repair">
@@ -142,11 +153,11 @@ export default function CreateUpdateInstrument({
                   as={FaScrewdriverWrench}
                   boxSize={4}
                 />
-                <Text>Needs repair</Text>
+                <Text>{t('updates.needsRepair')}</Text>
               </HStack>
             </Radio>
             <Radio value="Other">
-              <Text>Other (please explain in note below)</Text>
+              <Text>{t('updates.otherExplain')}</Text>
             </Radio>
           </VStack>
         </RadioGroup>
@@ -165,7 +176,7 @@ export default function CreateUpdateInstrument({
             size="sm"
             fontWeight="600"
           >
-            How many instruments are affected?
+            {t('updates.howManyAffected')}
           </Heading>
         </HStack>
         <Text
@@ -174,12 +185,12 @@ export default function CreateUpdateInstrument({
           fontWeight="500"
           mb={1}
         >
-          Number of instruments{' '}
+          {t('updates.numberOfInstruments')}{' '}
           <Text
             as="span"
             color="red.500"
           >
-            *
+            {t('common.requiredStar')}
           </Text>
         </Text>
         <NumberInput
@@ -203,7 +214,7 @@ export default function CreateUpdateInstrument({
             ''
           ) : (
             <>
-              Total {selectedInstrument}:{' '}
+              {t('common.totalLabel', { name: selectedInstrument })}{' '}
               <Text
                 as="span"
                 fontWeight="bold"
@@ -228,7 +239,7 @@ export default function CreateUpdateInstrument({
             size="sm"
             fontWeight="600"
           >
-            Do you want to add photos or videos?
+            {t('updates.photosVideosInstrument')}
           </Heading>
         </HStack>
         <Text
@@ -236,7 +247,7 @@ export default function CreateUpdateInstrument({
           fontSize="sm"
           mb={2}
         >
-          This helps us understand the issue.
+          {t('updates.photosHelp')}
         </Text>
         {uploadedMedia.length > 0 && (
           <HStack
@@ -305,7 +316,7 @@ export default function CreateUpdateInstrument({
           size="sm"
           onClick={mediaUploadDisclosure.onOpen}
         >
-          + Upload Media
+          {t('updates.uploadMedia')}
         </Button>
       </Box>
 
@@ -322,7 +333,7 @@ export default function CreateUpdateInstrument({
             size="sm"
             fontWeight="600"
           >
-            Do you need admin help or approval for this?
+            {t('updates.adminHelpHeading')}
           </Heading>
         </HStack>
         <Checkbox
@@ -330,7 +341,7 @@ export default function CreateUpdateInstrument({
           onChange={(e) => setNeedsAdminHelp(e.target.checked)}
           colorScheme="teal"
         >
-          Yes, this is a special request
+          {t('updates.specialRequest')}
         </Checkbox>
       </Box>
 
@@ -347,7 +358,7 @@ export default function CreateUpdateInstrument({
             size="sm"
             fontWeight="600"
           >
-            Add a note
+            {t('updates.addNoteHeading')}
           </Heading>
         </HStack>
         <Text
@@ -356,12 +367,12 @@ export default function CreateUpdateInstrument({
           fontWeight="500"
           mb={1}
         >
-          Notes
+          {t('common.notes')}
         </Text>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Add notes"
+          placeholder={t('updates.addNotesPlaceholder')}
           minH="100px"
         />
       </Box>

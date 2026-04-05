@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS user (
     date_created DATE NOT NULL,
     created_by BIGINT,
     picture TEXT,
+    preferred_language VARCHAR(10) NOT NULL DEFAULT 'en',
     CONSTRAINT fk_created_by
         FOREIGN KEY (created_by) REFERENCES user(id)
         ON DELETE SET NULL

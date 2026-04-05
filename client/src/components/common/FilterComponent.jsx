@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   Box,
@@ -8,68 +8,71 @@ import {
   Input,
   Select,
   Text,
-  VStack
-} from "@chakra-ui/react";
+  VStack,
+} from '@chakra-ui/react';
 
-import { HiOutlineTrash } from "react-icons/hi2";
+import { useTranslation } from 'react-i18next';
+import { HiOutlineTrash } from 'react-icons/hi2';
 
-const OPERATIONS = {
-  text: [
-    { label: "contains", value: "contains" },
-    { label: "equal to", value: "equals" },
-    { label: "does not contain", value: "does_not_contain" },
-  ],
-  number: [
-    { label: "equal to", value: "equals" },
-    { label: "greater than", value: "gt" },
-    { label: "less than", value: "lt" },
-    { label: "greater than or equal", value: "gte" },
-    { label: "less than or equal", value: "lte" },
-  ],
-  date: [
-    { label: "is", value: "is" },
-    { label: "before", value: "before" },
-    { label: "after", value: "after" },
-  ],
-  select: [
-    { label: "is", value: "equals" },
-    { label: "is not", value: "is_not" },
-  ],
-  list: [
-  { label: "contains", value: "contains_item" },
-],
-};
+function FilterComponent({ columns = [], onFilterChange }) {
+  const { t } = useTranslation();
 
+  const operations = useMemo(
+    () => ({
+      text: [
+        { label: t('filter.ops.contains'), value: 'contains' },
+        { label: t('filter.ops.equals'), value: 'equals' },
+        { label: t('filter.ops.doesNotContain'), value: 'does_not_contain' },
+      ],
+      number: [
+        { label: t('filter.ops.equals'), value: 'equals' },
+        { label: t('filter.ops.gt'), value: 'gt' },
+        { label: t('filter.ops.lt'), value: 'lt' },
+        { label: t('filter.ops.gte'), value: 'gte' },
+        { label: t('filter.ops.lte'), value: 'lte' },
+      ],
+      date: [
+        { label: t('filter.ops.is'), value: 'is' },
+        { label: t('filter.ops.before'), value: 'before' },
+        { label: t('filter.ops.after'), value: 'after' },
+      ],
+      select: [
+        { label: t('filter.ops.is'), value: 'equals' },
+        { label: t('filter.ops.isNot'), value: 'is_not' },
+      ],
+      list: [{ label: t('filter.ops.containsItem'), value: 'contains_item' }],
+    }),
+    [t]
+  );
 
-  function FilterComponent({ columns = [], onFilterChange }) {
-    const createDefaultFilter = () => {
-      const defaultCol = columns[0];
-      const defaultOps = defaultCol
-        ? OPERATIONS[defaultCol.type] || OPERATIONS.text
-        : OPERATIONS.text;
+  const createDefaultFilter = () => {
+    const defaultCol = columns[0];
+    const defaultOps = defaultCol
+      ? operations[defaultCol.type] || operations.text
+      : operations.text;
 
-      return {
-        id: crypto.randomUUID(),
-        logic: "and", // Used for rows > 0
-        column: defaultCol?.key || "",
-        operation: defaultOps[0]?.value || "",
-        value: "",
-      };
+    return {
+      id: crypto.randomUUID(),
+      logic: 'and', // Used for rows > 0
+      column: defaultCol?.key || '',
+      operation: defaultOps[0]?.value || '',
+      value: '',
     };
+  };
 
-    const [filters, setFilters] = useState([]);
-    const lastFilter = filters[filters.length - 1];
-    const isLastFilterIncomplete = lastFilter && lastFilter.value === "";
+  const [filters, setFilters] = useState([]);
+  const lastFilter = filters[filters.length - 1];
+  const isLastFilterIncomplete = lastFilter && lastFilter.value === '';
 
-    useEffect(() => {
-      if (onFilterChange) {
-        onFilterChange(filters);
-      }
-    }, [filters, onFilterChange]);
+  useEffect(() => {
+    if (onFilterChange) {
+      onFilterChange(filters);
+    }
+  }, [filters, onFilterChange]);
 
-    const addFilter = () => {
-      setFilters([...filters, createDefaultFilter()]);
-    };
+  const addFilter = () => {
+    setFilters([...filters, createDefaultFilter()]);
+  };
 
   const removeFilter = (id) => {
     setFilters(filters.filter((f) => f.id !== id));
@@ -82,14 +85,14 @@ const OPERATIONS = {
 
         const updatedFilter = { ...filter, [field]: newValue };
 
-        if (field === "column") {
+        if (field === 'column') {
           const selectedCol = columns.find((c) => c.key === newValue);
           const availableOps = selectedCol
-            ? OPERATIONS[selectedCol.type] || OPERATIONS.text
-            : OPERATIONS.text;
+            ? operations[selectedCol.type] || operations.text
+            : operations.text;
 
-          updatedFilter.operation = availableOps[0]?.value || "";
-          updatedFilter.value = "";
+          updatedFilter.operation = availableOps[0]?.value || '';
+          updatedFilter.value = '';
         }
 
         return updatedFilter;
@@ -108,14 +111,14 @@ const OPERATIONS = {
       );
 
     switch (columnConfig.type) {
-      case "select":
+      case 'select':
         return (
           <Select
             flex="1"
             value={filter.value}
-            onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
+            onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
           >
-            <option value="">Select option...</option>
+            <option value="">{t('common.selectOption')}</option>
             {columnConfig.options?.map((opt) => (
               <option
                 key={opt}
@@ -126,44 +129,44 @@ const OPERATIONS = {
             ))}
           </Select>
         );
-      case "date":
+      case 'date':
         return (
           <Input
             flex="1"
             type="date"
             value={filter.value}
-            onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
+            onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
           />
         );
-      case "number":
+      case 'number':
         return (
           <Input
             flex="1"
             type="number"
-            placeholder="0"
+            placeholder={t('filter.numberPlaceholder')}
             value={filter.value}
-            onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
+            onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
           />
         );
-      case "text":
+      case 'text':
       default:
         return (
           <Input
             flex="1"
             type="text"
-            placeholder="Enter value..."
+            placeholder={t('common.enterValue')}
             value={filter.value}
-            onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
+            onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
           />
         );
-      case "list":
+      case 'list':
         return (
           <Input
             flex="1"
             type="text"
-            placeholder="Enter value..."
+            placeholder={t('common.enterValue')}
             value={filter.value}
-            onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
+            onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
           />
         );
     }
@@ -185,7 +188,7 @@ const OPERATIONS = {
           color="gray.600"
           fontSize="sm"
         >
-          In this view, show records
+          {t('common.recordsHint')}
         </Text>
 
         <VStack
@@ -195,8 +198,8 @@ const OPERATIONS = {
           {filters.map((filter, index) => {
             const selectedCol = columns.find((c) => c.key === filter.column);
             const availableOps = selectedCol
-              ? OPERATIONS[selectedCol.type] || OPERATIONS.text
-              : OPERATIONS.text;
+              ? operations[selectedCol.type] || operations.text
+              : operations.text;
 
             return (
               <HStack
@@ -212,18 +215,18 @@ const OPERATIONS = {
                       fontWeight="medium"
                       pl={2}
                     >
-                      Where
+                      {t('common.where')}
                     </Text>
                   ) : (
                     <Select
                       size="md"
                       value={filter.logic}
                       onChange={(e) =>
-                        updateFilter(filter.id, "logic", e.target.value)
+                        updateFilter(filter.id, 'logic', e.target.value)
                       }
                     >
-                      <option value="and">And</option>
-                      <option value="or">Or</option>
+                      <option value="and">{t('common.and')}</option>
+                      <option value="or">{t('common.or')}</option>
                     </Select>
                   )}
                 </Box>
@@ -232,7 +235,7 @@ const OPERATIONS = {
                   flex="1"
                   value={filter.column}
                   onChange={(e) =>
-                    updateFilter(filter.id, "column", e.target.value)
+                    updateFilter(filter.id, 'column', e.target.value)
                   }
                 >
                   {columns.map((col) => (
@@ -241,7 +244,7 @@ const OPERATIONS = {
                       value={col.key}
                     >
                       {col.key
-                        .replace(/([A-Z])/g, " $1")
+                        .replace(/([A-Z])/g, ' $1')
                         .replace(/^./, (str) => str.toUpperCase())}
                     </option>
                   ))}
@@ -251,7 +254,7 @@ const OPERATIONS = {
                   flex="1"
                   value={filter.operation}
                   onChange={(e) =>
-                    updateFilter(filter.id, "operation", e.target.value)
+                    updateFilter(filter.id, 'operation', e.target.value)
                   }
                 >
                   {availableOps.map((op) => (
@@ -267,14 +270,14 @@ const OPERATIONS = {
                 {renderInput(filter)}
 
                 <IconButton
-                  aria-label="Remove filter"
+                  aria-label={t('common.filterRemove')}
                   icon={<HiOutlineTrash size={20} />}
                   variant="ghost"
                   colorScheme="gray"
                   color="gray.400"
-                  _hover={{ color: "red.500", bg: "red.50" }}
+                  _hover={{ color: 'red.500', bg: 'red.50' }}
                   onClick={() => removeFilter(filter.id)}
-                  title="Remove filter"
+                  title={t('common.filterRemove')}
                 />
               </HStack>
             );
@@ -289,7 +292,7 @@ const OPERATIONS = {
             onClick={addFilter}
             isDisabled={isLastFilterIncomplete}
           >
-            + Add Filter
+            {t('common.addFilter')}
           </Button>
         </Box>
       </VStack>

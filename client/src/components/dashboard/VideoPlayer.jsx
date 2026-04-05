@@ -19,6 +19,7 @@ import {
 } from '@chakra-ui/react';
 
 import { getYouTubeEmbedUrl } from '@/utils/youtube';
+import { useTranslation } from 'react-i18next';
 
 function VideoPlayer({
   playlist,
@@ -28,6 +29,7 @@ function VideoPlayer({
   setSelectedVideo,
 }) {
   const [isOpen, setIsOpen] = useState(true);
+  const { t } = useTranslation();
   return (
     <HStack
       align="flex-start"
@@ -51,7 +53,7 @@ function VideoPlayer({
           bg="teal.500"
           onClick={onBack}
         >
-          Back
+          {t('common.back')}
         </Button>
         <Box
           overflow="hidden"

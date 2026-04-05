@@ -1,5 +1,7 @@
 import {
   Box,
+  Button,
+  CloseButton,
   Heading,
   HStack,
   Icon,
@@ -15,6 +17,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
 import { BsPencilSquare } from 'react-icons/bs';
 import { FaTrophy, FaUserTimes } from 'react-icons/fa';
 import { FiUserPlus, FiUsers } from 'react-icons/fi';
@@ -28,6 +31,7 @@ export default function CreateUpdateStudent({
   notes,
   setNotes,
 }) {
+  const { t } = useTranslation();
   return (
     <>
       <Box>
@@ -120,12 +124,12 @@ export default function CreateUpdateStudent({
           fontWeight="500"
           mb={1}
         >
-          Number of students{' '}
+          {t('updates.numberOfStudents')}{' '}
           <Text
             as="span"
             color="red.500"
           >
-            *
+            {t('common.requiredStar')}
           </Text>
         </Text>
         <NumberInput
@@ -168,7 +172,7 @@ export default function CreateUpdateStudent({
             size="sm"
             fontWeight="600"
           >
-            Add a note
+            {t('updates.addNoteHeading')}
           </Heading>
         </HStack>
         <Text
@@ -177,12 +181,12 @@ export default function CreateUpdateStudent({
           fontWeight="500"
           mb={1}
         >
-          Notes
+          {t('common.notes')}
         </Text>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Add notes"
+          placeholder={t('updates.addNotesPlaceholder')}
           minH="100px"
         />
       </Box>

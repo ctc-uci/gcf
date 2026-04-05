@@ -14,12 +14,14 @@ import {
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 import { GrEdit } from 'react-icons/gr';
 import { MdAccountCircle } from 'react-icons/md';
 
 import { isoCodeToFlagIconCode } from '../../utils/isoCodeToFlagIconCode';
 
 export const RegionCard = ({ region, onEdit, countries }) => {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
   const [regionalDirector, setRegionalDirector] = useState(null);
 
@@ -62,7 +64,7 @@ export const RegionCard = ({ region, onEdit, countries }) => {
           fontWeight="semibold"
           color="gray.500"
         >
-          Regional Director
+          {t('regions.cardRegionalDirector')}
         </Text>
         <HStack ml="2">
           <Icon
@@ -74,7 +76,7 @@ export const RegionCard = ({ region, onEdit, countries }) => {
           <Text mb="2">
             {regionalDirector
               ? `${regionalDirector.firstName} ${regionalDirector.lastName}`
-              : 'N/A'}
+              : t('common.na')}
           </Text>
         </HStack>
         <Text
@@ -82,7 +84,7 @@ export const RegionCard = ({ region, onEdit, countries }) => {
           fontWeight="semibold"
           color="gray.500"
         >
-          Assigned Countries
+          {t('regions.cardAssignedCountries')}
         </Text>
         <Box
           overflowY="auto"
@@ -96,7 +98,7 @@ export const RegionCard = ({ region, onEdit, countries }) => {
           }}
         >
           {countries.length === 0 ? (
-            <Text>No countries assigned</Text>
+            <Text>{t('regions.noCountries')}</Text>
           ) : (
             countries.map((country) => {
               const flagCode = isoCodeToFlagIconCode(country.isoCode);
@@ -135,7 +137,7 @@ export const RegionCard = ({ region, onEdit, countries }) => {
         border="2px solid"
         borderColor="teal.500"
       >
-        Edit
+        {t('common.edit')}
       </Button>
     </Card>
   );

@@ -1,36 +1,24 @@
-import { useState } from 'react';
-
 import { EditIcon } from '@chakra-ui/icons';
 import {
   Avatar,
-  AvatarBadge,
-  AvatarGroup,
-  Badge,
   Box,
   Card,
   CardBody,
-  CardFooter,
   CardHeader,
-  Center,
   Divider,
-  Flex,
   Grid,
-  GridItem,
   HStack,
   IconButton,
-  Image,
   Link,
-  Stack,
   Tag,
   Text,
   VStack,
 } from '@chakra-ui/react';
 
 import ReactCardFlip from 'react-card-flip';
+import { useTranslation } from 'react-i18next';
 
-import GcfGlobe from '/gcf_globe.png';
-
-const BackCardView = ({ p, onClick }) => {
+const BackCardView = ({ p, onClick, t }) => {
   return (
     <Card
       h="100%"
@@ -55,7 +43,9 @@ const BackCardView = ({ p, onClick }) => {
           fontWeight="semibold"
           mt="4"
         >
-          PARTNER ORGANIZATION
+          {t('programCard.partnerOrganization', {
+            defaultValue: 'PARTNER ORGANIZATION',
+          })}
         </Text>
         <Text
           mt="2"
@@ -109,15 +99,21 @@ const BackCardView = ({ p, onClick }) => {
               fontWeight="semibold"
               pb="2px"
             >
-              REGIONAL DIRECTOR
+              {t('expandableProgramRow.regionalDirectors')}
             </Text>
 
             <HStack height="55px">
               <Avatar
                 size="sm"
-                name="Regional Director"
+                name={t('programCard.regionalDirectorPlaceholder', {
+                  defaultValue: 'Regional Director',
+                })}
               />
-              <Text textAlign="left">Regional Director</Text>
+              <Text textAlign="left">
+                {t('programCard.regionalDirectorPlaceholder', {
+                  defaultValue: 'Regional Director',
+                })}
+              </Text>
             </HStack>
           </VStack>
 
@@ -128,15 +124,21 @@ const BackCardView = ({ p, onClick }) => {
               fontWeight="semibold"
               pb="2px"
             >
-              PROGRAM DIRECTOR
+              {t('expandableProgramRow.programDirectors')}
             </Text>
 
             <HStack height="55px">
               <Avatar
                 size="sm"
-                name="Program Director"
+                name={t('programCard.programDirectorPlaceholder', {
+                  defaultValue: 'Program Director',
+                })}
               />
-              <Text textAlign="left">Program Director</Text>
+              <Text textAlign="left">
+                {t('programCard.programDirectorPlaceholder', {
+                  defaultValue: 'Program Director',
+                })}
+              </Text>
             </HStack>
           </VStack>
         </HStack>
@@ -148,7 +150,7 @@ const BackCardView = ({ p, onClick }) => {
           mt="4"
           pb="9px"
         >
-          CURRICULUM LINKS
+          {t('expandableProgramRow.curriculumLinks')}
         </Text>
 
         <HStack
@@ -197,7 +199,7 @@ const BackCardView = ({ p, onClick }) => {
             mt="4"
             pb="9px"
           >
-            FILES
+            {t('programCard.filesLabel', { defaultValue: 'FILES' })}
           </Text>
           <Tag
             size="md"
@@ -216,7 +218,7 @@ const BackCardView = ({ p, onClick }) => {
             mt="4"
             pb="9px"
           >
-            MAP MEDIA
+            {t('programCard.mapMediaLabel', { defaultValue: 'MAP MEDIA' })}
           </Text>
           <Tag
             size="md"
@@ -233,7 +235,7 @@ const BackCardView = ({ p, onClick }) => {
   );
 };
 
-const FrontCardView = ({ p, openEditForm, onClick }) => {
+const FrontCardView = ({ p, openEditForm, onClick, t }) => {
   return (
     <Card
       br={20}
@@ -257,7 +259,7 @@ const FrontCardView = ({ p, openEditForm, onClick }) => {
           fontWeight="semibold"
           mt="4"
         >
-          LAUNCH DATE
+          {t('programsTable.colLaunchDate')}
         </Text>
         <Text size="md">
           {new Date(p.launchDate).toLocaleDateString('en-US', {})}
@@ -278,11 +280,14 @@ const FrontCardView = ({ p, openEditForm, onClick }) => {
           right={2}
         >
           <IconButton
-            aria-label="edit"
+            aria-label={t('programCard.editAria')}
             icon={<EditIcon />}
             size="sm"
             variant="ghost"
-            onClick={(e) => { e.stopPropagation(); openEditForm(p); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditForm(p);
+            }}
             bg="#808080"
             borderRadius="full"
             color="white"
@@ -299,13 +304,19 @@ const FrontCardView = ({ p, openEditForm, onClick }) => {
           fontWeight="semibold"
           pb="2px"
         >
-          STUDENTS
+          {t('common.students')}
         </Text>
 
         <HStack height="25px">
-          <Text>{p.students} Total</Text>
+          <Text>
+            {p.students}{' '}
+            {t('programCard.totalSuffix', { defaultValue: 'Total' })}
+          </Text>
           <Divider orientation="vertical" />
-          <Text>{p.students} Graduated</Text>
+          <Text>
+            {p.students}{' '}
+            {t('programCard.graduatedSuffix', { defaultValue: 'Graduated' })}
+          </Text>
         </HStack>
 
         <Text
@@ -315,7 +326,7 @@ const FrontCardView = ({ p, openEditForm, onClick }) => {
           mt="4"
           pb="9px"
         >
-          INSTRUMENTS
+          {t('common.instruments')}
         </Text>
 
         <HStack
@@ -332,7 +343,10 @@ const FrontCardView = ({ p, openEditForm, onClick }) => {
             msOverflowStyle: 'none',
           }}
         >
-          <Text>{p.totalInstruments} Total</Text>
+          <Text>
+            {p.totalInstruments}{' '}
+            {t('programCard.totalSuffix', { defaultValue: 'Total' })}
+          </Text>
           <Divider orientation="vertical" />
           {Array.isArray(p.instrumentsMap)
             ? p.instrumentsMap.map((d, idx) => (
@@ -356,6 +370,8 @@ const FrontCardView = ({ p, openEditForm, onClick }) => {
 };
 
 const CardView = ({ data, flippedId, setFlippedId, openEditForm }) => {
+  const { t } = useTranslation();
+
   const handleFlip = (id) => {
     setFlippedId((prev) => (prev === id ? null : id));
   };
@@ -379,10 +395,12 @@ const CardView = ({ data, flippedId, setFlippedId, openEditForm }) => {
             p={item}
             openEditForm={openEditForm}
             onClick={() => handleFlip(item.id)}
+            t={t}
           />
           <BackCardView
             p={item}
             onClick={() => handleFlip(item.id)}
+            t={t}
           />
         </ReactCardFlip>
       ))}
