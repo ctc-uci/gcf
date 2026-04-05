@@ -45,7 +45,7 @@ countryRouter.get('/:id/region', async (req, res) => {
       [id]
     );
 
-    res.status(201).json(keysToCamel(regionName));
+    res.status(200).json(keysToCamel(regionName));
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');
