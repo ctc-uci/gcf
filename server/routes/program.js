@@ -164,7 +164,7 @@ programRouter.post('/', async (req, res) => {
       partnerOrg,
       status,
       launchDate,
-      languages
+      languages,
     } = req.body;
 
     const newProgram = await db.query(
@@ -201,7 +201,7 @@ programRouter.post('/', async (req, res) => {
         partnerOrg,
         status,
         launchDate,
-        languages
+        languages,
       ]
     );
 
@@ -226,7 +226,7 @@ programRouter.put('/:id', async (req, res) => {
       partnerOrg,
       status,
       launchDate,
-      languages
+      languages,
     } = req.body;
 
     const updatedProgram = await db.query(
