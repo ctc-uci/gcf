@@ -118,9 +118,17 @@ export default function CreateUpdateStudent({
             How many students are affected?
           </Heading>
         </HStack>
-        <Text color="gray.500" fontSize="sm" fontWeight="500" mb={1}>
+        <Text
+          color="gray.500"
+          fontSize="sm"
+          fontWeight="500"
+          mb={1}
+        >
           {t('updates.numberOfStudents')}{' '}
-          <Text as="span" color="red.500">
+          <Text
+            as="span"
+            color="red.500"
+          >
             {t('common.requiredStar')}
           </Text>
         </Text>

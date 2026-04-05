@@ -11,8 +11,11 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import 'flag-icons/css/flag-icons.min.css';
+
 import { useTranslation } from 'react-i18next';
 
+import { isoCodeToFlagIconCode } from '../../../utils/isoCodeToFlagIconCode';
 import { formatLaunchDate } from './programTableMappers';
 import { getInstrumentTagStyle } from './programTableTagConstants';
 import { StatusTag } from './StatusTag';
@@ -20,7 +23,7 @@ import { StatusTag } from './StatusTag';
 export function ExpandableProgramRow({ p, onEdit }) {
   const { t } = useTranslation();
   const { isOpen, onToggle } = useDisclosure();
-
+  const flagCode = isoCodeToFlagIconCode(p.isoCode);
   return (
     <>
       <Tr
@@ -38,40 +41,38 @@ export function ExpandableProgramRow({ p, onEdit }) {
           <StatusTag status={p.status} />
         </Td>
         <Td>{formatLaunchDate(p.launchDate)}</Td>
-        <Td>{p.location}</Td>
+        <Td>
+          {flagCode ? (
+            <>
+              <span
+                className={`fi fi-${flagCode}`}
+                aria-hidden="true"
+              />
+              {'  '}
+            </>
+          ) : null}
+          {p.location}
+        </Td>
         <Td>{p.students}</Td>
         <Td>
-          {Array.isArray(p.instruments) || Array.isArray(p.instrumentTypes) ? (
-            <HStack
-              spacing={2}
-              flexWrap="wrap"
-            >
-              {(Array.isArray(p.instruments)
-                ? p.instruments
-                : p.instrumentTypes
-              ).map((inst) => {
-                const style = getInstrumentTagStyle(inst.name);
-                return (
+          <VStack
+            align="start"
+            spacing={2}
+          >
+            {Array.isArray(p.instrumentsMap)
+              ? p.instrumentsMap.map((d, idx) => (
                   <Box
-                    key={`${inst.name}-${inst.quantity}`}
-                    as="span"
-                    display="inline-block"
-                    px={2}
-                    py={0.5}
-                    borderRadius="md"
-                    fontSize="sm"
-                    fontWeight="medium"
-                    bg={style.bg}
-                    color={style.color}
+                    key={`${d.name}-${d.quantity}-${idx}`}
+                    bg="gray.200"
+                    px={3}
+                    py={1}
+                    borderRadius="full"
                   >
-                    {inst.name} {inst.quantity}
+                    {d.name} {d.quantity}
                   </Box>
-                );
-              })}
-            </HStack>
-          ) : (
-            (p.instruments ?? '-')
-          )}
+                ))
+              : null}
+          </VStack>
         </Td>
         <Td>{p.totalInstruments}</Td>
       </Tr>

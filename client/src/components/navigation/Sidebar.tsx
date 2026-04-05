@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+
 import { Box, Button, Flex, Icon, Image, Link, VStack } from '@chakra-ui/react';
 
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
@@ -11,15 +13,13 @@ import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { SIDEBAR_WIDTH } from './layoutConstants';
 import logo from '/logo.png';
 
-import { useEffect, useRef } from 'react';
-
 const AutoFitText = ({ children }) => {
   const ref = useRef(null);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    
+
     el.style.fontSize = '1rem';
     const ratio = el.clientWidth / el.scrollWidth;
     if (ratio < 1) {

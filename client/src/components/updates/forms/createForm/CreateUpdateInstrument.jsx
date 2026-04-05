@@ -23,7 +23,6 @@ import {
 } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
-
 import { BsMusicNoteList, BsPencilSquare } from 'react-icons/bs';
 import { FaScrewdriverWrench } from 'react-icons/fa6';
 import {
@@ -248,7 +247,7 @@ export default function CreateUpdateInstrument({
           fontSize="sm"
           mb={2}
         >
-           {t('updates.photosHelp')}
+          {t('updates.photosHelp')}
         </Text>
         {uploadedMedia.length > 0 && (
           <HStack

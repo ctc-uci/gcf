@@ -62,7 +62,9 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
 
     const fetchMedia = async () => {
       try {
-        const mediaChanges = await backend.get(`/mediaChange/update/${updateId}`);
+        const mediaChanges = await backend.get(
+          `/mediaChange/update/${updateId}`
+        );
         const data = mediaChanges.data;
 
         const response = await Promise.all(
@@ -81,116 +83,116 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
 
   return (
     <>
-    <Drawer
-      isOpen={true}
-      onClose={onClose}
-      placement="right"
-      size={isFullScreen ? 'full' : 'lg'}
-    >
-      <DrawerOverlay />
-      <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
-        <Flex
-          position="absolute"
-          top={3}
-          left={3}
-          zIndex={1}
-        >
-          <IconButton
-            icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
-            aria-label={
-              isFullScreen
-                ? t('fullscreenFlyout.minimize')
-                : t('fullscreenFlyout.expand')
-            }
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsFullScreen(!isFullScreen)}
-          />
-        </Flex>
-
-        <Box
-          pt={6}
-          pb={2}
-          px={8}
-        >
-          <Text
-            fontSize="xl"
-            fontWeight="600"
-            textAlign="center"
+      <Drawer
+        isOpen={true}
+        onClose={onClose}
+        placement="right"
+        size={isFullScreen ? 'full' : 'lg'}
+      >
+        <DrawerOverlay />
+        <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
+          <Flex
+            position="absolute"
+            top={3}
+            left={3}
+            zIndex={1}
           >
-            {t('updates.mediaUpdateTitle')}
-          </Text>
-          <Divider mt={3} />
-        </Box>
+            <IconButton
+              icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
+              aria-label={
+                isFullScreen
+                  ? t('fullscreenFlyout.minimize')
+                  : t('fullscreenFlyout.expand')
+              }
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsFullScreen(!isFullScreen)}
+            />
+          </Flex>
 
-        <DrawerBody
-          px={8}
-          pb={24}
-        >
-          <VStack
-            spacing={6}
-            align="stretch"
-            mt={4}
+          <Box
+            pt={6}
+            pb={2}
+            px={8}
           >
-            <Grid
-              templateColumns="repeat(3, 1fr)"
-              gap={6}
+            <Text
+              fontSize="xl"
+              fontWeight="600"
+              textAlign="center"
             >
-              <GridItem>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={1}
-                >
-                  {t('updates.colAuthor')}
-                </Text>
-                <HStack spacing={1}>
-                  <Icon
-                    as={FiUser}
-                    boxSize={4}
-                    color="gray.400"
-                  />
-                  <Text>
-                    {update?.firstName} {update?.lastName}
-                  </Text>
-                </HStack>
-              </GridItem>
-              <GridItem>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={1}
-                >
-                  {t('updates.colProgram')}
-                </Text>
-                <Text>{update?.programName ?? ''}</Text>
-              </GridItem>
-              <GridItem>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={1}
-                >
-                  {t('common.time')}
-                </Text>
-                <Text>{update?.updateDate ?? ''}</Text>
-              </GridItem>
-            </Grid>
+              {t('updates.mediaUpdateTitle')}
+            </Text>
+            <Divider mt={3} />
+          </Box>
 
-            <Box>
-              <Text
-                color="teal.500"
-                fontSize="sm"
-                fontWeight="500"
-                mb={2}
+          <DrawerBody
+            px={8}
+            pb={24}
+          >
+            <VStack
+              spacing={6}
+              align="stretch"
+              mt={4}
+            >
+              <Grid
+                templateColumns="repeat(3, 1fr)"
+                gap={6}
               >
-                {t('common.note')}
-              </Text>
-              <Text>{update?.note || ''}</Text>
-            </Box>
+                <GridItem>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={1}
+                  >
+                    {t('updates.colAuthor')}
+                  </Text>
+                  <HStack spacing={1}>
+                    <Icon
+                      as={FiUser}
+                      boxSize={4}
+                      color="gray.400"
+                    />
+                    <Text>
+                      {update?.firstName} {update?.lastName}
+                    </Text>
+                  </HStack>
+                </GridItem>
+                <GridItem>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={1}
+                  >
+                    {t('updates.colProgram')}
+                  </Text>
+                  <Text>{update?.programName ?? ''}</Text>
+                </GridItem>
+                <GridItem>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={1}
+                  >
+                    {t('common.time')}
+                  </Text>
+                  <Text>{update?.updateDate ?? ''}</Text>
+                </GridItem>
+              </Grid>
+
+              <Box>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={2}
+                >
+                  {t('common.note')}
+                </Text>
+                <Text>{update?.note || ''}</Text>
+              </Box>
 
               <Box>
                 <Text
@@ -251,11 +253,8 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
             gap={3}
           >
             <Button
-           
               variant="outline"
-           
               onClick={handleKeepUnresolved}
-          
             >
               {t('common.keepUnresolved')}
             </Button>

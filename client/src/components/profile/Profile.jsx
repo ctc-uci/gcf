@@ -289,6 +289,19 @@ export const Profile = () => {
     );
   }
 
+  if (!gcfUser) {
+    return (
+      <Box
+        p={10}
+        bg="gray.50"
+        minH="94vh"
+        mx={-4}
+      >
+        <Text>Unable to load your profile. Please try again later.</Text>
+      </Box>
+    );
+  }
+
   const profilePicture =
     gcfUser.picture && gcfUser.picture.trim() !== ''
       ? gcfUser.picture

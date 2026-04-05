@@ -24,6 +24,7 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
+import { FaUser } from 'react-icons/fa6';
 import {
   FiMaximize2,
   FiMinimize2,
@@ -31,8 +32,6 @@ import {
   FiTrash2,
   FiUser,
 } from 'react-icons/fi';
-
-import { FaUser } from 'react-icons/fa6';
 import { IoMusicalNoteSharp } from 'react-icons/io5';
 
 import { MediaUploadModal } from '../../../media/MediaUploadModal';
@@ -711,9 +710,7 @@ export const CreateUpdateDrawer = ({
                   fontWeight="600"
                   mb={3}
                 >
-                  {isEditMode
-                    ? 'Update type'
-                    : t('updates.createTypeQuestion')}
+                  {isEditMode ? 'Update type' : t('updates.createTypeQuestion')}
                 </Heading>
                 {isEditMode ? (
                   <Text
@@ -803,7 +800,7 @@ export const CreateUpdateDrawer = ({
                   boxSize={4}
                   mr={1}
                 />{' '}
-                 {t('updates.deleteDraft')}
+                {t('updates.deleteDraft')}
               </Button>
             ) : (
               <Box aria-hidden />

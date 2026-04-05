@@ -229,7 +229,9 @@ export const MediaUpdatesTable = ({
                         bg="teal.500"
                         color="white"
                       />
-                      <Text fontSize="sm">{authorDisplayName(row) || t('common.name')}</Text>
+                      <Text fontSize="sm">
+                        {authorDisplayName(row) || t('common.name')}
+                      </Text>
                     </HStack>
                   </Td>
                   <Td>

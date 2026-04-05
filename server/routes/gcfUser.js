@@ -338,7 +338,7 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
 const ALLOWED_PREFERRED_LANGUAGES = new Set(['en', 'es', 'fr', 'zh']);
 
 function normalizePreferredLanguage(raw) {
-  if (raw == null) return '';
+  if (raw === null) return '';
   const s = String(raw).trim().toLowerCase();
   // custom filtering here if needed
   return s;
@@ -352,7 +352,7 @@ gcfUserRouter.patch('/:id/preferred-language', async (req, res) => {
     }
 
     const tokenUid = res.locals.decodedToken?.uid;
-    if (tokenUid != null && tokenUid !== id) {
+    if (tokenUid !== null && tokenUid !== id) {
       return res.status(403).json({
         error: "Cannot change another user's language preference",
       });
