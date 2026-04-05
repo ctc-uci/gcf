@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Button,
   Center,
   FormControl,
   FormLabel,
-  Select,
   Textarea,
   useToast,
   VStack,
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+
 import { MediaPreview } from './MediaPreview';
 
 export function MediaPreviewList({ files, onComplete, formOrigin }) {
@@ -20,25 +20,7 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
   const [isUploading, setIsUploading] = useState(false);
 
   const [titles, setTitles] = useState([]);
-  const [instruments, setInstruments] = useState([]);
-  const [folder, setFolder] = useState('');
   const [description, setDescription] = useState('');
-
-  useEffect(() => {
-    async function fetchInstruments() {
-      try {
-        const response = await backend.get('/instruments');
-        const data = response.data || [];
-        const unique = Array.from(
-          new Map(data.map((i) => [i.name, i])).values()
-        );
-        setInstruments(unique);
-      } catch (err) {
-        console.error('Failed to fetch instruments:', err);
-      }
-    }
-    fetchInstruments();
-  }, [backend]);
 
   // keep titles array in sync with files prop
   useEffect(() => {
@@ -94,7 +76,6 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
           file_type: file.type,
           title: titles[i],
           description: description,
-          instrument_id: null,
         });
       }
 
@@ -125,9 +106,18 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
   };
 
   return (
-    <VStack spacing={6} align="stretch">
-      <VStack spacing={0} align="stretch">
-        <FormLabel color="gray.500" fontWeight="bold">
+    <VStack
+      spacing={6}
+      align="stretch"
+    >
+      <VStack
+        spacing={0}
+        align="stretch"
+      >
+        <FormLabel
+          color="gray.500"
+          fontWeight="bold"
+        >
           Uploaded Files
         </FormLabel>
         {files.map((file, i) => (
@@ -140,41 +130,24 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
         ))}
       </VStack>
       {formOrigin !== 'profile' && (
-        <>
-          <FormControl>
-            <FormLabel color="gray.500" fontWeight="normal" mb={1}>
-              Select Folder
-            </FormLabel>
-            <Select
-              border="2px solid"
-              borderRadius="md"
-              borderColor="gray.100"
-              value={folder}
-              onChange={(e) => setFolder(e.target.value)}
-              placeholder="Instrument"
-            >
-              {instruments.map((inst) => (
-                <option key={inst.id} value={inst.id}>
-                  {inst.name}
-                </option>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl>
-            <FormLabel color="gray.500" fontWeight="normal" mb={1}>
-              Notes
-            </FormLabel>
-            <Textarea
-              border="2px solid"
-              borderRadius="md"
-              borderColor="gray.100"
-              rows={3}
-              value={description}
-              placeholder="Add Notes"
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </FormControl>
-        </>
+        <FormControl>
+          <FormLabel
+            color="gray.500"
+            fontWeight="normal"
+            mb={1}
+          >
+            Notes
+          </FormLabel>
+          <Textarea
+            border="2px solid"
+            borderRadius="md"
+            borderColor="gray.100"
+            rows={3}
+            value={description}
+            placeholder="Add Notes"
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </FormControl>
       )}
       <Center pt={4}>
         <Button

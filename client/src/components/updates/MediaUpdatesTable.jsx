@@ -1,17 +1,12 @@
-import { useMemo, useState, useEffect } from 'react';
+//TODO: check this again
+import { useEffect, useMemo, useState } from 'react';
 
-import { DownloadIcon, HamburgerIcon, SearchIcon } from '@chakra-ui/icons';
 import {
+  Avatar,
   Badge,
   Box,
   Center,
-  Flex,
-  Heading,
-  IconButton,
-  Input,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+  HStack,
   Spinner,
   Table,
   TableContainer,
@@ -22,81 +17,68 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
-import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 
-import {
-  downloadCsv,
-  escapeCsvValue,
-  getFilenameTimestamp,
-} from '@/utils/downloadCsv';
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
-import { FilterComponent } from '../common/FilterComponent';
 import { SortArrows } from '../tables/SortArrows';
-import { ReviewMediaUpdate } from './ReviewMediaUpdate';
+import { ReviewMediaUpdate } from './forms/ReviewMediaUpdate';
 
-export function downloadMediaUpdatesAsCsv(data) {
-  const headers = ['Time', 'Notes', 'Program', 'Author', 'Status'];
-  const rows = (data || []).map((row) => [
-    escapeCsvValue(row.updateDate),
-    escapeCsvValue(row.note),
-    escapeCsvValue(row.programName),
-    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
-    escapeCsvValue(row.status),
-  ]);
-  downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
-}
+const authorDisplayName = (row) =>
+  [row.firstName, row.lastName].filter(Boolean).join(' ').trim() ||
+  row.fullName?.trim() ||
+  '';
 
-export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const columns = [
-    {
-      key: 'updateDate',
-      type: 'date',
-    },
-    {
-      key: 'note',
-      type: 'text',
-    },
-    {
-      key: 'programName',
-      type: 'text',
-    },
-    {
-      key: 'fullName',
-      type: 'text',
-    },
-    {
-      key: 'status',
-      type: 'select',
-      options: ['Approved', 'Archived', 'Unread'],
-    },
-  ];
-  const [activeFilters, setActiveFilters] = useState([]);
+const StatusBadge = ({ status }) => {
+  const isResolved =
+    status?.toLowerCase() === 'resolved' ||
+    status?.toLowerCase() === 'approved' ||
+    status?.toLowerCase() === 'active';
+  return (
+    <Badge
+      bg={isResolved ? 'gray.100' : 'red.100'}
+      color={isResolved ? 'gray.700' : 'red.700'}
+      borderRadius="md"
+      px={2}
+      py={0.5}
+      fontSize="xs"
+      fontWeight="500"
+      textTransform="capitalize"
+    >
+      {isResolved ? 'Resolved' : 'Unresolved'}
+    </Badge>
+  );
+};
 
-  const sourceData = data ?? originalData ?? [];
+export const MediaUpdatesTable = ({
+  data,
+  setData,
+  originalData,
+  isLoading,
+  searchQuery = '',
+  embedded: _embedded = false,
+  activeFilters: externalFilters,
+}) => {
+  const [internalFilters] = useState([]);
+  const activeFilters = externalFilters ?? internalFilters;
 
   const filteredData = useMemo(
-    () => applyFilters(activeFilters, sourceData),
-    [activeFilters, sourceData]
+    () => applyFilters(activeFilters, data ?? originalData ?? []),
+    [activeFilters, data, originalData]
   );
 
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
-  };
-
   const displayData = useMemo(() => {
-    if (searchQuery === '') {
-      return filteredData;
-    }
-    return filteredData.filter(
-      (update) =>
-        update.updateDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        update.note.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        update.programName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        update.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        update.status.includes(searchQuery.toLowerCase())
-    );
+    if (!searchQuery) return filteredData;
+    const q = searchQuery.toLowerCase();
+    return filteredData.filter((update) => {
+      const author = (authorDisplayName(update) || '').toLowerCase();
+      return (
+        (update.note || '').toLowerCase().includes(q) ||
+        (update.programName || '').toLowerCase().includes(q) ||
+        author.includes(q) ||
+        (update.status || '').toLowerCase().includes(q) ||
+        (update.updateDate || '').toLowerCase().includes(q)
+      );
+    });
   }, [searchQuery, filteredData]);
 
   const [sortedData, setSortedData] = useState(null);
@@ -110,75 +92,83 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
   const tableData = sortedData ?? displayData;
 
   return (
-    <Box mt="30px" ml="10px">
-      <Flex gap={10} mb="20px" align="center">
-        <Heading>Media Updates</Heading>
-        <SearchIcon mt="10px" ml="10px" />
-        <Input
-          placeholder="Type to search"
-          variant="flushed"
-          w="200px"
-          value={searchQuery}
-          onChange={handleSearch}
-        />
-        <Popover>
-          <PopoverTrigger>
-            <IconButton
-              aria-label="filter"
-              icon={<HiOutlineAdjustmentsHorizontal />}
-              size="sm"
-              variant="ghost"
-            />
-          </PopoverTrigger>
-          <PopoverContent w="800px" maxW="90vw" shadow="xl">
-            <FilterComponent
-              columns={columns}
-              onFilterChange={(filters) => {
-                setActiveFilters(filters);
-              }}
-            />
-          </PopoverContent>
-        </Popover>
-        <Text fontSize="sm" color="gray.500">
-          Displaying {tableData.length} results
-        </Text>
-        <IconButton
-          aria-label="menu"
-          icon={<HamburgerIcon />}
-          size="sm"
-          variant="ghost"
-        />
-        <IconButton
-          aria-label="Download"
-          icon={<DownloadIcon />}
-          size="sm"
-          variant="ghost"
-          onClick={() => downloadMediaUpdatesAsCsv(tableData)}
-        />
-      </Flex>
-
-      <TableContainer overflowX="auto" maxW="100%">
+    <Box position="relative">
+      <TableContainer
+        overflowX="auto"
+        maxW="100%"
+      >
         <Table variant="simple">
           <Thead>
-            {/* { TODO: implement interface for row data to avoid hardcoding keys in handleSort call } */}
             <Tr>
-              <Th onClick={() => handleSort('updateDate')} cursor="pointer">
-                Time{' '}
-                <SortArrows columnKey={'updateDate'} sortOrder={sortOrder} />{' '}
+              <Th
+                onClick={() => handleSort('note')}
+                cursor="pointer"
+                color="gray.500"
+                fontSize="xs"
+                textTransform="uppercase"
+                fontWeight="600"
+              >
+                Update Note
+                <SortArrows
+                  columnKey="note"
+                  sortOrder={sortOrder}
+                />
               </Th>
-              <Th onClick={() => handleSort('note')} cursor="pointer">
-                Notes <SortArrows columnKey={'note'} sortOrder={sortOrder} />{' '}
+              <Th
+                onClick={() => handleSort('status')}
+                cursor="pointer"
+                color="gray.500"
+                fontSize="xs"
+                textTransform="uppercase"
+                fontWeight="600"
+              >
+                Status
+                <SortArrows
+                  columnKey="status"
+                  sortOrder={sortOrder}
+                />
               </Th>
-              <Th onClick={() => handleSort('programName')} cursor="pointer">
-                Program{' '}
-                <SortArrows columnKey={'programName'} sortOrder={sortOrder} />{' '}
+              <Th
+                onClick={() => handleSort('fullName')}
+                cursor="pointer"
+                color="gray.500"
+                fontSize="xs"
+                textTransform="uppercase"
+                fontWeight="600"
+              >
+                Author
+                <SortArrows
+                  columnKey="fullName"
+                  sortOrder={sortOrder}
+                />
               </Th>
-              <Th onClick={() => handleSort('firstName')} cursor="pointer">
-                Author{' '}
-                <SortArrows columnKey={'firstName'} sortOrder={sortOrder} />{' '}
+              <Th
+                onClick={() => handleSort('programName')}
+                cursor="pointer"
+                color="gray.500"
+                fontSize="xs"
+                textTransform="uppercase"
+                fontWeight="600"
+              >
+                Program
+                <SortArrows
+                  columnKey="programName"
+                  sortOrder={sortOrder}
+                />
               </Th>
-              <Th onClick={() => handleSort('status')} cursor="pointer">
-                Status <SortArrows columnKey={'status'} sortOrder={sortOrder} />{' '}
+              <Th
+                onClick={() => handleSort('updateDate')}
+                cursor="pointer"
+                color="gray.500"
+                fontSize="xs"
+                textTransform="uppercase"
+                fontWeight="600"
+              >
+                Date
+                <SortArrows
+                  columnKey="updateDate"
+                  sortOrder={sortOrder}
+                />
               </Th>
             </Tr>
           </Thead>
@@ -193,20 +183,49 @@ export const MediaUpdatesTable = ({ data, setData, originalData, isLoading }) =>
               </Tr>
             ) : (
               tableData.map((row) => (
-                <Tr key={row.id}>
-                  <Td>{row.updateDate}</Td>
-                  <Td>{row.note}</Td>
-                  <Td>{row.programName}</Td>
+                <Tr
+                  key={row.id}
+                  cursor="pointer"
+                  _hover={{ bg: 'gray.50' }}
+                  onClick={() => setSelectedUpdate(row)}
+                >
                   <Td>
-                    {row.firstName} {row.lastName}
+                    <Text
+                      noOfLines={1}
+                      maxW="400px"
+                    >
+                      {row.note || 'Note about the program...'}
+                    </Text>
                   </Td>
                   <Td>
-                    <Badge
-                      cursor="pointer"
-                      onClick={() => setSelectedUpdate(row)}
+                    <StatusBadge status={row.status} />
+                  </Td>
+                  <Td>
+                    <HStack spacing={2}>
+                      <Avatar
+                        size="xs"
+                        name={authorDisplayName(row) || undefined}
+                        bg="teal.500"
+                        color="white"
+                      />
+                      <Text fontSize="sm">{authorDisplayName(row) || '—'}</Text>
+                    </HStack>
+                  </Td>
+                  <Td>
+                    <Text
+                      fontSize="sm"
+                      fontWeight="500"
                     >
-                      {row.status}
-                    </Badge>
+                      {row.programName || ''}
+                    </Text>
+                  </Td>
+                  <Td>
+                    <Text
+                      fontSize="sm"
+                      color="gray.600"
+                    >
+                      {row.updateDate || ''}
+                    </Text>
                   </Td>
                 </Tr>
               ))

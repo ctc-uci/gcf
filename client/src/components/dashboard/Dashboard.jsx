@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { Box, Flex } from '@chakra-ui/react';
 
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
@@ -14,12 +15,23 @@ const Dashboard = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
 
   return (
-    <Flex direction="column" minH="100vh" gap={6} as="main" p={10} w>
+    <Flex
+      direction="column"
+      minH="100vh"
+      gap={6}
+      as="main"
+      p={10}
+      w="100%"
+    >
       {!selectedPlaylist && (
         <StatisticsSummary refreshTrigger={statsRefreshTrigger} />
       )}
 
-      <Box as="section">
+      <Box
+        as="section"
+        w="100%"
+        maxW="100%"
+      >
         {(role === 'Super Admin' ||
           role === 'Admin' ||
           role === 'Regional Director') && (

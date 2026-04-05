@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
-import { GetCity, GetState } from 'react-country-state-city';
+import { GetCity, GetCountries, GetState } from 'react-country-state-city';
 
 import 'react-country-state-city/dist/react-country-state-city.css';
 
@@ -27,12 +27,27 @@ export function LocationForm({ formState, setFormData }) {
   const { role } = useRoleContext();
 
   const userId = currentUser?.uid;
-  const isStateless = STATELESS_COUNTRIES.has(Number(formState.country));
 
+  const [libraryCountries, setLibraryCountries] = useState([]);
   const [countriesList, setCountriesList] = useState([]);
   const [regionList, setRegionList] = useState([]);
   const [stateList, setStateList] = useState([]);
   const [cityList, setCityList] = useState([]);
+
+  const selectedBackendCountry = formState.country
+    ? countriesList.find((c) => Number(c.id) === Number(formState.country))
+    : null;
+  const isoCode = selectedBackendCountry?.isoCode ?? null;
+  const libraryCountry = isoCode
+    ? libraryCountries.find(
+        (c) => String(c.iso3).toUpperCase() === String(isoCode).toUpperCase()
+      )
+    : null;
+  const libraryCountryId = libraryCountry?.id ?? null;
+
+  // Use library country id with hardcoded set (library's ids for countries that have no states)
+  const isStateless =
+    libraryCountryId !== null && STATELESS_COUNTRIES.has(libraryCountryId);
 
   useEffect(() => {
     async function getRegions() {
@@ -62,6 +77,10 @@ export function LocationForm({ formState, setFormData }) {
   }, [formState.regionId, role, userId, backend]);
 
   useEffect(() => {
+    GetCountries().then((list) => setLibraryCountries(list ?? []));
+  }, []);
+
+  useEffect(() => {
     async function getCountries() {
       try {
         const id = formState.regionId;
@@ -75,28 +94,35 @@ export function LocationForm({ formState, setFormData }) {
   }, [formState.regionId, backend, role, userId]);
 
   useEffect(() => {
-    if (formState.country) {
-      GetState(parseInt(formState.country)).then((result) => {
-        setStateList(result);
+    if (libraryCountryId !== null) {
+      GetState(parseInt(libraryCountryId, 10)).then((result) => {
+        setStateList(result ?? []);
       });
+    } else {
+      setStateList([]);
     }
-  }, [formState.country]);
+  }, [libraryCountryId]);
 
   useEffect(() => {
-    if (formState.country && formState.state) {
+    if (libraryCountryId !== null && formState.state) {
       const selectedState = stateList.find(
         (state) => state.id === formState.state
       );
 
       if (selectedState?.hasCities) {
-        GetCity(parseInt(formState.country), parseInt(selectedState.id)).then(
-          (result) => {
-            setCityList(result);
-          }
-        );
+        GetCity(
+          parseInt(libraryCountryId, 10),
+          parseInt(selectedState.id, 10)
+        ).then((result) => {
+          setCityList(result ?? []);
+        });
+      } else {
+        setCityList([]);
       }
+    } else {
+      setCityList([]);
     }
-  }, [formState.country, formState.state, stateList]);
+  }, [libraryCountryId, formState.state, stateList]);
 
   function handleRegionChange(selectedRegion) {
     setFormData({ ...formState, regionId: selectedRegion, country: null });
@@ -165,7 +191,7 @@ export function LocationForm({ formState, setFormData }) {
       </GridItem>
 
       <GridItem>
-        {formState.country && (
+        {formState.country && stateList.length > 0 && (
           <Select
             onChange={(e) => handleStateChange(e.target.value)}
             value={formState.state || ''}
@@ -186,7 +212,7 @@ export function LocationForm({ formState, setFormData }) {
       </GridItem>
 
       <GridItem>
-        {formState.state && !isStateless && (
+        {formState.state && !isStateless && cityList.length > 0 && (
           <Select
             onChange={(e) => handleCityChange(e.target.value)}
             value={formState.city || ''}

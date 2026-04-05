@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import {
   Box,
   Image,
@@ -7,6 +8,7 @@ import {
   TagCloseButton,
   TagLabel,
 } from '@chakra-ui/react';
+
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
 export function MediaPreviewTag({ item, onRemove }) {
@@ -38,7 +40,12 @@ export function MediaPreviewTag({ item, onRemove }) {
   const isVideo = item.file_type?.startsWith('video/');
 
   return (
-    <Tag maxW="250px" p={2} borderRadius="md" size="lg">
+    <Tag
+      maxW="250px"
+      p={2}
+      borderRadius="md"
+      size="lg"
+    >
       <Box
         w="2.5rem"
         h="2.5rem"
@@ -70,7 +77,10 @@ export function MediaPreviewTag({ item, onRemove }) {
         )}
       </Box>
 
-      <TagLabel isTruncated title={item.file_name}>
+      <TagLabel
+        isTruncated
+        title={item.file_name}
+      >
         {item.file_name}
       </TagLabel>
       <TagCloseButton onClick={onRemove} />

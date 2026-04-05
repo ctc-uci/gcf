@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { AddIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -51,7 +52,6 @@ export const Media = () => {
           file_type: file.file_type || 'image',
           is_thumbnail: false,
           description: file.description,
-          instrument_id: file.instrument_id,
         });
 
         const urlResponse = await backend.get(
@@ -126,25 +126,41 @@ export const Media = () => {
 
   return (
     <Box minH="100vh">
-      <Container maxW="container.xl" py={8}>
-        <Box borderRadius="lg" p={8}>
-          <VStack align="start" spacing={6} w="full">
-            <Heading size="xl" color="gray.800">
-              {programName} Media
+      <Container
+        maxW="container.xl"
+        py={8}
+      >
+        <Box
+          borderRadius="lg"
+          p={8}
+        >
+          <VStack
+            align="start"
+            spacing={6}
+            w="full"
+          >
+            <Heading
+              size="xl"
+              color="gray.800"
+            >
+              My Media
             </Heading>
 
             <Button
-              variant="outline"
-              bg="white"
-              borderColor="gray.800"
-              color="gray.800"
-              _hover={{ bg: 'gray.50' }}
+              size="sm"
+              leftIcon={<AddIcon />}
+              backgroundColor="teal.500"
+              color="white"
+              _hover={{ backgroundColor: 'teal.600' }}
               onClick={onOpen}
             >
-              + New
+              New
             </Button>
 
-            <MediaGrid mediaItems={media} programName={programName} />
+            <MediaGrid
+              mediaItems={media}
+              programName={programName}
+            />
           </VStack>
         </Box>
       </Container>

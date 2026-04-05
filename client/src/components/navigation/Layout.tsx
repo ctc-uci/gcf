@@ -1,25 +1,38 @@
-import { Box } from '@chakra-ui/react';
+import { Box, Flex } from '@chakra-ui/react';
 
 import { Outlet } from 'react-router-dom';
 
-import { NAVBAR_HEIGHT, SIDEBAR_WIDTH } from './layoutConstants';
 import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
 
 export const Layout = () => {
   return (
-    <>
-      <Navbar />
+    <Flex
+      bg="gray.50"
+      minHeight="100vh"
+      minW={0}
+      w="100%"
+      maxW="100%"
+      padding={6}
+      gap={6}
+    >
       <Sidebar />
       <Box
-        as="main"
-        marginLeft={SIDEBAR_WIDTH}
-        paddingTop={NAVBAR_HEIGHT}
-        minHeight="100vh"
-        paddingX={4}
+        flex="1"
+        minW={0}
+        display="flex"
+        flexDirection="column"
       >
-        <Outlet />
+        <Navbar />
+        <Box
+          as="main"
+          mt={6}
+          flex="1"
+          minW={0}
+        >
+          <Outlet />
+        </Box>
       </Box>
-    </>
+    </Flex>
   );
 };
