@@ -119,7 +119,12 @@ export function LocationLanguageSection({
   const libraryCountryId = libraryCountry?.id ?? null;
 
   useEffect(() => {
-    GetCountries().then((list) => setLibraryCountries(list ?? []));
+    GetCountries()
+      .then((list) => setLibraryCountries(list ?? []))
+      .catch((err) => {
+        console.error('Error fetching library countries:', err);
+        setLibraryCountries([]);
+      });
   }, []);
 
   useEffect(() => {
