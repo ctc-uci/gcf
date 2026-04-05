@@ -777,7 +777,7 @@ export const ProgramUpdateEditForm = ({ programUpdateId }) => {
               size="sm"
               variant="outline"
             >
-              + Add
+              {t('common.add')}
             </Button>
           </FormControl>
 
