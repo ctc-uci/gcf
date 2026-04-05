@@ -70,8 +70,8 @@ export const ProgramForm = ({
     launchDate: null,
     regionId: null,
     country: null,
+    countryIsoCode: null,
     city: null,
-    mockCity: '',
     state: null,
     students: 0,
     graduatedStudents: 0,
@@ -106,9 +106,9 @@ export const ProgramForm = ({
           launchDate: null,
           regionId: null,
           country: null,
+          countryIsoCode: null,
           state: null,
           city: null,
-          mockCity: '',
           students: 0,
           graduatedStudents: 0,
           instruments: {},
@@ -125,20 +125,41 @@ export const ProgramForm = ({
         return;
       }
 
-      let regionId = null;
+      let record = program;
+      try {
+        const { data } = await backend.get(`/program/${program.id}`);
+        record = {
+          ...program,
+          ...data,
+          programDirectors: program.programDirectors ?? [],
+          regionalDirectors: program.regionalDirectors ?? [],
+          playlists: program.playlists ?? [],
+          media: program.media ?? [],
+        };
+      } catch (err) {
+        console.error('ProgramForm: could not load program details', err);
+      }
 
-      if (program.country) {
+      let regionId = null;
+      let countryIsoCode = null;
+
+      if (record.country) {
         try {
           const countryResponse = await backend.get(
-            `/country/${program.country}`
+            `/country/${record.country}`
           );
           regionId = countryResponse.data.regionId;
+          const rawIso =
+            countryResponse.data.isoCode ?? countryResponse.data.iso_code;
+          if (rawIso != null && String(rawIso).trim() !== '') {
+            countryIsoCode = String(rawIso).trim().toUpperCase();
+          }
         } catch (error) {
           console.error('error fetching country/region', error);
         }
       }
 
-      const mappedProgramDirectors = (program.programDirectors ?? []).map(
+      const mappedProgramDirectors = (record.programDirectors ?? []).map(
         (d) => ({
           userId: d.userId ?? d.id ?? d.user_id,
           firstName: d.firstName,
@@ -152,7 +173,7 @@ export const ProgramForm = ({
       const initialInstrumentMap = {};
       try {
         const instrumentsResponse = await backend.get(
-          `/program/${program.id}/instruments`
+          `/program/${record.id}/instruments`
         );
         const instruments = instrumentsResponse.data || [];
         instruments.forEach((inst) => {
@@ -170,16 +191,16 @@ export const ProgramForm = ({
       }
 
       const normalizedLanguages = (() => {
-        if (Array.isArray(program.languages)) {
+        if (Array.isArray(record.languages)) {
           return [
             ...new Set(
-              program.languages
+              record.languages
                 .map((value) => String(value).trim().toLowerCase())
                 .filter((value) => ISO6391.validate(value))
             ),
           ];
         }
-        const existingValue = program.primaryLanguage;
+        const existingValue = record.primaryLanguage;
         if (!existingValue) return [];
         const trimmedValue = String(existingValue).trim();
         if (ISO6391.validate(trimmedValue.toLowerCase())) {
@@ -193,7 +214,7 @@ export const ProgramForm = ({
       let sumEnrollment = 0;
       try {
         const aggRes = await backend.get(
-          `/program/${program.id}/enrollment-aggregates`
+          `/program/${record.id}/enrollment-aggregates`
         );
         graduatedTotal = Number(aggRes.data?.sumGraduated ?? 0);
         sumEnrollment = Number(aggRes.data?.sumEnrollment ?? 0);
@@ -206,21 +227,25 @@ export const ProgramForm = ({
 
       const netStudentsFromAgg = sumEnrollment - graduatedTotal;
       const resolvedStudents =
-        program.students !== null && program.students !== undefined
-          ? Number(program.students)
+        record.students !== null && record.students !== undefined
+          ? Number(record.students)
           : netStudentsFromAgg;
 
       setFormState({
-        status: program.status ?? null,
-        programName: program.title ?? '',
-        partnerOrg: program.partnerOrg ?? null,
-        showPartnerOrgOnMap: program.showPartnerOrgOnMap ?? false,
-        launchDate: program.launchDate ? program.launchDate.split('T')[0] : '',
+        status: record.status ?? null,
+        programName: record.title ?? '',
+        partnerOrg: record.partnerOrg ?? record.partner_org ?? null,
+        showPartnerOrgOnMap:
+          record.showPartnerOrgOnMap ?? record.show_partner_org_on_map ?? false,
+        launchDate: record.launchDate ? record.launchDate.split('T')[0] : '',
         regionId: regionId,
-        state: program.state ?? null,
-        city: program.city ?? null,
-        mockCity: '',
-        country: program.country ?? null,
+        state: record.state ?? null,
+        city:
+          record.city != null && record.city !== ''
+            ? Number(record.city)
+            : null,
+        country: record.country ?? null,
+        countryIsoCode,
         students: Number.isNaN(resolvedStudents) ? 0 : resolvedStudents,
         graduatedStudents: graduatedTotal,
         instruments: instrumentMap,
@@ -228,8 +253,8 @@ export const ProgramForm = ({
 
         programDirectors: programDirectorsForForm,
 
-        curriculumLinks: Array.isArray(program.playlists)
-          ? program.playlists
+        curriculumLinks: Array.isArray(record.playlists)
+          ? record.playlists
               .filter(
                 (p) =>
                   p.link &&
@@ -244,8 +269,8 @@ export const ProgramForm = ({
               }))
           : [],
 
-        media: Array.isArray(program.media)
-          ? program.media.map((m) => ({
+        media: Array.isArray(record.media)
+          ? record.media.map((m) => ({
               id: m.id,
               s3_key: m.s3_key,
               file_name: m.file_name,
@@ -259,7 +284,7 @@ export const ProgramForm = ({
       );
       setInitialInstrumentQuantities(initialInstrumentMap);
       setInitialCurriculumLinks(
-        (program.playlists ?? [])
+        (record.playlists ?? [])
           .filter(
             (p) =>
               p.link &&
@@ -273,7 +298,7 @@ export const ProgramForm = ({
       );
 
       setInitialUploadedMedia(
-        (program.media ?? []).filter((m) => m.file_name).map((m) => m.file_name)
+        (record.media ?? []).filter((m) => m.file_name).map((m) => m.file_name)
       );
     }
     loadProgramRegionData();

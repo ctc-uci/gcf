@@ -24,6 +24,14 @@ export function PartnerOrganizationField({
   }, [valueId, partnerOrgs]);
 
   useEffect(() => {
+    if (selected?.name) {
+      setSearchQuery(selected.name);
+    } else if (valueId === null || valueId === undefined || valueId === '') {
+      setSearchQuery('');
+    }
+  }, [selected, valueId]);
+
+  useEffect(() => {
     let cancelled = false;
     async function fetchPartnerOrgs() {
       try {

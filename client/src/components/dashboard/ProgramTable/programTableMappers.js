@@ -30,6 +30,9 @@ export function mapAdminRow(row) {
     country: row.country,
     city: row.city,
     state: row.state,
+    partnerOrg: row.partnerOrg ?? row.partner_org ?? null,
+    showPartnerOrgOnMap:
+      row.showPartnerOrgOnMap ?? row.show_partner_org_on_map ?? false,
     students: row.students ?? 0,
     instruments: row.instrumentTypes ?? [],
     totalInstruments: row.instruments ?? 0,
@@ -56,6 +59,9 @@ export function mapRdRow(row) {
     city: row.city,
     state: row.state,
     regionId: row.regionId,
+    partnerOrg: row.partnerOrg ?? row.partner_org ?? null,
+    showPartnerOrgOnMap:
+      row.showPartnerOrgOnMap ?? row.show_partner_org_on_map ?? false,
     students: row.totalStudents ?? 0,
     instruments: row.instrumentTypes ?? [],
     totalInstruments: row.totalInstruments ?? 0,

@@ -18,6 +18,7 @@ async function getDataByUserId(userId) {
             p.status AS program_status,
             p.launch_date AS program_launch_date,
             p.country AS country_id,
+            p.partner_org AS partner_org,
             c.name AS program_location,
             p.languages AS languages,
 
@@ -46,6 +47,7 @@ async function getDataByUserId(userId) {
             p.city,
             p.state,
             p.country,
+            p.partner_org,
             p.launch_date,
             p.languages,
             c.name
