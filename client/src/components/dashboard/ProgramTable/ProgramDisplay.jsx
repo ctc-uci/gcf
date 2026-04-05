@@ -277,7 +277,7 @@ export function ProgramDisplay({
               aria-label="card view"
               icon={<HiOutlineSquares2X2 />}
               size="sm"
-              variant={isCardView ? 'ghost' : 'solid'}
+              variant={isCardView ? 'solid' : 'ghost'}
               onClick={() => setIsCardView(true)}
             />
 

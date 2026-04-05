@@ -84,8 +84,10 @@ export function LocationForm({ formState, setFormData }) {
     async function getCountries() {
       try {
         const id = formState.regionId;
-        const response = await backend.get(`/region/${id}/countries`);
-        setCountriesList(response.data);
+        if (id) {
+          const response = await backend.get(`/region/${id}/countries`);
+          setCountriesList(response.data);
+        }
       } catch (error) {
         console.error('Error fetching countries:', error);
       }
