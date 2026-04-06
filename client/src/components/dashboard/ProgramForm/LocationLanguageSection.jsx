@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 
+import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import { GetCountries } from 'react-country-state-city';
+import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { GetCity, GetCountries, GetState } from 'react-country-state-city';
 
 import 'react-country-state-city/dist/react-country-state-city.css';
 
@@ -10,6 +12,8 @@ import {
   Button,
   FormControl,
   FormLabel,
+  Grid,
+  GridItem,
   Heading,
   HStack,
   Select,
@@ -22,57 +26,17 @@ import {
 import { useTranslation } from 'react-i18next';
 import ReactSelect from 'react-select';
 
-/** Same CDN path `GetCity` uses; we fetch once and slice by country (GetCity re-fetches this file per state). */
-const CITIES_DATA_URL =
-  'https://venkatmcajj.github.io/react-country-state-city/data/citiesminified.json';
-
-let citiesDatasetPromise = null;
-
-function getCitiesDataset() {
-  if (!citiesDatasetPromise) {
-    citiesDatasetPromise = fetch(CITIES_DATA_URL)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Cities data HTTP ${res.status}`);
-        return res.json();
-      })
-      .catch((err) => {
-        citiesDatasetPromise = null;
-        throw err;
-      });
-  }
-  return citiesDatasetPromise;
-}
-
-function buildCityOptionsForLibraryCountry(dataset, libraryCountryId) {
-  const idNum = Number(libraryCountryId);
-  const country = Array.isArray(dataset)
-    ? dataset.find((c) => Number(c.id) === idNum)
-    : null;
-  const states = country?.states ?? [];
-  const seen = new Set();
-  const merged = [];
-  for (const s of states) {
-    const rawCities = Array.isArray(s.cities) ? s.cities : [];
-    if (rawCities.length > 0) {
-      for (const c of rawCities) {
-        if (c == null || c.id == null) continue;
-        if (!seen.has(c.id)) {
-          seen.add(c.id);
-          merged.push({ id: c.id, name: c.name });
-        }
-      }
-    } else if (s.id != null) {
-      if (!seen.has(s.id)) {
-        seen.add(s.id);
-        merged.push({ id: s.id, name: s.name });
-      }
-    }
-  }
-  merged.sort((a, b) =>
-    String(a.name ?? '').localeCompare(String(b.name ?? ''))
-  );
-  return merged;
-}
+const STATELESS_COUNTRIES = new Set([
+  145, // Monaco
+  238, // Vatican City
+  199, // Singapore
+  33, // Brunei
+  60, // Djibouti
+  117, // Kuwait
+  228, // Tuvalu
+  49, // Comoros
+  66, // El Salvador
+]);
 
 function findLibraryCountryByIso(libraryCountries, isoInput) {
   const code = String(isoInput ?? '')
@@ -97,75 +61,111 @@ export function LocationLanguageSection({
   const { t } = useTranslation();
   const { backend } = useBackendContext();
 
+  const { currentUser } = useAuthContext();
+  const { role } = useRoleContext();
+  const userId = currentUser?.uid;
+
   const [libraryCountries, setLibraryCountries] = useState([]);
   const [countriesList, setCountriesList] = useState([]);
+  const [regionList, setRegionList] = useState([]);
+  const [stateList, setStateList] = useState([]);
   const [cityList, setCityList] = useState([]);
   const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
 
   const selectedBackendCountry = formState.country
     ? countriesList.find((c) => Number(c.id) === Number(formState.country))
     : null;
-  const effectiveIso = (
-    formState.countryIsoCode ||
-    selectedBackendCountry?.isoCode ||
-    selectedBackendCountry?.iso_code ||
-    ''
-  )
-    .toString()
-    .trim();
+  const isoCodeFromBackend =
+    selectedBackendCountry?.isoCode ?? selectedBackendCountry?.iso_code;
+  const effectiveIso = formState.countryIsoCode ?? isoCodeFromBackend ?? null;
   const libraryCountry = effectiveIso
     ? findLibraryCountryByIso(libraryCountries, effectiveIso)
     : null;
   const libraryCountryId = libraryCountry?.id ?? null;
+  const isStateless =
+    libraryCountryId !== null && STATELESS_COUNTRIES.has(libraryCountryId);
 
   useEffect(() => {
     GetCountries()
       .then((list) => setLibraryCountries(list ?? []))
-      .catch((err) => {
-        console.error('Error fetching library countries:', err);
-        setLibraryCountries([]);
-      });
+      .catch(() => setLibraryCountries([]));
   }, []);
+
+  useEffect(() => {
+    async function getRegions() {
+      try {
+        if (role === 'Regional Director') {
+          const regionalDirectorRegionId = await backend.get(
+            `/regional-directors/${userId}`
+          );
+          const response = await backend.get(
+            `/region/${regionalDirectorRegionId.data.regionId}`
+          );
+          setRegionList([response.data]);
+        } else if (role === 'Program Director') {
+          const response = await backend.get(
+            `/program-directors/me/${userId}/region`
+          );
+          setRegionList([response.data]);
+        } else if (role === 'Admin') {
+          const response = await backend.get('/region');
+          setRegionList(response.data);
+        } else {
+          setRegionList([]);
+        }
+      } catch (error) {
+        console.error('Error fetching regions:', error);
+        setRegionList([]);
+      }
+    }
+    getRegions();
+  }, [backend, role, userId]);
 
   useEffect(() => {
     async function getCountries() {
       try {
-        const response = await backend.get('/country');
-        setCountriesList(Array.isArray(response.data) ? response.data : []);
+        const id = formState.regionId;
+        if (id) {
+          const response = await backend.get(`/region/${id}/countries`);
+          setCountriesList(Array.isArray(response.data) ? response.data : []);
+        } else {
+          setCountriesList([]);
+        }
       } catch (error) {
         console.error('Error fetching countries:', error);
         setCountriesList([]);
       }
     }
     getCountries();
-  }, [backend]);
+  }, [formState.regionId, backend, role, userId]);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadAllCitiesForCountry() {
-      if (libraryCountryId == null) {
-        if (!cancelled) setCityList([]);
-        return;
-      }
-
-      try {
-        const dataset = await getCitiesDataset();
-        if (cancelled) return;
-        setCityList(
-          buildCityOptionsForLibraryCountry(dataset, libraryCountryId)
-        );
-      } catch (error) {
-        console.error('Error loading cities dataset:', error);
-        if (!cancelled) setCityList([]);
-      }
+    if (libraryCountryId !== null) {
+      GetState(parseInt(libraryCountryId, 10))
+        .then((result) => setStateList(result ?? []))
+        .catch(() => setStateList([]));
+    } else {
+      setStateList([]);
     }
-
-    loadAllCitiesForCountry();
-    return () => {
-      cancelled = true;
-    };
   }, [libraryCountryId]);
+
+  useEffect(() => {
+    if (libraryCountryId !== null && formState.state) {
+      const selectedState = stateList.find(
+        (state) => Number(state.id) === Number(formState.state)
+      );
+
+      if (selectedState?.hasCities) {
+        GetCity(parseInt(libraryCountryId, 10), parseInt(selectedState.id, 10))
+          .then((result) => setCityList(result ?? []))
+          .catch(() => setCityList([]));
+      } else {
+        setCityList([]);
+      }
+    } else {
+      setCityList([]);
+    }
+  }, [libraryCountryId, formState.state, stateList]);
 
   function handleCountryChange(e) {
     const raw = e.target.value;
@@ -191,11 +191,31 @@ export function LocationLanguageSection({
     }));
   }
 
+  function handleRegionChange(selectedRegion) {
+    const regionId = selectedRegion ? Number(selectedRegion) : null;
+    setFormData((prev) => ({
+      ...prev,
+      regionId,
+      country: null,
+      countryIsoCode: null,
+      state: null,
+      city: null,
+    }));
+  }
+
   function handleCityChange(e) {
     const cityId = e.target.value;
     setFormData((prev) => ({
       ...prev,
       city: cityId ? Number(cityId) : null,
+    }));
+  }
+
+  function handleStateChange(stateId) {
+    setFormData((prev) => ({
+      ...prev,
+      state: stateId ? Number(stateId) : null,
+      city: null,
     }));
   }
 
@@ -208,10 +228,6 @@ export function LocationLanguageSection({
     const opt = languageOptions.find((o) => o.value === code);
     return { code, label: opt?.label ?? code };
   });
-
-  const countryDisabled = countriesList.length === 0;
-  const cityDisabled =
-    !formState.country || cityList.length === 0 || countryDisabled;
 
   return (
     <Box>
@@ -236,57 +252,89 @@ export function LocationLanguageSection({
           >
             {t('programForm.locationRowLabel')}
           </FormLabel>
-          <HStack
-            align="flex-start"
-            spacing={4}
+
+          <Grid
+            templateColumns="repeat(2, 1fr)"
+            gap={6}
           >
-            <FormControl flex={1}>
+            <GridItem>
               <Select
-                placeholder={t('locationForm.selectCountry')}
-                value={
-                  formState.country !== null &&
-                  formState.country !== undefined &&
-                  formState.country !== ''
-                    ? String(formState.country)
-                    : ''
-                }
-                onChange={handleCountryChange}
-                isDisabled={countryDisabled}
+                onChange={(e) => handleRegionChange(e.target.value)}
+                placeholder={t('locationForm.selectRegion')}
+                value={formState.regionId || ''}
               >
-                {countriesList.map((c) => (
+                {regionList.map((_region) => (
                   <option
-                    key={c.id}
-                    value={String(c.id)}
+                    key={_region.id}
+                    value={_region.id}
                   >
-                    {c.name}
+                    {_region.name}
                   </option>
                 ))}
               </Select>
-            </FormControl>
-            <FormControl flex={1}>
-              <Select
-                placeholder={t('locationForm.selectCity')}
-                value={
-                  formState.city !== null &&
-                  formState.city !== undefined &&
-                  formState.city !== ''
-                    ? String(formState.city)
-                    : ''
-                }
-                onChange={handleCityChange}
-                isDisabled={cityDisabled}
-              >
-                {cityList.map((c) => (
-                  <option
-                    key={c.id}
-                    value={String(c.id)}
-                  >
-                    {c.name}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
-          </HStack>
+            </GridItem>
+
+            <GridItem>
+              {formState.regionId && (
+                <Select
+                  onChange={handleCountryChange}
+                  placeholder={t('locationForm.selectCountry')}
+                  value={formState.country || ''}
+                >
+                  {countriesList.map((_country) => (
+                    <option
+                      key={_country.id}
+                      value={_country.id}
+                    >
+                      {_country.name}
+                    </option>
+                  ))}
+                </Select>
+              )}
+            </GridItem>
+
+            <GridItem>
+              {formState.country && stateList.length > 0 && (
+                <Select
+                  onChange={(e) => handleStateChange(e.target.value)}
+                  value={formState.state || ''}
+                  placeholder={
+                    isStateless
+                      ? t('locationForm.selectCity')
+                      : t('locationForm.selectState')
+                  }
+                >
+                  {stateList.map((_state) => (
+                    <option
+                      key={_state.id}
+                      value={_state.id}
+                    >
+                      {_state.name}
+                    </option>
+                  ))}
+                </Select>
+              )}
+            </GridItem>
+
+            <GridItem>
+              {formState.state && !isStateless && cityList.length > 0 && (
+                <Select
+                  onChange={handleCityChange}
+                  value={formState.city || ''}
+                  placeholder={t('locationForm.selectCity')}
+                >
+                  {cityList.map((_city) => (
+                    <option
+                      key={_city.id}
+                      value={_city.id}
+                    >
+                      {_city.name}
+                    </option>
+                  ))}
+                </Select>
+              )}
+            </GridItem>
+          </Grid>
         </Box>
 
         <FormControl>
