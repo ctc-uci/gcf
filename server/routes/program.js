@@ -204,7 +204,6 @@ programRouter.post('/', async (req, res) => {
       partnerOrg,
       status,
       launchDate,
-      languages,
     } = req.body;
     const normalizedLanguages = normalizeLanguages(languages, primaryLanguage);
 
@@ -222,8 +221,7 @@ programRouter.post('/', async (req, res) => {
         languages,
         partner_org,
         status,
-        launch_date,
-        languages
+        launch_date
       )
       VALUES (
         $1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11
@@ -242,7 +240,6 @@ programRouter.post('/', async (req, res) => {
         partnerOrg,
         status,
         launchDate,
-        languages,
       ]
     );
 
@@ -268,7 +265,6 @@ programRouter.put('/:id', async (req, res) => {
       partnerOrg,
       status,
       launchDate,
-      languages,
     } = req.body;
     const normalizedLanguages = normalizeLanguages(languages, primaryLanguage);
 
@@ -285,9 +281,8 @@ programRouter.put('/:id', async (req, res) => {
         languages = COALESCE($7, languages),
         partner_org = COALESCE($8, partner_org),
         status = COALESCE($9, status),
-        launch_date = COALESCE($10, launch_date),
-        languages = COALESCE($11, languages)
-      WHERE id = $12
+        launch_date = COALESCE($10, launch_date)
+      WHERE id = $11
       RETURNING *;
       `,
       [
@@ -301,7 +296,6 @@ programRouter.put('/:id', async (req, res) => {
         partnerOrg,
         status,
         launchDate,
-        languages,
         id,
       ]
     );

@@ -68,17 +68,21 @@ export function ExpandableProgramRow({ p, onEdit }) {
             spacing={2}
           >
             {Array.isArray(p.instrumentsMap)
-              ? p.instrumentsMap.map((d, idx) => (
-                  <Box
-                    key={`${d.name}-${d.quantity}-${idx}`}
-                    bg="gray.200"
-                    px={3}
-                    py={1}
-                    borderRadius="full"
-                  >
-                    {d.name} {d.quantity}
-                  </Box>
-                ))
+              ? p.instrumentsMap.map((d, idx) => {
+                  const tagStyle = getInstrumentTagStyle(d.name);
+                  return (
+                    <Box
+                      key={`${d.name}-${d.quantity}-${idx}`}
+                      bg={tagStyle.bg}
+                      color={tagStyle.color}
+                      px={3}
+                      py={1}
+                      borderRadius="full"
+                    >
+                      {d.name} {d.quantity}
+                    </Box>
+                  );
+                })
               : null}
           </VStack>
         </Td>
