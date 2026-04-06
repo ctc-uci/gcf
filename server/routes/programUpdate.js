@@ -46,7 +46,8 @@ programUpdateRouter.get('/:id', async (req, res) => {
 
 // Creating a program update
 programUpdateRouter.post('/', async (req, res) => {
-  const { title, program_id, created_by, update_date, note, show_on_table } = req.body;
+  const { title, program_id, created_by, update_date, note, show_on_table } =
+    req.body;
   try {
     const newEntry = await db.query(
       `INSERT INTO program_update (title, program_id, created_by, update_date, note, show_on_table)

@@ -18,7 +18,9 @@ regionRouter.get('/', async (req, res) => {
 
 regionRouter.get('/countries-by-region', async (req, res) => {
   try {
-    const countries = await db.query(`SELECT * FROM country ORDER BY region_id, name`);
+    const countries = await db.query(
+      `SELECT * FROM country ORDER BY region_id, name`
+    );
     const countriesByRegion = countries.reduce((acc, country) => {
       if (!acc[country.region_id]) {
         acc[country.region_id] = [];

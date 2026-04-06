@@ -199,6 +199,7 @@ export function ProgramDisplay({
 
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;
+  const [flippedId, setFlippedId] = useState(null);
 
   if (!getRouteByRole(role, userId)) return null;
 
@@ -266,7 +267,7 @@ export function ProgramDisplay({
               aria-label="table view"
               icon={<HamburgerIcon />}
               size="sm"
-              variant="ghost"
+              variant={isCardView ? 'ghost' : 'solid'}
               onClick={() => setIsCardView(false)}
             />
             <Divider
@@ -278,7 +279,7 @@ export function ProgramDisplay({
               aria-label="card view"
               icon={<HiOutlineSquares2X2 />}
               size="sm"
-              variant="ghost"
+              variant={isCardView ? 'solid' : 'ghost'}
               onClick={() => setIsCardView(true)}
             />
 
@@ -594,6 +595,8 @@ export function ProgramDisplay({
           ) : (
             <CardView
               data={tableData}
+              flippedId={flippedId}
+              setFlippedId={setFlippedId}
               openEditForm={openEditForm}
             />
           )}

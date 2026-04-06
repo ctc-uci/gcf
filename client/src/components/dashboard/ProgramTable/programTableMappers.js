@@ -21,23 +21,30 @@ export function getRouteByRole(role, userId) {
 export function mapAdminRow(row) {
   const languages = Array.isArray(row.languages) ? row.languages : [];
 
+  const location = row.cityName
+    ? `${row.cityName}, ${row.countryName}`
+    : row.countryName;
   return {
     id: row.id,
     title: row.title ?? row.name,
     status: row.status,
     launchDate: row.launchDate,
-    location: row.countryName ?? '',
+    location: location,
     country: row.country,
+    regionName: row.regionName,
+    isoCode: row.isoCode,
     city: row.city,
     state: row.state,
     partnerOrg: row.partnerOrg ?? row.partner_org ?? null,
     showPartnerOrgOnMap:
       row.showPartnerOrgOnMap ?? row.show_partner_org_on_map ?? false,
     students: row.students ?? 0,
-    instruments: row.instrumentTypes ?? [],
+    languages: row.languages,
+    instrumentsMap: row.instrumentsMap,
     totalInstruments: row.instruments ?? 0,
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
+    partnerOrgName: row.partnerOrgName,
     playlists: row.playlists,
     languages,
     primaryLanguage: row.primaryLanguage,
@@ -49,6 +56,10 @@ export function mapAdminRow(row) {
 export function mapRdRow(row) {
   const languages = Array.isArray(row.languages) ? row.languages : [];
 
+  const location =
+    row.programLocation && row.regionName
+      ? `${row.programLocation}, ${row.regionName}`
+      : (row.programLocation ?? row.regionName ?? '');
   return {
     id: row.programId,
     title: row.programName,
@@ -56,6 +67,8 @@ export function mapRdRow(row) {
     launchDate: row.programLaunchDate,
     location: row.programLocation ?? row.regionName ?? '',
     country: row.countryId,
+    languages: row.languages,
+    isoCode: row.isoCode,
     city: row.city,
     state: row.state,
     regionId: row.regionId,
@@ -63,10 +76,11 @@ export function mapRdRow(row) {
     showPartnerOrgOnMap:
       row.showPartnerOrgOnMap ?? row.show_partner_org_on_map ?? false,
     students: row.totalStudents ?? 0,
-    instruments: row.instrumentTypes ?? [],
+    instrumentsMap: row.instrumentsMap,
     totalInstruments: row.totalInstruments ?? 0,
     programDirectors: row.programDirectors,
     regionalDirectors: row.regionalDirectors,
+    partnerOrgName: row.partnerOrgName,
     playlists: row.playlists,
     languages,
     primaryLanguage: row.primaryLanguage,

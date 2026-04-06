@@ -204,6 +204,7 @@ programRouter.post('/', async (req, res) => {
       partnerOrg,
       status,
       launchDate,
+      languages,
     } = req.body;
     const normalizedLanguages = normalizeLanguages(languages, primaryLanguage);
 
@@ -221,7 +222,8 @@ programRouter.post('/', async (req, res) => {
         languages,
         partner_org,
         status,
-        launch_date
+        launch_date,
+        languages
       )
       VALUES (
         $1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11
@@ -240,6 +242,7 @@ programRouter.post('/', async (req, res) => {
         partnerOrg,
         status,
         launchDate,
+        languages,
       ]
     );
 
@@ -265,6 +268,7 @@ programRouter.put('/:id', async (req, res) => {
       partnerOrg,
       status,
       launchDate,
+      languages,
     } = req.body;
     const normalizedLanguages = normalizeLanguages(languages, primaryLanguage);
 
@@ -281,8 +285,9 @@ programRouter.put('/:id', async (req, res) => {
         languages = COALESCE($7, languages),
         partner_org = COALESCE($8, partner_org),
         status = COALESCE($9, status),
-        launch_date = COALESCE($10, launch_date)
-      WHERE id = $11
+        launch_date = COALESCE($10, launch_date),
+        languages = COALESCE($11, languages)
+      WHERE id = $12
       RETURNING *;
       `,
       [
@@ -296,6 +301,7 @@ programRouter.put('/:id', async (req, res) => {
         partnerOrg,
         status,
         launchDate,
+        languages,
         id,
       ]
     );
@@ -532,6 +538,31 @@ programRouter.get('/:id/media', async (req, res) => {
     }));
 
     res.status(200).json(media);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+programRouter.get('/:id/partner-organization', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await db.query(
+      `
+      SELECT g.name
+      FROM partner_organization g
+      JOIN program p ON g.id = p.partner_org
+      WHERE p.id = $1;
+      `,
+      [id]
+    );
+
+    if (result.length === 0) {
+      return res.status(404).send('Partner organization not found');
+    }
+
+    res.status(200).json(result[0].name);
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');

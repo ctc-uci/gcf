@@ -22,25 +22,24 @@ playlistCacheRouter.get('/:playlistId', async (req, res) => {
       return res.json(cached[0].videos);
     }
     do {
-        const youtubeRes = await fetch(
-        `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&key=${YOUTUBE_API_KEY}${nextPageToken ? `&pageToken=${nextPageToken}`: ''}`
-        );
-        if (!youtubeRes.ok) {
-            return res.status(502).json({ error: 'Youtube API request failed' });
-        }
-        const data = await youtubeRes.json();
-        if (data.error) {
-            return res.status(502).json({error: data.error.message});
-        }
-        allData.push(...data.items);
-        nextPageToken = data.nextPageToken;
-
+      const youtubeRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&key=${YOUTUBE_API_KEY}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`
+      );
+      if (!youtubeRes.ok) {
+        return res.status(502).json({ error: 'Youtube API request failed' });
+      }
+      const data = await youtubeRes.json();
+      if (data.error) {
+        return res.status(502).json({ error: data.error.message });
+      }
+      allData.push(...data.items);
+      nextPageToken = data.nextPageToken;
     } while (nextPageToken);
 
     if (!allData || allData.length === 0) {
-        return res
-            .status(404)
-            .json({ error: 'Empty playlist or playlist not found' });
+      return res
+        .status(404)
+        .json({ error: 'Empty playlist or playlist not found' });
     }
 
     const insert = await db.query(
@@ -53,7 +52,7 @@ playlistCacheRouter.get('/:playlistId', async (req, res) => {
     );
 
     if (insert.length === 0) {
-        return res.status(500).json({ error: 'Failed to cache playlist' });
+      return res.status(500).json({ error: 'Failed to cache playlist' });
     }
     return res.json(allData);
   } catch (err) {
