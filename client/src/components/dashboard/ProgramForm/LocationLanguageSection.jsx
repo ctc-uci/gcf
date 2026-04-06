@@ -137,7 +137,7 @@ export function LocationLanguageSection({
       }
     }
     getCountries();
-  }, [formState.regionId, backend, role, userId]);
+  }, [formState.regionId, backend]);
 
   useEffect(() => {
     if (libraryCountryId !== null) {
@@ -155,7 +155,7 @@ export function LocationLanguageSection({
         (state) => Number(state.id) === Number(formState.state)
       );
 
-      if (selectedState?.hasCities) {
+      if (selectedState) {
         GetCity(parseInt(libraryCountryId, 10), parseInt(selectedState.id, 10))
           .then((result) => setCityList(result ?? []))
           .catch(() => setCityList([]));
