@@ -343,7 +343,9 @@
     "selectStatus": "Sélectionner le statut",
     "enterProgramTitle": "Saisir le titre du programme",
     "locationRowLabel": "Lieu",
-    "instrumentQuantityPair": "{{name}}: {{qty}}"
+    "instrumentQuantityPair": "{{name}}: {{qty}}",
+    "instrumentQuantityInvalid": "Saisissez une quantité d’au moins 1.",
+    "instrumentQuantityAria": "Quantité d’instruments"
   },
   "locationForm": {
     "selectRegion": "Sélectionnez la région...",

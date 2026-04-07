@@ -38,6 +38,9 @@ export async function initI18n(): Promise<void> {
     lng: initial,
     fallbackLng: 'en',
     supportedLngs: [...APP_LOCALES],
+    /** Bundles from `public/locales/{lng}/translation.json` are added under this namespace. */
+    defaultNS: 'translation',
+    ns: ['translation'],
     interpolation: { escapeValue: false },
     resources: {},
     react: {

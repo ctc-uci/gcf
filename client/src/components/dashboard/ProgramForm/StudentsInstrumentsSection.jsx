@@ -7,6 +7,7 @@ import {
   FormLabel,
   Heading,
   HStack,
+  Input,
   NumberDecrementStepper,
   NumberIncrementStepper,
   NumberInput,
@@ -15,6 +16,7 @@ import {
   Tag,
   TagCloseButton,
   TagLabel,
+  useToast,
   VStack,
 } from '@chakra-ui/react';
 
@@ -23,14 +25,16 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 
 export function StudentsInstrumentsSection({ formState, setFormData }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('translation');
+  const toast = useToast();
   const { backend } = useBackendContext();
   const [instruments, setInstruments] = useState([]);
   const [isAddingInstrument, setIsAddingInstrument] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInstrument, setSelectedInstrument] = useState('');
   const [newInstrumentName, setNewInstrumentName] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  /** Plain string so the field can be cleared while typing; validated on Add only. */
+  const [quantityInput, setQuantityInput] = useState('1');
 
   useEffect(() => {
     if (selectedInstrument && !Number.isNaN(Number(selectedInstrument))) {
@@ -80,7 +84,18 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
     const chosen = String(selectedInstrument || '').trim();
     const instrumentName = chosen || typed;
 
-    if (!instrumentName || quantity <= 0) return false;
+    if (!instrumentName) return false;
+
+    const qty = parseInt(quantityInput.trim(), 10);
+    if (Number.isNaN(qty) || qty < 1) {
+      toast({
+        title: t('programForm.instrumentQuantityInvalid'),
+        status: 'warning',
+        duration: 4000,
+        isClosable: true,
+      });
+      return false;
+    }
 
     let instrumentId = null;
     let resolvedName = instrumentName;
@@ -123,7 +138,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
           [idKey]: {
             id: Number(instrumentId),
             name: resolvedName,
-            quantity: prevQty + quantity,
+            quantity: prevQty + qty,
           },
         },
       };
@@ -131,7 +146,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
 
     setSelectedInstrument('');
     setNewInstrumentName('');
-    setQuantity(1);
+    setQuantityInput('1');
     return true;
   }
 
@@ -227,7 +242,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
                 setSearchQuery('');
                 setSelectedInstrument('');
                 setNewInstrumentName('');
-                setQuantity(1);
+                setQuantityInput('1');
                 setIsAddingInstrument(true);
               }}
             >
@@ -261,20 +276,19 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
                   }}
                 />
               </Box>
-              <NumberInput
-                value={quantity}
-                min={1}
-                onChange={(value) => {
-                  const n = parseInt(value, 10);
-                  setQuantity(Number.isNaN(n) ? 1 : n);
+              <Input
+                type="text"
+                inputMode="numeric"
+                value={quantityInput}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === '' || /^\d+$/.test(v)) {
+                    setQuantityInput(v);
+                  }
                 }}
-              >
-                <NumberInputField />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
+                width="5.5rem"
+                aria-label={t('programForm.instrumentQuantityAria')}
+              />
               <Button
                 size="sm"
                 variant="outline"

@@ -343,7 +343,9 @@
     "selectStatus": "选择状态",
     "enterProgramTitle": "输入节目标题",
     "locationRowLabel": "地点",
-    "instrumentQuantityPair": "{{name}}: {{qty}}"
+    "instrumentQuantityPair": "{{name}}: {{qty}}",
+    "instrumentQuantityInvalid": "请输入至少为 1 的数量。",
+    "instrumentQuantityAria": "乐器数量"
   },
   "locationForm": {
     "selectRegion": "选择地区...",
