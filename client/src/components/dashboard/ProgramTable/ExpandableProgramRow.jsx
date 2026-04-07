@@ -13,6 +13,7 @@ import {
 
 import 'flag-icons/css/flag-icons.min.css';
 
+import ISO6391 from 'iso-639-1';
 import { useTranslation } from 'react-i18next';
 
 import { isoCodeToFlagIconCode } from '../../../utils/isoCodeToFlagIconCode';
@@ -23,6 +24,13 @@ import { StatusTag } from './StatusTag';
 export function ExpandableProgramRow({ p, onEdit }) {
   const { t } = useTranslation();
   const { isOpen, onToggle } = useDisclosure();
+  const languageCodes = Array.isArray(p.languages) ? p.languages : [];
+
+  const languageLabel = languageCodes.length
+    ? languageCodes
+        .map((code) => ISO6391.getName(String(code).toLowerCase()) || code)
+        .join(', ')
+    : '';
   const flagCode = isoCodeToFlagIconCode(p.isoCode);
   return (
     <>
@@ -60,17 +68,21 @@ export function ExpandableProgramRow({ p, onEdit }) {
             spacing={2}
           >
             {Array.isArray(p.instrumentsMap)
-              ? p.instrumentsMap.map((d, idx) => (
-                  <Box
-                    key={`${d.name}-${d.quantity}-${idx}`}
-                    bg="gray.200"
-                    px={3}
-                    py={1}
-                    borderRadius="full"
-                  >
-                    {d.name} {d.quantity}
-                  </Box>
-                ))
+              ? p.instrumentsMap.map((d, idx) => {
+                  const tagStyle = getInstrumentTagStyle(d.name);
+                  return (
+                    <Box
+                      key={`${d.name}-${d.quantity}-${idx}`}
+                      bg={tagStyle.bg}
+                      color={tagStyle.color}
+                      px={3}
+                      py={1}
+                      borderRadius="full"
+                    >
+                      {d.name} {d.quantity}
+                    </Box>
+                  );
+                })
               : null}
           </VStack>
         </Td>
@@ -97,7 +109,7 @@ export function ExpandableProgramRow({ p, onEdit }) {
                   >
                     {t('expandableProgramRow.language')}
                   </Box>
-                  <Box>{p.primaryLanguage ?? '-'}</Box>
+                  <Box>{languageLabel}</Box>
                 </Box>
                 <Box
                   flex="1"
