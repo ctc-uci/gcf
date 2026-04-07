@@ -343,7 +343,7 @@
     "selectStatus": "Seleccionar estado",
     "enterProgramTitle": "Ingrese el título del programa",
     "locationRowLabel": "Ubicación",
-    "instrumentQuantityPair": "{{name}} - {{qty}}"
+    "instrumentQuantityPair": "{{name}}: {{qty}}"
   },
   "locationForm": {
     "selectRegion": "Seleccionar región...",

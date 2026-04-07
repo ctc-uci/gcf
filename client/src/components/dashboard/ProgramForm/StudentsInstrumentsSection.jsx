@@ -7,19 +7,18 @@ import {
   FormLabel,
   Heading,
   HStack,
-  Input,
   NumberDecrementStepper,
   NumberIncrementStepper,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
-  Select,
   Tag,
   TagCloseButton,
   TagLabel,
   VStack,
 } from '@chakra-ui/react';
 
+import { SearchInput } from '@/components/common/SearchInput';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 
@@ -28,9 +27,33 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
   const { backend } = useBackendContext();
   const [instruments, setInstruments] = useState([]);
   const [isAddingInstrument, setIsAddingInstrument] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedInstrument, setSelectedInstrument] = useState('');
   const [newInstrumentName, setNewInstrumentName] = useState('');
   const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    if (selectedInstrument && !Number.isNaN(Number(selectedInstrument))) {
+      const found = instruments.find(
+        (i) => Number(i.id) === Number(selectedInstrument)
+      );
+      if (found?.name) {
+        setSearchQuery(found.name);
+        return;
+      }
+    }
+    const pending = newInstrumentName.trim();
+    if (pending) {
+      setSearchQuery(pending);
+      return;
+    }
+    if (
+      (!selectedInstrument || selectedInstrument === '') &&
+      !newInstrumentName.trim()
+    ) {
+      setSearchQuery('');
+    }
+  }, [selectedInstrument, instruments, newInstrumentName]);
 
   useEffect(() => {
     let cancelled = false;
@@ -200,7 +223,13 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => setIsAddingInstrument(true)}
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedInstrument('');
+                setNewInstrumentName('');
+                setQuantity(1);
+                setIsAddingInstrument(true);
+              }}
             >
               {t('common.add')}
             </Button>
@@ -211,33 +240,27 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
               spacing={3}
               flexWrap="wrap"
             >
-              <Select
-                placeholder={t('programForm.selectInstrument')}
-                onChange={(e) => {
-                  setSelectedInstrument(e.target.value);
-                  setNewInstrumentName('');
-                }}
-                value={selectedInstrument}
-                maxW="12rem"
+              <Box
+                flex="1"
+                minW="12rem"
+                maxW="16rem"
               >
-                {instruments.map((instrument) => (
-                  <option
-                    key={instrument.id}
-                    value={String(instrument.id)}
-                  >
-                    {instrument.name}
-                  </option>
-                ))}
-              </Select>
-              <Input
-                placeholder={t('programForm.orTypeNewInstrument')}
-                value={newInstrumentName}
-                onChange={(e) => {
-                  setNewInstrumentName(e.target.value);
-                  setSelectedInstrument('');
-                }}
-                maxW="12rem"
-              />
+                <SearchInput
+                  items={instruments}
+                  value={searchQuery}
+                  onChange={(val) => setSearchQuery(val)}
+                  onSelectExisting={(instrument) => {
+                    setSelectedInstrument(String(instrument.id));
+                    setNewInstrumentName('');
+                    setSearchQuery('');
+                  }}
+                  onCreateNew={(name) => {
+                    setSelectedInstrument('');
+                    setNewInstrumentName(name.trim());
+                    setSearchQuery('');
+                  }}
+                />
+              </Box>
               <NumberInput
                 value={quantity}
                 min={1}

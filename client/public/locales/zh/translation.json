@@ -343,7 +343,7 @@
     "selectStatus": "选择状态",
     "enterProgramTitle": "输入节目标题",
     "locationRowLabel": "地点",
-    "instrumentQuantityPair": "{{name}} - {{qty}}"
+    "instrumentQuantityPair": "{{name}}: {{qty}}"
   },
   "locationForm": {
     "selectRegion": "选择地区...",
