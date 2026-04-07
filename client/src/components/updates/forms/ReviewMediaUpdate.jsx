@@ -20,7 +20,7 @@ import {
 } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
-import { FiDownload, FiMaximize2, FiMinimize2, FiUser } from 'react-icons/fi';
+import { FiMaximize2, FiMinimize2, FiUser } from 'react-icons/fi';
 
 import { useBackendContext } from '../../../contexts/hooks/useBackendContext';
 import { MediaCard } from '../../media/MediaCard';
@@ -211,6 +211,8 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                       <Box
                         key={idx}
                         onClick={() => setSelectedIndex(idx)}
+                        cursor="pointer"
+                        borderRadius="md"
                       >
                         <Box
                           position="relative"
