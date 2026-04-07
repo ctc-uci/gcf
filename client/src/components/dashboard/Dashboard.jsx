@@ -1,8 +1,18 @@
 import { useState } from 'react';
 
-import { Box, Flex } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  Heading,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+} from '@chakra-ui/react';
 
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { useTranslation } from 'react-i18next';
 
 import LessonVideos from './lessonVideos';
 import ProgramTable from './ProgramTable';
@@ -10,6 +20,7 @@ import StatisticsSummary from './StatisticsSummary';
 
 const Dashboard = () => {
   const { role } = useRoleContext();
+  const { t } = useTranslation();
   const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(null);
@@ -40,12 +51,35 @@ const Dashboard = () => {
           />
         )}
         {role === 'Program Director' && (
-          <LessonVideos
-            selectedPlaylist={selectedPlaylist}
-            setSelectedPlaylist={setSelectedPlaylist}
-            selectedVideo={selectedVideo}
-            setSelectedVideo={setSelectedVideo}
-          />
+          <Box>
+            <Heading
+              size="lg"
+              fontWeight="extrabold"
+              mb={4}
+            >
+              {t('lessonVideos.title')}
+            </Heading>
+            <Tabs>
+              <TabList>
+                <Tab _selected={{ borderBottomColor: 'teal.500' }}>
+                  {' '}
+                  Videos{' '}
+                </Tab>
+                <Tab _selected={{ borderBottomColor: 'teal.500' }}> PDFs </Tab>
+              </TabList>
+
+              <TabPanels>
+                <TabPanel>
+                  <LessonVideos
+                    selectedPlaylist={selectedPlaylist}
+                    setSelectedPlaylist={setSelectedPlaylist}
+                    selectedVideo={selectedVideo}
+                    setSelectedVideo={setSelectedVideo}
+                  />
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </Box>
         )}
       </Box>
     </Flex>
