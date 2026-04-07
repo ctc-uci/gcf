@@ -1,6 +1,9 @@
+import { useEffect, useRef } from 'react';
+
 import { Box, Button, Flex, Icon, Image, Link, VStack } from '@chakra-ui/react';
 
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { useTranslation } from 'react-i18next';
 import { BsMap } from 'react-icons/bs';
 import { FaGuitar } from 'react-icons/fa';
 import { HiOutlineUser } from 'react-icons/hi';
@@ -10,7 +13,34 @@ import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { SIDEBAR_WIDTH } from './layoutConstants';
 import logo from '/logo.png';
 
+const AutoFitText = ({ children }) => {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    el.style.fontSize = '1rem';
+    const ratio = el.clientWidth / el.scrollWidth;
+    if (ratio < 1) {
+      el.style.fontSize = `${Math.max(ratio, 0.6)}rem`;
+    }
+  }, [children]);
+
+  return (
+    <Box
+      ref={ref}
+      whiteSpace="nowrap"
+      overflow="hidden"
+      width="100%"
+    >
+      {children}
+    </Box>
+  );
+};
+
 export const Sidebar = () => {
+  const { t } = useTranslation();
   const { role } = useRoleContext();
   const location = useLocation();
   interface NavItem {
@@ -23,7 +53,7 @@ export const Sidebar = () => {
   if (role === 'Super Admin' || role === 'Admin') {
     navItems = [
       {
-        name: 'Programs',
+        name: t('sidebar.programs'),
         icon: (
           <Icon
             as={FaGuitar}
@@ -33,7 +63,7 @@ export const Sidebar = () => {
         path: '/dashboard',
       },
       {
-        name: 'Updates',
+        name: t('sidebar.updates'),
         icon: (
           <Icon
             as={MdOutlineNotifications}
@@ -43,7 +73,7 @@ export const Sidebar = () => {
         path: '/updates',
       },
       {
-        name: 'Accounts',
+        name: t('sidebar.accounts'),
         icon: (
           <Icon
             as={HiOutlineUser}
@@ -53,7 +83,7 @@ export const Sidebar = () => {
         path: '/account',
       },
       {
-        name: 'Regions',
+        name: t('sidebar.regions'),
         icon: (
           <Icon
             as={BsMap}
@@ -66,7 +96,7 @@ export const Sidebar = () => {
   } else if (role === 'Regional Director') {
     navItems = [
       {
-        name: 'Programs',
+        name: t('sidebar.programs'),
         icon: (
           <Icon
             as={FaGuitar}
@@ -76,7 +106,7 @@ export const Sidebar = () => {
         path: '/dashboard',
       },
       {
-        name: 'Updates',
+        name: t('sidebar.updates'),
         icon: (
           <Icon
             as={MdOutlineNotifications}
@@ -86,7 +116,7 @@ export const Sidebar = () => {
         path: '/updates',
       },
       {
-        name: 'Accounts',
+        name: t('sidebar.accounts'),
         icon: (
           <Icon
             as={HiOutlineUser}
@@ -99,7 +129,7 @@ export const Sidebar = () => {
   } else if (role === 'Program Director') {
     navItems = [
       {
-        name: 'Programs',
+        name: t('sidebar.programs'),
         icon: (
           <Icon
             as={FaGuitar}
@@ -109,7 +139,7 @@ export const Sidebar = () => {
         path: '/dashboard',
       },
       {
-        name: 'Updates',
+        name: t('sidebar.updates'),
         icon: (
           <Icon
             as={MdOutlineNotifications}
@@ -119,7 +149,7 @@ export const Sidebar = () => {
         path: '/updates',
       },
       {
-        name: 'Media',
+        name: t('sidebar.media'),
         icon: (
           <Icon
             as={MdPermMedia}
@@ -156,7 +186,7 @@ export const Sidebar = () => {
         >
           <Image
             src={logo}
-            alt="Logo"
+            alt={t('sidebar.logoAlt')}
             objectFit="contain"
             draggable={false}
           />
@@ -173,7 +203,7 @@ export const Sidebar = () => {
                 location.pathname.startsWith(item.path + '/'));
             return (
               <Link
-                key={item.name}
+                key={item.path}
                 as={RouterLink}
                 to={item.path}
                 textDecoration="none"
@@ -194,13 +224,14 @@ export const Sidebar = () => {
                   px={6}
                   py={5}
                   borderRadius="xl"
+                  fontSize="clamp(0.6rem, 1vw, 1rem)"
                   transition="background-color 0.4s ease, transform 0.4s ease"
                   _hover={{
                     bg: isActive ? 'teal.600' : 'gray.100',
                     transform: 'translateX(2px)',
                   }}
                 >
-                  {item.name}
+                  <AutoFitText>{item.name}</AutoFitText>
                 </Button>
               </Link>
             );

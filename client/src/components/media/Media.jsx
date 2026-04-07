@@ -14,11 +14,13 @@ import {
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 
 import { MediaGrid } from './MediaGrid';
 import { MediaUploadModal } from './MediaUploadModal';
 
 export const Media = () => {
+  const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { backend } = useBackendContext();
@@ -143,7 +145,7 @@ export const Media = () => {
               size="xl"
               color="gray.800"
             >
-              My Media
+              {t('mediaPage.title')}
             </Heading>
 
             <Button
@@ -154,7 +156,7 @@ export const Media = () => {
               _hover={{ backgroundColor: 'teal.600' }}
               onClick={onOpen}
             >
-              New
+              {t('mediaPage.new')}
             </Button>
 
             <MediaGrid

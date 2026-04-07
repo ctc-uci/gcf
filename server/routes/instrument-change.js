@@ -8,7 +8,8 @@ instrumentChangeRouter.use(express.json());
 
 instrumentChangeRouter.post('/', async (req, res) => {
   try {
-    const { instrumentId, updateId, amountChanged, event_type, description } = req.body;
+    const { instrumentId, updateId, amountChanged, event_type, description } =
+      req.body;
 
     const newChange = await db.query(
       `INSERT INTO instrument_change
@@ -45,7 +46,6 @@ instrumentChangeRouter.get('/update/:updateId', async (req, res) => {
       [updateId]
     );
 
-
     res.status(200).json(change.map(keysToCamel));
   } catch (err) {
     console.error(err);
@@ -76,7 +76,8 @@ instrumentChangeRouter.get('/:id', async (req, res) => {
 instrumentChangeRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { instrumentId, updateId, amountChanged, event_type, description } = req.body;
+    const { instrumentId, updateId, amountChanged, event_type, description } =
+      req.body;
 
     const updatedChange = await db.query(
       `UPDATE instrument_change SET

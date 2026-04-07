@@ -36,6 +36,7 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { useTranslation } from 'react-i18next';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 function formatUpdateDisplayDate(value) {
@@ -72,6 +73,7 @@ export const ProgramUpdateForm = ({
   isInstrumentUpdate = null,
   selectedUpdate = null,
 }) => {
+  const { t } = useTranslation();
   const disclosure = useDisclosure();
   const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
   const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
@@ -432,10 +434,12 @@ export const ProgramUpdateForm = ({
       }
 
       toast({
-        title: programUpdateId ? 'Update saved' : 'Update created',
+        title: programUpdateId
+          ? t('updates.savedTitle')
+          : t('updates.createdTitleToast'),
         description: programUpdateId
-          ? 'Program update was updated successfully.'
-          : 'Program update was created successfully.',
+          ? t('updates.savedDesc')
+          : t('updates.programUpdateCreatedDesc'),
         status: 'success',
         duration: 5000,
         isClosable: true,
@@ -446,11 +450,11 @@ export const ProgramUpdateForm = ({
     } catch (error) {
       console.error('Error submitting program update:', error);
       toast({
-        title: 'Failed to save',
+        title: t('updates.failedSaveTitle'),
         description:
           error?.response?.data?.message ??
           error?.message ??
-          'Something went wrong.',
+          t('updates.failedSaveDesc'),
         status: 'error',
         duration: 7000,
         isClosable: true,
@@ -479,7 +483,11 @@ export const ProgramUpdateForm = ({
         >
           <IconButton
             icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
-            aria-label={isFullScreen ? 'Minimize' : 'Expand'}
+            aria-label={
+              isFullScreen
+                ? t('fullscreenFlyout.minimize')
+                : t('fullscreenFlyout.expand')
+            }
             variant="ghost"
             size="sm"
             onClick={() => setIsFullScreen(!isFullScreen)}
@@ -496,7 +504,7 @@ export const ProgramUpdateForm = ({
             fontWeight="600"
             textAlign="center"
           >
-            Program Update
+            {t('updates.programUpdateTitle')}
           </Text>
           <Divider mt={3} />
         </Box>
@@ -513,7 +521,7 @@ export const ProgramUpdateForm = ({
               size="md"
               mt={4}
             >
-              Update Information
+              {t('updates.updateInformation')}
             </Heading>
 
             <Grid
@@ -527,7 +535,7 @@ export const ProgramUpdateForm = ({
                   fontWeight="500"
                   mb={1}
                 >
-                  Author
+                  {t('updates.colAuthor')}
                 </Text>
                 <HStack spacing={3}>
                   <Avatar
@@ -536,7 +544,7 @@ export const ProgramUpdateForm = ({
                     bg="teal.500"
                     color="white"
                   />
-                  <Text>{authorName || '—'}</Text>
+                  <Text>{authorName || t('common.emDash')}</Text>
                 </HStack>
               </GridItem>
               <GridItem>
@@ -546,9 +554,11 @@ export const ProgramUpdateForm = ({
                   fontWeight="500"
                   mb={1}
                 >
-                  Program
+                  {t('updates.colProgram')}
                 </Text>
-                <Text fontWeight="500">{programName || '—'}</Text>
+                <Text fontWeight="500">
+                  {programName || t('common.emDash')}
+                </Text>
               </GridItem>
               <GridItem>
                 <Text
@@ -557,9 +567,12 @@ export const ProgramUpdateForm = ({
                   fontWeight="500"
                   mb={1}
                 >
-                  Time
+                  {t('common.time')}
                 </Text>
-                <Text>{formatUpdateDisplayDate(updateDateTime) || '—'}</Text>
+                <Text>
+                  {formatUpdateDisplayDate(updateDateTime) ||
+                    t('common.emDash')}
+                </Text>
               </GridItem>
             </Grid>
             {isInstrumentUpdate && (
@@ -570,13 +583,13 @@ export const ProgramUpdateForm = ({
                   fontWeight="500"
                   mb={2}
                 >
-                  Flag
+                  {t('updates.flagLabel')}
                 </Text>
                 <Checkbox
                   isChecked={flagged}
                   onChange={(e) => setFlagged(e.target.checked)}
                 >
-                  Yes, this is a special request
+                  {t('updates.specialRequest')}
                 </Checkbox>
               </Box>
             )}
@@ -591,9 +604,13 @@ export const ProgramUpdateForm = ({
                   fontWeight="500"
                   mb={1}
                 >
-                  Update Type
+                  {t('updates.updateType')}
                 </Text>
-                <Text>{isInstrumentUpdate ? 'Instrument' : 'Student'}</Text>
+                <Text>
+                  {isInstrumentUpdate
+                    ? t('updates.typeInstrument')
+                    : t('updates.typeStudent')}
+                </Text>
               </GridItem>
             </Grid>
 
@@ -604,13 +621,13 @@ export const ProgramUpdateForm = ({
                 fontWeight="500"
                 mb={2}
               >
-                Photos/Videos
+                {t('updates.photosVideos')}
               </Text>
               <Text
                 color="gray.400"
                 fontSize="sm"
               >
-                No media attached
+                {t('updates.noMediaAttached')}
               </Text>
             </Box>
 
@@ -621,7 +638,7 @@ export const ProgramUpdateForm = ({
                 fontWeight="500"
                 mb={2}
               >
-                Note
+                {t('common.note')}
               </Text>
               <Text>{notes || ''}</Text>
             </Box>
@@ -629,7 +646,7 @@ export const ProgramUpdateForm = ({
             <Divider />
             {isInstrumentUpdate && (
               <Box>
-                <Heading size="md">Edit Update</Heading>
+                <Heading size="md">{t('updates.editUpdate')}</Heading>
 
                 <Box>
                   <Text
@@ -638,7 +655,7 @@ export const ProgramUpdateForm = ({
                     fontWeight="500"
                     mb={2}
                   >
-                    Instrument & Quantity
+                    {t('updates.instrumentQuantity')}
                   </Text>
                   <HStack
                     wrap="wrap"
@@ -663,7 +680,7 @@ export const ProgramUpdateForm = ({
                   </HStack>
                   <HStack spacing={2}>
                     <Select
-                      placeholder="Select Instrument"
+                      placeholder={t('updates.selectInstrumentPh')}
                       value={selectedInstrument}
                       onChange={(e) => setSelectedInstrument(e.target.value)}
                       size="sm"
@@ -697,7 +714,7 @@ export const ProgramUpdateForm = ({
                       variant="outline"
                       onClick={handleConfirmAddInstrument}
                     >
-                      + Add
+                      {t('common.add')}
                     </Button>
                   </HStack>
                 </Box>

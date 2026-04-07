@@ -19,13 +19,15 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
-import { FiMaximize2, FiMinimize2, FiUser } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
+import { FiDownload, FiMaximize2, FiMinimize2, FiUser } from 'react-icons/fi';
 
 import { useBackendContext } from '../../../contexts/hooks/useBackendContext';
 import { MediaCard } from '../../media/MediaCard';
 import { MediaViewer } from '../MediaViewer';
 
 export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -97,7 +99,11 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
           >
             <IconButton
               icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
-              aria-label={isFullScreen ? 'Minimize' : 'Expand'}
+              aria-label={
+                isFullScreen
+                  ? t('fullscreenFlyout.minimize')
+                  : t('fullscreenFlyout.expand')
+              }
               variant="ghost"
               size="sm"
               onClick={() => setIsFullScreen(!isFullScreen)}
@@ -114,7 +120,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
               fontWeight="600"
               textAlign="center"
             >
-              Media Update
+              {t('updates.mediaUpdateTitle')}
             </Text>
             <Divider mt={3} />
           </Box>
@@ -139,7 +145,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                     fontWeight="500"
                     mb={1}
                   >
-                    Author
+                    {t('updates.colAuthor')}
                   </Text>
                   <HStack spacing={1}>
                     <Icon
@@ -159,7 +165,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                     fontWeight="500"
                     mb={1}
                   >
-                    Program
+                    {t('updates.colProgram')}
                   </Text>
                   <Text>{update?.programName ?? ''}</Text>
                 </GridItem>
@@ -170,7 +176,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                     fontWeight="500"
                     mb={1}
                   >
-                    Time
+                    {t('common.time')}
                   </Text>
                   <Text>{update?.updateDate ?? ''}</Text>
                 </GridItem>
@@ -183,7 +189,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                   fontWeight="500"
                   mb={2}
                 >
-                  Note
+                  {t('common.note')}
                 </Text>
                 <Text>{update?.note || ''}</Text>
               </Box>
@@ -194,7 +200,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                   fontWeight="600"
                   mb={3}
                 >
-                  Media
+                  {t('updates.mediaSection')}
                 </Text>
                 {updates.length > 0 ? (
                   <SimpleGrid
@@ -226,7 +232,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                     color="gray.400"
                     fontSize="sm"
                   >
-                    No media attached
+                    {t('updates.noMediaAttached')}
                   </Text>
                 )}
               </Box>
@@ -250,7 +256,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
               variant="outline"
               onClick={handleKeepUnresolved}
             >
-              Keep as Unresolved
+              {t('common.keepUnresolved')}
             </Button>
             <Button
               bg="teal.500"
@@ -259,7 +265,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
               onClick={handleMarkResolved}
               isLoading={isLoading}
             >
-              Save & Mark as Resolved
+              {t('common.saveMarkResolved')}
             </Button>
           </Flex>
         </DrawerContent>

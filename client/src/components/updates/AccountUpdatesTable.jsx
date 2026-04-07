@@ -18,6 +18,7 @@ import {
   Tr,
 } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
 import { FiUser } from 'react-icons/fi';
 
 import { useTableSort } from '../../contexts/hooks/TableSort';
@@ -25,6 +26,7 @@ import { SortArrows } from '../tables/SortArrows';
 import { AccountUpdateDrawer } from './forms/AccountUpdateDrawer';
 
 const StatusBadge = ({ status, adminName }) => {
+  const { t } = useTranslation();
   const hasAdmin = adminName && adminName.trim();
   const isResolved =
     status?.toLowerCase() === 'resolved' || status?.toLowerCase() === 'active';
@@ -62,7 +64,7 @@ const StatusBadge = ({ status, adminName }) => {
       fontWeight="500"
       textTransform="capitalize"
     >
-      {isResolved ? 'Resolved' : 'Unresolved'}
+      {isResolved ? t('common.resolved') : t('common.unresolved')}
     </Badge>
   );
 };
@@ -73,6 +75,7 @@ export const AccountUpdatesTable = ({
   isLoading = false,
   searchQuery = '',
 }) => {
+  const { t } = useTranslation();
   const sourceData = data ?? originalData ?? [];
 
   const displayData = useMemo(() => {
@@ -114,7 +117,7 @@ export const AccountUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Update Note
+                {t('updates.colUpdateNote')}
                 <SortArrows
                   columnKey="note"
                   sortOrder={sortOrder}
@@ -128,7 +131,7 @@ export const AccountUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Status
+                {t('updates.colStatus')}
                 <SortArrows
                   columnKey="status"
                   sortOrder={sortOrder}
@@ -142,7 +145,7 @@ export const AccountUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Author
+                {t('updates.colAuthor')}
                 <SortArrows
                   columnKey="firstName"
                   sortOrder={sortOrder}
@@ -156,7 +159,7 @@ export const AccountUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Program
+                {t('updates.colProgram')}
                 <SortArrows
                   columnKey="programName"
                   sortOrder={sortOrder}
@@ -170,7 +173,7 @@ export const AccountUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Date
+                {t('updates.colDate')}
                 <SortArrows
                   columnKey="updateDate"
                   sortOrder={sortOrder}
@@ -200,7 +203,7 @@ export const AccountUpdatesTable = ({
                       noOfLines={1}
                       maxW="400px"
                     >
-                      {row.note || 'Account password changed.'}
+                      {row.note || t('updates.accountNotePlaceholder')}
                     </Text>
                   </Td>
                   <Td>
@@ -217,7 +220,7 @@ export const AccountUpdatesTable = ({
                         color="gray.400"
                       />
                       <Text fontSize="sm">
-                        {row.authorName || row.firstName || 'Name'}
+                        {row.authorName || row.firstName || t('common.name')}
                       </Text>
                     </HStack>
                   </Td>

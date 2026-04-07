@@ -7,6 +7,7 @@ import { instrumentRouter } from '@/routes/instrument';
 import { instrumentChangeRouter } from '@/routes/instrument-change';
 import { mediaChangeRouter } from '@/routes/mediaChange';
 import { partnerOrganizationRouter } from '@/routes/partnerOrganization';
+import { playlistCacheRouter } from '@/routes/playlistCache';
 import { programRouter } from '@/routes/program';
 import { directorRouter } from '@/routes/programDirector';
 import { programUpdateRouter } from '@/routes/programUpdate';
@@ -14,7 +15,6 @@ import { rdProgramTableRouter } from '@/routes/rdProgramTable';
 import { regionRouter } from '@/routes/region';
 import { regionalDirectorRouter } from '@/routes/regionalDirector';
 import { updatesPermissionsRouter } from '@/routes/updatesPermissions';
-import { playlistCacheRouter } from '@/routes/playlistCache';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -59,7 +59,6 @@ app.use('/program', programRouter);
 app.use('/partners', partnerOrganizationRouter);
 app.use('/images', imagesRouter);
 app.use('/playlistCache', playlistCacheRouter);
-
 
 // Listening is moved to server.ts to enable importing app in tests
 export default app;

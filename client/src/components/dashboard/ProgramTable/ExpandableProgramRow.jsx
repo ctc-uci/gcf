@@ -11,13 +11,27 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import 'flag-icons/css/flag-icons.min.css';
+
+import ISO6391 from 'iso-639-1';
+import { useTranslation } from 'react-i18next';
+
+import { isoCodeToFlagIconCode } from '../../../utils/isoCodeToFlagIconCode';
 import { formatLaunchDate } from './programTableMappers';
 import { getInstrumentTagStyle } from './programTableTagConstants';
 import { StatusTag } from './StatusTag';
 
 export function ExpandableProgramRow({ p, onEdit }) {
+  const { t } = useTranslation();
   const { isOpen, onToggle } = useDisclosure();
+  const languageCodes = Array.isArray(p.languages) ? p.languages : [];
 
+  const languageLabel = languageCodes.length
+    ? languageCodes
+        .map((code) => ISO6391.getName(String(code).toLowerCase()) || code)
+        .join(', ')
+    : '';
+  const flagCode = isoCodeToFlagIconCode(p.isoCode);
   return (
     <>
       <Tr
@@ -35,40 +49,42 @@ export function ExpandableProgramRow({ p, onEdit }) {
           <StatusTag status={p.status} />
         </Td>
         <Td>{formatLaunchDate(p.launchDate)}</Td>
-        <Td>{p.location}</Td>
+        <Td>
+          {flagCode ? (
+            <>
+              <span
+                className={`fi fi-${flagCode}`}
+                aria-hidden="true"
+              />
+              {'  '}
+            </>
+          ) : null}
+          {p.location}
+        </Td>
         <Td>{p.students}</Td>
         <Td>
-          {Array.isArray(p.instruments) || Array.isArray(p.instrumentTypes) ? (
-            <HStack
-              spacing={2}
-              flexWrap="wrap"
-            >
-              {(Array.isArray(p.instruments)
-                ? p.instruments
-                : p.instrumentTypes
-              ).map((inst) => {
-                const style = getInstrumentTagStyle(inst.name);
-                return (
-                  <Box
-                    key={`${inst.name}-${inst.quantity}`}
-                    as="span"
-                    display="inline-block"
-                    px={2}
-                    py={0.5}
-                    borderRadius="md"
-                    fontSize="sm"
-                    fontWeight="medium"
-                    bg={style.bg}
-                    color={style.color}
-                  >
-                    {inst.name} {inst.quantity}
-                  </Box>
-                );
-              })}
-            </HStack>
-          ) : (
-            (p.instruments ?? '-')
-          )}
+          <VStack
+            align="start"
+            spacing={2}
+          >
+            {Array.isArray(p.instrumentsMap)
+              ? p.instrumentsMap.map((d, idx) => {
+                  const tagStyle = getInstrumentTagStyle(d.name);
+                  return (
+                    <Box
+                      key={`${d.name}-${d.quantity}-${idx}`}
+                      bg={tagStyle.bg}
+                      color={tagStyle.color}
+                      px={3}
+                      py={1}
+                      borderRadius="full"
+                    >
+                      {d.name} {d.quantity}
+                    </Box>
+                  );
+                })
+              : null}
+          </VStack>
         </Td>
         <Td>{p.totalInstruments}</Td>
       </Tr>
@@ -91,9 +107,9 @@ export function ExpandableProgramRow({ p, onEdit }) {
                     fontWeight="semibold"
                     pb="2"
                   >
-                    Language:
+                    {t('expandableProgramRow.language')}
                   </Box>
-                  <Box>{p.primaryLanguage ?? '-'}</Box>
+                  <Box>{languageLabel}</Box>
                 </Box>
                 <Box
                   flex="1"
@@ -104,7 +120,7 @@ export function ExpandableProgramRow({ p, onEdit }) {
                     fontWeight="semibold"
                     pb="2"
                   >
-                    Regional Director(s)
+                    {t('expandableProgramRow.regionalDirectors')}
                   </Box>
                   <Box>
                     <VStack
@@ -139,7 +155,7 @@ export function ExpandableProgramRow({ p, onEdit }) {
                     fontWeight="semibold"
                     pb="2"
                   >
-                    Program Director(s)
+                    {t('expandableProgramRow.programDirectors')}
                   </Box>
                   <Box>
                     <VStack
@@ -174,7 +190,7 @@ export function ExpandableProgramRow({ p, onEdit }) {
                     fontWeight="semibold"
                     pb="2"
                   >
-                    Curriculum Link(s)
+                    {t('expandableProgramRow.curriculumLinks')}
                   </Box>
                   <Box>
                     {Array.isArray(p.playlists)
@@ -207,7 +223,7 @@ export function ExpandableProgramRow({ p, onEdit }) {
                 }}
                 leftIcon={<EditIcon />}
               >
-                Update
+                {t('expandableProgramRow.update')}
               </Button>
             </Box>
           </Collapse>

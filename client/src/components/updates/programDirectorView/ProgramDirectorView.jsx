@@ -15,6 +15,7 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
 import { FiDownload } from 'react-icons/fi';
 
 import { applyFilters } from '../../../contexts/hooks/TableFilter';
@@ -35,6 +36,7 @@ import { CreateUpdateDrawer } from '../forms/createForm/CreateUpdateDrawer';
 import { ProgramDirectorUpdatesTable } from './ProgramDirectorUpdatesTable';
 
 export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState([]);
   const updateDrawerDisclosure = useDisclosure();
@@ -121,15 +123,15 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           size="lg"
           fontWeight="500"
         >
-          Updates
+          {t('updates.pageTitle')}
         </Heading>
         <IconButton
           icon={<FiDownload />}
           variant="ghost"
           size="sm"
-          aria-label="Download updates"
+          aria-label={t('updates.downloadAria')}
           color="gray.500"
-          onClick={() => downloadProgramUpdatesAsCsv(data)}
+          onClick={() => downloadProgramUpdatesAsCsv(data, t)}
         />
         <UpdatesSearchInput
           value={searchQuery}
@@ -151,7 +153,7 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           leftIcon={<AddIcon boxSize={3} />}
           onClick={openCreateUpdate}
         >
-          New Update
+          {t('updates.newUpdate')}
         </Button>
       </Flex>
 
@@ -170,7 +172,7 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
             {...UPDATES_TAB_BASE_PROPS}
             mr={0}
           >
-            Instrument
+            {t('updates.tabInstrument')}
             <UpdatesTabCountBadge count={instrumentRows.length} />
           </Tab>
           <Tab
@@ -180,7 +182,7 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
             {...UPDATES_TAB_BASE_PROPS}
             mr={0}
           >
-            Student
+            {t('updates.tabStudent')}
             <UpdatesTabCountBadge count={studentRows.length} />
           </Tab>
         </TabList>

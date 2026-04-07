@@ -24,6 +24,8 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import i18n, { APP_LOCALES, isAppLocale } from '@/i18n';
+import { useTranslation } from 'react-i18next';
 import {
   FiCamera,
   FiCheck,
@@ -66,6 +68,7 @@ const fetchRegionData = async (backend, userId) => {
 };
 
 export const Profile = () => {
+  const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
   const { backend } = useBackendContext();
@@ -83,8 +86,23 @@ export const Profile = () => {
     firstName: '',
     lastName: '',
     email: '',
-    language: 'English',
+    language: 'en',
+    bio: '',
   });
+
+  const localeLabel = (code) => {
+    const c = isAppLocale(String(code)) ? code : 'en';
+    switch (c) {
+      case 'es':
+        return t('profile.langSpanish');
+      case 'fr':
+        return t('profile.langFrench');
+      case 'zh':
+        return t('profile.langChinese');
+      default:
+        return t('profile.langEnglish');
+    }
+  };
 
   const fetchUserData = useCallback(async () => {
     if (!currentUser?.uid) {
@@ -108,11 +126,17 @@ export const Profile = () => {
       }
 
       setGcfUser(userData);
+      const prefLang =
+        userData.preferredLanguage &&
+        isAppLocale(String(userData.preferredLanguage))
+          ? String(userData.preferredLanguage)
+          : 'en';
       setFormData({
         firstName: userData.firstName || '',
         lastName: userData.lastName || '',
         email: currentUser?.email || '',
-        language: 'English',
+        language: prefLang,
+        bio: userData.bio || '',
       });
 
       if (role === 'Program Director') {
@@ -157,11 +181,18 @@ export const Profile = () => {
   };
 
   const handleEdit = () => {
+    const prefLang =
+      gcfUser.preferredLanguage &&
+      isAppLocale(String(gcfUser.preferredLanguage))
+        ? String(gcfUser.preferredLanguage)
+        : 'en';
     setFormData({
       firstName: gcfUser.firstName || '',
       lastName: gcfUser.lastName || '',
       email: currentUser?.email || '',
-      language: 'English',
+      language: prefLang,
+      bio: gcfUser.bio || '',
+      // TODO: add Bio column to gcf_user schema and add here
     });
     setIsEditing(true);
   };
@@ -171,15 +202,15 @@ export const Profile = () => {
     setShowPassword(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (
       !formData.firstName.trim() ||
       !formData.lastName.trim() ||
       !formData.email.trim()
     ) {
       toast({
-        title: 'Invalid Information!',
-        description: 'Please check your input information.',
+        title: t('profile.invalidInfoTitle'),
+        description: t('profile.invalidInfoDesc'),
         status: 'error',
         variant: 'subtle',
         position: 'bottom-right',
@@ -187,24 +218,58 @@ export const Profile = () => {
       return;
     }
 
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      timeZoneName: 'short',
-    });
+    if (!currentUser?.uid) return;
 
-    toast({
-      title: 'Account Changes Saved',
-      description: `The updates to your account have been saved at ${timeStr}.`,
-      status: 'success',
-      variant: 'subtle',
-      position: 'bottom-right',
-    });
+    try {
+      await Promise.all([
+        backend.patch(`/gcf-users/${currentUser.uid}/preferred-language`, {
+          preferredLanguage: formData.language,
+        }),
+        backend.put(`/gcf-users/${currentUser.uid}`, {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+        }),
+      ]);
 
-    setIsEditing(false);
-    setShowPassword(false);
+      await i18n.changeLanguage(formData.language);
+      setGcfUser((prev) => ({
+        ...prev,
+        preferredLanguage: formData.language,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      }));
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString(i18n.language || 'en', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZoneName: 'short',
+      });
+
+      toast({
+        title: t('profile.savedTitle'),
+        description: t('profile.savedDesc', { time: timeStr }),
+        status: 'success',
+        variant: 'subtle',
+        position: 'bottom-right',
+      });
+
+      setIsEditing(false);
+      setShowPassword(false);
+    } catch (err) {
+      console.error('Error saving profile language:', err);
+      toast({
+        title: t('signup.errorTitle'),
+        description:
+          err.response?.data?.error ??
+          err.message ??
+          t('updates.failedSaveDesc'),
+        status: 'error',
+        variant: 'subtle',
+        position: 'bottom-right',
+      });
+    }
   };
 
   const handleInputChange = (field) => (e) => {
@@ -220,6 +285,19 @@ export const Profile = () => {
         justifyContent="center"
       >
         <Spinner size="xl" />
+      </Box>
+    );
+  }
+
+  if (!gcfUser) {
+    return (
+      <Box
+        p={10}
+        bg="gray.50"
+        minH="94vh"
+        mx={-4}
+      >
+        <Text>Unable to load your profile. Please try again later.</Text>
       </Box>
     );
   }
@@ -251,7 +329,7 @@ export const Profile = () => {
             _hover={{ bg: 'teal.600' }}
             onClick={handleEdit}
           >
-            Edit
+            {t('profile.edit')}
           </Button>
         </Flex>
       )}
@@ -272,12 +350,12 @@ export const Profile = () => {
             boxSize="200px"
             borderRadius="full"
             fit="cover"
-            alt="Profile"
+            alt={t('accountForm.profileAlt')}
           />
           {isEditing && (
             <IconButton
               icon={<FiCamera />}
-              aria-label="Upload photo"
+              aria-label={t('profile.uploadPhoto')}
               borderRadius="full"
               size="sm"
               bg="white"
@@ -307,7 +385,7 @@ export const Profile = () => {
                 fontWeight="bold"
                 mb={1}
               >
-                First Name
+                {t('common.firstName')}
               </Text>
               {isEditing ? (
                 <Input
@@ -323,7 +401,7 @@ export const Profile = () => {
                 fontWeight="bold"
                 mb={1}
               >
-                Last Name
+                {t('common.lastName')}
               </Text>
               {isEditing ? (
                 <Input
@@ -342,7 +420,7 @@ export const Profile = () => {
                 fontWeight="bold"
                 mb={1}
               >
-                Bio
+                {t('profile.bio')}
               </Text>
               {isEditing ? (
                 <Input
@@ -361,7 +439,7 @@ export const Profile = () => {
               fontWeight="bold"
               mb={1}
             >
-              Email
+              {t('common.email')}
             </Text>
             {isEditing ? (
               <Input
@@ -380,7 +458,7 @@ export const Profile = () => {
               fontWeight="bold"
               mb={1}
             >
-              Password
+              {t('common.password')}
             </Text>
             {isEditing ? (
               <>
@@ -393,7 +471,7 @@ export const Profile = () => {
                   <InputRightElement>
                     <IconButton
                       icon={showPassword ? <FiEye /> : <FiEyeOff />}
-                      aria-label="Toggle password visibility"
+                      aria-label={t('profile.togglePassword')}
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowPassword(!showPassword)}
@@ -407,7 +485,7 @@ export const Profile = () => {
                   cursor="pointer"
                   _hover={{ textDecoration: 'underline' }}
                 >
-                  Change password
+                  {t('profile.changePassword')}
                 </Text>
               </>
             ) : (
@@ -416,7 +494,7 @@ export const Profile = () => {
                 {(role === 'Admin' || role === 'Super Admin') && (
                   <IconButton
                     icon={<FiEyeOff />}
-                    aria-label="Toggle password visibility"
+                    aria-label={t('profile.togglePassword')}
                     variant="ghost"
                     size="sm"
                   />
@@ -431,7 +509,7 @@ export const Profile = () => {
                 fontWeight="bold"
                 mb={1}
               >
-                Region
+                {t('common.region')}
               </Text>
               {isEditing ? (
                 <Input
@@ -450,7 +528,7 @@ export const Profile = () => {
                 fontWeight="bold"
                 mb={1}
               >
-                Program
+                {t('common.program')}
               </Text>
               {isEditing ? (
                 <Input
@@ -468,19 +546,24 @@ export const Profile = () => {
               fontWeight="bold"
               mb={1}
             >
-              Preferred Language
+              {t('profile.preferredLanguage')}
             </Text>
             {isEditing ? (
               <Select
                 value={formData.language}
                 onChange={handleInputChange('language')}
               >
-                <option value="English">🇺🇸 English</option>
-                <option value="Español">🇪🇸 Español</option>
-                <option value="Swahili">🇰🇪 Swahili</option>
+                {APP_LOCALES.map((code) => (
+                  <option
+                    key={code}
+                    value={code}
+                  >
+                    {localeLabel(code)}
+                  </option>
+                ))}
               </Select>
             ) : (
-              <Text>🇺🇸 English</Text>
+              <Text>{localeLabel(gcfUser?.preferredLanguage)}</Text>
             )}
           </FormControl>
         </VStack>
@@ -497,7 +580,7 @@ export const Profile = () => {
             variant="outline"
             onClick={handleCancel}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             leftIcon={<FiCheck />}
@@ -506,7 +589,7 @@ export const Profile = () => {
             _hover={{ bg: 'teal.600' }}
             onClick={handleSave}
           >
-            Save
+            {t('common.save')}
           </Button>
         </Flex>
       )}

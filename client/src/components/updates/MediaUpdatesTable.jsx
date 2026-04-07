@@ -18,17 +18,37 @@ import {
   Tr,
 } from '@chakra-ui/react';
 
+import {
+  downloadCsv,
+  escapeCsvValue,
+  getFilenameTimestamp,
+} from '@/utils/downloadCsv';
+import { useTranslation } from 'react-i18next';
+import { FiUser } from 'react-icons/fi';
+
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
 import { ReviewMediaUpdate } from './forms/ReviewMediaUpdate';
 
+export function downloadMediaUpdatesAsCsv(data) {
+  const headers = ['Update Note', 'Status', 'Author', 'Program', 'Date'];
+  const rows = (data || []).map((row) => [
+    escapeCsvValue(row.note),
+    escapeCsvValue(row.status),
+    escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
+    escapeCsvValue(row.programName),
+    escapeCsvValue(row.updateDate),
+  ]);
+  downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
+}
+
 const authorDisplayName = (row) =>
   [row.firstName, row.lastName].filter(Boolean).join(' ').trim() ||
   row.fullName?.trim() ||
   '';
-
 const StatusBadge = ({ status }) => {
+  const { t } = useTranslation();
   const isResolved =
     status?.toLowerCase() === 'resolved' ||
     status?.toLowerCase() === 'approved' ||
@@ -44,7 +64,7 @@ const StatusBadge = ({ status }) => {
       fontWeight="500"
       textTransform="capitalize"
     >
-      {isResolved ? 'Resolved' : 'Unresolved'}
+      {isResolved ? t('common.resolved') : t('common.unresolved')}
     </Badge>
   );
 };
@@ -57,6 +77,7 @@ export const MediaUpdatesTable = ({
   searchQuery = '',
   activeFilters: externalFilters,
 }) => {
+  const { t } = useTranslation();
   const [internalFilters] = useState([]);
   const activeFilters = externalFilters ?? internalFilters;
 
@@ -107,7 +128,7 @@ export const MediaUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Update Note
+                {t('updates.colUpdateNote')}
                 <SortArrows
                   columnKey="note"
                   sortOrder={sortOrder}
@@ -121,7 +142,7 @@ export const MediaUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Status
+                {t('updates.colStatus')}
                 <SortArrows
                   columnKey="status"
                   sortOrder={sortOrder}
@@ -135,9 +156,9 @@ export const MediaUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Author
+                {t('updates.colAuthor')}
                 <SortArrows
-                  columnKey="fullName"
+                  columnKey="firstName"
                   sortOrder={sortOrder}
                 />
               </Th>
@@ -149,7 +170,7 @@ export const MediaUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Program
+                {t('updates.colProgram')}
                 <SortArrows
                   columnKey="programName"
                   sortOrder={sortOrder}
@@ -163,7 +184,7 @@ export const MediaUpdatesTable = ({
                 textTransform="uppercase"
                 fontWeight="600"
               >
-                Date
+                {t('updates.colDate')}
                 <SortArrows
                   columnKey="updateDate"
                   sortOrder={sortOrder}
@@ -193,7 +214,7 @@ export const MediaUpdatesTable = ({
                       noOfLines={1}
                       maxW="400px"
                     >
-                      {row.note || 'Note about the program...'}
+                      {row.note || t('updates.programNotePlaceholder')}
                     </Text>
                   </Td>
                   <Td>
@@ -207,7 +228,9 @@ export const MediaUpdatesTable = ({
                         bg="teal.500"
                         color="white"
                       />
-                      <Text fontSize="sm">{authorDisplayName(row) || '—'}</Text>
+                      <Text fontSize="sm">
+                        {authorDisplayName(row) || t('common.name')}
+                      </Text>
                     </HStack>
                   </Td>
                   <Td>

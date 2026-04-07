@@ -16,6 +16,7 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { useTranslation } from 'react-i18next';
 import { HiOutlineLogout, HiOutlineUser } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,6 +25,7 @@ import { NAVBAR_HEIGHT } from './layoutConstants';
 const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
 
 export const Navbar = () => {
+  const { t } = useTranslation();
   const { role } = useRoleContext();
   const { logout } = useAuthContext();
   const { currentUser } = useAuthContext();
@@ -153,12 +155,16 @@ export const Navbar = () => {
           minW={0}
           flexShrink={1}
         >
-          {role === 'Super Admin' ? 'Super Admin Dashboard' : ''}
-          {role === 'Admin' ? 'Admin Dashboard' : ''}
-          {role === 'Regional Director' ? 'Regional Director Dashboard' : ''}
+          {role === 'Super Admin' ? t('navbar.superAdminDashboard') : ''}
+          {role === 'Admin' ? t('navbar.adminDashboard') : ''}
+          {role === 'Regional Director'
+            ? t('navbar.regionalDirectorDashboard')
+            : ''}
           {role === 'Program Director' ? `${project}` : ''}
 
-          {role === 'Regional Director' ? `: ${region}` : ''}
+          {role === 'Regional Director'
+            ? t('navbar.regionPrefix', { region })
+            : ''}
         </Text>
 
         <Flex
@@ -196,7 +202,7 @@ export const Navbar = () => {
                 >
                   <Image
                     src={profilePictureUrl ?? DEFAULT_PROFILE_IMAGE}
-                    alt="Profile"
+                    alt={t('navbar.profileAlt')}
                     w="28px"
                     h="28px"
                     borderRadius="full"
@@ -211,7 +217,7 @@ export const Navbar = () => {
                     flex="1"
                     textAlign="center"
                   >
-                    {userName || 'User'}
+                    {userName || t('common.user')}
                   </Text>
                   <ChevronDownIcon
                     boxSize={4}
@@ -262,7 +268,7 @@ export const Navbar = () => {
                     bg="transparent"
                     _hover={{ bg: 'gray.400' }}
                   >
-                    <Text fontSize="2vh">Profile</Text>
+                    <Text fontSize="2vh">{t('common.profile')}</Text>
                   </Button>
                   <Button
                     onClick={handleLogout}
@@ -278,7 +284,7 @@ export const Navbar = () => {
                     bg="transparent"
                     _hover={{ bg: 'gray.400' }}
                   >
-                    <Text fontSize="2vh">Log Out</Text>
+                    <Text fontSize="2vh">{t('common.logOut')}</Text>
                   </Button>
                 </Box>
               </Collapse>

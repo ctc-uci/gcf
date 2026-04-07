@@ -42,6 +42,7 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { useTranslation } from 'react-i18next';
 import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
@@ -66,21 +67,22 @@ export function ProgramDisplay({
   onSave,
   onStatsRefresh,
 }) {
+  const { t } = useTranslation();
   const [isCardView, setIsCardView] = useState(false);
 
   const downloadDataAsCsv = () => {
     const headers = [
-      'Program',
-      'Status',
-      'Launch Date',
-      'Location',
-      'Students',
-      'Instruments',
-      'Total Instruments',
-      'Primary Language',
-      'Regional Directors',
-      'Program Directors',
-      'Curriculum Links',
+      t('programsTable.csvProgram'),
+      t('programsTable.csvStatus'),
+      t('programsTable.csvLaunchDate'),
+      t('programsTable.csvLocation'),
+      t('programsTable.csvStudents'),
+      t('programsTable.csvInstruments'),
+      t('programsTable.csvTotalInstruments'),
+      t('programsTable.csvPrimaryLanguage'),
+      t('programsTable.csvRegionalDirectors'),
+      t('programsTable.csvProgramDirectors'),
+      t('programsTable.csvCurriculumLinks'),
     ];
     const rows = (tableData || []).map((p) => {
       const instrumentsArray =
@@ -197,6 +199,7 @@ export function ProgramDisplay({
 
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;
+  const [flippedId, setFlippedId] = useState(null);
 
   if (!getRouteByRole(role, userId)) return null;
 
@@ -229,10 +232,10 @@ export function ProgramDisplay({
               fontSize="3xl"
               fontWeight="semibold"
             >
-              Programs
+              {t('programsTable.title')}
             </Box>
             <IconButton
-              aria-label="download CSV"
+              aria-label={t('common.downloadCsv')}
               icon={<DownloadIcon />}
               size="sm"
               variant="ghost"
@@ -264,7 +267,7 @@ export function ProgramDisplay({
               aria-label="table view"
               icon={<HamburgerIcon />}
               size="sm"
-              variant="ghost"
+              variant={isCardView ? 'ghost' : 'solid'}
               onClick={() => setIsCardView(false)}
             />
             <Divider
@@ -276,7 +279,7 @@ export function ProgramDisplay({
               aria-label="card view"
               icon={<HiOutlineSquares2X2 />}
               size="sm"
-              variant="ghost"
+              variant={isCardView ? 'solid' : 'ghost'}
               onClick={() => setIsCardView(true)}
             />
 
@@ -313,7 +316,7 @@ export function ProgramDisplay({
                         fontWeight="semibold"
                         mb={2}
                       >
-                        Program Status
+                        {t('programsTable.programStatus')}
                       </Text>
                       <HStack spacing={2}>
                         <Box
@@ -340,7 +343,7 @@ export function ProgramDisplay({
                             )
                           }
                         >
-                          Developing
+                          {t('programsTable.developing')}
                         </Box>
                         <Box
                           as="button"
@@ -366,7 +369,7 @@ export function ProgramDisplay({
                             )
                           }
                         >
-                          Launched
+                          {t('programsTable.launched')}
                         </Box>
                       </HStack>
                     </Box>
@@ -376,7 +379,7 @@ export function ProgramDisplay({
                         fontWeight="semibold"
                         mb={2}
                       >
-                        Location
+                        {t('common.location')}
                       </Text>
                       <InputGroup size="sm">
                         <InputLeftElement pointerEvents="none">
@@ -399,7 +402,7 @@ export function ProgramDisplay({
                         fontWeight="semibold"
                         mb={2}
                       >
-                        Instruments
+                        {t('common.instruments')}
                       </Text>
                       <InputGroup size="sm">
                         <InputLeftElement pointerEvents="none">
@@ -436,7 +439,9 @@ export function ProgramDisplay({
               fontSize="sm"
               color="gray.500"
             >
-              Displaying {tableData.length} results
+              {t('programsTable.displayingResults', {
+                count: tableData.length,
+              })}
             </Text>
             <Button
               size="sm"
@@ -451,7 +456,7 @@ export function ProgramDisplay({
                 setIsFormOpen(true);
               }}
             >
-              New Program
+              {t('programsTable.newProgram')}
             </Button>
           </HStack>
         </HStack>
@@ -467,7 +472,7 @@ export function ProgramDisplay({
               >
                 <Table
                   variant="unstyled"
-                  aria-label="collapsible-table"
+                  aria-label={t('programsTable.collapsibleTableAria')}
                   sx={{
                     border: '1px solid',
                     borderColor: 'gray.200',
@@ -491,7 +496,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('title')}
                         cursor="pointer"
                       >
-                        Program{' '}
+                        {t('programsTable.colProgram')}{' '}
                         <SortArrows
                           columnKey="title"
                           sortOrder={sortOrder}
@@ -501,7 +506,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('status')}
                         cursor="pointer"
                       >
-                        Status{' '}
+                        {t('programsTable.colStatus')}{' '}
                         <SortArrows
                           columnKey="status"
                           sortOrder={sortOrder}
@@ -511,7 +516,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('launchDate')}
                         cursor="pointer"
                       >
-                        Launch Date{' '}
+                        {t('programsTable.colLaunchDate')}{' '}
                         <SortArrows
                           columnKey="launchDate"
                           sortOrder={sortOrder}
@@ -521,7 +526,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('location')}
                         cursor="pointer"
                       >
-                        Location{' '}
+                        {t('programsTable.colLocation')}{' '}
                         <SortArrows
                           columnKey="location"
                           sortOrder={sortOrder}
@@ -531,7 +536,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('students')}
                         cursor="pointer"
                       >
-                        Students{' '}
+                        {t('programsTable.colStudents')}{' '}
                         <SortArrows
                           columnKey="students"
                           sortOrder={sortOrder}
@@ -541,7 +546,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('instruments')}
                         cursor="pointer"
                       >
-                        Instruments{' '}
+                        {t('programsTable.colInstruments')}{' '}
                         <SortArrows
                           columnKey="instruments"
                           sortOrder={sortOrder}
@@ -551,7 +556,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('totalInstruments')}
                         cursor="pointer"
                       >
-                        Total Instruments{' '}
+                        {t('programsTable.colTotalInstruments')}{' '}
                         <SortArrows
                           columnKey="totalInstruments"
                           sortOrder={sortOrder}
@@ -590,6 +595,8 @@ export function ProgramDisplay({
           ) : (
             <CardView
               data={tableData}
+              flippedId={flippedId}
+              setFlippedId={setFlippedId}
               openEditForm={openEditForm}
             />
           )}

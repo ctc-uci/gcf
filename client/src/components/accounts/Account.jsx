@@ -13,6 +13,7 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { useTranslation } from 'react-i18next';
 import { FiDownload } from 'react-icons/fi';
 
 import { AccountForm } from './AccountForm';
@@ -28,6 +29,7 @@ const getAccountsRoute = (role, userId) => {
 };
 
 export const Account = () => {
+  const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
   const userId = currentUser?.uid;
@@ -127,15 +129,15 @@ export const Account = () => {
             fontWeight="600"
             color="blackAlpha.900"
           >
-            Accounts
+            {t('accounts.title')}
           </Heading>
           <IconButton
             icon={<FiDownload size={20} />}
             variant="ghost"
             size="sm"
-            aria-label="Download accounts"
+            aria-label={t('accounts.downloadAria')}
             color="gray.600"
-            onClick={() => downloadAccountsAsCsv(users)}
+            onClick={() => downloadAccountsAsCsv(users, t)}
           />
         </HStack>
 

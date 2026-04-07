@@ -11,6 +11,7 @@ CREATE TABLE program (
     title VARCHAR(140) NOT NULL,
     description VARCHAR,
     primary_language VARCHAR,
+    languages VARCHAR(2)[],
     partner_org BIGINT NOT NULL,
     status status_type NOT NULL,
     launch_date DATE NOT NULL,

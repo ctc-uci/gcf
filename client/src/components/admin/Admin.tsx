@@ -1,9 +1,12 @@
 import { Box, Text } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
+
 export const Admin = () => {
+  const { t } = useTranslation();
   return (
     <Box>
-      <Text>This is a page only admins are able to see!</Text>
+      <Text>{t('admin.message')}</Text>
     </Box>
   );
 };

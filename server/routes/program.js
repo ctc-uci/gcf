@@ -6,6 +6,22 @@ import { db } from '../db/db-pgp';
 const programRouter = express.Router();
 programRouter.use(express.json());
 
+function normalizeLanguages(languages, primaryLanguage) {
+  const candidateCodes = Array.isArray(languages)
+    ? languages
+    : primaryLanguage
+      ? [primaryLanguage]
+      : [];
+
+  return [
+    ...new Set(
+      candidateCodes
+        .map((value) => String(value).trim().toLowerCase())
+        .filter((value) => /^[a-z]{2}$/.test(value))
+    ),
+  ];
+}
+
 programRouter.get('/', async (req, res) => {
   try {
     const program = await db.query(`SELECT * FROM program`);
@@ -27,6 +43,29 @@ programRouter.get('/:id', async (req, res) => {
     }
 
     res.status(200).json(keysToCamel(program[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+/** Cumulative enrollment_change and graduated_change totals for a program (via program_update). */
+programRouter.get('/:id/enrollment-aggregates', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await db.query(
+      `SELECT
+         COALESCE(SUM(ec.enrollment_change), 0) AS sum_enrollment,
+         COALESCE(SUM(ec.graduated_change), 0) AS sum_graduated
+       FROM enrollment_change ec
+       INNER JOIN program_update pu ON pu.id = ec.update_id
+       WHERE pu.program_id = $1`,
+      [id]
+    );
+
+    const row = result[0] ?? { sum_enrollment: 0, sum_graduated: 0 };
+    res.status(200).json(keysToCamel(row));
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');
@@ -160,11 +199,13 @@ programRouter.post('/', async (req, res) => {
       city,
       title,
       description,
+      languages,
       primaryLanguage,
       partnerOrg,
       status,
       launchDate,
     } = req.body;
+    const normalizedLanguages = normalizeLanguages(languages, primaryLanguage);
 
     const newProgram = await db.query(
       `
@@ -177,7 +218,7 @@ programRouter.post('/', async (req, res) => {
         city,
         title,
         description,
-        primary_language,
+        languages,
         partner_org,
         status,
         launch_date
@@ -195,7 +236,7 @@ programRouter.post('/', async (req, res) => {
         city,
         title,
         description ?? null,
-        primaryLanguage ?? null,
+        normalizedLanguages.length > 0 ? normalizedLanguages : null,
         partnerOrg,
         status,
         launchDate,
@@ -219,11 +260,13 @@ programRouter.put('/:id', async (req, res) => {
       city,
       title,
       description,
+      languages,
       primaryLanguage,
       partnerOrg,
       status,
       launchDate,
     } = req.body;
+    const normalizedLanguages = normalizeLanguages(languages, primaryLanguage);
 
     const updatedProgram = await db.query(
       `
@@ -235,7 +278,7 @@ programRouter.put('/:id', async (req, res) => {
         city = COALESCE($4, city),
         title = COALESCE($5, title),
         description = COALESCE($6, description),
-        primary_language = COALESCE($7, primary_language),
+        languages = COALESCE($7, languages),
         partner_org = COALESCE($8, partner_org),
         status = COALESCE($9, status),
         launch_date = COALESCE($10, launch_date)
@@ -249,7 +292,7 @@ programRouter.put('/:id', async (req, res) => {
         city,
         title,
         description,
-        primaryLanguage,
+        normalizedLanguages.length > 0 ? normalizedLanguages : null,
         partnerOrg,
         status,
         launchDate,
@@ -297,7 +340,8 @@ programRouter.get('/:id/regional-directors', async (req, res) => {
       SELECT 
         u.id AS user_id,
         u.first_name,
-        u.last_name
+        u.last_name,
+        u.picture
       FROM program p
       JOIN country c ON p.country = c.id
       JOIN regional_director rd ON c.region_id = rd.region_id
@@ -315,6 +359,7 @@ programRouter.get('/:id/regional-directors', async (req, res) => {
       userId: row.user_id,
       firstName: row.first_name,
       lastName: row.last_name,
+      picture: row.picture,
     }));
 
     res.status(200).json(regional_directors);
@@ -419,6 +464,7 @@ programRouter.get('/:id/instruments', async (req, res) => {
       JOIN instrument i ON i.id = ic.instrument_id
       WHERE p.id = $1
       GROUP BY i.id, i.name
+      HAVING COALESCE(SUM(ic.amount_changed), 0) <> 0
       ORDER BY i.name ASC;
       `,
       [id]
@@ -440,7 +486,8 @@ programRouter.get('/:id/program-directors', async (req, res) => {
       SELECT 
         u.id AS user_id,
         u.first_name,
-        u.last_name
+        u.last_name,
+        u.picture
       FROM program_director pd
       JOIN gcf_user u ON pd.user_id = u.id
       WHERE pd.program_id = $1
@@ -452,6 +499,7 @@ programRouter.get('/:id/program-directors', async (req, res) => {
       userId: row.user_id,
       firstName: row.first_name,
       lastName: row.last_name,
+      picture: row.picture,
     }));
 
     res.status(200).json(directors);
@@ -485,6 +533,31 @@ programRouter.get('/:id/media', async (req, res) => {
     }));
 
     res.status(200).json(media);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+programRouter.get('/:id/partner-organization', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await db.query(
+      `
+      SELECT g.name
+      FROM partner_organization g
+      JOIN program p ON g.id = p.partner_org
+      WHERE p.id = $1;
+      `,
+      [id]
+    );
+
+    if (result.length === 0) {
+      return res.status(404).send('Partner organization not found');
+    }
+
+    res.status(200).json(result[0].name);
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');
