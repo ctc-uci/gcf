@@ -130,7 +130,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
 
     const idKey = String(instrumentId);
     setFormData((prev) => {
-      const prevQty = prev.instruments[idKey]?.quantity ?? 0;
+      const prevQty = Number(prev.instruments[idKey]?.quantity ?? 0);
       return {
         ...prev,
         instruments: {
