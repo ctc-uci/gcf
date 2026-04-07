@@ -379,6 +379,7 @@ export function LocationLanguageSection({
                 isMulti
                 closeMenuOnSelect={false}
                 options={languageOptions}
+                components={{ MultiValue: () => null }}
                 value={languageOptions.filter((option) =>
                   (formState.languages ?? []).includes(option.value)
                 )}
