@@ -37,12 +37,13 @@ export const Layout = () => {
   return (
     <Flex
       bg="gray.50"
-      minHeight="100vh"
+      h="100vh"
       minW={0}
       w="100%"
       maxW="100%"
       padding={6}
       gap={6}
+      overflow="hidden"
     >
       <Sidebar />
       <Box
@@ -50,6 +51,7 @@ export const Layout = () => {
         minW={0}
         display="flex"
         flexDirection="column"
+        minH={0}
       >
         <Navbar />
         <Box
@@ -57,6 +59,8 @@ export const Layout = () => {
           mt={6}
           flex="1"
           minW={0}
+          minH={0}
+          overflowY="auto"
         >
           <Outlet />
         </Box>
