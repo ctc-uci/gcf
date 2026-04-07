@@ -17,6 +17,18 @@ import { useTranslation } from 'react-i18next';
 
 import { DirectorAvatar } from './DirectorAvatar';
 
+function normalizeDirectorRow(d) {
+  if (!d || typeof d !== 'object') return null;
+  const userId = d.userId ?? d.user_id;
+  if (userId === null || userId === undefined || userId === '') return null;
+  return {
+    userId,
+    firstName: d.firstName ?? d.first_name,
+    lastName: d.lastName ?? d.last_name,
+    picture: d.picture,
+  };
+}
+
 export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
@@ -36,7 +48,7 @@ export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
         );
         if (cancelled) return;
         const data = res.data;
-        if (data == null) {
+        if (data === null || data === undefined) {
           setRegional([]);
           return;
         }
@@ -65,9 +77,10 @@ export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
         const response = await backend.get(
           '/program-directors/program-director-names'
         );
-        const directors = response.data ?? [];
+        const raw = Array.isArray(response.data) ? response.data : [];
+        const directors = raw.map(normalizeDirectorRow).filter(Boolean);
         const uniqueDirectors = Array.from(
-          new Map(directors.map((d) => [d.userId, d])).values()
+          new Map(directors.map((d) => [String(d.userId), d])).values()
         );
         setNameOptions(uniqueDirectors);
       } catch {
@@ -78,9 +91,16 @@ export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
   }, [backend]);
 
   const directorChoices = useMemo(() => {
+    const normalizedSelected = selected ? normalizeDirectorRow(selected) : null;
     const byId = new Map(nameOptions.map((d) => [String(d.userId), d]));
-    if (selected?.userId != null && !byId.has(String(selected.userId))) {
-      byId.set(String(selected.userId), selected);
+    const selectedId = normalizedSelected?.userId;
+    if (
+      selectedId !== undefined &&
+      selectedId !== null &&
+      selectedId !== '' &&
+      !byId.has(String(selectedId))
+    ) {
+      byId.set(String(selectedId), normalizedSelected);
     }
     return Array.from(byId.values());
   }, [nameOptions, selected]);
@@ -89,23 +109,21 @@ export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
     selected && `${selected.firstName ?? ''} ${selected.lastName ?? ''}`.trim();
 
   function handleProgramDirectorChange(e) {
-    const v = e.target.value;
+    const raw = e.currentTarget?.value ?? e.target?.value ?? '';
+    const v = String(raw).trim();
     if (!v) {
       setFormData((prev) => ({ ...prev, programDirectors: [] }));
       return;
     }
-    const found = directorChoices.find((d) => String(d.userId) === String(v));
+    const found = directorChoices.find(
+      (d) => String(d.userId) === v || Number(d.userId) === Number(v)
+    );
     if (!found) return;
+    const row = normalizeDirectorRow(found);
+    if (!row) return;
     setFormData((prev) => ({
       ...prev,
-      programDirectors: [
-        {
-          userId: found.userId,
-          firstName: found.firstName,
-          lastName: found.lastName,
-          picture: found.picture,
-        },
-      ],
+      programDirectors: [row],
     }));
   }
 
@@ -204,7 +222,9 @@ export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
               pr={2}
               placeholder={t('programForm.selectProgramDirector')}
               value={
-                selected?.userId != null && selected.userId !== ''
+                selected?.userId !== undefined &&
+                selected?.userId !== null &&
+                selected.userId !== ''
                   ? String(selected.userId)
                   : ''
               }

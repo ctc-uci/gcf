@@ -97,7 +97,7 @@ export const ProgramForm = ({
     useState({});
   const [initialCurriculumLinks, setInitialCurriculumLinks] = useState([]);
 
-  const [initialUploadedMedia, setInitialUploadedMedia] = useState([]);
+  const [, setInitialUploadedMedia] = useState([]);
   const [initialGraduated, setInitialGraduated] = useState(0);
 
   const [formState, setFormState] = useState({
@@ -184,6 +184,17 @@ export const ProgramForm = ({
         console.error('ProgramForm: could not load program details', err);
       }
 
+      try {
+        const pdRes = await backend.get(
+          `/program/${program.id}/program-directors`
+        );
+        if (Array.isArray(pdRes.data)) {
+          record = { ...record, programDirectors: pdRes.data };
+        }
+      } catch (err) {
+        console.error('ProgramForm: could not load program directors', err);
+      }
+
       let regionId = null;
       let countryIsoCode = null;
 
@@ -195,7 +206,11 @@ export const ProgramForm = ({
           regionId = countryResponse.data.regionId;
           const rawIso =
             countryResponse.data.isoCode ?? countryResponse.data.iso_code;
-          if (rawIso != null && String(rawIso).trim() !== '') {
+          if (
+            rawIso !== null &&
+            rawIso !== undefined &&
+            String(rawIso).trim() !== ''
+          ) {
             countryIsoCode = String(rawIso).trim().toUpperCase();
           }
         } catch (error) {
@@ -287,7 +302,9 @@ export const ProgramForm = ({
         regionId: regionId,
         state: record.state ?? null,
         city:
-          record.city != null && record.city !== ''
+          record.city !== null &&
+          record.city !== undefined &&
+          record.city !== ''
             ? Number(record.city)
             : null,
         country: record.country ?? null,
@@ -370,19 +387,19 @@ export const ProgramForm = ({
   }, [isOpen]);
 
   function handleProgramStatusChange(status) {
-    setFormState({ ...formState, status: status || null });
+    setFormState((prev) => ({ ...prev, status: status || null }));
   }
 
   function handleProgramNameChange(name) {
-    setFormState({ ...formState, programName: name });
+    setFormState((prev) => ({ ...prev, programName: name }));
   }
 
   function handleProgramLaunchDateChange(date) {
-    setFormState({ ...formState, launchDate: date });
+    setFormState((prev) => ({ ...prev, launchDate: date }));
   }
 
   function handleLanguageChange(languageChanges) {
-    setFormState({ ...formState, languages: languageChanges });
+    setFormState((prev) => ({ ...prev, languages: languageChanges }));
   }
 
   const handleMediaChange = (newMediaFiles) => {
@@ -433,37 +450,48 @@ export const ProgramForm = ({
         programId = response.data.id;
       }
 
-      const selectedRaw = formState.programDirectors[0]?.userId;
-      const selectedNum =
-        selectedRaw !== null && selectedRaw !== undefined && selectedRaw !== ''
-          ? Number(selectedRaw)
-          : null;
-      const validSelected =
-        typeof selectedNum === 'number' && !Number.isNaN(selectedNum);
-      const initialDirectorNums = (initialProgramDirectorIds || []).map((id) =>
-        Number(id)
+      const selectedDirector = formState.programDirectors[0];
+      const selectedRaw = selectedDirector?.userId;
+      const selectedKey =
+        selectedRaw !== null &&
+        selectedRaw !== undefined &&
+        String(selectedRaw).trim() !== ''
+          ? String(selectedRaw).trim()
+          : '';
+      const validSelected = selectedKey !== '';
+
+      const initialIds = initialProgramDirectorIds || [];
+      const initialKeySet = new Set(
+        initialIds.map((id) =>
+          id !== null && id !== undefined ? String(id).trim() : ''
+        )
       );
 
       if (validSelected) {
-        for (const uid of initialDirectorNums) {
-          if (uid !== selectedNum) {
-            await backend.delete(`/program-directors/${uid}`, {
+        for (const uid of initialIds) {
+          if (String(uid).trim() === selectedKey) continue;
+          await backend.delete(
+            `/program-directors/${encodeURIComponent(String(uid))}`,
+            {
               params: { programId },
-            });
-          }
+            }
+          );
         }
-        if (!initialDirectorNums.includes(selectedNum)) {
+        if (!initialKeySet.has(selectedKey)) {
           await backend.post(`/program-directors`, {
-            userId: selectedNum,
+            userId: selectedRaw,
             programId,
           });
         }
-        setInitialProgramDirectorIds([selectedNum]);
+        setInitialProgramDirectorIds([selectedRaw]);
       } else {
-        for (const uid of initialDirectorNums) {
-          await backend.delete(`/program-directors/${uid}`, {
-            params: { programId },
-          });
+        for (const uid of initialIds) {
+          await backend.delete(
+            `/program-directors/${encodeURIComponent(String(uid))}`,
+            {
+              params: { programId },
+            }
+          );
         }
         setInitialProgramDirectorIds([]);
       }
