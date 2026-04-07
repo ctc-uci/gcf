@@ -23,7 +23,7 @@ regionalDirectorRouter.get('/region/:region_id', async (req, res) => {
   try {
     const { region_id } = req.params;
     const director = await db.query(
-      `SELECT rd.*, u.first_name, u.last_name
+      `SELECT rd.*, u.first_name, u.last_name, u.picture
        FROM regional_director rd
        JOIN gcf_user u ON u.id = rd.user_id
        WHERE rd.region_id = $1

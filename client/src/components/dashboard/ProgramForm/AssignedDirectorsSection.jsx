@@ -17,16 +17,45 @@ import { useTranslation } from 'react-i18next';
 
 import { DirectorAvatar } from './DirectorAvatar';
 
-export function AssignedDirectorsSection({
-  regionalDirectors = [],
-  formState,
-  setFormData,
-}) {
+export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
   const [nameOptions, setNameOptions] = useState([]);
+  const [regional, setRegional] = useState([]);
 
-  const regional = Array.isArray(regionalDirectors) ? regionalDirectors : [];
+  useEffect(() => {
+    if (regionId === null || regionId === undefined || regionId === '') {
+      setRegional([]);
+      return undefined;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await backend.get(
+          `/regional-directors/region/${Number(regionId)}`
+        );
+        if (cancelled) return;
+        const data = res.data;
+        if (data == null) {
+          setRegional([]);
+          return;
+        }
+        setRegional([
+          {
+            userId: data.userId ?? data.user_id,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            picture: data.picture,
+          },
+        ]);
+      } catch {
+        if (!cancelled) setRegional([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [backend, regionId]);
   const programDirectors = formState.programDirectors ?? [];
   const selected = programDirectors[0];
 

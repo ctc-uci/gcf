@@ -799,7 +799,7 @@ export const ProgramForm = ({
                 />
 
                 <AssignedDirectorsSection
-                  regionalDirectors={program?.regionalDirectors ?? []}
+                  regionId={formState.regionId}
                   formState={formState}
                   setFormData={setFormState}
                 />
