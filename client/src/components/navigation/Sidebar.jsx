@@ -43,12 +43,7 @@ export const Sidebar = () => {
   const { t } = useTranslation();
   const { role } = useRoleContext();
   const location = useLocation();
-  interface NavItem {
-    name: string;
-    icon: React.ReactElement;
-    path: string;
-  }
-  let navItems: NavItem[] = [];
+  let navItems = [];
 
   if (role === 'Super Admin' || role === 'Admin') {
     navItems = [
