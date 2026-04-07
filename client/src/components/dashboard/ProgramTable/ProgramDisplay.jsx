@@ -28,7 +28,6 @@ import {
   Th,
   Thead,
   Tr,
-  useDisclosure,
   VStack,
 } from '@chakra-ui/react';
 
@@ -43,6 +42,7 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { useTranslation } from 'react-i18next';
 import {
   HiOutlineAdjustmentsHorizontal,
   HiOutlineSquares2X2,
@@ -55,7 +55,7 @@ import { STATUS_TAG_STYLES } from './programTableTagConstants';
 export function ProgramDisplay({
   originalData,
   searchQuery,
-  setSearchQuery: _setSearchQuery,
+  setSearchQuery,
   isLoading,
   role,
   userId,
@@ -67,21 +67,22 @@ export function ProgramDisplay({
   onSave,
   onStatsRefresh,
 }) {
+  const { t } = useTranslation();
   const [isCardView, setIsCardView] = useState(false);
 
   const downloadDataAsCsv = () => {
     const headers = [
-      'Program',
-      'Status',
-      'Launch Date',
-      'Location',
-      'Students',
-      'Instruments',
-      'Total Instruments',
-      'Primary Language',
-      'Regional Directors',
-      'Program Directors',
-      'Curriculum Links',
+      t('programsTable.csvProgram'),
+      t('programsTable.csvStatus'),
+      t('programsTable.csvLaunchDate'),
+      t('programsTable.csvLocation'),
+      t('programsTable.csvStudents'),
+      t('programsTable.csvInstruments'),
+      t('programsTable.csvTotalInstruments'),
+      t('programsTable.csvPrimaryLanguage'),
+      t('programsTable.csvRegionalDirectors'),
+      t('programsTable.csvProgramDirectors'),
+      t('programsTable.csvCurriculumLinks'),
     ];
     const rows = (tableData || []).map((p) => {
       const instrumentsArray =
@@ -142,7 +143,6 @@ export function ProgramDisplay({
   const [filterStatus, setFilterStatus] = useState('');
   const [filterLocation, setFilterLocation] = useState('');
   const [filterInstruments, setFilterInstruments] = useState('');
-  const filtersDisclosure = useDisclosure();
 
   const filterBySearchPanel = useMemo(() => {
     let data = originalData ?? [];
@@ -199,6 +199,7 @@ export function ProgramDisplay({
 
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;
+  const [flippedId, setFlippedId] = useState(null);
 
   if (!getRouteByRole(role, userId)) return null;
 
@@ -231,10 +232,10 @@ export function ProgramDisplay({
               fontSize="3xl"
               fontWeight="semibold"
             >
-              Programs
+              {t('programsTable.title')}
             </Box>
             <IconButton
-              aria-label="download CSV"
+              aria-label={t('common.downloadCsv')}
               icon={<DownloadIcon />}
               size="sm"
               variant="ghost"
@@ -242,40 +243,57 @@ export function ProgramDisplay({
             />
           </HStack>
           <HStack spacing={2}>
-            <Popover
-              isOpen={filtersDisclosure.isOpen}
-              onClose={filtersDisclosure.onClose}
-              placement="bottom-start"
+            <InputGroup
+              size="sm"
+              maxW="200px"
             >
+              <InputLeftElement pointerEvents="none">
+                <Search2Icon
+                  color="gray.400"
+                  boxSize={4}
+                />
+              </InputLeftElement>
+              <Input
+                pl={8}
+                placeholder="Search programs"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                bg="white"
+                borderColor="gray.200"
+              />
+            </InputGroup>
+
+            <IconButton
+              aria-label="table view"
+              icon={<HamburgerIcon />}
+              size="sm"
+              variant={isCardView ? 'ghost' : 'solid'}
+              onClick={() => setIsCardView(false)}
+            />
+            <Divider
+              orientation="vertical"
+              h="20px"
+              borderWidth="1px"
+            />
+            <IconButton
+              aria-label="card view"
+              icon={<HiOutlineSquares2X2 />}
+              size="sm"
+              variant={isCardView ? 'solid' : 'ghost'}
+              onClick={() => setIsCardView(true)}
+            />
+
+            <Popover placement="bottom-end">
               <PopoverTrigger>
-                <HStack
-                  spacing={2}
-                  as="button"
-                  type="button"
-                  border="1px solid"
-                  borderColor="gray.200"
-                  borderRadius="md"
-                  px={3}
-                  py={2}
-                  bg="white"
-                  _hover={{ borderColor: 'gray.300' }}
-                  onClick={filtersDisclosure.onOpen}
-                  w="200px"
-                  justifyContent="flex-start"
-                >
-                  <Search2Icon />
-                  <Text
-                    fontSize="sm"
-                    color="gray.500"
-                    flex={1}
-                    textAlign="left"
-                  >
-                    Search
-                  </Text>
-                </HStack>
+                <IconButton
+                  aria-label="Filters"
+                  icon={<HiOutlineAdjustmentsHorizontal />}
+                  size="sm"
+                  variant="ghost"
+                />
               </PopoverTrigger>
               <PopoverContent
-                w="400px"
+                w={_activeFilters.length > 0 ? '800px' : '400px'}
                 maxW="90vw"
                 shadow="xl"
               >
@@ -285,11 +303,12 @@ export function ProgramDisplay({
                     fontSize="lg"
                     mb={4}
                   >
-                    Filters
+                    Quick filters
                   </Text>
                   <VStack
                     align="stretch"
                     spacing={4}
+                    mb={6}
                   >
                     <Box>
                       <Text
@@ -297,7 +316,7 @@ export function ProgramDisplay({
                         fontWeight="semibold"
                         mb={2}
                       >
-                        Program Status
+                        {t('programsTable.programStatus')}
                       </Text>
                       <HStack spacing={2}>
                         <Box
@@ -324,7 +343,7 @@ export function ProgramDisplay({
                             )
                           }
                         >
-                          Developing
+                          {t('programsTable.developing')}
                         </Box>
                         <Box
                           as="button"
@@ -350,7 +369,7 @@ export function ProgramDisplay({
                             )
                           }
                         >
-                          Launched
+                          {t('programsTable.launched')}
                         </Box>
                       </HStack>
                     </Box>
@@ -360,7 +379,7 @@ export function ProgramDisplay({
                         fontWeight="semibold"
                         mb={2}
                       >
-                        Location
+                        {t('common.location')}
                       </Text>
                       <InputGroup size="sm">
                         <InputLeftElement pointerEvents="none">
@@ -371,7 +390,7 @@ export function ProgramDisplay({
                         </InputLeftElement>
                         <Input
                           pl={8}
-                          placeholder="Search Locations"
+                          placeholder="Filter by location"
                           value={filterLocation}
                           onChange={(e) => setFilterLocation(e.target.value)}
                         />
@@ -383,7 +402,7 @@ export function ProgramDisplay({
                         fontWeight="semibold"
                         mb={2}
                       >
-                        Instruments
+                        {t('common.instruments')}
                       </Text>
                       <InputGroup size="sm">
                         <InputLeftElement pointerEvents="none">
@@ -394,71 +413,36 @@ export function ProgramDisplay({
                         </InputLeftElement>
                         <Input
                           pl={8}
-                          placeholder="Search Instruments"
+                          placeholder="Filter by instrument"
                           value={filterInstruments}
                           onChange={(e) => setFilterInstruments(e.target.value)}
                         />
                       </InputGroup>
                     </Box>
                   </VStack>
+                  <Divider mb={4} />
+                  <Text
+                    fontWeight="bold"
+                    fontSize="lg"
+                    mb={4}
+                  >
+                    Advanced filters
+                  </Text>
+                  <FilterComponent
+                    columns={columns}
+                    onFilterChange={(filters) => setActiveFilters(filters)}
+                  />
                 </Box>
-              </PopoverContent>
-            </Popover>
-
-            <IconButton
-              aria-label="table view"
-              icon={<HamburgerIcon />}
-              size="sm"
-              variant="ghost"
-              onClick={() => setIsCardView(false)}
-            />
-            <Divider
-              orientation="vertical"
-              h="20px"
-              borderWidth="1px"
-            />
-            <IconButton
-              aria-label="card view"
-              icon={<HiOutlineSquares2X2 />}
-              size="sm"
-              variant="ghost"
-              onClick={() => setIsCardView(true)}
-            />
-
-            <Popover>
-              <PopoverTrigger>
-                <IconButton
-                  aria-label="filter"
-                  icon={<HiOutlineAdjustmentsHorizontal />}
-                  size="sm"
-                  variant="ghost"
-                />
-              </PopoverTrigger>
-              <PopoverContent
-                w="800px"
-                maxW="90vw"
-                shadow="xl"
-              >
-                <FilterComponent
-                  columns={columns}
-                  onFilterChange={(filters) => setActiveFilters(filters)}
-                />
               </PopoverContent>
             </Popover>
             <Text
               fontSize="sm"
               color="gray.500"
             >
-              Displaying {tableData.length} results
+              {t('programsTable.displayingResults', {
+                count: tableData.length,
+              })}
             </Text>
-            <IconButton
-              aria-label="download"
-              icon={<DownloadIcon />}
-              size="sm"
-              variant="ghost"
-              ml={2}
-              onClick={downloadDataAsCsv}
-            />
             <Button
               size="sm"
               leftIcon={<AddIcon />}
@@ -472,7 +456,7 @@ export function ProgramDisplay({
                 setIsFormOpen(true);
               }}
             >
-              New Program
+              {t('programsTable.newProgram')}
             </Button>
           </HStack>
         </HStack>
@@ -488,7 +472,7 @@ export function ProgramDisplay({
               >
                 <Table
                   variant="unstyled"
-                  aria-label="collapsible-table"
+                  aria-label={t('programsTable.collapsibleTableAria')}
                   sx={{
                     border: '1px solid',
                     borderColor: 'gray.200',
@@ -512,7 +496,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('title')}
                         cursor="pointer"
                       >
-                        Program{' '}
+                        {t('programsTable.colProgram')}{' '}
                         <SortArrows
                           columnKey="title"
                           sortOrder={sortOrder}
@@ -522,7 +506,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('status')}
                         cursor="pointer"
                       >
-                        Status{' '}
+                        {t('programsTable.colStatus')}{' '}
                         <SortArrows
                           columnKey="status"
                           sortOrder={sortOrder}
@@ -532,7 +516,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('launchDate')}
                         cursor="pointer"
                       >
-                        Launch Date{' '}
+                        {t('programsTable.colLaunchDate')}{' '}
                         <SortArrows
                           columnKey="launchDate"
                           sortOrder={sortOrder}
@@ -542,7 +526,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('location')}
                         cursor="pointer"
                       >
-                        Location{' '}
+                        {t('programsTable.colLocation')}{' '}
                         <SortArrows
                           columnKey="location"
                           sortOrder={sortOrder}
@@ -552,7 +536,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('students')}
                         cursor="pointer"
                       >
-                        Students{' '}
+                        {t('programsTable.colStudents')}{' '}
                         <SortArrows
                           columnKey="students"
                           sortOrder={sortOrder}
@@ -562,7 +546,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('instruments')}
                         cursor="pointer"
                       >
-                        Instruments{' '}
+                        {t('programsTable.colInstruments')}{' '}
                         <SortArrows
                           columnKey="instruments"
                           sortOrder={sortOrder}
@@ -572,7 +556,7 @@ export function ProgramDisplay({
                         onClick={() => handleSort('totalInstruments')}
                         cursor="pointer"
                       >
-                        Total Instruments{' '}
+                        {t('programsTable.colTotalInstruments')}{' '}
                         <SortArrows
                           columnKey="totalInstruments"
                           sortOrder={sortOrder}
@@ -611,6 +595,8 @@ export function ProgramDisplay({
           ) : (
             <CardView
               data={tableData}
+              flippedId={flippedId}
+              setFlippedId={setFlippedId}
               openEditForm={openEditForm}
             />
           )}

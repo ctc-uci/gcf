@@ -1,0 +1,251 @@
+import { useEffect, useMemo, useState } from 'react';
+
+import { ChevronDownIcon } from '@chakra-ui/icons';
+import {
+  Box,
+  FormControl,
+  FormLabel,
+  Heading,
+  HStack,
+  Select,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
+
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
+
+import { DirectorAvatar } from './DirectorAvatar';
+
+function normalizeDirectorRow(d) {
+  if (!d || typeof d !== 'object') return null;
+  const userId = d.userId ?? d.user_id;
+  if (userId === null || userId === undefined || userId === '') return null;
+  return {
+    userId,
+    firstName: d.firstName ?? d.first_name,
+    lastName: d.lastName ?? d.last_name,
+    picture: d.picture,
+  };
+}
+
+export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
+  const { t } = useTranslation();
+  const { backend } = useBackendContext();
+  const [nameOptions, setNameOptions] = useState([]);
+  const [regional, setRegional] = useState([]);
+
+  useEffect(() => {
+    if (regionId === null || regionId === undefined || regionId === '') {
+      setRegional([]);
+      return undefined;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await backend.get(
+          `/regional-directors/region/${Number(regionId)}`
+        );
+        if (cancelled) return;
+        const data = res.data;
+        if (data === null || data === undefined) {
+          setRegional([]);
+          return;
+        }
+        setRegional([
+          {
+            userId: data.userId ?? data.user_id,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            picture: data.picture,
+          },
+        ]);
+      } catch {
+        if (!cancelled) setRegional([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [backend, regionId]);
+  const programDirectors = formState.programDirectors ?? [];
+  const selected = programDirectors[0];
+
+  useEffect(() => {
+    async function fetchProgramDirectors() {
+      try {
+        const response = await backend.get(
+          '/program-directors/program-director-names'
+        );
+        const raw = Array.isArray(response.data) ? response.data : [];
+        const directors = raw.map(normalizeDirectorRow).filter(Boolean);
+        const uniqueDirectors = Array.from(
+          new Map(directors.map((d) => [String(d.userId), d])).values()
+        );
+        setNameOptions(uniqueDirectors);
+      } catch {
+        setNameOptions([]);
+      }
+    }
+    fetchProgramDirectors();
+  }, [backend]);
+
+  const directorChoices = useMemo(() => {
+    const normalizedSelected = selected ? normalizeDirectorRow(selected) : null;
+    const byId = new Map(nameOptions.map((d) => [String(d.userId), d]));
+    const selectedId = normalizedSelected?.userId;
+    if (
+      selectedId !== undefined &&
+      selectedId !== null &&
+      selectedId !== '' &&
+      !byId.has(String(selectedId))
+    ) {
+      byId.set(String(selectedId), normalizedSelected);
+    }
+    return Array.from(byId.values());
+  }, [nameOptions, selected]);
+
+  const selectedLabel =
+    selected && `${selected.firstName ?? ''} ${selected.lastName ?? ''}`.trim();
+
+  function handleProgramDirectorChange(e) {
+    const raw = e.currentTarget?.value ?? e.target?.value ?? '';
+    const v = String(raw).trim();
+    if (!v) {
+      setFormData((prev) => ({ ...prev, programDirectors: [] }));
+      return;
+    }
+    const found = directorChoices.find(
+      (d) => String(d.userId) === v || Number(d.userId) === Number(v)
+    );
+    if (!found) return;
+    const row = normalizeDirectorRow(found);
+    if (!row) return;
+    setFormData((prev) => ({
+      ...prev,
+      programDirectors: [row],
+    }));
+  }
+
+  return (
+    <Box>
+      <Heading
+        size="md"
+        fontWeight="semibold"
+        mb={3}
+      >
+        {t('programForm.assignedDirectors')}
+      </Heading>
+      <VStack
+        align="stretch"
+        spacing={4}
+      >
+        <FormControl>
+          <FormLabel
+            size="sm"
+            fontWeight="normal"
+            color="gray"
+          >
+            {t('programForm.regionalDirectors')}
+          </FormLabel>
+          {regional.length > 0 ? (
+            <VStack
+              align="start"
+              spacing={3}
+            >
+              {regional.map((d) => {
+                const label =
+                  `${d.firstName ?? ''} ${d.lastName ?? ''}`.trim() ||
+                  t('programForm.directorFallbackRegional');
+                return (
+                  <HStack
+                    key={d.userId}
+                    spacing={3}
+                  >
+                    <DirectorAvatar
+                      picture={d.picture}
+                      name={label}
+                    />
+                    <Text fontSize="sm">{label}</Text>
+                  </HStack>
+                );
+              })}
+            </VStack>
+          ) : (
+            <Text
+              fontSize="sm"
+              color="gray.500"
+            >
+              {t('programForm.noRegionalDirectorsForRegion')}
+            </Text>
+          )}
+        </FormControl>
+
+        <FormControl>
+          <FormLabel
+            size="sm"
+            fontWeight="normal"
+            color="gray"
+          >
+            {t('programForm.programDirector')}
+          </FormLabel>
+          <HStack
+            align="stretch"
+            spacing={0}
+            borderWidth="1px"
+            borderColor="gray.200"
+            borderRadius="md"
+            bg="white"
+            overflow="hidden"
+            minH="40px"
+          >
+            <Box
+              pl={3}
+              pr={2}
+              display="flex"
+              alignItems="center"
+              flexShrink={0}
+            >
+              <DirectorAvatar
+                picture={selected?.picture}
+                name={selectedLabel || t('programForm.directorFallbackProgram')}
+                boxSize="32px"
+              />
+            </Box>
+            <Select
+              flex={1}
+              border="none"
+              borderRadius="none"
+              h="auto"
+              minH="40px"
+              py={2}
+              pr={2}
+              placeholder={t('programForm.selectProgramDirector')}
+              value={
+                selected?.userId !== undefined &&
+                selected?.userId !== null &&
+                selected.userId !== ''
+                  ? String(selected.userId)
+                  : ''
+              }
+              onChange={handleProgramDirectorChange}
+              icon={<ChevronDownIcon />}
+              iconColor="gray.500"
+              _focus={{ boxShadow: 'none' }}
+            >
+              {directorChoices.map((director) => (
+                <option
+                  value={String(director.userId)}
+                  key={director.userId}
+                >
+                  {`${director.firstName ?? ''} ${director.lastName ?? ''}`.trim() ||
+                    t('programForm.directorFallbackProgram')}
+                </option>
+              ))}
+            </Select>
+          </HStack>
+        </FormControl>
+      </VStack>
+    </Box>
+  );
+}

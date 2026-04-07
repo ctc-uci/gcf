@@ -1,36 +1,76 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
+  Box,
   Button,
+  Center,
+  Checkbox,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
+  FormControl,
+  FormLabel,
+  Heading,
   HStack,
   Input,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
   Select,
-  Tag,
-  TagCloseButton,
-  TagLabel,
+  Spinner,
+  Text,
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
 
+import { MediaUploadModal } from '@/components/media/MediaUploadModal';
+import { PartnerOrganizationField } from '@/components/partners/PartnerOrganizationField';
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import ISO6391 from 'iso-639-1';
+import { useTranslation } from 'react-i18next';
 
-import { CurriculumLinkForm } from './CurriculumLinkForm';
-import { InstrumentForm } from './InstrumentForm';
-import { LocationForm } from './LocationForm';
-import { MediaUploadForm } from './MediaUploadForm';
-import { ProgramDirectorForm } from './ProgramDirectorForm';
+import { AssignedDirectorsSection } from './AssignedDirectorsSection';
+import { LocationLanguageSection } from './LocationLanguageSection';
+import { MediaPreviewTag } from './MediaPreviewTag';
+import { ResourcesSection } from './ResourcesSection';
+import { StudentsInstrumentsSection } from './StudentsInstrumentsSection';
+
+/**
+ * Deletes all `instrument_change` rows for this program + instrument using
+ * existing routes (same DELETE as ProgramUpdateForm). Sweeps every
+ * program_update for the program.
+ */
+async function deleteInstrumentChangesForProgramInstrument(
+  backend,
+  programId,
+  instrumentId
+) {
+  const numericProgramId = Number(programId);
+  const numericInstrumentId = Number(instrumentId);
+  if (Number.isNaN(numericInstrumentId)) return;
+
+  const res = await backend.get('/program-updates');
+  const updates = Array.isArray(res.data) ? res.data : [];
+  const updateIds = updates
+    .filter((u) => Number(u.programId ?? u.program_id) === numericProgramId)
+    .map((u) => u.id);
+
+  for (const updateId of updateIds) {
+    const icRes = await backend.get(`/instrument-changes/update/${updateId}`);
+    const rows = Array.isArray(icRes.data) ? icRes.data : [];
+    for (const row of rows) {
+      const iid = Number(row.instrumentId ?? row.instrument_id);
+      if (
+        iid === numericInstrumentId &&
+        row.id !== null &&
+        row.id !== undefined
+      ) {
+        await backend.delete(`/instrument-changes/${row.id}`);
+      }
+    }
+  }
+}
 
 export const ProgramForm = ({
   isOpen: isOpenProp,
@@ -39,7 +79,9 @@ export const ProgramForm = ({
   onSave,
   program,
 }) => {
+  const { t } = useTranslation();
   const disclosure = useDisclosure();
+  const mediaUploadModal = useDisclosure();
 
   const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
   const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
@@ -55,40 +97,64 @@ export const ProgramForm = ({
     useState({});
   const [initialCurriculumLinks, setInitialCurriculumLinks] = useState([]);
 
-  const [initialUploadedMedia, setInitialUploadedMedia] = useState([]);
+  const [, setInitialUploadedMedia] = useState([]);
+  const [initialGraduated, setInitialGraduated] = useState(0);
 
   const [formState, setFormState] = useState({
     status: null,
     programName: null,
+    partnerOrg: null,
+    showPartnerOrgOnMap: false,
     launchDate: null,
     regionId: null,
     country: null,
+    countryIsoCode: null,
     city: null,
     state: null,
     students: 0,
+    graduatedStudents: 0,
     instruments: {},
-    language: null,
+    languages: [],
     programDirectors: [],
     curriculumLinks: [],
     media: [],
   });
+  const languageOptions = useMemo(
+    () =>
+      ISO6391.getAllCodes()
+        .map((code) => ({
+          value: code.toLowerCase(),
+          label: ISO6391.getName(code),
+        }))
+        .filter((option) => option.label)
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    []
+  );
 
   const [activeTab, setActiveTab] = useState('overview');
+  const [isLoadingProgramData, setIsLoadingProgramData] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadProgramRegionData() {
       if (!program) {
+        setIsLoadingProgramData(false);
         setFormState({
           status: null,
           programName: null,
+          partnerOrg: null,
+          showPartnerOrgOnMap: false,
           launchDate: null,
           regionId: null,
           country: null,
+          countryIsoCode: null,
           state: null,
           city: null,
           students: 0,
+          graduatedStudents: 0,
           instruments: {},
-          language: null,
+          languages: [],
           programDirectors: [],
           curriculumLinks: [],
           media: [],
@@ -97,68 +163,167 @@ export const ProgramForm = ({
         setInitialInstrumentQuantities({});
         setInitialCurriculumLinks([]);
         setInitialUploadedMedia([]);
+        setInitialGraduated(0);
         return;
       }
 
-      let regionId = null;
+      setIsLoadingProgramData(true);
 
-      if (program.country) {
+      let record = program;
+      try {
+        const { data } = await backend.get(`/program/${program.id}`);
+        record = {
+          ...program,
+          ...data,
+          programDirectors: program.programDirectors ?? [],
+          regionalDirectors: program.regionalDirectors ?? [],
+          playlists: program.playlists ?? [],
+          media: program.media ?? [],
+        };
+      } catch (err) {
+        console.error('ProgramForm: could not load program details', err);
+      }
+
+      try {
+        const pdRes = await backend.get(
+          `/program/${program.id}/program-directors`
+        );
+        if (Array.isArray(pdRes.data)) {
+          record = { ...record, programDirectors: pdRes.data };
+        }
+      } catch (err) {
+        console.error('ProgramForm: could not load program directors', err);
+      }
+
+      let regionId = null;
+      let countryIsoCode = null;
+
+      if (record.country) {
         try {
           const countryResponse = await backend.get(
-            `/country/${program.country}`
+            `/country/${record.country}`
           );
           regionId = countryResponse.data.regionId;
+          const rawIso =
+            countryResponse.data.isoCode ?? countryResponse.data.iso_code;
+          if (
+            rawIso !== null &&
+            rawIso !== undefined &&
+            String(rawIso).trim() !== ''
+          ) {
+            countryIsoCode = String(rawIso).trim().toUpperCase();
+          }
         } catch (error) {
           console.error('error fetching country/region', error);
         }
       }
 
-      const mappedProgramDirectors = (program.programDirectors ?? []).map(
+      const mappedProgramDirectors = (record.programDirectors ?? []).map(
         (d) => ({
           userId: d.userId ?? d.id ?? d.user_id,
           firstName: d.firstName,
           lastName: d.lastName,
+          picture: d.picture,
         })
       );
+      const programDirectorsForForm = mappedProgramDirectors.slice(0, 1);
 
       const instrumentMap = {};
       const initialInstrumentMap = {};
       try {
         const instrumentsResponse = await backend.get(
-          `/program/${program.id}/instruments`
+          `/program/${record.id}/instruments`
         );
         const instruments = instrumentsResponse.data || [];
         instruments.forEach((inst) => {
           const id = inst.instrumentId ?? inst.id;
           if (!id) return;
+          const qty = inst.quantity ?? 0;
+          if (qty === 0) return;
           instrumentMap[id] = {
             id,
             name: inst.name,
-            quantity: inst.quantity ?? 0,
+            quantity: qty,
           };
-          initialInstrumentMap[id] = inst.quantity ?? 0;
+          initialInstrumentMap[id] = qty;
         });
       } catch (err) {
         console.error('Error fetching program instruments:', err);
       }
 
+      const normalizedLanguages = (() => {
+        if (Array.isArray(record.languages)) {
+          return [
+            ...new Set(
+              record.languages
+                .map((value) => String(value).trim().toLowerCase())
+                .filter((value) => ISO6391.validate(value))
+            ),
+          ];
+        }
+        const existingValue = record.primaryLanguage;
+        if (!existingValue) return [];
+        const trimmedValue = String(existingValue).trim();
+        if (ISO6391.validate(trimmedValue.toLowerCase())) {
+          return [trimmedValue.toLowerCase()];
+        }
+        const mappedCode = ISO6391.getCode(trimmedValue);
+        return mappedCode ? [mappedCode.toLowerCase()] : [];
+      })();
+
+      let graduatedTotal = 0;
+      let sumEnrollment = 0;
+      try {
+        const aggRes = await backend.get(
+          `/program/${record.id}/enrollment-aggregates`
+        );
+        graduatedTotal = Number(aggRes.data?.sumGraduated ?? 0);
+        sumEnrollment = Number(aggRes.data?.sumEnrollment ?? 0);
+      } catch (error) {
+        console.error('Error fetching enrollment aggregates:', error);
+      }
+      if (Number.isNaN(graduatedTotal)) graduatedTotal = 0;
+      if (Number.isNaN(sumEnrollment)) sumEnrollment = 0;
+      setInitialGraduated(graduatedTotal);
+
+      const netStudentsFromAgg = sumEnrollment - graduatedTotal;
+      const resolvedStudents =
+        record.students !== null && record.students !== undefined
+          ? Number(record.students)
+          : netStudentsFromAgg;
+
       setFormState({
-        status: program.status ?? null,
-        programName: program.title ?? '',
-        launchDate: program.launchDate ? program.launchDate.split('T')[0] : '',
+        status: record.status ?? null,
+        programName: record.title ?? '',
+        partnerOrg: record.partnerOrg ?? record.partner_org ?? null,
+        showPartnerOrgOnMap:
+          record.showPartnerOrgOnMap ?? record.show_partner_org_on_map ?? false,
+        launchDate: record.launchDate ? record.launchDate.split('T')[0] : '',
         regionId: regionId,
-        state: program.state ?? null,
-        city: program.city ?? null,
-        country: program.country ?? null,
-        students: program.students ?? 0,
+        state: record.state ?? null,
+        city:
+          record.city !== null &&
+          record.city !== undefined &&
+          record.city !== ''
+            ? Number(record.city)
+            : null,
+        country: record.country ?? null,
+        countryIsoCode,
+        students: Number.isNaN(resolvedStudents) ? 0 : resolvedStudents,
+        graduatedStudents: graduatedTotal,
         instruments: instrumentMap,
-        language: program.primaryLanguage?.toLowerCase() ?? null,
+        languages: normalizedLanguages,
 
-        programDirectors: mappedProgramDirectors,
+        programDirectors: programDirectorsForForm,
 
-        curriculumLinks: Array.isArray(program.playlists)
-          ? program.playlists
-              .filter((p) => p.link && p.instrumentId != null)
+        curriculumLinks: Array.isArray(record.playlists)
+          ? record.playlists
+              .filter(
+                (p) =>
+                  p.link &&
+                  ((p.instrumentId !== null && p.instrumentId !== undefined) ||
+                    (p.instrument_id !== null && p.instrument_id !== undefined))
+              )
               .map((p) => ({
                 link: p.link,
                 name: p.name || 'Playlist',
@@ -167,8 +332,8 @@ export const ProgramForm = ({
               }))
           : [],
 
-        media: Array.isArray(program.media)
-          ? program.media.map((m) => ({
+        media: Array.isArray(record.media)
+          ? record.media.map((m) => ({
               id: m.id,
               s3_key: m.s3_key,
               file_name: m.file_name,
@@ -182,9 +347,12 @@ export const ProgramForm = ({
       );
       setInitialInstrumentQuantities(initialInstrumentMap);
       setInitialCurriculumLinks(
-        (program.playlists ?? [])
+        (record.playlists ?? [])
           .filter(
-            (p) => p.link && (p.instrumentId != null || p.instrument_id != null)
+            (p) =>
+              p.link &&
+              ((p.instrumentId !== null && p.instrumentId !== undefined) ||
+                (p.instrument_id !== null && p.instrument_id !== undefined))
           )
           .map((p) => ({
             link: p.link,
@@ -193,11 +361,24 @@ export const ProgramForm = ({
       );
 
       setInitialUploadedMedia(
-        (program.media ?? []).filter((m) => m.file_name).map((m) => m.file_name)
+        (record.media ?? []).filter((m) => m.file_name).map((m) => m.file_name)
       );
     }
-    loadProgramRegionData();
-  }, [program?.id, backend]);
+
+    (async () => {
+      try {
+        await loadProgramRegionData();
+      } finally {
+        if (!cancelled) {
+          setIsLoadingProgramData(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [program, backend]);
 
   useEffect(() => {
     if (isOpen) {
@@ -206,31 +387,19 @@ export const ProgramForm = ({
   }, [isOpen]);
 
   function handleProgramStatusChange(status) {
-    setFormState({ ...formState, status: status });
+    setFormState((prev) => ({ ...prev, status: status || null }));
   }
 
   function handleProgramNameChange(name) {
-    setFormState({ ...formState, programName: name });
+    setFormState((prev) => ({ ...prev, programName: name }));
   }
 
   function handleProgramLaunchDateChange(date) {
-    setFormState({ ...formState, launchDate: date });
+    setFormState((prev) => ({ ...prev, launchDate: date }));
   }
 
-  function handleRegionChange(regionId) {
-    setFormState({ ...formState, regionId: Number(regionId), country: null });
-  }
-
-  function handleCountryChange(countryId) {
-    setFormState({ ...formState, country: Number(countryId) });
-  }
-
-  function handleStudentNumberChange(numStudents) {
-    setFormState({ ...formState, students: numStudents });
-  }
-
-  function handleLanguageChange(langChange) {
-    setFormState({ ...formState, language: langChange });
+  function handleLanguageChange(languageChanges) {
+    setFormState((prev) => ({ ...prev, languages: languageChanges }));
   }
 
   const handleMediaChange = (newMediaFiles) => {
@@ -242,6 +411,15 @@ export const ProgramForm = ({
 
   async function handleSave() {
     try {
+      const rawPartner = formState.partnerOrg;
+      const hasPartnerOrg =
+        rawPartner !== null && rawPartner !== undefined && rawPartner !== '';
+      const partnerOrgPayload = hasPartnerOrg
+        ? Number(rawPartner)
+        : program
+          ? null
+          : 1;
+
       const data = {
         name: formState.programName,
         title: formState.programName,
@@ -251,14 +429,18 @@ export const ProgramForm = ({
         state: formState.state,
         city: formState.city,
         students: formState.students ?? 0,
-        primaryLanguage: formState.language,
-        partnerOrg: 1,
+        languages: formState.languages ?? [],
+        partnerOrg: partnerOrgPayload,
         createdBy: currentUser?.uid || currentUser?.id,
         description: '',
       };
 
       let programId;
       const oldStudentCount = program?.students || 0;
+      const deltaNet = (formState.students ?? 0) - oldStudentCount;
+      const deltaGrad = (formState.graduatedStudents ?? 0) - initialGraduated;
+      const enrollmentDelta = deltaNet + deltaGrad;
+      const graduatedDelta = deltaGrad;
 
       if (program) {
         await backend.put(`/program/${program.id}`, data);
@@ -268,18 +450,50 @@ export const ProgramForm = ({
         programId = response.data.id;
       }
 
-      if (formState.programDirectors.length > 0) {
-        for (const director of formState.programDirectors) {
-          if (
-            director.userId &&
-            !initialProgramDirectorIds.includes(director.userId)
-          ) {
-            await backend.post(`/program-directors`, {
-              userId: director.userId,
-              programId,
-            });
-          }
+      const selectedDirector = formState.programDirectors[0];
+      const selectedRaw = selectedDirector?.userId;
+      const selectedKey =
+        selectedRaw !== null &&
+        selectedRaw !== undefined &&
+        String(selectedRaw).trim() !== ''
+          ? String(selectedRaw).trim()
+          : '';
+      const validSelected = selectedKey !== '';
+
+      const initialIds = initialProgramDirectorIds || [];
+      const initialKeySet = new Set(
+        initialIds.map((id) =>
+          id !== null && id !== undefined ? String(id).trim() : ''
+        )
+      );
+
+      if (validSelected) {
+        for (const uid of initialIds) {
+          if (String(uid).trim() === selectedKey) continue;
+          await backend.delete(
+            `/program-directors/${encodeURIComponent(String(uid))}`,
+            {
+              params: { programId },
+            }
+          );
         }
+        if (!initialKeySet.has(selectedKey)) {
+          await backend.post(`/program-directors`, {
+            userId: selectedRaw,
+            programId,
+          });
+        }
+        setInitialProgramDirectorIds([selectedRaw]);
+      } else {
+        for (const uid of initialIds) {
+          await backend.delete(
+            `/program-directors/${encodeURIComponent(String(uid))}`,
+            {
+              params: { programId },
+            }
+          );
+        }
+        setInitialProgramDirectorIds([]);
       }
 
       const currentLinkKeys = (formState.curriculumLinks ?? []).map(
@@ -324,8 +538,8 @@ export const ProgramForm = ({
       }
       const mediaChanges = formState.media.filter((mediaItem) => !mediaItem.id);
 
-      const studentCountChange = formState.students - oldStudentCount;
       const instrumentChanges = [];
+      const instrumentIdsToPurge = [];
 
       const allInstrumentIds = new Set([
         ...Object.keys(initialInstrumentQuantities || {}),
@@ -335,6 +549,10 @@ export const ProgramForm = ({
       for (const id of allInstrumentIds) {
         const newQty = formState.instruments?.[id]?.quantity ?? 0;
         const oldQty = initialInstrumentQuantities?.[id] ?? 0;
+        if (program && newQty === 0 && oldQty > 0) {
+          instrumentIdsToPurge.push(Number(id));
+          continue;
+        }
         const instrumentDiff = newQty - oldQty;
         if (instrumentDiff !== 0) {
           instrumentChanges.push({
@@ -344,17 +562,35 @@ export const ProgramForm = ({
         }
       }
 
-      const hasStudentChange = studentCountChange !== 0;
+      if (program && instrumentIdsToPurge.length > 0) {
+        for (const instId of instrumentIdsToPurge) {
+          await deleteInstrumentChangesForProgramInstrument(
+            backend,
+            programId,
+            instId
+          );
+        }
+      }
+
+      const hasStudentChange = enrollmentDelta !== 0 || graduatedDelta !== 0;
       const hasInstrumentChange = instrumentChanges.length > 0;
       const hasMediaChange = mediaChanges.length > 0;
 
-      if (hasStudentChange || hasInstrumentChange || hasMediaChange) {
+      const isNewProgram = !program;
+
+      if (
+        isNewProgram ||
+        hasStudentChange ||
+        hasInstrumentChange ||
+        hasMediaChange
+      ) {
         const updateResponse = await backend.post(`/program-updates`, {
-          title: 'update program stats',
+          title: isNewProgram ? 'Program Created' : 'update program stats',
           program_id: programId,
           created_by: currentUser?.uid || currentUser?.id,
           update_date: new Date().toISOString(),
-          note: 'Program update',
+          note: isNewProgram ? 'Program Created' : 'Program update',
+          show_on_table: isNewProgram,
         });
 
         const updateId = updateResponse.data.id;
@@ -362,8 +598,9 @@ export const ProgramForm = ({
         if (hasStudentChange) {
           await backend.post(`/enrollmentChange`, {
             update_id: updateId,
-            enrollment_change: studentCountChange,
-            graduated_change: 0,
+            enrollment_change: enrollmentDelta,
+            graduated_change: graduatedDelta,
+            event_type: 'other',
           });
         }
 
@@ -373,6 +610,7 @@ export const ProgramForm = ({
               instrumentId: instrumentChange.instrumentId,
               updateId,
               amountChanged: instrumentChange.amountChanged,
+              event_type: 'other',
             });
           }
         }
@@ -406,7 +644,10 @@ export const ProgramForm = ({
       size="lg"
     >
       <DrawerOverlay />
-      <DrawerContent>
+      <DrawerContent
+        position="relative"
+        overflow="hidden"
+      >
         <HStack marginBottom="1em">
           <DrawerCloseButton
             left="4"
@@ -423,7 +664,7 @@ export const ProgramForm = ({
             onClick={handleSave}
           >
             {' '}
-            Save{' '}
+            {t('common.save')}{' '}
           </Button>
         </HStack>
 
@@ -433,7 +674,13 @@ export const ProgramForm = ({
             align="stretch"
             marginLeft="1em"
           >
-            <DrawerHeader padding="0 0">Program</DrawerHeader>
+            <DrawerHeader
+              padding="0 0"
+              textAlign="center"
+              w="full"
+            >
+              {t('programForm.drawerTitle')}
+            </DrawerHeader>
             <HStack
               w="full"
               spacing={0}
@@ -449,7 +696,7 @@ export const ProgramForm = ({
                 borderColor={activeTab === 'overview' ? 'teal.500' : 'gray.200'}
                 _hover={{ bg: 'gray.50' }}
               >
-                Overview
+                {t('programForm.overview')}
               </Button>
 
               <Button
@@ -462,192 +709,207 @@ export const ProgramForm = ({
                 borderColor={activeTab === 'media' ? 'teal.500' : 'gray.200'}
                 _hover={{ bg: 'gray.50' }}
               >
-                Media
+                {t('programForm.mediaTab')}
               </Button>
             </HStack>
 
             {activeTab === 'overview' && (
               <>
-                <h3>Status</h3>
-                <HStack>
-                  <Button
-                    onClick={() => handleProgramStatusChange('Inactive')}
-                    colorScheme={
-                      formState.status === 'Inactive' ? 'teal' : undefined
-                    }
+                <Box>
+                  <Heading
+                    size="md"
+                    fontWeight="semibold"
+                    mb={3}
                   >
-                    Developing
-                  </Button>
-                  <Button
-                    onClick={() => handleProgramStatusChange('Active')}
-                    colorScheme={
-                      formState.status === 'Active' ? 'teal' : undefined
-                    }
+                    {t('programForm.generalInformation')}
+                  </Heading>
+                  <VStack
+                    align="stretch"
+                    spacing={4}
                   >
-                    Launched
-                  </Button>
-                </HStack>
-                <h3>Program Name</h3>
-                <Input
-                  placeholder="Enter Program Name"
-                  value={formState.programName || ''}
-                  onChange={(e) => handleProgramNameChange(e.target.value)}
+                    <FormControl isRequired>
+                      <FormLabel
+                        size="sm"
+                        fontWeight="normal"
+                        color="gray"
+                      >
+                        {t('programForm.programName')}
+                      </FormLabel>
+                      <Input
+                        placeholder={t('programForm.enterProgramTitle')}
+                        value={formState.programName || ''}
+                        onChange={(e) =>
+                          handleProgramNameChange(e.target.value)
+                        }
+                      />
+                    </FormControl>
+
+                    <PartnerOrganizationField
+                      label={t('programForm.partnerOrgName')}
+                      valueId={formState.partnerOrg}
+                      onChangeId={(id) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          partnerOrg: id,
+                        }))
+                      }
+                    />
+
+                    <FormControl>
+                      <Checkbox
+                        isChecked={Boolean(formState.showPartnerOrgOnMap)}
+                        onChange={(e) =>
+                          setFormState((prev) => ({
+                            ...prev,
+                            showPartnerOrgOnMap: e.target.checked,
+                          }))
+                        }
+                      >
+                        {t('programForm.showPartnerOnMap')}
+                      </Checkbox>
+                      {/* TODO: Implement persistence and map behavior for showPartnerOrgOnMap (API + map layer). */}
+                    </FormControl>
+
+                    <FormControl isRequired>
+                      <FormLabel
+                        size="sm"
+                        fontWeight="normal"
+                        color="gray"
+                      >
+                        {t('programForm.status')}
+                      </FormLabel>
+                      <Select
+                        value={formState.status ?? ''}
+                        onChange={(e) =>
+                          handleProgramStatusChange(e.target.value)
+                        }
+                        placeholder={t('programForm.selectStatus')}
+                      >
+                        <option value="Active">
+                          {t('programForm.launched')}
+                        </option>
+                        <option value="Inactive">
+                          {t('programForm.developing')}
+                        </option>
+                      </Select>
+                    </FormControl>
+
+                    <FormControl>
+                      <FormLabel
+                        size="sm"
+                        fontWeight="normal"
+                        color="gray"
+                      >
+                        {t('programForm.launchDate')}
+                      </FormLabel>
+                      <Input
+                        type="date"
+                        placeholder={t('programForm.datePlaceholder')}
+                        value={formState.launchDate || ''}
+                        onChange={(e) =>
+                          handleProgramLaunchDateChange(e.target.value)
+                        }
+                      />
+                    </FormControl>
+                  </VStack>
+                </Box>
+
+                <LocationLanguageSection
+                  formState={formState}
+                  setFormData={setFormState}
+                  languageOptions={languageOptions}
+                  onLanguagesChange={handleLanguageChange}
                 />
-                <h3>Launch Date</h3>
-                <Input
-                  type="date"
-                  placeholder="MM/DD/YYYY"
-                  value={formState.launchDate || ''}
-                  onChange={(e) =>
-                    handleProgramLaunchDateChange(e.target.value)
-                  }
-                />
-                <h3>Location</h3>
-                <LocationForm
+
+                <StudentsInstrumentsSection
                   formState={formState}
                   setFormData={setFormState}
                 />
-                <h3>Students</h3>
-                <NumberInput
-                  min={0}
-                  value={formState.students}
-                  onChange={(e) => handleStudentNumberChange(Number(e))}
-                >
-                  <NumberInputField placeholder="Enter # of Students" />
-                  <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                  </NumberInputStepper>
-                </NumberInput>
 
-                <h3> Instrument(s) & Quantity </h3>
-                <HStack wrap="wrap">
-                  <InstrumentForm setFormData={setFormState} />
+                <AssignedDirectorsSection
+                  regionId={formState.regionId}
+                  formState={formState}
+                  setFormData={setFormState}
+                />
 
-                  {Object.entries(formState.instruments || {}).map(
-                    ([instrumentId, instrumentData]) => (
-                      <Tag key={instrumentId}>
-                        <TagLabel>
-                          {instrumentData.name}: {instrumentData.quantity}
-                        </TagLabel>
-                        <TagCloseButton
-                          onClick={() => {
-                            setFormState((prevData) => {
-                              const {
-                                [instrumentId]: _,
-                                ...remainingInstruments
-                              } = prevData.instruments;
-                              return {
-                                ...prevData,
-                                instruments: remainingInstruments,
-                              };
-                            });
-                          }}
-                        />
-                      </Tag>
-                    )
-                  )}
-                </HStack>
-                <h3>Language</h3>
-                <Select
-                  placeholder="Language"
-                  value={formState.language || ''}
-                  onChange={(e) => handleLanguageChange(e.target.value)}
-                >
-                  <option value="english">English</option>
-                  <option value="spanish">Spanish</option>
-                  <option value="french">French</option>
-                  <option value="arabic">Arabic</option>
-                  <option value="mandarin">Mandarin</option>
-                </Select>
-                <h3>Program Directors</h3>
-                <HStack wrap="wrap">
-                  <ProgramDirectorForm
-                    formState={formState}
-                    setFormData={setFormState}
-                  />
-                  {formState.programDirectors.map((director) => (
-                    <Tag key={director.userId}>
-                      <TagLabel>{`${director.firstName} ${director.lastName}`}</TagLabel>
-                      <TagCloseButton
-                        onClick={() => {
-                          setFormState((prevData) => ({
-                            ...prevData,
-                            programDirectors: prevData.programDirectors.filter(
-                              (d) => d !== director
-                            ),
-                          }));
-                        }}
-                      />
-                    </Tag>
-                  ))}
-                </HStack>
-
-                <h3>Curriculum Links</h3>
-                <CurriculumLinkForm
+                <ResourcesSection
                   formState={formState}
                   setFormData={setFormState}
                   programId={program?.id}
                   backend={backend}
+                  onOpenMediaModal={mediaUploadModal.onOpen}
+                  onSeeAllMedia={() => setActiveTab('media')}
                 />
-                <HStack wrap="wrap">
-                  {(formState.curriculumLinks ?? []).map((playlist) => (
-                    <Tag key={`${playlist.link}-${playlist.instrumentId}`}>
-                      <TagLabel
-                        cursor="pointer"
-                        onClick={() => {
-                          window.open(
-                            playlist.link,
-                            '_blank',
-                            'noopener,noreferrer'
-                          );
-                        }}
-                      >
-                        {playlist.instrumentName
-                          ? `${playlist.instrumentName}: `
-                          : ''}
-                        {playlist.name}
-                      </TagLabel>
-                      <TagCloseButton
-                        onClick={() => {
-                          setFormState((prev) => ({
-                            ...prev,
-                            curriculumLinks: prev.curriculumLinks.filter(
-                              (p) =>
-                                !(
-                                  p.link === playlist.link &&
-                                  p.instrumentId === playlist.instrumentId
-                                )
-                            ),
-                          }));
-                        }}
-                      />
-                    </Tag>
-                  ))}
-                </HStack>
               </>
             )}
 
             {activeTab === 'media' && (
-              <>
-                <h4>Media</h4>
-                <MediaUploadForm
-                  onUploadComplete={handleMediaChange}
-                  uploadedMedia={formState.media}
-                  onRemove={(indexToRemove) => {
-                    setFormState((prev) => ({
-                      ...prev,
-                      media: prev.media.filter(
-                        (_, idx) => idx !== indexToRemove
-                      ),
-                    }));
-                  }}
-                />
-              </>
+              <VStack
+                align="stretch"
+                spacing={4}
+              >
+                <Heading
+                  size="md"
+                  fontWeight="semibold"
+                >
+                  {t('programForm.mediaHeading')}
+                </Heading>
+                <Text
+                  fontSize="sm"
+                  color="gray.600"
+                ></Text>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={mediaUploadModal.onOpen}
+                >
+                  {t('common.add')}
+                </Button>
+                <HStack
+                  wrap="wrap"
+                  spacing={3}
+                >
+                  {(formState.media ?? []).map((item, index) => (
+                    <MediaPreviewTag
+                      key={item.id || item.s3_key || `media-${index}`}
+                      item={item}
+                      onRemove={() => {
+                        setFormState((prev) => ({
+                          ...prev,
+                          media: prev.media.filter((_, idx) => idx !== index),
+                        }));
+                      }}
+                    />
+                  ))}
+                </HStack>
+              </VStack>
             )}
           </VStack>
         </DrawerBody>
+
+        {isLoadingProgramData && (
+          <Center
+            position="absolute"
+            inset={0}
+            zIndex="overlay"
+            bg="rgba(107, 114, 128, 0.72)"
+          >
+            <Spinner
+              size="xl"
+              thickness="4px"
+              color="teal.500"
+              emptyColor="gray.200"
+            />
+          </Center>
+        )}
       </DrawerContent>
+
+      <MediaUploadModal
+        isOpen={mediaUploadModal.isOpen}
+        onClose={mediaUploadModal.onClose}
+        onUploadComplete={handleMediaChange}
+        formOrigin="program"
+      />
     </Drawer>
   );
 };

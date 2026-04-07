@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import {
   Button,
@@ -17,24 +17,33 @@ import {
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
-import { authenticateGoogleUser } from '@/utils/auth/providers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // import { FaGoogle } from "react-icons/fa6";
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
-const signupSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters long'),
-  role: z.enum(['Regional Director', 'Program Director', 'Admin'], {
-    required_error: 'Please select a role',
-  }),
-});
-
-type SignupFormValues = z.infer<typeof signupSchema>;
+type SignupFormValues = {
+  email: string;
+  password: string;
+  role: 'Regional Director' | 'Program Director' | 'Admin';
+};
 
 export const Signup = () => {
+  const { t } = useTranslation();
+  const signupSchema = useMemo(
+    () =>
+      z.object({
+        email: z.string().email(t('validation.invalidEmail')),
+        password: z.string().min(6, t('validation.passwordMin')),
+        role: z.enum(['Regional Director', 'Program Director', 'Admin'], {
+          required_error: t('validation.selectRole'),
+        }),
+      }),
+    [t]
+  );
+  type SignupFormValues = z.infer<typeof signupSchema>;
   const navigate = useNavigate();
   const toast = useToast();
   const { signup, handleRedirectResult } = useAuthContext();
@@ -63,7 +72,7 @@ export const Signup = () => {
     } catch (err) {
       if (err instanceof Error) {
         toast({
-          title: 'An error occurred',
+          title: t('signup.errorTitle'),
           description: err.message,
           status: 'error',
           variant: 'subtle',
@@ -72,24 +81,29 @@ export const Signup = () => {
     }
   };
 
-  const handleGoogleSignup = async () => {
-    await authenticateGoogleUser();
-  };
-
   useEffect(() => {
     handleRedirectResult(backend, navigate, toast);
   }, [backend, handleRedirectResult, navigate, toast]);
 
   return (
-    <VStack spacing={8} sx={{ width: 300, marginX: 'auto' }}>
-      <Heading>Signup</Heading>
+    <VStack
+      spacing={8}
+      sx={{ width: 300, marginX: 'auto' }}
+    >
+      <Heading>{t('signup.title')}</Heading>
 
-      <form onSubmit={handleSubmit(handleSignup)} style={{ width: '100%' }}>
+      <form
+        onSubmit={handleSubmit(handleSignup)}
+        style={{ width: '100%' }}
+      >
         <Stack spacing={2}>
-          <FormControl isInvalid={!!errors.email} w={'100%'}>
+          <FormControl
+            isInvalid={!!errors.email}
+            w={'100%'}
+          >
             <Center>
               <Input
-                placeholder="Email"
+                placeholder={t('signup.emailPlaceholder')}
                 type="email"
                 size={'lg'}
                 {...register('email')}
@@ -105,7 +119,7 @@ export const Signup = () => {
           <FormControl isInvalid={!!errors.password}>
             <Center>
               <Input
-                placeholder="Password"
+                placeholder={t('signup.passwordPlaceholder')}
                 type="password"
                 size={'lg'}
                 {...register('password')}
@@ -122,22 +136,29 @@ export const Signup = () => {
           <FormControl isInvalid={!!errors.role}>
             <Center>
               <Select
-                placeholder="Select role"
+                placeholder={t('signup.selectRolePlaceholder')}
                 size={'lg'}
                 {...register('role')}
                 name="role"
                 isRequired
               >
-                <option value="Admin">Admin</option>
-                <option value="Regional Director">Regional Director</option>
-                <option value="Program Director">Program Director</option>
+                <option value="Admin">{t('signup.roleAdmin')}</option>
+                <option value="Regional Director">
+                  {t('signup.roleRegionalDirector')}
+                </option>
+                <option value="Program Director">
+                  {t('signup.roleProgramDirector')}
+                </option>
               </Select>
             </Center>
             <FormErrorMessage>
               {errors.role?.message?.toString()}
             </FormErrorMessage>
-            <ChakraLink as={Link} to="/login">
-              <FormHelperText>Click here to login</FormHelperText>
+            <ChakraLink
+              as={Link}
+              to="/login"
+            >
+              <FormHelperText>{t('signup.loginHint')}</FormHelperText>
             </ChakraLink>
           </FormControl>
 
@@ -147,7 +168,7 @@ export const Signup = () => {
             sx={{ width: '100%' }}
             isDisabled={Object.keys(errors).length > 0}
           >
-            Signup
+            {t('common.signup')}
           </Button>
         </Stack>
       </form>

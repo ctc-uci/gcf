@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { GetCity } from 'react-country-state-city';
 
 import { ProgramDisplay } from './ProgramDisplay';
 import { getRouteByRole, MAP_BY_ROLE } from './programTableMappers';
@@ -24,6 +25,20 @@ function ProgramTable({ onStatsRefresh }) {
     setIsFormOpen(true);
   };
 
+  async function getCityNameByCode(countryCode, stateCode, cityCode) {
+    const countryId = parseInt(countryCode);
+    const stateId = parseInt(stateCode);
+    const cityId = parseInt(cityCode);
+
+    const cities = await GetCity(countryId, stateId);
+
+    if (!cities || !Array.isArray(cities)) {
+      return '';
+    }
+    const city = cities.find((c) => c.id === cityId);
+    return city ? city.name : '';
+  }
+
   const fetchData = useCallback(async () => {
     if (roleLoading) return;
 
@@ -43,12 +58,19 @@ function ProgramTable({ onStatsRefresh }) {
         rows.map(async (row) => {
           // TODO: make this more efficient with lazy loading
           const programId = row.id ?? row.programId;
+          const cityName = await getCityNameByCode(
+            row.country,
+            row.state,
+            row.city
+          );
           const [
             instrumentTypes,
             playlists,
             programDirectors,
             regionalDirectors,
             media,
+            instrumentsMap,
+            partnerOrgName,
           ] = await Promise.all([
             backend.get(`/program/${programId}/instruments`),
             backend.get(`/program/${programId}/playlists`),
@@ -61,15 +83,24 @@ function ProgramTable({ onStatsRefresh }) {
             backend
               .get(`/program/${programId}/media`)
               .catch(() => ({ data: [] })),
+            backend
+              .get(`/program/${programId}/instruments`)
+              .catch(() => ({ data: [] })),
+            backend
+              .get(`/program/${programId}/partner-organization`)
+              .catch(() => ({ data: [] })),
           ]);
 
           return {
             ...row,
+            cityName: cityName,
             instrumentTypes: instrumentTypes?.data || [],
             playlists: playlists.data,
             programDirectors: programDirectors?.data || [],
             regionalDirectors: regionalDirectors?.data || [],
             media: media?.data || [],
+            instrumentsMap: instrumentsMap?.data || [],
+            partnerOrgName: partnerOrgName?.data || [],
           };
         })
       );

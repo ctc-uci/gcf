@@ -1,4 +1,7 @@
+import { useEffect, useMemo, useState } from 'react';
+
 import {
+  Avatar,
   Badge,
   Box,
   Button,
@@ -14,35 +17,57 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  VStack,
 } from '@chakra-ui/react';
-
-import { FiEdit2, FiEyeOff } from 'react-icons/fi';
 
 import {
   downloadCsv,
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { useTranslation } from 'react-i18next';
+import { FiEdit2, FiUsers } from 'react-icons/fi';
 
+import { applyFilters } from '../../contexts/hooks/TableFilter';
+import { useTableSort } from '../../contexts/hooks/TableSort';
+import { SortArrows } from '../tables/SortArrows';
 import CardView from './CardView';
 
-export function downloadAccountsAsCsv(data) {
-  const headers = ['First Name', 'Last Name', 'Email', 'Type', 'Program(s)'];
+export function downloadAccountsAsCsv(data, t) {
+  const headers = [
+    t('accounts.csvFirstName'),
+    t('accounts.csvLastName'),
+    t('accounts.csvEmail'),
+    t('accounts.csvRole'),
+    t('accounts.csvProgramRegion'),
+  ];
   const rows = (data || []).map((user) => [
     escapeCsvValue(user.firstName),
     escapeCsvValue(user.lastName),
     escapeCsvValue(user.email),
     escapeCsvValue(user.role),
     escapeCsvValue(
-      Array.isArray(user.programs) ? user.programs.join('; ') : ''
+      Array.isArray(user.programs) && user.programs.length > 0
+        ? user.programs.join('; ')
+        : ''
     ),
   ]);
   downloadCsv(headers, rows, `accounts-${getFilenameTimestamp()}.csv`);
 }
-import { useTableSort } from '../../contexts/hooks/TableSort';
-import { SortArrows } from '../tables/SortArrows';
-import { useMemo, useEffect, useState } from 'react';
-import { applyFilters } from '../../contexts/hooks/TableFilter';
+
+const getRoleBadgeProps = (role) => {
+  switch (role) {
+    case 'Program Director':
+      return { bg: 'teal.100', color: 'teal.800' };
+    case 'Regional Director':
+      return { bg: 'teal.400', color: 'white' };
+    case 'Admin':
+    case 'Super Admin':
+      return { bg: 'teal.700', color: 'white' };
+    default:
+      return { bg: 'gray.200', color: 'gray.800' };
+  }
+};
 
 export const AccountsTable = ({
   originalData,
@@ -51,7 +76,9 @@ export const AccountsTable = ({
   isCardView,
   onSave,
   onUpdate,
+  showCreatedBy = false,
 }) => {
+  const { t } = useTranslation();
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
   const filteredData = useMemo(
     () => applyFilters(activeFilters, originalData ?? []),
@@ -84,151 +111,237 @@ export const AccountsTable = ({
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;
 
+  if (!tableData || tableData.length === 0) {
+    return (
+      <Center py={20}>
+        <VStack spacing={4}>
+          <Box
+            bg="gray.100"
+            borderRadius="full"
+            w="200px"
+            h="200px"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Icon
+              as={FiUsers}
+              boxSize={20}
+              color="gray.300"
+            />
+          </Box>
+          <Text
+            color="gray.400"
+            textAlign="center"
+            fontSize="md"
+            maxW="250px"
+            lineHeight="tall"
+          >
+            {t('accounts.noAccountsYet')}
+          </Text>
+        </VStack>
+      </Center>
+    );
+  }
+
   return (
-    <TableContainer>
-      {!isCardView ? (
-        <Table variant="simple" size="md">
-          <Thead>
-            <Tr>
-              <Th
-                onClick={() => handleSort('firstName')}
-                cursor="pointer"
-                color="black"
-                fontSize="sm"
-                textTransform="none"
-                fontWeight="bold"
-              >
-                Name
-                <SortArrows columnKey="firstName" sortOrder={sortOrder} />
-              </Th>
-              <Th
-                onClick={() => handleSort('email')}
-                cursor="pointer"
-                color="black"
-                fontSize="sm"
-                textTransform="none"
-                fontWeight="bold"
-              >
-                Email
-                <SortArrows columnKey="email" sortOrder={sortOrder} />
-              </Th>
-              <Th
-                onClick={() => handleSort('password')}
-                cursor="pointer"
-                color="black"
-                fontSize="sm"
-                textTransform="none"
-                fontWeight="bold"
-              >
-                Password
-                <SortArrows columnKey="passsword" sortOrder={sortOrder} />
-              </Th>
-              <Th
-                onClick={() => handleSort('role')}
-                cursor="pointer"
-                color="black"
-                fontSize="sm"
-                textTransform="none"
-                fontWeight="bold"
-              >
-                Type
-                <SortArrows columnKey="role" sortOrder={sortOrder} />
-              </Th>
-              <Th
-                onClick={() => handleSort('programs')}
-                cursor="pointer"
-                color="black"
-                fontSize="sm"
-                textTransform="none"
-                fontWeight="bold"
-              >
-                Program(s)
-                <SortArrows columnKey="programs" sortOrder={sortOrder} />
-              </Th>
-              <Th width="50px"></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {!tableData ||
-              (tableData.length === 0 && (
-                <Center py={10}>
-                  <Text color="gray.500">No accounts found.</Text>
-                </Center>
-              ))}
-
-            {tableData.map((user) => (
-              <Tr
-                key={user.id}
-                _hover={{
-                  bg: hoverBg,
-                  '& .action-group': { opacity: 1, visibility: 'visible' },
-                }}
-                transition="background 0.2s"
-              >
-                <Td fontWeight="medium">
-                  {user.firstName} {user.lastName}
-                </Td>
-
-                <Td>{user.email}</Td>
-
-                <Td>
-                  <HStack spacing={2}>
-                    {/* TODO: Update to utilize password field when data is available + hidden functionality */}
-                    <Text fontSize="lg" lineHeight="1" mt="6px">
-                      ********
-                    </Text>
-                    <Icon as={FiEyeOff} color="gray.500" cursor="pointer" />
-                  </HStack>
-                </Td>
-
-                <Td>
-                  <Badge
-                    px={4}
-                    py={1}
-                    borderRadius="full"
-                    bg="gray.200"
-                    color="gray.800"
-                    textTransform="capitalize"
-                    fontWeight="normal"
-                    fontSize="sm"
+    <Box
+      bg="white"
+      borderRadius="xl"
+      overflow="hidden"
+      minW={0}
+      maxW="100%"
+    >
+      <TableContainer maxW="100%">
+        {!isCardView ? (
+          <Table
+            variant="simple"
+            size="md"
+          >
+            <Thead>
+              <Tr>
+                <Th
+                  onClick={() => handleSort('firstName')}
+                  cursor="pointer"
+                  color="gray.500"
+                  fontSize="xs"
+                  textTransform="uppercase"
+                  fontWeight="semibold"
+                  letterSpacing="wider"
+                >
+                  {t('accounts.colName')}
+                  <SortArrows
+                    columnKey="firstName"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort('email')}
+                  cursor="pointer"
+                  color="gray.500"
+                  fontSize="xs"
+                  textTransform="uppercase"
+                  fontWeight="semibold"
+                  letterSpacing="wider"
+                >
+                  {t('accounts.colEmail')}
+                  <SortArrows
+                    columnKey="email"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort('programs')}
+                  cursor="pointer"
+                  color="gray.500"
+                  fontSize="xs"
+                  textTransform="uppercase"
+                  fontWeight="semibold"
+                  letterSpacing="wider"
+                >
+                  {t('accounts.colProgramRegion')}
+                  <SortArrows
+                    columnKey="programs"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                <Th
+                  onClick={() => handleSort('role')}
+                  cursor="pointer"
+                  color="gray.500"
+                  fontSize="xs"
+                  textTransform="uppercase"
+                  fontWeight="semibold"
+                  letterSpacing="wider"
+                >
+                  {t('accounts.colRole')}
+                  <SortArrows
+                    columnKey="role"
+                    sortOrder={sortOrder}
+                  />
+                </Th>
+                {showCreatedBy && (
+                  <Th
+                    color="gray.500"
+                    fontSize="xs"
+                    textTransform="uppercase"
+                    fontWeight="semibold"
+                    letterSpacing="wider"
                   >
-                    {user.role}
-                  </Badge>
-                </Td>
-
-                <Td>
-                  {Array.isArray(user.programs) && user.programs.length > 0
-                    ? user.programs.join(', ')
-                    : '-'}
-                </Td>
-
-                <Td p={0} textAlign="right">
-                  <Box
-                    className="action-group"
-                    opacity={0}
-                    visibility="hidden"
-                    transition="all 0.2s"
-                    pr={4}
-                  >
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      leftIcon={<FiEdit2 />}
-                      colorScheme="gray"
-                      bg="white"
-                      onClick={() => onUpdate(user)}
-                    >
-                      Update
-                    </Button>
-                  </Box>
-                </Td>
+                    {t('accounts.colCreatedBy')}
+                  </Th>
+                )}
+                <Th width="80px"></Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      ) : (
-        <CardView data={data} onSave={onSave} />
-      )}
-    </TableContainer>
+            </Thead>
+            <Tbody>
+              {tableData.map((user) => (
+                <Tr
+                  key={user.id}
+                  _hover={{
+                    bg: hoverBg,
+                    '& .action-group': { opacity: 1, visibility: 'visible' },
+                  }}
+                  transition="background 0.2s"
+                >
+                  <Td>
+                    <HStack spacing={3}>
+                      <Avatar
+                        size="xs"
+                        name={`${user.firstName} ${user.lastName}`}
+                        bg="teal.500"
+                        color="white"
+                      />
+                      <Text fontWeight="medium">
+                        {user.firstName} {user.lastName}
+                      </Text>
+                    </HStack>
+                  </Td>
+
+                  <Td>{user.email}</Td>
+
+                  <Td>
+                    {Array.isArray(user.programs) &&
+                    user.programs.length > 0 ? (
+                      <Text>{user.programs.join(' + ')}</Text>
+                    ) : (
+                      <Badge
+                        px={2}
+                        py={0.5}
+                        borderRadius="sm"
+                        bg="gray.500"
+                        color="white"
+                        textTransform="uppercase"
+                        fontWeight="bold"
+                        fontSize="xs"
+                      >
+                        {t('common.notAssigned')}
+                      </Badge>
+                    )}
+                  </Td>
+
+                  <Td>
+                    <Badge
+                      px={3}
+                      py={1}
+                      borderRadius="full"
+                      {...getRoleBadgeProps(user.role)}
+                      textTransform="capitalize"
+                      fontWeight="normal"
+                      fontSize="sm"
+                    >
+                      {user.role}
+                    </Badge>
+                  </Td>
+
+                  {showCreatedBy && (
+                    <Td>
+                      <HStack spacing={2}>
+                        <Avatar
+                          size="xs"
+                          name={user.createdBy || ''}
+                          bg="teal.500"
+                          color="white"
+                        />
+                        <Text>{user.createdBy || '-'}</Text>
+                      </HStack>
+                    </Td>
+                  )}
+
+                  <Td
+                    p={0}
+                    textAlign="right"
+                  >
+                    <Box
+                      className="action-group"
+                      opacity={0}
+                      visibility="hidden"
+                      transition="all 0.2s"
+                      pr={4}
+                    >
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        leftIcon={<FiEdit2 />}
+                        colorScheme="teal"
+                        bg="white"
+                        onClick={() => onUpdate(user)}
+                      >
+                        {t('common.edit')}
+                      </Button>
+                    </Box>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        ) : (
+          <CardView
+            data={tableData}
+            onSave={onSave}
+          />
+        )}
+      </TableContainer>
+    </Box>
   );
 };

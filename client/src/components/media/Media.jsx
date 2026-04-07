@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { AddIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -11,15 +12,15 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
-import { AddIcon } from '@chakra-ui/icons';
-
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 
 import { MediaGrid } from './MediaGrid';
 import { MediaUploadModal } from './MediaUploadModal';
 
 export const Media = () => {
+  const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { backend } = useBackendContext();
@@ -127,11 +128,24 @@ export const Media = () => {
 
   return (
     <Box minH="100vh">
-      <Container maxW="container.xl" py={8}>
-        <Box borderRadius="lg" p={8}>
-          <VStack align="start" spacing={6} w="full">
-            <Heading size="xl" color="gray.800">
-              My Media
+      <Container
+        maxW="container.xl"
+        py={8}
+      >
+        <Box
+          borderRadius="lg"
+          p={8}
+        >
+          <VStack
+            align="start"
+            spacing={6}
+            w="full"
+          >
+            <Heading
+              size="xl"
+              color="gray.800"
+            >
+              {t('mediaPage.title')}
             </Heading>
 
             <Button
@@ -142,10 +156,13 @@ export const Media = () => {
               _hover={{ backgroundColor: 'teal.600' }}
               onClick={onOpen}
             >
-              New
+              {t('mediaPage.new')}
             </Button>
 
-            <MediaGrid mediaItems={media} programName={programName} />
+            <MediaGrid
+              mediaItems={media}
+              programName={programName}
+            />
           </VStack>
         </Box>
       </Container>

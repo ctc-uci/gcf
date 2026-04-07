@@ -1,28 +1,48 @@
 import { SimpleGrid, Text, VStack } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
+
 import { MediaCard } from './MediaCard';
 
 export const MediaGrid = ({ mediaItems, programName }) => {
+  const { t } = useTranslation();
   let content;
 
   if (mediaItems.length === 0 && !programName) {
-    content = <Text>No program found</Text>;
+    content = <Text>{t('mediaPage.noProgram')}</Text>;
   } else if (mediaItems.length === 0) {
-    content = <Text>No media associated with {programName}</Text>;
+    content = (
+      <Text>{t('mediaPage.noMediaForProgram', { name: programName })}</Text>
+    );
   } else {
     content = (
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w="full">
+      <SimpleGrid
+        columns={{ base: 1, md: 2, lg: 3 }}
+        spacing={6}
+        w="full"
+      >
         {mediaItems.map((item) => (
-          <MediaCard key={item.id} {...item} />
+          <MediaCard
+            key={item.id}
+            {...item}
+          />
         ))}
       </SimpleGrid>
     );
   }
 
   return (
-    <VStack align="start" spacing={4} w="full">
-      <Text fontSize="lg" fontWeight="semibold" color="gray.800">
-        Uploads
+    <VStack
+      align="start"
+      spacing={4}
+      w="full"
+    >
+      <Text
+        fontSize="lg"
+        fontWeight="semibold"
+        color="gray.800"
+      >
+        {t('mediaPage.uploads')}
       </Text>
 
       {content}
