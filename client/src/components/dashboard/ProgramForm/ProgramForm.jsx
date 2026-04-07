@@ -34,6 +34,42 @@ import { MediaPreviewTag } from './MediaPreviewTag';
 import { ResourcesSection } from './ResourcesSection';
 import { StudentsInstrumentsSection } from './StudentsInstrumentsSection';
 
+/**
+ * Deletes all `instrument_change` rows for this program + instrument using
+ * existing routes (same DELETE as ProgramUpdateForm). Sweeps every
+ * program_update for the program.
+ */
+async function deleteInstrumentChangesForProgramInstrument(
+  backend,
+  programId,
+  instrumentId
+) {
+  const numericProgramId = Number(programId);
+  const numericInstrumentId = Number(instrumentId);
+  if (Number.isNaN(numericInstrumentId)) return;
+
+  const res = await backend.get('/program-updates');
+  const updates = Array.isArray(res.data) ? res.data : [];
+  const updateIds = updates
+    .filter((u) => Number(u.programId ?? u.program_id) === numericProgramId)
+    .map((u) => u.id);
+
+  for (const updateId of updateIds) {
+    const icRes = await backend.get(`/instrument-changes/update/${updateId}`);
+    const rows = Array.isArray(icRes.data) ? icRes.data : [];
+    for (const row of rows) {
+      const iid = Number(row.instrumentId ?? row.instrument_id);
+      if (
+        iid === numericInstrumentId &&
+        row.id !== null &&
+        row.id !== undefined
+      ) {
+        await backend.delete(`/instrument-changes/${row.id}`);
+      }
+    }
+  }
+}
+
 export const ProgramForm = ({
   isOpen: isOpenProp,
   onOpen: onOpenProp,
@@ -179,12 +215,14 @@ export const ProgramForm = ({
         instruments.forEach((inst) => {
           const id = inst.instrumentId ?? inst.id;
           if (!id) return;
+          const qty = inst.quantity ?? 0;
+          if (qty === 0) return;
           instrumentMap[id] = {
             id,
             name: inst.name,
-            quantity: inst.quantity ?? 0,
+            quantity: qty,
           };
-          initialInstrumentMap[id] = inst.quantity ?? 0;
+          initialInstrumentMap[id] = qty;
         });
       } catch (err) {
         console.error('Error fetching program instruments:', err);
@@ -452,6 +490,7 @@ export const ProgramForm = ({
       const mediaChanges = formState.media.filter((mediaItem) => !mediaItem.id);
 
       const instrumentChanges = [];
+      const instrumentIdsToPurge = [];
 
       const allInstrumentIds = new Set([
         ...Object.keys(initialInstrumentQuantities || {}),
@@ -461,12 +500,26 @@ export const ProgramForm = ({
       for (const id of allInstrumentIds) {
         const newQty = formState.instruments?.[id]?.quantity ?? 0;
         const oldQty = initialInstrumentQuantities?.[id] ?? 0;
+        if (program && newQty === 0 && oldQty > 0) {
+          instrumentIdsToPurge.push(Number(id));
+          continue;
+        }
         const instrumentDiff = newQty - oldQty;
         if (instrumentDiff !== 0) {
           instrumentChanges.push({
             instrumentId: Number(id),
             amountChanged: instrumentDiff,
           });
+        }
+      }
+
+      if (program && instrumentIdsToPurge.length > 0) {
+        for (const instId of instrumentIdsToPurge) {
+          await deleteInstrumentChangesForProgramInstrument(
+            backend,
+            programId,
+            instId
+          );
         }
       }
 
