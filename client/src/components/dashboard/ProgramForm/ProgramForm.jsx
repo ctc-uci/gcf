@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Button,
+  Center,
   Checkbox,
   Drawer,
   DrawerBody,
@@ -16,6 +17,7 @@ import {
   HStack,
   Input,
   Select,
+  Spinner,
   Text,
   useDisclosure,
   VStack,
@@ -130,10 +132,14 @@ export const ProgramForm = ({
   );
 
   const [activeTab, setActiveTab] = useState('overview');
+  const [isLoadingProgramData, setIsLoadingProgramData] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadProgramRegionData() {
       if (!program) {
+        setIsLoadingProgramData(false);
         setFormState({
           status: null,
           programName: null,
@@ -160,6 +166,8 @@ export const ProgramForm = ({
         setInitialGraduated(0);
         return;
       }
+
+      setIsLoadingProgramData(true);
 
       let record = program;
       try {
@@ -339,7 +347,20 @@ export const ProgramForm = ({
         (record.media ?? []).filter((m) => m.file_name).map((m) => m.file_name)
       );
     }
-    loadProgramRegionData();
+
+    (async () => {
+      try {
+        await loadProgramRegionData();
+      } finally {
+        if (!cancelled) {
+          setIsLoadingProgramData(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [program, backend]);
 
   useEffect(() => {
@@ -595,7 +616,10 @@ export const ProgramForm = ({
       size="lg"
     >
       <DrawerOverlay />
-      <DrawerContent>
+      <DrawerContent
+        position="relative"
+        overflow="hidden"
+      >
         <HStack marginBottom="1em">
           <DrawerCloseButton
             left="4"
@@ -834,6 +858,22 @@ export const ProgramForm = ({
             )}
           </VStack>
         </DrawerBody>
+
+        {isLoadingProgramData && (
+          <Center
+            position="absolute"
+            inset={0}
+            zIndex="overlay"
+            bg="rgba(107, 114, 128, 0.72)"
+          >
+            <Spinner
+              size="xl"
+              thickness="4px"
+              color="teal.500"
+              emptyColor="gray.200"
+            />
+          </Center>
+        )}
       </DrawerContent>
 
       <MediaUploadModal
