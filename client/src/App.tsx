@@ -5,7 +5,6 @@ import { Login } from '@/components/login/Login';
 import { Layout } from '@/components/navigation/Layout';
 import { Profile } from '@/components/profile/Profile';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { Signup } from '@/components/signup/Signup';
 import { UpdatesPage } from '@/components/updates/UpdatesPage';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { BackendProvider } from '@/contexts/BackendContext';
@@ -34,10 +33,6 @@ const App = () => {
                 <Route
                   path="/login"
                   element={<Login />}
-                />
-                <Route
-                  path="/signup"
-                  element={<Signup />}
                 />
                 <Route
                   path="/map"
