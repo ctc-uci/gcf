@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   Box,
@@ -30,6 +30,7 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
   const { backend } = useBackendContext();
   const [instruments, setInstruments] = useState([]);
   const [isAddingInstrument, setIsAddingInstrument] = useState(false);
+  const instrumentAddRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInstrument, setSelectedInstrument] = useState('');
   const [newInstrumentName, setNewInstrumentName] = useState('');
@@ -77,6 +78,17 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
       cancelled = true;
     };
   }, [backend]);
+
+  useEffect(() => {
+    if (!isAddingInstrument) return undefined;
+    function handlePointerDown(event) {
+      const el = instrumentAddRef.current;
+      if (!el || el.contains(event.target)) return;
+      setIsAddingInstrument(false);
+    }
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [isAddingInstrument]);
 
   /** @returns {Promise<boolean>} true if an instrument line was added */
   async function handleAddInstrumentAndQuantity() {
@@ -250,56 +262,61 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
             </Button>
           )}
           {isAddingInstrument && (
-            <HStack
-              align="flex-end"
-              spacing={3}
-              flexWrap="wrap"
+            <Box
+              ref={instrumentAddRef}
+              mt={1}
             >
-              <Box
-                flex="1"
-                minW="12rem"
-                maxW="16rem"
+              <HStack
+                align="flex-end"
+                spacing={3}
+                flexWrap="wrap"
               >
-                <SearchInput
-                  items={instruments}
-                  value={searchQuery}
-                  onChange={(val) => setSearchQuery(val)}
-                  onSelectExisting={(instrument) => {
-                    setSelectedInstrument(String(instrument.id));
-                    setNewInstrumentName('');
-                    setSearchQuery('');
+                <Box
+                  flex="1"
+                  minW="12rem"
+                  maxW="16rem"
+                >
+                  <SearchInput
+                    items={instruments}
+                    value={searchQuery}
+                    onChange={(val) => setSearchQuery(val)}
+                    onSelectExisting={(instrument) => {
+                      setSelectedInstrument(String(instrument.id));
+                      setNewInstrumentName('');
+                      setSearchQuery('');
+                    }}
+                    onCreateNew={(name) => {
+                      setSelectedInstrument('');
+                      setNewInstrumentName(name.trim());
+                      setSearchQuery('');
+                    }}
+                  />
+                </Box>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  value={quantityInput}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === '' || /^\d+$/.test(v)) {
+                      setQuantityInput(v);
+                    }
                   }}
-                  onCreateNew={(name) => {
-                    setSelectedInstrument('');
-                    setNewInstrumentName(name.trim());
-                    setSearchQuery('');
-                  }}
+                  width="5.5rem"
+                  aria-label={t('programForm.instrumentQuantityAria')}
                 />
-              </Box>
-              <Input
-                type="text"
-                inputMode="numeric"
-                value={quantityInput}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (v === '' || /^\d+$/.test(v)) {
-                    setQuantityInput(v);
-                  }
-                }}
-                width="5.5rem"
-                aria-label={t('programForm.instrumentQuantityAria')}
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={async () => {
-                  const added = await handleAddInstrumentAndQuantity();
-                  if (added) setIsAddingInstrument(false);
-                }}
-              >
-                {t('common.add')}
-              </Button>
-            </HStack>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    const added = await handleAddInstrumentAndQuantity();
+                    if (added) setIsAddingInstrument(false);
+                  }}
+                >
+                  {t('common.add')}
+                </Button>
+              </HStack>
+            </Box>
           )}
         </FormControl>
 

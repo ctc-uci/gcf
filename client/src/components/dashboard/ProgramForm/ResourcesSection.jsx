@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   Box,
@@ -31,6 +31,18 @@ export function ResourcesSection({
 }) {
   const { t } = useTranslation();
   const [showCurriculumAdd, setShowCurriculumAdd] = useState(false);
+  const curriculumAddRef = useRef(null);
+
+  useEffect(() => {
+    if (!showCurriculumAdd) return undefined;
+    function handlePointerDown(event) {
+      const el = curriculumAddRef.current;
+      if (!el || el.contains(event.target)) return;
+      setShowCurriculumAdd(false);
+    }
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [showCurriculumAdd]);
 
   return (
     <Box mt={2}>
@@ -63,9 +75,9 @@ export function ResourcesSection({
             </Button>
           )}
           {showCurriculumAdd && (
-            <VStack
-              align="stretch"
-              spacing={3}
+            <Box
+              ref={curriculumAddRef}
+              mt={1}
             >
               <CurriculumLinkForm
                 formState={formState}
@@ -73,15 +85,7 @@ export function ResourcesSection({
                 programId={programId}
                 backend={backend}
               />
-              <Button
-                size="xs"
-                variant="ghost"
-                alignSelf="flex-start"
-                onClick={() => setShowCurriculumAdd(false)}
-              >
-                {t('programForm.done')}
-              </Button>
-            </VStack>
+            </Box>
           )}
           {(formState.curriculumLinks ?? []).length > 0 && (
             <HStack
