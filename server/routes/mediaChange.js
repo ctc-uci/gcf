@@ -193,6 +193,55 @@ mediaChangeRouter.get('/:userId/media', async (req, res) => {
   }
 });
 
+mediaChangeRouter.get('/:userId/pdf', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await db.query(
+      `
+      SELECT 
+        mc.id,
+        mc.s3_key,
+        mc.file_name,
+        mc.file_type,
+        mc.is_thumbnail,
+        p.id as program_id,
+        p.name as program_name
+      FROM program_director pd
+      JOIN program p ON pd.program_id = p.id
+      LEFT JOIN program_update pu ON pu.program_id = pd.program_id
+      LEFT JOIN media_change mc ON mc.update_id = pu.id
+      WHERE pd.user_id = $1
+      AND (mc.file_name ILIKE '%.pdf' OR mc.file_name IS NULL)
+      ORDER BY mc.id DESC NULLS LAST
+    `,
+      [userId]
+    );
+
+    if (!result || result.length === 0) {
+      return res.status(200).json({
+        media: [],
+        programName: null,
+        programId: null,
+      });
+    }
+
+    //in the case theres no media we still want to get the program name
+    //so this filters out null results
+    const programName = result[0].program_name;
+    const programId = result[0].program_id;
+    const mediaItems = result.filter((row) => row.id !== null);
+
+    res.status(200).json({
+      media: keysToCamel(mediaItems),
+      programName: programName,
+      programId: programId,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 mediaChangeRouter.get('/:userId/media-updates', async (req, res) => {
   try {
     const { userId } = req.params;

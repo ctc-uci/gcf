@@ -15,6 +15,7 @@ import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useTranslation } from 'react-i18next';
 
 import LessonVideos from './lessonVideos';
+import PDF from './PDF';
 import ProgramTable from './ProgramTable';
 import StatisticsSummary from './StatisticsSummary';
 
@@ -61,11 +62,8 @@ const Dashboard = () => {
             </Heading>
             <Tabs>
               <TabList>
-                <Tab _selected={{ borderBottomColor: 'teal.500' }}>
-                  {' '}
-                  Videos{' '}
-                </Tab>
-                <Tab _selected={{ borderBottomColor: 'teal.500' }}> PDFs </Tab>
+                <Tab _selected={{ borderBottomColor: 'teal.500' }}>Videos</Tab>
+                <Tab _selected={{ borderBottomColor: 'teal.500' }}>PDFs</Tab>
               </TabList>
 
               <TabPanels>
@@ -76,6 +74,9 @@ const Dashboard = () => {
                     selectedVideo={selectedVideo}
                     setSelectedVideo={setSelectedVideo}
                   />
+                </TabPanel>
+                <TabPanel>
+                  <PDF />
                 </TabPanel>
               </TabPanels>
             </Tabs>
