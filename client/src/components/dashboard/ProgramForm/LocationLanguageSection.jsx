@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
@@ -71,6 +71,18 @@ export function LocationLanguageSection({
   const [stateList, setStateList] = useState([]);
   const [cityList, setCityList] = useState([]);
   const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
+  const languagePickerRef = useRef(null);
+
+  useEffect(() => {
+    if (!languagePickerOpen) return undefined;
+    function handlePointerDown(event) {
+      const el = languagePickerRef.current;
+      if (!el || el.contains(event.target)) return;
+      setLanguagePickerOpen(false);
+    }
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [languagePickerOpen]);
 
   const selectedBackendCountry = formState.country
     ? countriesList.find((c) => Number(c.id) === Number(formState.country))
@@ -373,7 +385,10 @@ export function LocationLanguageSection({
             </Button>
           )}
           {languagePickerOpen && (
-            <Box mt={2}>
+            <Box
+              ref={languagePickerRef}
+              mt={2}
+            >
               <ReactSelect
                 placeholder={t('programForm.languagePlaceholder')}
                 isMulti
@@ -389,14 +404,6 @@ export function LocationLanguageSection({
                   )
                 }
               />
-              <Button
-                size="xs"
-                variant="ghost"
-                mt={2}
-                onClick={() => setLanguagePickerOpen(false)}
-              >
-                {t('programForm.done')}
-              </Button>
             </Box>
           )}
         </FormControl>
