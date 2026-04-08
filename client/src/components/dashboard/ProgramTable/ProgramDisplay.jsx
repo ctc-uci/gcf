@@ -202,7 +202,7 @@ export function ProgramDisplay({
     // OR logic across instrument tags
     if (filterInstrumentTags.length > 0) {
       data = data.filter((p) => {
-        const list = Array.isArray(p.instruments) ? p.instruments : [];
+        const list = Array.isArray(p.instrumentsMap) ? p.instrumentsMap : [];
         return filterInstrumentTags.some((tag) =>
           list.some((inst) =>
             (inst.name ?? '').toLowerCase().includes(tag.toLowerCase())
