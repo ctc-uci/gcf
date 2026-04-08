@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   Box,
@@ -109,7 +109,7 @@ const STATS_FROM_RESPONSE = {
   'Program Director': statsFromPdData,
 };
 
-const StatisticsSummary = ({ refreshTrigger = 0 }) => {
+const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
   const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
@@ -119,17 +119,6 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
     STAT_LABEL_KEYS_BY_ROLE[role] ?? STAT_LABEL_KEYS_BY_ROLE.Admin;
   const [stats, setStats] = useState(initialStats);
   const [isLoading, setIsLoading] = useState(true);
-
-  const downloadDataAsCsv = () => {
-    const headers = stats.map((stat) => t(stat.labelKey));
-    const rows = [stats.map((stat) => escapeCsvValue(stat.number))];
-
-    downloadCsv(
-      headers,
-      rows,
-      `statistics-summary-${getFilenameTimestamp()}.csv`
-    );
-  };
 
   useEffect(() => {
     if (roleLoading) return;
@@ -160,6 +149,40 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
     fetchData();
   }, [role, roleLoading, userId, backend, refreshTrigger]);
 
+  const displayStats = useMemo(() => {
+      if (!filteredData) return stats; // use fetched stats when no filter active
+
+      const totalStudents = filteredData.reduce(
+        (sum, p) => sum + (Number(p.students) || 0), 0
+      );
+      const totalInstruments = filteredData.reduce(
+        (sum, p) => sum + (Number(p.totalInstruments) || 0), 0
+      );
+
+      if (role === 'Program Director') {
+        return [
+          { labelKey: 'statistics.currentEnrollment', number: totalStudents },
+          { labelKey: 'statistics.instrumentsDonated', number: totalInstruments },
+        ];
+      }
+      return [
+        { labelKey: 'statistics.programs', number: filteredData.length },
+        { labelKey: 'statistics.students', number: totalStudents },
+        { labelKey: 'statistics.instruments', number: totalInstruments },
+      ];
+    }, [filteredData, stats, role]);
+
+    const downloadDataAsCsv = () => {
+    const headers = stats.map((stat) => t(stat.labelKey));
+    const rows = [stats.map((stat) => escapeCsvValue(stat.number))];
+
+    downloadCsv(
+      headers,
+      rows,
+      `statistics-summary-${getFilenameTimestamp()}.csv`
+    );
+  };
+  
   return (
     <Box as="section">
       <VStack
@@ -187,7 +210,7 @@ const StatisticsSummary = ({ refreshTrigger = 0 }) => {
             w="full"
             align="stretch"
           >
-            {stats.map((stat) => (
+            {displayStats.map((stat) => (
               <StatBox
                 key={stat.labelKey}
                 labelKey={stat.labelKey}

@@ -69,6 +69,7 @@ export function ProgramDisplay({
   setSelectedProgram,
   onSave,
   onStatsRefresh,
+  onFilteredDataChange,
 }) {
   const { t } = useTranslation();
   const [isCardView, setIsCardView] = useState(false);
@@ -178,41 +179,116 @@ export function ProgramDisplay({
   };
 
   const filterBySearchPanel = useMemo(() => {
-    let data = originalData ?? [];
+  let data = originalData ?? [];
 
-    if (filterStatus) {
-      const norm = String(filterStatus).toLowerCase();
-      data = data.filter((p) => {
-        const s = String(p.status ?? '').toLowerCase();
-        if (norm === 'active') return s === 'active' || s === 'launched';
-        if (norm === 'inactive') return s === 'inactive' || s === 'developing';
-        return s === norm;
-      });
-    }
+  // Status filter
+  if (filterStatus) {
+    const norm = String(filterStatus).toLowerCase();
+    data = data.filter((p) => {
+      const s = String(p.status ?? '').toLowerCase();
+      if (norm === 'active') return s === 'active' || s === 'launched';
+      if (norm === 'inactive') return s === 'inactive' || s === 'developing';
+      return s === norm;
+    });
+  }
 
-    // OR logic across location tags
-    if (filterLocationTags.length > 0) {
-      data = data.filter((p) =>
-        filterLocationTags.some((tag) =>
-          (p.location ?? '').toLowerCase().includes(tag.toLowerCase())
+  // Location tag OR filter
+  if (filterLocationTags.length > 0) {
+    data = data.filter((p) =>
+      filterLocationTags.some((tag) =>
+        (p.location ?? '').toLowerCase().includes(tag.toLowerCase())
+      )
+    );
+  }
+
+  // Instrument tag OR filter
+  if (filterInstrumentTags.length > 0) {
+    data = data.filter((p) => {
+      const list = Array.isArray(p.instrumentsMap) ? p.instrumentsMap : [];
+      return filterInstrumentTags.some((tag) =>
+        list.some((inst) =>
+          (inst.name ?? '').toLowerCase().includes(tag.toLowerCase())
         )
       );
-    }
+    });
+  }
 
-    // OR logic across instrument tags
-    if (filterInstrumentTags.length > 0) {
-      data = data.filter((p) => {
-        const list = Array.isArray(p.instrumentsMap) ? p.instrumentsMap : [];
-        return filterInstrumentTags.some((tag) =>
-          list.some((inst) =>
-            (inst.name ?? '').toLowerCase().includes(tag.toLowerCase())
-          )
-        );
-      });
-    }
+  // Advanced filters
+  if (_activeFilters.length > 0) {
+    const completeFilters = _activeFilters.filter((f) => f.value !== '');
 
-    return data;
-  }, [originalData, filterStatus, filterLocationTags, filterInstrumentTags]);
+    data = data.filter((row) => {
+      if (completeFilters.length === 0) return true;
+
+      return completeFilters.reduce((acc, filter, index) => {
+        const rowValue = row[filter.column];
+
+        const matches = (() => {
+          switch (filter.operation) {
+            case 'contains':
+              return String(rowValue ?? '')
+                .toLowerCase()
+                .includes(String(filter.value).toLowerCase());
+            case 'does_not_contain':
+              return !String(rowValue ?? '')
+                .toLowerCase()
+                .includes(String(filter.value).toLowerCase());
+            case 'equals':
+              return (
+                String(rowValue ?? '').toLowerCase() ===
+                String(filter.value).toLowerCase()
+              );
+            case 'is_not':
+              return (
+                String(rowValue ?? '').toLowerCase() !==
+                String(filter.value).toLowerCase()
+              );
+            case 'gt':
+              return Number(rowValue) > Number(filter.value);
+            case 'lt':
+              return Number(rowValue) < Number(filter.value);
+            case 'gte':
+              return Number(rowValue) >= Number(filter.value);
+            case 'lte':
+              return Number(rowValue) <= Number(filter.value);
+            case 'before':
+              return new Date(rowValue) < new Date(filter.value);
+            case 'after':
+              return new Date(rowValue) > new Date(filter.value);
+            case 'is':
+              return (
+                new Date(rowValue).toDateString() ===
+                new Date(filter.value).toDateString()
+              );
+            case 'contains_item':
+              return Array.isArray(rowValue)
+                ? rowValue.some((item) =>
+                    String(item?.name ?? item)
+                      .toLowerCase()
+                      .includes(String(filter.value).toLowerCase())
+                  )
+                : false;
+            default:
+              return true;
+          }
+        })();
+
+        // First filter always applies; subsequent use AND/OR logic
+        if (index === 0) return matches;
+        if (filter.logic === 'or') return acc || matches;
+        return acc && matches;
+      }, true);
+    });
+  }
+
+  return data;
+}, [
+  originalData,
+  filterStatus,
+  filterLocationTags,
+  filterInstrumentTags,
+  _activeFilters,
+]);
 
   const displayData = useMemo(() => {
     if (!searchQuery) return filterBySearchPanel;
@@ -240,6 +316,10 @@ export function ProgramDisplay({
   useEffect(() => {
     setSortedData(null);
   }, [displayData]);
+  
+  useEffect(() => {
+    onFilteredDataChange?.(displayData);
+  }, [displayData, onFilteredDataChange]);
 
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;

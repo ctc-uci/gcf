@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [filteredPrograms, setFilteredPrograms] = useState(null);
 
   return (
     <Flex
@@ -36,7 +37,7 @@ const Dashboard = () => {
       w="100%"
     >
       {!selectedPlaylist && (
-        <StatisticsSummary refreshTrigger={statsRefreshTrigger} />
+        <StatisticsSummary refreshTrigger={statsRefreshTrigger} filteredData={filteredPrograms} />
       )}
 
       <Box
@@ -48,7 +49,7 @@ const Dashboard = () => {
           role === 'Admin' ||
           role === 'Regional Director') && (
           <ProgramTable
-            onStatsRefresh={() => setStatsRefreshTrigger((t) => t + 1)}
+            onStatsRefresh={() => setStatsRefreshTrigger((t) => t + 1)} onFilteredDataChange={setFilteredPrograms}
           />
         )}
         {role === 'Program Director' && (
