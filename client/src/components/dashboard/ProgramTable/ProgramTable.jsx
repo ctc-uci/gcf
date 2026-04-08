@@ -8,7 +8,7 @@ import { GetCity } from 'react-country-state-city';
 import { ProgramDisplay } from './ProgramDisplay';
 import { getRouteByRole, MAP_BY_ROLE } from './programTableMappers';
 
-function ProgramTable({ onStatsRefresh }) {
+function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { role, loading: roleLoading } = useRoleContext();
@@ -136,6 +136,7 @@ function ProgramTable({ onStatsRefresh }) {
       setSelectedProgram={setSelectedProgram}
       onSave={fetchData}
       onStatsRefresh={onStatsRefresh}
+      onFilteredDataChange={onFilteredDataChange}
     />
   );
 }

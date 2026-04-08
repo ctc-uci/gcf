@@ -69,6 +69,7 @@ export function ProgramDisplay({
   setSelectedProgram,
   onSave,
   onStatsRefresh,
+  onFilteredDataChange,
 }) {
   const { t } = useTranslation();
   const [isCardView, setIsCardView] = useState(false);
@@ -315,6 +316,10 @@ export function ProgramDisplay({
   useEffect(() => {
     setSortedData(null);
   }, [displayData]);
+  
+  useEffect(() => {
+    onFilteredDataChange?.(displayData);
+  }, [displayData, onFilteredDataChange]);
 
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;
