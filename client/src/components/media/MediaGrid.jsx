@@ -25,6 +25,7 @@ export const MediaGrid = ({ mediaItems, programName }) => {
           <MediaCard
             key={item.id}
             {...item}
+            height={item.height ?? '300px'}
           />
         ))}
       </SimpleGrid>
