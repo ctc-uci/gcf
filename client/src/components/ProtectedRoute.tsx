@@ -37,6 +37,7 @@ function getIsValidRole(roles: string[], role: string | undefined) {
   return (
     roles.length === 0 ||
     (role !== undefined && roles.includes(role)) ||
-    role === 'admin'
+    role === 'Admin' ||
+    role === 'Super Admin'
   );
 }
