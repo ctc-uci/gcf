@@ -15,6 +15,7 @@ export const MediaCard = ({
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const isVideo = file_type?.startsWith('video');
+  const isPdf = file_type === 'application/pdf';
 
   return (
     <Box
@@ -43,6 +44,19 @@ export const MediaCard = ({
             borderRadius: '6px',
           }}
           onLoadedData={() => setIsLoading(false)}
+        />
+      ) : isPdf ? (
+        <iframe
+          src={imageUrl}
+          title={file_name}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            display: isLoading ? 'none' : 'block',
+            borderRadius: '6px',
+          }}
+          onLoad={() => setIsLoading(false)}
         />
       ) : (
         <Image
