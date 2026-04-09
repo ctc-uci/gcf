@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { AddIcon } from '@chakra-ui/icons';
+import { AddIcon, DownloadIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -16,7 +16,6 @@ import {
 } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
-import { FiDownload } from 'react-icons/fi';
 
 import { applyFilters } from '../../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../../contexts/hooks/TableSort';
@@ -126,7 +125,7 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           {t('updates.pageTitle')}
         </Heading>
         <IconButton
-          icon={<FiDownload />}
+          icon={<DownloadIcon />}
           variant="ghost"
           size="sm"
           aria-label={t('updates.downloadAria')}
