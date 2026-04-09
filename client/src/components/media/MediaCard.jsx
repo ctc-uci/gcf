@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Box, Center, Image, Text } from '@chakra-ui/react';
+import { Box, Center, HStack, Image, Spacer, Text } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -11,6 +11,7 @@ export const MediaCard = ({
   file_type,
   imageUrl,
   description,
+  update_date,
   height = '200px',
 }) => {
   const { t } = useTranslation();
@@ -51,16 +52,29 @@ export const MediaCard = ({
           />
         )}
       </Box>
-
-      <Text
-        color="gray.700"
-        fontSize="sm"
-        mt={2}
-        px={2}
-        isTruncated
-      >
-        {file_name || 'TEXT'}
-      </Text>
+      <HStack>
+        <Text
+          color="gray.700"
+          fontSize="sm"
+          mt={2}
+          px={2}
+          isTruncated
+        >
+          {file_name}
+        </Text>
+        <Spacer />
+        <Text
+          color="gray.700"
+          fontSize="sm"
+          mt={2}
+          px={2}
+          isTruncated
+        >
+          {update_date
+            ? new Date(update_date.updateDate).toLocaleDateString()
+            : ''}
+        </Text>
+      </HStack>
       <Text
         color="gray.500"
         fontSize="xs"

@@ -62,12 +62,14 @@ export const Media = () => {
 
         newMediaItems.push({
           id: mediaChangeResponse.data.id,
+          update_id: mediaChangeResponse.data.update_id,
           s3_key: file.s3_key,
           file_name: file.file_name,
           file_type: file.file_type || 'image',
           is_thumbnail: false,
           imageUrl: urlResponse.data.url,
           description: file.description,
+          update_date: null,
         });
       }
 
@@ -88,14 +90,19 @@ export const Media = () => {
           const urlResponse = await backend.get(
             `/images/url/${encodeURIComponent(media.s3Key)}`
           );
+          const programUpdateDateResponse = await backend.get(
+            `/program-updates/${media.updateId}/date`
+          );
           return {
             id: media.id,
+            update_id: media.updateId,
             s3_key: media.s3Key,
             file_name: media.fileName,
             file_type: media.fileType,
             is_thumbnail: media.isThumbnail,
             imageUrl: urlResponse.data.url,
             description: media.description,
+            update_date: programUpdateDateResponse.data,
           };
         })
       );

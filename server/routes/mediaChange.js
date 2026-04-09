@@ -152,6 +152,7 @@ mediaChangeRouter.get('/:userId/media', async (req, res) => {
       `
       SELECT 
         mc.id,
+        mc.update_id,
         mc.s3_key,
         mc.file_name,
         mc.file_type,
