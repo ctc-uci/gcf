@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Box, Center, Image } from '@chakra-ui/react';
+import { Box, Center, Image, Text } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -10,6 +10,7 @@ export const MediaCard = ({
   file_name,
   file_type,
   imageUrl,
+  description,
   height = '200px',
 }) => {
   const { t } = useTranslation();
@@ -18,44 +19,57 @@ export const MediaCard = ({
 
   return (
     <Box
-      h={height}
       borderRadius="md"
       overflow="hidden"
+      bg="gray.100"
     >
-      {isLoading && (
-        <Center h="100%">
-          <Image
-            src={gcf_globe}
-            alt={t('mediaCard.loadingAlt')}
-            w="50px"
+      <Box
+        h={height}
+        position="relative"
+      >
+        {isLoading && (
+          <Center h="100%">
+            <Image
+              src={gcf_globe}
+              w="50px"
+            />
+          </Center>
+        )}
+        {isVideo ? (
+          <video
+            src={imageUrl}
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            onLoadedData={() => setIsLoading(false)}
           />
-        </Center>
-      )}
-      {isVideo ? (
-        <video
-          src={imageUrl}
-          controls
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
-            display: isLoading ? 'none' : 'block',
-            borderRadius: '6px',
-          }}
-          onLoadedData={() => setIsLoading(false)}
-        />
-      ) : (
-        <Image
-          src={imageUrl}
-          alt={file_name}
-          w="100%"
-          h="100%"
-          objectFit="contain"
-          display={isLoading ? 'none' : 'block'}
-          borderRadius="md"
-          onLoad={() => setIsLoading(false)}
-        />
-      )}
+        ) : (
+          <Image
+            src={imageUrl}
+            h="100%"
+            w="100%"
+            objectFit="contain"
+            onLoad={() => setIsLoading(false)}
+          />
+        )}
+      </Box>
+
+      <Text
+        color="gray.700"
+        fontSize="sm"
+        mt={2}
+        px={2}
+        isTruncated
+      >
+        {file_name || 'TEXT'}
+      </Text>
+      <Text
+        color="gray.500"
+        fontSize="xs"
+        mt={1}
+        px={2}
+        isTruncated
+      >
+        {description || 'No description available'}
+      </Text>
     </Box>
   );
 };

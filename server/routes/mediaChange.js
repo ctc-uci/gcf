@@ -156,6 +156,7 @@ mediaChangeRouter.get('/:userId/media', async (req, res) => {
         mc.file_name,
         mc.file_type,
         mc.is_thumbnail,
+        mc.description,
         p.id as program_id,
         p.name as program_name
       FROM program_director pd

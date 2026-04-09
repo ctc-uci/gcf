@@ -67,6 +67,7 @@ export const Media = () => {
           file_type: file.file_type || 'image',
           is_thumbnail: false,
           imageUrl: urlResponse.data.url,
+          description: file.description,
         });
       }
 
@@ -94,6 +95,7 @@ export const Media = () => {
             file_type: media.fileType,
             is_thumbnail: media.isThumbnail,
             imageUrl: urlResponse.data.url,
+            description: media.description,
           };
         })
       );
