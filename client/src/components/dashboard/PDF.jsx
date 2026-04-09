@@ -17,11 +17,20 @@ const PDF = () => {
       try {
         const res = await backend.get(`/mediaChange/${userId}/pdf`);
 
+        if (!res) {
+          return;
+        }
+
         const transformedMedia = await Promise.all(
           res.data.media.map(async (media) => {
             const urlResponse = await backend.get(
               `/images/url/${encodeURIComponent(media.s3Key)}`
             );
+
+            if (!urlResponse) {
+              return;
+            }
+
             return {
               id: media.id,
               s3_key: media.s3Key,
@@ -36,7 +45,7 @@ const PDF = () => {
         setPdfs(transformedMedia);
         setProgramName(res.data.programName);
       } catch (err) {
-        console.error('Error saving uploaded files:', err);
+        console.error('Error fetching PDFS:', err);
       }
     };
 

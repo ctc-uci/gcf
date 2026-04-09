@@ -37,7 +37,10 @@ const Dashboard = () => {
       w="100%"
     >
       {!selectedPlaylist && (
-        <StatisticsSummary refreshTrigger={statsRefreshTrigger} filteredData={filteredPrograms} />
+        <StatisticsSummary
+          refreshTrigger={statsRefreshTrigger}
+          filteredData={filteredPrograms}
+        />
       )}
 
       <Box
@@ -49,7 +52,8 @@ const Dashboard = () => {
           role === 'Admin' ||
           role === 'Regional Director') && (
           <ProgramTable
-            onStatsRefresh={() => setStatsRefreshTrigger((t) => t + 1)} onFilteredDataChange={setFilteredPrograms}
+            onStatsRefresh={() => setStatsRefreshTrigger((prev) => prev + 1)}
+            onFilteredDataChange={setFilteredPrograms}
           />
         )}
         {role === 'Program Director' && (
@@ -63,8 +67,12 @@ const Dashboard = () => {
             </Heading>
             <Tabs>
               <TabList>
-                <Tab _selected={{ borderBottomColor: 'teal.500' }}>Videos</Tab>
-                <Tab _selected={{ borderBottomColor: 'teal.500' }}>PDFs</Tab>
+                <Tab _selected={{ borderBottomColor: 'teal.500' }}>
+                  {t('lessonVideos.videosTab')}
+                </Tab>
+                <Tab _selected={{ borderBottomColor: 'teal.500' }}>
+                  {t('lessonVideos.pdfsTab')}
+                </Tab>
               </TabList>
 
               <TabPanels>

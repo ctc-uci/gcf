@@ -150,31 +150,33 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
   }, [role, roleLoading, userId, backend, refreshTrigger]);
 
   const displayStats = useMemo(() => {
-      if (!filteredData) return stats; // use fetched stats when no filter active
+    if (!filteredData) return stats; // use fetched stats when no filter active
 
-      const totalStudents = filteredData.reduce(
-        (sum, p) => sum + (Number(p.students) || 0), 0
-      );
-      const totalInstruments = filteredData.reduce(
-        (sum, p) => sum + (Number(p.totalInstruments) || 0), 0
-      );
+    const totalStudents = filteredData.reduce(
+      (sum, p) => sum + (Number(p.students) || 0),
+      0
+    );
+    const totalInstruments = filteredData.reduce(
+      (sum, p) => sum + (Number(p.totalInstruments) || 0),
+      0
+    );
 
-      if (role === 'Program Director') {
-        return [
-          { labelKey: 'statistics.currentEnrollment', number: totalStudents },
-          { labelKey: 'statistics.instrumentsDonated', number: totalInstruments },
-        ];
-      }
+    if (role === 'Program Director') {
       return [
-        { labelKey: 'statistics.programs', number: filteredData.length },
-        { labelKey: 'statistics.students', number: totalStudents },
-        { labelKey: 'statistics.instruments', number: totalInstruments },
+        { labelKey: 'statistics.currentEnrollment', number: totalStudents },
+        { labelKey: 'statistics.instrumentsDonated', number: totalInstruments },
       ];
-    }, [filteredData, stats, role]);
+    }
+    return [
+      { labelKey: 'statistics.programs', number: filteredData.length },
+      { labelKey: 'statistics.students', number: totalStudents },
+      { labelKey: 'statistics.instruments', number: totalInstruments },
+    ];
+  }, [filteredData, stats, role]);
 
-    const downloadDataAsCsv = () => {
-    const headers = stats.map((stat) => t(stat.labelKey));
-    const rows = [stats.map((stat) => escapeCsvValue(stat.number))];
+  const downloadDataAsCsv = () => {
+    const headers = displayStats.map((stat) => t(stat.labelKey));
+    const rows = [displayStats.map((stat) => escapeCsvValue(stat.number))];
 
     downloadCsv(
       headers,
@@ -182,7 +184,7 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
       `statistics-summary-${getFilenameTimestamp()}.csv`
     );
   };
-  
+
   return (
     <Box as="section">
       <VStack

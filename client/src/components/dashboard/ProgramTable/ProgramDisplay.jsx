@@ -22,11 +22,11 @@ import {
   Spinner,
   Table,
   TableContainer,
-  Tbody,
-  Td,
   Tag,
   TagCloseButton,
   TagLabel,
+  Tbody,
+  Td,
   Text,
   Th,
   Thead,
@@ -157,7 +157,12 @@ export function ProgramDisplay({
   const handleLocationKeyDown = (e) => {
     if (e.key === 'Enter' && filterLocationInput.trim()) {
       e.preventDefault();
-      setFilterLocationTags((prev) => [...prev, filterLocationInput.trim()]);
+      setFilterLocationTags((prev) => {
+        const trimmed = filterLocationInput.trim();
+        return prev.some((t) => t.toLowerCase() === trimmed.toLowerCase())
+          ? prev
+          : [...prev, trimmed];
+      });
       setFilterLocationInput('');
     }
   };
@@ -165,7 +170,10 @@ export function ProgramDisplay({
   const handleInstrumentKeyDown = (e) => {
     if (e.key === 'Enter' && filterInstrumentInput.trim()) {
       e.preventDefault();
-      setFilterInstrumentTags((prev) => [...prev, filterInstrumentInput.trim()]);
+      setFilterInstrumentTags((prev) => [
+        ...prev,
+        filterInstrumentInput.trim(),
+      ]);
       setFilterInstrumentInput('');
     }
   };
@@ -179,116 +187,116 @@ export function ProgramDisplay({
   };
 
   const filterBySearchPanel = useMemo(() => {
-  let data = originalData ?? [];
+    let data = originalData ?? [];
 
-  // Status filter
-  if (filterStatus) {
-    const norm = String(filterStatus).toLowerCase();
-    data = data.filter((p) => {
-      const s = String(p.status ?? '').toLowerCase();
-      if (norm === 'active') return s === 'active' || s === 'launched';
-      if (norm === 'inactive') return s === 'inactive' || s === 'developing';
-      return s === norm;
-    });
-  }
+    // Status filter
+    if (filterStatus) {
+      const norm = String(filterStatus).toLowerCase();
+      data = data.filter((p) => {
+        const s = String(p.status ?? '').toLowerCase();
+        if (norm === 'active') return s === 'active' || s === 'launched';
+        if (norm === 'inactive') return s === 'inactive' || s === 'developing';
+        return s === norm;
+      });
+    }
 
-  // Location tag OR filter
-  if (filterLocationTags.length > 0) {
-    data = data.filter((p) =>
-      filterLocationTags.some((tag) =>
-        (p.location ?? '').toLowerCase().includes(tag.toLowerCase())
-      )
-    );
-  }
-
-  // Instrument tag OR filter
-  if (filterInstrumentTags.length > 0) {
-    data = data.filter((p) => {
-      const list = Array.isArray(p.instrumentsMap) ? p.instrumentsMap : [];
-      return filterInstrumentTags.some((tag) =>
-        list.some((inst) =>
-          (inst.name ?? '').toLowerCase().includes(tag.toLowerCase())
+    // Location tag OR filter
+    if (filterLocationTags.length > 0) {
+      data = data.filter((p) =>
+        filterLocationTags.some((tag) =>
+          (p.location ?? '').toLowerCase().includes(tag.toLowerCase())
         )
       );
-    });
-  }
+    }
 
-  // Advanced filters
-  if (_activeFilters.length > 0) {
-    const completeFilters = _activeFilters.filter((f) => f.value !== '');
+    // Instrument tag OR filter
+    if (filterInstrumentTags.length > 0) {
+      data = data.filter((p) => {
+        const list = Array.isArray(p.instrumentsMap) ? p.instrumentsMap : [];
+        return filterInstrumentTags.some((tag) =>
+          list.some((inst) =>
+            (inst.name ?? '').toLowerCase().includes(tag.toLowerCase())
+          )
+        );
+      });
+    }
 
-    data = data.filter((row) => {
-      if (completeFilters.length === 0) return true;
+    // Advanced filters
+    if (_activeFilters.length > 0) {
+      const completeFilters = _activeFilters.filter((f) => f.value !== '');
 
-      return completeFilters.reduce((acc, filter, index) => {
-        const rowValue = row[filter.column];
+      data = data.filter((row) => {
+        if (completeFilters.length === 0) return true;
 
-        const matches = (() => {
-          switch (filter.operation) {
-            case 'contains':
-              return String(rowValue ?? '')
-                .toLowerCase()
-                .includes(String(filter.value).toLowerCase());
-            case 'does_not_contain':
-              return !String(rowValue ?? '')
-                .toLowerCase()
-                .includes(String(filter.value).toLowerCase());
-            case 'equals':
-              return (
-                String(rowValue ?? '').toLowerCase() ===
-                String(filter.value).toLowerCase()
-              );
-            case 'is_not':
-              return (
-                String(rowValue ?? '').toLowerCase() !==
-                String(filter.value).toLowerCase()
-              );
-            case 'gt':
-              return Number(rowValue) > Number(filter.value);
-            case 'lt':
-              return Number(rowValue) < Number(filter.value);
-            case 'gte':
-              return Number(rowValue) >= Number(filter.value);
-            case 'lte':
-              return Number(rowValue) <= Number(filter.value);
-            case 'before':
-              return new Date(rowValue) < new Date(filter.value);
-            case 'after':
-              return new Date(rowValue) > new Date(filter.value);
-            case 'is':
-              return (
-                new Date(rowValue).toDateString() ===
-                new Date(filter.value).toDateString()
-              );
-            case 'contains_item':
-              return Array.isArray(rowValue)
-                ? rowValue.some((item) =>
-                    String(item?.name ?? item)
-                      .toLowerCase()
-                      .includes(String(filter.value).toLowerCase())
-                  )
-                : false;
-            default:
-              return true;
-          }
-        })();
+        return completeFilters.reduce((acc, filter, index) => {
+          const rowValue = row[filter.column];
 
-        // First filter always applies; subsequent use AND/OR logic
-        if (index === 0) return matches;
-        if (filter.logic === 'or') return acc || matches;
-        return acc && matches;
-      }, true);
-    });
-  }
+          const matches = (() => {
+            switch (filter.operation) {
+              case 'contains':
+                return String(rowValue ?? '')
+                  .toLowerCase()
+                  .includes(String(filter.value).toLowerCase());
+              case 'does_not_contain':
+                return !String(rowValue ?? '')
+                  .toLowerCase()
+                  .includes(String(filter.value).toLowerCase());
+              case 'equals':
+                return (
+                  String(rowValue ?? '').toLowerCase() ===
+                  String(filter.value).toLowerCase()
+                );
+              case 'is_not':
+                return (
+                  String(rowValue ?? '').toLowerCase() !==
+                  String(filter.value).toLowerCase()
+                );
+              case 'gt':
+                return Number(rowValue) > Number(filter.value);
+              case 'lt':
+                return Number(rowValue) < Number(filter.value);
+              case 'gte':
+                return Number(rowValue) >= Number(filter.value);
+              case 'lte':
+                return Number(rowValue) <= Number(filter.value);
+              case 'before':
+                return new Date(rowValue) < new Date(filter.value);
+              case 'after':
+                return new Date(rowValue) > new Date(filter.value);
+              case 'is':
+                return (
+                  new Date(rowValue).toDateString() ===
+                  new Date(filter.value).toDateString()
+                );
+              case 'contains_item':
+                return Array.isArray(rowValue)
+                  ? rowValue.some((item) =>
+                      String(item?.name ?? item)
+                        .toLowerCase()
+                        .includes(String(filter.value).toLowerCase())
+                    )
+                  : false;
+              default:
+                return true;
+            }
+          })();
 
-  return data;
-}, [
-  originalData,
-  filterStatus,
-  filterLocationTags,
-  filterInstrumentTags,
-  _activeFilters,
-]);
+          // First filter always applies; subsequent use AND/OR logic
+          if (index === 0) return matches;
+          if (filter.logic === 'or') return acc || matches;
+          return acc && matches;
+        }, true);
+      });
+    }
+
+    return data;
+  }, [
+    originalData,
+    filterStatus,
+    filterLocationTags,
+    filterInstrumentTags,
+    _activeFilters,
+  ]);
 
   const displayData = useMemo(() => {
     if (!searchQuery) return filterBySearchPanel;
@@ -316,7 +324,7 @@ export function ProgramDisplay({
   useEffect(() => {
     setSortedData(null);
   }, [displayData]);
-  
+
   useEffect(() => {
     onFilteredDataChange?.(displayData);
   }, [displayData, onFilteredDataChange]);
@@ -519,7 +527,10 @@ export function ProgramDisplay({
                         alignItems="center"
                         minH="32px"
                         bg="white"
-                        _focusWithin={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)' }}
+                        _focusWithin={{
+                          borderColor: 'blue.500',
+                          boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)',
+                        }}
                       >
                         {filterLocationTags.map((tag, i) => (
                           <Tag
@@ -529,7 +540,9 @@ export function ProgramDisplay({
                             colorScheme="blue"
                           >
                             <TagLabel>{tag}</TagLabel>
-                            <TagCloseButton onClick={() => removeLocationTag(i)} />
+                            <TagCloseButton
+                              onClick={() => removeLocationTag(i)}
+                            />
                           </Tag>
                         ))}
                         <Input
@@ -537,11 +550,13 @@ export function ProgramDisplay({
                           size="sm"
                           placeholder={
                             filterLocationTags.length === 0
-                              ? 'Filter by location, press Enter'
+                              ? t('programDisplay.filterByLocation')
                               : ''
                           }
                           value={filterLocationInput}
-                          onChange={(e) => setFilterLocationInput(e.target.value)}
+                          onChange={(e) =>
+                            setFilterLocationInput(e.target.value)
+                          }
                           onKeyDown={handleLocationKeyDown}
                           flex={1}
                           minW="120px"
@@ -571,7 +586,10 @@ export function ProgramDisplay({
                         alignItems="center"
                         minH="32px"
                         bg="white"
-                        _focusWithin={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)' }}
+                        _focusWithin={{
+                          borderColor: 'blue.500',
+                          boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)',
+                        }}
                       >
                         {filterInstrumentTags.map((tag, i) => (
                           <Tag
@@ -581,7 +599,9 @@ export function ProgramDisplay({
                             colorScheme="blue"
                           >
                             <TagLabel>{tag}</TagLabel>
-                            <TagCloseButton onClick={() => removeInstrumentTag(i)} />
+                            <TagCloseButton
+                              onClick={() => removeInstrumentTag(i)}
+                            />
                           </Tag>
                         ))}
                         <Input
@@ -593,7 +613,9 @@ export function ProgramDisplay({
                               : ''
                           }
                           value={filterInstrumentInput}
-                          onChange={(e) => setFilterInstrumentInput(e.target.value)}
+                          onChange={(e) =>
+                            setFilterInstrumentInput(e.target.value)
+                          }
                           onKeyDown={handleInstrumentKeyDown}
                           flex={1}
                           minW="120px"
