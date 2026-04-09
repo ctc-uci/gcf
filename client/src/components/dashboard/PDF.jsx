@@ -15,7 +15,9 @@ const PDF = () => {
   useEffect(() => {
     const fetchPdfs = async () => {
       try {
-        const res = await backend.get(`/mediaChange/${userId}/pdf`);
+        const res = await backend.get(`/mediaChange/${userId}/media`, {
+          params: { fileType: 'pdf' },
+        });
 
         const transformedMedia = await Promise.all(
           res.data.media.map(async (media) => {
