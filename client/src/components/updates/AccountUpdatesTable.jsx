@@ -28,8 +28,7 @@ import { AccountUpdateDrawer } from './forms/AccountUpdateDrawer';
 const StatusBadge = ({ status, adminName }) => {
   const { t } = useTranslation();
   const hasAdmin = adminName && adminName.trim();
-  const isResolved =
-    status?.toLowerCase() === 'resolved' || status?.toLowerCase() === 'active';
+  const isResolved = status;
 
   if (hasAdmin) {
     return (
@@ -100,6 +99,17 @@ export const AccountUpdatesTable = ({
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;
 
+  const changeTypeToText = (changeType) => {
+    switch (changeType) {
+      case 'Creation':
+        return 'created';
+      case 'Update':
+        return 'updated';
+      case 'Deletion':
+        return 'deleted';
+    }
+  };
+
   return (
     <Box position="relative">
       <TableContainer
@@ -151,20 +161,7 @@ export const AccountUpdatesTable = ({
                   sortOrder={sortOrder}
                 />
               </Th>
-              <Th
-                onClick={() => handleSort('programName')}
-                cursor="pointer"
-                color="gray.500"
-                fontSize="xs"
-                textTransform="uppercase"
-                fontWeight="600"
-              >
-                {t('updates.colProgram')}
-                <SortArrows
-                  columnKey="programName"
-                  sortOrder={sortOrder}
-                />
-              </Th>
+
               <Th
                 onClick={() => handleSort('updateDate')}
                 cursor="pointer"
@@ -203,12 +200,15 @@ export const AccountUpdatesTable = ({
                       noOfLines={1}
                       maxW="400px"
                     >
-                      {row.note || t('updates.accountNotePlaceholder')}
+                      {/* {row.note || t('updates.accountNotePlaceholder')} */}
+                      {row.changeType
+                        ? `Account has been ${changeTypeToText(row.changeType)}.`
+                        : t('updates.accountNotePlaceholder')}
                     </Text>
                   </Td>
                   <Td>
                     <StatusBadge
-                      status={row.status}
+                      status={row.resolved}
                       adminName={row.resolvedBy}
                     />
                   </Td>
@@ -220,24 +220,17 @@ export const AccountUpdatesTable = ({
                         color="gray.400"
                       />
                       <Text fontSize="sm">
-                        {row.authorName || row.firstName || t('common.name')}
+                        {row.authorFirstName + ' ' + row.authorLastName ||
+                          t('common.name')}
                       </Text>
                     </HStack>
                   </Td>
                   <Td>
                     <Text
                       fontSize="sm"
-                      fontWeight="500"
-                    >
-                      {row.programName || ''}
-                    </Text>
-                  </Td>
-                  <Td>
-                    <Text
-                      fontSize="sm"
                       color="gray.600"
                     >
-                      {row.updateDate || ''}
+                      {row.lastModified || ''}
                     </Text>
                   </Td>
                 </Tr>

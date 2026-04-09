@@ -116,8 +116,11 @@ export function useUpdatesPageData() {
           setOriginalProgramUpdatesData(mappedProgram);
 
           // Account updates placeholder — no backend route yet
-          setAccountUpdatesData([]);
-          setOriginalAccountUpdatesData([]);
+          const response = await backend.get(`/accountChange`);
+          const accountUpdates = await response.data;
+          console.log('accountUpdates', accountUpdates);
+          setAccountUpdatesData(accountUpdates);
+          setOriginalAccountUpdatesData(accountUpdates);
         }
       } catch (error) {
         console.error('Fetch error:', error);

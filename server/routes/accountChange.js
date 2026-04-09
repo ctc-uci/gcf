@@ -8,7 +8,15 @@ accountChangeRouter.use(express.json());
 
 accountChangeRouter.get('/', async (req, res) => {
   try {
-    const data = await db.query(`SELECT * FROM account_change`);
+    const data = await db.query(`
+      SELECT 
+        ac.*, 
+        u.first_name AS author_first_name,
+        u.last_name AS author_last_name
+      FROM account_change ac
+      LEFT JOIN gcf_user u ON ac.author_id = u.id
+    `);
+    
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
