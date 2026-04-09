@@ -135,13 +135,14 @@ export const Profile = () => {
         firstName: userData.firstName || '',
         lastName: userData.lastName || '',
         email: currentUser?.email || '',
+        bio: '',
         language: prefLang,
-        bio: userData.bio || '',
       });
 
       if (role === 'Program Director') {
         const programData = await fetchProgramData(backend, userData.id);
         setRoleSpecificData(programData);
+        setFormData(prev => ({ ...prev, bio: programData.bio || ''}))
       } else if (role === 'Regional Director') {
         const regionData = await fetchRegionData(backend, userData.id);
         setRoleSpecificData(regionData);
@@ -191,7 +192,7 @@ export const Profile = () => {
       lastName: gcfUser.lastName || '',
       email: currentUser?.email || '',
       language: prefLang,
-      bio: gcfUser.bio || '',
+      bio: roleSpecificData.bio || '',
       // TODO: add Bio column to gcf_user schema and add here
     });
     setIsEditing(true);
@@ -221,6 +222,7 @@ export const Profile = () => {
     if (!currentUser?.uid) return;
 
     try {
+      console.log(roleSpecificData)
       await Promise.all([
         backend.patch(`/gcf-users/${currentUser.uid}/preferred-language`, {
           preferredLanguage: formData.language,
@@ -229,6 +231,9 @@ export const Profile = () => {
           first_name: formData.firstName,
           last_name: formData.lastName,
         }),
+        role === 'Program Director' && backend.patch(`/program-directors/${currentUser.uid}`, {
+          bio: formData.bio,
+        })
       ]);
 
       await i18n.changeLanguage(formData.language);
@@ -238,6 +243,7 @@ export const Profile = () => {
         firstName: formData.firstName,
         lastName: formData.lastName,
       }));
+      setRoleSpecificData(prev => ({ ...prev, bio: formData.bio }));
 
       const now = new Date();
       const timeStr = now.toLocaleTimeString(i18n.language || 'en', {
@@ -428,7 +434,7 @@ export const Profile = () => {
                   onChange={handleInputChange('bio')}
                 />
               ) : (
-                <Text>{gcfUser.bio || ''}</Text>
+                <Text>{formData.bio || ''}</Text>
               )}
             </FormControl>
           )}
@@ -446,6 +452,8 @@ export const Profile = () => {
                 value={formData.email}
                 onChange={handleInputChange('email')}
                 type="email"
+                isReadOnly
+                bg="gray.100"
               />
             ) : (
               <Text>{currentUser?.email || ''}</Text>
@@ -466,7 +474,6 @@ export const Profile = () => {
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     value="********"
-                    isReadOnly
                   />
                   <InputRightElement>
                     <IconButton
@@ -515,6 +522,7 @@ export const Profile = () => {
                 <Input
                   value={roleSpecificData.name}
                   isReadOnly
+                  bg="gray.100"
                 />
               ) : (
                 <Text>{roleSpecificData.name}</Text>
@@ -534,6 +542,7 @@ export const Profile = () => {
                 <Input
                   value={roleSpecificData.name}
                   isReadOnly
+                  bg="gray.100"
                 />
               ) : (
                 <Text>{roleSpecificData.name}</Text>
