@@ -1,4 +1,5 @@
 import { verifyToken } from '@/middleware';
+import { accountChangeRouter } from '@/routes/accountChange';
 import { adminRouter } from '@/routes/admin';
 import { countryRouter } from '@/routes/country';
 import { enrollmentChangeRouter } from '@/routes/enrollmentChange';
@@ -58,6 +59,7 @@ app.use('/program', programRouter);
 app.use('/partners', partnerOrganizationRouter);
 app.use('/images', imagesRouter);
 app.use('/playlistCache', playlistCacheRouter);
+app.use('/accountChange', accountChangeRouter);
 
 // Listening is moved to server.ts to enable importing app in tests
 export default app;
