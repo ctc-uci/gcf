@@ -38,6 +38,7 @@ const CardView = ({
   const [cityName, setCityName] = useState('');
   const [instruments, setInstruments] = useState(0);
   const [students, setStudents] = useState(0);
+  const [partnerOrg, setPartnerOrg] = useState('');
   const { backend } = useBackendContext();
 
   const formatDate = (dateString) => {
@@ -80,9 +81,21 @@ const CardView = ({
       }
     };
 
+    const fetchPartnerOrg = async () => {
+      try {
+        const res = await backend.get(
+          `/program/${programId}/partner-organization`
+        );
+        setPartnerOrg(res.data.name);
+      } catch (error) {
+        console.error('Error fetching partner organization: ', error);
+      }
+    };
+
     if (programId) {
       fetchInstruments();
       fetchStudents();
+      fetchPartnerOrg();
     }
   }, [programId, backend]);
 
@@ -134,8 +147,7 @@ const CardView = ({
             pl="8px"
             pr="8px"
           >
-            {/* TODO: assuming this is the partner organization */}
-            Placeholder
+            {partnerOrg || 'Partner Organization'}
           </Badge>
           <Spacer />
           <Badge

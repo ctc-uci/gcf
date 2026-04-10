@@ -515,7 +515,7 @@ programRouter.get('/:id/media', async (req, res) => {
 
     const result = await db.query(
       `
-      SELECT m.id, m.s3_key, m.file_name, m.file_type, m.is_thumbnail, m.instrument_id, m.status
+      SELECT m.id, m.s3_key, m.file_name, m.file_type, m.is_thumbnail, m.instrument_id, m.status, m.description
       FROM media_change m
       JOIN program_update pu ON m.update_id = pu.id
       WHERE program_id = $1;
@@ -530,6 +530,7 @@ programRouter.get('/:id/media', async (req, res) => {
       file_type: row.file_type,
       is_thumbnail: row.is_thumbnail,
       instrument_id: row.instrument_id,
+      description: row.description,
     }));
 
     res.status(200).json(media);

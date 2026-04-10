@@ -37,6 +37,7 @@ const ProgramInfoView = ({ program }) => {
   const [directorPicUrls, setDirectorPicUrls] = useState({});
   const [locationName, setLocationName] = useState('');
   const [flagCode, setFlagCode] = useState('');
+  const [partnerOrg, setPartnerOrg] = useState('');
   const galleryRef = useRef(null);
 
   const programId = program.id;
@@ -117,6 +118,13 @@ const ProgramInfoView = ({ program }) => {
           }
         }
         setDirectorPicUrls(picUrls);
+
+        try {
+          const partnerRes = await backend.get(
+            `/program/${programId}/partner-organization`
+          );
+          setPartnerOrg(partnerRes.data.name);
+        } catch {}
       } catch (error) {
         console.error('Error fetching program details:', error);
       }
@@ -187,7 +195,7 @@ const ProgramInfoView = ({ program }) => {
           fontWeight="500"
           textTransform="none"
         >
-          Partner Organization
+          {partnerOrg || 'Partner Organization'}
         </Badge>
         <Heading
           fontWeight="700"
@@ -504,17 +512,61 @@ const ProgramInfoView = ({ program }) => {
           >
             {media.map((m) =>
               mediaUrls[m.id] ? (
-                <Image
+                <Box
                   key={m.id}
-                  src={mediaUrls[m.id]}
-                  alt={m.fileName || m.file_name}
+                  position="relative"
                   w="300px"
                   h="300px"
-                  borderRadius="12px"
-                  objectFit="cover"
                   flexShrink={0}
+                  borderRadius="12px"
+                  overflow="hidden"
                   filter="drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))"
-                />
+                  role="group"
+                  cursor="pointer"
+                >
+                  <Image
+                    src={mediaUrls[m.id]}
+                    alt={m.fileName || m.file_name}
+                    w="100%"
+                    h="100%"
+                    objectFit="cover"
+                  />
+                  <Flex
+                    position="absolute"
+                    top={0}
+                    left={0}
+                    w="100%"
+                    h="100%"
+                    bg="blackAlpha.600"
+                    sx={{
+                      opacity: 0,
+                      '[role=group]:hover &': { opacity: 1 },
+                    }}
+                    transition="opacity 0.3s"
+                    direction="column"
+                    justify="flex-end"
+                    p="16px"
+                  >
+                    <Text
+                      color="white"
+                      fontWeight="700"
+                      fontSize="16px"
+                      lineHeight="20px"
+                    >
+                      {m.fileName || m.file_name}
+                    </Text>
+                    {m.description && (
+                      <Text
+                        color="whiteAlpha.800"
+                        fontSize="13px"
+                        lineHeight="18px"
+                        mt="4px"
+                      >
+                        {m.description}
+                      </Text>
+                    )}
+                  </Flex>
+                </Box>
               ) : null
             )}
           </HStack>

@@ -80,6 +80,7 @@ export const Map = () => {
         console.error('No regions found for the selected country.');
         return;
       }
+      setSelectedProgram(null);
       setRegions(regionsRes.data);
 
       try {
@@ -113,7 +114,6 @@ export const Map = () => {
         w="100%"
         p="20px"
         mb="30px"
-        display="block"
       >
         <Heading
           color="white"
@@ -221,7 +221,6 @@ export const Map = () => {
                     setPrograms([]);
                     setRegions([]);
                     setSelectedProgram(null);
-                    setDisplay('block');
                   }
                 }}
                 cursor="pointer"
