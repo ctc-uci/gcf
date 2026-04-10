@@ -22,7 +22,13 @@ programUpdateRouter.get('/:id', async (req, res) => {
     const { id } = req.params;
     const entry = await db.query(
       `
-            SELECT * FROM program_update 
+            SELECT *,
+            EXISTS (
+              SELECT 1 FROM instrument_change ic
+              WHERE ic.update_id = program_update.id
+                AND ic.special_request IS TRUE
+            ) AS flagged
+            FROM program_update 
             WHERE id = $1`,
       [id]
     );
@@ -40,13 +46,14 @@ programUpdateRouter.get('/:id', async (req, res) => {
 
 // Creating a program update
 programUpdateRouter.post('/', async (req, res) => {
-  const { title, program_id, created_by, update_date, note } = req.body;
+  const { title, program_id, created_by, update_date, note, show_on_table } =
+    req.body;
   try {
     const newEntry = await db.query(
-      `INSERT INTO program_update (title, program_id, created_by, update_date, note)
-            VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO program_update (title, program_id, created_by, update_date, note, show_on_table)
+            VALUES ($1, $2, $3, $4, $5, COALESCE($6, TRUE))
             RETURNING *`,
-      [title, program_id, created_by, update_date, note]
+      [title, program_id, created_by, update_date, note, show_on_table]
     );
     res.status(201).json(keysToCamel(newEntry[0]));
   } catch (err) {

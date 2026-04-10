@@ -1,3 +1,4 @@
+import { verifyRole } from '@/middleware';
 import { keysToCamel } from '@/common/utils';
 import express from 'express';
 
@@ -5,6 +6,7 @@ import { db } from '../db/db-pgp';
 
 const adminRouter = express.Router();
 adminRouter.use(express.json());
+adminRouter.use(verifyRole(['Admin', 'Super Admin']));
 
 // GET /admin/programs - returns all programs with student/instrument counts
 adminRouter.get('/programs', async (req, res) => {
@@ -13,10 +15,13 @@ adminRouter.get('/programs', async (req, res) => {
       `SELECT
         p.*,
         c.name AS country_name,
+        c.iso_code AS iso_code,
+        r.name AS region_name,
         COALESCE(ec.total_enrollment, 0) AS students,
         COALESCE(ic.total_instruments, 0) AS instruments
       FROM program p
       LEFT JOIN country c ON c.id = p.country
+      LEFT JOIN region r ON r.id = c.region_id
       LEFT JOIN (
         SELECT pu.program_id, SUM(ec.enrollment_change) - SUM(ec.graduated_change) AS total_enrollment
         FROM enrollment_change ec

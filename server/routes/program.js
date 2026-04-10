@@ -6,6 +6,22 @@ import { db } from '../db/db-pgp';
 const programRouter = express.Router();
 programRouter.use(express.json());
 
+function normalizeLanguages(languages, primaryLanguage) {
+  const candidateCodes = Array.isArray(languages)
+    ? languages
+    : primaryLanguage
+      ? [primaryLanguage]
+      : [];
+
+  return [
+    ...new Set(
+      candidateCodes
+        .map((value) => String(value).trim().toLowerCase())
+        .filter((value) => /^[a-z]{2}$/.test(value))
+    ),
+  ];
+}
+
 programRouter.get('/', async (req, res) => {
   try {
     const program = await db.query(`SELECT * FROM program`);
@@ -21,6 +37,123 @@ programRouter.get('/:id', async (req, res) => {
     const { id } = req.params;
 
     const program = await db.query(`SELECT * FROM program WHERE id = $1`, [id]);
+
+    if (program.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(program[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+/** Cumulative enrollment_change and graduated_change totals for a program (via program_update). */
+programRouter.get('/:id/enrollment-aggregates', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await db.query(
+      `SELECT
+         COALESCE(SUM(ec.enrollment_change), 0) AS sum_enrollment,
+         COALESCE(SUM(ec.graduated_change), 0) AS sum_graduated
+       FROM enrollment_change ec
+       INNER JOIN program_update pu ON pu.id = ec.update_id
+       WHERE pu.program_id = $1`,
+      [id]
+    );
+
+    const row = result[0] ?? { sum_enrollment: 0, sum_graduated: 0 };
+    res.status(200).json(keysToCamel(row));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+programRouter.get('/students/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const program = await db.query(
+      `
+      SELECT ec.enrollment_change, ec.graduated_change FROM program AS p
+      INNER JOIN program_update AS pu ON pu.program_id = p.id
+      INNER JOIN enrollment_change AS ec ON ec.update_id = pu.id
+      WHERE p.id = $1
+      `,
+      [id]
+    );
+
+    if (program.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(program));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+programRouter.get('/region/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const program = await db.query(
+      `
+      SELECT 
+        p.id,
+        p.city,
+        p.country,
+        p.launch_date,
+        p.state,
+        p.status,
+        p.title,
+        p.primary_language,
+        r.id AS region_id,
+        c.iso_code
+      FROM program AS p
+      INNER JOIN country AS c ON c.id = p.country
+      INNER JOIN region AS r ON r.id = c.region_id
+      WHERE r.id = $1`,
+      [id]
+    );
+
+    res.status(200).json(keysToCamel(program));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+programRouter.get('/city/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const program = await db.query(`SELECT city FROM program WHERE id = $1`, [
+      id,
+    ]);
+
+    if (program.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(program[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+programRouter.get('/state/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const program = await db.query(`SELECT state FROM program WHERE id = $1`, [
+      id,
+    ]);
 
     if (program.length === 0) {
       return res.status(404).send('Item not found');
@@ -62,13 +195,17 @@ programRouter.post('/', async (req, res) => {
       createdBy,
       name,
       country,
+      state,
+      city,
       title,
       description,
+      languages,
       primaryLanguage,
       partnerOrg,
       status,
       launchDate,
     } = req.body;
+    const normalizedLanguages = normalizeLanguages(languages, primaryLanguage);
 
     const newProgram = await db.query(
       `
@@ -77,15 +214,17 @@ programRouter.post('/', async (req, res) => {
         name,
         date_created,
         country,
+        state,
+        city,
         title,
         description,
-        primary_language,
+        languages,
         partner_org,
         status,
         launch_date
       )
       VALUES (
-        $1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9
+        $1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11
       )
       RETURNING *;
       `,
@@ -93,9 +232,11 @@ programRouter.post('/', async (req, res) => {
         createdBy,
         name,
         country,
+        state,
+        city,
         title,
         description ?? null,
-        primaryLanguage ?? null,
+        normalizedLanguages.length > 0 ? normalizedLanguages : null,
         partnerOrg,
         status,
         launchDate,
@@ -115,13 +256,17 @@ programRouter.put('/:id', async (req, res) => {
     const {
       name,
       country,
+      state,
+      city,
       title,
       description,
+      languages,
       primaryLanguage,
       partnerOrg,
       status,
       launchDate,
     } = req.body;
+    const normalizedLanguages = normalizeLanguages(languages, primaryLanguage);
 
     const updatedProgram = await db.query(
       `
@@ -129,21 +274,25 @@ programRouter.put('/:id', async (req, res) => {
       SET
         name = COALESCE($1, name),
         country = COALESCE($2, country),
-        title = COALESCE($3, title),
-        description = COALESCE($4, description),
-        primary_language = COALESCE($5, primary_language),
-        partner_org = COALESCE($6, partner_org),
-        status = COALESCE($7, status),
-        launch_date = COALESCE($8, launch_date)
-      WHERE id = $9
+        state = COALESCE($3, state),
+        city = COALESCE($4, city),
+        title = COALESCE($5, title),
+        description = COALESCE($6, description),
+        languages = COALESCE($7, languages),
+        partner_org = COALESCE($8, partner_org),
+        status = COALESCE($9, status),
+        launch_date = COALESCE($10, launch_date)
+      WHERE id = $11
       RETURNING *;
       `,
       [
         name,
         country,
+        state,
+        city,
         title,
         description,
-        primaryLanguage,
+        normalizedLanguages.length > 0 ? normalizedLanguages : null,
         partnerOrg,
         status,
         launchDate,
@@ -191,7 +340,8 @@ programRouter.get('/:id/regional-directors', async (req, res) => {
       SELECT 
         u.id AS user_id,
         u.first_name,
-        u.last_name
+        u.last_name,
+        u.picture
       FROM program p
       JOIN country c ON p.country = c.id
       JOIN regional_director rd ON c.region_id = rd.region_id
@@ -209,6 +359,7 @@ programRouter.get('/:id/regional-directors', async (req, res) => {
       userId: row.user_id,
       firstName: row.first_name,
       lastName: row.last_name,
+      picture: row.picture,
     }));
 
     res.status(200).json(regional_directors);
@@ -237,10 +388,13 @@ programRouter.get('/:id/playlists', async (req, res) => {
 programRouter.post('/:id/playlists', async (req, res) => {
   try {
     const { id } = req.params;
-    const { link, name } = req.body;
+    const { link, name, instrumentId } = req.body;
 
     if (!link || !name) {
       return res.status(400).json({ error: 'link and name are required' });
+    }
+    if (instrumentId === null) {
+      return res.status(400).json({ error: 'instrumentId is required' });
     }
 
     const normalizedLink =
@@ -249,14 +403,15 @@ programRouter.post('/:id/playlists', async (req, res) => {
         : `https://${link}`;
 
     await db.query(
-      `INSERT INTO playlist (program_id, link, name) VALUES ($1, $2, $3)
-       ON CONFLICT (program_id, link) DO UPDATE SET name = EXCLUDED.name`,
-      [id, normalizedLink, name]
+      `INSERT INTO playlist (program_id, instrument_id, link, name)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (program_id, instrument_id, link) DO UPDATE SET name = EXCLUDED.name`,
+      [id, instrumentId, normalizedLink, name]
     );
 
     const [inserted] = await db.query(
-      `SELECT * FROM playlist WHERE program_id = $1 AND link = $2`,
-      [id, normalizedLink]
+      `SELECT * FROM playlist WHERE program_id = $1 AND instrument_id = $2 AND link = $3`,
+      [id, instrumentId, normalizedLink]
     );
     res.status(201).json(keysToCamel(inserted[0]));
   } catch (err) {
@@ -268,15 +423,18 @@ programRouter.post('/:id/playlists', async (req, res) => {
 programRouter.delete('/:id/playlists', async (req, res) => {
   try {
     const { id } = req.params;
-    const { link } = req.body;
+    const { link, instrumentId } = req.body;
 
     if (!link) {
       return res.status(400).json({ error: 'link is required' });
     }
+    if (instrumentId === null) {
+      return res.status(400).json({ error: 'instrumentId is required' });
+    }
 
     const result = await db.query(
-      `DELETE FROM playlist WHERE program_id = $1 AND link = $2 RETURNING *`,
-      [id, link]
+      `DELETE FROM playlist WHERE program_id = $1 AND instrument_id = $2 AND link = $3 RETURNING *`,
+      [id, instrumentId, link]
     );
 
     if (result.length === 0) {
@@ -306,6 +464,7 @@ programRouter.get('/:id/instruments', async (req, res) => {
       JOIN instrument i ON i.id = ic.instrument_id
       WHERE p.id = $1
       GROUP BY i.id, i.name
+      HAVING COALESCE(SUM(ic.amount_changed), 0) <> 0
       ORDER BY i.name ASC;
       `,
       [id]
@@ -327,7 +486,8 @@ programRouter.get('/:id/program-directors', async (req, res) => {
       SELECT 
         u.id AS user_id,
         u.first_name,
-        u.last_name
+        u.last_name,
+        u.picture
       FROM program_director pd
       JOIN gcf_user u ON pd.user_id = u.id
       WHERE pd.program_id = $1
@@ -339,6 +499,7 @@ programRouter.get('/:id/program-directors', async (req, res) => {
       userId: row.user_id,
       firstName: row.first_name,
       lastName: row.last_name,
+      picture: row.picture,
     }));
 
     res.status(200).json(directors);
@@ -372,6 +533,31 @@ programRouter.get('/:id/media', async (req, res) => {
     }));
 
     res.status(200).json(media);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+programRouter.get('/:id/partner-organization', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await db.query(
+      `
+      SELECT g.name
+      FROM partner_organization g
+      JOIN program p ON g.id = p.partner_org
+      WHERE p.id = $1;
+      `,
+      [id]
+    );
+
+    if (result.length === 0) {
+      return res.status(404).send('Partner organization not found');
+    }
+
+    res.status(200).json(result[0].name);
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');

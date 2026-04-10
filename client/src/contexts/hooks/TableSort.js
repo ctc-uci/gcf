@@ -7,6 +7,12 @@ const sortCycle = Object.freeze({
   UNSORTED: 'ASCENDING',
 });
 
+function sortableString(value) {
+  if (value == null) return '';
+  if (Array.isArray(value)) return value.join(' ');
+  return String(value);
+}
+
 export function useTableSort(filteredData, setData) {
   const filteredDataRef = useRef(filteredData);
   filteredDataRef.current = filteredData;
@@ -40,19 +46,13 @@ export function useTableSort(filteredData, setData) {
 
     setData((prevData) =>
       [...(prevData ?? filteredDataRef.current)].sort((a, b) => {
-        let first = a[column];
-        let second = b[column];
-
-        if (Array.isArray(first) && Array.isArray(second)) {
-          first = first.join(' ');
-          second = second.join(' ');
-        }
+        const first = sortableString(a[column]);
+        const second = sortableString(b[column]);
 
         if (sortOrderCopy['prevSortColumn'][column] === sortCycle.ASCENDING) {
           return first.localeCompare(second);
-        } else {
-          return second.localeCompare(first);
         }
+        return second.localeCompare(first);
       })
     );
   }

@@ -1,44 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Button,
   Center,
   FormControl,
   FormLabel,
-  Select,
   Textarea,
   useToast,
   VStack,
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
+
 import { MediaPreview } from './MediaPreview';
 
 export function MediaPreviewList({ files, onComplete, formOrigin }) {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
   const toast = useToast();
   const [isUploading, setIsUploading] = useState(false);
 
   const [titles, setTitles] = useState([]);
-  const [instruments, setInstruments] = useState([]);
-  const [folder, setFolder] = useState('');
   const [description, setDescription] = useState('');
-
-  useEffect(() => {
-    async function fetchInstruments() {
-      try {
-        const response = await backend.get('/instruments');
-        const data = response.data || [];
-        const unique = Array.from(
-          new Map(data.map((i) => [i.name, i])).values()
-        );
-        setInstruments(unique);
-      } catch (err) {
-        console.error('Failed to fetch instruments:', err);
-      }
-    }
-    fetchInstruments();
-  }, [backend]);
 
   // keep titles array in sync with files prop
   useEffect(() => {
@@ -94,15 +78,14 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
           file_type: file.type,
           title: titles[i],
           description: description,
-          instrument_id: null,
         });
       }
 
       onComplete(results, description);
 
       toast({
-        title: 'Upload successful.',
-        description: `All files have been uploaded to the server.`,
+        title: t('mediaPreviewList.toastSuccessTitle'),
+        description: t('mediaPreviewList.toastSuccessDesc'),
         status: 'success',
         duration: 5000,
         isClosable: true,
@@ -112,8 +95,8 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
       console.error('Upload failed:', error);
 
       toast({
-        title: 'Upload failed.',
-        description: 'There was an error uploading 1 of more of your files.',
+        title: t('mediaPreviewList.toastErrorTitle'),
+        description: t('mediaPreviewList.toastErrorDesc'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -125,10 +108,19 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
   };
 
   return (
-    <VStack spacing={6} align="stretch">
-      <VStack spacing={0} align="stretch">
-        <FormLabel color="gray.500" fontWeight="bold">
-          Uploaded Files
+    <VStack
+      spacing={6}
+      align="stretch"
+    >
+      <VStack
+        spacing={0}
+        align="stretch"
+      >
+        <FormLabel
+          color="gray.500"
+          fontWeight="bold"
+        >
+          {t('mediaPreviewList.uploadedFiles')}
         </FormLabel>
         {files.map((file, i) => (
           <MediaPreview
@@ -140,41 +132,24 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
         ))}
       </VStack>
       {formOrigin !== 'profile' && (
-        <>
-          <FormControl>
-            <FormLabel color="gray.500" fontWeight="normal" mb={1}>
-              Select Folder
-            </FormLabel>
-            <Select
-              border="2px solid"
-              borderRadius="md"
-              borderColor="gray.100"
-              value={folder}
-              onChange={(e) => setFolder(e.target.value)}
-              placeholder="Instrument"
-            >
-              {instruments.map((inst) => (
-                <option key={inst.id} value={inst.id}>
-                  {inst.name}
-                </option>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl>
-            <FormLabel color="gray.500" fontWeight="normal" mb={1}>
-              Notes
-            </FormLabel>
-            <Textarea
-              border="2px solid"
-              borderRadius="md"
-              borderColor="gray.100"
-              rows={3}
-              value={description}
-              placeholder="Add Notes"
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </FormControl>
-        </>
+        <FormControl>
+          <FormLabel
+            color="gray.500"
+            fontWeight="normal"
+            mb={1}
+          >
+            {t('mediaPreviewList.notesLabel')}
+          </FormLabel>
+          <Textarea
+            border="2px solid"
+            borderRadius="md"
+            borderColor="gray.100"
+            rows={3}
+            value={description}
+            placeholder={t('mediaPreviewList.notesPlaceholder')}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </FormControl>
       )}
       <Center pt={4}>
         <Button
@@ -185,10 +160,10 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
           bg="gray.50"
           fontWeight="normal"
           isLoading={isUploading}
-          loadingText="Uploading..."
+          loadingText={t('common.uploading')}
           onClick={handleFullUploadProcess}
         >
-          Upload
+          {t('common.upload')}
         </Button>
       </Center>
     </VStack>

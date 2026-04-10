@@ -1,6 +1,7 @@
 import express from 'express';
+
+import { deleteFromS3, getS3ImageURL, getS3UploadURL } from '../common/s3';
 import { db } from '../db/db-pgp';
-import { getS3UploadURL, getS3ImageURL, deleteFromS3 } from '../common/s3';
 
 export const imagesRouter = express.Router();
 imagesRouter.use(express.json());

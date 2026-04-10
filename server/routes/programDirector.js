@@ -97,6 +97,33 @@ directorRouter.get('/me/:userId/playlist', async (req, res) => {
   }
 });
 
+// get director's region
+directorRouter.get('/me/:userId/region', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const director = await db.query(
+      'SELECT program_id FROM program_director WHERE user_id = $1 LIMIT 1',
+      [userId]
+    );
+
+    if (!director?.length)
+      return res.status(404).json({ error: 'Program director not found' });
+    const region = await db.query(
+      `SELECT r.id
+            FROM program AS p
+            INNER JOIN country AS c ON p.country = c.id
+            INNER JOIN region AS r ON c.region_id = r.id
+            INNER JOIN program_director AS pd ON pd.program_id = p.id
+            WHERE pd.user_id = $1;`,
+      [director]
+    );
+
+    res.status(200).json(keysToCamel(region));
+  } catch (err) {
+    console.error('Error in /me/:userId/region:', err);
+  }
+});
+
 // create program director
 directorRouter.post('/', async (req, res) => {
   try {
@@ -131,10 +158,10 @@ directorRouter.get('/', async (req, res) => {
 directorRouter.get('/program-director-names', async (req, res) => {
   try {
     const director_names = await db.query(
-      `SELECT pd.user_id, gu.first_name, gu.last_name
-             FROM gcf_user as gu
-                INNER JOIN program_director AS pd ON pd.user_id = gu.id
-             ORDER BY gu.first_name ASC, gu.last_name ASC`
+      `SELECT gu.id AS user_id, gu.first_name, gu.last_name, gu.picture
+       FROM gcf_user AS gu
+       WHERE gu.role = 'Program Director'
+       ORDER BY gu.first_name ASC, gu.last_name ASC`
     );
 
     res.status(200).json(keysToCamel(director_names));
@@ -175,14 +202,21 @@ directorRouter.put('/:userId', async (req, res) => {
   }
 });
 
-// delete a program director
+// delete a program director assignment for one program (composite PK is user_id + program_id)
 directorRouter.delete('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
+    const programId = req.query.programId;
+
+    if (programId === undefined || programId === null || programId === '') {
+      return res.status(400).json({
+        error: 'programId query parameter is required',
+      });
+    }
 
     const director = await db.query(
-      'DELETE FROM program_director WHERE user_id = $1 RETURNING *',
-      [userId]
+      'DELETE FROM program_director WHERE user_id = $1 AND program_id = $2 RETURNING *',
+      [userId, programId]
     );
 
     res.status(200).json(keysToCamel(director));

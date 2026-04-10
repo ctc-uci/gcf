@@ -1,26 +1,26 @@
 import { Admin } from '@/components/admin/Admin';
 import { CatchAll } from '@/components/CatchAll';
 import Dashboard from '@/components/dashboard/Dashboard';
-// import { ProgramForm } from "@/components/dashboard/ProgramForm";
 import { Login } from '@/components/login/Login';
 import { Layout } from '@/components/navigation/Layout';
 import { Profile } from '@/components/profile/Profile';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { Signup } from '@/components/signup/Signup';
 import { UpdatesPage } from '@/components/updates/UpdatesPage';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { BackendProvider } from '@/contexts/BackendContext';
 import { RoleProvider } from '@/contexts/RoleContext';
 import { CookiesProvider } from 'react-cookie';
 import {
+  Navigate,
   Route,
   BrowserRouter as Router,
   Routes,
-  Navigate,
 } from 'react-router-dom';
 
 import { Account } from './components/accounts/Account';
+import { Map } from './components/map/Map';
 import { Media } from './components/media/Media';
+import { RegionsPage } from './components/regions/RegionsPage';
 
 const App = () => {
   return (
@@ -30,14 +30,27 @@ const App = () => {
           <RoleProvider>
             <Router>
               <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-
+                <Route
+                  path="/login"
+                  element={<Login />}
+                />
+                <Route
+                  path="/map"
+                  element={<Map />}
+                />
                 <Route
                   path="/"
                   element={<ProtectedRoute element={<Layout />} />}
                 >
-                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route
+                    index
+                    element={
+                      <Navigate
+                        to="/dashboard"
+                        replace
+                      />
+                    }
+                  />
                   <Route
                     path="admin"
                     element={
@@ -77,9 +90,20 @@ const App = () => {
                     }
                   />
 
-                  <Route path={'dashboard'} element={<Dashboard />} />
+                  <Route
+                    path={'dashboard'}
+                    element={<Dashboard />}
+                  />
 
-                  <Route path={'updates'} element={<UpdatesPage />} />
+                  <Route
+                    path={'updates'}
+                    element={<UpdatesPage />}
+                  />
+
+                  <Route
+                    path={'regions'}
+                    element={<RegionsPage />}
+                  />
                 </Route>
 
                 <Route
