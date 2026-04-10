@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import {
   Box,
+  Button,
   Center,
   HStack,
   IconButton,
@@ -20,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { SlOptionsVertical } from 'react-icons/sl';
 
+import { MediaDeleteModal } from './MediaDeleteModal';
 import { MediaEditModal } from './MediaEditModal';
 import gcf_globe from '/gcf_globe.png';
 
@@ -40,6 +42,11 @@ export const MediaCard = ({
     isOpen: isEditModalOpen,
     onOpen: onEditModalOpen,
     onClose: onEditModalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
   } = useDisclosure();
   const isVideo = file_type?.startsWith('video');
 
@@ -62,6 +69,11 @@ export const MediaCard = ({
     } catch (error) {
       console.error('Error deleting media:', error);
     }
+  };
+
+  const confirmDelete = async () => {
+    await handleDelete();
+    onDeleteClose();
   };
 
   return (
@@ -113,7 +125,7 @@ export const MediaCard = ({
                 <MdEdit />
               </HStack>
             </MenuItem>
-            <MenuItem onClick={handleDelete}>
+            <MenuItem onClick={onDeleteOpen}>
               <HStack w="full">
                 <Text
                   color="red.500"
@@ -204,6 +216,11 @@ export const MediaCard = ({
         onSave={handleEditSave}
         initialTitle={file_name}
         initialDescription={description}
+      />
+      <MediaDeleteModal
+        isOpen={isDeleteOpen}
+        onClose={onDeleteClose}
+        onConfirm={confirmDelete}
       />
     </Box>
   );
