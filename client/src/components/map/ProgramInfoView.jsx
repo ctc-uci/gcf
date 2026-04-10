@@ -86,10 +86,16 @@ const ProgramInfoView = ({ program }) => {
         setStudents(totalStudents);
 
         setDirectors(directorsRes.data);
-        setMedia(mediaRes.data);
+
+        const approvedMedia = mediaRes.data.filter(
+          (m) => m.status === 'Approved'
+        );
+        const displayMedia =
+          approvedMedia.length > 0 ? approvedMedia : mediaRes.data;
+        setMedia(displayMedia);
 
         const urls = {};
-        for (const m of mediaRes.data) {
+        for (const m of displayMedia) {
           try {
             const urlRes = await backend.get(
               `/images/url/${encodeURIComponent(m.s3Key || m.s3_key)}`

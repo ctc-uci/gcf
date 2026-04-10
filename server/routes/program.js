@@ -515,11 +515,10 @@ programRouter.get('/:id/media', async (req, res) => {
 
     const result = await db.query(
       `
-      SELECT m.id, m.s3_key, m.file_name, m.file_type, m.is_thumbnail, m.instrument_id
+      SELECT m.id, m.s3_key, m.file_name, m.file_type, m.is_thumbnail, m.instrument_id, m.status
       FROM media_change m
       JOIN program_update pu ON m.update_id = pu.id
-      WHERE program_id = $1
-        AND m.status = 'Approved';
+      WHERE program_id = $1;
       `,
       [id]
     );
