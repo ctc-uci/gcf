@@ -373,6 +373,14 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     }
   };
 
+  const logAccountChange = async (payload) => {
+    try {
+      await backend.post('/accountChange', payload);
+    } catch (err) {
+      console.error('Failed to log account change:', err);
+    }
+  };
+
   const handleCreateUser = async () => {
     if (
       !formData.first_name ||
@@ -394,7 +402,22 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       regionId:
         formData.regions.length > 0 ? Number(formData.regions[0].id) : null,
     };
-    await backend.post('/gcf-users/admin/create-user', userData);
+    const createRes = await backend.post(
+      '/gcf-users/admin/create-user',
+      userData
+    );
+    const newUserId = createRes.data?.uid;
+    if (newUserId && userId) {
+      await logAccountChange({
+        user_id: String(newUserId),
+        author_id: String(userId),
+        change_type: 'Creation',
+        old_values: null,
+        new_values: userData,
+        resolved: false,
+        last_modified: new Date().toISOString(),
+      });
+    }
     await sendPasswordResetEmail(auth, formData.email);
   };
 
@@ -424,14 +447,18 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       userData.password = formData.password;
     }
     await backend.put('/gcf-users/admin/update-user', userData);
-    // await backend.post('/nodemailer', {
-    //   email: formData.email,
-    //   password: formData.password || null,
-    //   firstName: formData.first_name,
-    //   lastName: formData.last_name,
-    //   role: formData.role,
-    //   isNewAccount: false,
-    // });
+
+    if (userId) {
+      await logAccountChange({
+        user_id: String(targetUserId),
+        author_id: String(userId),
+        change_type: 'Update',
+        old_values: initialFormData,
+        new_values: formData,
+        resolved: false,
+        last_modified: new Date().toISOString(),
+      });
+    }
   };
 
   const handleCloseWithCheck = () => {
