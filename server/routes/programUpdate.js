@@ -50,8 +50,8 @@ programUpdateRouter.post('/', async (req, res) => {
     req.body;
   try {
     const newEntry = await db.query(
-      `INSERT INTO program_update (title, program_id, created_by, update_date, note, show_on_table)
-            VALUES ($1, $2, $3, $4, $5, COALESCE($6, TRUE))
+      `INSERT INTO program_update (title, program_id, created_by, update_date, note, show_on_table, updated_at)
+            VALUES ($1, $2, $3, $4, $5, COALESCE($6, TRUE), CURRENT_TIMESTAMP)
             RETURNING *`,
       [title, program_id, created_by, update_date, note, show_on_table]
     );
@@ -74,7 +74,8 @@ programUpdateRouter.put('/:id', async (req, res) => {
             program_id = COALESCE($2, program_id),
             created_by = COALESCE($3, created_by),
             update_date = COALESCE($4, update_date),
-            note = COALESCE($5, note)
+            note = COALESCE($5, note),
+            updated_at = CURRENT_TIMESTAMP
             WHERE id = $6
             RETURNING *`,
       [title, program_id, created_by, update_date, note, id]

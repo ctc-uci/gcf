@@ -24,7 +24,7 @@ import {
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
 import { useTranslation } from 'react-i18next';
-import { FiStar, FiUser } from 'react-icons/fi';
+import { FiStar } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
@@ -32,9 +32,44 @@ import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './forms/ProgramUpdateForm';
 
 function formatDate(dateStr) {
+  // TODO: handle timezeones
   if (!dateStr) return '';
-  const d = new Date(dateStr);
+
+  let safeDateString = String(dateStr).replace(' ', 'T');
+  if (
+    !safeDateString.endsWith('Z') &&
+    !safeDateString.includes('+') &&
+    !safeDateString.includes('-')
+  ) {
+    safeDateString += 'Z';
+  }
+
+  const d = new Date(safeDateString);
   if (isNaN(d.getTime())) return dateStr;
+
+  const now = new Date();
+  const isToday =
+    d.getDate() === now.getDate() &&
+    d.getMonth() === now.getMonth() &&
+    d.getFullYear() === now.getFullYear();
+
+  const isThisYear = d.getFullYear() === now.getFullYear();
+
+  if (isToday) {
+    return d.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+
+  if (isThisYear) {
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+
   return d.toLocaleDateString('en-US', {
     month: '2-digit',
     day: '2-digit',
@@ -59,7 +94,7 @@ export function downloadProgramUpdatesAsCsv(data, t) {
     escapeCsvValue(row.status),
     escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
     escapeCsvValue(row.name),
-    escapeCsvValue(formatDate(row.updateDate)),
+    escapeCsvValue(formatDate(row.updatedAt || row.updateDate)),
   ]);
   downloadCsv(headers, rows, `program-updates-${getFilenameTimestamp()}.csv`);
 }
@@ -139,7 +174,7 @@ export const ProgramUpdatesTable = ({
         (update.name || '').toLowerCase().includes(q) ||
         (update.fullName || '').toLowerCase().includes(q) ||
         (update.status || '').toLowerCase().includes(q) ||
-        (formatDate(update.updateDate) || '').toLowerCase().includes(q)
+        (formatDate(update.updatedAt) || '').toLowerCase().includes(q)
     );
   }, [searchQuery, filteredData]);
 
@@ -267,7 +302,7 @@ export const ProgramUpdatesTable = ({
                   />
                 </Th>
                 <Th
-                  onClick={() => handleSort('updateDate')}
+                  onClick={() => handleSort('updatedAt')}
                   cursor="pointer"
                   color="gray.500"
                   fontSize="xs"
@@ -276,7 +311,7 @@ export const ProgramUpdatesTable = ({
                 >
                   {t('updates.colDate')}
                   <SortArrows
-                    columnKey="updateDate"
+                    columnKey="updatedAt"
                     sortOrder={sortOrder}
                   />
                 </Th>
@@ -369,7 +404,7 @@ export const ProgramUpdatesTable = ({
                         fontSize="sm"
                         color="gray.600"
                       >
-                        {formatDate(row.updateDate)}
+                        {formatDate(row.updatedAt)}
                       </Text>
                     </Td>
                   </Tr>

@@ -34,6 +34,7 @@ import { CreateUpdateDrawer } from '../forms/createForm/CreateUpdateDrawer';
 import { ProgramDirectorUpdatesTable } from './ProgramDirectorUpdatesTable';
 
 export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
+  console.log('First row of data:', data?.[0]);
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState([]);
@@ -59,9 +60,18 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
     updateDrawerDisclosure.onClose();
   };
 
+  const sortedData = useMemo(() => {
+    if (!data) return [];
+    return [...data].sort((a, b) => {
+      const dateA = new Date(a.updatedAt || a.updateDate || 0).getTime();
+      const dateB = new Date(b.updatedAt || b.updateDate || 0).getTime();
+      return dateB - dateA;
+    });
+  }, [data]);
+
   const filteredData = useMemo(
-    () => applyFilters(activeFilters, data),
-    [activeFilters, data]
+    () => applyFilters(activeFilters, sortedData),
+    [activeFilters, sortedData]
   );
 
   const displayData = useMemo(() => {
@@ -72,7 +82,8 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
         (row.instrumentName || row.title || '').toLowerCase().includes(q) ||
         (row.note || '').toLowerCase().includes(q) ||
         (row.status || '').toLowerCase().includes(q) ||
-        (row.updateDate || '').toLowerCase().includes(q)
+        (row.updateDate || '').toLowerCase().includes(q) ||
+        (row.updatedAt || '').toLowerCase().includes(q)
     );
   }, [searchQuery, filteredData]);
 

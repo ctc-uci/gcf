@@ -25,13 +25,7 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 import { FaUser } from 'react-icons/fa6';
-import {
-  FiMaximize2,
-  FiMinimize2,
-  FiMusic,
-  FiTrash2,
-  FiUser,
-} from 'react-icons/fi';
+import { FiMaximize2, FiMinimize2, FiTrash2 } from 'react-icons/fi';
 import { IoMusicalNoteSharp } from 'react-icons/io5';
 
 import { MediaUploadModal } from '../../../media/MediaUploadModal';
@@ -459,12 +453,15 @@ export const CreateUpdateDrawer = ({
       fullNote = notes;
     }
 
+    const timestamp = new Date().toISOString();
+
     const programUpdateData = {
       title:
         updateType === 'instrument' ? 'Instrument Update' : 'Student Update',
       program_id: programId,
       created_by: currentUser?.uid,
-      update_date: new Date().toISOString(),
+      update_date: timestamp,
+      updated_at: timestamp,
       note: fullNote || null,
     };
 

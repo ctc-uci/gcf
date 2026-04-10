@@ -20,17 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { FiStar } from 'react-icons/fi';
 
 import { SortArrows } from '../../tables/SortArrows';
-
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr;
-  return d.toLocaleDateString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: '2-digit',
-  });
-}
+import { formatTableDate } from '../config/updatesColumnConfig';
 
 function formatChangeAmount(value, dash) {
   if (value === null || value === undefined || value === '') return dash;
@@ -44,7 +34,7 @@ function displayInstrumentName(row, dash) {
 }
 
 function EnrollmentChangeDetails({ row, dash }) {
-  const hasEnrollment = row.enrollmentChange != null;
+  const hasEnrollment = row.enrollmentChange !== null;
   if (!hasEnrollment) {
     return (
       <Text
@@ -271,7 +261,7 @@ export const ProgramDirectorUpdatesTable = ({
                             fontSize="sm"
                             color="gray.700"
                           >
-                            {formatDate(row.updateDate)}
+                            {formatTableDate(row.updatedAt)}
                           </Text>
                         </Td>
                       </>
@@ -297,7 +287,7 @@ export const ProgramDirectorUpdatesTable = ({
                             fontSize="sm"
                             color="gray.700"
                           >
-                            {formatDate(row.updateDate)}
+                            {formatTableDate(row.updatedAt)}
                           </Text>
                         </Td>
                       </>

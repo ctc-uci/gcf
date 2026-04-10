@@ -8,7 +8,7 @@ const sortCycle = Object.freeze({
 });
 
 function sortableString(value) {
-  if (value == null) return '';
+  if (value === null) return '';
   if (Array.isArray(value)) return value.join(' ');
   return String(value);
 }
@@ -46,15 +46,40 @@ export function useTableSort(filteredData, setData) {
 
     setData((prevData) =>
       [...(prevData ?? filteredDataRef.current)].sort((a, b) => {
+        const isAscending =
+          sortOrderCopy['prevSortColumn'][column] === sortCycle.ASCENDING;
+
+        if (column === 'updateDate' || column === 'updatedAt') {
+          const dateA = new Date(a[column] || 0).getTime();
+          const dateB = new Date(b[column] || 0).getTime();
+          return isAscending ? dateA - dateB : dateB - dateA;
+        }
+
+        const valA = a[column];
+        const valB = b[column];
+        if (
+          valA !== null &&
+          valA !== '' &&
+          !isNaN(Number(valA)) &&
+          valB !== null &&
+          valB !== '' &&
+          !isNaN(Number(valB))
+        ) {
+          const numA = Number(valA);
+          const numB = Number(valB);
+          return isAscending ? numA - numB : numB - numA;
+        }
+
         const first = sortableString(a[column]);
         const second = sortableString(b[column]);
 
-        if (sortOrderCopy['prevSortColumn'][column] === sortCycle.ASCENDING) {
+        if (isAscending) {
           return first.localeCompare(second);
         }
         return second.localeCompare(first);
       })
     );
   }
+
   return { sortOrder, handleSort };
 }
