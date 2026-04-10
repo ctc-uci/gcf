@@ -36,14 +36,6 @@ export const MediaGrid = ({ mediaItems, programName }) => {
       spacing={4}
       w="full"
     >
-      <Text
-        fontSize="lg"
-        fontWeight="semibold"
-        color="gray.800"
-      >
-        {t('mediaPage.uploads')}
-      </Text>
-
       {content}
     </VStack>
   );

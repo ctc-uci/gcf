@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { AddIcon } from '@chakra-ui/icons';
+import { AddIcon, SearchIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
   Center,
   Container,
   Heading,
+  HStack,
+  Input,
+  InputGroup,
+  InputLeftElement,
   Spinner,
   useDisclosure,
   VStack,
@@ -31,6 +35,7 @@ export const Media = () => {
   const [programName, setProgramName] = useState('');
   const [programId, setProgramId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const onUploadCompleteHandler = async (uploadedFiles, description) => {
     try {
@@ -121,6 +126,16 @@ export const Media = () => {
     fetchData();
   }, [fetchData]);
 
+  const filteredMedia = media.filter((item) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      item.file_name?.toLowerCase().includes(query) ||
+      false ||
+      item.description?.toLowerCase().includes(query) ||
+      false
+    );
+  });
+
   if (isLoading) {
     return (
       <Center h="100vh">
@@ -150,26 +165,47 @@ export const Media = () => {
             spacing={6}
             w="full"
           >
-            <Heading
-              size="xl"
-              color="gray.800"
+            <HStack
+              w="full"
+              justify="space-between"
+              align="center"
+              spacing={4}
             >
-              {t('mediaPage.title')}
-            </Heading>
-
-            <Button
-              size="sm"
-              leftIcon={<AddIcon />}
-              backgroundColor="teal.500"
-              color="white"
-              _hover={{ backgroundColor: 'teal.600' }}
-              onClick={onOpen}
-            >
-              {t('mediaPage.uploadMedia')}
-            </Button>
+              <Heading
+                size="xl"
+                color="gray.800"
+              >
+                {t('mediaPage.title')}
+              </Heading>
+              <InputGroup
+                w="60"
+                maxW="400px"
+                size="sm"
+              >
+                <InputLeftElement pointerEvents="none">
+                  <SearchIcon color="gray.400" />
+                </InputLeftElement>
+                <Input
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  borderRadius="md"
+                />
+              </InputGroup>
+              <Button
+                size="sm"
+                leftIcon={<AddIcon />}
+                backgroundColor="teal.500"
+                color="white"
+                _hover={{ backgroundColor: 'teal.600' }}
+                onClick={onOpen}
+              >
+                {t('mediaPage.uploadMedia')}
+              </Button>
+            </HStack>
 
             <MediaGrid
-              mediaItems={media}
+              mediaItems={filteredMedia}
               programName={programName}
             />
           </VStack>

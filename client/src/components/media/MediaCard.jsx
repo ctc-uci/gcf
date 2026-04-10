@@ -1,8 +1,22 @@
 import { useState } from 'react';
 
-import { Box, Center, HStack, Image, Spacer, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Center,
+  HStack,
+  IconButton,
+  Image,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Spacer,
+  Text,
+} from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
+import { MdDelete, MdEdit } from 'react-icons/md';
+import { SlOptionsVertical } from 'react-icons/sl';
 
 import gcf_globe from '/gcf_globe.png';
 
@@ -31,9 +45,56 @@ export const MediaCard = ({
         mr={3}
         borderRadius="xl"
         position="relative"
-        bg="white"
         overflow="hidden"
       >
+        <Menu
+          isLazy
+          placement="top-end"
+          gutter={0}
+          offset={[0, -40]}
+        >
+          <MenuButton
+            as={IconButton}
+            icon={<SlOptionsVertical />}
+            size="md"
+            colorScheme="none"
+            position="absolute"
+            top="4px"
+            right="0px"
+            zIndex="docked"
+          />
+          <MenuList
+            minW="150px"
+            p={0}
+            m={0}
+            boxShadow="xl"
+            border="none"
+            zIndex="popover"
+            position="absolute"
+            top="0"
+            right="0"
+          >
+            <MenuItem>
+              <HStack w="full">
+                <Text fontWeight="semibold">Edit details</Text>
+                <Spacer />
+                <MdEdit />
+              </HStack>
+            </MenuItem>
+            <MenuItem>
+              <HStack w="full">
+                <Text
+                  color="red.500"
+                  fontWeight="semibold"
+                >
+                  Delete
+                </Text>
+                <Spacer />
+                <MdDelete />
+              </HStack>
+            </MenuItem>
+          </MenuList>
+        </Menu>
         {isLoading && (
           <Center h="100%">
             <Image
