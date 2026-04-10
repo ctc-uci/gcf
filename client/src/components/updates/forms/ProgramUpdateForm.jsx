@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 import {
-  Avatar,
   Box,
   Button,
   Checkbox,
@@ -33,6 +32,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { DirectorAvatar } from '@/components/dashboard/ProgramForm/DirectorAvatar';
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
@@ -95,6 +95,7 @@ export const ProgramUpdateForm = ({
   const [updateType, setUpdateType] = useState('');
   const [programName, setProgramName] = useState('');
   const [authorName, setAuthorName] = useState('');
+  const [authorPicture, setAuthorPicture] = useState('');
   const [updateDateTime, setUpdateDateTime] = useState('');
 
   const [selectedInstrument, setSelectedInstrument] = useState('');
@@ -127,6 +128,7 @@ export const ProgramUpdateForm = ({
       setUpdateType('');
       setProgramName('');
       setAuthorName('');
+      setAuthorPicture('');
       setUpdateDateTime('');
     }
   }, [programUpdateId]);
@@ -189,6 +191,7 @@ export const ProgramUpdateForm = ({
             .filter(Boolean)
             .join(' ') || ''
         );
+        setAuthorPicture(selectedUpdate.picture || '');
         setUpdateDateTime(selectedUpdate.updateDate || '');
       }
       try {
@@ -219,32 +222,40 @@ export const ProgramUpdateForm = ({
         } else {
           let resolvedProgramName = '';
           let resolvedAuthorName = '';
-          const fetchGcfName = async (id) => {
-            if (id == null || id === '') return '';
+          let resolvedAuthorPicture = '';
+          const fetchGcfUser = async (id) => {
+            if (id == null || id === '') return { name: '', picture: '' };
             try {
               const userRes = await backend.get(`/gcf-users/${id}`);
-              return (
-                [userRes.data?.firstName, userRes.data?.lastName]
-                  .filter(Boolean)
-                  .join(' ') || ''
-              );
+              return {
+                name:
+                  [userRes.data?.firstName, userRes.data?.lastName]
+                    .filter(Boolean)
+                    .join(' ') || '',
+                picture: userRes.data?.picture || '',
+              };
             } catch {
-              return '';
+              return { name: '', picture: '' };
             }
           };
           try {
             const progRes = await backend.get(`/program/${pid}`);
             resolvedProgramName = progRes.data?.name || '';
             const programCreatorId = progRes.data?.createdBy;
-            resolvedAuthorName = await fetchGcfName(programCreatorId);
+            const primary = await fetchGcfUser(programCreatorId);
+            resolvedAuthorName = primary.name;
+            resolvedAuthorPicture = primary.picture;
             if (!resolvedAuthorName && data.createdBy != null) {
-              resolvedAuthorName = await fetchGcfName(data.createdBy);
+              const fallback = await fetchGcfUser(data.createdBy);
+              resolvedAuthorName = fallback.name;
+              resolvedAuthorPicture = fallback.picture;
             }
           } catch (e) {
             console.error('Error fetching program or author:', e);
           }
           setProgramName(resolvedProgramName);
           setAuthorName(resolvedAuthorName);
+          setAuthorPicture(resolvedAuthorPicture);
         }
         setUpdateType(data.updateType || data.title || '');
         setFlagged(data.flagged || false);
@@ -538,11 +549,10 @@ export const ProgramUpdateForm = ({
                   {t('updates.colAuthor')}
                 </Text>
                 <HStack spacing={3}>
-                  <Avatar
-                    size="sm"
-                    name={authorName || undefined}
-                    bg="teal.500"
-                    color="white"
+                  <DirectorAvatar
+                    picture={authorPicture}
+                    name={authorName || ''}
+                    boxSize="32px"
                   />
                   <Text>{authorName || t('common.emDash')}</Text>
                 </HStack>
