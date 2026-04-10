@@ -60,6 +60,8 @@
     "placeholderNotes": "Notas",
     "keepUnresolved": "Mantener como no resuelto",
     "saveMarkResolved": "Guardar y marcar como resuelto",
+    "markAsUnresolved": "Marcar como no resuelto",
+    "keepResolved": "Mantener resuelto",
     "oldProfile": "perfil antiguo",
     "newProfile": "Nuevo perfil",
     "editUpdates": "Editar actualizaciones",

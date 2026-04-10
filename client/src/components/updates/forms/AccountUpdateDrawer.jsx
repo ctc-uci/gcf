@@ -17,6 +17,7 @@ import {
   Image,
   Spinner,
   Text,
+  useToast,
   VStack,
 } from '@chakra-ui/react';
 
@@ -466,13 +467,19 @@ function AccountChangeProfileImages({
   );
 }
 
-export const AccountUpdateDrawer = ({ update, onClose }) => {
+export const AccountUpdateDrawer = ({
+  update,
+  onClose,
+  onAccountChangeUpdated,
+}) => {
   const { t } = useTranslation();
+  const toast = useToast();
   const { backend } = useBackendContext();
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [programNamesById, setProgramNamesById] = useState({});
   const [regionNamesById, setRegionNamesById] = useState({});
 
@@ -635,6 +642,40 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
     };
   }, [oldSnap, newSnap, changeType, programNamesById, regionNamesById]);
 
+  const isResolved = Boolean(detail?.resolved);
+
+  const applyResolvedStatus = async (nextResolved) => {
+    if (!accountChangeId || !backend) return;
+    setSaving(true);
+    try {
+      const { data } = await backend.put(`/accountChange/${accountChangeId}`, {
+        resolved: nextResolved,
+        last_modified: new Date().toISOString(),
+      });
+      setDetail(data);
+      onAccountChangeUpdated?.();
+      toast({
+        title: nextResolved ? t('common.resolved') : t('common.unresolved'),
+        status: 'success',
+        duration: 2500,
+        isClosable: true,
+      });
+      onClose();
+    } catch (e) {
+      console.error('Account change update failed:', e);
+      toast({
+        title: t('accountForm.errorTitle'),
+        description:
+          typeof e?.response?.data === 'string' ? e.response.data : e?.message,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (!update) return null;
 
   return (
@@ -771,34 +812,63 @@ export const AccountUpdateDrawer = ({ update, onClose }) => {
           )}
         </DrawerBody>
 
-        <Flex
-          position="absolute"
-          bottom={0}
-          left={0}
-          right={0}
-          bg="white"
-          borderTop="1px solid"
-          borderColor="gray.200"
-          px={8}
-          py={4}
-          justify="flex-end"
-          gap={3}
-        >
-          <Button
-            variant="outline"
-            onClick={onClose}
+        {!loading && detail && !loadError && (
+          <Flex
+            position="absolute"
+            bottom={0}
+            left={0}
+            right={0}
+            bg="white"
+            borderTop="1px solid"
+            borderColor="gray.200"
+            px={8}
+            py={4}
+            justify="flex-end"
+            gap={3}
           >
-            {t('common.keepUnresolved')}
-          </Button>
-          <Button
-            bg="teal.500"
-            color="white"
-            _hover={{ bg: 'teal.600' }}
-            onClick={onClose}
-          >
-            {t('common.saveMarkResolved')}
-          </Button>
-        </Flex>
+            {isResolved ? (
+              <>
+                <Button
+                  variant="outline"
+                  isDisabled={saving}
+                  isLoading={saving}
+                  onClick={() => applyResolvedStatus(false)}
+                >
+                  {t('common.markAsUnresolved')}
+                </Button>
+                <Button
+                  bg="teal.500"
+                  color="white"
+                  _hover={{ bg: 'teal.600' }}
+                  isDisabled={saving}
+                  onClick={onClose}
+                >
+                  {t('common.keepResolved')}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  isDisabled={saving}
+                  onClick={onClose}
+                >
+                  {t('common.keepUnresolved')}
+                </Button>
+                <Button
+                  bg="teal.500"
+                  color="white"
+                  _hover={{ bg: 'teal.600' }}
+                  isDisabled={saving}
+                  isLoading={saving}
+                  onClick={() => applyResolvedStatus(true)}
+                >
+                  {t('common.saveMarkResolved')}
+                </Button>
+              </>
+            )}
+          </Flex>
+        )}
       </DrawerContent>
     </Drawer>
   );

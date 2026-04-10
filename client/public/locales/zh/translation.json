@@ -60,6 +60,8 @@
     "placeholderNotes": "笔记",
     "keepUnresolved": "保留为未解决",
     "saveMarkResolved": "保存并标记为已解决",
+    "markAsUnresolved": "标记为未解决",
+    "keepResolved": "保持已解决",
     "oldProfile": "旧档案",
     "newProfile": "新的个人资料",
     "editUpdates": "编辑更新",

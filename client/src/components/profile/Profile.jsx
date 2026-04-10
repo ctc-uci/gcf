@@ -113,10 +113,17 @@ export const Profile = () => {
     try {
       const userResponse = await backend.get(`/gcf-users/${currentUser.uid}`);
       const userData = userResponse.data;
-      if (userData.picture && userData.picture.trim() !== '') {
+      const pictureKey =
+        userData.picture && userData.picture.trim() !== ''
+          ? userData.picture
+          : null;
+
+      userData.pictureKey = pictureKey;
+
+      if (pictureKey) {
         try {
           const urlResponse = await backend.get(
-            `/images/url/${encodeURIComponent(userData.picture)}`
+            `/images/url/${encodeURIComponent(pictureKey)}`
           );
           userData.picture = urlResponse.data.url;
         } catch (urlErr) {
@@ -171,8 +178,39 @@ export const Profile = () => {
         userId: currentUser.uid,
       });
 
+      const prevPictureKey = gcfUser?.pictureKey || null;
+      const nextPictureKey = key;
+
+      // Log this as an account change even if only the picture changed
+      if (prevPictureKey !== nextPictureKey) {
+        const trackedBio =
+          role === 'Program Director' ? gcfUser?.bio || '' : '';
+        await backend.post('/accountChange', {
+          user_id: currentUser.uid,
+          author_id: currentUser.uid,
+          change_type: 'Update',
+          old_values: {
+            first_name: gcfUser?.firstName || '',
+            last_name: gcfUser?.lastName || '',
+            email: currentUser?.email || '',
+            picture: prevPictureKey,
+            bio: trackedBio,
+          },
+          new_values: {
+            first_name: gcfUser?.firstName || '',
+            last_name: gcfUser?.lastName || '',
+            email: currentUser?.email || '',
+            picture: nextPictureKey,
+            bio: trackedBio,
+          },
+          resolved: false,
+          last_modified: new Date().toISOString(),
+        });
+      }
+
       setGcfUser((prev) => ({
         ...prev,
+        pictureKey: nextPictureKey,
         picture: urlResponse.data.url,
       }));
     } catch (err) {
@@ -221,15 +259,44 @@ export const Profile = () => {
     if (!currentUser?.uid) return;
 
     try {
-      await Promise.all([
-        backend.patch(`/gcf-users/${currentUser.uid}/preferred-language`, {
-          preferredLanguage: formData.language,
-        }),
-        backend.put(`/gcf-users/${currentUser.uid}`, {
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-        }),
-      ]);
+      const oldBio = role === 'Program Director' ? gcfUser?.bio || '' : '';
+      const newBio =
+        role === 'Program Director' ? formData.bio?.trim() || '' : '';
+      const oldValues = {
+        first_name: gcfUser?.firstName || '',
+        last_name: gcfUser?.lastName || '',
+        email: currentUser?.email || '',
+        picture: gcfUser?.pictureKey || null,
+        bio: oldBio,
+      };
+      const newValues = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: currentUser?.email || '',
+        picture: gcfUser?.pictureKey || null,
+        bio: newBio,
+      };
+
+      await backend.put(`/gcf-users/${currentUser.uid}`, {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+      });
+
+      if (JSON.stringify(oldValues) !== JSON.stringify(newValues)) {
+        await backend.post('/accountChange', {
+          user_id: currentUser.uid,
+          author_id: currentUser.uid,
+          change_type: 'Update',
+          old_values: oldValues,
+          new_values: newValues,
+          resolved: false,
+          last_modified: new Date().toISOString(),
+        });
+      }
+
+      await backend.patch(`/gcf-users/${currentUser.uid}/preferred-language`, {
+        preferredLanguage: formData.language,
+      });
 
       await i18n.changeLanguage(formData.language);
       setGcfUser((prev) => ({

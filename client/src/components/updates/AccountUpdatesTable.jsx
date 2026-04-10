@@ -73,6 +73,7 @@ export const AccountUpdatesTable = ({
   originalData = [],
   isLoading = false,
   searchQuery = '',
+  onAccountChangeUpdated,
 }) => {
   const { t } = useTranslation();
   const sourceData = data ?? originalData ?? [];
@@ -243,6 +244,7 @@ export const AccountUpdatesTable = ({
         <AccountUpdateDrawer
           update={selectedUpdate}
           onClose={() => setSelectedUpdate(null)}
+          onAccountChangeUpdated={onAccountChangeUpdated}
         />
       )}
     </Box>
