@@ -28,7 +28,13 @@ accountChangeRouter.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const accountChange = await db.query(
-      `SELECT ALL * FROM account_change WHERE id = $1`,
+      `SELECT 
+        ac.*, 
+        u.first_name AS author_first_name,
+        u.last_name AS author_last_name
+      FROM account_change ac
+      LEFT JOIN gcf_user u ON ac.author_id = u.id
+      WHERE ac.id = $1`,
       [id]
     );
 
