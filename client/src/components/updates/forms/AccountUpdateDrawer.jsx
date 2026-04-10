@@ -28,7 +28,46 @@ import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 const PASSWORD_MASK = '••••••••';
 const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
 
-/** Normalize snapshot from API (camelCase from keysToCamel + nested form shape). */
+const getRoleBadgeProps = (role) => {
+  switch (role) {
+    case 'Program Director':
+      return { bg: 'teal.100', color: 'teal.800' };
+    case 'Regional Director':
+      return { bg: 'teal.400', color: 'white' };
+    case 'Admin':
+    case 'Super Admin':
+      return { bg: 'teal.700', color: 'white' };
+    default:
+      return { bg: 'gray.200', color: 'gray.800' };
+  }
+};
+
+const ACCOUNT_CHANGE_DEFAULTS = {
+  first_name: '',
+  last_name: '',
+  email: '',
+  picture: '',
+  role: '',
+  program: '',
+  region: '',
+  bio: '',
+};
+
+const normalizeAccountSnapshot = (snap) => {
+  if (!snap || typeof snap !== 'object') {
+    return { ...ACCOUNT_CHANGE_DEFAULTS };
+  }
+  return {
+    ...ACCOUNT_CHANGE_DEFAULTS,
+    ...snap,
+  };
+};
+
+const isBlank = (v) => v == null || String(v).trim() === '';
+
+const valueOrFallback = (primary, fallback) =>
+  isBlank(primary) ? (fallback ?? '') : primary;
+
 const pickStr = (snap, camelKey, snakeKey) => {
   if (!snap || typeof snap !== 'object') return '';
   const v =
@@ -53,20 +92,22 @@ const regionName = (snap) => {
   return r?.name != null ? String(r.name).trim() : '';
 };
 
-/** Prefer embedded name; otherwise map from fetched `/program/:id` labels */
 const resolveProgramDisplay = (snap, idToName) => {
   const n = programName(snap);
   if (n) return n;
+  const direct = snap?.program;
+  if (typeof direct === 'string' && direct.trim()) return direct.trim();
   const id = snap?.programId ?? snap?.program_id ?? snap?.programs?.[0]?.id;
   if (id == null || id === '') return '';
   const mapped = idToName[String(id)];
   return mapped && mapped.trim() ? mapped : String(id);
 };
 
-/** Prefer embedded name; otherwise map from fetched `/region/:id` labels */
 const resolveRegionDisplay = (snap, idToName) => {
   const n = regionName(snap);
   if (n) return n;
+  const direct = snap?.region;
+  if (typeof direct === 'string' && direct.trim()) return direct.trim();
   const id = snap?.regionId ?? snap?.region_id ?? snap?.regions?.[0]?.id;
   if (id == null || id === '') return '';
   const mapped = idToName[String(id)];
@@ -76,10 +117,6 @@ const resolveRegionDisplay = (snap, idToName) => {
 const isDirectImageUrl = (s) =>
   typeof s === 'string' && /^https?:\/\//i.test(s.trim());
 
-/**
- * Resolves an S3 key or URL for <Image src>. Returns null when there is no usable URL
- * (same idea as Profile.jsx: on failure or empty `url`, fall back to default asset).
- */
 const fetchPictureDisplayUrl = async (backend, keyOrUrl) => {
   if (!keyOrUrl || !String(keyOrUrl).trim()) return null;
   const raw = String(keyOrUrl).trim();
@@ -97,7 +134,6 @@ const fetchPictureDisplayUrl = async (backend, keyOrUrl) => {
   }
 };
 
-/** Match Profile.jsx: use resolved URL only if non-empty; otherwise default asset. */
 const displaySrcForSlot = (hadKey, resolvedUrl) => {
   if (!hadKey) return '';
   if (resolvedUrl && String(resolvedUrl).trim() !== '') {
@@ -204,6 +240,8 @@ const DiffField = ({
 const RoleDiffField = ({ oldRole, newRole, changeType }) => {
   const { t } = useTranslation();
   const isCreation = changeType === 'Creation';
+  const newRoleBadge = getRoleBadgeProps(newRole);
+  const oldRoleBadge = getRoleBadgeProps(oldRole);
 
   if (isCreation) {
     if (!newRole) return null;
@@ -218,8 +256,8 @@ const RoleDiffField = ({ oldRole, newRole, changeType }) => {
           {t('common.role')}
         </Text>
         <Badge
-          bg="teal.500"
-          color="white"
+          bg={newRoleBadge.bg}
+          color={newRoleBadge.color}
           borderRadius="md"
           px={2}
           py={0.5}
@@ -245,8 +283,8 @@ const RoleDiffField = ({ oldRole, newRole, changeType }) => {
           {t('common.role')}
         </Text>
         <Badge
-          bg="teal.500"
-          color="white"
+          bg={newRoleBadge.bg}
+          color={newRoleBadge.color}
           borderRadius="md"
           px={2}
           py={0.5}
@@ -273,8 +311,8 @@ const RoleDiffField = ({ oldRole, newRole, changeType }) => {
       >
         {oldRole ? (
           <Badge
-            bg="teal.500"
-            color="white"
+            bg={oldRoleBadge.bg}
+            color={oldRoleBadge.color}
             borderRadius="md"
             px={2}
             py={0.5}
@@ -286,8 +324,8 @@ const RoleDiffField = ({ oldRole, newRole, changeType }) => {
         ) : null}
         {newRole ? (
           <Badge
-            bg="teal.500"
-            color="white"
+            bg={newRoleBadge.bg}
+            color={newRoleBadge.color}
             borderRadius="md"
             px={2}
             py={0.5}
@@ -482,6 +520,16 @@ export const AccountUpdateDrawer = ({
   const [saving, setSaving] = useState(false);
   const [programNamesById, setProgramNamesById] = useState({});
   const [regionNamesById, setRegionNamesById] = useState({});
+  const [fallbackValues, setFallbackValues] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    picture: '',
+    role: '',
+    program: '',
+    region: '',
+    bio: '',
+  });
 
   const accountChangeId = update?.id;
 
@@ -496,8 +544,128 @@ export const AccountUpdateDrawer = ({
       setLoading(true);
       setLoadError(null);
       try {
-        const { data } = await backend.get(`/accountChange/${accountChangeId}`);
-        if (!cancelled) setDetail(data);
+        const { data: change } = await backend.get(
+          `/accountChange/${accountChangeId}`
+        );
+
+        const targetUserId = change?.userId ?? update?.userId ?? '';
+
+        const oldRaw = normalizeAccountSnapshot(change?.oldValues);
+        const newRaw = normalizeAccountSnapshot(change?.newValues);
+
+        const fetchUser = targetUserId
+          ? backend
+              .get(`/gcf-users/${targetUserId}`)
+              .then((r) => r.data)
+              .catch(() => null)
+          : Promise.resolve(null);
+
+        const programIdToResolve = (snap) => {
+          if (!snap) return null;
+          if (programName(snap)) return null;
+          if (typeof snap.program === 'string' && snap.program.trim())
+            return null;
+          const id =
+            snap.programId ?? snap.program_id ?? snap.programs?.[0]?.id;
+          return id != null && id !== '' ? String(id) : null;
+        };
+
+        const regionIdToResolve = (snap) => {
+          if (!snap) return null;
+          if (regionName(snap)) return null;
+          if (typeof snap.region === 'string' && snap.region.trim())
+            return null;
+          const id = snap.regionId ?? snap.region_id ?? snap.regions?.[0]?.id;
+          return id != null && id !== '' ? String(id) : null;
+        };
+
+        const programIds = [
+          ...new Set(
+            [programIdToResolve(oldRaw), programIdToResolve(newRaw)].filter(
+              Boolean
+            )
+          ),
+        ];
+        const regionIds = [
+          ...new Set(
+            [regionIdToResolve(oldRaw), regionIdToResolve(newRaw)].filter(
+              Boolean
+            )
+          ),
+        ];
+
+        const [userData, progEntries, regEntries] = await Promise.all([
+          fetchUser,
+          Promise.all(
+            programIds.map(async (id) => {
+              try {
+                const { data } = await backend.get(`/program/${id}`);
+                return [id, data?.name != null ? String(data.name).trim() : ''];
+              } catch {
+                return [id, ''];
+              }
+            })
+          ),
+          Promise.all(
+            regionIds.map(async (id) => {
+              try {
+                const { data } = await backend.get(`/region/${id}`);
+                return [id, data?.name != null ? String(data.name).trim() : ''];
+              } catch {
+                return [id, ''];
+              }
+            })
+          ),
+        ]);
+
+        let role = String(userData?.role || '').trim();
+        let program = '';
+        let region = '';
+
+        if (role === 'Program Director' && targetUserId) {
+          try {
+            const { data: programData } = await backend.get(
+              `/program-directors/me/${targetUserId}/program`
+            );
+            program = String(programData?.name || '').trim();
+          } catch {
+            // best-effort
+          }
+        } else if (role === 'Regional Director' && targetUserId) {
+          try {
+            const { data: rdData } = await backend.get(
+              `/regional-directors/me/${targetUserId}`
+            );
+            if (rdData?.regionId) {
+              const { data: regionData } = await backend.get(
+                `/region/${rdData.regionId}`
+              );
+              region = String(regionData?.name || '').trim();
+            }
+          } catch {
+            // best-effort
+          }
+        }
+
+        const nextFallback = {
+          first_name: String(userData?.firstName || '').trim(),
+          last_name: String(userData?.lastName || '').trim(),
+          email: String(userData?.email || '').trim(),
+          picture: String(userData?.picture || '').trim(),
+          role,
+          program,
+          region,
+          bio:
+            role === 'Program Director'
+              ? String(userData?.bio || '').trim()
+              : '',
+        };
+
+        if (cancelled) return;
+        setDetail(change);
+        setFallbackValues(nextFallback);
+        setProgramNamesById(Object.fromEntries(progEntries));
+        setRegionNamesById(Object.fromEntries(regEntries));
       } catch (e) {
         console.error('AccountUpdateDrawer fetch failed:', e);
         if (!cancelled) {
@@ -515,82 +683,56 @@ export const AccountUpdateDrawer = ({
   }, [accountChangeId, backend]);
 
   const changeType = detail?.changeType ?? update?.changeType;
-  const oldSnap = detail?.oldValues ?? null;
-  const newSnap = detail?.newValues ?? null;
 
-  useEffect(() => {
-    if (!backend) {
-      setProgramNamesById({});
-      setRegionNamesById({});
-      return;
-    }
-
-    const programIdToResolve = (snap) => {
-      if (!snap) return null;
-      if (programName(snap)) return null;
-      const id = snap.programId ?? snap.program_id ?? snap.programs?.[0]?.id;
-      return id != null && id !== '' ? String(id) : null;
-    };
-
-    const regionIdToResolve = (snap) => {
-      if (!snap) return null;
-      if (regionName(snap)) return null;
-      const id = snap.regionId ?? snap.region_id ?? snap.regions?.[0]?.id;
-      return id != null && id !== '' ? String(id) : null;
-    };
-
-    const pIds = [
-      ...new Set(
-        [programIdToResolve(oldSnap), programIdToResolve(newSnap)].filter(
-          Boolean
-        )
+  const oldSnap = useMemo(() => {
+    const s = normalizeAccountSnapshot(detail?.oldValues);
+    const role = valueOrFallback(s.role, fallbackValues.role);
+    return {
+      ...s,
+      first_name: valueOrFallback(
+        s.first_name ?? s.firstName,
+        fallbackValues.first_name
       ),
-    ];
-    const rIds = [
-      ...new Set(
-        [regionIdToResolve(oldSnap), regionIdToResolve(newSnap)].filter(Boolean)
+      last_name: valueOrFallback(
+        s.last_name ?? s.lastName,
+        fallbackValues.last_name
       ),
-    ];
-
-    if (pIds.length === 0 && rIds.length === 0) {
-      setProgramNamesById({});
-      setRegionNamesById({});
-      return;
-    }
-
-    let cancelled = false;
-    (async () => {
-      const [progEntries, regEntries] = await Promise.all([
-        Promise.all(
-          pIds.map(async (id) => {
-            try {
-              const { data } = await backend.get(`/program/${id}`);
-              return [id, data?.name != null ? String(data.name).trim() : ''];
-            } catch {
-              return [id, ''];
-            }
-          })
-        ),
-        Promise.all(
-          rIds.map(async (id) => {
-            try {
-              const { data } = await backend.get(`/region/${id}`);
-              return [id, data?.name != null ? String(data.name).trim() : ''];
-            } catch {
-              return [id, ''];
-            }
-          })
-        ),
-      ]);
-      if (cancelled) return;
-      setProgramNamesById(Object.fromEntries(progEntries));
-      setRegionNamesById(Object.fromEntries(regEntries));
-    })();
-
-    return () => {
-      cancelled = true;
+      email: valueOrFallback(s.email, fallbackValues.email),
+      picture: valueOrFallback(s.picture, fallbackValues.picture),
+      role,
+      program: valueOrFallback(s.program, fallbackValues.program),
+      region: valueOrFallback(s.region, fallbackValues.region),
+      bio:
+        role === 'Program Director'
+          ? valueOrFallback(s.bio ?? s.biography, fallbackValues.bio)
+          : '',
     };
-  }, [backend, oldSnap, newSnap]);
+  }, [detail?.oldValues, fallbackValues]);
+
+  const newSnap = useMemo(() => {
+    const s = normalizeAccountSnapshot(detail?.newValues);
+    const role = valueOrFallback(s.role, fallbackValues.role);
+    return {
+      ...s,
+      first_name: valueOrFallback(
+        s.first_name ?? s.firstName,
+        fallbackValues.first_name
+      ),
+      last_name: valueOrFallback(
+        s.last_name ?? s.lastName,
+        fallbackValues.last_name
+      ),
+      email: valueOrFallback(s.email, fallbackValues.email),
+      picture: valueOrFallback(s.picture, fallbackValues.picture),
+      role,
+      program: valueOrFallback(s.program, fallbackValues.program),
+      region: valueOrFallback(s.region, fallbackValues.region),
+      bio:
+        role === 'Program Director'
+          ? valueOrFallback(s.bio ?? s.biography, fallbackValues.bio)
+          : '',
+    };
+  }, [detail?.newValues, fallbackValues]);
 
   const fields = useMemo(() => {
     const oldFirst = pickStr(oldSnap, 'firstName', 'first_name');
