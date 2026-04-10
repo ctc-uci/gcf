@@ -134,6 +134,7 @@ export const Map = () => {
         h="600px"
         mx="auto"
         position="relative"
+        overflow="hidden"
         onMouseMove={handleMouseMove}
         onClick={() => {
           setPrograms([]);
@@ -203,7 +204,7 @@ export const Map = () => {
         )}
       </Box>
       {regions.length > 0 && (
-        <>
+        <Box onClick={(e) => e.stopPropagation()}>
           <Flex
             mt="15px"
             ml="25px"
@@ -215,21 +216,28 @@ export const Map = () => {
             <HStack>
               <Icon
                 as={FaRegArrowAltCircleLeft}
-                onClick={() => {
-                  setPrograms([]);
-                  setRegions([]);
-                  setSelectedProgram(null);
-                  setDisplay('block');
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (selectedProgram) {
+                    setSelectedProgram(null);
+                  } else {
+                    setPrograms([]);
+                    setRegions([]);
+                    setSelectedProgram(null);
+                    setDisplay('block');
+                  }
                 }}
                 cursor="pointer"
                 boxSize={6}
               />
               <Heading fontSize="2xl">
-                {`Featured Programs in ${regionName}`}
+                {selectedProgram
+                  ? selectedProgram.title
+                  : `Featured Programs in ${regionName}`}
               </Heading>
             </HStack>
 
-            {programs.length > 0 && (
+            {programs.length > 0 && !selectedProgram && (
               <HStack gap={3}>
                 <Flex
                   as="button"
@@ -265,7 +273,23 @@ export const Map = () => {
             )}
           </Flex>
 
-          {programs.length > 0 ? (
+          {selectedProgram ? (
+            <Box
+              w="100%"
+              maxH="600px"
+              overflowY="auto"
+              css={{
+                '&::-webkit-scrollbar': { width: '6px' },
+                '&::-webkit-scrollbar-track': { background: 'transparent' },
+                '&::-webkit-scrollbar-thumb': {
+                  background: '#CBD5E0',
+                  borderRadius: '3px',
+                },
+              }}
+            >
+              <ProgramInfoView program={selectedProgram} />
+            </Box>
+          ) : programs.length > 0 ? (
             <Box w="100%">
               <HStack
                 ref={scrollRef}
@@ -313,33 +337,6 @@ export const Map = () => {
               No Programs in this Region!
             </Text>
           )}
-        </>
-      )}
-
-      {selectedProgram && (
-        <Box
-          position="fixed"
-          top={0}
-          left={0}
-          w="100%"
-          h="100%"
-          bg="white"
-          zIndex={1000}
-          overflowY="auto"
-        >
-          <Box
-            px="28px"
-            pt="20px"
-          >
-            <Icon
-              as={FaRegArrowAltCircleLeft}
-              onClick={() => setSelectedProgram(null)}
-              cursor="pointer"
-              boxSize={7}
-              color="#2C7A7B"
-            />
-          </Box>
-          <ProgramInfoView program={selectedProgram} />
         </Box>
       )}
     </>
