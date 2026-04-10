@@ -423,7 +423,7 @@
   },
   "mediaPage": {
     "title": "Mes médias",
-    "new": "Nouveau",
+    "uploadMedia": "Ajouter un fichier",
     "uploads": "Téléchargements",
     "noProgram": "Aucun programme trouvé",
     "noMediaForProgram": "Aucun média associé à {{name}}"

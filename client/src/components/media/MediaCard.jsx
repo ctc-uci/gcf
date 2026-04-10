@@ -20,26 +20,38 @@ export const MediaCard = ({
 
   return (
     <Box
-      borderRadius="md"
+      borderRadius="xl"
       overflow="hidden"
       bg="gray.100"
     >
       <Box
         h={height}
+        mt={4}
+        ml={3}
+        mr={3}
+        borderRadius="xl"
         position="relative"
+        bg="white"
+        overflow="hidden"
       >
         {isLoading && (
           <Center h="100%">
             <Image
               src={gcf_globe}
               w="50px"
+              borderRadius="xl"
             />
           </Center>
         )}
         {isVideo ? (
           <video
             src={imageUrl}
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              borderRadius: 'xl',
+            }}
             onLoadedData={() => setIsLoading(false)}
           />
         ) : (
@@ -48,6 +60,7 @@ export const MediaCard = ({
             h="100%"
             w="100%"
             objectFit="contain"
+            borderRadius="xl"
             onLoad={() => setIsLoading(false)}
           />
         )}
@@ -55,7 +68,8 @@ export const MediaCard = ({
       <HStack>
         <Text
           color="gray.700"
-          fontSize="sm"
+          fontSize="md"
+          fontWeight="semibold"
           mt={2}
           px={2}
           isTruncated
@@ -65,7 +79,7 @@ export const MediaCard = ({
         <Spacer />
         <Text
           color="gray.700"
-          fontSize="sm"
+          fontSize="md"
           mt={2}
           px={2}
           isTruncated
@@ -78,6 +92,7 @@ export const MediaCard = ({
       <Text
         color="gray.500"
         fontSize="xs"
+        fontWeight="medium"
         mt={1}
         px={2}
         isTruncated

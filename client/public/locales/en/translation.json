@@ -423,7 +423,7 @@
   },
   "mediaPage": {
     "title": "My Media",
-    "new": "New",
+    "uploadMedia": "Upload Media",
     "uploads": "Uploads",
     "noProgram": "No program found",
     "noMediaForProgram": "No media associated with {{name}}"

@@ -423,7 +423,7 @@
   },
   "mediaPage": {
     "title": "Mis medios",
-    "new": "Nuevo",
+    "uploadMedia": "Subir Archivos",
     "uploads": "Subidas",
     "noProgram": "No se encontró ningún programa",
     "noMediaForProgram": "No hay medios asociados con {{name}}"

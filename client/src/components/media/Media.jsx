@@ -165,7 +165,7 @@ export const Media = () => {
               _hover={{ backgroundColor: 'teal.600' }}
               onClick={onOpen}
             >
-              {t('mediaPage.new')}
+              {t('mediaPage.uploadMedia')}
             </Button>
 
             <MediaGrid

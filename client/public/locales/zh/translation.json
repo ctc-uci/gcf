@@ -423,7 +423,7 @@
   },
   "mediaPage": {
     "title": "我的媒体",
-    "new": "新的",
+    "uploadMedia": "上传文件",
     "uploads": "上传",
     "noProgram": "没有找到程序",
     "noMediaForProgram": "没有与 {{name}} 相关的媒体"

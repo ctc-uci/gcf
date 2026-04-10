@@ -7,7 +7,6 @@ import { MediaCard } from './MediaCard';
 export const MediaGrid = ({ mediaItems, programName }) => {
   const { t } = useTranslation();
   let content;
-  console.log(mediaItems[0].update_date);
   if (mediaItems.length === 0 && !programName) {
     content = <Text>{t('mediaPage.noProgram')}</Text>;
   } else if (mediaItems.length === 0) {
