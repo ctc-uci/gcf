@@ -321,6 +321,28 @@ export const CreateUpdateDrawer = ({
             setNotes(pu.note || '');
           }
         }
+
+        try {
+          const { data: mediaData = [] } = await backend.get(
+            `/mediaChange/update/${editProgramUpdateId}`
+          );
+          if (!cancelled && mediaData.length > 0) {
+            const urlResponses = await Promise.all(
+              mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
+            );
+            setUploadedMedia(
+              mediaData.map((m, i) => ({
+                id: m.id,
+                s3_key: m.s3Key,
+                file_name: m.fileName,
+                file_type: m.fileType,
+                previewUrl: urlResponses[i].data.url,
+              }))
+            );
+          }
+        } catch (e) {
+          console.error('Error loading existing media for edit:', e);
+        }
       } catch (e) {
         console.error('Error loading update for edit:', e);
         toast({
@@ -522,6 +544,7 @@ export const CreateUpdateDrawer = ({
         }
 
         for (const media of uploadedMedia) {
+          if (media.id) continue;
           await backend.post('/mediaChange', {
             update_id: editProgramUpdateId,
             s3_key: media.s3_key,

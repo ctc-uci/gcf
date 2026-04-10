@@ -78,6 +78,7 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
           file_type: file.type,
           title: titles[i],
           description: description,
+          previewUrl: URL.createObjectURL(file),
         });
       }
 
