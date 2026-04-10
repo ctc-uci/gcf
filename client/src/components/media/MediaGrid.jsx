@@ -16,7 +16,7 @@ export const MediaGrid = ({ mediaItems, programName, onUpdate }) => {
   } else {
     content = (
       <SimpleGrid
-        columns={{ base: 1, md: 2, lg: 3 }}
+        columns={{ base: 1, md: 2, lg: 3, xl: 4 }}
         spacing={6}
         w="full"
       >

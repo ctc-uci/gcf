@@ -155,67 +155,68 @@ export const Media = () => {
   }
 
   return (
-    <Box minH="100vh">
-      <Container
-        maxW="container.xl"
-        py={8}
+    <Box
+      minH="100vh"
+      mt={-10}
+      ml={-10}
+    >
+      <Box
+        borderRadius="lg"
+        p={8}
+        ml={4}
+        mt={2}
       >
-        <Box
-          borderRadius="lg"
-          p={8}
+        <VStack
+          align="start"
+          spacing={6}
+          w="full"
         >
-          <VStack
-            align="start"
-            spacing={6}
+          <HStack
             w="full"
+            justify="space-between"
+            align="center"
+            spacing={4}
           >
-            <HStack
-              w="full"
-              justify="space-between"
-              align="center"
-              spacing={4}
+            <Heading
+              size="xl"
+              color="gray.800"
             >
-              <Heading
-                size="xl"
-                color="gray.800"
-              >
-                {t('mediaPage.title')}
-              </Heading>
-              <InputGroup
-                w="60"
-                maxW="400px"
-                size="sm"
-              >
-                <InputLeftElement pointerEvents="none">
-                  <SearchIcon color="gray.400" />
-                </InputLeftElement>
-                <Input
-                  placeholder="Search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  borderRadius="md"
-                />
-              </InputGroup>
-              <Button
-                size="sm"
-                leftIcon={<AddIcon />}
-                backgroundColor="teal.500"
-                color="white"
-                _hover={{ backgroundColor: 'teal.600' }}
-                onClick={onOpen}
-              >
-                {t('mediaPage.uploadMedia')}
-              </Button>
-            </HStack>
+              {t('mediaPage.title')}
+            </Heading>
+            <InputGroup
+              w="60"
+              maxW="400px"
+              size="sm"
+            >
+              <InputLeftElement pointerEvents="none">
+                <SearchIcon color="gray.400" />
+              </InputLeftElement>
+              <Input
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                borderRadius="md"
+              />
+            </InputGroup>
+            <Button
+              size="sm"
+              leftIcon={<AddIcon />}
+              backgroundColor="teal.500"
+              color="white"
+              _hover={{ backgroundColor: 'teal.600' }}
+              onClick={onOpen}
+            >
+              {t('mediaPage.uploadMedia')}
+            </Button>
+          </HStack>
 
-            <MediaGrid
-              mediaItems={filteredMedia}
-              programName={programName}
-              onUpdate={fetchData}
-            />
-          </VStack>
-        </Box>
-      </Container>
+          <MediaGrid
+            mediaItems={filteredMedia}
+            programName={programName}
+            onUpdate={fetchData}
+          />
+        </VStack>
+      </Box>
       <MediaUploadModal
         isOpen={isOpen}
         onClose={onClose}

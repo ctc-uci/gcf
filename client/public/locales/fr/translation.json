@@ -443,7 +443,11 @@
     "descriptionPlaceholder": "Ajouter une description"
   },
   "mediaCard": {
-    "loadingAlt": "Chargement..."
+    "loadingAlt": "Chargement...",
+    "noDescription": "Aucune description",
+    "deleteModalHeader": "Êtes-vous sûr de vouloir supprimer?",
+    "deleteModalBody": "Cette action ne peut pas être annulée.",
+    "deleteMedia": "Supprimer les médias"
   },
   "mediaPreview": {
     "previewAlt": "Aperçu",

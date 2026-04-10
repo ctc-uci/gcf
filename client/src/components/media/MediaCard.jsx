@@ -11,6 +11,13 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Spacer,
   Text,
   useDisclosure,
@@ -18,10 +25,9 @@ import {
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
-import { MdDelete, MdEdit } from 'react-icons/md';
+import { BsFillPencilFill, BsFillTrashFill } from 'react-icons/bs';
 import { SlOptionsVertical } from 'react-icons/sl';
 
-import { MediaDeleteModal } from './MediaDeleteModal';
 import { MediaEditModal } from './MediaEditModal';
 import gcf_globe from '/gcf_globe.png';
 
@@ -120,9 +126,9 @@ export const MediaCard = ({
           >
             <MenuItem onClick={onEditModalOpen}>
               <HStack w="full">
-                <Text fontWeight="semibold">Edit details</Text>
+                <Text fontWeight="semibold">{t('mediaEditModal.heading')}</Text>
                 <Spacer />
-                <MdEdit />
+                <BsFillPencilFill />
               </HStack>
             </MenuItem>
             <MenuItem onClick={onDeleteOpen}>
@@ -131,10 +137,10 @@ export const MediaCard = ({
                   color="red.500"
                   fontWeight="semibold"
                 >
-                  Delete
+                  {t('common.delete')}
                 </Text>
                 <Spacer />
-                <MdDelete />
+                <BsFillTrashFill />
               </HStack>
             </MenuItem>
           </MenuList>
@@ -208,7 +214,7 @@ export const MediaCard = ({
         px={2}
         isTruncated
       >
-        {description || 'No description available'}
+        {description || t('mediaCard.noDescription')}
       </Text>
       <MediaEditModal
         isOpen={isEditModalOpen}
@@ -217,11 +223,33 @@ export const MediaCard = ({
         initialTitle={file_name}
         initialDescription={description}
       />
-      <MediaDeleteModal
+      <Modal
         isOpen={isDeleteOpen}
         onClose={onDeleteClose}
-        onConfirm={confirmDelete}
-      />
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>{t('mediaCard.deleteModalHeader')}</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>{t('mediaCard.deleteModalBody')}</ModalBody>
+          <ModalFooter>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={onDeleteClose}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              colorScheme="red"
+              onClick={confirmDelete}
+            >
+              {t('mediaCard.deleteMedia')}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };

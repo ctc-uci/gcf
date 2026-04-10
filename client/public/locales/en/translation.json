@@ -443,7 +443,11 @@
     "descriptionPlaceholder": "Add description"
   },
   "mediaCard": {
-    "loadingAlt": "Loading..."
+    "loadingAlt": "Loading...",
+    "noDescription": "No description",
+    "deleteModalHeader": "Are you sure you want to delete?",
+    "deleteModalBody": "This action cannot be undone.",
+    "deleteMedia": "Delete Media"
   },
   "mediaPreview": {
     "previewAlt": "Preview",
