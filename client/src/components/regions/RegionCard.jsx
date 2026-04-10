@@ -9,16 +9,15 @@ import {
   CardBody,
   CardHeader,
   HStack,
-  Icon,
   Text,
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 import { GrEdit } from 'react-icons/gr';
-import { MdAccountCircle } from 'react-icons/md';
 
 import { isoCodeToFlagIconCode } from '../../utils/isoCodeToFlagIconCode';
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 
 export const RegionCard = ({ region, onEdit, countries }) => {
   const { t } = useTranslation();
@@ -67,11 +66,14 @@ export const RegionCard = ({ region, onEdit, countries }) => {
           {t('regions.cardRegionalDirector')}
         </Text>
         <HStack ml="2">
-          <Icon
-            as={MdAccountCircle}
-            mb="1"
-            boxSize={5}
-            color="gray.600"
+          <DirectorAvatar
+            picture={regionalDirector?.picture}
+            name={
+              regionalDirector
+                ? `${regionalDirector.firstName} ${regionalDirector.lastName}`
+                : ''
+            }
+            boxSize="24px"
           />
           <Text mb="2">
             {regionalDirector
