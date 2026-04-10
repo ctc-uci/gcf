@@ -31,6 +31,17 @@ import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
 import { ReviewMediaUpdate } from './forms/ReviewMediaUpdate';
 
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: '2-digit',
+  });
+}
+
 export function downloadMediaUpdatesAsCsv(data) {
   const headers = ['Update Note', 'Status', 'Author', 'Program', 'Date'];
   const rows = (data || []).map((row) => [
@@ -38,7 +49,7 @@ export function downloadMediaUpdatesAsCsv(data) {
     escapeCsvValue(row.status),
     escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
     escapeCsvValue(row.programName),
-    escapeCsvValue(row.updateDate),
+    escapeCsvValue(formatDate(row.updateDate)),
   ]);
   downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
 }
@@ -47,6 +58,7 @@ const authorDisplayName = (row) =>
   [row.firstName, row.lastName].filter(Boolean).join(' ').trim() ||
   row.fullName?.trim() ||
   '';
+
 const StatusBadge = ({ status }) => {
   const { t } = useTranslation();
   const isResolved =
@@ -97,7 +109,7 @@ export const MediaUpdatesTable = ({
         (update.programName || '').toLowerCase().includes(q) ||
         author.includes(q) ||
         (update.status || '').toLowerCase().includes(q) ||
-        (update.updateDate || '').toLowerCase().includes(q)
+        (formatDate(update.updateDate) || '').toLowerCase().includes(q)
       );
     });
   }, [searchQuery, filteredData]);
@@ -247,7 +259,7 @@ export const MediaUpdatesTable = ({
                       fontSize="sm"
                       color="gray.600"
                     >
-                      {row.updateDate || ''}
+                      {formatDate(row.updateDate)}
                     </Text>
                   </Td>
                 </Tr>

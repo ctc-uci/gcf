@@ -31,6 +31,17 @@ import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './forms/ProgramUpdateForm';
 
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: '2-digit',
+  });
+}
+
 export function downloadProgramUpdatesAsCsv(data, t) {
   const headers = [
     t('updates.csvFlag'),
@@ -48,7 +59,7 @@ export function downloadProgramUpdatesAsCsv(data, t) {
     escapeCsvValue(row.status),
     escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
     escapeCsvValue(row.name),
-    escapeCsvValue(row.updateDate),
+    escapeCsvValue(formatDate(row.updateDate)),
   ]);
   downloadCsv(headers, rows, `program-updates-${getFilenameTimestamp()}.csv`);
 }
@@ -128,7 +139,7 @@ export const ProgramUpdatesTable = ({
         (update.name || '').toLowerCase().includes(q) ||
         (update.fullName || '').toLowerCase().includes(q) ||
         (update.status || '').toLowerCase().includes(q) ||
-        (update.updateDate || '').toLowerCase().includes(q)
+        (formatDate(update.updateDate) || '').toLowerCase().includes(q)
     );
   }, [searchQuery, filteredData]);
 
@@ -358,7 +369,7 @@ export const ProgramUpdatesTable = ({
                         fontSize="sm"
                         color="gray.600"
                       >
-                        {row.updateDate || ''}
+                        {formatDate(row.updateDate)}
                       </Text>
                     </Td>
                   </Tr>
