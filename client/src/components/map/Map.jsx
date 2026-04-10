@@ -22,7 +22,6 @@ export const Map = () => {
   const [regionName, setRegionName] = useState('');
   const [hoverRegions, setHoverRegions] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [display, setDisplay] = useState('block');
   const [programs, setPrograms] = useState([]);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const { backend } = useBackendContext();
@@ -81,7 +80,6 @@ export const Map = () => {
         console.error('No regions found for the selected country.');
         return;
       }
-      setDisplay('none');
       setRegions(regionsRes.data);
 
       try {
@@ -115,7 +113,7 @@ export const Map = () => {
         w="100%"
         p="20px"
         mb="30px"
-        display={display}
+        display="block"
       >
         <Heading
           color="white"
@@ -140,7 +138,6 @@ export const Map = () => {
           setPrograms([]);
           setRegions([]);
           setSelectedProgram(null);
-          setDisplay('block');
         }}
       >
         <ComposableMap style={{ height: '700px', width: '100%' }}>
