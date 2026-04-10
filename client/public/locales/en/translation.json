@@ -440,7 +440,7 @@
   "mediaEditModal": {
     "heading": "Edit Details",
     "titlePlaceholder": "Title",
-    "descriptionPlaceholder": "Description"
+    "descriptionPlaceholder": "Add description"
   },
   "mediaCard": {
     "loadingAlt": "Loading..."

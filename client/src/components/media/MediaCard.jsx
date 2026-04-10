@@ -55,6 +55,15 @@ export const MediaCard = ({
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      await backend.delete(`/mediaChange/${id}`);
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      console.error('Error deleting media:', error);
+    }
+  };
+
   return (
     <Box
       borderRadius="xl"
@@ -84,7 +93,7 @@ export const MediaCard = ({
             position="absolute"
             top="4px"
             right="0px"
-            zIndex="docked"
+            zIndex={2}
           />
           <MenuList
             minW="150px"
@@ -92,7 +101,7 @@ export const MediaCard = ({
             m={0}
             boxShadow="xl"
             border="none"
-            zIndex="popover"
+            zIndex={3}
             position="absolute"
             top="0"
             right="0"
@@ -104,7 +113,7 @@ export const MediaCard = ({
                 <MdEdit />
               </HStack>
             </MenuItem>
-            <MenuItem>
+            <MenuItem onClick={handleDelete}>
               <HStack w="full">
                 <Text
                   color="red.500"
@@ -118,6 +127,13 @@ export const MediaCard = ({
             </MenuItem>
           </MenuList>
         </Menu>
+        <Box
+          position="absolute"
+          inset={0}
+          bg="blackAlpha.300"
+          zIndex={1}
+          pointerEvents="none"
+        />
         {isLoading && (
           <Center h="100%">
             <Image
@@ -166,7 +182,6 @@ export const MediaCard = ({
           fontSize="md"
           mt={2}
           px={2}
-          isTruncated
         >
           {update_date
             ? new Date(update_date.updateDate).toLocaleDateString()

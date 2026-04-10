@@ -440,7 +440,7 @@
   "mediaEditModal": {
     "heading": "编辑详情",
     "titlePlaceholder": "标题",
-    "descriptionPlaceholder": "描述"
+    "descriptionPlaceholder": "添加描述"
   },
   "mediaCard": {
     "loadingAlt": "加载中..."
