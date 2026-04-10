@@ -216,26 +216,20 @@ export const Map = () => {
               <Icon
                 as={FaRegArrowAltCircleLeft}
                 onClick={() => {
-                  if (selectedProgram) {
-                    setSelectedProgram(null);
-                  } else {
-                    setPrograms([]);
-                    setRegions([]);
-                    setSelectedProgram(null);
-                    setDisplay('block');
-                  }
+                  setPrograms([]);
+                  setRegions([]);
+                  setSelectedProgram(null);
+                  setDisplay('block');
                 }}
                 cursor="pointer"
                 boxSize={6}
               />
               <Heading fontSize="2xl">
-                {selectedProgram
-                  ? selectedProgram.title
-                  : `Featured Programs in ${regionName}`}
+                {`Featured Programs in ${regionName}`}
               </Heading>
             </HStack>
 
-            {programs.length > 0 && !selectedProgram && (
+            {programs.length > 0 && (
               <HStack gap={3}>
                 <Flex
                   as="button"
@@ -271,9 +265,7 @@ export const Map = () => {
             )}
           </Flex>
 
-          {selectedProgram ? (
-            <ProgramInfoView program={selectedProgram} />
-          ) : programs.length > 0 ? (
+          {programs.length > 0 ? (
             <Box w="100%">
               <HStack
                 ref={scrollRef}
@@ -322,6 +314,33 @@ export const Map = () => {
             </Text>
           )}
         </>
+      )}
+
+      {selectedProgram && (
+        <Box
+          position="fixed"
+          top={0}
+          left={0}
+          w="100%"
+          h="100%"
+          bg="white"
+          zIndex={1000}
+          overflowY="auto"
+        >
+          <Box
+            px="28px"
+            pt="20px"
+          >
+            <Icon
+              as={FaRegArrowAltCircleLeft}
+              onClick={() => setSelectedProgram(null)}
+              cursor="pointer"
+              boxSize={7}
+              color="#2C7A7B"
+            />
+          </Box>
+          <ProgramInfoView program={selectedProgram} />
+        </Box>
       )}
     </>
   );

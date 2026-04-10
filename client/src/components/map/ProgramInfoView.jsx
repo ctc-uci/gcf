@@ -101,9 +101,7 @@ const ProgramInfoView = ({ program }) => {
               `/images/url/${encodeURIComponent(m.s3Key || m.s3_key)}`
             );
             urls[m.id] = urlRes.data.url;
-          } catch {
-            // skip
-          }
+          } catch {}
         }
         setMediaUrls(urls);
 
@@ -115,9 +113,7 @@ const ProgramInfoView = ({ program }) => {
                 `/images/url/${encodeURIComponent(d.picture)}`
               );
               picUrls[d.userId] = urlRes.data.url;
-            } catch {
-              // skip
-            }
+            } catch {}
           }
         }
         setDirectorPicUrls(picUrls);
@@ -172,20 +168,8 @@ const ProgramInfoView = ({ program }) => {
       gap="32px"
       bg="white"
       mx="28px"
-      mb="20px"
-      maxH="600px"
-      overflowY="auto"
       borderRadius="12px"
-      css={{
-        '&::-webkit-scrollbar': { width: '6px' },
-        '&::-webkit-scrollbar-track': { background: 'transparent' },
-        '&::-webkit-scrollbar-thumb': {
-          background: '#CBD5E0',
-          borderRadius: '3px',
-        },
-      }}
     >
-      {/* Header */}
       <VStack
         align="flex-start"
         spacing="12px"
@@ -196,18 +180,18 @@ const ProgramInfoView = ({ program }) => {
           color="white"
           borderRadius="6px"
           px="12px"
-          h="32px"
+          h="25px"
           display="flex"
           alignItems="center"
-          fontSize="16px"
+          fontSize="12px"
           fontWeight="500"
           textTransform="none"
         >
-          Global Chief Foundation
+          Partner Organization
         </Badge>
         <Heading
           fontWeight="700"
-          fontSize="48px"
+          fontSize="36px"
           lineHeight="48px"
           letterSpacing="-0.85px"
           color="#101828"
@@ -222,7 +206,7 @@ const ProgramInfoView = ({ program }) => {
             />
           )}
           <Text
-            fontSize="18px"
+            fontSize="12px"
             lineHeight="28px"
             letterSpacing="-0.44px"
             color="#4A5565"
@@ -232,7 +216,6 @@ const ProgramInfoView = ({ program }) => {
         </HStack>
       </VStack>
 
-      {/* Program Overview */}
       <VStack
         align="flex-start"
         spacing="24px"
@@ -240,7 +223,7 @@ const ProgramInfoView = ({ program }) => {
       >
         <Heading
           fontWeight="700"
-          fontSize="36px"
+          fontSize="28px"
           lineHeight="44px"
           color="#000000"
         >
@@ -252,7 +235,6 @@ const ProgramInfoView = ({ program }) => {
           w="100%"
           justify="space-between"
         >
-          {/* Students Card */}
           <Box
             w="100%"
             h="218px"
@@ -291,7 +273,6 @@ const ProgramInfoView = ({ program }) => {
             </Text>
           </Box>
 
-          {/* Instruments Card */}
           <Box
             w="100%"
             h="218px"
@@ -349,7 +330,6 @@ const ProgramInfoView = ({ program }) => {
             )}
           </Box>
 
-          {/* Timeline Card */}
           <Box
             w="100%"
             h="218px"
@@ -415,7 +395,6 @@ const ProgramInfoView = ({ program }) => {
         </Flex>
       </VStack>
 
-      {/* Meet the Director */}
       {directors.length > 0 && (
         <Box
           w="100%"
@@ -426,18 +405,19 @@ const ProgramInfoView = ({ program }) => {
         >
           <Heading
             fontWeight="600"
-            fontSize="36px"
+            fontSize="28px"
             lineHeight="44px"
             color="#000000"
             mb="24px"
           >
-            Meet the Director
+            {directors.length > 1 ? 'Meet the Directors' : 'Meet the Director'}
           </Heading>
           {directors.map((director) => (
             <Flex
               key={director.userId}
               gap="32px"
               align="flex-start"
+              pb="20px"
             >
               <Image
                 src={directorPicUrls[director.userId]}
@@ -497,7 +477,6 @@ const ProgramInfoView = ({ program }) => {
         </Box>
       )}
 
-      {/* Gallery */}
       {media.length > 0 && (
         <VStack
           align="flex-start"
@@ -507,7 +486,7 @@ const ProgramInfoView = ({ program }) => {
         >
           <Heading
             fontWeight="600"
-            fontSize="36px"
+            fontSize="28px"
             lineHeight="44px"
             color="#000000"
           >
@@ -542,10 +521,9 @@ const ProgramInfoView = ({ program }) => {
         </VStack>
       )}
 
-      {/* Donate Section */}
       <Flex
         w="100%"
-        h="336px"
+        h="300px"
         bgGradient="linear(100.45deg, #FFFFFF -34.33%, #20ABA8 50.52%, #FFFFFF 123.24%)"
         boxShadow="0px 5px 3px rgba(0, 0, 0, 0.45)"
         borderRadius="12px"
@@ -553,10 +531,13 @@ const ProgramInfoView = ({ program }) => {
         align="center"
         py="8px"
       >
-        <VStack spacing="16px">
+        <VStack
+          h="300px"
+          justify="center"
+        >
           <Heading
             fontWeight="600"
-            fontSize="58px"
+            fontSize="40px"
             lineHeight="70px"
             color="white"
             textAlign="center"
@@ -565,14 +546,14 @@ const ProgramInfoView = ({ program }) => {
           </Heading>
           <Button
             as="a"
-            href="https://www.guitarsoverguns.org/donate"
+            href="https://www.youtube.com/watch?v=BnmzxN0if-I"
             target="_blank"
             bg="white"
             color="#2C7A7B"
             borderRadius="12px"
             px="48px"
-            h="96px"
-            fontSize="36px"
+            h="70px"
+            fontSize="20px"
             fontWeight="600"
             lineHeight="56px"
             boxShadow="0px 4px 4px rgba(0, 0, 0, 0.25)"
