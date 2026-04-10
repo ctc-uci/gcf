@@ -23,7 +23,6 @@ import { programDirectorFilterColumns } from '../config/updatesColumnConfig';
 import {
   UpdatesFilterPopover,
   UpdatesSearchInput,
-  UpdatesViewModeToggle,
 } from '../config/UpdatesSharedControls';
 import {
   UPDATES_TAB_BASE_PROPS,
@@ -140,7 +139,6 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           columns={programDirectorFilterColumns}
           onFilterChange={setActiveFilters}
         />
-        <UpdatesViewModeToggle />
         <Button
           ml="auto"
           flexShrink={0}

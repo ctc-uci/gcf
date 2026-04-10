@@ -81,36 +81,3 @@ export function UpdatesFilterPopover({ columns, onFilterChange }) {
     </Popover>
   );
 }
-/** List / grid view toggle (visual only; wire actions when needed). */
-export function UpdatesViewModeToggle() {
-  const { t } = useTranslation();
-  return (
-    <>
-      {/* TODO: Add card view functionality here 
-        logic for the colors of both icons should look like:
-    
-        color={isCardView ? 'gray.600' : 'teal.500'}
-        onClick={() => setIsCardView(false)} */}
-
-      <IconButton
-        aria-label={t('common.listViewAria')}
-        icon={<HamburgerIcon />}
-        size="sm"
-        variant="ghost"
-        color={'gray.600'}
-      />
-      <Divider
-        orientation="vertical"
-        h="20px"
-        borderWidth="1px"
-      />
-      <IconButton
-        aria-label={t('common.gridViewAria')}
-        icon={<HiOutlineSquares2X2 />}
-        color={'gray.600'}
-        size="sm"
-        variant="ghost"
-      />
-    </>
-  );
-}
