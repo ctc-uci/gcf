@@ -17,6 +17,10 @@ import {
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { isoCodeToFlagIconCode } from '@/utils/isoCodeToFlagIconCode';
+
+import 'flag-icons/css/flag-icons.min.css';
+
 import { GetCity, GetCountries, GetState } from 'react-country-state-city';
 import { FaMusic, FaRegCalendar, FaUser } from 'react-icons/fa';
 
@@ -30,7 +34,7 @@ const CardView = ({
   started,
 }) => {
   const [countryName, setCountryName] = useState('');
-  const [flag, setFlag] = useState('');
+  const [flagCode, setFlagCode] = useState('');
   const [cityName, setCityName] = useState('');
   const [instruments, setInstruments] = useState(0);
   const [students, setStudents] = useState(0);
@@ -94,7 +98,7 @@ const CardView = ({
 
         if (foundCountry) {
           setCountryName(foundCountry.name);
-          setFlag(foundCountry.emoji);
+          setFlagCode(isoCodeToFlagIconCode(fetchCountry.data.isoCode));
           const states = await GetState(parseInt(foundCountry.id));
           const foundState = states.find(
             (s) => parseInt(s.id) === parseInt(state)
@@ -161,7 +165,13 @@ const CardView = ({
           {title}
         </Heading>
         <Text fontSize="14px">
-          {flag} {cityName ? `${cityName}, ${countryName}` : countryName}
+          {flagCode && (
+            <span
+              className={`fi fi-${flagCode}`}
+              aria-hidden="true"
+            />
+          )}{' '}
+          {cityName ? `${cityName}, ${countryName}` : countryName}
         </Text>
       </CardHeader>
 

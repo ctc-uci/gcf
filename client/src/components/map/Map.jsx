@@ -11,19 +11,24 @@ import {
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 
 import CardView from './CardView.jsx';
+import ProgramInfoView from './ProgramInfoView.jsx';
 
 const geoUrl = '/map-data.json';
 
 export const Map = () => {
   const [allCountries, setAllCountries] = useState([]);
+  const [regionMap, setRegionMap] = useState({});
   const [regions, setRegions] = useState([]);
   const [regionName, setRegionName] = useState('');
   const [hoverRegions, setHoverRegions] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [display, setDisplay] = useState('block');
   const [programs, setPrograms] = useState([]);
+  const [selectedProgram, setSelectedProgram] = useState(null);
   const { backend } = useBackendContext();
 
   const scrollRef = useRef(null);
+  const mapContainerRef = useRef(null);
 
   const scroll = (scrollOffset) => {
     if (scrollRef.current) {
@@ -32,16 +37,30 @@ export const Map = () => {
   };
 
   useEffect(() => {
-    const fetchAllCountries = async () => {
+    const fetchInitialData = async () => {
       try {
-        const res = await backend.get('/country');
-        setAllCountries(res.data);
+        const [countriesRes, regionsRes] = await Promise.all([
+          backend.get('/country'),
+          backend.get('/region'),
+        ]);
+        setAllCountries(countriesRes.data);
+        const map = {};
+        for (const r of regionsRes.data) {
+          map[r.id] = r.name;
+        }
+        setRegionMap(map);
       } catch (error) {
-        console.error('Error fetching countries:', error);
+        console.error('Error fetching initial data:', error);
       }
     };
-    fetchAllCountries();
+    fetchInitialData();
   }, [backend]);
+
+  const handleMouseMove = (e) => {
+    if (!mapContainerRef.current) return;
+    const rect = mapContainerRef.current.getBoundingClientRect();
+    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  };
 
   const getRegionFromIso = (iso) => {
     const countries = allCountries.find((c) => c.isoCode === iso);
@@ -107,15 +126,19 @@ export const Map = () => {
         <Text color="white"> Explore our Programs and Impact </Text>
       </Box>
       <Box
+        ref={mapContainerRef}
         borderRadius="md"
         boxShadow="md"
         borderWidth="1px"
         w="96%"
         h="600px"
         mx="auto"
+        position="relative"
+        onMouseMove={handleMouseMove}
         onClick={() => {
           setPrograms([]);
           setRegions([]);
+          setSelectedProgram(null);
           setDisplay('block');
         }}
       >
@@ -146,9 +169,9 @@ export const Map = () => {
                         outline: 'none',
                       },
                       hover: {
-                        fill: '#868686',
+                        fill: regionId ? '#868686' : '#B3B3B3',
                         outline: 'none',
-                        cursor: 'pointer',
+                        cursor: regionId ? 'pointer' : 'default',
                       },
                       pressed: { fill: '#636363', outline: 'none' },
                     }}
@@ -158,6 +181,26 @@ export const Map = () => {
             }
           </Geographies>
         </ComposableMap>
+
+        {hoverRegions && regionMap[hoverRegions] && (
+          <Box
+            position="absolute"
+            left={`${mousePos.x + 12}px`}
+            top={`${mousePos.y - 28}px`}
+            bg="gray.800"
+            color="white"
+            px={3}
+            py={1}
+            borderRadius="md"
+            fontSize="sm"
+            fontWeight="semibold"
+            pointerEvents="none"
+            zIndex={10}
+            whiteSpace="nowrap"
+          >
+            {regionMap[hoverRegions]}
+          </Box>
+        )}
       </Box>
       {regions.length > 0 && (
         <>
@@ -173,19 +216,26 @@ export const Map = () => {
               <Icon
                 as={FaRegArrowAltCircleLeft}
                 onClick={() => {
-                  setPrograms([]);
-                  setRegions([]);
-                  setDisplay('block');
+                  if (selectedProgram) {
+                    setSelectedProgram(null);
+                  } else {
+                    setPrograms([]);
+                    setRegions([]);
+                    setSelectedProgram(null);
+                    setDisplay('block');
+                  }
                 }}
                 cursor="pointer"
                 boxSize={6}
               />
               <Heading fontSize="2xl">
-                Featured Programs in {regionName}
+                {selectedProgram
+                  ? selectedProgram.title
+                  : `Featured Programs in ${regionName}`}
               </Heading>
             </HStack>
 
-            {programs.length > 0 && (
+            {programs.length > 0 && !selectedProgram && (
               <HStack gap={3}>
                 <Flex
                   as="button"
@@ -221,7 +271,9 @@ export const Map = () => {
             )}
           </Flex>
 
-          {programs.length > 0 ? (
+          {selectedProgram ? (
+            <ProgramInfoView program={selectedProgram} />
+          ) : programs.length > 0 ? (
             <Box w="100%">
               <HStack
                 ref={scrollRef}
@@ -240,6 +292,10 @@ export const Map = () => {
                   <Box
                     key={program.id}
                     minW="300px"
+                    cursor="pointer"
+                    onClick={() => setSelectedProgram(program)}
+                    transition="transform 0.2s"
+                    _hover={{ transform: 'scale(1.03)' }}
                   >
                     <CardView
                       programId={program.id}
