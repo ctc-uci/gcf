@@ -12,12 +12,15 @@ import {
   MenuList,
   Spacer,
   Text,
+  useDisclosure,
 } from '@chakra-ui/react';
 
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { SlOptionsVertical } from 'react-icons/sl';
 
+import { MediaEditModal } from './MediaEditModal';
 import gcf_globe from '/gcf_globe.png';
 
 export const MediaCard = ({
@@ -27,10 +30,30 @@ export const MediaCard = ({
   description,
   update_date,
   height = '200px',
+  id,
+  onUpdate,
 }) => {
   const { t } = useTranslation();
+  const { backend } = useBackendContext();
   const [isLoading, setIsLoading] = useState(true);
+  const {
+    isOpen: isEditModalOpen,
+    onOpen: onEditModalOpen,
+    onClose: onEditModalClose,
+  } = useDisclosure();
   const isVideo = file_type?.startsWith('video');
+
+  const handleEditSave = async (newTitle, newDescription) => {
+    try {
+      await backend.put(`/mediaChange/${id}`, {
+        file_name: newTitle,
+        description: newDescription,
+      });
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      console.error('Error updating media:', error);
+    }
+  };
 
   return (
     <Box
@@ -74,7 +97,7 @@ export const MediaCard = ({
             top="0"
             right="0"
           >
-            <MenuItem>
+            <MenuItem onClick={onEditModalOpen}>
               <HStack w="full">
                 <Text fontWeight="semibold">Edit details</Text>
                 <Spacer />
@@ -160,6 +183,13 @@ export const MediaCard = ({
       >
         {description || 'No description available'}
       </Text>
+      <MediaEditModal
+        isOpen={isEditModalOpen}
+        onClose={onEditModalClose}
+        onSave={handleEditSave}
+        initialTitle={file_name}
+        initialDescription={description}
+      />
     </Box>
   );
 };

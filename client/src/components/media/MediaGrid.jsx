@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { MediaCard } from './MediaCard';
 
-export const MediaGrid = ({ mediaItems, programName }) => {
+export const MediaGrid = ({ mediaItems, programName, onUpdate }) => {
   const { t } = useTranslation();
   let content;
   if (mediaItems.length === 0 && !programName) {
@@ -24,6 +24,7 @@ export const MediaGrid = ({ mediaItems, programName }) => {
           <MediaCard
             key={item.id}
             {...item}
+            onUpdate={onUpdate}
           />
         ))}
       </SimpleGrid>

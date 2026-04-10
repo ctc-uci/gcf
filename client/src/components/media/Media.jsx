@@ -95,9 +95,15 @@ export const Media = () => {
           const urlResponse = await backend.get(
             `/images/url/${encodeURIComponent(media.s3Key)}`
           );
-          const programUpdateDateResponse = await backend.get(
-            `/program-updates/${media.updateId}/date`
-          );
+          let update_date = null;
+          try {
+            const programUpdateDateResponse = await backend.get(
+              `/program-updates/${media.updateId}/date`
+            );
+            update_date = programUpdateDateResponse.data;
+          } catch (error) {
+            console.error('Error fetching update date:', error);
+          }
           return {
             id: media.id,
             update_id: media.updateId,
@@ -107,7 +113,7 @@ export const Media = () => {
             is_thumbnail: media.isThumbnail,
             imageUrl: urlResponse.data.url,
             description: media.description,
-            update_date: programUpdateDateResponse.data,
+            update_date: update_date,
           };
         })
       );
@@ -129,10 +135,8 @@ export const Media = () => {
   const filteredMedia = media.filter((item) => {
     const query = searchQuery.toLowerCase();
     return (
-      item.file_name?.toLowerCase().includes(query) ||
-      false ||
-      item.description?.toLowerCase().includes(query) ||
-      false
+      (item.file_name || '').toLowerCase().includes(query) ||
+      (item.description || '').toLowerCase().includes(query)
     );
   });
 
@@ -207,6 +211,7 @@ export const Media = () => {
             <MediaGrid
               mediaItems={filteredMedia}
               programName={programName}
+              onUpdate={fetchData}
             />
           </VStack>
         </Box>

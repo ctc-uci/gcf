@@ -437,6 +437,11 @@
     "or": "OU",
     "browse": "Parcourir les fichiers"
   },
+  "mediaEditModal": {
+    "heading": "Modifier les détails",
+    "titlePlaceholder": "Titre",
+    "descriptionPlaceholder": "Description"
+  },
   "mediaCard": {
     "loadingAlt": "Chargement..."
   },

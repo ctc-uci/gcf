@@ -437,6 +437,11 @@
     "or": "或者",
     "browse": "浏览文件"
   },
+  "mediaEditModal": {
+    "heading": "编辑详情",
+    "titlePlaceholder": "标题",
+    "descriptionPlaceholder": "描述"
+  },
   "mediaCard": {
     "loadingAlt": "加载中..."
   },
