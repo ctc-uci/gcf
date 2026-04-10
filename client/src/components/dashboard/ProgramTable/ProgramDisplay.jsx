@@ -267,7 +267,8 @@ export function ProgramDisplay({
               aria-label="table view"
               icon={<HamburgerIcon />}
               size="sm"
-              variant={isCardView ? 'ghost' : 'solid'}
+              variant="ghost"
+              color={isCardView ? 'gray.600' : 'teal.500'}
               onClick={() => setIsCardView(false)}
             />
             <Divider
@@ -278,8 +279,9 @@ export function ProgramDisplay({
             <IconButton
               aria-label="card view"
               icon={<HiOutlineSquares2X2 />}
+              color={!isCardView ? 'gray.600' : 'teal.500'}
               size="sm"
-              variant={isCardView ? 'solid' : 'ghost'}
+              variant="ghost"
               onClick={() => setIsCardView(true)}
             />
 

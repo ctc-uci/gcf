@@ -1,5 +1,6 @@
+import { HamburgerIcon } from '@chakra-ui/icons';
 import {
-  HStack,
+  Divider,
   Icon,
   IconButton,
   Input,
@@ -11,11 +12,10 @@ import {
 } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
-import { BsGrid3X3Gap } from 'react-icons/bs';
-import { FiList, FiSearch } from 'react-icons/fi';
+import { FiSearch } from 'react-icons/fi';
 import {
-  HiArrowsUpDown,
   HiOutlineAdjustmentsHorizontal,
+  HiOutlineSquares2X2,
 } from 'react-icons/hi2';
 
 import { FilterComponent } from '../../common/FilterComponent';
@@ -85,28 +85,32 @@ export function UpdatesFilterPopover({ columns, onFilterChange }) {
 export function UpdatesViewModeToggle() {
   const { t } = useTranslation();
   return (
-    <HStack
-      spacing={0}
-      border="1px solid"
-      borderColor="gray.200"
-      borderRadius="md"
-    >
+    <>
+      {/* TODO: Add card view functionality here 
+        logic for the colors of both icons should look like:
+    
+        color={isCardView ? 'gray.600' : 'teal.500'}
+        onClick={() => setIsCardView(false)} */}
+
       <IconButton
         aria-label={t('common.listViewAria')}
-        icon={<FiList />}
-        variant="ghost"
+        icon={<HamburgerIcon />}
         size="sm"
-        color="gray.500"
-        borderRadius="md"
+        variant="ghost"
+        color={'gray.600'}
+      />
+      <Divider
+        orientation="vertical"
+        h="20px"
+        borderWidth="1px"
       />
       <IconButton
         aria-label={t('common.gridViewAria')}
-        icon={<BsGrid3X3Gap />}
-        variant="ghost"
+        icon={<HiOutlineSquares2X2 />}
+        color={'gray.600'}
         size="sm"
-        color="gray.500"
-        borderRadius="md"
+        variant="ghost"
       />
-    </HStack>
+    </>
   );
 }
