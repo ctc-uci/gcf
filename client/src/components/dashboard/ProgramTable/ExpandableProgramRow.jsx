@@ -6,6 +6,7 @@ import {
   HStack,
   Link,
   Td,
+  Text,
   Tr,
   useDisclosure,
   VStack,
@@ -17,6 +18,7 @@ import ISO6391 from 'iso-639-1';
 import { useTranslation } from 'react-i18next';
 
 import { isoCodeToFlagIconCode } from '../../../utils/isoCodeToFlagIconCode';
+import { DirectorAvatar } from '../ProgramForm/DirectorAvatar';
 import { formatLaunchDate } from './programTableMappers';
 import { getInstrumentTagStyle } from './programTableTagConstants';
 import { StatusTag } from './StatusTag';
@@ -129,18 +131,22 @@ export function ExpandableProgramRow({ p, onEdit }) {
                     >
                       {Array.isArray(p.regionalDirectors)
                         ? p.regionalDirectors.map((d, idx) => (
-                            <Box
+                            <HStack
                               key={
                                 d.userId ??
                                 `${d.firstName}-${d.lastName}-${idx}`
                               }
-                              bg="gray.200"
-                              px={3}
-                              py={1}
-                              borderRadius="full"
+                              spacing={2}
                             >
-                              {d.firstName} {d.lastName}
-                            </Box>
+                              <DirectorAvatar
+                                picture={d.picture}
+                                name={`${d.firstName} ${d.lastName}`}
+                                boxSize="28px"
+                              />
+                              <Text fontSize="sm">
+                                {d.firstName} {d.lastName}
+                              </Text>
+                            </HStack>
                           ))
                         : null}
                     </VStack>
@@ -164,18 +170,22 @@ export function ExpandableProgramRow({ p, onEdit }) {
                     >
                       {Array.isArray(p.programDirectors)
                         ? p.programDirectors.map((d, idx) => (
-                            <Box
+                            <HStack
                               key={
                                 d.userId ??
                                 `${d.firstName}-${d.lastName}-${idx}`
                               }
-                              bg="gray.200"
-                              px={3}
-                              py={1}
-                              borderRadius="full"
+                              spacing={2}
                             >
-                              {d.firstName} {d.lastName}
-                            </Box>
+                              <DirectorAvatar
+                                picture={d.picture}
+                                name={`${d.firstName} ${d.lastName}`}
+                                boxSize="28px"
+                              />
+                              <Text fontSize="sm">
+                                {d.firstName} {d.lastName}
+                              </Text>
+                            </HStack>
                           ))
                         : null}
                     </VStack>
