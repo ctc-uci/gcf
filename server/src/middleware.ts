@@ -79,7 +79,9 @@ export const getAuthenticatedUser = async (
   req: Request,
   res: Response
 ): Promise<AuthenticatedUser> => {
-  const cachedUser = res.locals.authenticatedUser as AuthenticatedUser | undefined;
+  const cachedUser = res.locals.authenticatedUser as
+  | AuthenticatedUser
+  | undefined;
   if (cachedUser) {
     return cachedUser;
   }
