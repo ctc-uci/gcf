@@ -1,3 +1,4 @@
+import { verifyToken } from '@/middleware';
 import { keysToCamel } from '@/common/utils';
 import express from 'express';
 
@@ -5,6 +6,10 @@ import { db } from '../db/db-pgp';
 
 const programRouter = express.Router();
 programRouter.use(express.json());
+
+programRouter.post('*', verifyToken);
+programRouter.put('*', verifyToken);
+programRouter.delete('*', verifyToken);
 
 function normalizeLanguages(languages, primaryLanguage) {
   const candidateCodes = Array.isArray(languages)

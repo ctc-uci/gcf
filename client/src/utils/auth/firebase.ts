@@ -1,8 +1,5 @@
-import axios from 'axios';
 import { initializeApp } from 'firebase/app';
 import { getAuth, User } from 'firebase/auth';
-
-import { cookieKeys, setCookie } from './cookie';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_APIKEY,
@@ -41,29 +38,14 @@ export const getCurrentUser = (): Promise<User | null> => {
   });
 };
 
-const REFRESH_URL = `https://securetoken.googleapis.com/v1/token?key=${
-  import.meta.env.VITE_FIREBASE_APIKEY
-}`;
-
 export const refreshToken = async () => {
   const currentUser = await getCurrentUser();
 
-  if (currentUser) {
-    const refreshToken = currentUser.refreshToken;
-    const response = await axios.post(REFRESH_URL, {
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-    });
-
-    const id_token = response.data.id_token;
-
-    // Sets the appropriate cookies after refreshing access token
-    setCookie({
-      key: cookieKeys.ACCESS_TOKEN,
-      value: id_token,
-    });
-
-    return { accessToken: id_token };
+  if (!currentUser) {
+    return null;
   }
-  return null;
+
+  const accessToken = await currentUser.getIdToken(true);
+
+  return { accessToken };
 };
