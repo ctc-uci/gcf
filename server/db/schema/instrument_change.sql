@@ -1,21 +1,12 @@
+CREATE TABLE public.instrument_change (
+  id bigserial NOT NULL,
+  instrument_id bigint NOT NULL,
+  update_id bigint NOT NULL,
+  amount_changed smallint NOT NULL,
+  special_request boolean NOT NULL DEFAULT false,
+  event_type character varying(50) NOT NULL,
+  description text NULL
+);
 
-
-
-CREATE TABLE instrument_change (
-  id BIGSERIAL PRIMARY KEY,
-
-  instrument_id BIGINT NOT NULL,
-  update_id BIGINT NOT NULL,
-  amount_changed SMALLINT NOT NULL,
-  event_type VARCHAR(50) NOT NULL CHECK (event_type IN ('broken', 'missing', 'new_donation', 'needs_repair', 'other')),
-  description TEXT,
-
-    CONSTRAINT fk_instrument
-      FOREIGN KEY (instrument_id)
-        REFERENCES instrument(id)
-          ON DELETE CASCADE,
-    CONSTRAINT fk_update
-      FOREIGN KEY (update_id)
-        REFERENCES update(id)
-          ON DELETE CASCADE
-  );
+ALTER TABLE public.instrument_change
+ADD CONSTRAINT instrument_change_pkey PRIMARY KEY (id)
