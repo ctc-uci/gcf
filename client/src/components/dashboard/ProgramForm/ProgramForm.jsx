@@ -12,6 +12,15 @@ import {
   DrawerHeader,
   DrawerOverlay,
   HStack,
+  Icon,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Select,
   Spinner,
   useDisclosure,
   VStack,
@@ -164,6 +173,34 @@ export const ProgramForm = ({
         onClose,
       });
     } catch (err) {
+      console.error('Error saving program:', err);
+    }
+  }
+
+  async function handleDelete() {
+    if (!program?.id) return;
+
+    try {
+      await backend.delete(`/program/${program.id}`);
+
+      deleteDisclosure.onClose();
+      onSave?.();
+      onClose();
+    } catch (err) {
+      console.error('Error deleting program:', err);
+    }
+  }
+
+  async function handleDelete() {
+    if (!program?.id) return;
+
+    try {
+      await backend.delete(`/program/${program.id}`);
+
+      deleteDisclosure.onClose();
+      onSave?.();
+      onClose();
+    } catch (err) {
       console.error('Error deleting program:', err);
     }
   }
@@ -189,7 +226,8 @@ export const ProgramForm = ({
             right="auto"
           />
         </HStack>
-        <DrawerBody>
+
+        <DrawerBody pb={8}>
           <VStack
             spacing={4}
             align="stretch"
