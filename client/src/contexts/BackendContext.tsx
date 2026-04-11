@@ -15,7 +15,6 @@ export const BackendContext = createContext<BackendContextProps | null>(null);
 export const BackendProvider = ({ children }: { children: ReactNode }) => {
   const backend = axios.create({
     baseURL,
-    withCredentials: true,
   });
 
   authInterceptor(backend);

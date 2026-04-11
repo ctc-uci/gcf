@@ -41,7 +41,11 @@
       "**/patch-package",
       "**/patch-package/**",
       "**/postinstall-postinstall",
-      "**/postinstall-postinstall/**"
+      "**/postinstall-postinstall/**",
+      "**/vite",
+      "**/vite/**",
+      "**/@vitejs/plugin-react",
+      "**/@vitejs/plugin-react/**"
     ]
   },
   "packageManager": "yarn@1.22.22",
