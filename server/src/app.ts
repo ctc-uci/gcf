@@ -18,8 +18,8 @@ import { updatesPermissionsRouter } from '@/routes/updatesPermissions';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-
 dotenv.config();
+import { verifyToken } from './middleware';
 
 const CLIENT_HOSTNAME =
   process.env.NODE_ENV === 'development'
@@ -35,11 +35,7 @@ app.use(
 );
 
 app.use(express.json());
-// if (process.env.NODE_ENV === 'production') {
-//   app.use(verifyToken);
-// }
 
-// app.use("/users", usersRouter);
 app.use('/admin', verifyToken, adminRouter);
 app.use('/rdProgramTable', verifyToken, rdProgramTableRouter);
 app.use('/program-directors', verifyToken, directorRouter);
