@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { DeleteIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -9,13 +10,21 @@ import {
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
+  DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   FormControl,
   FormLabel,
   Heading,
   HStack,
+  Icon,
   Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Select,
   Spinner,
   Text,
@@ -89,6 +98,8 @@ export const ProgramForm = ({
   const btnRef = useRef(null);
   const { backend } = useBackendContext();
   const { currentUser } = useAuthContext();
+
+  const deleteDisclosure = useDisclosure();
 
   const [initialProgramDirectorIds, setInitialProgramDirectorIds] = useState(
     []
@@ -635,6 +646,20 @@ export const ProgramForm = ({
     }
   }
 
+  async function handleDelete() {
+    if (!program?.id) return;
+
+    try {
+      await backend.delete(`/program/${program.id}`);
+
+      deleteDisclosure.onClose();
+      onSave?.();
+      onClose();
+    } catch (err) {
+      console.error('Error deleting program:', err);
+    }
+  }
+
   return (
     <Drawer
       isOpen={isOpen}
@@ -647,28 +672,17 @@ export const ProgramForm = ({
       <DrawerContent
         position="relative"
         overflow="hidden"
+        display="flex"
+        flexDirection="column"
       >
         <HStack marginBottom="1em">
           <DrawerCloseButton
             left="4"
             right="auto"
           />
-          <Button
-            colorScheme="teal"
-            marginLeft="auto"
-            marginRight="2em"
-            width="5em"
-            height="2em"
-            top="2"
-            fontSize="small"
-            onClick={handleSave}
-          >
-            {' '}
-            {t('common.save')}{' '}
-          </Button>
         </HStack>
 
-        <DrawerBody>
+        <DrawerBody pb={8}>
           <VStack
             spacing={4}
             align="stretch"
@@ -712,7 +726,6 @@ export const ProgramForm = ({
                 {t('programForm.mediaTab')}
               </Button>
             </HStack>
-
             {activeTab === 'overview' && (
               <>
                 <Box>
@@ -767,7 +780,6 @@ export const ProgramForm = ({
                       >
                         {t('programForm.showPartnerOnMap')}
                       </Checkbox>
-                      {/* TODO: Implement persistence and map behavior for showPartnerOrgOnMap (API + map layer). */}
                     </FormControl>
 
                     <FormControl isRequired>
@@ -886,6 +898,86 @@ export const ProgramForm = ({
             )}
           </VStack>
         </DrawerBody>
+
+        <DrawerFooter
+          borderTopWidth="1px"
+          borderColor="gray.200"
+          justifyContent="space-between"
+          w="full"
+          p={4}
+        >
+          <Box>
+            {program && (
+              <Button
+                variant="ghost"
+                color="red.500"
+                leftIcon={<Icon as={DeleteIcon} />}
+                onClick={deleteDisclosure.onOpen}
+                _hover={{ bg: 'red.50' }}
+              >
+                Delete
+              </Button>
+            )}
+          </Box>
+
+          <HStack spacing={3}>
+            <Button
+              variant="outline"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              colorScheme="teal"
+              onClick={handleSave}
+            >
+              {t('common.save')}
+            </Button>
+          </HStack>
+        </DrawerFooter>
+
+        <Modal
+          isOpen={deleteDisclosure.isOpen}
+          onClose={deleteDisclosure.onClose}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent
+            borderRadius="md"
+            p={2}
+          >
+            <ModalHeader
+              fontSize="lg"
+              fontWeight="semibold"
+            >
+              Are you sure you want to delete this program?
+            </ModalHeader>
+
+            <ModalBody color="gray.600">
+              This action cannot be undone.
+            </ModalBody>
+
+            <ModalFooter
+              justifyContent="center"
+              gap={3}
+            >
+              <Button
+                onClick={deleteDisclosure.onClose}
+                bg="gray.100"
+                _hover={{ bg: 'gray.200' }}
+              >
+                Keep Editing
+              </Button>
+
+              <Button
+                colorScheme="red"
+                onClick={handleDelete}
+              >
+                Delete Program
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
 
         {isLoadingProgramData && (
           <Center

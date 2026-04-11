@@ -34,7 +34,6 @@ import { CreateUpdateDrawer } from '../forms/createForm/CreateUpdateDrawer';
 import { ProgramDirectorUpdatesTable } from './ProgramDirectorUpdatesTable';
 
 export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
-  console.log('First row of data:', data?.[0]);
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState([]);
