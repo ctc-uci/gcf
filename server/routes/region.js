@@ -1,6 +1,7 @@
 import { keysToCamel } from '@/common/utils';
-import express from 'express';
 import { verifyToken } from '@/middleware';
+import express from 'express';
+
 import { db } from '../db/db-pgp';
 
 const regionRouter = express.Router();
