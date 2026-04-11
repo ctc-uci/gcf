@@ -1,43 +1,64 @@
-import axios, { AxiosInstance } from 'axios';
+import { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
-import { refreshToken } from './firebase';
+import { auth, refreshToken } from './firebase';
+
+const attachAccessToken = async (config: InternalAxiosRequestConfig) => {
+  if (config.baseURL === '') {
+    return config;
+  }
+
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    return config;
+  }
+
+  const accessToken = await currentUser.getIdToken();
+  config.headers.set('Authorization', `Bearer ${accessToken}`);
+
+  return config;
+};
 
 /**
- * Adds an interceptor to the provided Axios instance that handles authentication token refresh.
+ * Adds interceptors that attach Firebase bearer tokens to requests and retry once after refresh.
  *
- * This interceptor checks for a 400 status code with a specific error message indicating that
- * the access token has expired. If the token has expired, it attempts to refresh the token
- * using the `refreshToken` function and retries the original request with the new token.
- *
- * @see verifyToken {@link server/src/middleware.ts} "@verifyToken invalid access token" may refer to a genuinely invalid access token, or that no token was provided with the request
+ * @see verifyToken {@link server/src/middleware.ts}
  */
 export const authInterceptor = (axiosInstance: AxiosInstance) => {
+  axiosInstance.interceptors.request.use(attachAccessToken);
+
   axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
-      // Handle network errors or request setup errors
-      if (!error.response) {
+      if (!error.response || !error.config) {
         return Promise.reject(error);
       }
 
-      const { status, data, config } = error.response;
+      const { status } = error.response;
+      const originalConfig = error.config as InternalAxiosRequestConfig & {
+        _retry?: boolean;
+      };
 
-      if (status === 400 && data === '@verifyToken invalid access token') {
+      if (status === 401 && !originalConfig._retry) {
         try {
-          await refreshToken();
+          originalConfig._retry = true;
 
-          // Create a new instance of the request with updated token
-          return axios({
-            ...config,
-            url: `${config.baseURL}${config.url}`,
-            withCredentials: true,
-          });
+          const refreshedToken = await refreshToken();
+          if (!refreshedToken) {
+            return Promise.reject(error);
+          }
+
+          originalConfig.headers.set(
+            'Authorization',
+            `Bearer ${refreshedToken.accessToken}`
+          );
+
+          return axiosInstance(originalConfig);
         } catch (refreshError) {
           return Promise.reject(refreshError);
         }
       }
 
-      // For other status codes, or if the token refresh logic was not triggered
       return Promise.reject(error);
     }
   );
