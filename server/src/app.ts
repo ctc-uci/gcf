@@ -16,7 +16,6 @@ import { rdProgramTableRouter } from '@/routes/rdProgramTable';
 import { regionRouter } from '@/routes/region';
 import { regionalDirectorRouter } from '@/routes/regionalDirector';
 import { updatesPermissionsRouter } from '@/routes/updatesPermissions';
-import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
@@ -32,34 +31,30 @@ export const app = express();
 app.use(
   cors({
     origin: CLIENT_HOSTNAME,
-    credentials: true,
+    allowedHeaders: ['Authorization', 'Content-Type'],
   })
 );
 
-app.use(cookieParser());
 app.use(express.json());
-if (process.env.NODE_ENV === 'production') {
-  app.use(verifyToken);
-}
 
 // app.use("/users", usersRouter);
-app.use('/admin', adminRouter);
-app.use('/rdProgramTable', rdProgramTableRouter);
-app.use('/program-directors', directorRouter);
-app.use('/program-updates', programUpdateRouter);
-app.use('/instruments', instrumentRouter);
-app.use('/instrument-changes', instrumentChangeRouter);
-app.use('/gcf-users', gcfUserRouter);
-app.use('/update-permissions', updatesPermissionsRouter);
-app.use('/regional-directors', regionalDirectorRouter);
+app.use('/admin', verifyToken, adminRouter);
+app.use('/rdProgramTable', verifyToken, rdProgramTableRouter);
+app.use('/program-directors', verifyToken, directorRouter);
+app.use('/program-updates', verifyToken, programUpdateRouter);
+app.use('/instruments', verifyToken, instrumentRouter);
+app.use('/instrument-changes', verifyToken, instrumentChangeRouter);
+app.use('/gcf-users', verifyToken, gcfUserRouter);
+app.use('/update-permissions', verifyToken, updatesPermissionsRouter);
+app.use('/regional-directors', verifyToken, regionalDirectorRouter);
 app.use('/country', countryRouter);
 app.use('/region', regionRouter);
-app.use('/enrollmentChange', enrollmentChangeRouter);
-app.use('/mediaChange', mediaChangeRouter);
+app.use('/enrollmentChange', verifyToken, enrollmentChangeRouter);
+app.use('/mediaChange', verifyToken, mediaChangeRouter);
 app.use('/program', programRouter);
-app.use('/partners', partnerOrganizationRouter);
-app.use('/images', imagesRouter);
-app.use('/playlistCache', playlistCacheRouter);
+app.use('/partners', verifyToken, partnerOrganizationRouter);
+app.use('/images', verifyToken, imagesRouter);
+app.use('/playlistCache', verifyToken, playlistCacheRouter);
 
 // Listening is moved to server.ts to enable importing app in tests
 export default app;
