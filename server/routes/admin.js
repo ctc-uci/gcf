@@ -1,4 +1,3 @@
-import { verifyRole } from '@/middleware';
 import { keysToCamel } from '@/common/utils';
 import { verifyRole } from '@/middleware';
 import express from 'express';
