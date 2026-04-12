@@ -212,6 +212,9 @@ directorRouter.patch('/:userId', async (req, res) => {
       [userId, bio]
     );
 
+    if (!director?.length)
+      return res.status(404).json({ error: 'Program director not found' });
+
     res.status(200).json(keysToCamel(director[0]));
   } catch (err) {
     res.status(400).send(err.message);
