@@ -10,19 +10,35 @@ type AuthenticatedUser = {
   role: string;
 };
 
+const getBearerToken = (req: Request): string | null => {
+  const authorizationHeader = req.headers.authorization;
+
+  if (!authorizationHeader) {
+    return null;
+  }
+
+  const [scheme, token] = authorizationHeader.split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    return null;
+  }
+
+  return token;
+};
+
 export const getVerifiedToken = async (
   req: Request,
   res: Response
 ): Promise<DecodedIdToken> => {
   const decodedToken: DecodedIdToken | undefined = res.locals.decodedToken;
-  const accessToken = req.cookies.accessToken;
+  const accessToken = getBearerToken(req);
 
   if (!decodedToken && !accessToken) {
     throw new Error('Missing access token');
   }
 
   const verifiedToken =
-    decodedToken ?? (await admin.auth().verifyIdToken(accessToken));
+    decodedToken ?? (await admin.auth().verifyIdToken(accessToken!));
 
   res.locals.decodedToken = verifiedToken;
 
@@ -30,7 +46,7 @@ export const getVerifiedToken = async (
 };
 
 /**
- * Verifies the access token attached to the request's cookies.
+ * Verifies the access token attached to the request's Authorization header.
  */
 export const verifyToken = async (
   req: Request,
@@ -38,24 +54,24 @@ export const verifyToken = async (
   next: NextFunction
 ) => {
   try {
-    const { cookies } = req;
+    const accessToken = getBearerToken(req);
 
-    if (!cookies.accessToken) {
-      return res.status(400).send('@verifyToken invalid access token');
+    if (!accessToken) {
+      return res.status(401).send('@verifyToken invalid access token');
     }
 
-    const decodedToken = await admin.auth().verifyIdToken(cookies.accessToken);
+    const decodedToken = await admin.auth().verifyIdToken(accessToken);
 
     // this should not happen!
     if (!decodedToken) {
-      return res.status(400).send('@verifyToken no decodedToken returned');
+      return res.status(401).send('@verifyToken no decodedToken returned');
     }
 
     res.locals.decodedToken = decodedToken;
 
     next();
   } catch (_err) {
-    return res.status(400).send('@verifyToken error validating token');
+    return res.status(401).send('@verifyToken error validating token');
   }
 };
 
@@ -63,7 +79,9 @@ export const getAuthenticatedUser = async (
   req: Request,
   res: Response
 ): Promise<AuthenticatedUser> => {
-  const cachedUser = res.locals.authenticatedUser as AuthenticatedUser | undefined;
+  const cachedUser = res.locals.authenticatedUser as
+  | AuthenticatedUser
+  | undefined;
   if (cachedUser) {
     return cachedUser;
   }
@@ -87,7 +105,7 @@ export const getAuthenticatedUser = async (
 
 /**
  * A higher order function returning a middleware that protects routes based on the user's role.
- * The role "admin" can access all routes
+ * Users with an Admin or Super Admin role can access all routes.
  *
  * @param requiredRole a list of roles that can use this route
  */
