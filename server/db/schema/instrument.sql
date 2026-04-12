@@ -1,5 +1,4 @@
-
-CREATE TABLE instrument (
-  id BIGSERIAL PRIMARY KEY,
-  name VARCHAR(70) NOT NULL
+CREATE TABLE public.instrument (
+  id bigserial PRIMARY KEY,
+  name character varying(70) NOT NULL
 );

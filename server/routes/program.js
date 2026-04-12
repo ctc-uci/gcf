@@ -1,5 +1,5 @@
-import { verifyToken } from '@/middleware';
 import { keysToCamel } from '@/common/utils';
+import { verifyToken } from '@/middleware';
 import express from 'express';
 
 import { db } from '../db/db-pgp';
