@@ -86,7 +86,7 @@ const CardView = ({
         const res = await backend.get(
           `/program/${programId}/partner-organization`
         );
-        setPartnerOrg(res.data.name);
+        setPartnerOrg(res.data);
       } catch (error) {
         console.error('Error fetching partner organization: ', error);
       }
@@ -147,7 +147,7 @@ const CardView = ({
             pl="8px"
             pr="8px"
           >
-            {partnerOrg || 'Partner Organization'}
+            {partnerOrg}
           </Badge>
           <Spacer />
           <Badge

@@ -102,7 +102,9 @@ const ProgramInfoView = ({ program }) => {
               `/images/url/${encodeURIComponent(m.s3Key || m.s3_key)}`
             );
             urls[m.id] = urlRes.data.url;
-          } catch {}
+          } catch (error) {
+            console.error('Error fetching media: ', error);
+          }
         }
         setMediaUrls(urls);
 
@@ -114,22 +116,30 @@ const ProgramInfoView = ({ program }) => {
                 `/images/url/${encodeURIComponent(d.picture)}`
               );
               picUrls[d.userId] = urlRes.data.url;
-            } catch {}
+            } catch (error) {
+              console.error('Error fetching media: ', error);
+            }
           }
         }
         setDirectorPicUrls(picUrls);
-
-        try {
-          const partnerRes = await backend.get(
-            `/program/${programId}/partner-organization`
-          );
-          setPartnerOrg(partnerRes.data.name);
-        } catch {}
       } catch (error) {
         console.error('Error fetching program details:', error);
       }
     };
+
+    const fetchPartnerOrg = async () => {
+      try {
+        const partnerRes = await backend.get(
+          `/program/${programId}/partner-organization`
+        );
+        setPartnerOrg(partnerRes.data);
+      } catch (error) {
+        console.error('Error fetching partner organization: ', error);
+      }
+    };
+
     fetchData();
+    fetchPartnerOrg();
   }, [programId, backend]);
 
   useEffect(() => {
@@ -195,7 +205,7 @@ const ProgramInfoView = ({ program }) => {
           fontWeight="500"
           textTransform="none"
         >
-          {partnerOrg || 'Partner Organization'}
+          {partnerOrg}
         </Badge>
         <Heading
           fontWeight="700"
@@ -598,7 +608,7 @@ const ProgramInfoView = ({ program }) => {
           </Heading>
           <Button
             as="a"
-            href="https://www.youtube.com/watch?v=BnmzxN0if-I"
+            href="https://givebutter.com/Donate-GCF"
             target="_blank"
             bg="white"
             color="#2C7A7B"
