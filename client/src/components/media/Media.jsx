@@ -192,7 +192,7 @@ export const Media = () => {
                 <SearchIcon color="gray.400" />
               </InputLeftElement>
               <Input
-                placeholder="Search"
+                placeholder={t('mediaPage.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 borderRadius="md"

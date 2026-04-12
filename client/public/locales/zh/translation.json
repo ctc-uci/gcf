@@ -423,6 +423,7 @@
   },
   "mediaPage": {
     "title": "我的媒体",
+    "searchPlaceholder": "搜索",
     "uploadMedia": "上传文件",
     "uploads": "上传",
     "noProgram": "没有找到程序",

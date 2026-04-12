@@ -423,6 +423,7 @@
   },
   "mediaPage": {
     "title": "Mis medios",
+    "searchPlaceholder": "Buscar",
     "uploadMedia": "Subir Archivos",
     "uploads": "Subidas",
     "noProgram": "No se encontró ningún programa",

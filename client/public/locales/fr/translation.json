@@ -423,6 +423,7 @@
   },
   "mediaPage": {
     "title": "Mes médias",
+    "searchPlaceholder": "Rechercher",
     "uploadMedia": "Ajouter un fichier",
     "uploads": "Téléchargements",
     "noProgram": "Aucun programme trouvé",
