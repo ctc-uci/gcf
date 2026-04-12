@@ -37,8 +37,15 @@ export const Navbar = () => {
   const [profilePictureUrl, setProfilePictureUrl] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
   const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handler = () => setRefreshKey((k) => k + 1);
+    window.addEventListener('profile-updated', handler);
+    return () => window.removeEventListener('profile-updated', handler);
+  }, []);
 
   useOutsideClick({
     ref: menuRef,
@@ -121,7 +128,7 @@ export const Navbar = () => {
       }
     };
     loadData();
-  }, [userId, backend, role, currentUser?.displayName]);
+  }, [userId, backend, role, currentUser?.displayName, refreshKey]);
 
   const triggerBg = isMenuOpen || isHovered ? 'gray.300' : 'transparent';
 
