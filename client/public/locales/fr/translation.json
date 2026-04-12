@@ -513,6 +513,8 @@
     "instrumentUpdateCard": "Mise à jour des instruments",
     "studentUpdateCard": "Mise à jour des étudiants",
     "deleteDraft": "Supprimer",
+    "deleteUpdateTitle": "Supprimer cette mise à jour ?",
+    "deleteUpdateBody": "Cette action est irréversible. Voulez-vous vraiment supprimer cette mise à jour du programme ?",
     "cannotSaveTitle": "Impossible d'enregistrer la mise à jour",
     "cannotSaveDesc": "Votre programme n'a pas pu être chargé. Actualisez la page et réessayez.",
     "createdTitle": "Nouvelle mise à jour créée",

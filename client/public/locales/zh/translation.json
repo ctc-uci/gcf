@@ -513,6 +513,8 @@
     "instrumentUpdateCard": "仪器更新",
     "studentUpdateCard": "学生更新",
     "deleteDraft": "删除",
+    "deleteUpdateTitle": "删除此更新？",
+    "deleteUpdateBody": "此操作无法撤销。确定要删除此项目更新吗？",
     "cannotSaveTitle": "无法保存更新",
     "cannotSaveDesc": "无法加载您的程序。刷新页面并重试。",
     "createdTitle": "已创建新更新",

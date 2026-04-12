@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Box,
   Button,
   Center,
@@ -135,14 +141,17 @@ export const CreateUpdateDrawer = ({
 }) => {
   const { t } = useTranslation();
   const btnRef = useRef(null);
+  const cancelDeleteRef = useRef(null);
   const { currentUser } = useAuthContext();
   const { backend } = useBackendContext();
   const toast = useToast();
   const mediaUploadDisclosure = useDisclosure();
+  const deleteConfirmDisclosure = useDisclosure();
 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isEditLoading, setIsEditLoading] = useState(false);
+  const [isDeletingUpdate, setIsDeletingUpdate] = useState(false);
   const [editingInstrumentChangeId, setEditingInstrumentChangeId] =
     useState(null);
   const [editingEnrollmentChangeId, setEditingEnrollmentChangeId] =
@@ -370,9 +379,33 @@ export const CreateUpdateDrawer = ({
     setUploadedMedia((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleDelete = () => {
-    resetForm();
-    onClose();
+  const confirmDeleteProgramUpdate = async () => {
+    if (!editProgramUpdateId) return;
+    setIsDeletingUpdate(true);
+    try {
+      await backend.delete(`/program-updates/${editProgramUpdateId}`);
+      toast({
+        title: 'Update deleted',
+        description: 'Your program update was deleted successfully.',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      deleteConfirmDisclosure.onClose();
+      onSave?.();
+      handleClose();
+    } catch (error) {
+      console.error('Error deleting update:', error);
+      toast({
+        title: 'Could not delete update',
+        description: 'Please try again.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeletingUpdate(false);
+    }
   };
 
   const handleSave = async () => {
@@ -781,26 +814,24 @@ export const CreateUpdateDrawer = ({
             borderColor="gray.200"
             px={8}
             py={4}
-            justify="space-between"
+            justify={isEditMode ? 'space-between' : 'flex-end'}
             align="center"
           >
-            {!isEditMode ? (
+            {isEditMode && (
               <Button
                 variant="ghost"
                 color="red.500"
                 fontWeight="500"
-                onClick={handleDelete}
-                isDisabled={isLoading || isEditLoading}
+                onClick={deleteConfirmDisclosure.onOpen}
+                isDisabled={isLoading || isEditLoading || isDeletingUpdate}
               >
                 <Icon
                   as={FiTrash2}
                   boxSize={4}
                   mr={1}
                 />{' '}
-                {t('updates.deleteDraft')}
+                {t('common.delete')}
               </Button>
-            ) : (
-              <Box aria-hidden />
             )}
             <HStack spacing={3}>
               <Button
@@ -823,6 +854,41 @@ export const CreateUpdateDrawer = ({
           </Flex>
         </DrawerContent>
       </Drawer>
+
+      <AlertDialog
+        isOpen={deleteConfirmDisclosure.isOpen}
+        leastDestructiveRef={cancelDeleteRef}
+        onClose={deleteConfirmDisclosure.onClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader
+              fontSize="lg"
+              fontWeight="bold"
+            >
+              {t('updates.deleteUpdateTitle')}
+            </AlertDialogHeader>
+            <AlertDialogBody>{t('updates.deleteUpdateBody')}</AlertDialogBody>
+            <AlertDialogFooter>
+              <Button
+                ref={cancelDeleteRef}
+                onClick={deleteConfirmDisclosure.onClose}
+                isDisabled={isDeletingUpdate}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                colorScheme="red"
+                ml={3}
+                onClick={confirmDeleteProgramUpdate}
+                isLoading={isDeletingUpdate}
+              >
+                {t('common.delete')}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
 
       <MediaUploadModal
         isOpen={mediaUploadDisclosure.isOpen}

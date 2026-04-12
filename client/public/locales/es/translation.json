@@ -513,6 +513,8 @@
     "instrumentUpdateCard": "Actualización del instrumento",
     "studentUpdateCard": "Actualización estudiantil",
     "deleteDraft": "Eliminar",
+    "deleteUpdateTitle": "¿Eliminar esta actualización?",
+    "deleteUpdateBody": "Esta acción no se puede deshacer. ¿Seguro que deseas eliminar esta actualización del programa?",
     "cannotSaveTitle": "No se puede guardar la actualización",
     "cannotSaveDesc": "Su programa no se pudo cargar. Actualiza la página y vuelve a intentarlo.",
     "createdTitle": "Nueva actualización creada",
