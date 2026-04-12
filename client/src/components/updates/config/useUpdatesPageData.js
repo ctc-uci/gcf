@@ -130,7 +130,6 @@ export function useUpdatesPageData() {
           // Account updates placeholder — no backend route yet
           const response = await backend.get(`/accountChange`);
           const accountUpdates = response.data ?? [];
-          console.log('accountUpdates', accountUpdates);
           setAccountUpdatesData(accountUpdates);
           setOriginalAccountUpdatesData(accountUpdates);
         }

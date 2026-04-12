@@ -185,27 +185,31 @@ export const Profile = () => {
       if (prevPictureKey !== nextPictureKey) {
         const trackedBio =
           role === 'Program Director' ? gcfUser?.bio || '' : '';
-        await backend.post('/accountChange', {
-          user_id: currentUser.uid,
-          author_id: currentUser.uid,
-          change_type: 'Update',
-          old_values: {
-            first_name: gcfUser?.firstName || '',
-            last_name: gcfUser?.lastName || '',
-            email: currentUser?.email || '',
-            picture: prevPictureKey,
-            bio: trackedBio,
-          },
-          new_values: {
-            first_name: gcfUser?.firstName || '',
-            last_name: gcfUser?.lastName || '',
-            email: currentUser?.email || '',
-            picture: nextPictureKey,
-            bio: trackedBio,
-          },
-          resolved: false,
-          last_modified: new Date().toISOString(),
-        });
+        try {
+          await backend.post('/accountChange', {
+            user_id: currentUser.uid,
+            author_id: currentUser.uid,
+            change_type: 'Update',
+            old_values: {
+              first_name: gcfUser?.firstName || '',
+              last_name: gcfUser?.lastName || '',
+              email: currentUser?.email || '',
+              picture: prevPictureKey,
+              bio: trackedBio,
+            },
+            new_values: {
+              first_name: gcfUser?.firstName || '',
+              last_name: gcfUser?.lastName || '',
+              email: currentUser?.email || '',
+              picture: nextPictureKey,
+              bio: trackedBio,
+            },
+            resolved: false,
+            last_modified: new Date().toISOString(),
+          });
+        } catch (changeErr) {
+          console.error('Error logging account change:', changeErr);
+        }
       }
 
       setGcfUser((prev) => ({
@@ -283,15 +287,19 @@ export const Profile = () => {
       });
 
       if (JSON.stringify(oldValues) !== JSON.stringify(newValues)) {
-        await backend.post('/accountChange', {
-          user_id: currentUser.uid,
-          author_id: currentUser.uid,
-          change_type: 'Update',
-          old_values: oldValues,
-          new_values: newValues,
-          resolved: false,
-          last_modified: new Date().toISOString(),
-        });
+        try {
+          await backend.post('/accountChange', {
+            user_id: currentUser.uid,
+            author_id: currentUser.uid,
+            change_type: 'Update',
+            old_values: oldValues,
+            new_values: newValues,
+            resolved: false,
+            last_modified: new Date().toISOString(),
+          });
+        } catch (changeErr) {
+          console.error('Error logging account change:', changeErr);
+        }
       }
 
       await backend.patch(`/gcf-users/${currentUser.uid}/preferred-language`, {

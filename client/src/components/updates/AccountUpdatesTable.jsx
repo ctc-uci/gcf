@@ -108,6 +108,8 @@ export const AccountUpdatesTable = ({
         return 'updated';
       case 'Deletion':
         return 'deleted';
+      default:
+        return 'changed';
     }
   };
 
@@ -221,8 +223,9 @@ export const AccountUpdatesTable = ({
                         color="gray.400"
                       />
                       <Text fontSize="sm">
-                        {row.authorFirstName + ' ' + row.authorLastName ||
-                          t('common.name')}
+                        {row.authorFirstName && row.authorLastName
+                          ? `${row.authorFirstName} ${row.authorLastName}`
+                          : t('common.name')}
                       </Text>
                     </HStack>
                   </Td>

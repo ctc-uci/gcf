@@ -25,7 +25,6 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
-const PASSWORD_MASK = '••••••••';
 const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
 
 const getRoleBadgeProps = (role) => {
@@ -57,9 +56,10 @@ const normalizeAccountSnapshot = (snap) => {
   if (!snap || typeof snap !== 'object') {
     return { ...ACCOUNT_CHANGE_DEFAULTS };
   }
+  const { password: _omitPwd, ...rest } = snap;
   return {
     ...ACCOUNT_CHANGE_DEFAULTS,
-    ...snap,
+    ...rest,
   };
 };
 
@@ -68,11 +68,17 @@ const isBlank = (v) => v == null || String(v).trim() === '';
 const valueOrFallback = (primary, fallback) =>
   isBlank(primary) ? (fallback ?? '') : primary;
 
+const firstNonBlank = (a, b) => {
+  if (!isBlank(a)) return a;
+  if (!isBlank(b)) return b;
+  return '';
+};
+
 const pickStr = (snap, camelKey, snakeKey) => {
   if (!snap || typeof snap !== 'object') return '';
   const v =
     snakeKey !== undefined
-      ? (snap[camelKey] ?? snap[snakeKey])
+      ? firstNonBlank(snap[camelKey], snap[snakeKey])
       : snap[camelKey];
   if (v == null) return '';
   return String(v).trim();
@@ -114,6 +120,19 @@ const resolveRegionDisplay = (snap, idToName) => {
   return mapped && mapped.trim() ? mapped : String(id);
 };
 
+/** Normalized id for diff/strikethrough (audit payloads use programId / regionId). */
+const programIdKey = (snap) => {
+  if (!snap || typeof snap !== 'object') return '';
+  const id = snap.programId ?? snap.program_id ?? snap.programs?.[0]?.id;
+  return id == null || id === '' ? '' : String(id);
+};
+
+const regionIdKey = (snap) => {
+  if (!snap || typeof snap !== 'object') return '';
+  const id = snap.regionId ?? snap.region_id ?? snap.regions?.[0]?.id;
+  return id == null || id === '' ? '' : String(id);
+};
+
 const isDirectImageUrl = (s) =>
   typeof s === 'string' && /^https?:\/\//i.test(s.trim());
 
@@ -144,31 +163,24 @@ const displaySrcForSlot = (hadKey, resolvedUrl) => {
 
 const pictureUrl = (snap) => {
   if (!snap || typeof snap !== 'object') return '';
-  const u =
-    snap.picture ??
-    snap.profilePicture ??
-    snap.profile_image ??
-    snap.photoUrl ??
-    '';
+  const u = firstNonBlank(
+    firstNonBlank(
+      firstNonBlank(snap.picture, snap.profilePicture),
+      snap.profile_image
+    ),
+    snap.photoUrl
+  );
   return typeof u === 'string' && u.trim() ? u.trim() : '';
 };
 
 const bioText = (snap) => {
   if (!snap || typeof snap !== 'object') return '';
-  const b = snap.biography ?? snap.bio ?? snap.biographyText;
-  if (b == null) return '';
+  const b = firstNonBlank(
+    firstNonBlank(snap.biography, snap.bio),
+    snap.biographyText
+  );
+  if (isBlank(b)) return '';
   return String(b).trim();
-};
-
-const passwordMaskDisplay = (snap) => {
-  const p = pickStr(snap, 'password');
-  return p ? PASSWORD_MASK : '';
-};
-
-const passwordsDiffer = (oldSnap, newSnap) => {
-  const o = pickStr(oldSnap, 'password');
-  const n = pickStr(newSnap, 'password');
-  return o !== n;
 };
 
 const DiffField = ({
@@ -176,10 +188,11 @@ const DiffField = ({
   oldValue,
   newValue,
   changeType,
-  isPassword = false,
+  /** When set, drives strikethrough instead of comparing display strings (e.g. program/region by id). */
+  hasChangeOverride,
 }) => {
-  const oldStr = isPassword ? oldValue : (oldValue ?? '');
-  const newStr = isPassword ? newValue : (newValue ?? '');
+  const oldStr = oldValue ?? '';
+  const newStr = newValue ?? '';
   const isCreation = changeType === 'Creation';
 
   if (isCreation) {
@@ -199,9 +212,12 @@ const DiffField = ({
     );
   }
 
-  if (!oldStr && !newStr) return null;
+  if (!oldStr && !newStr && hasChangeOverride !== true) return null;
 
-  const hasChange = String(oldStr) !== String(newStr);
+  const hasChange =
+    typeof hasChangeOverride === 'boolean'
+      ? hasChangeOverride
+      : String(oldStr) !== String(newStr);
 
   return (
     <Box>
@@ -526,8 +542,6 @@ export const AccountUpdateDrawer = ({
     email: '',
     picture: '',
     role: '',
-    program: '',
-    region: '',
     bio: '',
   });
 
@@ -618,34 +632,7 @@ export const AccountUpdateDrawer = ({
           ),
         ]);
 
-        let role = String(userData?.role || '').trim();
-        let program = '';
-        let region = '';
-
-        if (role === 'Program Director' && targetUserId) {
-          try {
-            const { data: programData } = await backend.get(
-              `/program-directors/me/${targetUserId}/program`
-            );
-            program = String(programData?.name || '').trim();
-          } catch {
-            // best-effort
-          }
-        } else if (role === 'Regional Director' && targetUserId) {
-          try {
-            const { data: rdData } = await backend.get(
-              `/regional-directors/me/${targetUserId}`
-            );
-            if (rdData?.regionId) {
-              const { data: regionData } = await backend.get(
-                `/region/${rdData.regionId}`
-              );
-              region = String(regionData?.name || '').trim();
-            }
-          } catch {
-            // best-effort
-          }
-        }
+        const role = String(userData?.role || '').trim();
 
         const nextFallback = {
           first_name: String(userData?.firstName || '').trim(),
@@ -653,8 +640,6 @@ export const AccountUpdateDrawer = ({
           email: String(userData?.email || '').trim(),
           picture: String(userData?.picture || '').trim(),
           role,
-          program,
-          region,
           bio:
             role === 'Program Director'
               ? String(userData?.bio || '').trim()
@@ -690,21 +675,26 @@ export const AccountUpdateDrawer = ({
     return {
       ...s,
       first_name: valueOrFallback(
-        s.first_name ?? s.firstName,
+        firstNonBlank(s.first_name, s.firstName),
         fallbackValues.first_name
       ),
       last_name: valueOrFallback(
-        s.last_name ?? s.lastName,
+        firstNonBlank(s.last_name, s.lastName),
         fallbackValues.last_name
       ),
       email: valueOrFallback(s.email, fallbackValues.email),
       picture: valueOrFallback(s.picture, fallbackValues.picture),
       role,
-      program: valueOrFallback(s.program, fallbackValues.program),
-      region: valueOrFallback(s.region, fallbackValues.region),
+      // Do not fall back to the user's current program/region — that masks ID-only
+      // audit payloads and makes old/new identical so program/region diffs never strike through.
+      program: valueOrFallback(s.program, ''),
+      region: valueOrFallback(s.region, ''),
       bio:
         role === 'Program Director'
-          ? valueOrFallback(s.bio ?? s.biography, fallbackValues.bio)
+          ? valueOrFallback(
+              firstNonBlank(s.bio, s.biography),
+              fallbackValues.bio
+            )
           : '',
     };
   }, [detail?.oldValues, fallbackValues]);
@@ -715,21 +705,24 @@ export const AccountUpdateDrawer = ({
     return {
       ...s,
       first_name: valueOrFallback(
-        s.first_name ?? s.firstName,
+        firstNonBlank(s.first_name, s.firstName),
         fallbackValues.first_name
       ),
       last_name: valueOrFallback(
-        s.last_name ?? s.lastName,
+        firstNonBlank(s.last_name, s.lastName),
         fallbackValues.last_name
       ),
       email: valueOrFallback(s.email, fallbackValues.email),
       picture: valueOrFallback(s.picture, fallbackValues.picture),
       role,
-      program: valueOrFallback(s.program, fallbackValues.program),
-      region: valueOrFallback(s.region, fallbackValues.region),
+      program: valueOrFallback(s.program, ''),
+      region: valueOrFallback(s.region, ''),
       bio:
         role === 'Program Director'
-          ? valueOrFallback(s.bio ?? s.biography, fallbackValues.bio)
+          ? valueOrFallback(
+              firstNonBlank(s.bio, s.biography),
+              fallbackValues.bio
+            )
           : '',
     };
   }, [detail?.newValues, fallbackValues]);
@@ -747,19 +740,12 @@ export const AccountUpdateDrawer = ({
     const newProg = resolveProgramDisplay(newSnap, programNamesById);
     const oldReg = resolveRegionDisplay(oldSnap, regionNamesById);
     const newReg = resolveRegionDisplay(newSnap, regionNamesById);
+    const progById = programIdKey(oldSnap) !== programIdKey(newSnap);
+    const regById = regionIdKey(oldSnap) !== regionIdKey(newSnap);
     const oldBio = bioText(oldSnap);
     const newBio = bioText(newSnap);
     const oldPic = pictureUrl(oldSnap);
     const newPic = pictureUrl(newSnap);
-
-    const pwdOld = passwordMaskDisplay(oldSnap);
-    const pwdNew = passwordMaskDisplay(newSnap);
-    const showPassword =
-      changeType === 'Creation'
-        ? Boolean(passwordMaskDisplay(newSnap))
-        : passwordsDiffer(oldSnap, newSnap) ||
-          Boolean(passwordMaskDisplay(oldSnap)) ||
-          Boolean(passwordMaskDisplay(newSnap));
 
     return {
       oldFirst,
@@ -774,15 +760,23 @@ export const AccountUpdateDrawer = ({
       newProg,
       oldReg,
       newReg,
+      progById,
+      regById,
       oldBio,
       newBio,
       oldPic,
       newPic,
-      pwdOld,
-      pwdNew,
-      showPassword,
     };
-  }, [oldSnap, newSnap, changeType, programNamesById, regionNamesById]);
+  }, [oldSnap, newSnap, programNamesById, regionNamesById]);
+
+  const roleDiffers = fields.oldRole.trim() !== fields.newRole.trim();
+  const programOldDisplay = roleDiffers ? '' : fields.oldProg;
+  const regionOldDisplay = roleDiffers ? '' : fields.oldReg;
+  const bioOldDisplay = roleDiffers ? '' : fields.oldBio;
+
+  const newRoleNorm = fields.newRole.trim();
+  const showProgramDiff = newRoleNorm !== 'Regional Director';
+  const showRegionDiff = newRoleNorm !== 'Program Director';
 
   const isResolved = Boolean(detail?.resolved);
 
@@ -912,15 +906,6 @@ export const AccountUpdateDrawer = ({
                 newValue={fields.newEmail}
                 changeType={changeType}
               />
-              {fields.showPassword && (
-                <DiffField
-                  label={t('common.password')}
-                  oldValue={fields.pwdOld}
-                  newValue={fields.pwdNew}
-                  changeType={changeType}
-                  isPassword
-                />
-              )}
 
               <RoleDiffField
                 oldRole={fields.oldRole}
@@ -928,21 +913,27 @@ export const AccountUpdateDrawer = ({
                 changeType={changeType}
               />
 
-              <DiffField
-                label={t('common.program')}
-                oldValue={fields.oldProg}
-                newValue={fields.newProg}
-                changeType={changeType}
-              />
-              <DiffField
-                label={t('common.region')}
-                oldValue={fields.oldReg}
-                newValue={fields.newReg}
-                changeType={changeType}
-              />
+              {showProgramDiff && (
+                <DiffField
+                  label={t('common.program')}
+                  oldValue={programOldDisplay}
+                  newValue={fields.newProg}
+                  changeType={changeType}
+                  hasChangeOverride={roleDiffers ? undefined : fields.progById}
+                />
+              )}
+              {showRegionDiff && (
+                <DiffField
+                  label={t('common.region')}
+                  oldValue={regionOldDisplay}
+                  newValue={fields.newReg}
+                  changeType={changeType}
+                  hasChangeOverride={roleDiffers ? undefined : fields.regById}
+                />
+              )}
               <DiffField
                 label={t('common.biography')}
-                oldValue={fields.oldBio}
+                oldValue={bioOldDisplay}
                 newValue={fields.newBio}
                 changeType={changeType}
               />

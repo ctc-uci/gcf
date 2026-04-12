@@ -75,6 +75,17 @@ const INITIAL_FORM_STATE = {
   regions: [],
 };
 
+const formStateToAuditSnapshot = (fd, meta = {}) => ({
+  email: fd.email,
+  firstName: fd.first_name,
+  lastName: fd.last_name,
+  role: fd.role,
+  programId: fd.programs?.length > 0 ? Number(fd.programs[0].id) : null,
+  regionId: fd.regions?.length > 0 ? Number(fd.regions[0].id) : null,
+  ...(meta.currentUserId != null ? { currentUserId: meta.currentUserId } : {}),
+  ...(meta.targetId != null ? { targetId: meta.targetId } : {}),
+});
+
 export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const { t } = useTranslation();
   const { currentUser } = useAuthContext();
@@ -453,8 +464,14 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         user_id: String(targetUserId),
         author_id: String(userId),
         change_type: 'Update',
-        old_values: initialFormData,
-        new_values: formData,
+        old_values: formStateToAuditSnapshot(initialFormData, {
+          currentUserId: userId,
+          targetId: targetUserId,
+        }),
+        new_values: formStateToAuditSnapshot(formData, {
+          currentUserId: userId,
+          targetId: targetUserId,
+        }),
         resolved: false,
         last_modified: new Date().toISOString(),
       });
