@@ -168,6 +168,7 @@ export const CreateUpdateDrawer = ({
 
   const [notes, setNotes] = useState('');
   const [uploadedMedia, setUploadedMedia] = useState([]);
+  const originalMediaIds = useRef(new Set());
 
   const [instruments, setInstruments] = useState([]);
   const [programId, setProgramId] = useState(null);
@@ -330,6 +331,7 @@ export const CreateUpdateDrawer = ({
             const urlResponses = await Promise.all(
               mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
             );
+            originalMediaIds.current = new Set(mediaData.map((m) => m.id));
             setUploadedMedia(
               mediaData.map((m, i) => ({
                 id: m.id,
@@ -380,6 +382,7 @@ export const CreateUpdateDrawer = ({
     setStudentWhatHappened('');
     setNotes('');
     setUploadedMedia([]);
+    originalMediaIds.current = new Set();
     setIsFullScreen(false);
     setEditingInstrumentChangeId(null);
     setEditingEnrollmentChangeId(null);
@@ -542,6 +545,16 @@ export const CreateUpdateDrawer = ({
             description: notes || null,
           });
         }
+
+        const currentMediaIds = new Set(
+          uploadedMedia.filter((m) => m.id).map((m) => m.id)
+        );
+        for (const id of originalMediaIds.current) {
+          if (!currentMediaIds.has(id)) {
+            await backend.delete(`/mediaChange/${id}`);
+          }
+        }
+        originalMediaIds.current = new Set(currentMediaIds);
 
         for (const media of uploadedMedia) {
           if (media.id) continue;
