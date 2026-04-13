@@ -20,6 +20,7 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 
+import { MediaViewer } from '../updates/MediaViewer';
 import { MediaGrid } from './MediaGrid';
 import { MediaUploadModal } from './MediaUploadModal';
 
@@ -36,6 +37,7 @@ export const Media = () => {
   const [programId, setProgramId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewerIndex, setViewerIndex] = useState(null);
 
   const onUploadCompleteHandler = async (uploadedFiles, description) => {
     try {
@@ -214,6 +216,7 @@ export const Media = () => {
             mediaItems={filteredMedia}
             programName={programName}
             onUpdate={fetchData}
+            onCardClick={(index) => setViewerIndex(index)}
           />
         </VStack>
       </Box>
@@ -222,6 +225,20 @@ export const Media = () => {
         onClose={onClose}
         onUploadComplete={onUploadCompleteHandler}
       />
+      {viewerIndex !== null && (
+        <MediaViewer
+          updates={filteredMedia.map((m) => ({
+            id: m.id,
+            fileName: m.file_name,
+            fileType: m.file_type,
+            description: m.description,
+          }))}
+          mediaURLs={filteredMedia.map((m) => m.imageUrl)}
+          selectedIndex={viewerIndex}
+          onClose={() => setViewerIndex(null)}
+          onUpdate={fetchData}
+        />
+      )}
     </Box>
   );
 };

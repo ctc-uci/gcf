@@ -26,6 +26,7 @@ import {
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 import { BsFillPencilFill, BsFillTrashFill } from 'react-icons/bs';
+import { FiPlay } from 'react-icons/fi';
 import { SlOptionsVertical } from 'react-icons/sl';
 
 import { MediaEditModal } from './MediaEditModal';
@@ -40,6 +41,7 @@ export const MediaCard = ({
   height = '200px',
   id,
   onUpdate,
+  onClick,
 }) => {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
@@ -96,6 +98,8 @@ export const MediaCard = ({
         borderRadius="xl"
         position="relative"
         overflow="hidden"
+        cursor="pointer"
+        onClick={onClick}
       >
         <Menu
           isLazy
@@ -103,47 +107,51 @@ export const MediaCard = ({
           gutter={0}
           offset={[0, -40]}
         >
-          <MenuButton
-            as={IconButton}
-            icon={<SlOptionsVertical />}
-            size="md"
-            colorScheme="none"
-            position="absolute"
-            top="4px"
-            right="0px"
-            zIndex={2}
-          />
-          <MenuList
-            minW="150px"
-            p={0}
-            m={0}
-            boxShadow="xl"
-            border="none"
-            zIndex={3}
-            position="absolute"
-            top="0"
-            right="0"
-          >
-            <MenuItem onClick={onEditModalOpen}>
-              <HStack w="full">
-                <Text fontWeight="semibold">{t('mediaEditModal.heading')}</Text>
-                <Spacer />
-                <BsFillPencilFill />
-              </HStack>
-            </MenuItem>
-            <MenuItem onClick={onDeleteOpen}>
-              <HStack w="full">
-                <Text
-                  color="red.500"
-                  fontWeight="semibold"
-                >
-                  {t('common.delete')}
-                </Text>
-                <Spacer />
-                <BsFillTrashFill />
-              </HStack>
-            </MenuItem>
-          </MenuList>
+          <Box onClick={(e) => e.stopPropagation()}>
+            <MenuButton
+              as={IconButton}
+              icon={<SlOptionsVertical />}
+              size="md"
+              colorScheme="none"
+              position="absolute"
+              top="4px"
+              right="0px"
+              zIndex={2}
+            />
+            <MenuList
+              minW="150px"
+              p={0}
+              m={0}
+              boxShadow="xl"
+              border="none"
+              zIndex={3}
+              position="absolute"
+              top="0"
+              right="0"
+            >
+              <MenuItem onClick={onEditModalOpen}>
+                <HStack w="full">
+                  <Text fontWeight="semibold">
+                    {t('mediaEditModal.heading')}
+                  </Text>
+                  <Spacer />
+                  <BsFillPencilFill />
+                </HStack>
+              </MenuItem>
+              <MenuItem onClick={onDeleteOpen}>
+                <HStack w="full">
+                  <Text
+                    color="red.500"
+                    fontWeight="semibold"
+                  >
+                    {t('common.delete')}
+                  </Text>
+                  <Spacer />
+                  <BsFillTrashFill />
+                </HStack>
+              </MenuItem>
+            </MenuList>
+          </Box>
         </Menu>
         <Box
           position="absolute"
@@ -162,23 +170,43 @@ export const MediaCard = ({
           </Center>
         )}
         {isVideo ? (
-          <video
-            src={imageUrl}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              borderRadius: 'xl',
-            }}
-            onLoadedData={() => setIsLoading(false)}
-          />
+          <>
+            <video
+              src={imageUrl}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                pointerEvents: 'none',
+              }}
+              onLoadedData={() => setIsLoading(false)}
+            />
+            {!isLoading && (
+              <Center
+                position="absolute"
+                inset={0}
+                zIndex={1}
+                pointerEvents="none"
+              >
+                <Box
+                  bg="blackAlpha.600"
+                  borderRadius="full"
+                  p={3}
+                >
+                  <FiPlay
+                    size={24}
+                    color="white"
+                  />
+                </Box>
+              </Center>
+            )}
+          </>
         ) : (
           <Image
             src={imageUrl}
             h="100%"
             w="100%"
             objectFit="contain"
-            borderRadius="xl"
             onLoad={() => setIsLoading(false)}
           />
         )}

@@ -4,7 +4,12 @@ import { useTranslation } from 'react-i18next';
 
 import { MediaCard } from './MediaCard';
 
-export const MediaGrid = ({ mediaItems, programName, onUpdate }) => {
+export const MediaGrid = ({
+  mediaItems,
+  programName,
+  onUpdate,
+  onCardClick,
+}) => {
   const { t } = useTranslation();
   let content;
   if (mediaItems.length === 0 && !programName) {
@@ -20,11 +25,12 @@ export const MediaGrid = ({ mediaItems, programName, onUpdate }) => {
         spacing={6}
         w="full"
       >
-        {mediaItems.map((item) => (
+        {mediaItems.map((item, index) => (
           <MediaCard
             key={item.id}
             {...item}
             onUpdate={onUpdate}
+            onClick={() => onCardClick?.(index)}
           />
         ))}
       </SimpleGrid>

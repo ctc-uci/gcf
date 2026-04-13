@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Button,
@@ -26,6 +26,11 @@ export const MediaEditModal = ({
   const { t } = useTranslation();
   const [title, setTitle] = useState(initialTitle || '');
   const [description, setDescription] = useState(initialDescription || '');
+
+  useEffect(() => {
+    setTitle(initialTitle || '');
+    setDescription(initialDescription || '');
+  }, [initialTitle, initialDescription]);
 
   const handleSave = () => {
     onSave(title, description);
