@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -23,6 +23,11 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
 
   const [titles, setTitles] = useState([]);
   const [description, setDescription] = useState('');
+
+  const previewUrls = useMemo(
+    () => files.map((file) => URL.createObjectURL(file)),
+    [files]
+  );
 
   // keep titles array in sync with files prop
   useEffect(() => {
@@ -78,7 +83,7 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
           file_type: file.type,
           title: titles[i],
           description: description,
-          previewUrl: URL.createObjectURL(file),
+          previewUrl: previewUrls[i],
         });
       }
 
@@ -127,6 +132,7 @@ export function MediaPreviewList({ files, onComplete, formOrigin }) {
           <MediaPreview
             key={file.name + i}
             file={file}
+            previewUrl={previewUrls[i]}
             title={titles[i]}
             onTitleChange={(val) => updateTitle(i, val)}
           />
