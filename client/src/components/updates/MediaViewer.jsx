@@ -39,6 +39,7 @@ export const MediaViewer = ({
     onOpen: onEditOpen,
     onClose: onEditClose,
   } = useDisclosure();
+  const [editingItem, setEditingItem] = useState(null);
 
   useEffect(() => {
     setCurrent(selectedIndex);
@@ -70,8 +71,18 @@ export const MediaViewer = ({
     return () => window.removeEventListener('keydown', handleKey);
   }, [goNext, goPrev, onClose]);
 
+  const openEdit = () => {
+    setEditingItem(item);
+    onEditOpen();
+  };
+
+  const closeEdit = () => {
+    setEditingItem(null);
+    onEditClose();
+  };
+
   const handleEditSave = async (newTitle, newDescription) => {
-    const mediaId = item?.id;
+    const mediaId = editingItem?.id;
     if (!mediaId) return;
     try {
       await backend.put(`/mediaChange/${mediaId}`, {
@@ -158,6 +169,7 @@ export const MediaViewer = ({
                   display: isLoading ? 'none' : 'block',
                 }}
                 onLoadedData={() => setIsLoading(false)}
+                onError={() => setIsLoading(false)}
               />
             ) : (
               <Image
@@ -168,6 +180,7 @@ export const MediaViewer = ({
                 objectFit="contain"
                 display={isLoading ? 'none' : 'block'}
                 onLoad={() => setIsLoading(false)}
+                onError={() => setIsLoading(false)}
               />
             )}
           </Box>
@@ -229,7 +242,7 @@ export const MediaViewer = ({
                 aria-label={t('mediaEditModal.heading')}
                 size="sm"
                 variant="ghost"
-                onClick={onEditOpen}
+                onClick={openEdit}
               />
             )}
           </HStack>
@@ -245,10 +258,10 @@ export const MediaViewer = ({
 
       <MediaEditModal
         isOpen={isEditOpen}
-        onClose={onEditClose}
+        onClose={closeEdit}
         onSave={handleEditSave}
-        initialTitle={item?.fileName || ''}
-        initialDescription={item?.description || ''}
+        initialTitle={editingItem?.fileName || ''}
+        initialDescription={editingItem?.description || ''}
       />
     </Modal>
   );

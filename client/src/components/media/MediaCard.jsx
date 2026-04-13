@@ -180,6 +180,7 @@ export const MediaCard = ({
                 pointerEvents: 'none',
               }}
               onLoadedData={() => setIsLoading(false)}
+              onError={() => setIsLoading(false)}
             />
             {!isLoading && (
               <Center
@@ -208,6 +209,7 @@ export const MediaCard = ({
             w="100%"
             objectFit="contain"
             onLoad={() => setIsLoading(false)}
+            onError={() => setIsLoading(false)}
           />
         )}
       </Box>
