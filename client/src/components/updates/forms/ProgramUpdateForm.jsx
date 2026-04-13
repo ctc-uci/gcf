@@ -16,7 +16,6 @@ import {
   Heading,
   HStack,
   IconButton,
-  Input,
   NumberDecrementStepper,
   NumberIncrementStepper,
   NumberInput,
@@ -27,9 +26,7 @@ import {
   TagCloseButton,
   TagLabel,
   Text,
-  Textarea,
   useDisclosure,
-  useToast,
   VStack,
 } from '@chakra-ui/react';
 
@@ -68,7 +65,6 @@ export const ProgramUpdateForm = ({
   isOpen: isOpenProp,
   onOpen: onOpenProp,
   onClose: onCloseProp,
-  onSave,
   programUpdateId = null,
   isInstrumentUpdate = null,
   selectedUpdate = null,
@@ -79,20 +75,20 @@ export const ProgramUpdateForm = ({
   const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
   const onClose = isControlled ? onCloseProp : disclosure.onClose;
   const btnRef = useRef(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [programId, setProgramId] = useState('');
-  const [availablePrograms, setAvailablePrograms] = useState([]);
+  const [, setProgramId] = useState('');
+  const [, setAvailablePrograms] = useState([]);
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
 
-  const [title, setTitle] = useState('');
-  const [enrollmentNumber, setEnrollmentNumber] = useState(null);
-  const [graduatedNumber, setGraduatedNumber] = useState(null);
-  const [enrollmentChangeId, setEnrollmentChangeId] = useState(null);
+  const [, setTitle] = useState('');
+  const [, setEnrollmentNumber] = useState(null);
+  const [, setGraduatedNumber] = useState(null);
+  const [, setEnrollmentChangeId] = useState(null);
   const [notes, setNotes] = useState('');
   const [flagged, setFlagged] = useState(false);
-  const [updateType, setUpdateType] = useState('');
+  const [, setUpdateType] = useState('');
   const [programName, setProgramName] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [updateDateTime, setUpdateDateTime] = useState('');
@@ -103,12 +99,11 @@ export const ProgramUpdateForm = ({
 
   const [existingInstruments, setExistingInstruments] = useState([]);
   const [addedInstruments, setAddedInstruments] = useState({});
-  const [originalInstruments, setOriginalInstruments] = useState({});
-  const [newInstruments, setNewInstruments] = useState([]);
-  const [instrumentChangeMap, setInstrumentChangeMap] = useState({});
+  const [, setOriginalInstruments] = useState({});
+  const [, setNewInstruments] = useState([]);
+  const [, setInstrumentChangeMap] = useState({});
 
   const { backend } = useBackendContext();
-  const toast = useToast();
 
   useEffect(() => {
     if (!programUpdateId) {
@@ -220,7 +215,7 @@ export const ProgramUpdateForm = ({
           let resolvedProgramName = '';
           let resolvedAuthorName = '';
           const fetchGcfName = async (id) => {
-            if (id == null || id === '') return '';
+            if (id === null || id === '') return '';
             try {
               const userRes = await backend.get(`/gcf-users/${id}`);
               return (
@@ -237,7 +232,7 @@ export const ProgramUpdateForm = ({
             resolvedProgramName = progRes.data?.name || '';
             const programCreatorId = progRes.data?.createdBy;
             resolvedAuthorName = await fetchGcfName(programCreatorId);
-            if (!resolvedAuthorName && data.createdBy != null) {
+            if (!resolvedAuthorName && data.createdBy !== null) {
               resolvedAuthorName = await fetchGcfName(data.createdBy);
             }
           } catch (e) {
@@ -326,142 +321,6 @@ export const ProgramUpdateForm = ({
     setNewInstrumentName('');
     setSelectedInstrument('');
     setQuantity(0);
-  };
-
-  const handleSubmit = async (markResolved = false) => {
-    setIsLoading(true);
-    try {
-      const programUpdateData = {
-        title: title ? String(title).trim() : null,
-        program_id: parseInt(programId, 10) || null,
-        created_by: currentUser?.uid,
-        update_date: new Date().toISOString(),
-        note: notes ? String(notes).trim() : null,
-      };
-
-      let updatedProgramUpdateId = programUpdateId;
-
-      if (programUpdateId) {
-        await backend.put(
-          `/program-updates/${programUpdateId}`,
-          programUpdateData
-        );
-      } else {
-        const response = await backend.post(
-          '/program-updates',
-          programUpdateData
-        );
-        updatedProgramUpdateId = response.data.id;
-      }
-
-      // Handle new instruments
-      for (const iName of newInstruments) {
-        try {
-          await backend.post('/instruments', { name: iName });
-        } catch (error) {
-          console.error(`Error adding instrument ${iName}:`, error);
-        }
-      }
-
-      const instrumentsResponse = await backend.get('/instruments');
-      setExistingInstruments(instrumentsResponse.data);
-
-      // Handle deleted instruments
-      const deletedInstruments = Object.keys(originalInstruments).filter(
-        (name) => !addedInstruments[name]
-      );
-      for (const deletedName of deletedInstruments) {
-        const changeMeta = instrumentChangeMap[deletedName];
-        if (changeMeta?.changeId) {
-          await backend.delete(`/instrument-changes/${changeMeta.changeId}`);
-        }
-      }
-
-      // Handle added/updated instruments
-      if (Object.keys(addedInstruments).length > 0) {
-        for (const [name, qty] of Object.entries(addedInstruments)) {
-          const meta = instrumentChangeMap[name];
-          if (meta?.changeId) {
-            if (originalInstruments[name] !== qty) {
-              await backend.put(`/instrument-changes/${meta.changeId}`, {
-                instrumentId: meta.instrumentId,
-                updateId: updatedProgramUpdateId,
-                amountChanged: qty,
-              });
-            }
-          } else {
-            const instrument = instrumentsResponse.data.find(
-              (i) => i.name === name
-            );
-            if (instrument) {
-              await backend.post('/instrument-changes', {
-                instrumentId: instrument.id,
-                updateId: updatedProgramUpdateId,
-                amountChanged: qty,
-              });
-            }
-          }
-        }
-      }
-
-      if (isInstrumentUpdate && updatedProgramUpdateId) {
-        const { data: rowsForThisProgramUpdate = [] } = await backend.get(
-          `/instrument-changes/update/${updatedProgramUpdateId}`
-        );
-        for (const row of rowsForThisProgramUpdate) {
-          await backend.put(`/instrument-changes/${row.id}`, {
-            special_request: flagged,
-          });
-        }
-      }
-
-      // Handle enrollment
-      if (enrollmentNumber !== null) {
-        if (enrollmentChangeId) {
-          await backend.put(`/enrollmentChange/${enrollmentChangeId}`, {
-            update_id: updatedProgramUpdateId,
-            enrollment_change: enrollmentNumber,
-            graduated_change: graduatedNumber || 0,
-          });
-        } else {
-          const enrollmentResponse = await backend.post('/enrollmentChange', {
-            update_id: updatedProgramUpdateId,
-            enrollment_change: enrollmentNumber,
-            graduated_change: graduatedNumber || 0,
-          });
-          setEnrollmentChangeId(enrollmentResponse.data.id);
-        }
-      }
-
-      toast({
-        title: programUpdateId
-          ? t('updates.savedTitle')
-          : t('updates.createdTitleToast'),
-        description: programUpdateId
-          ? t('updates.savedDesc')
-          : t('updates.programUpdateCreatedDesc'),
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      });
-
-      onSave?.();
-      onClose();
-    } catch (error) {
-      console.error('Error submitting program update:', error);
-      toast({
-        title: t('updates.failedSaveTitle'),
-        description:
-          error?.response?.data?.message ??
-          error?.message ??
-          t('updates.failedSaveDesc'),
-        status: 'error',
-        duration: 7000,
-        isClosable: true,
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const drawerSize = isFullScreen ? 'full' : 'lg';
