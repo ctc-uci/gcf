@@ -66,7 +66,8 @@ programUpdateRouter.post('/', async (req, res) => {
 programUpdateRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, program_id, created_by, update_date, note } = req.body;
+    const { title, program_id, created_by, update_date, note, show_on_table } =
+      req.body;
 
     const newProgramUpdate = await db.query(
       `UPDATE program_update SET
@@ -75,10 +76,11 @@ programUpdateRouter.put('/:id', async (req, res) => {
             created_by = COALESCE($3, created_by),
             update_date = COALESCE($4, update_date),
             note = COALESCE($5, note),
+            show_on_table = COALESCE($6, show_on_table),
             updated_at = CURRENT_TIMESTAMP
-            WHERE id = $6
+            WHERE id = $7
             RETURNING *`,
-      [title, program_id, created_by, update_date, note, id]
+      [title, program_id, created_by, update_date, note, show_on_table, id]
     );
 
     if (newProgramUpdate.length === 0) {

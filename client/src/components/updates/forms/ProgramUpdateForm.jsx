@@ -9,6 +9,7 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
+  DrawerFooter,
   DrawerOverlay,
   Flex,
   Grid,
@@ -35,6 +36,8 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useTranslation } from 'react-i18next';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
+
+import { ReviewProgramUpdate } from './ReviewProgramUpdate';
 
 function formatUpdateDisplayDate(value) {
   if (value === null || value === undefined || value === '') return '';
@@ -68,22 +71,28 @@ export const ProgramUpdateForm = ({
   programUpdateId = null,
   isInstrumentUpdate = null,
   selectedUpdate = null,
+  onSuccess,
 }) => {
   const { t } = useTranslation();
   const disclosure = useDisclosure();
+  const confirmDisclosure = useDisclosure();
+
   const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
   const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
   const onClose = isControlled ? onCloseProp : disclosure.onClose;
   const btnRef = useRef(null);
+
   const [, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [, setProgramId] = useState('');
+
+  const [programId, setProgramId] = useState('');
   const [, setAvailablePrograms] = useState([]);
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
 
-  const [, setTitle] = useState('');
-  const [, setEnrollmentNumber] = useState(null);
+  const [title, setTitle] = useState('');
+  const [enrollmentNumber, setEnrollmentNumber] = useState(null);
   const [, setGraduatedNumber] = useState(null);
   const [, setEnrollmentChangeId] = useState(null);
   const [notes, setNotes] = useState('');
@@ -99,11 +108,129 @@ export const ProgramUpdateForm = ({
 
   const [existingInstruments, setExistingInstruments] = useState([]);
   const [addedInstruments, setAddedInstruments] = useState({});
-  const [, setOriginalInstruments] = useState({});
+  const [originalInstruments, setOriginalInstruments] = useState({});
   const [, setNewInstruments] = useState([]);
-  const [, setInstrumentChangeMap] = useState({});
-
+  const [instrumentChangeMap, setInstrumentChangeMap] = useState({});
   const { backend } = useBackendContext();
+
+  const diffChanges = [
+    {
+      label: 'Program Name',
+      oldValue: selectedUpdate?.name || programName,
+      newValue: programName,
+    },
+    {
+      label: 'Instruments & Quantity',
+      isTag: true,
+      oldTags: Object.entries(originalInstruments || {}).map(
+        ([name, qty]) => `${name} ${qty}`
+      ),
+      newTags: Object.entries(addedInstruments || {}).map(
+        ([name, qty]) => `${name} ${qty}`
+      ),
+    },
+    {
+      label: 'Current Students',
+      oldValue: selectedUpdate?.enrollmentChange,
+      newValue: enrollmentNumber,
+    },
+    {
+      label: 'Special Request (Flagged)',
+      oldValue: selectedUpdate?.flagged ? 'Yes' : 'No',
+      newValue: flagged ? 'Yes' : 'No',
+    },
+    {
+      label: 'Notes',
+      oldValue: selectedUpdate?.note,
+      newValue: notes,
+    },
+  ];
+
+  const handleKeepAsUnresolved = async () => {
+    setIsSaving(true);
+    try {
+      await backend.put(`/program-updates/${programUpdateId}`, {
+        show_on_table: false,
+        note: notes,
+        title,
+        programId,
+      });
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (error) {
+      console.error('Failed to update status:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveAndResolveClick = () => {
+    confirmDisclosure.onOpen();
+  };
+
+  const handleConfirmChanges = async () => {
+    setIsSaving(true);
+    try {
+      await backend.put(`/program-updates/${programUpdateId}`, {
+        show_on_table: true,
+        note: notes,
+        title,
+        programId,
+      });
+
+      if (isInstrumentUpdate) {
+        const instrumentPromises = [];
+
+        for (const [name, originalQty] of Object.entries(originalInstruments)) {
+          const newQty = addedInstruments[name];
+          const meta = instrumentChangeMap[name];
+
+          if (newQty === undefined) {
+            if (meta?.changeId) {
+              instrumentPromises.push(
+                backend.delete(`/instrument-changes/${meta.changeId}`)
+              );
+            }
+          } else if (newQty !== originalQty) {
+            if (meta?.changeId) {
+              instrumentPromises.push(
+                backend.put(`/instrument-changes/${meta.changeId}`, {
+                  amountChanged: newQty,
+                })
+              );
+            }
+          }
+        }
+
+        for (const [name, newQty] of Object.entries(addedInstruments)) {
+          if (originalInstruments[name] === undefined) {
+            const instrumentId = existingInstruments.find(
+              (i) => i.name === name
+            )?.id;
+
+            if (instrumentId) {
+              instrumentPromises.push(
+                backend.post(`/instrument-changes`, {
+                  instrumentId: instrumentId,
+                  updateId: programUpdateId,
+                  amountChanged: newQty,
+                  event_type: 'other',
+                })
+              );
+            }
+          }
+        }
+        await Promise.all(instrumentPromises);
+      }
+      if (onSuccess) onSuccess();
+      confirmDisclosure.onClose();
+      onClose();
+    } catch (error) {
+      console.error('Failed to confirm changes:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (!programUpdateId) {
@@ -581,7 +708,40 @@ export const ProgramUpdateForm = ({
             )}
           </VStack>
         </DrawerBody>
+
+        <DrawerFooter
+          borderTopWidth="1px"
+          borderColor="gray.200"
+          justifyContent="flex-end"
+          w="full"
+          p={4}
+        >
+          <HStack spacing={3}>
+            <Button
+              variant="outline"
+              onClick={handleKeepAsUnresolved}
+              isLoading={isSaving}
+            >
+              Keep as Unresolved
+            </Button>
+            <Button
+              colorScheme="teal"
+              onClick={handleSaveAndResolveClick}
+              isDisabled={isSaving}
+            >
+              Save & Mark as Resolved
+            </Button>
+          </HStack>
+        </DrawerFooter>
       </DrawerContent>
+
+      <ReviewProgramUpdate
+        isOpen={confirmDisclosure.isOpen}
+        onClose={confirmDisclosure.onClose}
+        onConfirm={handleConfirmChanges}
+        changes={diffChanges}
+        isLoading={isSaving}
+      />
     </Drawer>
   );
 };

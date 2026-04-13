@@ -169,6 +169,7 @@ export const ProgramUpdatesTable = ({
     return filteredData.filter(
       (update) =>
         (update.note || '').toLowerCase().includes(q) ||
+        (update.title || '').toLowerCase().includes(q) ||
         (update.name || '').toLowerCase().includes(q) ||
         (update.fullName || '').toLowerCase().includes(q) ||
         (update.status || '').toLowerCase().includes(q) ||
@@ -194,7 +195,7 @@ export const ProgramUpdatesTable = ({
           setIsFormOpen(false);
           setSelectedUpdate(null);
         }}
-        onSave={onSave}
+        onSuccess={onSave}
         programUpdateId={selectedUpdate?.id}
         isInstrumentUpdate={selectedUpdate?.isInstrumentUpdate}
         selectedUpdate={selectedUpdate}
@@ -362,7 +363,9 @@ export const ProgramUpdatesTable = ({
                         noOfLines={1}
                         maxW="400px"
                       >
-                        {row.note || t('updates.programNotePlaceholder')}
+                        {row.note ||
+                          row.title ||
+                          t('updates.programNotePlaceholder')}
                       </Text>
                     </Td>
                     {(showStatus || showFlagAndType) && (

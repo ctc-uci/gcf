@@ -25,16 +25,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { BsMusicNoteList, BsPencilSquare } from 'react-icons/bs';
 import { FaScrewdriverWrench } from 'react-icons/fa6';
-import {
-  FiCamera,
-  FiCornerDownRight,
-  FiEdit3,
-  FiHelpCircle,
-  FiMusic,
-  FiStar,
-  FiTool,
-  FiX,
-} from 'react-icons/fi';
+import { FiStar, FiX } from 'react-icons/fi';
 import { IoIosMusicalNotes, IoMdPhotos } from 'react-icons/io';
 import { MdQuestionMark } from 'react-icons/md';
 
