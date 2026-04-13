@@ -225,7 +225,7 @@ export const Media = () => {
         onClose={onClose}
         onUploadComplete={onUploadCompleteHandler}
       />
-      {viewerIndex !== null && (
+      {viewerIndex !== null && filteredMedia[viewerIndex] && (
         <MediaViewer
           updates={filteredMedia.map((m) => ({
             id: m.id,

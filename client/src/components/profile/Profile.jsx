@@ -151,7 +151,7 @@ export const Profile = () => {
       if (role === 'Program Director') {
         const programData = await fetchProgramData(backend, userData.id);
         setRoleSpecificData(programData);
-        setFormData((prev) => ({ ...prev, bio: programData.bio || '' }));
+        setFormData((prev) => ({ ...prev, bio: programData?.bio || '' }));
       } else if (role === 'Regional Director') {
         const regionData = await fetchRegionData(backend, userData.id);
         setRoleSpecificData(regionData);
