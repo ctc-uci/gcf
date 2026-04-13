@@ -214,8 +214,6 @@ export const Profile = () => {
   };
 
   const saveProfileEdits = async () => {
-    console.log('currentUser.uid:', currentUser.uid);
-    console.log('gcfUser.id:', gcfUser.id);
     try {
       await Promise.all([
         backend.patch(`/gcf-users/${currentUser.uid}/preferred-language`, {
