@@ -100,8 +100,7 @@ export function downloadProgramUpdatesAsCsv(data, t) {
 
 const StatusBadge = ({ status }) => {
   const { t } = useTranslation();
-  const isResolved =
-    status?.toLowerCase() === 'resolved' || status?.toLowerCase() === 'active';
+  const isResolved = status;
   return (
     <Badge
       bg={isResolved ? 'gray.100' : 'red.100'}
@@ -368,7 +367,7 @@ export const ProgramUpdatesTable = ({
                     </Td>
                     {(showStatus || showFlagAndType) && (
                       <Td>
-                        <StatusBadge status={row.status} />
+                        <StatusBadge status={row.showOnTable} />
                       </Td>
                     )}
                     <Td>
