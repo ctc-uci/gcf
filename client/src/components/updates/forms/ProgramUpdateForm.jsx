@@ -321,11 +321,17 @@ export const ProgramUpdateForm = ({
             `/mediaChange/update/${programUpdateId}`
           );
           const mediaData = mediaChangesRes.data || [];
-          const urlResponses = await Promise.all(
+          const urlResults = await Promise.allSettled(
             mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
           );
-          setMediaItems(mediaData);
-          setMediaURLs(urlResponses.map((r) => r.data.url));
+          const validItems = mediaData.filter(
+            (_, i) => urlResults[i].status === 'fulfilled'
+          );
+          const validURLs = urlResults
+            .filter((r) => r.status === 'fulfilled')
+            .map((r) => r.value.data.url);
+          setMediaItems(validItems);
+          setMediaURLs(validURLs);
         } catch (error) {
           console.error('Error fetching media changes:', error);
         }
