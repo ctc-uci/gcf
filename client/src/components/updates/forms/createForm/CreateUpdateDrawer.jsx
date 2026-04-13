@@ -496,6 +496,7 @@ export const CreateUpdateDrawer = ({
       update_date: timestamp,
       updated_at: timestamp,
       note: fullNote || null,
+      show_on_table: false,
     };
 
     setIsLoading(true);

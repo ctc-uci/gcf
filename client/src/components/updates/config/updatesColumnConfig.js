@@ -31,7 +31,6 @@ export const mediaSectionColumns = [
 ];
 
 export const formatTableDate = (dateString) => {
-  // TODO: timezone handling
   if (!dateString) return '';
 
   let safeDateString = dateString.replace(' ', 'T');

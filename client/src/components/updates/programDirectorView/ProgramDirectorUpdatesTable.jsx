@@ -21,23 +21,21 @@ import { FiStar } from 'react-icons/fi';
 import { SortArrows } from '../../tables/SortArrows';
 import { formatTableDate } from '../config/updatesColumnConfig';
 
-/**
- * TODO(program-update-status): Replace placeholder with real resolved/unresolved UI.
- * Wrong approach (removed): mapping `row.status` from `program.status` (Active/Inactive).
- * Per product: resolved = admin/regional director has reviewed the update and approved it
- * for overall stats — not the same as whether the program is "active".
- * Likely source: `program_update.show_on_table` and/or a dedicated approval field; confirm
- * schema + API (`updatesPermissions` program-updates queries, `programUpdate` routes) expose
- * the right boolean/enum, then map to labels (e.g. common.resolved / common.unresolved).
- */
-function formatStatus(_row, dash) {
+function formatStatus(row, t) {
+  const isResolved = Boolean(row.showOnTable);
   return (
-    <Text
-      fontSize="sm"
-      color="gray.500"
+    <Badge
+      bg={isResolved ? 'gray.100' : 'red.100'}
+      color={isResolved ? 'gray.700' : 'red.700'}
+      borderRadius="md"
+      px={2}
+      py={0.5}
+      fontSize="xs"
+      fontWeight="500"
+      textTransform="capitalize"
     >
-      {dash}
-    </Text>
+      {isResolved ? t('common.resolved') : t('common.unresolved')}
+    </Badge>
   );
 }
 
@@ -56,6 +54,7 @@ export const ProgramDirectorUpdatesTable = ({
   const { t } = useTranslation();
   const dash = t('common.emDash');
   const colSpan = variant === 'student' ? 4 : 5;
+
   return (
     <Box
       position="relative"
@@ -262,7 +261,7 @@ export const ProgramDirectorUpdatesTable = ({
                           isNumeric
                           verticalAlign="top"
                         >
-                          {formatStatus(row, dash)}
+                          {formatStatus(row, t)}
                         </Td>
                         <Td
                           isNumeric
@@ -303,7 +302,7 @@ export const ProgramDirectorUpdatesTable = ({
                           isNumeric
                           verticalAlign="top"
                         >
-                          {formatStatus(row, dash)}
+                          {formatStatus(row, t)}
                         </Td>
                         <Td
                           isNumeric

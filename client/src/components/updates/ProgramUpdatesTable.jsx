@@ -32,7 +32,6 @@ import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './forms/ProgramUpdateForm';
 
 function formatDate(dateStr) {
-  // TODO: handle timezeones
   if (!dateStr) return '';
 
   let safeDateString = String(dateStr).replace(' ', 'T');
