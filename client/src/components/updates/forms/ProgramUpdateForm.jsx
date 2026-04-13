@@ -42,6 +42,7 @@ import { ReviewProgramUpdate } from './ReviewProgramUpdate';
 function formatUpdateDisplayDate(value) {
   if (value === null || value === undefined || value === '') return '';
   const s = String(value).trim();
+
   const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
   if (ymd && !/\d{1,2}:\d{2}/.test(s)) {
     const [, y, mo, d] = ymd;
@@ -54,13 +55,17 @@ function formatUpdateDisplayDate(value) {
       year: 'numeric',
     });
   }
+
   const dt = new Date(s);
   if (Number.isNaN(dt.getTime())) return s;
+
   return dt.toLocaleString(undefined, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
     year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   });
 }
 
@@ -311,7 +316,7 @@ export const ProgramUpdateForm = ({
             .filter(Boolean)
             .join(' ') || ''
         );
-        setUpdateDateTime(selectedUpdate.updateDate || '');
+        setUpdateDateTime(selectedUpdate.updatedAt || '');
       }
       try {
         const response = await backend.get(
@@ -321,7 +326,7 @@ export const ProgramUpdateForm = ({
         setTitle(data.title || '');
         setNotes(data.note || '');
         setProgramId(parseInt(data.programId, 10));
-        setUpdateDateTime(data.updateDate || '');
+        setUpdateDateTime(data.updatedAt || '');
 
         const pid = parseInt(data.programId, 10);
         const listRow =

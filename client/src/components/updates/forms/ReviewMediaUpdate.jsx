@@ -26,6 +26,36 @@ import { useBackendContext } from '../../../contexts/hooks/useBackendContext';
 import { MediaCard } from '../../media/MediaCard';
 import { MediaViewer } from '../MediaViewer';
 
+function formatUpdateDisplayDate(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const s = String(value).trim();
+
+  const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+  if (ymd && !/\d{1,2}:\d{2}/.test(s)) {
+    const [, y, mo, d] = ymd;
+    const dt = new Date(Number(y), Number(mo) - 1, Number(d));
+    if (Number.isNaN(dt.getTime())) return s;
+    return dt.toLocaleDateString(undefined, {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
+
+  const dt = new Date(s);
+  if (Number.isNaN(dt.getTime())) return s;
+
+  return dt.toLocaleString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
@@ -178,7 +208,9 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                   >
                     {t('common.time')}
                   </Text>
-                  <Text>{update?.updateDate ?? ''}</Text>
+                  <Text>
+                    {formatUpdateDisplayDate(update?.updatedAt) || ''}
+                  </Text>
                 </GridItem>
               </Grid>
 

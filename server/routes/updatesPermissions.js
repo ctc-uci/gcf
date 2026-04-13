@@ -36,6 +36,7 @@ updatesPermissionsRouter.get('/media-updates/:id', async (req, res) => {
           program_update.update_date,
           program_update.note,
           program_update.show_on_table,
+          program_update.updated_at,
           program.name AS program_name,
           creator.first_name,
           creator.last_name,

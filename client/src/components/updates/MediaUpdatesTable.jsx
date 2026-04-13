@@ -33,8 +33,42 @@ import { ReviewMediaUpdate } from './forms/ReviewMediaUpdate';
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
+
+  let safeDateString = String(dateStr).replace(' ', 'T');
+  if (
+    !safeDateString.endsWith('Z') &&
+    !safeDateString.includes('+') &&
+    !safeDateString.includes('-')
+  ) {
+    safeDateString += 'Z';
+  }
+
+  const d = new Date(safeDateString);
   if (isNaN(d.getTime())) return dateStr;
+
+  const now = new Date();
+  const isToday =
+    d.getDate() === now.getDate() &&
+    d.getMonth() === now.getMonth() &&
+    d.getFullYear() === now.getFullYear();
+
+  const isThisYear = d.getFullYear() === now.getFullYear();
+
+  if (isToday) {
+    return d.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+
+  if (isThisYear) {
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+
   return d.toLocaleDateString('en-US', {
     month: '2-digit',
     day: '2-digit',
@@ -49,7 +83,7 @@ export function downloadMediaUpdatesAsCsv(data) {
     escapeCsvValue(row.status),
     escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
     escapeCsvValue(row.programName),
-    escapeCsvValue(formatDate(row.updateDate)),
+    escapeCsvValue(formatDate(row.updatedAt || row.updateDate)),
   ]);
   downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
 }
@@ -109,7 +143,7 @@ export const MediaUpdatesTable = ({
         (update.programName || '').toLowerCase().includes(q) ||
         author.includes(q) ||
         (update.status || '').toLowerCase().includes(q) ||
-        (formatDate(update.updateDate) || '').toLowerCase().includes(q)
+        (formatDate(update.updatedAt) || '').toLowerCase().includes(q)
       );
     });
   }, [searchQuery, filteredData]);
@@ -259,7 +293,7 @@ export const MediaUpdatesTable = ({
                       fontSize="sm"
                       color="gray.600"
                     >
-                      {formatDate(row.updateDate)}
+                      {formatDate(row.updatedAt)}
                     </Text>
                   </Td>
                 </Tr>
