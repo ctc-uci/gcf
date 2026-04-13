@@ -331,6 +331,7 @@ export const CreateUpdateDrawer = ({
             const urlResponses = await Promise.all(
               mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
             );
+            if (cancelled) return;
             originalMediaIds.current = new Set(mediaData.map((m) => m.id));
             setUploadedMedia(
               mediaData.map((m, i) => ({
