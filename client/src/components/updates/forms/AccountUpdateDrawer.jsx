@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  Badge,
   Box,
   Button,
   Center,
@@ -12,9 +11,7 @@ import {
   DrawerOverlay,
   Flex,
   Heading,
-  HStack,
   IconButton,
-  Image,
   Spinner,
   Text,
   useToast,
@@ -25,501 +22,32 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
-const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
+import { BaseAccountInfoSection } from './account-update-drawer/BaseAccountInfoSection';
+import { RoleSpecificDetails } from './account-update-drawer/RoleSpecificDetails';
+import {
+  bioText,
+  firstNonBlank,
+  normalizeAccountSnapshot,
+  pickStr,
+  pictureUrl,
+  programIdKey,
+  programName,
+  regionIdKey,
+  regionName,
+  resolveProgramDisplay,
+  resolveRegionDisplay,
+  valueOrFallback,
+} from './account-update-drawer/shared';
 
-const getRoleBadgeProps = (role) => {
-  switch (role) {
-    case 'Program Director':
-      return { bg: 'teal.100', color: 'teal.800' };
-    case 'Regional Director':
-      return { bg: 'teal.400', color: 'white' };
-    case 'Admin':
-    case 'Super Admin':
-      return { bg: 'teal.700', color: 'white' };
-    default:
-      return { bg: 'gray.200', color: 'gray.800' };
-  }
+const resolvableIdFromSnap = (snap, { nameGetter, directKey, idGetter }) => {
+  if (!snap) return null;
+  if (nameGetter(snap)) return null;
+  const direct = snap[directKey];
+  if (typeof direct === 'string' && direct.trim()) return null;
+
+  const id = idGetter(snap);
+  return id != null && id !== '' ? String(id) : null;
 };
-
-const ACCOUNT_CHANGE_DEFAULTS = {
-  first_name: '',
-  last_name: '',
-  email: '',
-  picture: '',
-  role: '',
-  program: '',
-  region: '',
-  bio: '',
-};
-
-const normalizeAccountSnapshot = (snap) => {
-  if (!snap || typeof snap !== 'object') {
-    return { ...ACCOUNT_CHANGE_DEFAULTS };
-  }
-  const { password: _omitPwd, ...rest } = snap;
-  return {
-    ...ACCOUNT_CHANGE_DEFAULTS,
-    ...rest,
-  };
-};
-
-const isBlank = (v) => v == null || String(v).trim() === '';
-
-const valueOrFallback = (primary, fallback) =>
-  isBlank(primary) ? (fallback ?? '') : primary;
-
-const firstNonBlank = (a, b) => {
-  if (!isBlank(a)) return a;
-  if (!isBlank(b)) return b;
-  return '';
-};
-
-const pickStr = (snap, camelKey, snakeKey) => {
-  if (!snap || typeof snap !== 'object') return '';
-  const v =
-    snakeKey !== undefined
-      ? firstNonBlank(snap[camelKey], snap[snakeKey])
-      : snap[camelKey];
-  if (v == null) return '';
-  return String(v).trim();
-};
-
-const programName = (snap) => {
-  const list = snap?.programs ?? snap?.Programs;
-  if (!Array.isArray(list) || list.length === 0) return '';
-  const p = list[0];
-  return p?.name != null ? String(p.name).trim() : '';
-};
-
-const regionName = (snap) => {
-  const list = snap?.regions ?? snap?.Regions;
-  if (!Array.isArray(list) || list.length === 0) return '';
-  const r = list[0];
-  return r?.name != null ? String(r.name).trim() : '';
-};
-
-const resolveProgramDisplay = (snap, idToName) => {
-  const n = programName(snap);
-  if (n) return n;
-  const direct = snap?.program;
-  if (typeof direct === 'string' && direct.trim()) return direct.trim();
-  const id = snap?.programId ?? snap?.program_id ?? snap?.programs?.[0]?.id;
-  if (id == null || id === '') return '';
-  const mapped = idToName[String(id)];
-  return mapped && mapped.trim() ? mapped : String(id);
-};
-
-const resolveRegionDisplay = (snap, idToName) => {
-  const n = regionName(snap);
-  if (n) return n;
-  const direct = snap?.region;
-  if (typeof direct === 'string' && direct.trim()) return direct.trim();
-  const id = snap?.regionId ?? snap?.region_id ?? snap?.regions?.[0]?.id;
-  if (id == null || id === '') return '';
-  const mapped = idToName[String(id)];
-  return mapped && mapped.trim() ? mapped : String(id);
-};
-
-/** Normalized id for diff/strikethrough (audit payloads use programId / regionId). */
-const programIdKey = (snap) => {
-  if (!snap || typeof snap !== 'object') return '';
-  const id = snap.programId ?? snap.program_id ?? snap.programs?.[0]?.id;
-  return id == null || id === '' ? '' : String(id);
-};
-
-const regionIdKey = (snap) => {
-  if (!snap || typeof snap !== 'object') return '';
-  const id = snap.regionId ?? snap.region_id ?? snap.regions?.[0]?.id;
-  return id == null || id === '' ? '' : String(id);
-};
-
-const isDirectImageUrl = (s) =>
-  typeof s === 'string' && /^https?:\/\//i.test(s.trim());
-
-const fetchPictureDisplayUrl = async (backend, keyOrUrl) => {
-  if (!keyOrUrl || !String(keyOrUrl).trim()) return null;
-  const raw = String(keyOrUrl).trim();
-  if (isDirectImageUrl(raw)) return raw;
-  try {
-    const { data } = await backend.get(
-      `/images/url/${encodeURIComponent(raw)}`
-    );
-    if (data?.success === false) return null;
-    const url = data?.url != null ? String(data.url).trim() : '';
-    return url || null;
-  } catch (err) {
-    console.error('Error fetching profile image URL:', err);
-    return null;
-  }
-};
-
-const displaySrcForSlot = (hadKey, resolvedUrl) => {
-  if (!hadKey) return '';
-  if (resolvedUrl && String(resolvedUrl).trim() !== '') {
-    return String(resolvedUrl).trim();
-  }
-  return DEFAULT_PROFILE_IMAGE;
-};
-
-const pictureUrl = (snap) => {
-  if (!snap || typeof snap !== 'object') return '';
-  const u = firstNonBlank(
-    firstNonBlank(
-      firstNonBlank(snap.picture, snap.profilePicture),
-      snap.profile_image
-    ),
-    snap.photoUrl
-  );
-  return typeof u === 'string' && u.trim() ? u.trim() : '';
-};
-
-const bioText = (snap) => {
-  if (!snap || typeof snap !== 'object') return '';
-  const b = firstNonBlank(
-    firstNonBlank(snap.biography, snap.bio),
-    snap.biographyText
-  );
-  if (isBlank(b)) return '';
-  return String(b).trim();
-};
-
-const DiffField = ({
-  label,
-  oldValue,
-  newValue,
-  changeType,
-  /** When set, drives strikethrough instead of comparing display strings (e.g. program/region by id). */
-  hasChangeOverride,
-}) => {
-  const oldStr = oldValue ?? '';
-  const newStr = newValue ?? '';
-  const isCreation = changeType === 'Creation';
-
-  if (isCreation) {
-    if (!newStr) return null;
-    return (
-      <Box>
-        <Text
-          color="teal.500"
-          fontSize="sm"
-          fontWeight="500"
-          mb={1}
-        >
-          {label}
-        </Text>
-        <Text>{newStr}</Text>
-      </Box>
-    );
-  }
-
-  if (!oldStr && !newStr && hasChangeOverride !== true) return null;
-
-  const hasChange =
-    typeof hasChangeOverride === 'boolean'
-      ? hasChangeOverride
-      : String(oldStr) !== String(newStr);
-
-  return (
-    <Box>
-      <Text
-        color="teal.500"
-        fontSize="sm"
-        fontWeight="500"
-        mb={1}
-      >
-        {label}
-      </Text>
-      {hasChange ? (
-        <HStack
-          spacing={2}
-          align="baseline"
-          flexWrap="wrap"
-        >
-          {oldStr ? (
-            <Text
-              as="span"
-              textDecoration="line-through"
-              color="gray.500"
-            >
-              {oldStr}
-            </Text>
-          ) : null}
-          {newStr ? <Text as="span">{newStr}</Text> : null}
-        </HStack>
-      ) : (
-        <Text>{newStr || oldStr}</Text>
-      )}
-    </Box>
-  );
-};
-
-const RoleDiffField = ({ oldRole, newRole, changeType }) => {
-  const { t } = useTranslation();
-  const isCreation = changeType === 'Creation';
-  const newRoleBadge = getRoleBadgeProps(newRole);
-  const oldRoleBadge = getRoleBadgeProps(oldRole);
-
-  if (isCreation) {
-    if (!newRole) return null;
-    return (
-      <Box>
-        <Text
-          color="teal.500"
-          fontSize="sm"
-          fontWeight="500"
-          mb={1}
-        >
-          {t('common.role')}
-        </Text>
-        <Badge
-          bg={newRoleBadge.bg}
-          color={newRoleBadge.color}
-          borderRadius="md"
-          px={2}
-          py={0.5}
-        >
-          {newRole}
-        </Badge>
-      </Box>
-    );
-  }
-
-  if (!oldRole && !newRole) return null;
-  const hasChange = oldRole !== newRole;
-
-  if (!hasChange) {
-    return (
-      <Box>
-        <Text
-          color="teal.500"
-          fontSize="sm"
-          fontWeight="500"
-          mb={1}
-        >
-          {t('common.role')}
-        </Text>
-        <Badge
-          bg={newRoleBadge.bg}
-          color={newRoleBadge.color}
-          borderRadius="md"
-          px={2}
-          py={0.5}
-        >
-          {newRole || oldRole}
-        </Badge>
-      </Box>
-    );
-  }
-
-  return (
-    <Box>
-      <Text
-        color="teal.500"
-        fontSize="sm"
-        fontWeight="500"
-        mb={1}
-      >
-        {t('common.role')}
-      </Text>
-      <HStack
-        spacing={2}
-        flexWrap="wrap"
-      >
-        {oldRole ? (
-          <Badge
-            bg={oldRoleBadge.bg}
-            color={oldRoleBadge.color}
-            borderRadius="md"
-            px={2}
-            py={0.5}
-            textDecoration="line-through"
-            opacity={0.75}
-          >
-            {oldRole}
-          </Badge>
-        ) : null}
-        {newRole ? (
-          <Badge
-            bg={newRoleBadge.bg}
-            color={newRoleBadge.color}
-            borderRadius="md"
-            px={2}
-            py={0.5}
-          >
-            {newRole}
-          </Badge>
-        ) : null}
-      </HStack>
-    </Box>
-  );
-};
-
-function AccountChangeProfileImages({
-  oldKey,
-  newKey,
-  changeType,
-  backend,
-  t,
-}) {
-  const [oldResolved, setOldResolved] = useState(null);
-  const [newResolved, setNewResolved] = useState(null);
-  const [resolving, setResolving] = useState(false);
-
-  const hasOld = Boolean(oldKey && String(oldKey).trim());
-  const hasNew = Boolean(newKey && String(newKey).trim());
-
-  useEffect(() => {
-    if (!backend) {
-      setOldResolved(null);
-      setNewResolved(null);
-      setResolving(false);
-      return;
-    }
-
-    if (!hasOld && !hasNew) {
-      setOldResolved(null);
-      setNewResolved(null);
-      setResolving(false);
-      return;
-    }
-
-    let cancelled = false;
-    (async () => {
-      setResolving(true);
-      try {
-        const [o, n] = await Promise.all([
-          hasOld
-            ? fetchPictureDisplayUrl(backend, oldKey)
-            : Promise.resolve(null),
-          hasNew
-            ? fetchPictureDisplayUrl(backend, newKey)
-            : Promise.resolve(null),
-        ]);
-        if (!cancelled) {
-          setOldResolved(o);
-          setNewResolved(n);
-        }
-      } finally {
-        if (!cancelled) setResolving(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [backend, oldKey, newKey, hasOld, hasNew]);
-
-  const label = (
-    <Text
-      color="teal.500"
-      fontSize="sm"
-      fontWeight="500"
-      mb={2}
-    >
-      {t('common.profilePicture')}
-    </Text>
-  );
-
-  if (resolving) {
-    return (
-      <Box>
-        {label}
-        <Spinner size="md" />
-      </Box>
-    );
-  }
-
-  const displayOld = displaySrcForSlot(hasOld, oldResolved);
-  const displayNew = displaySrcForSlot(hasNew, newResolved);
-
-  const keysDiffer =
-    hasOld && hasNew && String(oldKey).trim() !== String(newKey).trim();
-
-  if (!hasOld && !hasNew) {
-    return (
-      <Box>
-        {label}
-        <Image
-          src={DEFAULT_PROFILE_IMAGE}
-          boxSize="120px"
-          borderRadius="full"
-          objectFit="cover"
-          alt={t('common.profilePicture')}
-        />
-      </Box>
-    );
-  }
-
-  if (changeType === 'Creation') {
-    const src = hasNew
-      ? displayNew
-      : hasOld
-        ? displayOld
-        : DEFAULT_PROFILE_IMAGE;
-    return (
-      <Box>
-        {label}
-        <Image
-          src={src}
-          boxSize="120px"
-          borderRadius="full"
-          objectFit="cover"
-          alt={t('common.newProfile')}
-        />
-      </Box>
-    );
-  }
-
-  if (!keysDiffer) {
-    const single = hasNew
-      ? displayNew
-      : hasOld
-        ? displayOld
-        : DEFAULT_PROFILE_IMAGE;
-    return (
-      <Box>
-        {label}
-        <Image
-          src={single}
-          boxSize="120px"
-          borderRadius="full"
-          objectFit="cover"
-          alt={t('common.profilePicture')}
-        />
-      </Box>
-    );
-  }
-
-  return (
-    <Box>
-      {label}
-      <HStack
-        spacing={4}
-        align="flex-start"
-      >
-        {hasOld ? (
-          <Image
-            src={displayOld}
-            boxSize="120px"
-            borderRadius="full"
-            objectFit="cover"
-            alt={t('common.oldProfile')}
-            opacity={0.85}
-            sx={{ WebkitFilter: 'grayscale(35%)' }}
-          />
-        ) : null}
-        {hasNew ? (
-          <Image
-            src={displayNew}
-            boxSize="120px"
-            borderRadius="full"
-            objectFit="cover"
-            alt={t('common.newProfile')}
-          />
-        ) : null}
-      </HStack>
-    </Box>
-  );
-}
 
 export const AccountUpdateDrawer = ({
   update,
@@ -574,24 +102,19 @@ export const AccountUpdateDrawer = ({
               .catch(() => null)
           : Promise.resolve(null);
 
-        const programIdToResolve = (snap) => {
-          if (!snap) return null;
-          if (programName(snap)) return null;
-          if (typeof snap.program === 'string' && snap.program.trim())
-            return null;
-          const id =
-            snap.programId ?? snap.program_id ?? snap.programs?.[0]?.id;
-          return id != null && id !== '' ? String(id) : null;
-        };
+        const programIdToResolve = (snap) =>
+          resolvableIdFromSnap(snap, {
+            nameGetter: programName,
+            directKey: 'program',
+            idGetter: (s) => s.programId ?? s.program_id ?? s.programs?.[0]?.id,
+          });
 
-        const regionIdToResolve = (snap) => {
-          if (!snap) return null;
-          if (regionName(snap)) return null;
-          if (typeof snap.region === 'string' && snap.region.trim())
-            return null;
-          const id = snap.regionId ?? snap.region_id ?? snap.regions?.[0]?.id;
-          return id != null && id !== '' ? String(id) : null;
-        };
+        const regionIdToResolve = (snap) =>
+          resolvableIdFromSnap(snap, {
+            nameGetter: regionName,
+            directKey: 'region',
+            idGetter: (s) => s.regionId ?? s.region_id ?? s.regions?.[0]?.id,
+          });
 
         const programIds = [
           ...new Set(
@@ -669,8 +192,8 @@ export const AccountUpdateDrawer = ({
 
   const changeType = detail?.changeType ?? update?.changeType;
 
-  const oldSnap = useMemo(() => {
-    const s = normalizeAccountSnapshot(detail?.oldValues);
+  const withFallbacks = (raw) => {
+    const s = normalizeAccountSnapshot(raw);
     const role = valueOrFallback(s.role, fallbackValues.role);
     return {
       ...s,
@@ -685,8 +208,6 @@ export const AccountUpdateDrawer = ({
       email: valueOrFallback(s.email, fallbackValues.email),
       picture: valueOrFallback(s.picture, fallbackValues.picture),
       role,
-      // Do not fall back to the user's current program/region — that masks ID-only
-      // audit payloads and makes old/new identical so program/region diffs never strike through.
       program: valueOrFallback(s.program, ''),
       region: valueOrFallback(s.region, ''),
       bio:
@@ -697,35 +218,16 @@ export const AccountUpdateDrawer = ({
             )
           : '',
     };
-  }, [detail?.oldValues, fallbackValues]);
+  };
 
-  const newSnap = useMemo(() => {
-    const s = normalizeAccountSnapshot(detail?.newValues);
-    const role = valueOrFallback(s.role, fallbackValues.role);
-    return {
-      ...s,
-      first_name: valueOrFallback(
-        firstNonBlank(s.first_name, s.firstName),
-        fallbackValues.first_name
-      ),
-      last_name: valueOrFallback(
-        firstNonBlank(s.last_name, s.lastName),
-        fallbackValues.last_name
-      ),
-      email: valueOrFallback(s.email, fallbackValues.email),
-      picture: valueOrFallback(s.picture, fallbackValues.picture),
-      role,
-      program: valueOrFallback(s.program, ''),
-      region: valueOrFallback(s.region, ''),
-      bio:
-        role === 'Program Director'
-          ? valueOrFallback(
-              firstNonBlank(s.bio, s.biography),
-              fallbackValues.bio
-            )
-          : '',
-    };
-  }, [detail?.newValues, fallbackValues]);
+  const oldSnap = useMemo(
+    () => withFallbacks(detail?.oldValues),
+    [detail?.oldValues, fallbackValues]
+  );
+  const newSnap = useMemo(
+    () => withFallbacks(detail?.newValues),
+    [detail?.newValues, fallbackValues]
+  );
 
   const fields = useMemo(() => {
     const oldFirst = pickStr(oldSnap, 'firstName', 'first_name');
@@ -775,8 +277,6 @@ export const AccountUpdateDrawer = ({
   const bioOldDisplay = roleDiffers ? '' : fields.oldBio;
 
   const newRoleNorm = fields.newRole.trim();
-  const showProgramDiff = newRoleNorm !== 'Regional Director';
-  const showRegionDiff = newRoleNorm !== 'Program Director';
 
   const isResolved = Boolean(detail?.resolved);
 
@@ -880,62 +380,22 @@ export const AccountUpdateDrawer = ({
               align="stretch"
               mt={6}
             >
-              <AccountChangeProfileImages
-                oldKey={fields.oldPic}
-                newKey={fields.newPic}
+              <BaseAccountInfoSection
+                fields={fields}
                 changeType={changeType}
                 backend={backend}
                 t={t}
               />
 
-              <DiffField
-                label={t('common.firstName')}
-                oldValue={fields.oldFirst}
-                newValue={fields.newFirst}
+              <RoleSpecificDetails
+                fields={fields}
                 changeType={changeType}
-              />
-              <DiffField
-                label={t('common.lastName')}
-                oldValue={fields.oldLast}
-                newValue={fields.newLast}
-                changeType={changeType}
-              />
-              <DiffField
-                label={t('common.email')}
-                oldValue={fields.oldEmail}
-                newValue={fields.newEmail}
-                changeType={changeType}
-              />
-
-              <RoleDiffField
-                oldRole={fields.oldRole}
-                newRole={fields.newRole}
-                changeType={changeType}
-              />
-
-              {showProgramDiff && (
-                <DiffField
-                  label={t('common.program')}
-                  oldValue={programOldDisplay}
-                  newValue={fields.newProg}
-                  changeType={changeType}
-                  hasChangeOverride={roleDiffers ? undefined : fields.progById}
-                />
-              )}
-              {showRegionDiff && (
-                <DiffField
-                  label={t('common.region')}
-                  oldValue={regionOldDisplay}
-                  newValue={fields.newReg}
-                  changeType={changeType}
-                  hasChangeOverride={roleDiffers ? undefined : fields.regById}
-                />
-              )}
-              <DiffField
-                label={t('common.biography')}
-                oldValue={bioOldDisplay}
-                newValue={fields.newBio}
-                changeType={changeType}
+                roleDiffers={roleDiffers}
+                programOldDisplay={programOldDisplay}
+                regionOldDisplay={regionOldDisplay}
+                bioOldDisplay={bioOldDisplay}
+                newRoleNorm={newRoleNorm}
+                t={t}
               />
 
               <Divider />

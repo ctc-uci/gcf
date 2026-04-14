@@ -194,7 +194,7 @@ export const Profile = () => {
       // Log this as an account change even if only the picture changed
       if (prevPictureKey !== nextPictureKey) {
         const trackedBio =
-          role === 'Program Director' ? gcfUser?.bio || '' : '';
+          role === 'Program Director' ? roleSpecificData?.bio || '' : '';
         try {
           await backend.post('/accountChange', {
             user_id: currentUser.uid,
@@ -257,7 +257,8 @@ export const Profile = () => {
 
   const saveProfileEdits = async () => {
     try {
-      const oldBio = role === 'Program Director' ? gcfUser?.bio || '' : '';
+      const oldBio =
+        role === 'Program Director' ? roleSpecificData?.bio || '' : '';
       const newBio =
         role === 'Program Director' ? formData.bio?.trim() || '' : '';
       const oldValues = {
@@ -275,14 +276,15 @@ export const Profile = () => {
         bio: newBio,
       };
 
-      (await backend.put(`/gcf-users/${currentUser.uid}`, {
+      await backend.put(`/gcf-users/${currentUser.uid}`, {
         first_name: formData.firstName,
         last_name: formData.lastName,
-      }),
-        role === 'Program Director' &&
-          backend.patch(`/program-directors/${currentUser.uid}`, {
-            bio: formData.bio,
-          }));
+      });
+      if (role === 'Program Director') {
+        await backend.patch(`/program-directors/${currentUser.uid}`, {
+          bio: newBio,
+        });
+      }
 
       if (JSON.stringify(oldValues) !== JSON.stringify(newValues)) {
         try {
@@ -310,8 +312,9 @@ export const Profile = () => {
         preferredLanguage: formData.language,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        bio: role === 'Program Director' ? newBio : prev?.bio,
       }));
-      setRoleSpecificData((prev) => ({ ...prev, bio: formData.bio }));
+      setRoleSpecificData((prev) => ({ ...prev, bio: newBio }));
       window.dispatchEvent(new Event('profile-updated'));
 
       const now = new Date();
