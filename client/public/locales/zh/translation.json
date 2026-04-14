@@ -64,6 +64,8 @@
     "keepResolved": "保持已解决",
     "oldProfile": "旧档案",
     "newProfile": "新的个人资料",
+    "diffLabelOld": "旧",
+    "diffLabelNew": "新",
     "editUpdates": "编辑更新",
     "accountUpdate": "账户更新",
     "profilePicture": "个人资料图片",

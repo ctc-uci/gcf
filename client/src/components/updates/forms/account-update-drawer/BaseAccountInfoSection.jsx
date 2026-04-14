@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 
-import { Badge, Box, HStack, Image, Spinner, Text } from '@chakra-ui/react';
+import {
+  Badge,
+  Box,
+  HStack,
+  Image,
+  Spinner,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 
 import { DiffField } from './DiffField';
 import {
@@ -110,7 +118,7 @@ const RoleDiffField = ({ oldRole, newRole, changeType, t }) => {
   );
 };
 
-const ProfileImageDiff = ({ oldKey, newKey, changeType, backend, t }) => {
+const ProfileImageDiff = ({ oldKey, newKey, backend, t }) => {
   const [oldResolved, setOldResolved] = useState(null);
   const [newResolved, setNewResolved] = useState(null);
   const [resolving, setResolving] = useState(false);
@@ -180,8 +188,9 @@ const ProfileImageDiff = ({ oldKey, newKey, changeType, backend, t }) => {
 
   const displayOld = displaySrcForSlot(hasOld, oldResolved);
   const displayNew = displaySrcForSlot(hasNew, newResolved);
-  const keysDiffer =
-    hasOld && hasNew && String(oldKey).trim() !== String(newKey).trim();
+
+  const unchanged =
+    hasOld && hasNew && String(oldKey).trim() === String(newKey).trim();
 
   if (!hasOld && !hasNew) {
     return (
@@ -198,32 +207,8 @@ const ProfileImageDiff = ({ oldKey, newKey, changeType, backend, t }) => {
     );
   }
 
-  if (changeType === 'Creation') {
-    const src = hasNew
-      ? displayNew
-      : hasOld
-        ? displayOld
-        : DEFAULT_PROFILE_IMAGE;
-    return (
-      <Box>
-        {label}
-        <Image
-          src={src}
-          boxSize="120px"
-          borderRadius="full"
-          objectFit="cover"
-          alt={t('common.newProfile')}
-        />
-      </Box>
-    );
-  }
-
-  if (!keysDiffer) {
-    const single = hasNew
-      ? displayNew
-      : hasOld
-        ? displayOld
-        : DEFAULT_PROFILE_IMAGE;
+  if (unchanged) {
+    const single = displayNew || displayOld || DEFAULT_PROFILE_IMAGE;
     return (
       <Box>
         {label}
@@ -238,6 +223,9 @@ const ProfileImageDiff = ({ oldKey, newKey, changeType, backend, t }) => {
     );
   }
 
+  const oldSrc = hasOld ? displayOld : DEFAULT_PROFILE_IMAGE;
+  const newSrc = hasNew ? displayNew : DEFAULT_PROFILE_IMAGE;
+
   return (
     <Box>
       {label}
@@ -245,26 +233,50 @@ const ProfileImageDiff = ({ oldKey, newKey, changeType, backend, t }) => {
         spacing={4}
         align="flex-start"
       >
-        {hasOld ? (
+        <VStack
+          spacing={1}
+          align="center"
+        >
           <Image
-            src={displayOld}
+            src={oldSrc}
             boxSize="120px"
             borderRadius="full"
             objectFit="cover"
             alt={t('common.oldProfile')}
-            opacity={0.85}
-            sx={{ WebkitFilter: 'grayscale(35%)' }}
+            {...(hasOld
+              ? {
+                  opacity: 0.85,
+                  sx: { WebkitFilter: 'grayscale(35%)' },
+                }
+              : {})}
           />
-        ) : null}
-        {hasNew ? (
+          <Text
+            fontSize="xs"
+            color="gray.600"
+            fontWeight="500"
+          >
+            {t('common.diffLabelOld')}
+          </Text>
+        </VStack>
+        <VStack
+          spacing={1}
+          align="center"
+        >
           <Image
-            src={displayNew}
+            src={newSrc}
             boxSize="120px"
             borderRadius="full"
             objectFit="cover"
             alt={t('common.newProfile')}
           />
-        ) : null}
+          <Text
+            fontSize="xs"
+            color="gray.600"
+            fontWeight="500"
+          >
+            {t('common.diffLabelNew')}
+          </Text>
+        </VStack>
       </HStack>
     </Box>
   );
@@ -275,7 +287,6 @@ export const BaseAccountInfoSection = ({ fields, changeType, backend, t }) => (
     <ProfileImageDiff
       oldKey={fields.oldPic}
       newKey={fields.newPic}
-      changeType={changeType}
       backend={backend}
       t={t}
     />

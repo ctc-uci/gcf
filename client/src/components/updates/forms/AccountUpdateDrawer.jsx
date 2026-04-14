@@ -25,11 +25,11 @@ import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { BaseAccountInfoSection } from './account-update-drawer/BaseAccountInfoSection';
 import { RoleSpecificDetails } from './account-update-drawer/RoleSpecificDetails';
 import {
+  auditPictureKey,
   bioText,
   firstNonBlank,
   normalizeAccountSnapshot,
   pickStr,
-  pictureUrl,
   programIdKey,
   programName,
   regionIdKey,
@@ -246,8 +246,8 @@ export const AccountUpdateDrawer = ({
     const regById = regionIdKey(oldSnap) !== regionIdKey(newSnap);
     const oldBio = bioText(oldSnap);
     const newBio = bioText(newSnap);
-    const oldPic = pictureUrl(oldSnap);
-    const newPic = pictureUrl(newSnap);
+    const oldPic = auditPictureKey(detail?.oldValues);
+    const newPic = auditPictureKey(detail?.newValues);
 
     return {
       oldFirst,
@@ -269,7 +269,14 @@ export const AccountUpdateDrawer = ({
       oldPic,
       newPic,
     };
-  }, [oldSnap, newSnap, programNamesById, regionNamesById]);
+  }, [
+    detail?.oldValues,
+    detail?.newValues,
+    oldSnap,
+    newSnap,
+    programNamesById,
+    regionNamesById,
+  ]);
 
   const roleDiffers = fields.oldRole.trim() !== fields.newRole.trim();
   const programOldDisplay = roleDiffers ? '' : fields.oldProg;

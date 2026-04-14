@@ -145,6 +145,9 @@ export const pictureUrl = (snap) => {
   return typeof u === 'string' && u.trim() ? u.trim() : '';
 };
 
+export const auditPictureKey = (rawValues) =>
+  pictureUrl(normalizeAccountSnapshot(rawValues));
+
 export const bioText = (snap) => {
   if (!snap || typeof snap !== 'object') return '';
   const b = firstNonBlank(

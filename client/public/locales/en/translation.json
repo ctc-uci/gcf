@@ -64,6 +64,8 @@
     "keepResolved": "Keep Resolved",
     "oldProfile": "Old profile",
     "newProfile": "New profile",
+    "diffLabelOld": "Old",
+    "diffLabelNew": "New",
     "editUpdates": "Edit Updates",
     "accountUpdate": "Account Update",
     "profilePicture": "Profile Picture",
