@@ -80,8 +80,8 @@ export const getAuthenticatedUser = async (
   res: Response
 ): Promise<AuthenticatedUser> => {
   const cachedUser = res.locals.authenticatedUser as
-  | AuthenticatedUser
-  | undefined;
+    | AuthenticatedUser
+    | undefined;
   if (cachedUser) {
     return cachedUser;
   }

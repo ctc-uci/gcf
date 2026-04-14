@@ -4,10 +4,14 @@ import { useTranslation } from 'react-i18next';
 
 import { MediaCard } from './MediaCard';
 
-export const MediaGrid = ({ mediaItems, programName }) => {
+export const MediaGrid = ({
+  mediaItems,
+  programName,
+  onUpdate,
+  onCardClick,
+}) => {
   const { t } = useTranslation();
   let content;
-
   if (mediaItems.length === 0 && !programName) {
     content = <Text>{t('mediaPage.noProgram')}</Text>;
   } else if (mediaItems.length === 0) {
@@ -17,14 +21,16 @@ export const MediaGrid = ({ mediaItems, programName }) => {
   } else {
     content = (
       <SimpleGrid
-        columns={{ base: 1, md: 2, lg: 3 }}
+        columns={{ base: 1, md: 2, lg: 3, xl: 4 }}
         spacing={6}
         w="full"
       >
-        {mediaItems.map((item) => (
+        {mediaItems.map((item, index) => (
           <MediaCard
             key={item.id}
             {...item}
+            onUpdate={onUpdate}
+            onClick={() => onCardClick?.(index)}
           />
         ))}
       </SimpleGrid>
@@ -37,14 +43,6 @@ export const MediaGrid = ({ mediaItems, programName }) => {
       spacing={4}
       w="full"
     >
-      <Text
-        fontSize="lg"
-        fontWeight="semibold"
-        color="gray.800"
-      >
-        {t('mediaPage.uploads')}
-      </Text>
-
       {content}
     </VStack>
   );
