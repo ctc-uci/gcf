@@ -1,13 +1,14 @@
-CREATE TABLE country (
-	id SERIAL PRIMARY KEY,
- 	region_id INT NOT NULL,
-    name VARCHAR(70) NOT NULL,
-    last_modified TIMESTAMP NOT NULL,
-	iso_code VARCHAR(70) PRIMARY KEY,
-
-	CONSTRAINT fk_region_id
-    	FOREIGN KEY (region_id)
-  		REFERENCES region(id)
-  		ON DELETE CASCADE
-		ON UPDATE CASCADE,
+CREATE TABLE public.country (
+  id serial PRIMARY KEY,
+  region_id integer NOT NULL,
+  name character varying(70) NOT NULL,
+  last_modified timestamp without time zone NOT NULL,
+  iso_code character varying(3) NULL
 );
+
+ALTER TABLE public.country
+ADD CONSTRAINT fk_region_id
+    FOREIGN KEY(region_id)
+        REFERENCES region(id)
+        ON DELETE CASCADE,
+		ON UPDATE CASCADE;

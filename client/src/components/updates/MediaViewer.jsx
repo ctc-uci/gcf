@@ -5,22 +5,49 @@ import {
   Box,
   CloseButton,
   Flex,
+  HStack,
   IconButton,
   Image,
   Modal,
   ModalContent,
   ModalOverlay,
+  Spacer,
   Text,
+  useDisclosure,
 } from '@chakra-ui/react';
 
-import { MediaCard } from '@/components/media/MediaCard';
+import { MediaEditModal } from '@/components/media/MediaEditModal';
+import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
+import { BsFillPencilFill } from 'react-icons/bs';
 
-export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
+import gcf_globe from '/gcf_globe.png';
+
+export const MediaViewer = ({
+  updates,
+  mediaURLs,
+  selectedIndex,
+  onClose,
+  onUpdate,
+}) => {
+  const { t } = useTranslation();
+  const { backend } = useBackendContext();
   const [current, setCurrent] = useState(selectedIndex);
+  const [isLoading, setIsLoading] = useState(true);
+  const {
+    isOpen: isEditOpen,
+    onOpen: onEditOpen,
+    onClose: onEditClose,
+  } = useDisclosure();
+  const [editingItem, setEditingItem] = useState(null);
 
   useEffect(() => {
     setCurrent(selectedIndex);
   }, [selectedIndex]);
+
+  useEffect(() => {
+    setIsLoading(true);
+  }, [current]);
 
   const goNext = useCallback(
     () => setCurrent((prev) => (prev + 1) % updates.length),
@@ -32,6 +59,7 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
   );
   const item = updates[current];
   const url = mediaURLs[current];
+  const isVideo = item?.fileType?.startsWith('video');
 
   useEffect(() => {
     const handleKey = (e) => {
@@ -42,6 +70,30 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [goNext, goPrev, onClose]);
+
+  const openEdit = () => {
+    setEditingItem(item);
+    onEditOpen();
+  };
+
+  const closeEdit = () => {
+    setEditingItem(null);
+    onEditClose();
+  };
+
+  const handleEditSave = async (newTitle, newDescription) => {
+    const mediaId = editingItem?.id;
+    if (!mediaId) return;
+    try {
+      await backend.put(`/mediaChange/${mediaId}`, {
+        file_name: newTitle,
+        description: newDescription,
+      });
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      console.error('Error updating media:', error);
+    }
+  };
 
   return (
     <Modal
@@ -91,12 +143,47 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
           px={4}
           py={3}
         >
-          <MediaCard
-            file_name={item?.fileName}
-            file_type={item?.fileType}
-            imageUrl={url}
-            height={{ base: '38vh', md: '56vh' }}
-          />
+          <Box
+            h={{ base: '38vh', md: '56vh' }}
+            borderRadius="xl"
+            overflow="hidden"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            {isLoading && (
+              <Image
+                src={gcf_globe}
+                w="50px"
+                position="absolute"
+              />
+            )}
+            {isVideo ? (
+              <video
+                src={url}
+                controls
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  display: isLoading ? 'none' : 'block',
+                }}
+                onLoadedData={() => setIsLoading(false)}
+                onError={() => setIsLoading(false)}
+              />
+            ) : (
+              <Image
+                src={url}
+                alt={item?.fileName}
+                maxH="100%"
+                maxW="100%"
+                objectFit="contain"
+                display={isLoading ? 'none' : 'block'}
+                onLoad={() => setIsLoading(false)}
+                onError={() => setIsLoading(false)}
+              />
+            )}
+          </Box>
 
           {updates.length > 1 && (
             <>
@@ -137,98 +224,45 @@ export const MediaViewer = ({ updates, mediaURLs, selectedIndex, onClose }) => {
           pt={4}
           pb={2}
         >
-          <Text
-            fontWeight="700"
-            fontSize="md"
-            color="gray.800"
+          <HStack
+            w="full"
+            align="center"
           >
-            {item?.fileName ?? 'Media Title'}
-          </Text>
+            <Text
+              fontWeight="700"
+              fontSize="md"
+              color="gray.800"
+            >
+              {item?.fileName ?? 'Media Title'}
+            </Text>
+            <Spacer />
+            {onUpdate && (
+              <IconButton
+                icon={<BsFillPencilFill />}
+                aria-label={t('mediaEditModal.heading')}
+                size="sm"
+                variant="ghost"
+                onClick={openEdit}
+              />
+            )}
+          </HStack>
           <Text
             fontSize="sm"
             color="gray.500"
             mt={0.5}
           >
-            {item?.description ?? ''}
+            {item?.description || t('mediaCard.noDescription')}
           </Text>
         </Box>
-
-        {updates.length > 1 && (
-          <Flex
-            px={5}
-            pb={5}
-            pt={2}
-            gap={3}
-            overflowX="auto"
-            css={{
-              '&::-webkit-scrollbar': { height: '4px' },
-              '&::-webkit-scrollbar-thumb': {
-                background: '#CBD5E0',
-                borderRadius: '4px',
-              },
-            }}
-          >
-            {updates.map((thumb, i) => {
-              const isVideo = thumb.fileType?.startsWith('video');
-              return (
-                <Box
-                  key={thumb.id}
-                  flexShrink={0}
-                  cursor="pointer"
-                  onClick={() => setCurrent(i)}
-                  borderRadius="md"
-                  overflow="hidden"
-                  border="2px solid"
-                  borderColor={i === current ? 'teal.400' : 'transparent'}
-                  transition="border-color 0.15s"
-                  position="relative"
-                  w="90px"
-                  h="64px"
-                >
-                  {isVideo ? (
-                    <video
-                      src={mediaURLs[i]}
-                      muted
-                      preload="metadata"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        opacity: i === current ? 1 : 0.7,
-                        transition: 'opacity 0.15s',
-                      }}
-                    />
-                  ) : (
-                    <Image
-                      src={mediaURLs[i]}
-                      alt={thumb.fileName}
-                      w="100%"
-                      h="100%"
-                      objectFit="cover"
-                      opacity={i === current ? 1 : 0.7}
-                      transition="opacity 0.15s"
-                      _hover={{ opacity: 1 }}
-                    />
-                  )}
-                  <Text
-                    position="absolute"
-                    bottom={1}
-                    left={1}
-                    right={1}
-                    fontSize="9px"
-                    fontWeight="600"
-                    color="white"
-                    noOfLines={1}
-                    textShadow="0 1px 3px rgba(0,0,0,0.8)"
-                  >
-                    {thumb.fileName ?? 'Media Title'}
-                  </Text>
-                </Box>
-              );
-            })}
-          </Flex>
-        )}
       </ModalContent>
+
+      <MediaEditModal
+        isOpen={isEditOpen}
+        onClose={closeEdit}
+        onSave={handleEditSave}
+        initialTitle={editingItem?.fileName || ''}
+        initialDescription={editingItem?.description || ''}
+      />
     </Modal>
   );
 };

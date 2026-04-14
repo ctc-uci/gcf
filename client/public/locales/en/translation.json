@@ -425,7 +425,8 @@
   },
   "mediaPage": {
     "title": "My Media",
-    "new": "New",
+    "searchPlaceholder": "Search",
+    "uploadMedia": "Upload Media",
     "uploads": "Uploads",
     "noProgram": "No program found",
     "noMediaForProgram": "No media associated with {{name}}"
@@ -439,8 +440,17 @@
     "or": "OR",
     "browse": "Browse Files"
   },
+  "mediaEditModal": {
+    "heading": "Edit Details",
+    "titlePlaceholder": "Title",
+    "descriptionPlaceholder": "Add description"
+  },
   "mediaCard": {
-    "loadingAlt": "Loading..."
+    "loadingAlt": "Loading...",
+    "noDescription": "No description",
+    "deleteModalHeader": "Are you sure you want to delete?",
+    "deleteModalBody": "This action cannot be undone.",
+    "deleteMedia": "Delete Media"
   },
   "mediaPreview": {
     "previewAlt": "Preview",

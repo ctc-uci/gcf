@@ -425,7 +425,8 @@
   },
   "mediaPage": {
     "title": "我的媒体",
-    "new": "新的",
+    "searchPlaceholder": "搜索",
+    "uploadMedia": "上传文件",
     "uploads": "上传",
     "noProgram": "没有找到程序",
     "noMediaForProgram": "没有与 {{name}} 相关的媒体"
@@ -439,8 +440,17 @@
     "or": "或者",
     "browse": "浏览文件"
   },
+  "mediaEditModal": {
+    "heading": "编辑详情",
+    "titlePlaceholder": "标题",
+    "descriptionPlaceholder": "添加描述"
+  },
   "mediaCard": {
-    "loadingAlt": "加载中..."
+    "loadingAlt": "加载中...",
+    "noDescription": "暂无描述",
+    "deleteModalHeader": "您确定要删除吗？",
+    "deleteModalBody": "此操作无法撤消。",
+    "deleteMedia": "删除媒体"
   },
   "mediaPreview": {
     "previewAlt": "预览",

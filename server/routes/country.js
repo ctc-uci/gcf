@@ -1,10 +1,15 @@
 import { keysToCamel } from '@/common/utils';
+import { verifyToken } from '@/middleware';
 import express from 'express';
 
 import { db } from '../db/db-pgp';
 
 const countryRouter = express.Router();
 countryRouter.use(express.json());
+
+countryRouter.post('*', verifyToken);
+countryRouter.put('*', verifyToken);
+countryRouter.delete('*', verifyToken);
 
 countryRouter.get('/', async (req, res) => {
   try {

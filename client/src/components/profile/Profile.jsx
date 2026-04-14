@@ -36,6 +36,7 @@ import {
 } from 'react-icons/fi';
 
 import { MediaUploadModal } from '../media/MediaUploadModal';
+import { ChangePasswordModal } from './ChangePasswordModal';
 
 const DEFAULT_PROFILE_IMAGE = '/default-profile.png';
 
@@ -81,6 +82,14 @@ export const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordEdited, setPasswordEdited] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+
+  const {
+    isOpen: isPasswordModalOpen,
+    onOpen: onPasswordModelOpen,
+    onClose: onPasswordModelClose,
+  } = useDisclosure();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -142,13 +151,14 @@ export const Profile = () => {
         firstName: userData.firstName || '',
         lastName: userData.lastName || '',
         email: currentUser?.email || '',
+        bio: '',
         language: prefLang,
-        bio: userData.bio || '',
       });
 
       if (role === 'Program Director') {
         const programData = await fetchProgramData(backend, userData.id);
         setRoleSpecificData(programData);
+        setFormData((prev) => ({ ...prev, bio: programData?.bio || '' }));
       } else if (role === 'Regional Director') {
         const regionData = await fetchRegionData(backend, userData.id);
         setRoleSpecificData(regionData);
@@ -233,8 +243,7 @@ export const Profile = () => {
       lastName: gcfUser.lastName || '',
       email: currentUser?.email || '',
       language: prefLang,
-      bio: gcfUser.bio || '',
-      // TODO: add Bio column to gcf_user schema and add here
+      bio: roleSpecificData?.bio || '',
     });
     setIsEditing(true);
   };
@@ -242,26 +251,11 @@ export const Profile = () => {
   const handleCancel = () => {
     setIsEditing(false);
     setShowPassword(false);
+    setNewPassword('');
+    setPasswordEdited('');
   };
 
-  const handleSave = async () => {
-    if (
-      !formData.firstName.trim() ||
-      !formData.lastName.trim() ||
-      !formData.email.trim()
-    ) {
-      toast({
-        title: t('profile.invalidInfoTitle'),
-        description: t('profile.invalidInfoDesc'),
-        status: 'error',
-        variant: 'subtle',
-        position: 'bottom-right',
-      });
-      return;
-    }
-
-    if (!currentUser?.uid) return;
-
+  const saveProfileEdits = async () => {
     try {
       const oldBio = role === 'Program Director' ? gcfUser?.bio || '' : '';
       const newBio =
@@ -281,10 +275,14 @@ export const Profile = () => {
         bio: newBio,
       };
 
-      await backend.put(`/gcf-users/${currentUser.uid}`, {
+      (await backend.put(`/gcf-users/${currentUser.uid}`, {
         first_name: formData.firstName,
         last_name: formData.lastName,
-      });
+      }),
+        role === 'Program Director' &&
+          backend.patch(`/program-directors/${currentUser.uid}`, {
+            bio: formData.bio,
+          }));
 
       if (JSON.stringify(oldValues) !== JSON.stringify(newValues)) {
         try {
@@ -313,6 +311,8 @@ export const Profile = () => {
         firstName: formData.firstName,
         lastName: formData.lastName,
       }));
+      setRoleSpecificData((prev) => ({ ...prev, bio: formData.bio }));
+      window.dispatchEvent(new Event('profile-updated'));
 
       const now = new Date();
       const timeStr = now.toLocaleTimeString(i18n.language || 'en', {
@@ -332,6 +332,8 @@ export const Profile = () => {
 
       setIsEditing(false);
       setShowPassword(false);
+      setPasswordEdited(false);
+      setNewPassword('');
     } catch (err) {
       console.error('Error saving profile language:', err);
       toast({
@@ -345,6 +347,42 @@ export const Profile = () => {
         position: 'bottom-right',
       });
     }
+  };
+
+  const handleSave = async () => {
+    if (
+      !formData.firstName.trim() ||
+      !formData.lastName.trim() ||
+      !formData.email.trim()
+    ) {
+      toast({
+        title: t('profile.invalidInfoTitle'),
+        description: t('profile.invalidInfoDesc'),
+        status: 'error',
+        variant: 'subtle',
+        position: 'bottom-right',
+      });
+      return;
+    }
+
+    if (!currentUser?.uid) return;
+
+    if (passwordEdited && newPassword.length > 0) {
+      if (newPassword.length < 12) {
+        toast({
+          title: 'Invalid password',
+          description: 'Password must be at least 12 characters.',
+          status: 'error',
+          variant: 'subtle',
+          position: 'bottom-right',
+        });
+        return;
+      }
+      onPasswordModelOpen();
+      return;
+    }
+
+    await saveProfileEdits();
   };
 
   const handleInputChange = (field) => (e) => {
@@ -503,7 +541,7 @@ export const Profile = () => {
                   onChange={handleInputChange('bio')}
                 />
               ) : (
-                <Text>{gcfUser.bio || ''}</Text>
+                <Text>{formData.bio || ''}</Text>
               )}
             </FormControl>
           )}
@@ -521,6 +559,8 @@ export const Profile = () => {
                 value={formData.email}
                 onChange={handleInputChange('email')}
                 type="email"
+                isReadOnly
+                bg="gray.100"
               />
             ) : (
               <Text>{currentUser?.email || ''}</Text>
@@ -528,20 +568,28 @@ export const Profile = () => {
           </FormControl>
 
           {/* Password */}
-          <FormControl>
-            <Text
-              fontWeight="bold"
-              mb={1}
-            >
-              {t('common.password')}
-            </Text>
+          <FormControl
+            mt={-4}
+            mb={-2}
+          >
             {isEditing ? (
               <>
+                <Text
+                  fontWeight="bold"
+                  mb={1}
+                >
+                  {t('common.password')}
+                </Text>
                 <InputGroup>
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    value="********"
-                    isReadOnly
+                    value={newPassword}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      setPasswordEdited(true);
+                    }}
+                    placeholder="Leave blank to keep current password"
+                    autoComplete="new-password"
                   />
                   <InputRightElement>
                     <IconButton
@@ -553,19 +601,10 @@ export const Profile = () => {
                     />
                   </InputRightElement>
                 </InputGroup>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  mt={1}
-                  cursor="pointer"
-                  _hover={{ textDecoration: 'underline' }}
-                >
-                  {t('profile.changePassword')}
-                </Text>
               </>
             ) : (
               <HStack>
-                <Text>********</Text>
+                <Text></Text>
                 {(role === 'Admin' || role === 'Super Admin') && (
                   <IconButton
                     icon={<FiEyeOff />}
@@ -590,6 +629,7 @@ export const Profile = () => {
                 <Input
                   value={roleSpecificData.name}
                   isReadOnly
+                  bg="gray.100"
                 />
               ) : (
                 <Text>{roleSpecificData.name}</Text>
@@ -609,6 +649,7 @@ export const Profile = () => {
                 <Input
                   value={roleSpecificData.name}
                   isReadOnly
+                  bg="gray.100"
                 />
               ) : (
                 <Text>{roleSpecificData.name}</Text>
@@ -674,6 +715,31 @@ export const Profile = () => {
         onClose={onClose}
         onUploadComplete={handleProfilePictureUpload}
         formOrigin="profile"
+      />
+
+      <ChangePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={onPasswordModelClose}
+        newPassword={newPassword}
+        currentUser={currentUser}
+        onSuccess={async () => {
+          onPasswordModelClose();
+          await saveProfileEdits();
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString(i18n.language || 'en', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+            timeZoneName: 'short',
+          });
+          toast({
+            title: 'Password updated',
+            description: `Your password was updated at ${timeStr}`,
+            status: 'success',
+            variant: 'subtle',
+            position: 'bottom-right',
+          });
+        }}
       />
     </Box>
   );
