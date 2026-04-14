@@ -110,6 +110,7 @@ export const Account = () => {
       w="100%"
       maxW="100%"
       minW={0}
+      overflowX="hidden"
     >
       <Flex
         mb={8}

@@ -108,8 +108,8 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
     } = req.body;
 
     await admin.auth().updateUser(targetId, {
-      email: email,
-      password: password,
+      ...(email && { email }),
+      ...(password && { password }),
       displayName: `${firstName} ${lastName}`,
     });
 
@@ -117,6 +117,10 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
       `SELECT role FROM gcf_user WHERE id = $1`,
       [targetId]
     );
+
+    if (!oldRoleResponse[0]) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
     const oldRole = oldRoleResponse[0].role;
 
@@ -137,7 +141,7 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
           [targetId]
         );
       }
-      if (oldRole === 'Regional Director') {
+      else if (oldRole === 'Regional Director') {
         await db.query(
           `DELETE FROM regional_director WHERE user_id = $1 RETURNING *`,
           [targetId]
@@ -166,7 +170,7 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
           [programId, targetId]
         );
       }
-      if (role === 'Regional Director' && regionId) {
+      else if (role === 'Regional Director' && regionId) {
         await db.query(
           `UPDATE regional_director SET region_id = $1 WHERE user_id = $2`,
           [regionId, targetId]
@@ -174,13 +178,13 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
       }
     }
 
-    res.status(201).json({
+    res.status(200).json({
       uid: targetId,
       user: keysToCamel(updatedGcfUser[0]),
       message: 'User updated successfully',
     });
   } catch (err) {
-    console.error('Error creating user:', err);
+    console.error('Error updating user:', err);
     res.status(500).json({ error: err.message });
   }
 });
