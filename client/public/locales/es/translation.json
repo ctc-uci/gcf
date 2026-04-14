@@ -210,11 +210,13 @@
     "instrumentsDonated": "Instrumentos donados"
   },
   "lessonVideos": {
-    "title": "Vídeos de lecciones",
+    "title": "Materiales de la lección",
     "empty": "No hay videos de lecciones disponibles",
     "loading": "Cargando vídeos de lecciones...",
     "scrollLeft": "Desplazarse hacia la izquierda",
-    "scrollRight": "Desplácese hacia la derecha"
+    "scrollRight": "Desplácese hacia la derecha",
+    "videosTab": "Vídeos",
+    "pdfsTab": "PDFs"
   },
   "videoPlayer": {
     "playlistFallback": "Lista de reproducción"

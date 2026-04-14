@@ -210,11 +210,13 @@
     "instrumentsDonated": "捐赠仪器"
   },
   "lessonVideos": {
-    "title": "课程视频",
+    "title": "课程材料",
     "empty": "没有可用的课程视频",
     "loading": "正在加载课程视频...",
     "scrollLeft": "向左滚动",
-    "scrollRight": "向右滚动"
+    "scrollRight": "向右滚动",
+    "videosTab": "视频",
+    "pdfsTab": "PDF 文件"
   },
   "videoPlayer": {
     "playlistFallback": "播放列表"
