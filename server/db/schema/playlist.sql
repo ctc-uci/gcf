@@ -1,5 +1,5 @@
 CREATE TABLE playlist (
-  id SERIAL PRIMARY KEY,
+  id BIGSERIAL PRIMARY KEY,
   program_id BIGINT NOT NULL,
   instrument_id BIGINT NOT NULL,
   link TEXT NOT NULL,

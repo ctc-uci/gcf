@@ -8,7 +8,7 @@ directorRouter.get('/me/:userId/program', async (req, res) => {
   try {
     const { userId } = req.params;
     const director = await db.query(
-      'SELECT program_id FROM program_director WHERE user_id = $1 LIMIT 1',
+      'SELECT program_id, bio FROM program_director WHERE user_id = $1 LIMIT 1',
       [userId]
     );
     if (!director?.length)
@@ -18,7 +18,7 @@ directorRouter.get('/me/:userId/program', async (req, res) => {
     ]);
     if (!program?.length)
       return res.status(404).json({ error: 'Program not found' });
-    res.status(200).json(keysToCamel(program[0]));
+    res.status(200).json(keysToCamel({...program[0], bio: director[0].bio}));
   } catch (err) {
     console.error('Error in /me/:userId/program:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -197,6 +197,25 @@ directorRouter.put('/:userId', async (req, res) => {
     );
 
     res.status(200).json(keysToCamel(director));
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
+
+directorRouter.patch('/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { bio } = req.body;
+
+    const director = await db.query(
+      'UPDATE program_director SET bio = $2 WHERE user_id = $1 RETURNING *',
+      [userId, bio]
+    );
+
+    if (!director?.length)
+      return res.status(404).json({ error: 'Program director not found' });
+
+    res.status(200).json(keysToCamel(director[0]));
   } catch (err) {
     res.status(400).send(err.message);
   }

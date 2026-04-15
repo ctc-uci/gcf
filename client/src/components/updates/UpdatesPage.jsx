@@ -116,8 +116,11 @@ export const UpdatesPage = () => {
       p={8}
       bg="gray.50"
       minH="100vh"
+      w="100%"
+      maxW="100%"
       mx={-4}
       mt={0}
+      overflowX="hidden"
     >
       <Flex
         align="center"
