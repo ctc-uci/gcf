@@ -496,7 +496,6 @@ export const CreateUpdateDrawer = ({
       update_date: timestamp,
       updated_at: timestamp,
       note: fullNote || null,
-      show_on_table: false,
     };
 
     setIsLoading(true);
@@ -577,10 +576,10 @@ export const CreateUpdateDrawer = ({
         return;
       }
 
-      const response = await backend.post(
-        '/program-updates',
-        programUpdateData
-      );
+      const response = await backend.post('/program-updates', {
+        ...programUpdateData,
+        show_on_table: false,
+      });
       const newUpdateId = response.data.id;
 
       if (updateType === 'instrument' && selectedInstrument) {

@@ -97,7 +97,13 @@ export const ReviewProgramUpdate = ({
                           {field.oldValue}
                         </Text>
                       )}
-                    <Text color="gray.800">{field.newValue || 'None'}</Text>
+                    <Text color="gray.800">
+                      {field.newValue !== undefined &&
+                      field.newValue !== null &&
+                      field.newValue !== ''
+                        ? field.newValue
+                        : 'None'}
+                    </Text>
                   </HStack>
                 )}
               </GridItem>

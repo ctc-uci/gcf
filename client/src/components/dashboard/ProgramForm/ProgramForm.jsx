@@ -915,7 +915,7 @@ export const ProgramForm = ({
                 onClick={deleteDisclosure.onOpen}
                 _hover={{ bg: 'red.50' }}
               >
-                Delete
+                {t('common.delete')}
               </Button>
             )}
           </Box>
@@ -950,11 +950,11 @@ export const ProgramForm = ({
               fontSize="lg"
               fontWeight="semibold"
             >
-              Are you sure you want to delete this program?
+              {t('programForm.deleteTitle')}
             </ModalHeader>
 
             <ModalBody color="gray.600">
-              This action cannot be undone.
+              {t('programForm.deleteDesc')}
             </ModalBody>
 
             <ModalFooter
@@ -966,14 +966,14 @@ export const ProgramForm = ({
                 bg="gray.100"
                 _hover={{ bg: 'gray.200' }}
               >
-                Keep Editing
+                {t('common.cancel')}
               </Button>
 
               <Button
                 colorScheme="red"
                 onClick={handleDelete}
               >
-                Delete Program
+                {t('programForm.deleteProgram')}
               </Button>
             </ModalFooter>
           </ModalContent>

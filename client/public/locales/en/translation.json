@@ -345,7 +345,10 @@
     "locationRowLabel": "Location",
     "instrumentQuantityPair": "{{name}}: {{qty}}",
     "instrumentQuantityInvalid": "Enter a quantity of at least 1.",
-    "instrumentQuantityAria": "Instrument quantity"
+    "instrumentQuantityAria": "Instrument quantity",
+    "deleteTitle": "Are you sure you want to delete this program?",
+    "deleteDesc": "This action cannot be undone.",
+    "deleteProgram": "Delete Program"
   },
   "locationForm": {
     "selectRegion": "Select region...",

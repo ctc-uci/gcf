@@ -8,7 +8,7 @@ const sortCycle = Object.freeze({
 });
 
 function sortableString(value) {
-  if (value === null) return '';
+  if (value === null || value === undefined) return '';
   if (Array.isArray(value)) return value.join(' ');
   return String(value);
 }

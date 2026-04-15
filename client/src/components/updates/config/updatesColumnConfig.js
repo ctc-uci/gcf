@@ -33,13 +33,9 @@ export const mediaSectionColumns = [
 export const formatTableDate = (dateString) => {
   if (!dateString) return '';
 
-  let safeDateString = dateString.replace(' ', 'T');
-
-  if (
-    !safeDateString.endsWith('Z') &&
-    !safeDateString.includes('+') &&
-    !safeDateString.includes('-')
-  ) {
+  let safeDateString = String(dateString).replace(' ', 'T');
+  const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(safeDateString);
+  if (!hasTimezone) {
     safeDateString += 'Z';
   }
 

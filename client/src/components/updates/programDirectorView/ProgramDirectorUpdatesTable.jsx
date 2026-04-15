@@ -271,7 +271,7 @@ export const ProgramDirectorUpdatesTable = ({
                             fontSize="sm"
                             color="gray.700"
                           >
-                            {formatTableDate(row.updatedAt)}
+                            {formatTableDate(row.updatedAt || row.updateDate)}
                           </Text>
                         </Td>
                       </>
@@ -312,7 +312,7 @@ export const ProgramDirectorUpdatesTable = ({
                             fontSize="sm"
                             color="gray.700"
                           >
-                            {formatTableDate(row.updatedAt)}
+                            {formatTableDate(row.updatedAt || row.updateDate)}
                           </Text>
                         </Td>
                       </>

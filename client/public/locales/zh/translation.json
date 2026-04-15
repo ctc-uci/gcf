@@ -345,7 +345,10 @@
     "locationRowLabel": "地点",
     "instrumentQuantityPair": "{{name}}: {{qty}}",
     "instrumentQuantityInvalid": "请输入至少为 1 的数量。",
-    "instrumentQuantityAria": "乐器数量"
+    "instrumentQuantityAria": "乐器数量",
+    "deleteTitle": "确定要删除此项目吗？",
+    "deleteDesc": "此操作无法撤销。",
+    "deleteProgram": "删除项目"
   },
   "locationForm": {
     "selectRegion": "选择地区...",

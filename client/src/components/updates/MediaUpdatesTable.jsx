@@ -34,11 +34,8 @@ function formatDate(dateStr) {
   if (!dateStr) return '';
 
   let safeDateString = String(dateStr).replace(' ', 'T');
-  if (
-    !safeDateString.endsWith('Z') &&
-    !safeDateString.includes('+') &&
-    !safeDateString.includes('-')
-  ) {
+  const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(safeDateString);
+  if (!hasTimezone) {
     safeDateString += 'Z';
   }
 
@@ -142,7 +139,9 @@ export const MediaUpdatesTable = ({
         (update.programName || '').toLowerCase().includes(q) ||
         author.includes(q) ||
         (update.status || '').toLowerCase().includes(q) ||
-        (formatDate(update.updatedAt) || '').toLowerCase().includes(q)
+        (formatDate(update.updatedAt || update.updateDate) || '')
+          .toLowerCase()
+          .includes(q)
       );
     });
   }, [searchQuery, filteredData]);
@@ -292,7 +291,7 @@ export const MediaUpdatesTable = ({
                       fontSize="sm"
                       color="gray.600"
                     >
-                      {formatDate(row.updatedAt)}
+                      {formatDate(row.updatedAt || row.updateDate)}
                     </Text>
                   </Td>
                 </Tr>
