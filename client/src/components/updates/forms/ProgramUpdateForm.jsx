@@ -311,29 +311,32 @@ export const ProgramUpdateForm = ({
             setAddedInstruments(instrumentsMap);
             setOriginalInstruments(JSON.parse(JSON.stringify(instrumentsMap)));
             setInstrumentChangeMap(changeMeta);
+
+            const photoResults = await Promise.allSettled(
+              Object.values(changeMeta).map(({ changeId }) =>
+                backend.get(
+                  `/instrument-change-photos/instrument-change/${changeId}`
+                )
+              )
+            );
+            const mediaData = photoResults
+              .filter((r) => r.status === 'fulfilled')
+              .flatMap((r) => r.value.data || []);
+
+            const urlResults = await Promise.allSettled(
+              mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
+            );
+            const validItems = mediaData.filter(
+              (_, i) => urlResults[i].status === 'fulfilled'
+            );
+            const validURLs = urlResults
+              .filter((r) => r.status === 'fulfilled')
+              .map((r) => r.value.data.url);
+            setMediaItems(validItems);
+            setMediaURLs(validURLs);
           }
         } catch (error) {
           console.error('Error fetching instrument changes:', error);
-        }
-
-        try {
-          const mediaChangesRes = await backend.get(
-            `/mediaChange/update/${programUpdateId}`
-          );
-          const mediaData = mediaChangesRes.data || [];
-          const urlResults = await Promise.allSettled(
-            mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
-          );
-          const validItems = mediaData.filter(
-            (_, i) => urlResults[i].status === 'fulfilled'
-          );
-          const validURLs = urlResults
-            .filter((r) => r.status === 'fulfilled')
-            .map((r) => r.value.data.url);
-          setMediaItems(validItems);
-          setMediaURLs(validURLs);
-        } catch (error) {
-          console.error('Error fetching media changes:', error);
         }
       } catch (error) {
         console.error('Error fetching program update:', error);
