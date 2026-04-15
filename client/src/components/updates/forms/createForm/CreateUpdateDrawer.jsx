@@ -329,7 +329,7 @@ export const CreateUpdateDrawer = ({
         try {
           if (loadedInstrumentChangeId) {
             const { data: mediaData = [] } = await backend.get(
-              `/instrument-change-photos/instrument-change/${loadedInstrumentChangeId.id}`
+              `/instrument-change-photos/instrument-change/${loadedInstrumentChangeId}`
             );
           }
           if (!cancelled && mediaData.length > 0) {
