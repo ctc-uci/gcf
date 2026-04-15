@@ -331,22 +331,23 @@ export const CreateUpdateDrawer = ({
             const { data: mediaData = [] } = await backend.get(
               `/instrument-change-photos/instrument-change/${loadedInstrumentChangeId}`
             );
-          }
-          if (!cancelled && mediaData.length > 0) {
-            const urlResponses = await Promise.all(
-              mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
-            );
-            if (cancelled) return;
-            originalMediaIds.current = new Set(mediaData.map((m) => m.id));
-            setUploadedMedia(
-              mediaData.map((m, i) => ({
-                id: m.id,
-                s3_key: m.s3Key,
-                file_name: m.fileName,
-                file_type: m.fileType,
-                previewUrl: urlResponses[i].data.url,
-              }))
-            );
+
+            if (!cancelled && mediaData.length > 0) {
+              const urlResponses = await Promise.all(
+                mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
+              );
+              if (cancelled) return;
+              originalMediaIds.current = new Set(mediaData.map((m) => m.id));
+              setUploadedMedia(
+                mediaData.map((m, i) => ({
+                  id: m.id,
+                  s3_key: m.s3Key,
+                  file_name: m.fileName,
+                  file_type: m.fileType,
+                  previewUrl: urlResponses[i].data.url,
+                }))
+              );
+            }
           }
         } catch (e) {
           console.error('Error loading existing media for edit:', e);
