@@ -270,6 +270,8 @@ export const CreateUpdateDrawer = ({
         setProgramId(pu.programId);
         setUpdateType(editVariant);
 
+        let loadedInstrumentChangeId = null;
+
         if (editVariant === 'instrument') {
           const { data: icRows = [] } = await backend.get(
             `/instrument-changes/update/${editProgramUpdateId}`
@@ -286,6 +288,7 @@ export const CreateUpdateDrawer = ({
           }
 
           if (change && instruments?.length) {
+            loadedInstrumentChangeId = change.id;
             const inst = instruments.find((i) => i.id === change.instrumentId);
             setSelectedInstrument(inst?.name || '');
             setEditingInstrumentChangeId(change.id);
@@ -324,9 +327,11 @@ export const CreateUpdateDrawer = ({
         }
 
         try {
-          const { data: mediaData = [] } = await backend.get(
-            `/mediaChange/update/${editProgramUpdateId}`
-          );
+          if (loadedInstrumentChangeId) {
+            const { data: mediaData = [] } = await backend.get(
+              `/instrument-change-photos/instrument-change/${loadedInstrumentChangeId.id}`
+            );
+          }
           if (!cancelled && mediaData.length > 0) {
             const urlResponses = await Promise.all(
               mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
@@ -552,21 +557,26 @@ export const CreateUpdateDrawer = ({
         );
         for (const id of originalMediaIds.current) {
           if (!currentMediaIds.has(id)) {
-            await backend.delete(`/mediaChange/${id}`);
+            if (updateType === 'instrument') {
+              await backend.delete(`/instrument-change-photos/${id}`);
+            } else {
+              await backend.delete(`/mediaChange/${id}`);
+            }
           }
         }
+
         originalMediaIds.current = new Set(currentMediaIds);
 
         for (const media of uploadedMedia) {
           if (media.id) continue;
-          await backend.post('/mediaChange', {
-            update_id: editProgramUpdateId,
-            s3_key: media.s3_key,
-            file_name: media.file_name,
-            file_type: media.file_type,
-            is_thumbnail: false,
-            instrument_id: null,
-          });
+          if (updateType === 'instrument') {
+            await backend.post('/instrument-change-photos', {
+              instrument_change_id: editingInstrumentChangeId,
+              s3_key: media.s3_key,
+              file_name: media.file_name,
+              file_type: media.file_type,
+            });
+          }
         }
 
         toast({
@@ -601,13 +611,24 @@ export const CreateUpdateDrawer = ({
               : -1 * instrumentCount;
           const instrumentEventType =
             whatHappenedToEventType[whatHappened] ?? 'other';
-          await backend.post('/instrument-changes', {
+          const icResponse = await backend.post('/instrument-changes', {
             instrumentId: instrument.id,
             updateId: newUpdateId,
             amountChanged: instrumentDelta,
             event_type: instrumentEventType,
             description: instrumentEventType === 'other' ? notes || null : null,
           });
+
+          const newInstrumentChangeId = icResponse.data.id;
+
+          for (const media of uploadedMedia) {
+            await backend.post('/instrument-change-photos', {
+              instrument_change_id: newInstrumentChangeId,
+              s3_key: media.s3_key,
+              file_name: media.file_name,
+              file_type: media.file_type,
+            });
+          }
         }
       }
 
@@ -625,17 +646,6 @@ export const CreateUpdateDrawer = ({
             description: notes || null,
           });
         }
-      }
-
-      for (const media of uploadedMedia) {
-        await backend.post('/mediaChange', {
-          update_id: newUpdateId,
-          s3_key: media.s3_key,
-          file_name: media.file_name,
-          file_type: media.file_type,
-          is_thumbnail: false,
-          instrument_id: null,
-        });
       }
 
       const now = new Date();
