@@ -340,6 +340,7 @@ export const ProgramUpdateForm = ({
             setInstrumentChangeMap({});
             setMediaItems([]);
             setMediaURLs([]);
+            setSelectedMediaIndex(null);
           }
         } catch (error) {
           console.error('Error fetching instrument changes:', error);
