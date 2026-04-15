@@ -13,41 +13,38 @@ const PDF = () => {
   const [programName, setProgramName] = useState('');
 
   useEffect(() => {
-    const fetchPdfs = async () => {
-      try {
-        const res = await backend.get(`/mediaChange/${userId}/media`, {
-          params: { fileType: 'pdf' },
-        });
+  if (!userId) return;
 
-        if (!res) {
-          return;
-        }
+  const fetchPdfs = async () => {
+    console.log('userId:', userId);
+    console.log('url:', `/fileChanges/${userId}/files`);
+    try {
+      const res = await backend.get(`/fileChanges/${userId}/files`);
 
-        const transformedMedia = await Promise.all(
-          res.data.media.map(async (media) => {
+        if (!res) return;
+
+        const transformedFiles = await Promise.all(
+          res.data.files.map(async (file) => {
             const urlResponse = await backend.get(
-              `/images/url/${encodeURIComponent(media.s3Key)}`
+              `/images/url/${encodeURIComponent(file.s3Key)}`
             );
 
-            if (!urlResponse) {
-              return;
-            }
+            if (!urlResponse) return;
 
             return {
-              id: media.id,
-              s3_key: media.s3Key,
-              file_name: media.fileName,
-              file_type: media.fileType,
-              is_thumbnail: media.isThumbnail,
+              id: file.id,
+              s3_key: file.s3Key,
+              file_name: file.fileName,
+              file_type: file.fileType,
               imageUrl: urlResponse.data.url,
             };
           })
         );
 
-        setPdfs(transformedMedia);
+        setPdfs(transformedFiles);
         setProgramName(res.data.programName);
       } catch (err) {
-        console.error('Error fetching PDFS:', err);
+        console.error('Error fetching PDFs:', err);
       }
     };
 

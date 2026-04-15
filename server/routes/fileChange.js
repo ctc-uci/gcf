@@ -16,25 +16,6 @@ fileChangeRouter.get('/', async (req, res) => {
   }
 });
 
-fileChangeRouter.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const fileChange = await db.query(
-      `SELECT ALL * FROM file_change WHERE id = $1`,
-      [id]
-    );
-
-    if (fileChange.length === 0) {
-      return res.status(404).send('Item not found');
-    }
-
-    res.status(200).json(keysToCamel(fileChange[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
 fileChangeRouter.post('/', async (req, res) => {
   try {
     const { update_id, s3_key, file_name, file_type } = req.body;
@@ -52,16 +33,17 @@ fileChangeRouter.post('/', async (req, res) => {
 fileChangeRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { update_id, s3_key, file_name, file_type, is_thumbnail } = req.body;
+    const { update_id, s3_key, file_name, file_type, description } = req.body;
     const updatedFileChange = await db.query(
       `UPDATE file_change SET
         update_id = COALESCE($1, update_id),
         s3_key = COALESCE($2, s3_key),
         file_name = COALESCE($3, file_name),
         file_type = COALESCE($4, file_type),
-        WHERE id = $5,
+        description = COALESCE($5, description)
+        WHERE id = $6
         RETURNING *;`,
-      [update_id, s3_key, file_name, file_type, is_thumbnail, id]
+      [update_id, s3_key, file_name, file_type, description, id]
     );
 
     if (updatedFileChange.length === 0) {
@@ -261,6 +243,71 @@ fileChangeRouter.get('/update/:updateId', async (req, res) => {
     );
 
     res.status(200).json(keysToCamel(data));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+async function fetchUserFiles(userId) {
+  const result = await db.query(
+    `
+    SELECT
+      fc.id,
+      fc.s3_key,
+      fc.file_name,
+      fc.file_type,
+      fc.description,
+      fc.status,
+      p.id as program_id,
+      p.name as program_name
+    FROM program_director pd
+    JOIN program p ON pd.program_id = p.id
+    LEFT JOIN program_update pu ON pu.program_id = pd.program_id
+    LEFT JOIN file_change fc ON fc.update_id = pu.id
+    WHERE pd.user_id = $1
+    ORDER BY fc.id DESC NULLS LAST
+    `,
+    [userId]
+  );
+
+  if (!result || result.length === 0) {
+    return { files: [], programName: null, programId: null };
+  }
+
+  const fileItems = result.filter((row) => row.id !== null);
+
+  return {
+    files: keysToCamel(fileItems),
+    programName: result[0].program_name,
+    programId: result[0].program_id,
+  };
+}
+
+fileChangeRouter.get('/:userId/files', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const data = await fetchUserFiles(userId);
+    res.status(200).json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+fileChangeRouter.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const fileChange = await db.query(
+      `SELECT ALL * FROM file_change WHERE id = $1`,
+      [id]
+    );
+
+    if (fileChange.length === 0) {
+      return res.status(404).send('Item not found');
+    }
+
+    res.status(200).json(keysToCamel(fileChange[0]));
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');

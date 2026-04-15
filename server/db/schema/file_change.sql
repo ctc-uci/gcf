@@ -10,5 +10,5 @@ CREATE TABLE IF NOT EXISTS file_change (
     CONSTRAINT fk_program_update
         FOREIGN KEY(update_id)
             REFERENCES program_update(id)
-            ON DELETE CASCADE,
+            ON DELETE CASCADE
 );
