@@ -194,6 +194,8 @@
     "invalidInfoDesc": "Por favor verifique su información de entrada.",
     "savedTitle": "Cambios de cuenta guardados",
     "savedDesc": "Las actualizaciones de su cuenta se guardaron en {{time}}.",
+    "pendingApprovalTitle": "Enviado para aprobación",
+    "pendingApprovalDesc": "Los cambios de perfil están pendientes de revisión por un administrador o director regional.",
     "edit": "Editar"
   },
   "searchBar": {

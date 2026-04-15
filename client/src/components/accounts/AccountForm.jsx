@@ -425,7 +425,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         change_type: 'Creation',
         old_values: null,
         new_values: userData,
-        resolved: false,
+        resolved: true,
         last_modified: new Date().toISOString(),
       });
     }
@@ -472,7 +472,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
           currentUserId: userId,
           targetId: targetUserId,
         }),
-        resolved: false,
+        resolved: true,
         last_modified: new Date().toISOString(),
       });
     }

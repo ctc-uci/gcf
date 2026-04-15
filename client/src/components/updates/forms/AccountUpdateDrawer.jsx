@@ -366,7 +366,7 @@ export const AccountUpdateDrawer = ({
 
         <DrawerBody
           px={8}
-          pb={24}
+          pb={detail && !loadError && !isResolved ? 24 : 8}
         >
           {loading && (
             <Center py={12}>
@@ -412,7 +412,7 @@ export const AccountUpdateDrawer = ({
           )}
         </DrawerBody>
 
-        {!loading && detail && !loadError && (
+        {!loading && detail && !loadError && !isResolved && (
           <Flex
             position="absolute"
             bottom={0}
@@ -426,47 +426,23 @@ export const AccountUpdateDrawer = ({
             justify="flex-end"
             gap={3}
           >
-            {isResolved ? (
-              <>
-                <Button
-                  variant="outline"
-                  isDisabled={saving}
-                  isLoading={saving}
-                  onClick={() => applyResolvedStatus(false)}
-                >
-                  {t('common.markAsUnresolved')}
-                </Button>
-                <Button
-                  bg="teal.500"
-                  color="white"
-                  _hover={{ bg: 'teal.600' }}
-                  isDisabled={saving}
-                  onClick={onClose}
-                >
-                  {t('common.keepResolved')}
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="outline"
-                  isDisabled={saving}
-                  onClick={onClose}
-                >
-                  {t('common.keepUnresolved')}
-                </Button>
-                <Button
-                  bg="teal.500"
-                  color="white"
-                  _hover={{ bg: 'teal.600' }}
-                  isDisabled={saving}
-                  isLoading={saving}
-                  onClick={() => applyResolvedStatus(true)}
-                >
-                  {t('common.saveMarkResolved')}
-                </Button>
-              </>
-            )}
+            <Button
+              variant="outline"
+              isDisabled={saving}
+              onClick={onClose}
+            >
+              {t('common.keepUnresolved')}
+            </Button>
+            <Button
+              bg="teal.500"
+              color="white"
+              _hover={{ bg: 'teal.600' }}
+              isDisabled={saving}
+              isLoading={saving}
+              onClick={() => applyResolvedStatus(true)}
+            >
+              {t('common.saveMarkResolved')}
+            </Button>
           </Flex>
         )}
       </DrawerContent>

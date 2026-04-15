@@ -194,6 +194,8 @@
     "invalidInfoDesc": "Veuillez vérifier vos informations de saisie.",
     "savedTitle": "Modifications du compte enregistrées",
     "savedDesc": "Les mises à jour de votre compte ont été enregistrées à {{time}}.",
+    "pendingApprovalTitle": "Soumis pour approbation",
+    "pendingApprovalDesc": "Vos modifications de profil sont en attente d'examen par un administrateur ou un directeur régional.",
     "edit": "Modifier"
   },
   "searchBar": {

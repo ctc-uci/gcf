@@ -194,6 +194,8 @@
     "invalidInfoDesc": "Please check your input information.",
     "savedTitle": "Account Changes Saved",
     "savedDesc": "The updates to your account have been saved at {{time}}.",
+    "pendingApprovalTitle": "Submitted for approval",
+    "pendingApprovalDesc": "Your profile changes are pending review by an administrator or regional director.",
     "edit": "Edit"
   },
   "searchBar": {

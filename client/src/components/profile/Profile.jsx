@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   Box,
@@ -90,6 +90,11 @@ export const Profile = () => {
     onOpen: onPasswordModelOpen,
     onClose: onPasswordModelClose,
   } = useDisclosure();
+
+  const profileEditBaselineRef = useRef(null);
+  const [pendingPictureKey, setPendingPictureKey] = useState(null);
+  const [pendingPicturePreviewUrl, setPendingPicturePreviewUrl] =
+    useState(null);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -183,6 +188,13 @@ export const Profile = () => {
       const urlResponse = await backend.get(
         `/images/url/${encodeURIComponent(key)}`
       );
+
+      if (role === 'Program Director') {
+        setPendingPictureKey(key);
+        setPendingPicturePreviewUrl(urlResponse.data.url);
+        return;
+      }
+
       await backend.post('/images/profile-picture', {
         key: key,
         userId: currentUser.uid,
@@ -191,10 +203,7 @@ export const Profile = () => {
       const prevPictureKey = gcfUser?.pictureKey || null;
       const nextPictureKey = key;
 
-      // Log this as an account change even if only the picture changed
       if (prevPictureKey !== nextPictureKey) {
-        const trackedBio =
-          role === 'Program Director' ? roleSpecificData?.bio || '' : '';
         try {
           await backend.post('/accountChange', {
             user_id: currentUser.uid,
@@ -205,14 +214,14 @@ export const Profile = () => {
               last_name: gcfUser?.lastName || '',
               email: currentUser?.email || '',
               picture: prevPictureKey,
-              bio: trackedBio,
+              bio: '',
             },
             new_values: {
               first_name: gcfUser?.firstName || '',
               last_name: gcfUser?.lastName || '',
               email: currentUser?.email || '',
               picture: nextPictureKey,
-              bio: trackedBio,
+              bio: '',
             },
             resolved: false,
             last_modified: new Date().toISOString(),
@@ -238,6 +247,15 @@ export const Profile = () => {
       isAppLocale(String(gcfUser.preferredLanguage))
         ? String(gcfUser.preferredLanguage)
         : 'en';
+    profileEditBaselineRef.current = {
+      firstName: gcfUser.firstName || '',
+      lastName: gcfUser.lastName || '',
+      bio: role === 'Program Director' ? roleSpecificData?.bio || '' : '',
+      pictureKey: gcfUser.pictureKey || null,
+      language: prefLang,
+    };
+    setPendingPictureKey(null);
+    setPendingPicturePreviewUrl(null);
     setFormData({
       firstName: gcfUser.firstName || '',
       lastName: gcfUser.lastName || '',
@@ -252,39 +270,140 @@ export const Profile = () => {
     setIsEditing(false);
     setShowPassword(false);
     setNewPassword('');
-    setPasswordEdited('');
+    setPasswordEdited(false);
+    setPendingPictureKey(null);
+    setPendingPicturePreviewUrl(null);
+    profileEditBaselineRef.current = null;
   };
 
   const saveProfileEdits = async () => {
     try {
-      const oldBio =
-        role === 'Program Director' ? roleSpecificData?.bio || '' : '';
-      const newBio =
-        role === 'Program Director' ? formData.bio?.trim() || '' : '';
+      if (role === 'Program Director') {
+        const prefLang =
+          gcfUser.preferredLanguage &&
+          isAppLocale(String(gcfUser.preferredLanguage))
+            ? String(gcfUser.preferredLanguage)
+            : 'en';
+        const base = profileEditBaselineRef.current ?? {
+          firstName: gcfUser?.firstName || '',
+          lastName: gcfUser?.lastName || '',
+          bio: roleSpecificData?.bio || '',
+          pictureKey: gcfUser?.pictureKey || null,
+          language: prefLang,
+        };
+
+        const newBio = formData.bio?.trim() || '';
+        const newPic = pendingPictureKey ?? base.pictureKey;
+        const languageChanged = base.language !== formData.language;
+        const oldValues = {
+          first_name: base.firstName,
+          last_name: base.lastName,
+          email: currentUser?.email || '',
+          picture: base.pictureKey,
+          bio: base.bio,
+        };
+        const newValues = {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: currentUser?.email || '',
+          picture: newPic,
+          bio: newBio,
+        };
+
+        const hasProfileDiff =
+          JSON.stringify(oldValues) !== JSON.stringify(newValues);
+
+        if (languageChanged) {
+          await backend.patch(
+            `/gcf-users/${currentUser.uid}/preferred-language`,
+            {
+              preferredLanguage: formData.language,
+            }
+          );
+          await i18n.changeLanguage(formData.language);
+          setGcfUser((prev) => ({
+            ...prev,
+            preferredLanguage: formData.language,
+          }));
+        }
+
+        if (!hasProfileDiff) {
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString(i18n.language || 'en', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+            timeZoneName: 'short',
+          });
+          if (languageChanged) {
+            toast({
+              title: t('profile.savedTitle'),
+              description: t('profile.savedDesc', { time: timeStr }),
+              status: 'success',
+              variant: 'subtle',
+              position: 'bottom-right',
+            });
+          }
+          setIsEditing(false);
+          setShowPassword(false);
+          setPasswordEdited(false);
+          setNewPassword('');
+          setPendingPictureKey(null);
+          setPendingPicturePreviewUrl(null);
+          profileEditBaselineRef.current = null;
+          return;
+        }
+
+        await backend.post('/accountChange', {
+          user_id: currentUser.uid,
+          author_id: currentUser.uid,
+          change_type: 'Update',
+          old_values: oldValues,
+          new_values: newValues,
+          resolved: false,
+          last_modified: new Date().toISOString(),
+        });
+
+        await fetchUserData();
+        setPendingPictureKey(null);
+        setPendingPicturePreviewUrl(null);
+        profileEditBaselineRef.current = null;
+        window.dispatchEvent(new Event('profile-updated'));
+
+        toast({
+          title: t('profile.pendingApprovalTitle'),
+          description: t('profile.pendingApprovalDesc'),
+          status: 'success',
+          variant: 'subtle',
+          position: 'bottom-right',
+        });
+
+        setIsEditing(false);
+        setShowPassword(false);
+        setPasswordEdited(false);
+        setNewPassword('');
+        return;
+      }
+
       const oldValues = {
         first_name: gcfUser?.firstName || '',
         last_name: gcfUser?.lastName || '',
         email: currentUser?.email || '',
         picture: gcfUser?.pictureKey || null,
-        bio: oldBio,
+        bio: '',
       };
       const newValues = {
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: currentUser?.email || '',
         picture: gcfUser?.pictureKey || null,
-        bio: newBio,
+        bio: '',
       };
 
       await backend.put(`/gcf-users/${currentUser.uid}`, {
         first_name: formData.firstName,
         last_name: formData.lastName,
       });
-      if (role === 'Program Director') {
-        await backend.patch(`/program-directors/${currentUser.uid}`, {
-          bio: newBio,
-        });
-      }
 
       if (JSON.stringify(oldValues) !== JSON.stringify(newValues)) {
         try {
@@ -312,9 +431,7 @@ export const Profile = () => {
         preferredLanguage: formData.language,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        bio: role === 'Program Director' ? newBio : prev?.bio,
       }));
-      setRoleSpecificData((prev) => ({ ...prev, bio: newBio }));
       window.dispatchEvent(new Event('profile-updated'));
 
       const now = new Date();
@@ -419,9 +536,11 @@ export const Profile = () => {
   }
 
   const profilePicture =
-    gcfUser.picture && gcfUser.picture.trim() !== ''
-      ? gcfUser.picture
-      : DEFAULT_PROFILE_IMAGE;
+    pendingPicturePreviewUrl && role === 'Program Director'
+      ? pendingPicturePreviewUrl
+      : gcfUser.picture && gcfUser.picture.trim() !== ''
+        ? gcfUser.picture
+        : DEFAULT_PROFILE_IMAGE;
 
   return (
     <Box

@@ -194,6 +194,8 @@
     "invalidInfoDesc": "请检查您输入的信息。",
     "savedTitle": "帐户更改已保存",
     "savedDesc": "您帐户的更新已保存在 {{time}}。",
+    "pendingApprovalTitle": "已提交审批",
+    "pendingApprovalDesc": "您的个人资料更改正在等待管理员或区域总监审核。",
     "edit": "编辑"
   },
   "searchBar": {

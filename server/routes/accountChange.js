@@ -1,7 +1,68 @@
 import { keysToCamel } from '@/common/utils';
+import { getAuthenticatedUser } from '@/middleware';
 import express from 'express';
 
 import { db } from '../db/db-pgp';
+
+const RESOLVER_ROLES = new Set(['Admin', 'Super Admin', 'Regional Director']);
+
+function snapshotFromJsonb(val) {
+  if (val === null || val === undefined) return null;
+  if (typeof val === 'object') return val;
+  if (typeof val === 'string') {
+    try {
+      return JSON.parse(val);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+async function applyPendingProgramDirectorProfile(t, row) {
+  const nv = snapshotFromJsonb(row.new_values);
+  if (!nv || typeof nv !== 'object') return;
+
+  const uid = row.user_id;
+  const firstName = nv.first_name ?? nv.firstName;
+  const lastName = nv.last_name ?? nv.lastName;
+  const picture = Object.hasOwn(nv, 'picture') ? nv.picture : undefined;
+  const bio = nv.bio ?? nv.biography;
+  const prefLang = nv.preferred_language ?? nv.preferredLanguage;
+
+  const gcfSets = [];
+  const gcfVals = [];
+  let i = 1;
+  if (firstName !== undefined) {
+    gcfSets.push(`first_name = $${i++}`);
+    gcfVals.push(firstName);
+  }
+  if (lastName !== undefined) {
+    gcfSets.push(`last_name = $${i++}`);
+    gcfVals.push(lastName);
+  }
+  if (picture !== undefined) {
+    gcfSets.push(`picture = $${i++}`);
+    gcfVals.push(picture);
+  }
+  if (prefLang !== undefined) {
+    gcfSets.push(`preferred_language = $${i++}`);
+    gcfVals.push(prefLang);
+  }
+  if (gcfSets.length) {
+    gcfVals.push(uid);
+    await t.none(
+      `UPDATE gcf_user SET ${gcfSets.join(', ')} WHERE id = $${i}`,
+      gcfVals
+    );
+  }
+  if (bio !== undefined) {
+    await t.none(
+      `UPDATE program_director SET bio = $1 WHERE user_id = $2`,
+      [bio, uid]
+    );
+  }
+}
 
 const accountChangeRouter = express.Router();
 accountChangeRouter.use(express.json());
@@ -95,9 +156,53 @@ accountChangeRouter.put('/:id', async (req, res) => {
       last_modified,
     } = req.body;
 
-    const updatedAccountChange = await db.query(
-      `UPDATE account_change SET
-        user_id = COALESCE($1, user_id),
+    const updatedRow = await db.tx(async (t) => {
+      const existingRows = await t.manyOrNone(
+        'SELECT * FROM account_change WHERE id = $1 FOR UPDATE',
+        [id]
+      );
+      const existing = existingRows[0];
+      if (!existing) {
+        return null;
+      }
+
+      const incomingResolved =
+        resolved !== undefined ? resolved : existing.resolved;
+      const wasUnresolved = !existing.resolved;
+      const becomesResolved = wasUnresolved && incomingResolved === true;
+
+      if (becomesResolved) {
+        const selfInitiated =
+          existing.user_id &&
+          existing.author_id &&
+          String(existing.user_id) === String(existing.author_id);
+        const isUpdate = String(existing.change_type) === 'Update';
+
+        if (selfInitiated && isUpdate) {
+          const target = await t.oneOrNone(
+            'SELECT role FROM gcf_user WHERE id = $1',
+            [existing.user_id]
+          );
+          const targetIsPd =
+            target && String(target.role) === 'Program Director';
+
+          if (targetIsPd) {
+            let authUser;
+            try {
+              authUser = await getAuthenticatedUser(req, res);
+            } catch {
+              throw new Error('RESOLVE_UNAUTHORIZED');
+            }
+            if (!RESOLVER_ROLES.has(String(authUser.role))) {
+              throw new Error('RESOLVE_FORBIDDEN');
+            }
+            await applyPendingProgramDirectorProfile(t, existing);
+          }
+        }
+      }
+
+      const updated = await t.manyOrNone(
+        `UPDATE account_change SET user_id = COALESCE($1, user_id),
         author_id = COALESCE($2, author_id),
         change_type = COALESCE($3, change_type),
         old_values = COALESCE($4::jsonb, old_values),
@@ -106,24 +211,36 @@ accountChangeRouter.put('/:id', async (req, res) => {
         last_modified = COALESCE($7, last_modified)
         WHERE id = $8
         RETURNING *;`,
-      [
-        user_id,
-        author_id,
-        change_type,
-        old_values ? JSON.stringify(old_values) : null,
-        new_values ? JSON.stringify(new_values) : null,
-        resolved,
-        last_modified,
-        id,
-      ]
-    );
+        [
+          user_id,
+          author_id,
+          change_type,
+          old_values ? JSON.stringify(old_values) : null,
+          new_values ? JSON.stringify(new_values) : null,
+          resolved,
+          last_modified,
+          id,
+        ]
+      );
+      return updated[0] ?? null;
+    });
 
-    if (updatedAccountChange.length === 0) {
+    if (!updatedRow) {
       return res.status(404).send('Item not found');
     }
 
-    res.status(200).json(keysToCamel(updatedAccountChange[0]));
+    res.status(200).json(keysToCamel(updatedRow));
   } catch (err) {
+    if (err?.message === 'RESOLVE_UNAUTHORIZED') {
+      return res.status(401).send('Unauthorized');
+    }
+    if (err?.message === 'RESOLVE_FORBIDDEN') {
+      return res
+        .status(403)
+        .send(
+          'Only an admin or regional director can approve this profile update.'
+        );
+    }
     console.error(err);
     res.status(500).send('Internal Server Error');
   }
