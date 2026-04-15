@@ -24,7 +24,6 @@ import {
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
 import { useTranslation } from 'react-i18next';
-import { FiUser } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
