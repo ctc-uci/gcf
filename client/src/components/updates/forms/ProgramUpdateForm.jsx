@@ -334,6 +334,12 @@ export const ProgramUpdateForm = ({
               .map((r) => r.value.data.url);
             setMediaItems(validItems);
             setMediaURLs(validURLs);
+          } else {
+            setAddedInstruments({});
+            setOriginalInstruments({});
+            setInstrumentChangeMap({});
+            setMediaItems([]);
+            setMediaURLs([]);
           }
         } catch (error) {
           console.error('Error fetching instrument changes:', error);
