@@ -9,6 +9,15 @@ instrumentChangePhotoRouter.use(express.json());
 instrumentChangePhotoRouter.post('/', async (req, res) => {
     try {
         const { instrument_change_id, s3_key, file_name, file_type } = req.body;
+
+        if (!instrument_change_id || !s3_key || !file_name || !file_type) {
+            return res.status(400).send('Missing required fields for media.');
+        }
+
+        if (isNaN(instrument_change_id)) {
+            return res.status(400).send('Invalid ID format.');
+        }
+
         const newInstrumentChangePhoto = await db.query(
             `INSERT INTO instrument_change_photo (instrument_change_id, s3_key, file_name, file_type) VALUES ($1, $2, $3, $4) RETURNING *`,
             [instrument_change_id, s3_key, file_name, file_type]
@@ -38,6 +47,11 @@ instrumentChangePhotoRouter.get('/instrument-change/:instrumentChangeId', async 
 instrumentChangePhotoRouter.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
+
+        if (isNaN(id)) {
+            return res.status(400).send('Invalid ID format.');
+        }
+
         const deletedInstrumentChangePhoto = await db.query(
             `DELETE FROM instrument_change_photo WHERE id = $1 RETURNING *`,
             [id]
