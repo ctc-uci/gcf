@@ -338,6 +338,7 @@ export const ProgramUpdateForm = ({
             setAddedInstruments({});
             setOriginalInstruments({});
             setInstrumentChangeMap({});
+            setNewInstruments([]);
             setMediaItems([]);
             setMediaURLs([]);
             setSelectedMediaIndex(null);
