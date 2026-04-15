@@ -214,49 +214,66 @@ export const Map = () => {
         </Box>
 
         {regions.length > 0 && selectedProgram && (
-          <Box
-            position="absolute"
-            top="200px"
-            left="0"
-            w="100%"
-            h="calc(100% - 50px)"
-            bg="white"
-            zIndex={20}
-            borderRadius="md"
-            boxShadow="lg"
-            overflowY="auto"
-            css={{
-              '&::-webkit-scrollbar': { width: '6px' },
-              '&::-webkit-scrollbar-track': { background: 'transparent' },
-              '&::-webkit-scrollbar-thumb': {
-                background: '#CBD5E0',
-                borderRadius: '3px',
-              },
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Flex
-              mt="15px"
-              ml="25px"
-              mr="25px"
-              mb="10px"
-              alignItems="center"
+          <>
+            <Box
+              position="absolute"
+              top="0"
+              left="0"
+              w="100%"
+              h="100%"
+              bg="blackAlpha.500"
+              zIndex={19}
+              borderRadius="md"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedProgram(null);
+              }}
+              cursor="pointer"
+            />
+            <Box
+              position="absolute"
+              top="200px"
+              left="0"
+              w="100%"
+              h="calc(100% - 50px)"
+              bg="white"
+              zIndex={20}
+              borderRadius="md"
+              boxShadow="lg"
+              overflowY="auto"
+              css={{
+                '&::-webkit-scrollbar': { width: '6px' },
+                '&::-webkit-scrollbar-track': { background: 'transparent' },
+                '&::-webkit-scrollbar-thumb': {
+                  background: '#CBD5E0',
+                  borderRadius: '3px',
+                },
+              }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <HStack>
-                <Icon
-                  as={FaRegArrowAltCircleLeft}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedProgram(null);
-                  }}
-                  cursor="pointer"
-                  boxSize={6}
-                />
-                <Heading fontSize="2xl">{selectedProgram.title}</Heading>
-              </HStack>
-            </Flex>
-            <ProgramInfoView program={selectedProgram} />
-          </Box>
+              <Flex
+                mt="15px"
+                ml="25px"
+                mr="25px"
+                mb="10px"
+                alignItems="center"
+              >
+                <HStack>
+                  <Icon
+                    as={FaRegArrowAltCircleLeft}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedProgram(null);
+                    }}
+                    cursor="pointer"
+                    boxSize={6}
+                  />
+                  <Heading fontSize="2xl">{selectedProgram.title}</Heading>
+                </HStack>
+              </Flex>
+              <ProgramInfoView program={selectedProgram} />
+            </Box>
+          </>
         )}
       </Box>
 
