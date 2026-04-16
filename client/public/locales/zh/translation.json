@@ -60,8 +60,12 @@
     "placeholderNotes": "笔记",
     "keepUnresolved": "保留为未解决",
     "saveMarkResolved": "保存并标记为已解决",
+    "markAsUnresolved": "标记为未解决",
+    "keepResolved": "保持已解决",
     "oldProfile": "旧档案",
     "newProfile": "新的个人资料",
+    "diffLabelOld": "旧",
+    "diffLabelNew": "新",
     "editUpdates": "编辑更新",
     "accountUpdate": "账户更新",
     "profilePicture": "个人资料图片",
@@ -190,6 +194,12 @@
     "invalidInfoDesc": "请检查您输入的信息。",
     "savedTitle": "帐户更改已保存",
     "savedDesc": "您帐户的更新已保存在 {{time}}。",
+    "pendingApprovalTitle": "已提交审批",
+    "pendingApprovalDesc": "您的个人资料更改正在等待管理员或区域总监审核。",
+    "passwordInvalidTitle": "密码无效",
+    "passwordMin12Desc": "密码长度至少为 12 个字符。",
+    "passwordUpdatedTitle": "密码已更新",
+    "passwordUpdatedDesc": "您的密码已于 {{time}} 更新。",
     "edit": "编辑"
   },
   "searchBar": {
@@ -210,11 +220,13 @@
     "instrumentsDonated": "捐赠仪器"
   },
   "lessonVideos": {
-    "title": "课程视频",
+    "title": "课程材料",
     "empty": "没有可用的课程视频",
     "loading": "正在加载课程视频...",
     "scrollLeft": "向左滚动",
-    "scrollRight": "向右滚动"
+    "scrollRight": "向右滚动",
+    "videosTab": "视频",
+    "pdfsTab": "PDF 文件"
   },
   "videoPlayer": {
     "playlistFallback": "播放列表"
@@ -406,6 +418,9 @@
     "deleteTitle": "删除该帐户？",
     "deleteDesc": "此操作无法撤消。",
     "deleteAccount": "删除帐户",
+    "deleteSuccess": "帐户已删除",
+    "deletePartialTitle": "已从目录中移除帐户",
+    "deletePartialDesc": "用户已从应用中移除，但登录帐户未能自动删除。您可能需要在 Firebase 中手动删除或稍后重试。",
     "fieldFirstName": "名",
     "fieldLastName": "姓",
     "fieldEmail": "电子邮件",
@@ -436,7 +451,8 @@
   "mediaUpload": {
     "dragDrop": "将文件拖放到此处",
     "or": "或者",
-    "browse": "浏览文件"
+    "browse": "浏览文件",
+    "acceptedTypes": "可接受的文件类型：{{fileTypes}}"
   },
   "mediaEditModal": {
     "heading": "编辑详情",
@@ -448,12 +464,16 @@
     "noDescription": "暂无描述",
     "deleteModalHeader": "您确定要删除吗？",
     "deleteModalBody": "此操作无法撤消。",
-    "deleteMedia": "删除媒体"
+    "deleteMedia": "删除媒体",
+    "expandPdf": "展开 PDF"
   },
   "mediaPreview": {
     "previewAlt": "预览",
     "loadingAlt": "加载中...",
     "titlePlaceholder": "添加标题"
+  },
+  "mediaPreviewTag": {
+    "openPreview": "打开预览"
   },
   "mediaPreviewList": {
     "uploadedFiles": "上传的文件",

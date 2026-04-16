@@ -3,6 +3,7 @@ import { randomBytes } from 'crypto';
 import { keysToCamel } from '@/common/utils';
 import express from 'express';
 
+import { deleteFromS3 } from '../common/s3';
 import { admin } from '../config/firebase';
 import { db } from '../db/db-pgp';
 
@@ -444,16 +445,63 @@ gcfUserRouter.put('/:id', async (req, res) => {
 gcfUserRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedGcfUser = await db.query(
-      `DELETE FROM gcf_user WHERE id = $1 RETURNING *`,
-      [id]
-    );
 
-    if (deletedGcfUser.length === 0) {
+    const deletedRow = await db.tx(async (t) => {
+      const existing = await t.oneOrNone(
+        `SELECT id FROM gcf_user WHERE id = $1`,
+        [id]
+      );
+      if (!existing) {
+        return null;
+      }
+
+      await t.none(`DELETE FROM program_director WHERE user_id = $1`, [id]);
+      await t.none(`DELETE FROM regional_director WHERE user_id = $1`, [id]);
+
+      const deletedGcfUser = await t.any(
+        `DELETE FROM gcf_user WHERE id = $1 RETURNING *`,
+        [id]
+      );
+      return deletedGcfUser[0] ?? null;
+    });
+
+    if (!deletedRow) {
       return res.status(404).send('Item not found');
     }
 
-    res.status(200).json(keysToCamel(deletedGcfUser[0]));
+    const pictureKey =
+      typeof deletedRow.picture === 'string' ? deletedRow.picture.trim() : '';
+    if (pictureKey) {
+      try {
+        await deleteFromS3(pictureKey);
+      } catch (s3Err) {
+        console.error('S3 delete profile picture:', s3Err);
+      }
+    }
+
+    let firebaseAuthDeleted = true;
+    try {
+      await admin.auth().deleteUser(id);
+    } catch (firebaseErr) {
+      if (firebaseErr.code === 'auth/user-not-found') {
+        firebaseAuthDeleted = true;
+      } else {
+        firebaseAuthDeleted = false;
+        console.error('Firebase deleteUser:', firebaseErr);
+      }
+    }
+
+    if (!firebaseAuthDeleted) {
+      return res.status(503).json({
+        error:
+          'Database user was deleted but Firebase authentication could not be removed.',
+        gcfUserDeleted: true,
+        firebaseAuthDeleted: false,
+        user: keysToCamel(deletedRow),
+      });
+    }
+
+    res.status(200).json(keysToCamel(deletedRow));
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');

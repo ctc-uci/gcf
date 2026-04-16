@@ -5,7 +5,6 @@ import {
   AspectRatio,
   Box,
   Flex,
-  Heading,
   HStack,
   IconButton,
   Image,
@@ -134,13 +133,6 @@ function LessonVideos({
 
   return (
     <Box>
-      <Heading
-        size="lg"
-        fontWeight="extrabold"
-        mb={4}
-      >
-        {t('lessonVideos.title')}
-      </Heading>
       {!isLoading && playlists.length === 0 && (
         <Text color="gray.500">{t('lessonVideos.empty')}</Text>
       )}
