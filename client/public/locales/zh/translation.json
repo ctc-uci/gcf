@@ -437,7 +437,8 @@
   "mediaUpload": {
     "dragDrop": "将文件拖放到此处",
     "or": "或者",
-    "browse": "浏览文件"
+    "browse": "浏览文件",
+    "acceptedTypes": "可接受的文件类型：{{fileTypes}}"
   },
   "mediaCard": {
     "loadingAlt": "加载中..."

@@ -437,7 +437,8 @@
   "mediaUpload": {
     "dragDrop": "Arrastra y suelta archivos aquí",
     "or": "O",
-    "browse": "Explorar archivos"
+    "browse": "Explorar archivos",
+    "acceptedTypes": "Tipos de archivo aceptados: {{fileTypes}}"
   },
   "mediaCard": {
     "loadingAlt": "Cargando..."

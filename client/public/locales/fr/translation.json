@@ -437,7 +437,8 @@
   "mediaUpload": {
     "dragDrop": "Glissez et déposez les fichiers ici",
     "or": "OU",
-    "browse": "Parcourir les fichiers"
+    "browse": "Parcourir les fichiers",
+    "acceptedTypes": "Types de fichiers acceptés : {{fileTypes}}"
   },
   "mediaCard": {
     "loadingAlt": "Chargement..."

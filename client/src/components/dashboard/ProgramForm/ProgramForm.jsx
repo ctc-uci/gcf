@@ -75,7 +75,6 @@ function removeFormItemByIdOrKey(list, item) {
     return m !== item;
   });
 }
-
 export const ProgramForm = ({
   isOpen: isOpenProp,
   onOpen: onOpenProp,
@@ -994,6 +993,11 @@ export const ProgramForm = ({
         onClose={mediaUploadModal.onClose}
         onUploadComplete={handleUploadComplete}
         formOrigin="program"
+        accept={
+          mediaUploadTargetRef.current === 'files'
+            ? { 'application/pdf': ['.pdf'] }
+            : undefined
+        }
       />
     </Drawer>
   );
