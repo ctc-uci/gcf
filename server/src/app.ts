@@ -16,6 +16,7 @@ import { rdProgramTableRouter } from '@/routes/rdProgramTable';
 import { regionRouter } from '@/routes/region';
 import { regionalDirectorRouter } from '@/routes/regionalDirector';
 import { updatesPermissionsRouter } from '@/routes/updatesPermissions';
+import { fileChangeRouter } from '@/routes/fileChange';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
@@ -52,9 +53,9 @@ app.use('/region', regionRouter);
 app.use('/enrollmentChange', verifyToken, enrollmentChangeRouter);
 app.use('/mediaChange', verifyToken, mediaChangeRouter);
 app.use('/program', programRouter);
-app.use('/partners', verifyToken, partnerOrganizationRouter);
-app.use('/images', verifyToken, imagesRouter);
-app.use('/playlistCache', verifyToken, playlistCacheRouter);
-
+app.use('/partners', partnerOrganizationRouter);
+app.use('/images', imagesRouter);
+app.use('/playlistCache', playlistCacheRouter);
+app.use('/fileChanges', fileChangeRouter);
 // Listening is moved to server.ts to enable importing app in tests
 export default app;
