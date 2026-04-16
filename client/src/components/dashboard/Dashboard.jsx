@@ -15,7 +15,7 @@ import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useTranslation } from 'react-i18next';
 
 import LessonVideos from './lessonVideos';
-import PDF from './PDF';
+import PDF from './FileUpload';
 import ProgramTable from './ProgramTable';
 import StatisticsSummary from './StatisticsSummary';
 
