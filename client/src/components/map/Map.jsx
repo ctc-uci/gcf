@@ -21,6 +21,8 @@ export const Map = () => {
   const [regions, setRegions] = useState([]);
   const [regionName, setRegionName] = useState('');
   const [hoverRegions, setHoverRegions] = useState(null);
+  /** Set synchronously on country click so the whole region highlights without waiting for the API. */
+  const [selectedRegionId, setSelectedRegionId] = useState(null);
   const [programs, setPrograms] = useState([]);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const { backend } = useBackendContext();
@@ -80,11 +82,13 @@ export const Map = () => {
       if (!countriesRegion) {
         return;
       }
+      setSelectedRegionId(countriesRegion);
       const regionsRes = await backend.get(
         `/region/${countriesRegion}/countries`
       );
       if (regionsRes.data.length === 0) {
         console.error('No regions found for the selected country.');
+        setSelectedRegionId(null);
         return;
       }
       setSelectedProgram(null);
@@ -111,6 +115,7 @@ export const Map = () => {
       }
     } catch (error) {
       console.error('Error fetching country or region data:', error);
+      setSelectedRegionId(null);
     }
   };
 
@@ -148,6 +153,7 @@ export const Map = () => {
           onClick={() => {
             setPrograms([]);
             setRegions([]);
+            setSelectedRegionId(null);
             setSelectedProgram(null);
           }}
         >
@@ -157,7 +163,10 @@ export const Map = () => {
                 geographies.map((geo) => {
                   const regionId = getRegionFromIso(geo.id);
                   const isHovered = regionId && regionId === hoverRegions;
-                  const isClicked = regions.some((r) => r.isoCode === geo.id);
+                  const isSelectedRegion =
+                    regionId != null &&
+                    selectedRegionId != null &&
+                    regionId === selectedRegionId;
                   return (
                     <Geography
                       key={geo.rsmKey}
@@ -172,7 +181,7 @@ export const Map = () => {
                         default: {
                           fill: isHovered
                             ? '#868686'
-                            : isClicked
+                            : isSelectedRegion
                               ? '#636363'
                               : '#B3B3B3',
                           outline: 'none',
@@ -182,7 +191,11 @@ export const Map = () => {
                           outline: 'none',
                           cursor: regionId ? 'pointer' : 'default',
                         },
-                        pressed: { fill: '#636363', outline: 'none' },
+                        pressed: {
+                          fill: regionId ? '#868686' : '#B3B3B3',
+                          outline: 'none',
+                          cursor: regionId ? 'pointer' : 'default',
+                        },
                       }}
                     />
                   );
@@ -294,6 +307,7 @@ export const Map = () => {
                   e.stopPropagation();
                   setPrograms([]);
                   setRegions([]);
+                  setSelectedRegionId(null);
                   setSelectedProgram(null);
                 }}
                 cursor="pointer"
