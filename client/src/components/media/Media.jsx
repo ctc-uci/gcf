@@ -47,6 +47,22 @@ export const Media = () => {
 
       const newMediaItems = [];
       for (const file of uploadedFiles) {
+        const isPdf =
+          file.file_type === 'application/pdf' ||
+          file.file_name?.toLowerCase().endsWith('.pdf');
+
+        if (isPdf) {
+          await backend.post('/file-change', {
+            update_id: updateId,
+            s3_key: file.s3_key,
+            file_name: file.file_name,
+            file_type: file.file_type,
+            description: file.description,
+          });
+          // Skip adding PDFs to newMediaItems so they don't appear in the media grid
+          continue;
+        }
+
         const mediaChangeResponse = await backend.post('/mediaChange', {
           update_id: updateId,
           s3_key: file.s3_key,
@@ -83,19 +99,25 @@ export const Media = () => {
       const response = await backend.get(`/mediaChange/${userId}/media`);
 
       const transformedMedia = await Promise.all(
-        response.data.media.map(async (media) => {
-          const urlResponse = await backend.get(
-            `/images/url/${encodeURIComponent(media.s3Key)}`
-          );
-          return {
-            id: media.id,
-            s3_key: media.s3Key,
-            file_name: media.fileName,
-            file_type: media.fileType,
-            is_thumbnail: media.isThumbnail,
-            imageUrl: urlResponse.data.url,
-          };
-        })
+        response.data.media
+          .filter(
+            (media) =>
+              !media.fileName?.toLowerCase().endsWith('.pdf') &&
+              media.fileType !== 'application/pdf'
+          )
+          .map(async (media) => {
+            const urlResponse = await backend.get(
+              `/images/url/${encodeURIComponent(media.s3Key)}`
+            );
+            return {
+              id: media.id,
+              s3_key: media.s3Key,
+              file_name: media.fileName,
+              file_type: media.fileType,
+              is_thumbnail: media.isThumbnail,
+              imageUrl: urlResponse.data.url,
+            };
+          })
       );
 
       setMedia(transformedMedia);
