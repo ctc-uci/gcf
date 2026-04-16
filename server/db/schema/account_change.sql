@@ -1,13 +1,26 @@
-CREATE TABLE public.account_change (
-  id bigserial NOT NULL,
-  user_id text NOT NULL,
-  author_id text NOT NULL,
-  change_type character varying(50) NOT NULL,
-  old_values jsonb NULL,
-  new_values jsonb NULL,
-  resolved boolean NOT NULL DEFAULT false,
-  last_modified timestamp without time zone NOT NULL
+
+CREATE TABLE IF NOT EXISTS public.account_change (
+    id BIGSERIAL PRIMARY KEY,
+    user_id TEXT,
+    author_id TEXT,
+    
+    change_type VARCHAR(50) NOT NULL CHECK (change_type IN ('Creation', 'Update', 'Deletion')),
+    old_values JSONB,
+    new_values JSONB,
+    resolved BOOLEAN NOT NULL DEFAULT FALSE,
+    last_modified TIMESTAMP NOT NULL,
+
+    CONSTRAINT fk_user_id
+        FOREIGN KEY (user_id)
+            REFERENCES public.gcf_user(id)
+            ON DELETE SET NULL,
+
+    CONSTRAINT fk_author_id
+        FOREIGN KEY (author_id)
+            REFERENCES public.gcf_user(id)
+            ON DELETE SET NULL
+    
 );
 
-ALTER TABLE public.account_change
-ADD CONSTRAINT account_change_pkey PRIMARY KEY (id)
+
+

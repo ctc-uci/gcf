@@ -88,6 +88,18 @@ export function useUpdatesPageData() {
     }
   }, [fetchData, userId, role]);
 
+  const refetchAccountUpdates = useCallback(async () => {
+    if (!backend) return;
+    try {
+      const response = await backend.get(`/accountChange`);
+      const accountUpdates = response.data ?? [];
+      setAccountUpdatesData(accountUpdates);
+      setOriginalAccountUpdatesData(accountUpdates);
+    } catch (error) {
+      console.error('Error refetching account updates:', error);
+    }
+  }, [backend]);
+
   useEffect(() => {
     if (!userId || !backend) {
       setIsLoading(false);
@@ -116,8 +128,10 @@ export function useUpdatesPageData() {
           setOriginalProgramUpdatesData(mappedProgram);
 
           // Account updates placeholder — no backend route yet
-          setAccountUpdatesData([]);
-          setOriginalAccountUpdatesData([]);
+          const response = await backend.get(`/accountChange`);
+          const accountUpdates = response.data ?? [];
+          setAccountUpdatesData(accountUpdates);
+          setOriginalAccountUpdatesData(accountUpdates);
         }
       } catch (error) {
         console.error('Fetch error:', error);
@@ -142,5 +156,6 @@ export function useUpdatesPageData() {
     isLoading,
     isProgramUpdatesLoading,
     refetchProgramUpdates,
+    refetchAccountUpdates,
   };
 }
