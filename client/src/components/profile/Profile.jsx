@@ -96,6 +96,7 @@ export const Profile = () => {
   const [pendingPictureKey, setPendingPictureKey] = useState(null);
   const [pendingPicturePreviewUrl, setPendingPicturePreviewUrl] =
     useState(null);
+  const [pendingAccountChange, setPendingAccountChange] = useState(null);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -164,7 +165,66 @@ export const Profile = () => {
       if (role === 'Program Director') {
         const programData = await fetchProgramData(backend, userData.id);
         setRoleSpecificData(programData);
-        setFormData((prev) => ({ ...prev, bio: programData?.bio || '' }));
+
+        let pendingChange = null;
+        try {
+          const pendingResponse = await backend.get('/accountChange', {
+            params: { userId: currentUser.uid, resolved: 'false' },
+          });
+          const pendingList = pendingResponse.data || [];
+          if (pendingList.length > 0) {
+            pendingChange = pendingList.sort(
+              (a, b) => new Date(b.lastModified) - new Date(a.lastModified)
+            )[0];
+          }
+        } catch (err) {
+          console.error('Error fetching pending account changes:', err);
+        }
+
+        if (pendingChange) {
+          const nv = pendingChange.newValues || {};
+          const displayFirstName =
+            nv.first_name !== undefined
+              ? nv.first_name
+              : (userData.firstName ?? '');
+          const displayLastName =
+            nv.last_name !== undefined
+              ? nv.last_name
+              : (userData.lastName ?? '');
+          const displayBio =
+            nv.bio !== undefined ? nv.bio : programData?.bio || '';
+
+          setFormData({
+            firstName: displayFirstName,
+            lastName: displayLastName,
+            email: currentUser?.email || '',
+            bio: displayBio,
+            language: prefLang,
+          });
+
+          let pendingPic = null;
+          if (nv.picture && nv.picture !== pictureKey) {
+            try {
+              const urlResp = await backend.get(
+                `/images/url/${encodeURIComponent(nv.picture)}`
+              );
+              pendingPic = urlResp.data.url;
+            } catch {
+              // ignore
+            }
+          }
+
+          setGcfUser((prev) => ({
+            ...prev,
+            firstName: displayFirstName,
+            lastName: displayLastName,
+            ...(pendingPic ? { picture: pendingPic } : {}),
+          }));
+          setPendingAccountChange(pendingChange);
+        } else {
+          setFormData((prev) => ({ ...prev, bio: programData?.bio || '' }));
+          setPendingAccountChange(null);
+        }
       } else if (role === 'Regional Director') {
         const regionData = await fetchRegionData(backend, userData.id);
         setRoleSpecificData(regionData);
@@ -355,7 +415,7 @@ export const Profile = () => {
           return;
         }
 
-        await backend.post('/accountChange', {
+        const accountChangeResponse = await backend.post('/accountChange', {
           user_id: currentUser.uid,
           author_id: currentUser.uid,
           change_type: 'Update',
@@ -365,7 +425,23 @@ export const Profile = () => {
           last_modified: new Date().toISOString(),
         });
 
-        await fetchUserData();
+        // Update local display to show pending values immediately
+        setGcfUser((prev) => ({
+          ...prev,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          ...(pendingPicturePreviewUrl
+            ? { picture: pendingPicturePreviewUrl }
+            : {}),
+        }));
+        setRoleSpecificData((prev) => ({ ...prev, bio: newBio }));
+        setFormData((prev) => ({
+          ...prev,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          bio: newBio,
+        }));
+        setPendingAccountChange(accountChangeResponse.data);
         setPendingPictureKey(null);
         setPendingPicturePreviewUrl(null);
         profileEditBaselineRef.current = null;
@@ -374,7 +450,7 @@ export const Profile = () => {
         toast({
           title: t('profile.pendingApprovalTitle'),
           description: t('profile.pendingApprovalDesc'),
-          status: 'success',
+          status: 'info',
           variant: 'subtle',
           position: 'bottom-right',
         });
@@ -543,6 +619,14 @@ export const Profile = () => {
         ? gcfUser.picture
         : DEFAULT_PROFILE_IMAGE;
 
+  const pdPending = role === 'Program Director' && !!pendingAccountChange;
+  const ov = pendingAccountChange?.oldValues || {};
+  const nv = pendingAccountChange?.newValues || {};
+  const firstNamePending = pdPending && ov.first_name !== nv.first_name;
+  const lastNamePending = pdPending && ov.last_name !== nv.last_name;
+  const bioPending = pdPending && ov.bio !== nv.bio;
+  const picturePending = pdPending && ov.picture !== nv.picture;
+
   return (
     <Box
       p={10}
@@ -603,6 +687,20 @@ export const Profile = () => {
               _hover={{ bg: 'gray.100' }}
             />
           )}
+          {!isEditing && picturePending && (
+            <Text
+              as="span"
+              color="red.500"
+              fontWeight="bold"
+              fontSize="xl"
+              position="absolute"
+              top={1}
+              right={1}
+              lineHeight={1}
+            >
+              *
+            </Text>
+          )}
         </Box>
 
         <VStack
@@ -622,6 +720,15 @@ export const Profile = () => {
                 mb={1}
               >
                 {t('common.firstName')}
+                {!isEditing && firstNamePending && (
+                  <Text
+                    as="span"
+                    color="red.500"
+                    ml={0.5}
+                  >
+                    *
+                  </Text>
+                )}
               </Text>
               {isEditing ? (
                 <Input
@@ -638,6 +745,15 @@ export const Profile = () => {
                 mb={1}
               >
                 {t('common.lastName')}
+                {!isEditing && lastNamePending && (
+                  <Text
+                    as="span"
+                    color="red.500"
+                    ml={0.5}
+                  >
+                    *
+                  </Text>
+                )}
               </Text>
               {isEditing ? (
                 <Input
@@ -657,6 +773,15 @@ export const Profile = () => {
                 mb={1}
               >
                 {t('profile.bio')}
+                {!isEditing && bioPending && (
+                  <Text
+                    as="span"
+                    color="red.500"
+                    ml={0.5}
+                  >
+                    *
+                  </Text>
+                )}
               </Text>
               {isEditing ? (
                 <Textarea
@@ -807,6 +932,18 @@ export const Profile = () => {
               <Text>{localeLabel(gcfUser?.preferredLanguage)}</Text>
             )}
           </FormControl>
+
+          {!isEditing && pdPending && (
+            <Text
+              color="red.500"
+              fontSize="sm"
+              textAlign="center"
+              w="100%"
+            >
+              * Your changes have been submitted and will appear once approved
+              by an admin.
+            </Text>
+          )}
         </VStack>
       </VStack>
 

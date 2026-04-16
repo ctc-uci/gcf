@@ -69,15 +69,36 @@ accountChangeRouter.use(express.json());
 
 accountChangeRouter.get('/', async (req, res) => {
   try {
-    const data = await db.query(`
-      SELECT 
-        ac.*, 
+    const { userId, resolved } = req.query;
+    const conditions = [];
+    const params = [];
+    let i = 1;
+
+    if (userId) {
+      conditions.push(`ac.user_id = $${i++}`);
+      params.push(userId);
+    }
+    if (resolved !== undefined) {
+      conditions.push(`ac.resolved = $${i++}`);
+      params.push(resolved === 'true');
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(' AND ')}`
+      : '';
+
+    const data = await db.query(
+      `SELECT
+        ac.*,
         u.first_name AS author_first_name,
         u.last_name AS author_last_name
       FROM account_change ac
       LEFT JOIN gcf_user u ON ac.author_id = u.id
-    `);
-    
+      ${whereClause}
+      ORDER BY ac.last_modified DESC`,
+      params
+    );
+
     res.status(200).json(keysToCamel(data));
   } catch (err) {
     console.error(err);
