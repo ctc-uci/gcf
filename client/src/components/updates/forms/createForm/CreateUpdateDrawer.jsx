@@ -167,6 +167,7 @@ export const CreateUpdateDrawer = ({
   const [programEnrollmentCount, setProgramEnrollmentCount] = useState(0);
 
   const [notes, setNotes] = useState('');
+  const [specialRequest, setSpecialRequest] = useState(false);
   const [uploadedMedia, setUploadedMedia] = useState([]);
   const originalMediaIds = useRef(new Set());
 
@@ -302,6 +303,7 @@ export const CreateUpdateDrawer = ({
                 ? Math.max(0, Number.isNaN(amt) ? 0 : amt)
                 : Math.abs(Number.isNaN(amt) ? 0 : amt)
             );
+            setSpecialRequest(change.specialRequest === true);
             setNotes(extraNotesFromStoredNote(pu.note || ''));
           }
         } else {
@@ -388,6 +390,7 @@ export const CreateUpdateDrawer = ({
     setStudentCount(0);
     setStudentWhatHappened('');
     setNotes('');
+    setSpecialRequest(false);
     setUploadedMedia([]);
     originalMediaIds.current = new Set();
     setIsFullScreen(false);
@@ -534,6 +537,7 @@ export const CreateUpdateDrawer = ({
                 event_type: instrumentEventType,
                 description:
                   instrumentEventType === 'other' ? notes || null : null,
+                special_request: specialRequest,
               }
             );
           }
@@ -618,6 +622,7 @@ export const CreateUpdateDrawer = ({
             amountChanged: instrumentDelta,
             event_type: instrumentEventType,
             description: instrumentEventType === 'other' ? notes || null : null,
+            special_request: specialRequest,
           });
 
           const newInstrumentChangeId = icResponse.data.id;
@@ -807,6 +812,8 @@ export const CreateUpdateDrawer = ({
                   mediaUploadDisclosure={mediaUploadDisclosure}
                   notes={notes}
                   setNotes={setNotes}
+                  specialRequest={specialRequest}
+                  setSpecialRequest={setSpecialRequest}
                 />
               ) : (
                 <CreateUpdateStudent

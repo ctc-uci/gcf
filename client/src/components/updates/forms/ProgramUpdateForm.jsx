@@ -640,7 +640,8 @@ export const ProgramUpdateForm = ({
                   </Text>
                   <Checkbox
                     isChecked={flagged}
-                    onChange={(e) => setFlagged(e.target.checked)}
+                    isReadOnly
+                    pointerEvents="none"
                   >
                     {t('updates.specialRequest')}
                   </Checkbox>
@@ -698,6 +699,7 @@ export const ProgramUpdateForm = ({
                             file_name={item.fileName}
                             file_type={item.fileType}
                             imageUrl={mediaURLs[idx]}
+                            hideMenu
                           />
                         </Box>
                       </Box>
