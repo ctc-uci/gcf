@@ -135,6 +135,7 @@ export const useProfile = () => {
           const displayBio =
             nv.bio !== undefined ? nv.bio : programData?.bio || '';
 
+          setRoleSpecificData((prev) => ({ ...prev, bio: displayBio }));
           setFormData({
             firstName: displayFirstName,
             lastName: displayLastName,
@@ -356,15 +357,20 @@ export const useProfile = () => {
           return;
         }
 
-        const accountChangeResponse = await backend.post('/accountChange', {
-          user_id: currentUser.uid,
-          author_id: currentUser.uid,
-          change_type: 'Update',
-          old_values: oldValues,
-          new_values: newValues,
-          resolved: false,
-          last_modified: new Date().toISOString(),
-        });
+        const accountChangeResponse = pendingAccountChange
+          ? await backend.put(`/accountChange/${pendingAccountChange.id}`, {
+              new_values: newValues,
+              last_modified: new Date().toISOString(),
+            })
+          : await backend.post('/accountChange', {
+              user_id: currentUser.uid,
+              author_id: currentUser.uid,
+              change_type: 'Update',
+              old_values: oldValues,
+              new_values: newValues,
+              resolved: false,
+              last_modified: new Date().toISOString(),
+            });
 
         setGcfUser((prev) => ({
           ...prev,

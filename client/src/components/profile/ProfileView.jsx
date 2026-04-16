@@ -397,8 +397,7 @@ export const ProfileView = (props) => {
               textAlign="center"
               w="100%"
             >
-              * Your changes have been submitted and will appear once approved
-              by an admin.
+              * {t('profile.pendingApprovalDesc')}
             </Text>
           )}
         </VStack>
