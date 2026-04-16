@@ -31,16 +31,21 @@ export const Navbar = () => {
   const { currentUser } = useAuthContext();
   const { backend } = useBackendContext();
   const userId = currentUser?.uid;
-  const [region, setRegion] = useState(''); // placeholder for region
-  const [project, setProject] = useState(''); // placeholder for project
+  const [region, setRegion] = useState('');
+  const [project, setProject] = useState('');
   const [userName, setUserName] = useState(currentUser?.displayName ?? '');
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(
-    null
-  );
+  const [profilePictureUrl, setProfilePictureUrl] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handler = () => setRefreshKey((k) => k + 1);
+    window.addEventListener('profile-updated', handler);
+    return () => window.removeEventListener('profile-updated', handler);
+  }, []);
 
   useOutsideClick({
     ref: menuRef,
@@ -58,7 +63,7 @@ export const Navbar = () => {
   };
 
   useEffect(() => {
-    const fetchData = async (table: string, path: string) => {
+    const fetchData = async (table, path) => {
       try {
         const response = await backend.get(`/${table}/${path}`);
         return response.data;
@@ -123,7 +128,7 @@ export const Navbar = () => {
       }
     };
     loadData();
-  }, [userId, backend, role, currentUser?.displayName]);
+  }, [userId, backend, role, currentUser?.displayName, refreshKey]);
 
   const triggerBg = isMenuOpen || isHovered ? 'gray.300' : 'transparent';
 

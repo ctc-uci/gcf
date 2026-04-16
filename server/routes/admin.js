@@ -1,3 +1,4 @@
+import { verifyRole } from '@/middleware';
 import { keysToCamel } from '@/common/utils';
 import express from 'express';
 
@@ -5,6 +6,7 @@ import { db } from '../db/db-pgp';
 
 const adminRouter = express.Router();
 adminRouter.use(express.json());
+adminRouter.use(verifyRole(['Admin', 'Super Admin']));
 
 // GET /admin/programs - returns all programs with student/instrument counts
 adminRouter.get('/programs', async (req, res) => {

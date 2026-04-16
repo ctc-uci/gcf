@@ -6,4 +6,6 @@ CREATE TABLE program_update (
   update_date    DATE                           NOT NULL,
   note           TEXT,
   show_on_table  BOOLEAN NOT NULL DEFAULT TRUE
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  created_at timestamp with time zone NOT NULL DEFAULT now()
 );

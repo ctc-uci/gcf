@@ -44,6 +44,27 @@ programUpdateRouter.get('/:id', async (req, res) => {
   }
 });
 
+programUpdateRouter.get('/:id/date/', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const entry = await db.query(
+      `
+        SELECT update_date FROM program_update 
+        WHERE id = $1`,
+        [id]
+    );
+
+    if (entry.length === 0) {
+        return res.status(404).send('Program update date not found');
+    }
+
+    res.status(200).json(keysToCamel(entry[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+})
+
 // Creating a program update
 programUpdateRouter.post('/', async (req, res) => {
   const { title, program_id, created_by, update_date, note, show_on_table } =

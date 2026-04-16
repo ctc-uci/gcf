@@ -52,7 +52,7 @@ mediaChangeRouter.post('/', async (req, res) => {
 mediaChangeRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { update_id, s3_key, file_name, file_type, is_thumbnail } = req.body;
+    const { update_id, s3_key, file_name, file_type, is_thumbnail, description } = req.body;
     const updatedMediaChange = await db.query(
       `UPDATE media_change SET
         update_id = COALESCE($1, update_id),
@@ -60,9 +60,10 @@ mediaChangeRouter.put('/:id', async (req, res) => {
         file_name = COALESCE($3, file_name),
         file_type = COALESCE($4, file_type),
         is_thumbnail = COALESCE($5, is_thumbnail),
-        WHERE id = $6
+        description = COALESCE($6, description)
+        WHERE id = $7
         RETURNING *;`,
-      [update_id, s3_key, file_name, file_type, is_thumbnail, id]
+      [update_id, s3_key, file_name, file_type, is_thumbnail, description, id]
     );
 
     if (updatedMediaChange.length === 0) {

@@ -1,6 +1,8 @@
 CREATE TABLE IF NOT EXISTS program_director (
     user_id BIGINT,
+    bio TEXT,
     program_id BIGINT,
+    bio text NULL,
     CONSTRAINT fk_user_id
         FOREIGN KEY (user_id) 
         REFERENCES user(id)

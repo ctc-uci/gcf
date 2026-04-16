@@ -425,7 +425,8 @@
   },
   "mediaPage": {
     "title": "Mis medios",
-    "new": "Nuevo",
+    "searchPlaceholder": "Buscar",
+    "uploadMedia": "Subir Archivos",
     "uploads": "Subidas",
     "noProgram": "No se encontró ningún programa",
     "noMediaForProgram": "No hay medios asociados con {{name}}"
@@ -440,8 +441,18 @@
     "browse": "Explorar archivos",
     "acceptedTypes": "Tipos de archivo aceptados: {{fileTypes}}"
   },
+  "mediaEditModal": {
+    "heading": "Editar detalles",
+    "titlePlaceholder": "Título",
+    "descriptionPlaceholder": "Agregar descripción"
+  },
   "mediaCard": {
-    "loadingAlt": "Cargando..."
+    "loadingAlt": "Cargando...",
+    "noDescription": "Sin descripción",
+    "deleteModalHeader": "¿Estás seguro de que quieres eliminar?",
+    "deleteModalBody": "Esta acción no se puede deshacer.",
+    "deleteMedia": "Eliminar medios",
+    "expandPdf": "Ampliar PDF"
   },
   "mediaPreview": {
     "previewAlt": "Avance",

@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { AddIcon } from '@chakra-ui/icons';
+import { AddIcon, SearchIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
   Center,
   Container,
   Heading,
+  HStack,
+  Input,
+  InputGroup,
+  InputLeftElement,
   Spinner,
   useDisclosure,
   VStack,
@@ -16,6 +20,7 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 
+import { MediaViewer } from '../updates/MediaViewer';
 import { MediaGrid } from './MediaGrid';
 import { MediaUploadModal } from './MediaUploadModal';
 
@@ -31,6 +36,8 @@ export const Media = () => {
   const [programName, setProgramName] = useState('');
   const [programId, setProgramId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewerIndex, setViewerIndex] = useState(null);
 
   const onUploadCompleteHandler = async (uploadedFiles, description) => {
     try {
@@ -78,11 +85,14 @@ export const Media = () => {
 
         newMediaItems.push({
           id: mediaChangeResponse.data.id,
+          update_id: mediaChangeResponse.data.update_id,
           s3_key: file.s3_key,
           file_name: file.file_name,
           file_type: file.file_type || 'image',
           is_thumbnail: false,
           imageUrl: urlResponse.data.url,
+          description: file.description,
+          update_date: null,
         });
       }
 
@@ -99,25 +109,31 @@ export const Media = () => {
       const response = await backend.get(`/mediaChange/${userId}/media`);
 
       const transformedMedia = await Promise.all(
-        response.data.media
-          .filter(
-            (media) =>
-              !media.fileName?.toLowerCase().endsWith('.pdf') &&
-              media.fileType !== 'application/pdf'
-          )
-          .map(async (media) => {
-            const urlResponse = await backend.get(
-              `/images/url/${encodeURIComponent(media.s3Key)}`
+        response.data.media.map(async (media) => {
+          const urlResponse = await backend.get(
+            `/images/url/${encodeURIComponent(media.s3Key)}`
+          );
+          let update_date = null;
+          try {
+            const programUpdateDateResponse = await backend.get(
+              `/program-updates/${media.updateId}/date`
             );
-            return {
-              id: media.id,
-              s3_key: media.s3Key,
-              file_name: media.fileName,
-              file_type: media.fileType,
-              is_thumbnail: media.isThumbnail,
-              imageUrl: urlResponse.data.url,
-            };
-          })
+            update_date = programUpdateDateResponse.data;
+          } catch (error) {
+            console.error('Error fetching update date:', error);
+          }
+          return {
+            id: media.id,
+            update_id: media.updateId,
+            s3_key: media.s3Key,
+            file_name: media.fileName,
+            file_type: media.fileType,
+            is_thumbnail: media.isThumbnail,
+            imageUrl: urlResponse.data.url,
+            description: media.description,
+            update_date: update_date,
+          };
+        })
       );
 
       setMedia(transformedMedia);
@@ -134,6 +150,14 @@ export const Media = () => {
     fetchData();
   }, [fetchData]);
 
+  const filteredMedia = media.filter((item) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      (item.file_name || '').toLowerCase().includes(query) ||
+      (item.description || '').toLowerCase().includes(query)
+    );
+  });
+
   if (isLoading) {
     return (
       <Center h="100vh">
@@ -149,19 +173,27 @@ export const Media = () => {
   }
 
   return (
-    <Box minH="100vh">
-      <Container
-        maxW="container.xl"
-        py={8}
+    <Box
+      minH="100vh"
+      mt={-10}
+      ml={-10}
+    >
+      <Box
+        borderRadius="lg"
+        p={8}
+        ml={4}
+        mt={2}
       >
-        <Box
-          borderRadius="lg"
-          p={8}
+        <VStack
+          align="start"
+          spacing={6}
+          w="full"
         >
-          <VStack
-            align="start"
-            spacing={6}
+          <HStack
             w="full"
+            justify="space-between"
+            align="center"
+            spacing={4}
           >
             <Heading
               size="xl"
@@ -169,7 +201,21 @@ export const Media = () => {
             >
               {t('mediaPage.title')}
             </Heading>
-
+            <InputGroup
+              w="60"
+              maxW="400px"
+              size="sm"
+            >
+              <InputLeftElement pointerEvents="none">
+                <SearchIcon color="gray.400" />
+              </InputLeftElement>
+              <Input
+                placeholder={t('mediaPage.searchPlaceholder')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                borderRadius="md"
+              />
+            </InputGroup>
             <Button
               size="sm"
               leftIcon={<AddIcon />}
@@ -178,21 +224,37 @@ export const Media = () => {
               _hover={{ backgroundColor: 'teal.600' }}
               onClick={onOpen}
             >
-              {t('mediaPage.new')}
+              {t('mediaPage.uploadMedia')}
             </Button>
+          </HStack>
 
-            <MediaGrid
-              mediaItems={media}
-              programName={programName}
-            />
-          </VStack>
-        </Box>
-      </Container>
+          <MediaGrid
+            mediaItems={filteredMedia}
+            programName={programName}
+            onUpdate={fetchData}
+            onCardClick={(index) => setViewerIndex(index)}
+          />
+        </VStack>
+      </Box>
       <MediaUploadModal
         isOpen={isOpen}
         onClose={onClose}
         onUploadComplete={onUploadCompleteHandler}
       />
+      {viewerIndex !== null && filteredMedia[viewerIndex] && (
+        <MediaViewer
+          updates={filteredMedia.map((m) => ({
+            id: m.id,
+            fileName: m.file_name,
+            fileType: m.file_type,
+            description: m.description,
+          }))}
+          mediaURLs={filteredMedia.map((m) => m.imageUrl)}
+          selectedIndex={viewerIndex}
+          onClose={() => setViewerIndex(null)}
+          onUpdate={fetchData}
+        />
+      )}
     </Box>
   );
 };
