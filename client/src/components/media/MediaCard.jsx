@@ -46,6 +46,7 @@ export const MediaCard = ({
   const { t } = useTranslation();
   const { backend } = useBackendContext();
   const [isLoading, setIsLoading] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const {
     isOpen: isEditModalOpen,
     onOpen: onEditModalOpen,
@@ -57,6 +58,7 @@ export const MediaCard = ({
     onClose: onDeleteClose,
   } = useDisclosure();
   const isVideo = file_type?.startsWith('video');
+  const isPdf = file_type === 'application/pdf';
 
   const handleEditSave = async (newTitle, newDescription) => {
     try {
@@ -67,6 +69,7 @@ export const MediaCard = ({
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Error updating media:', error);
+      throw error;
     }
   };
 
@@ -89,12 +92,10 @@ export const MediaCard = ({
       borderRadius="xl"
       overflow="hidden"
       bg="gray.100"
+      p={4}
     >
       <Box
         h={height}
-        mt={4}
-        ml={3}
-        mr={3}
         borderRadius="xl"
         position="relative"
         overflow="hidden"
@@ -164,6 +165,7 @@ export const MediaCard = ({
           <Center h="100%">
             <Image
               src={gcf_globe}
+              alt={t('mediaCard.loadingAlt')}
               w="50px"
               borderRadius="xl"
             />
@@ -202,6 +204,36 @@ export const MediaCard = ({
               </Center>
             )}
           </>
+        ) : isPdf ? (
+          <>
+            <iframe
+              src={imageUrl}
+              title={file_name}
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                display: isLoading ? 'none' : 'block',
+                borderRadius: '6px',
+              }}
+              onLoad={() => setIsLoading(false)}
+            />
+            {!isLoading && (
+              <IconButton
+                aria-label={t('mediaCard.expandPdf')}
+                icon={<span style={{ fontSize: '16px' }}>⛶</span>}
+                size="sm"
+                position="absolute"
+                bottom={2}
+                right={2}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(true);
+                }}
+                zIndex={2}
+              />
+            )}
+          </>
         ) : (
           <Image
             src={imageUrl}
@@ -213,13 +245,40 @@ export const MediaCard = ({
           />
         )}
       </Box>
-      <HStack>
+
+      {isPdf && (
+        <Modal
+          isOpen={isExpanded}
+          onClose={() => setIsExpanded(false)}
+          size="6xl"
+        >
+          <ModalOverlay />
+          <ModalContent h="90vh">
+            <ModalCloseButton zIndex={1} />
+            <ModalBody p={0}>
+              <iframe
+                src={imageUrl}
+                title={file_name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  borderRadius: '6px',
+                }}
+              />
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+      )}
+
+      <HStack
+        align="flex-start"
+        mt={2}
+      >
         <Text
           color="gray.700"
           fontSize="md"
           fontWeight="semibold"
-          mt={2}
-          px={2}
           isTruncated
         >
           {file_name}
@@ -228,8 +287,7 @@ export const MediaCard = ({
         <Text
           color="gray.700"
           fontSize="md"
-          mt={2}
-          px={2}
+          flexShrink={0}
         >
           {update_date
             ? new Date(update_date.updateDate).toLocaleDateString()
@@ -241,7 +299,6 @@ export const MediaCard = ({
         fontSize="xs"
         fontWeight="medium"
         mt={1}
-        px={2}
         isTruncated
       >
         {description || t('mediaCard.noDescription')}

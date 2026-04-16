@@ -92,6 +92,7 @@ export const MediaViewer = ({
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Error updating media:', error);
+      throw error;
     }
   };
 
@@ -222,7 +223,7 @@ export const MediaViewer = ({
         <Box
           px={5}
           pt={4}
-          pb={2}
+          pb={5}
         >
           <HStack
             w="full"
