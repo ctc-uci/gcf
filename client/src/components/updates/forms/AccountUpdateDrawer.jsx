@@ -37,7 +37,7 @@ import {
   resolveProgramDisplay,
   resolveRegionDisplay,
   valueOrFallback,
-} from './account-update-drawer/shared';
+} from './account-update-drawer/shared.js';
 
 const resolvableIdFromSnap = (snap, { nameGetter, directKey, idGetter }) => {
   if (!snap) return null;
