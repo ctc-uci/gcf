@@ -69,6 +69,7 @@ export const MediaCard = ({
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Error updating media:', error);
+      throw error;
     }
   };
 

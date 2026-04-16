@@ -113,13 +113,19 @@ export const Media = () => {
             `/images/url/${encodeURIComponent(media.s3Key)}`
           );
           let update_date = null;
-          try {
-            const programUpdateDateResponse = await backend.get(
-              `/program-updates/${media.updateId}/date`
-            );
-            update_date = programUpdateDateResponse.data;
-          } catch (error) {
-            console.error('Error fetching update date:', error);
+          if (
+            media.updateId !== undefined &&
+            media.updateId !== null &&
+            String(media.updateId) !== ''
+          ) {
+            try {
+              const programUpdateDateResponse = await backend.get(
+                `/program-updates/${media.updateId}/date`
+              );
+              update_date = programUpdateDateResponse.data;
+            } catch (error) {
+              console.error('Error fetching update date:', error);
+            }
           }
           return {
             id: media.id,

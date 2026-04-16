@@ -92,6 +92,7 @@ export const MediaViewer = ({
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Error updating media:', error);
+      throw error;
     }
   };
 

@@ -154,10 +154,12 @@ async function fetchUserMedia(userId, fileType) {
     `
     SELECT
       mc.id,
+      mc.update_id,
       mc.s3_key,
       mc.file_name,
       mc.file_type,
       mc.is_thumbnail,
+      mc.description,
       p.id as program_id,
       p.name as program_name
     FROM program_director pd
