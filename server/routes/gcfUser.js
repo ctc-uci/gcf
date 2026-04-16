@@ -467,12 +467,26 @@ gcfUserRouter.delete('/:id', async (req, res) => {
       }
     }
 
+    let firebaseAuthDeleted = true;
     try {
       await admin.auth().deleteUser(id);
     } catch (firebaseErr) {
-      if (firebaseErr.code !== 'auth/user-not-found') {
+      if (firebaseErr.code === 'auth/user-not-found') {
+        firebaseAuthDeleted = true;
+      } else {
+        firebaseAuthDeleted = false;
         console.error('Firebase deleteUser:', firebaseErr);
       }
+    }
+
+    if (!firebaseAuthDeleted) {
+      return res.status(503).json({
+        error:
+          'Database user was deleted but Firebase authentication could not be removed.',
+        gcfUserDeleted: true,
+        firebaseAuthDeleted: false,
+        user: keysToCamel(deletedRow),
+      });
     }
 
     res.status(200).json(keysToCamel(deletedRow));

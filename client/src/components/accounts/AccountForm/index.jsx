@@ -374,13 +374,36 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
           last_modified: new Date().toISOString(),
         });
       }
-      await backend.delete(`/gcf-users/${targetUserId}`);
-      toast({
-        title: t('accountForm.deleteSuccess'),
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
+      try {
+        await backend.delete(`/gcf-users/${targetUserId}`);
+        toast({
+          title: t('accountForm.deleteSuccess', {
+            defaultValue: 'Account deleted',
+          }),
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      } catch (deleteErr) {
+        const status = deleteErr.response?.status;
+        const data = deleteErr.response?.data;
+        if (status === 503 && data?.gcfUserDeleted) {
+          toast({
+            title: t('accountForm.deletePartialTitle', {
+              defaultValue: 'Account removed from directory',
+            }),
+            description: t('accountForm.deletePartialDesc', {
+              defaultValue:
+                'The user was removed from the app, but their sign-in account could not be deleted automatically. You may need to remove it from Firebase or try again later.',
+            }),
+            status: 'warning',
+            duration: 8000,
+            isClosable: true,
+          });
+        } else {
+          throw deleteErr;
+        }
+      }
       deleteModal.onClose();
       onSave();
       onClose();
