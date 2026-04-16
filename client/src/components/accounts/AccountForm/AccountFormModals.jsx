@@ -76,13 +76,15 @@ export const AccountFormDeleteModal = ({
   isOpen,
   onClose,
   onConfirmDelete,
+  isDeleting = false,
 }) => {
   const { t } = useTranslation();
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={isDeleting ? () => {} : onClose}
+      closeOnOverlayClick={!isDeleting}
       isCentered
     >
       <ModalOverlay />
@@ -111,6 +113,7 @@ export const AccountFormDeleteModal = ({
             <Button
               variant="outline"
               onClick={onClose}
+              isDisabled={isDeleting}
             >
               {t('common.continueEditing')}
             </Button>
@@ -119,6 +122,7 @@ export const AccountFormDeleteModal = ({
               color="white"
               _hover={{ bg: 'red.600' }}
               onClick={onConfirmDelete}
+              isLoading={isDeleting}
             >
               {t('accountForm.deleteAccount')}
             </Button>

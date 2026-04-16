@@ -28,6 +28,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [currentPrograms, setCurrentPrograms] = useState(null);
   const [currentRegions, setCurrentRegions] = useState(null);
@@ -354,11 +355,36 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     }
   };
 
-  const confirmDelete = () => {
-    // TODO: Wire up actual delete backend call
-    deleteModal.onClose();
-    onSave();
-    onClose();
+  const confirmDelete = async () => {
+    if (!targetUserId) return;
+
+    setIsDeleting(true);
+    try {
+      await backend.delete(`/gcf-users/${targetUserId}`);
+      toast({
+        title: t('accountForm.deleteSuccess'),
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      deleteModal.onClose();
+      onSave();
+      onClose();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      const errorMessage = error.response?.data?.error || error.message;
+      toast({
+        title: t('accountForm.errorTitle'),
+        description: t('accountForm.errorWithMessage', {
+          message: errorMessage,
+        }),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const createdByName =
@@ -410,6 +436,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.onClose}
         onConfirmDelete={confirmDelete}
+        isDeleting={isDeleting}
       />
 
       <AccountFormSaveReviewModal
