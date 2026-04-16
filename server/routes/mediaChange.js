@@ -236,6 +236,7 @@ mediaChangeRouter.get('/:userId/media-updates', async (req, res) => {
           program.name AS program_name,
           creator.first_name,
           creator.last_name,
+          creator.picture,
           creator.role,
           media_change.status
         FROM program_update

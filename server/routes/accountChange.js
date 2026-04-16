@@ -91,7 +91,8 @@ accountChangeRouter.get('/', async (req, res) => {
       `SELECT
         ac.*,
         u.first_name AS author_first_name,
-        u.last_name AS author_last_name
+        u.last_name AS author_last_name,
+        u.picture AS author_picture
       FROM account_change ac
       LEFT JOIN gcf_user u ON ac.author_id = u.id
       ${whereClause}
@@ -113,7 +114,8 @@ accountChangeRouter.get('/:id', async (req, res) => {
       `SELECT 
         ac.*, 
         u.first_name AS author_first_name,
-        u.last_name AS author_last_name
+        u.last_name AS author_last_name,
+        u.picture AS author_picture
       FROM account_change ac
       LEFT JOIN gcf_user u ON ac.author_id = u.id
       WHERE ac.id = $1`,

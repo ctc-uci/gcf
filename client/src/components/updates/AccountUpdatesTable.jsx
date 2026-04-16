@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { FiUser } from 'react-icons/fi';
 
 import { useTableSort } from '../../contexts/hooks/TableSort';
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 import { SortArrows } from '../tables/SortArrows';
 import { AccountUpdateDrawer } from './forms/AccountUpdateDrawer';
 
@@ -221,54 +222,58 @@ export const AccountUpdatesTable = ({
                 </Td>
               </Tr>
             ) : (
-              tableData.map((row) => (
-                <Tr
-                  key={row.id}
-                  cursor="pointer"
-                  _hover={{ bg: 'gray.50' }}
-                  onClick={() => setSelectedUpdate(row)}
-                >
-                  <Td>
-                    <Text
-                      noOfLines={1}
-                      maxW="400px"
-                    >
-                      {/* {row.note || t('updates.accountNotePlaceholder')} */}
-                      {row.changeType
-                        ? `Account has been ${changeTypeToText(row.changeType)}.`
-                        : t('updates.accountNotePlaceholder')}
-                    </Text>
-                  </Td>
-                  <Td>
-                    <StatusBadge
-                      status={row.resolved}
-                      adminName={row.resolvedBy}
-                    />
-                  </Td>
-                  <Td>
-                    <HStack spacing={1}>
-                      <Icon
-                        as={FiUser}
-                        boxSize={4}
-                        color="gray.400"
-                      />
-                      <Text fontSize="sm">
-                        {row.authorFirstName && row.authorLastName
-                          ? `${row.authorFirstName} ${row.authorLastName}`
-                          : t('common.name')}
+              tableData.map((row) => {
+                const authorDisplay = [row.authorFirstName, row.authorLastName]
+                  .filter(Boolean)
+                  .join(' ')
+                  .trim();
+                return (
+                  <Tr
+                    key={row.id}
+                    cursor="pointer"
+                    _hover={{ bg: 'gray.50' }}
+                    onClick={() => setSelectedUpdate(row)}
+                  >
+                    <Td>
+                      <Text
+                        noOfLines={1}
+                        maxW="400px"
+                      >
+                        {/* {row.note || t('updates.accountNotePlaceholder')} */}
+                        {row.changeType
+                          ? `Account has been ${changeTypeToText(row.changeType)}.`
+                          : t('updates.accountNotePlaceholder')}
                       </Text>
-                    </HStack>
-                  </Td>
-                  <Td>
-                    <Text
-                      fontSize="sm"
-                      color="gray.600"
-                    >
-                      {row.lastModified || ''}
-                    </Text>
-                  </Td>
-                </Tr>
-              ))
+                    </Td>
+                    <Td>
+                      <StatusBadge
+                        status={row.resolved}
+                        adminName={row.resolvedBy}
+                      />
+                    </Td>
+                    <Td>
+                      <HStack spacing={2}>
+                        <DirectorAvatar
+                          picture={row.authorPicture}
+                          name={authorDisplay}
+                          boxSize="24px"
+                        />
+                        <Text fontSize="sm">
+                          {authorDisplay || t('common.name')}
+                        </Text>
+                      </HStack>
+                    </Td>
+                    <Td>
+                      <Text
+                        fontSize="sm"
+                        color="gray.600"
+                      >
+                        {row.lastModified || ''}
+                      </Text>
+                    </Td>
+                  </Tr>
+                );
+              })
             )}
           </Tbody>
         </Table>

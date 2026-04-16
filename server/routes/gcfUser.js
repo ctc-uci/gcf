@@ -229,11 +229,14 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
     // Super Admin: view and edit all users and their associated information (including admins)
     if (role === 'Super Admin') {
       accounts = await db.query(
-        `SELECT 
+        `SELECT
           u.id,
           u.first_name,
           u.last_name,
           u.role,
+          u.picture,
+          cb.picture AS created_by_picture,
+          MAX(TRIM(CONCAT_WS(' ', cb.first_name, cb.last_name))) AS created_by_name,
           COALESCE(
             array_cat(
               COALESCE(
@@ -253,7 +256,8 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
         LEFT JOIN program p_rd ON c.id = p_rd.country
         LEFT JOIN program_director pd ON u.id = pd.user_id
         LEFT JOIN program p_pd ON pd.program_id = p_pd.id
-        GROUP BY u.id, u.first_name, u.last_name, u.role
+        LEFT JOIN gcf_user cb ON cb.id = u.created_by
+        GROUP BY u.id, u.first_name, u.last_name, u.role, u.picture, cb.picture
         ORDER BY u.last_name ASC`
       );
     }
@@ -261,11 +265,14 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
     // Admin: RDs and PDs with their associated programs; CANNOT view or edit other Admins
     if (role === 'Admin') {
       accounts = await db.query(
-        `SELECT 
+        `SELECT
           u.id,
           u.first_name,
           u.last_name,
           u.role,
+          u.picture,
+          cb.picture AS created_by_picture,
+          MAX(TRIM(CONCAT_WS(' ', cb.first_name, cb.last_name))) AS created_by_name,
           COALESCE(
             array_cat(
               COALESCE(
@@ -285,19 +292,23 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
         LEFT JOIN program p_rd ON c.id = p_rd.country
         LEFT JOIN program_director pd ON u.id = pd.user_id
         LEFT JOIN program p_pd ON pd.program_id = p_pd.id
+        LEFT JOIN gcf_user cb ON cb.id = u.created_by
         WHERE u.role = 'Regional Director' OR u.role = 'Program Director'
-        GROUP BY u.id, u.first_name, u.last_name, u.role
+        GROUP BY u.id, u.first_name, u.last_name, u.role, u.picture, cb.picture
         ORDER BY u.last_name ASC`
       );
     }
     // Regional Director: only program directors in their region with their programs
     else if (role === 'Regional Director') {
       accounts = await db.query(
-        `SELECT 
+        `SELECT
           u.id,
           u.first_name,
           u.last_name,
           u.role,
+          u.picture,
+          cb.picture AS created_by_picture,
+          MAX(TRIM(CONCAT_WS(' ', cb.first_name, cb.last_name))) AS created_by_name,
           COALESCE(
             array_agg(DISTINCT p.name) FILTER (WHERE p.id IS NOT NULL),
             '{}'
@@ -307,8 +318,9 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
         JOIN program p ON c.id = p.country
         JOIN program_director pd ON p.id = pd.program_id
         JOIN gcf_user u ON pd.user_id = u.id
+        LEFT JOIN gcf_user cb ON cb.id = u.created_by
         WHERE rd.user_id = $1
-        GROUP BY u.id, u.first_name, u.last_name, u.role
+        GROUP BY u.id, u.first_name, u.last_name, u.role, u.picture, cb.picture
         ORDER BY u.last_name ASC`,
         [id]
       );

@@ -3,11 +3,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
   Box,
+  Button,
   FormControl,
   FormLabel,
   Heading,
   HStack,
-  Select,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Text,
   VStack,
 } from '@chakra-ui/react';
@@ -108,25 +112,6 @@ export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
   const selectedLabel =
     selected && `${selected.firstName ?? ''} ${selected.lastName ?? ''}`.trim();
 
-  function handleProgramDirectorChange(e) {
-    const raw = e.currentTarget?.value ?? e.target?.value ?? '';
-    const v = String(raw).trim();
-    if (!v) {
-      setFormData((prev) => ({ ...prev, programDirectors: [] }));
-      return;
-    }
-    const found = directorChoices.find(
-      (d) => String(d.userId) === v || Number(d.userId) === Number(v)
-    );
-    if (!found) return;
-    const row = normalizeDirectorRow(found);
-    if (!row) return;
-    setFormData((prev) => ({
-      ...prev,
-      programDirectors: [row],
-    }));
-  }
-
   return (
     <Box>
       <Heading
@@ -189,61 +174,76 @@ export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
           >
             {t('programForm.programDirector')}
           </FormLabel>
-          <HStack
-            align="stretch"
-            spacing={0}
-            borderWidth="1px"
-            borderColor="gray.200"
-            borderRadius="md"
-            bg="white"
-            overflow="hidden"
-            minH="40px"
-          >
-            <Box
-              pl={3}
-              pr={2}
-              display="flex"
-              alignItems="center"
-              flexShrink={0}
+          <Menu matchWidth>
+            <MenuButton
+              as={Button}
+              variant="outline"
+              width="100%"
+              textAlign="left"
+              fontWeight="normal"
+              rightIcon={<ChevronDownIcon />}
             >
-              <DirectorAvatar
-                picture={selected?.picture}
-                name={selectedLabel || t('programForm.directorFallbackProgram')}
-                boxSize="32px"
-              />
-            </Box>
-            <Select
-              flex={1}
-              border="none"
-              borderRadius="none"
-              h="auto"
-              minH="40px"
-              py={2}
-              pr={2}
-              placeholder={t('programForm.selectProgramDirector')}
-              value={
-                selected?.userId !== undefined &&
-                selected?.userId !== null &&
-                selected.userId !== ''
-                  ? String(selected.userId)
-                  : ''
-              }
-              onChange={handleProgramDirectorChange}
-              icon={<ChevronDownIcon />}
-              iconColor="gray.500"
-              _focus={{ boxShadow: 'none' }}
+              {selected ? (
+                <HStack spacing={2}>
+                  <DirectorAvatar
+                    picture={selected.picture}
+                    name={
+                      selectedLabel || t('programForm.directorFallbackProgram')
+                    }
+                    boxSize="24px"
+                  />
+                  <Text>
+                    {selectedLabel || t('programForm.directorFallbackProgram')}
+                  </Text>
+                </HStack>
+              ) : (
+                <Text color="gray.400">
+                  {t('programForm.selectProgramDirector')}
+                </Text>
+              )}
+            </MenuButton>
+            <MenuList
+              maxH="260px"
+              overflowY="auto"
             >
-              {directorChoices.map((director) => (
-                <option
-                  value={String(director.userId)}
-                  key={director.userId}
-                >
-                  {`${director.firstName ?? ''} ${director.lastName ?? ''}`.trim() ||
-                    t('programForm.directorFallbackProgram')}
-                </option>
-              ))}
-            </Select>
-          </HStack>
+              <MenuItem
+                onClick={() =>
+                  setFormData((prev) => ({ ...prev, programDirectors: [] }))
+                }
+              >
+                <Text color="gray.400">
+                  {t('programForm.selectProgramDirector')}
+                </Text>
+              </MenuItem>
+              {directorChoices.map((director) => {
+                const label =
+                  `${director.firstName ?? ''} ${director.lastName ?? ''}`.trim() ||
+                  t('programForm.directorFallbackProgram');
+                return (
+                  <MenuItem
+                    key={director.userId}
+                    onClick={() => {
+                      const row = normalizeDirectorRow(director);
+                      if (row)
+                        setFormData((prev) => ({
+                          ...prev,
+                          programDirectors: [row],
+                        }));
+                    }}
+                  >
+                    <HStack spacing={2}>
+                      <DirectorAvatar
+                        picture={director.picture}
+                        name={label}
+                        boxSize="28px"
+                      />
+                      <Text>{label}</Text>
+                    </HStack>
+                  </MenuItem>
+                );
+              })}
+            </MenuList>
+          </Menu>
         </FormControl>
       </VStack>
     </Box>

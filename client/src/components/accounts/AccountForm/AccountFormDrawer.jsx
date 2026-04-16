@@ -25,6 +25,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { DirectorAvatar } from '@/components/dashboard/ProgramForm/DirectorAvatar';
 import { useTranslation } from 'react-i18next';
 import {
   FiCamera,
@@ -53,6 +54,9 @@ export const AccountFormDrawer = ({
   currentRegions,
   setFormData,
   createdByName,
+  createdByPicture = '',
+  creatorPhotoUrl = '',
+  isNewAccount = false,
   onDeleteClick,
   onCancel,
   onSave,
@@ -452,12 +456,28 @@ export const AccountFormDrawer = ({
                 {t('accountForm.createdBy')}
               </Text>
               <HStack spacing={2}>
-                <Avatar
-                  size="sm"
-                  name={createdByName}
-                  bg="teal.500"
-                  color="white"
-                />
+                {isNewAccount ? (
+                  <Avatar
+                    size="sm"
+                    name={createdByName}
+                    src={creatorPhotoUrl || undefined}
+                    bg="teal.500"
+                    color="white"
+                  />
+                ) : createdByPicture ? (
+                  <DirectorAvatar
+                    picture={createdByPicture}
+                    name={createdByName}
+                    boxSize="32px"
+                  />
+                ) : (
+                  <Avatar
+                    size="sm"
+                    name={createdByName}
+                    bg="teal.500"
+                    color="white"
+                  />
+                )}
                 <Text fontSize="sm">{createdByName}</Text>
               </HStack>
             </Box>

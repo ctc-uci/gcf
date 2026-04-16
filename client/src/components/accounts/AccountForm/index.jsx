@@ -424,9 +424,17 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     }
   };
 
-  const createdByName =
-    currentUser?.displayName ||
-    `${currentUser?.email?.split('@')[0] || t('common.unknownUser')}`;
+  // "Created by" is the account record's creator when editing; when creating a new
+  // user it is the current admin (the creator that will be stored on save).
+  const isNewAccount = !targetUserId;
+  const createdByName = isNewAccount
+    ? currentUser?.displayName ||
+      `${currentUser?.email?.split('@')[0] || t('common.unknownUser')}`
+    : targetUser?.createdBy?.trim() || t('common.emDash');
+  const createdByPicture = isNewAccount
+    ? ''
+    : targetUser?.createdByPicture || '';
+  const creatorPhotoUrl = isNewAccount ? currentUser?.photoURL || '' : '';
 
   const errorBorderProps = (field) =>
     validationErrors[field]
@@ -454,6 +462,9 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         currentRegions={currentRegions}
         setFormData={setFormData}
         createdByName={createdByName}
+        createdByPicture={createdByPicture}
+        creatorPhotoUrl={creatorPhotoUrl}
+        isNewAccount={isNewAccount}
         onDeleteClick={() => deleteModal.onOpen()}
         onCancel={handleCloseWithCheck}
         onSave={handleSaveClick}
