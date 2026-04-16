@@ -492,7 +492,8 @@ programRouter.get('/:id/program-directors', async (req, res) => {
         u.id AS user_id,
         u.first_name,
         u.last_name,
-        u.picture
+        u.picture,
+        pd.bio
       FROM program_director pd
       JOIN gcf_user u ON pd.user_id = u.id
       WHERE pd.program_id = $1
@@ -505,6 +506,7 @@ programRouter.get('/:id/program-directors', async (req, res) => {
       firstName: row.first_name,
       lastName: row.last_name,
       picture: row.picture,
+      bio: row.bio,
     }));
 
     res.status(200).json(directors);

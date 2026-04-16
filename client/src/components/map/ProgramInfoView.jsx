@@ -489,6 +489,17 @@ const ProgramInfoView = ({ program }) => {
                     Program Director
                   </Text>
                 </VStack>
+                {director.bio?.trim() && (
+                  <Text
+                    fontWeight="400"
+                    fontSize="15px"
+                    lineHeight="24px"
+                    color="#4A5565"
+                    whiteSpace="pre-wrap"
+                  >
+                    {director.bio.trim()}
+                  </Text>
+                )}
               </VStack>
             </Flex>
           ))}
