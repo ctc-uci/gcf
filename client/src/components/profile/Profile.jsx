@@ -173,7 +173,7 @@ export const Profile = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser?.uid, backend, role]);
+  }, [currentUser?.uid, currentUser?.email, backend, role]);
 
   useEffect(() => {
     fetchUserData();
