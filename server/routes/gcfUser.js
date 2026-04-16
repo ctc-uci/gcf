@@ -235,6 +235,7 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
           u.role,
           u.picture,
           cb.picture AS created_by_picture,
+          MAX(TRIM(CONCAT_WS(' ', cb.first_name, cb.last_name))) AS created_by_name,
           COALESCE(
             array_cat(
               COALESCE(
@@ -270,6 +271,7 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
           u.role,
           u.picture,
           cb.picture AS created_by_picture,
+          MAX(TRIM(CONCAT_WS(' ', cb.first_name, cb.last_name))) AS created_by_name,
           COALESCE(
             array_cat(
               COALESCE(
@@ -305,6 +307,7 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
           u.role,
           u.picture,
           cb.picture AS created_by_picture,
+          MAX(TRIM(CONCAT_WS(' ', cb.first_name, cb.last_name))) AS created_by_name,
           COALESCE(
             array_agg(DISTINCT p.name) FILTER (WHERE p.id IS NOT NULL),
             '{}'
