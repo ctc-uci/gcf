@@ -16,6 +16,7 @@ import {
   Select,
   Spinner,
   Text,
+  Textarea,
   useDisclosure,
   useToast,
   VStack,
@@ -658,12 +659,14 @@ export const Profile = () => {
                 {t('profile.bio')}
               </Text>
               {isEditing ? (
-                <Input
+                <Textarea
                   value={formData.bio || ''}
                   onChange={handleInputChange('bio')}
+                  rows={5}
+                  resize="vertical"
                 />
               ) : (
-                <Text>{formData.bio || ''}</Text>
+                <Text whiteSpace="pre-wrap">{formData.bio || ''}</Text>
               )}
             </FormControl>
           )}
