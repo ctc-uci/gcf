@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
   AlertDialog,
   AlertDialogBody,
@@ -19,15 +20,16 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  HStack,
   Input,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
-  Select,
   Tag,
   TagCloseButton,
   TagLabel,
+  Text,
   useToast,
   VStack,
 } from '@chakra-ui/react';
@@ -36,6 +38,8 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { GetCountries } from 'react-country-state-city';
 import { useTranslation } from 'react-i18next';
 import { BsArrowsAngleContract, BsArrowsAngleExpand } from 'react-icons/bs';
+
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 
 const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   const { t } = useTranslation();
@@ -268,20 +272,68 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
 
             <FormControl>
               <FormLabel>{t('regions.regionalDirector')}</FormLabel>
-              <Select
-                placeholder={t('regions.directorPlaceholder')}
-                value={selectedDirector}
-                onChange={(e) => setSelectedDirector(e.target.value)}
-              >
-                {regionalDirectors?.map((director) => (
-                  <option
-                    key={director.id}
-                    value={director.id}
+              <Menu matchWidth>
+                <MenuButton
+                  as={Button}
+                  variant="outline"
+                  width="100%"
+                  textAlign="left"
+                  fontWeight="normal"
+                  rightIcon={<ChevronDownIcon />}
+                >
+                  {(() => {
+                    const dir = regionalDirectors.find(
+                      (d) => String(d.id) === String(selectedDirector)
+                    );
+                    return dir ? (
+                      <HStack spacing={2}>
+                        <DirectorAvatar
+                          picture={dir.picture}
+                          name={`${dir.firstName} ${dir.lastName}`}
+                          boxSize="24px"
+                        />
+                        <Text>
+                          {dir.firstName} {dir.lastName}
+                        </Text>
+                      </HStack>
+                    ) : (
+                      <Text color="gray.400">
+                        {t('regions.directorPlaceholder')}
+                      </Text>
+                    );
+                  })()}
+                </MenuButton>
+                <MenuList
+                  maxH="260px"
+                  overflowY="auto"
+                >
+                  <MenuItem
+                    value=""
+                    onClick={() => setSelectedDirector('')}
                   >
-                    {director.firstName} {director.lastName}
-                  </option>
-                ))}
-              </Select>
+                    <Text color="gray.400">
+                      {t('regions.directorPlaceholder')}
+                    </Text>
+                  </MenuItem>
+                  {regionalDirectors?.map((director) => (
+                    <MenuItem
+                      key={director.id}
+                      onClick={() => setSelectedDirector(String(director.id))}
+                    >
+                      <HStack spacing={2}>
+                        <DirectorAvatar
+                          picture={director.picture}
+                          name={`${director.firstName} ${director.lastName}`}
+                          boxSize="28px"
+                        />
+                        <Text>
+                          {director.firstName} {director.lastName}
+                        </Text>
+                      </HStack>
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              </Menu>
             </FormControl>
 
             <FormControl>

@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import {
   Box,
   Button,
@@ -52,9 +50,9 @@ export default function CreateUpdateInstrument({
   mediaUploadDisclosure,
   notes,
   setNotes,
+  specialRequest,
+  setSpecialRequest,
 }) {
-  const [needsAdminHelp, setNeedsAdminHelp] = useState(false);
-
   const { t } = useTranslation();
   return (
     <>
@@ -337,8 +335,8 @@ export default function CreateUpdateInstrument({
           </Heading>
         </HStack>
         <Checkbox
-          isChecked={needsAdminHelp}
-          onChange={(e) => setNeedsAdminHelp(e.target.checked)}
+          isChecked={specialRequest}
+          onChange={(e) => setSpecialRequest(e.target.checked)}
           colorScheme="teal"
         >
           {t('updates.specialRequest')}

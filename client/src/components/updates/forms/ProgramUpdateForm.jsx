@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 import {
-  Avatar,
   Box,
   Button,
   Checkbox,
@@ -23,6 +22,7 @@ import {
   NumberInputField,
   NumberInputStepper,
   Select,
+  SimpleGrid,
   Tag,
   TagCloseButton,
   TagLabel,
@@ -33,11 +33,15 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { DirectorAvatar } from '@/components/dashboard/ProgramForm/DirectorAvatar';
+import { MediaCard } from '@/components/media/MediaCard';
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useTranslation } from 'react-i18next';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
+
+import { MediaViewer } from '../MediaViewer';
 
 function formatUpdateDisplayDate(value) {
   if (value === null || value === undefined || value === '') return '';
@@ -95,6 +99,7 @@ export const ProgramUpdateForm = ({
   const [updateType, setUpdateType] = useState('');
   const [programName, setProgramName] = useState('');
   const [authorName, setAuthorName] = useState('');
+  const [authorPicture, setAuthorPicture] = useState('');
   const [updateDateTime, setUpdateDateTime] = useState('');
 
   const [selectedInstrument, setSelectedInstrument] = useState('');
@@ -106,6 +111,10 @@ export const ProgramUpdateForm = ({
   const [originalInstruments, setOriginalInstruments] = useState({});
   const [newInstruments, setNewInstruments] = useState([]);
   const [instrumentChangeMap, setInstrumentChangeMap] = useState({});
+
+  const [mediaItems, setMediaItems] = useState([]);
+  const [mediaURLs, setMediaURLs] = useState([]);
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(null);
 
   const { backend } = useBackendContext();
   const toast = useToast();
@@ -127,7 +136,11 @@ export const ProgramUpdateForm = ({
       setUpdateType('');
       setProgramName('');
       setAuthorName('');
+      setAuthorPicture('');
       setUpdateDateTime('');
+      setMediaItems([]);
+      setMediaURLs([]);
+      setSelectedMediaIndex(null);
     }
   }, [programUpdateId]);
 
@@ -189,6 +202,7 @@ export const ProgramUpdateForm = ({
             .filter(Boolean)
             .join(' ') || ''
         );
+        setAuthorPicture(selectedUpdate.picture || '');
         setUpdateDateTime(selectedUpdate.updateDate || '');
       }
       try {
@@ -219,32 +233,40 @@ export const ProgramUpdateForm = ({
         } else {
           let resolvedProgramName = '';
           let resolvedAuthorName = '';
-          const fetchGcfName = async (id) => {
-            if (id == null || id === '') return '';
+          let resolvedAuthorPicture = '';
+          const fetchGcfUser = async (id) => {
+            if (id == null || id === '') return { name: '', picture: '' };
             try {
               const userRes = await backend.get(`/gcf-users/${id}`);
-              return (
-                [userRes.data?.firstName, userRes.data?.lastName]
-                  .filter(Boolean)
-                  .join(' ') || ''
-              );
+              return {
+                name:
+                  [userRes.data?.firstName, userRes.data?.lastName]
+                    .filter(Boolean)
+                    .join(' ') || '',
+                picture: userRes.data?.picture || '',
+              };
             } catch {
-              return '';
+              return { name: '', picture: '' };
             }
           };
           try {
             const progRes = await backend.get(`/program/${pid}`);
             resolvedProgramName = progRes.data?.name || '';
             const programCreatorId = progRes.data?.createdBy;
-            resolvedAuthorName = await fetchGcfName(programCreatorId);
+            const primary = await fetchGcfUser(programCreatorId);
+            resolvedAuthorName = primary.name;
+            resolvedAuthorPicture = primary.picture;
             if (!resolvedAuthorName && data.createdBy != null) {
-              resolvedAuthorName = await fetchGcfName(data.createdBy);
+              const fallback = await fetchGcfUser(data.createdBy);
+              resolvedAuthorName = fallback.name;
+              resolvedAuthorPicture = fallback.picture;
             }
           } catch (e) {
             console.error('Error fetching program or author:', e);
           }
           setProgramName(resolvedProgramName);
           setAuthorName(resolvedAuthorName);
+          setAuthorPicture(resolvedAuthorPicture);
         }
         setUpdateType(data.updateType || data.title || '');
         setFlagged(data.flagged || false);
@@ -289,6 +311,37 @@ export const ProgramUpdateForm = ({
             setAddedInstruments(instrumentsMap);
             setOriginalInstruments(JSON.parse(JSON.stringify(instrumentsMap)));
             setInstrumentChangeMap(changeMeta);
+
+            const photoResults = await Promise.allSettled(
+              Object.values(changeMeta).map(({ changeId }) =>
+                backend.get(
+                  `/instrument-change-photos/instrument-change/${changeId}`
+                )
+              )
+            );
+            const mediaData = photoResults
+              .filter((r) => r.status === 'fulfilled')
+              .flatMap((r) => r.value.data || []);
+
+            const urlResults = await Promise.allSettled(
+              mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
+            );
+            const validItems = mediaData.filter(
+              (_, i) => urlResults[i].status === 'fulfilled'
+            );
+            const validURLs = urlResults
+              .filter((r) => r.status === 'fulfilled')
+              .map((r) => r.value.data.url);
+            setMediaItems(validItems);
+            setMediaURLs(validURLs);
+          } else {
+            setAddedInstruments({});
+            setOriginalInstruments({});
+            setInstrumentChangeMap({});
+            setNewInstruments([]);
+            setMediaItems([]);
+            setMediaURLs([]);
+            setSelectedMediaIndex(null);
           }
         } catch (error) {
           console.error('Error fetching instrument changes:', error);
@@ -466,188 +519,116 @@ export const ProgramUpdateForm = ({
 
   const drawerSize = isFullScreen ? 'full' : 'lg';
   return (
-    <Drawer
-      isOpen={isOpen}
-      placement="right"
-      onClose={onClose}
-      finalFocusRef={btnRef}
-      size={drawerSize}
-    >
-      <DrawerOverlay />
-      <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
-        <Flex
-          position="absolute"
-          top={3}
-          left={3}
-          zIndex={1}
-        >
-          <IconButton
-            icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
-            aria-label={
-              isFullScreen
-                ? t('fullscreenFlyout.minimize')
-                : t('fullscreenFlyout.expand')
-            }
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsFullScreen(!isFullScreen)}
-          />
-        </Flex>
-
-        <Box
-          pt={6}
-          pb={2}
-          px={8}
-        >
-          <Text
-            fontSize="xl"
-            fontWeight="600"
-            textAlign="center"
+    <>
+      <Drawer
+        isOpen={isOpen}
+        placement="right"
+        onClose={onClose}
+        finalFocusRef={btnRef}
+        size={drawerSize}
+      >
+        <DrawerOverlay />
+        <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
+          <Flex
+            position="absolute"
+            top={3}
+            left={3}
+            zIndex={1}
           >
-            {t('updates.programUpdateTitle')}
-          </Text>
-          <Divider mt={3} />
-        </Box>
+            <IconButton
+              icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
+              aria-label={
+                isFullScreen
+                  ? t('fullscreenFlyout.minimize')
+                  : t('fullscreenFlyout.expand')
+              }
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsFullScreen(!isFullScreen)}
+            />
+          </Flex>
 
-        <DrawerBody
-          px={8}
-          pb={24}
-        >
-          <VStack
-            spacing={6}
-            align="stretch"
+          <Box
+            pt={6}
+            pb={2}
+            px={8}
           >
-            <Heading
-              size="md"
-              mt={4}
+            <Text
+              fontSize="xl"
+              fontWeight="600"
+              textAlign="center"
             >
-              {t('updates.updateInformation')}
-            </Heading>
+              {t('updates.programUpdateTitle')}
+            </Text>
+            <Divider mt={3} />
+          </Box>
 
-            <Grid
-              templateColumns="repeat(3, 1fr)"
-              gap={6}
+          <DrawerBody
+            px={8}
+            pb={24}
+          >
+            <VStack
+              spacing={6}
+              align="stretch"
             >
-              <GridItem>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={1}
-                >
-                  {t('updates.colAuthor')}
-                </Text>
-                <HStack spacing={3}>
-                  <Avatar
-                    size="sm"
-                    name={authorName || undefined}
-                    bg="teal.500"
-                    color="white"
-                  />
-                  <Text>{authorName || t('common.emDash')}</Text>
-                </HStack>
-              </GridItem>
-              <GridItem>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={1}
-                >
-                  {t('updates.colProgram')}
-                </Text>
-                <Text fontWeight="500">
-                  {programName || t('common.emDash')}
-                </Text>
-              </GridItem>
-              <GridItem>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={1}
-                >
-                  {t('common.time')}
-                </Text>
-                <Text>
-                  {formatUpdateDisplayDate(updateDateTime) ||
-                    t('common.emDash')}
-                </Text>
-              </GridItem>
-            </Grid>
-            {isInstrumentUpdate && (
-              <Box>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={2}
-                >
-                  {t('updates.flagLabel')}
-                </Text>
-                <Checkbox
-                  isChecked={flagged}
-                  onChange={(e) => setFlagged(e.target.checked)}
-                >
-                  {t('updates.specialRequest')}
-                </Checkbox>
-              </Box>
-            )}
-            <Grid
-              templateColumns="repeat(3, 1fr)"
-              gap={6}
-            >
-              <GridItem>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={1}
-                >
-                  {t('updates.updateType')}
-                </Text>
-                <Text>
-                  {isInstrumentUpdate
-                    ? t('updates.typeInstrument')
-                    : t('updates.typeStudent')}
-                </Text>
-              </GridItem>
-            </Grid>
-
-            <Box>
-              <Text
-                color="teal.500"
-                fontSize="sm"
-                fontWeight="500"
-                mb={2}
+              <Heading
+                size="md"
+                mt={4}
               >
-                {t('updates.photosVideos')}
-              </Text>
-              <Text
-                color="gray.400"
-                fontSize="sm"
+                {t('updates.updateInformation')}
+              </Heading>
+
+              <Grid
+                templateColumns="repeat(3, 1fr)"
+                gap={6}
               >
-                {t('updates.noMediaAttached')}
-              </Text>
-            </Box>
-
-            <Box>
-              <Text
-                color="teal.500"
-                fontSize="sm"
-                fontWeight="500"
-                mb={2}
-              >
-                {t('common.note')}
-              </Text>
-              <Text>{notes || ''}</Text>
-            </Box>
-
-            <Divider />
-            {isInstrumentUpdate && (
-              <Box>
-                <Heading size="md">{t('updates.editUpdate')}</Heading>
-
+                <GridItem>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={1}
+                  >
+                    {t('updates.colAuthor')}
+                  </Text>
+                  <HStack spacing={3}>
+                    <DirectorAvatar
+                      picture={authorPicture}
+                      name={authorName || ''}
+                      boxSize="32px"
+                    />
+                    <Text>{authorName || t('common.emDash')}</Text>
+                  </HStack>
+                </GridItem>
+                <GridItem>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={1}
+                  >
+                    {t('updates.colProgram')}
+                  </Text>
+                  <Text fontWeight="500">
+                    {programName || t('common.emDash')}
+                  </Text>
+                </GridItem>
+                <GridItem>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={1}
+                  >
+                    {t('common.time')}
+                  </Text>
+                  <Text>
+                    {formatUpdateDisplayDate(updateDateTime) ||
+                      t('common.emDash')}
+                  </Text>
+                </GridItem>
+              </Grid>
+              {isInstrumentUpdate && (
                 <Box>
                   <Text
                     color="teal.500"
@@ -655,74 +636,186 @@ export const ProgramUpdateForm = ({
                     fontWeight="500"
                     mb={2}
                   >
-                    {t('updates.instrumentQuantity')}
+                    {t('updates.flagLabel')}
                   </Text>
-                  <HStack
-                    wrap="wrap"
-                    spacing={2}
-                    mb={3}
+                  <Checkbox
+                    isChecked={flagged}
+                    isReadOnly
+                    pointerEvents="none"
                   >
-                    {Object.entries(addedInstruments).map(([name, qty]) => (
-                      <Tag
-                        key={name}
-                        size="lg"
-                        borderRadius="md"
-                        variant="outline"
-                      >
-                        <TagLabel>
-                          {name} {qty}
-                        </TagLabel>
-                        <TagCloseButton
-                          onClick={() => removeInstrument(name)}
-                        />
-                      </Tag>
-                    ))}
-                  </HStack>
-                  <HStack spacing={2}>
-                    <Select
-                      placeholder={t('updates.selectInstrumentPh')}
-                      value={selectedInstrument}
-                      onChange={(e) => setSelectedInstrument(e.target.value)}
-                      size="sm"
-                      maxW="200px"
-                    >
-                      {existingInstruments.map((instrument) => (
-                        <option
-                          key={instrument.id}
-                          value={instrument.name}
-                        >
-                          {instrument.name}
-                        </option>
-                      ))}
-                    </Select>
-                    <NumberInput
-                      step={1}
-                      min={0}
-                      width="80px"
-                      value={quantity}
-                      onChange={(v) => setQuantity(Number(v))}
-                      size="sm"
-                    >
-                      <NumberInputField />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleConfirmAddInstrument}
-                    >
-                      {t('common.add')}
-                    </Button>
-                  </HStack>
+                    {t('updates.specialRequest')}
+                  </Checkbox>
                 </Box>
+              )}
+              <Grid
+                templateColumns="repeat(3, 1fr)"
+                gap={6}
+              >
+                <GridItem>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={1}
+                  >
+                    {t('updates.updateType')}
+                  </Text>
+                  <Text>
+                    {isInstrumentUpdate
+                      ? t('updates.typeInstrument')
+                      : t('updates.typeStudent')}
+                  </Text>
+                </GridItem>
+              </Grid>
+
+              <Box>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={2}
+                >
+                  {t('updates.photosVideos')}
+                </Text>
+                {mediaItems.length > 0 ? (
+                  <SimpleGrid
+                    columns={{ base: 2, md: 3, lg: 4 }}
+                    spacing={4}
+                  >
+                    {mediaItems.map((item, idx) => (
+                      <Box
+                        key={idx}
+                        onClick={() => setSelectedMediaIndex(idx)}
+                        cursor="pointer"
+                        borderRadius="md"
+                      >
+                        <Box
+                          position="relative"
+                          borderRadius="md"
+                          overflow="hidden"
+                          bg="gray.100"
+                        >
+                          <MediaCard
+                            file_name={item.fileName}
+                            file_type={item.fileType}
+                            imageUrl={mediaURLs[idx]}
+                            hideMenu
+                          />
+                        </Box>
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+                ) : (
+                  <Text
+                    color="gray.400"
+                    fontSize="sm"
+                  >
+                    {t('updates.noMediaAttached')}
+                  </Text>
+                )}
               </Box>
-            )}
-          </VStack>
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+
+              <Box>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={2}
+                >
+                  {t('common.note')}
+                </Text>
+                <Text>{notes || ''}</Text>
+              </Box>
+
+              <Divider />
+              {isInstrumentUpdate && (
+                <Box>
+                  <Heading size="md">{t('updates.editUpdate')}</Heading>
+
+                  <Box>
+                    <Text
+                      color="teal.500"
+                      fontSize="sm"
+                      fontWeight="500"
+                      mb={2}
+                    >
+                      {t('updates.instrumentQuantity')}
+                    </Text>
+                    <HStack
+                      wrap="wrap"
+                      spacing={2}
+                      mb={3}
+                    >
+                      {Object.entries(addedInstruments).map(([name, qty]) => (
+                        <Tag
+                          key={name}
+                          size="lg"
+                          borderRadius="md"
+                          variant="outline"
+                        >
+                          <TagLabel>
+                            {name} {qty}
+                          </TagLabel>
+                          <TagCloseButton
+                            onClick={() => removeInstrument(name)}
+                          />
+                        </Tag>
+                      ))}
+                    </HStack>
+                    <HStack spacing={2}>
+                      <Select
+                        placeholder={t('updates.selectInstrumentPh')}
+                        value={selectedInstrument}
+                        onChange={(e) => setSelectedInstrument(e.target.value)}
+                        size="sm"
+                        maxW="200px"
+                      >
+                        {existingInstruments.map((instrument) => (
+                          <option
+                            key={instrument.id}
+                            value={instrument.name}
+                          >
+                            {instrument.name}
+                          </option>
+                        ))}
+                      </Select>
+                      <NumberInput
+                        step={1}
+                        min={0}
+                        width="80px"
+                        value={quantity}
+                        onChange={(v) => setQuantity(Number(v))}
+                        size="sm"
+                      >
+                        <NumberInputField />
+                        <NumberInputStepper>
+                          <NumberIncrementStepper />
+                          <NumberDecrementStepper />
+                        </NumberInputStepper>
+                      </NumberInput>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleConfirmAddInstrument}
+                      >
+                        {t('common.add')}
+                      </Button>
+                    </HStack>
+                  </Box>
+                </Box>
+              )}
+            </VStack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+      {selectedMediaIndex !== null && (
+        <MediaViewer
+          updates={mediaItems}
+          mediaURLs={mediaURLs}
+          selectedIndex={selectedMediaIndex}
+          onClose={() => setSelectedMediaIndex(null)}
+        />
+      )}
+    </>
   );
 };

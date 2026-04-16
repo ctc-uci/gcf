@@ -50,6 +50,7 @@ export const UpdatesPage = () => {
     isLoading,
     isProgramUpdatesLoading,
     refetchProgramUpdates,
+    refetchAccountUpdates,
   } = useUpdatesPageData();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -244,6 +245,7 @@ export const UpdatesPage = () => {
                   originalData={originalAccountUpdatesData}
                   isLoading={isLoading}
                   searchQuery={searchQuery}
+                  onAccountChangeUpdated={refetchAccountUpdates}
                 />
               </Box>
             )}

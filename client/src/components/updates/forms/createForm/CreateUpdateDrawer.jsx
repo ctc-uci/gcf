@@ -167,7 +167,9 @@ export const CreateUpdateDrawer = ({
   const [programEnrollmentCount, setProgramEnrollmentCount] = useState(0);
 
   const [notes, setNotes] = useState('');
+  const [specialRequest, setSpecialRequest] = useState(false);
   const [uploadedMedia, setUploadedMedia] = useState([]);
+  const originalMediaIds = useRef(new Set());
 
   const [instruments, setInstruments] = useState([]);
   const [programId, setProgramId] = useState(null);
@@ -269,6 +271,8 @@ export const CreateUpdateDrawer = ({
         setProgramId(pu.programId);
         setUpdateType(editVariant);
 
+        let loadedInstrumentChangeId = null;
+
         if (editVariant === 'instrument') {
           const { data: icRows = [] } = await backend.get(
             `/instrument-changes/update/${editProgramUpdateId}`
@@ -285,6 +289,7 @@ export const CreateUpdateDrawer = ({
           }
 
           if (change && instruments?.length) {
+            loadedInstrumentChangeId = change.id;
             const inst = instruments.find((i) => i.id === change.instrumentId);
             setSelectedInstrument(inst?.name || '');
             setEditingInstrumentChangeId(change.id);
@@ -298,6 +303,7 @@ export const CreateUpdateDrawer = ({
                 ? Math.max(0, Number.isNaN(amt) ? 0 : amt)
                 : Math.abs(Number.isNaN(amt) ? 0 : amt)
             );
+            setSpecialRequest(change.specialRequest === true);
             setNotes(extraNotesFromStoredNote(pu.note || ''));
           }
         } else {
@@ -320,6 +326,33 @@ export const CreateUpdateDrawer = ({
             }
             setNotes(pu.note || '');
           }
+        }
+
+        try {
+          if (loadedInstrumentChangeId) {
+            const { data: mediaData = [] } = await backend.get(
+              `/instrument-change-photos/instrument-change/${loadedInstrumentChangeId}`
+            );
+
+            if (!cancelled && mediaData.length > 0) {
+              const urlResponses = await Promise.all(
+                mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
+              );
+              if (cancelled) return;
+              originalMediaIds.current = new Set(mediaData.map((m) => m.id));
+              setUploadedMedia(
+                mediaData.map((m, i) => ({
+                  id: m.id,
+                  s3_key: m.s3Key,
+                  file_name: m.fileName,
+                  file_type: m.fileType,
+                  previewUrl: urlResponses[i].data.url,
+                }))
+              );
+            }
+          }
+        } catch (e) {
+          console.error('Error loading existing media for edit:', e);
         }
       } catch (e) {
         console.error('Error loading update for edit:', e);
@@ -357,7 +390,9 @@ export const CreateUpdateDrawer = ({
     setStudentCount(0);
     setStudentWhatHappened('');
     setNotes('');
+    setSpecialRequest(false);
     setUploadedMedia([]);
+    originalMediaIds.current = new Set();
     setIsFullScreen(false);
     setEditingInstrumentChangeId(null);
     setEditingEnrollmentChangeId(null);
@@ -502,6 +537,7 @@ export const CreateUpdateDrawer = ({
                 event_type: instrumentEventType,
                 description:
                   instrumentEventType === 'other' ? notes || null : null,
+                special_request: specialRequest,
               }
             );
           }
@@ -521,15 +557,31 @@ export const CreateUpdateDrawer = ({
           });
         }
 
+        const currentMediaIds = new Set(
+          uploadedMedia.filter((m) => m.id).map((m) => m.id)
+        );
+        for (const id of originalMediaIds.current) {
+          if (!currentMediaIds.has(id)) {
+            if (updateType === 'instrument') {
+              await backend.delete(`/instrument-change-photos/${id}`);
+            } else {
+              await backend.delete(`/mediaChange/${id}`);
+            }
+          }
+        }
+
+        originalMediaIds.current = new Set(currentMediaIds);
+
         for (const media of uploadedMedia) {
-          await backend.post('/mediaChange', {
-            update_id: editProgramUpdateId,
-            s3_key: media.s3_key,
-            file_name: media.file_name,
-            file_type: media.file_type,
-            is_thumbnail: false,
-            instrument_id: null,
-          });
+          if (media.id) continue;
+          if (updateType === 'instrument') {
+            await backend.post('/instrument-change-photos', {
+              instrument_change_id: editingInstrumentChangeId,
+              s3_key: media.s3_key,
+              file_name: media.file_name,
+              file_type: media.file_type,
+            });
+          }
         }
 
         toast({
@@ -564,13 +616,25 @@ export const CreateUpdateDrawer = ({
               : -1 * instrumentCount;
           const instrumentEventType =
             whatHappenedToEventType[whatHappened] ?? 'other';
-          await backend.post('/instrument-changes', {
+          const icResponse = await backend.post('/instrument-changes', {
             instrumentId: instrument.id,
             updateId: newUpdateId,
             amountChanged: instrumentDelta,
             event_type: instrumentEventType,
             description: instrumentEventType === 'other' ? notes || null : null,
+            special_request: specialRequest,
           });
+
+          const newInstrumentChangeId = icResponse.data.id;
+
+          for (const media of uploadedMedia) {
+            await backend.post('/instrument-change-photos', {
+              instrument_change_id: newInstrumentChangeId,
+              s3_key: media.s3_key,
+              file_name: media.file_name,
+              file_type: media.file_type,
+            });
+          }
         }
       }
 
@@ -588,17 +652,6 @@ export const CreateUpdateDrawer = ({
             description: notes || null,
           });
         }
-      }
-
-      for (const media of uploadedMedia) {
-        await backend.post('/mediaChange', {
-          update_id: newUpdateId,
-          s3_key: media.s3_key,
-          file_name: media.file_name,
-          file_type: media.file_type,
-          is_thumbnail: false,
-          instrument_id: null,
-        });
       }
 
       const now = new Date();
@@ -759,6 +812,8 @@ export const CreateUpdateDrawer = ({
                   mediaUploadDisclosure={mediaUploadDisclosure}
                   notes={notes}
                   setNotes={setNotes}
+                  specialRequest={specialRequest}
+                  setSpecialRequest={setSpecialRequest}
                 />
               ) : (
                 <CreateUpdateStudent

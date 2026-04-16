@@ -11,19 +11,24 @@ import {
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 
 import CardView from './CardView.jsx';
+import ProgramInfoView from './ProgramInfoView.jsx';
 
 const geoUrl = '/map-data.json';
 
 export const Map = () => {
   const [allCountries, setAllCountries] = useState([]);
+  const [regionMap, setRegionMap] = useState({});
   const [regions, setRegions] = useState([]);
   const [regionName, setRegionName] = useState('');
   const [hoverRegions, setHoverRegions] = useState(null);
-  const [display, setDisplay] = useState('block');
   const [programs, setPrograms] = useState([]);
+  const [selectedProgram, setSelectedProgram] = useState(null);
   const { backend } = useBackendContext();
 
   const scrollRef = useRef(null);
+  const mapContainerRef = useRef(null);
+  const mousePosRef = useRef({ x: 0, y: 0 });
+  const tooltipRef = useRef(null);
 
   const scroll = (scrollOffset) => {
     if (scrollRef.current) {
@@ -32,16 +37,36 @@ export const Map = () => {
   };
 
   useEffect(() => {
-    const fetchAllCountries = async () => {
+    const fetchInitialData = async () => {
       try {
-        const res = await backend.get('/country');
-        setAllCountries(res.data);
+        const [countriesRes, regionsRes] = await Promise.all([
+          backend.get('/country'),
+          backend.get('/region'),
+        ]);
+        setAllCountries(countriesRes.data);
+        const map = {};
+        for (const r of regionsRes.data) {
+          map[r.id] = r.name;
+        }
+        setRegionMap(map);
       } catch (error) {
-        console.error('Error fetching countries:', error);
+        console.error('Error fetching initial data:', error);
       }
     };
-    fetchAllCountries();
+    fetchInitialData();
   }, [backend]);
+
+  const handleMouseMove = (e) => {
+    if (!mapContainerRef.current) return;
+    const rect = mapContainerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    mousePosRef.current = { x, y };
+    if (tooltipRef.current) {
+      tooltipRef.current.style.left = `${x + 12}px`;
+      tooltipRef.current.style.top = `${y - 28}px`;
+    }
+  };
 
   const getRegionFromIso = (iso) => {
     const countries = allCountries.find((c) => c.isoCode === iso);
@@ -62,7 +87,7 @@ export const Map = () => {
         console.error('No regions found for the selected country.');
         return;
       }
-      setDisplay('none');
+      setSelectedProgram(null);
       setRegions(regionsRes.data);
 
       try {
@@ -96,7 +121,6 @@ export const Map = () => {
         w="100%"
         p="20px"
         mb="30px"
-        display={display}
       >
         <Heading
           color="white"
@@ -107,60 +131,154 @@ export const Map = () => {
         <Text color="white"> Explore our Programs and Impact </Text>
       </Box>
       <Box
-        borderRadius="md"
-        boxShadow="md"
-        borderWidth="1px"
+        position="relative"
         w="96%"
-        h="600px"
         mx="auto"
-        onClick={() => {
-          setPrograms([]);
-          setRegions([]);
-          setDisplay('block');
-        }}
       >
-        <ComposableMap style={{ height: '700px', width: '100%' }}>
-          <Geographies geography={geoUrl}>
-            {({ geographies }) =>
-              geographies.map((geo) => {
-                const regionId = getRegionFromIso(geo.id);
-                const isHovered = regionId && regionId === hoverRegions;
-                const isClicked = regions.some((r) => r.isoCode === geo.id);
-                return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
+        <Box
+          ref={mapContainerRef}
+          borderRadius="md"
+          boxShadow="md"
+          borderWidth="1px"
+          w="100%"
+          h="600px"
+          position="relative"
+          overflow="hidden"
+          onMouseMove={handleMouseMove}
+          onClick={() => {
+            setPrograms([]);
+            setRegions([]);
+            setSelectedProgram(null);
+          }}
+        >
+          <ComposableMap style={{ height: '700px', width: '100%' }}>
+            <Geographies geography={geoUrl}>
+              {({ geographies }) =>
+                geographies.map((geo) => {
+                  const regionId = getRegionFromIso(geo.id);
+                  const isHovered = regionId && regionId === hoverRegions;
+                  const isClicked = regions.some((r) => r.isoCode === geo.id);
+                  return (
+                    <Geography
+                      key={geo.rsmKey}
+                      geography={geo}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCountry(geo);
+                      }}
+                      onMouseEnter={() => setHoverRegions(regionId)}
+                      onMouseLeave={() => setHoverRegions(null)}
+                      style={{
+                        default: {
+                          fill: isHovered
+                            ? '#868686'
+                            : isClicked
+                              ? '#636363'
+                              : '#B3B3B3',
+                          outline: 'none',
+                        },
+                        hover: {
+                          fill: regionId ? '#868686' : '#B3B3B3',
+                          outline: 'none',
+                          cursor: regionId ? 'pointer' : 'default',
+                        },
+                        pressed: { fill: '#636363', outline: 'none' },
+                      }}
+                    />
+                  );
+                })
+              }
+            </Geographies>
+          </ComposableMap>
+
+          {hoverRegions && regionMap[hoverRegions] && (
+            <Box
+              ref={tooltipRef}
+              position="absolute"
+              left={`${mousePosRef.current.x + 12}px`}
+              top={`${mousePosRef.current.y - 28}px`}
+              bg="gray.800"
+              color="white"
+              px={3}
+              py={1}
+              borderRadius="md"
+              fontSize="sm"
+              fontWeight="semibold"
+              pointerEvents="none"
+              zIndex={10}
+              whiteSpace="nowrap"
+            >
+              {regionMap[hoverRegions]}
+            </Box>
+          )}
+        </Box>
+
+        {regions.length > 0 && selectedProgram && (
+          <>
+            <Box
+              position="absolute"
+              top="0"
+              left="0"
+              w="100%"
+              h="100%"
+              bg="blackAlpha.500"
+              zIndex={19}
+              borderRadius="md"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedProgram(null);
+              }}
+              cursor="pointer"
+            />
+            <Box
+              position="absolute"
+              top="200px"
+              left="0"
+              w="100%"
+              h="calc(100% - 50px)"
+              bg="white"
+              zIndex={20}
+              borderRadius="md"
+              boxShadow="lg"
+              overflowY="auto"
+              css={{
+                '&::-webkit-scrollbar': { width: '6px' },
+                '&::-webkit-scrollbar-track': { background: 'transparent' },
+                '&::-webkit-scrollbar-thumb': {
+                  background: '#CBD5E0',
+                  borderRadius: '3px',
+                },
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Flex
+                mt="15px"
+                ml="25px"
+                mr="25px"
+                mb="10px"
+                alignItems="center"
+              >
+                <HStack>
+                  <Icon
+                    as={FaRegArrowAltCircleLeft}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleCountry(geo);
+                      setSelectedProgram(null);
                     }}
-                    onMouseEnter={() => setHoverRegions(regionId)}
-                    onMouseLeave={() => setHoverRegions(null)}
-                    style={{
-                      default: {
-                        fill: isHovered
-                          ? '#868686'
-                          : isClicked
-                            ? '#636363'
-                            : '#B3B3B3',
-                        outline: 'none',
-                      },
-                      hover: {
-                        fill: '#868686',
-                        outline: 'none',
-                        cursor: 'pointer',
-                      },
-                      pressed: { fill: '#636363', outline: 'none' },
-                    }}
+                    cursor="pointer"
+                    boxSize={6}
                   />
-                );
-              })
-            }
-          </Geographies>
-        </ComposableMap>
+                  <Heading fontSize="2xl">{selectedProgram.title}</Heading>
+                </HStack>
+              </Flex>
+              <ProgramInfoView program={selectedProgram} />
+            </Box>
+          </>
+        )}
       </Box>
-      {regions.length > 0 && (
-        <>
+
+      {regions.length > 0 && !selectedProgram && (
+        <Box onClick={(e) => e.stopPropagation()}>
           <Flex
             mt="15px"
             ml="25px"
@@ -172,16 +290,17 @@ export const Map = () => {
             <HStack>
               <Icon
                 as={FaRegArrowAltCircleLeft}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setPrograms([]);
                   setRegions([]);
-                  setDisplay('block');
+                  setSelectedProgram(null);
                 }}
                 cursor="pointer"
                 boxSize={6}
               />
               <Heading fontSize="2xl">
-                Featured Programs in {regionName}
+                {`Featured Programs in ${regionName}`}
               </Heading>
             </HStack>
 
@@ -240,6 +359,10 @@ export const Map = () => {
                   <Box
                     key={program.id}
                     minW="300px"
+                    cursor="pointer"
+                    onClick={() => setSelectedProgram(program)}
+                    transition="transform 0.2s"
+                    _hover={{ transform: 'scale(1.03)' }}
                   >
                     <CardView
                       programId={program.id}
@@ -265,7 +388,7 @@ export const Map = () => {
               No Programs in this Region!
             </Text>
           )}
-        </>
+        </Box>
       )}
     </>
   );

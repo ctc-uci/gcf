@@ -1,6 +1,7 @@
 import { keysToCamel } from '@/common/utils';
 import { db } from '@/db/db-pgp';
 import { json, Router } from 'express';
+import { deleteFromS3 } from '../common/s3';
 
 const programUpdateRouter = Router();
 programUpdateRouter.use(json());
@@ -44,7 +45,8 @@ programUpdateRouter.get('/:id', async (req, res) => {
   }
 });
 
-programUpdateRouter.get('/:id/date/', async (req, res) => {
+// More specific than `/:id` so `/123/date` is not captured as id=`123/date`.
+programUpdateRouter.get('/:id/date', async (req, res) => {
   try {
     const { id } = req.params;
     const entry = await db.query(
@@ -117,6 +119,11 @@ programUpdateRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
+    const [mediaFiles, fileFiles] = await Promise.all([
+      db.query(`SELECT s3_key FROM media_change WHERE update_id = $1`, [id]),
+      db.query(`SELECT s3_key FROM file_change WHERE update_id = $1`, [id]),
+    ]);
+
     const deletedProgramUpdate = await db.query(
       `DELETE FROM program_update
             WHERE id = $1
@@ -127,6 +134,9 @@ programUpdateRouter.delete('/:id', async (req, res) => {
     if (deletedProgramUpdate.length === 0) {
       return res.status(404).send('Program update not found');
     }
+
+    const s3Keys = [...mediaFiles, ...fileFiles].map((r) => r.s3_key).filter(Boolean);
+    await Promise.all(s3Keys.map((key) => deleteFromS3(key)));
 
     res.status(200).json(keysToCamel(deletedProgramUpdate[0]));
   } catch (err) {

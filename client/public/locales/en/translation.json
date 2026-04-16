@@ -60,8 +60,12 @@
     "placeholderNotes": "Notes",
     "keepUnresolved": "Keep as Unresolved",
     "saveMarkResolved": "Save & Mark as Resolved",
+    "markAsUnresolved": "Mark as Unresolved",
+    "keepResolved": "Keep Resolved",
     "oldProfile": "Old profile",
     "newProfile": "New profile",
+    "diffLabelOld": "Old",
+    "diffLabelNew": "New",
     "editUpdates": "Edit Updates",
     "accountUpdate": "Account Update",
     "profilePicture": "Profile Picture",
@@ -190,6 +194,12 @@
     "invalidInfoDesc": "Please check your input information.",
     "savedTitle": "Account Changes Saved",
     "savedDesc": "The updates to your account have been saved at {{time}}.",
+    "pendingApprovalTitle": "Submitted for approval",
+    "pendingApprovalDesc": "Your profile changes are pending review by an administrator or regional director.",
+    "passwordInvalidTitle": "Invalid password",
+    "passwordMin12Desc": "Password must be at least 12 characters.",
+    "passwordUpdatedTitle": "Password updated",
+    "passwordUpdatedDesc": "Your password was updated at {{time}}.",
     "edit": "Edit"
   },
   "searchBar": {
@@ -210,11 +220,13 @@
     "instrumentsDonated": "Instruments Donated"
   },
   "lessonVideos": {
-    "title": "Lesson Videos",
+    "title": "Lesson Materials",
     "empty": "No lesson videos available",
     "loading": "Loading lesson videos...",
     "scrollLeft": "Scroll left",
-    "scrollRight": "Scroll right"
+    "scrollRight": "Scroll right",
+    "videosTab": "Videos",
+    "pdfsTab": "PDFs"
   },
   "videoPlayer": {
     "playlistFallback": "Playlist"
@@ -406,6 +418,9 @@
     "deleteTitle": "Delete this account?",
     "deleteDesc": "This action cannot be undone.",
     "deleteAccount": "Delete Account",
+    "deleteSuccess": "Account deleted",
+    "deletePartialTitle": "Account removed from directory",
+    "deletePartialDesc": "The user was removed from the app, but their sign-in account could not be deleted automatically. You may need to remove it from Firebase or try again later.",
     "fieldFirstName": "First Name",
     "fieldLastName": "Last Name",
     "fieldEmail": "Email",
@@ -436,7 +451,8 @@
   "mediaUpload": {
     "dragDrop": "Drag and drop files here",
     "or": "OR",
-    "browse": "Browse Files"
+    "browse": "Browse Files",
+    "acceptedTypes": "Accepted file types: {{fileTypes}}"
   },
   "mediaEditModal": {
     "heading": "Edit Details",
@@ -448,12 +464,16 @@
     "noDescription": "No description",
     "deleteModalHeader": "Are you sure you want to delete?",
     "deleteModalBody": "This action cannot be undone.",
-    "deleteMedia": "Delete Media"
+    "deleteMedia": "Delete Media",
+    "expandPdf": "Expand PDF"
   },
   "mediaPreview": {
     "previewAlt": "Preview",
     "loadingAlt": "Loading...",
     "titlePlaceholder": "Add Title"
+  },
+  "mediaPreviewTag": {
+    "openPreview": "Open preview"
   },
   "mediaPreviewList": {
     "uploadedFiles": "Uploaded Files",
@@ -597,6 +617,9 @@
     "regionalDirectors": "Regional Director(s)",
     "selectRDPlaceholder": "Select Regional Director(s)",
     "saveChanges": "Save Changes"
+  },
+  "programDisplay": {
+    "filterByLocation": "Filter by location, press Enter"
   },
   "fullscreenFlyout": {
     "minimize": "Minimize",
