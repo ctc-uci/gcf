@@ -892,6 +892,7 @@ export const ProgramForm = ({
                           media: prev.media.filter((_, idx) => idx !== index),
                         }));
                       }}
+                      isMedia={true}
                     />
                   ))}
                 </HStack>

@@ -11,7 +11,7 @@ import {
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 
-export function MediaPreviewTag({ item, onRemove }) {
+export function MediaPreviewTag({ item, onRemove, isMedia }) {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const { backend } = useBackendContext();
@@ -36,6 +36,12 @@ export function MediaPreviewTag({ item, onRemove }) {
 
     fetchUrl();
   }, [item.s3_key, backend]);
+
+  const isPdf = item.file_type === 'application/pdf';
+
+  if ((isMedia && isPdf) || (!isMedia && !isPdf)) {
+    return null;
+  }
 
   const isVideo = item.file_type?.startsWith('video/');
 
@@ -67,14 +73,22 @@ export function MediaPreviewTag({ item, onRemove }) {
             muted
             playsInline
           />
-        ) : (
+        ) : isMedia ? (
+          // ONLY images when isMedia === true
           <Image
             src={previewUrl}
             alt={item.file_name}
             boxSize="100%"
             objectFit="cover"
           />
-        )}
+        ) : isPdf ? (
+          // ONLY PDFs when isMedia === false
+          <iframe
+            src={previewUrl}
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            title={item.file_name}
+          />
+        ) : null}
       </Box>
 
       <TagLabel

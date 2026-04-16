@@ -177,6 +177,7 @@ export function ResourcesSection({
                       }),
                     }));
                   }}
+                  isMedia={false}
                 />
               ))}
             </HStack>
