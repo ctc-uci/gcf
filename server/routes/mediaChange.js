@@ -49,20 +49,6 @@ mediaChangeRouter.post('/', async (req, res) => {
   }
 });
 
-mediaChangeRouter.post('/file-change', async (req, res) => {
-  try {
-    const { update_id, s3_key, file_name, file_type } = req.body;
-    const newFileChange = await db.query(
-      `INSERT INTO file_change (update_id, s3_key, file_name, file_type) VALUES ($1, $2, $3, $4) RETURNING *`,
-      [update_id, s3_key, file_name, file_type]
-    );
-    res.status(201).json(keysToCamel(newFileChange[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
 mediaChangeRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;

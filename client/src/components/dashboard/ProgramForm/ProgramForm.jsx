@@ -18,7 +18,6 @@ import {
   Input,
   Select,
   Spinner,
-  Text,
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
@@ -36,11 +35,7 @@ import { MediaPreviewTag } from './MediaPreviewTag';
 import { ResourcesSection } from './ResourcesSection';
 import { StudentsInstrumentsSection } from './StudentsInstrumentsSection';
 
-/**
- * Deletes all `instrument_change` rows for this program + instrument using
- * existing routes (same DELETE as ProgramUpdateForm). Sweeps every
- * program_update for the program.
- */
+/** Deletes instrument_change rows for this program + instrument (same as ProgramUpdateForm). */
 async function deleteInstrumentChangesForProgramInstrument(
   backend,
   programId,
@@ -70,6 +65,15 @@ async function deleteInstrumentChangesForProgramInstrument(
       }
     }
   }
+}
+function removeFormItemByIdOrKey(list, item) {
+  return (list ?? []).filter((m) => {
+    const itemHasId = item.id !== null && item.id !== undefined;
+    const mHasId = m.id !== null && m.id !== undefined;
+    if (itemHasId && mHasId) return Number(m.id) !== Number(item.id);
+    if (item.s3_key && m.s3_key) return m.s3_key !== item.s3_key;
+    return m !== item;
+  });
 }
 
 export const ProgramForm = ({
@@ -394,7 +398,9 @@ export const ProgramForm = ({
       );
 
       setInitialUploadedMedia(
-        (record.media ?? []).filter((m) => m.file_name).map((m) => m.file_name)
+        [...(record.media ?? []), ...(record.fileChanges ?? [])]
+          .filter((m) => m.file_name)
+          .map((m) => m.file_name)
       );
     }
 
@@ -666,7 +672,6 @@ export const ProgramForm = ({
         });
 
         const updateId = updateResponse.data.id;
-
         if (hasStudentChange) {
           await backend.post(`/enrollmentChange`, {
             update_id: updateId,
@@ -675,7 +680,6 @@ export const ProgramForm = ({
             event_type: 'other',
           });
         }
-
         if (hasInstrumentChange) {
           for (const instrumentChange of instrumentChanges) {
             await backend.post(`/instrument-changes`, {
@@ -686,10 +690,9 @@ export const ProgramForm = ({
             });
           }
         }
-
         if (hasMediaChange) {
           for (const fileChange of pendingFiles) {
-            await backend.post(`/mediaChange/file-change`, {
+            await backend.post(`/fileChanges`, {
               update_id: updateId,
               s3_key: fileChange.s3_key,
               file_name: fileChange.file_name,
@@ -747,7 +750,6 @@ export const ProgramForm = ({
             {t('common.save')}{' '}
           </Button>
         </HStack>
-
         <DrawerBody>
           <VStack
             spacing={4}
@@ -778,7 +780,6 @@ export const ProgramForm = ({
               >
                 {t('programForm.overview')}
               </Button>
-
               <Button
                 flex={1}
                 variant="ghost"
@@ -937,10 +938,6 @@ export const ProgramForm = ({
                 >
                   {t('programForm.mediaHeading')}
                 </Heading>
-                <Text
-                  fontSize="sm"
-                  color="gray.600"
-                ></Text>
                 <Button
                   size="sm"
                   variant="outline"
@@ -955,19 +952,21 @@ export const ProgramForm = ({
                   wrap="wrap"
                   spacing={3}
                 >
-                  {(formState.media ?? []).map((item, index) => (
-                    <MediaPreviewTag
-                      key={item.id || item.s3_key || `media-${index}`}
-                      item={item}
-                      onRemove={() => {
-                        setFormState((prev) => ({
-                          ...prev,
-                          media: prev.media.filter((_, idx) => idx !== index),
-                        }));
-                      }}
-                      isMedia={true}
-                    />
-                  ))}
+                  {(formState.media ?? [])
+                    .filter((item) => !isPdfByType(item))
+                    .map((item, index) => (
+                      <MediaPreviewTag
+                        key={item.id || item.s3_key || `media-${index}`}
+                        item={item}
+                        onRemove={() => {
+                          setFormState((prev) => ({
+                            ...prev,
+                            media: removeFormItemByIdOrKey(prev.media, item),
+                          }));
+                        }}
+                        isMedia={true}
+                      />
+                    ))}
                 </HStack>
               </VStack>
             )}

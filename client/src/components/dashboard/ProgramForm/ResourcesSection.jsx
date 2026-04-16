@@ -18,9 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { CurriculumLinkForm } from './CurriculumLinkForm';
 import { MediaPreviewTag } from './MediaPreviewTag';
 
-/**
- * Resources: curriculum links (toggle), file/media uploads (modal opened by parent), link to Media tab.
- */
+/** Resources: curriculum, file uploads (`file_change` only), link to Media tab. */
 export function ResourcesSection({
   formState,
   setFormData,
