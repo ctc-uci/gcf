@@ -241,6 +241,7 @@ export function useProgramFormLoad({
               s3_key: m.s3_key,
               file_name: m.file_name,
               file_type: m.file_type,
+              description: m.description ?? null,
             }))
           : [],
 
@@ -250,6 +251,7 @@ export function useProgramFormLoad({
               s3_key: f.s3_key,
               file_name: f.file_name,
               file_type: f.file_type,
+              description: f.description ?? null,
             }))
           : [],
       });

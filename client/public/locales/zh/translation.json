@@ -459,6 +459,9 @@
     "loadingAlt": "加载中...",
     "titlePlaceholder": "添加标题"
   },
+  "mediaPreviewTag": {
+    "openPreview": "打开预览"
+  },
   "mediaPreviewList": {
     "uploadedFiles": "上传的文件",
     "notesLabel": "笔记",

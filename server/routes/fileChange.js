@@ -27,7 +27,7 @@ fileChangeRouter.get('/program/:programId', async (req, res) => {
 
     const result = await db.query(
       `
-      SELECT fc.id, fc.s3_key, fc.file_name, fc.file_type
+      SELECT fc.id, fc.s3_key, fc.file_name, fc.file_type, fc.description
       FROM file_change fc
       JOIN program_update pu ON fc.update_id = pu.id
       WHERE pu.program_id = $1;
@@ -40,6 +40,7 @@ fileChangeRouter.get('/program/:programId', async (req, res) => {
       s3_key: row.s3_key,
       file_name: row.file_name,
       file_type: row.file_type,
+      description: row.description,
     }));
 
     res.status(200).json(files);

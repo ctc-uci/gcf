@@ -459,6 +459,9 @@
     "loadingAlt": "Chargement...",
     "titlePlaceholder": "Ajouter un titre"
   },
+  "mediaPreviewTag": {
+    "openPreview": "Ouvrir l'aperçu"
+  },
   "mediaPreviewList": {
     "uploadedFiles": "Fichiers téléchargés",
     "notesLabel": "Remarques",

@@ -459,6 +459,9 @@
     "loadingAlt": "Loading...",
     "titlePlaceholder": "Add Title"
   },
+  "mediaPreviewTag": {
+    "openPreview": "Open preview"
+  },
   "mediaPreviewList": {
     "uploadedFiles": "Uploaded Files",
     "notesLabel": "Notes",
