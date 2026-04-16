@@ -196,6 +196,10 @@
     "savedDesc": "Les mises à jour de votre compte ont été enregistrées à {{time}}.",
     "pendingApprovalTitle": "Soumis pour approbation",
     "pendingApprovalDesc": "Vos modifications de profil sont en attente d'examen par un administrateur ou un directeur régional.",
+    "passwordInvalidTitle": "Mot de passe invalide",
+    "passwordMin12Desc": "Le mot de passe doit contenir au moins 12 caractères.",
+    "passwordUpdatedTitle": "Mot de passe mis à jour",
+    "passwordUpdatedDesc": "Votre mot de passe a été mis à jour à {{time}}.",
     "edit": "Modifier"
   },
   "searchBar": {

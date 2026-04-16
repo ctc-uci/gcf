@@ -1,7 +1,7 @@
 
 CREATE TABLE IF NOT EXISTS public.account_change (
     id BIGSERIAL PRIMARY KEY,
-    user_id TEXT NOT NULL,
+    user_id TEXT,
     author_id TEXT,
     
     change_type VARCHAR(50) NOT NULL CHECK (change_type IN ('Creation', 'Update', 'Deletion')),
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS public.account_change (
     CONSTRAINT fk_user_id
         FOREIGN KEY (user_id)
             REFERENCES public.gcf_user(id)
-            ON DELETE CASCADE,
+            ON DELETE SET NULL,
 
     CONSTRAINT fk_author_id
         FOREIGN KEY (author_id)

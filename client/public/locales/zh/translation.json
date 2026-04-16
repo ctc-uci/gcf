@@ -196,6 +196,10 @@
     "savedDesc": "您帐户的更新已保存在 {{time}}。",
     "pendingApprovalTitle": "已提交审批",
     "pendingApprovalDesc": "您的个人资料更改正在等待管理员或区域总监审核。",
+    "passwordInvalidTitle": "密码无效",
+    "passwordMin12Desc": "密码长度至少为 12 个字符。",
+    "passwordUpdatedTitle": "密码已更新",
+    "passwordUpdatedDesc": "您的密码已于 {{time}} 更新。",
     "edit": "编辑"
   },
   "searchBar": {

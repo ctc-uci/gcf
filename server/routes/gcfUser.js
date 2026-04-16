@@ -3,6 +3,7 @@ import { randomBytes } from 'crypto';
 import { keysToCamel } from '@/common/utils';
 import express from 'express';
 
+import { deleteFromS3 } from '../common/s3';
 import { admin } from '../config/firebase';
 import { db } from '../db/db-pgp';
 
@@ -454,6 +455,16 @@ gcfUserRouter.delete('/:id', async (req, res) => {
 
     if (!deletedRow) {
       return res.status(404).send('Item not found');
+    }
+
+    const pictureKey =
+      typeof deletedRow.picture === 'string' ? deletedRow.picture.trim() : '';
+    if (pictureKey) {
+      try {
+        await deleteFromS3(pictureKey);
+      } catch (s3Err) {
+        console.error('S3 delete profile picture:', s3Err);
+      }
     }
 
     try {

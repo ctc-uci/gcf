@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   Box,
@@ -188,45 +188,48 @@ export const AccountUpdateDrawer = ({
     return () => {
       cancelled = true;
     };
-  }, [accountChangeId, backend]);
+  }, [accountChangeId, backend, update?.userId]);
 
   const changeType = detail?.changeType ?? update?.changeType;
 
-  const withFallbacks = (raw) => {
-    const s = normalizeAccountSnapshot(raw);
-    const role = valueOrFallback(s.role, fallbackValues.role);
-    return {
-      ...s,
-      first_name: valueOrFallback(
-        firstNonBlank(s.first_name, s.firstName),
-        fallbackValues.first_name
-      ),
-      last_name: valueOrFallback(
-        firstNonBlank(s.last_name, s.lastName),
-        fallbackValues.last_name
-      ),
-      email: valueOrFallback(s.email, fallbackValues.email),
-      picture: valueOrFallback(s.picture, fallbackValues.picture),
-      role,
-      program: valueOrFallback(s.program, ''),
-      region: valueOrFallback(s.region, ''),
-      bio:
-        role === 'Program Director'
-          ? valueOrFallback(
-              firstNonBlank(s.bio, s.biography),
-              fallbackValues.bio
-            )
-          : '',
-    };
-  };
+  const withFallbacks = useCallback(
+    (raw) => {
+      const s = normalizeAccountSnapshot(raw);
+      const role = valueOrFallback(s.role, fallbackValues.role);
+      return {
+        ...s,
+        first_name: valueOrFallback(
+          firstNonBlank(s.first_name, s.firstName),
+          fallbackValues.first_name
+        ),
+        last_name: valueOrFallback(
+          firstNonBlank(s.last_name, s.lastName),
+          fallbackValues.last_name
+        ),
+        email: valueOrFallback(s.email, fallbackValues.email),
+        picture: valueOrFallback(s.picture, fallbackValues.picture),
+        role,
+        program: valueOrFallback(s.program, ''),
+        region: valueOrFallback(s.region, ''),
+        bio:
+          role === 'Program Director'
+            ? valueOrFallback(
+                firstNonBlank(s.bio, s.biography),
+                fallbackValues.bio
+              )
+            : '',
+      };
+    },
+    [fallbackValues]
+  );
 
   const oldSnap = useMemo(
     () => withFallbacks(detail?.oldValues),
-    [detail?.oldValues, fallbackValues]
+    [detail?.oldValues, withFallbacks]
   );
   const newSnap = useMemo(
     () => withFallbacks(detail?.newValues),
-    [detail?.newValues, fallbackValues]
+    [detail?.newValues, withFallbacks]
   );
 
   const fields = useMemo(() => {

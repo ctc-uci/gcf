@@ -196,6 +196,10 @@
     "savedDesc": "Las actualizaciones de su cuenta se guardaron en {{time}}.",
     "pendingApprovalTitle": "Enviado para aprobación",
     "pendingApprovalDesc": "Los cambios de perfil están pendientes de revisión por un administrador o director regional.",
+    "passwordInvalidTitle": "Contraseña no válida",
+    "passwordMin12Desc": "La contraseña debe tener al menos 12 caracteres.",
+    "passwordUpdatedTitle": "Contraseña actualizada",
+    "passwordUpdatedDesc": "Su contraseña se actualizó a las {{time}}.",
     "edit": "Editar"
   },
   "searchBar": {

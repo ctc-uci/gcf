@@ -196,6 +196,10 @@
     "savedDesc": "The updates to your account have been saved at {{time}}.",
     "pendingApprovalTitle": "Submitted for approval",
     "pendingApprovalDesc": "Your profile changes are pending review by an administrator or regional director.",
+    "passwordInvalidTitle": "Invalid password",
+    "passwordMin12Desc": "Password must be at least 12 characters.",
+    "passwordUpdatedTitle": "Password updated",
+    "passwordUpdatedDesc": "Your password was updated at {{time}}.",
     "edit": "Edit"
   },
   "searchBar": {

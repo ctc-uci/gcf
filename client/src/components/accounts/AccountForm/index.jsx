@@ -361,6 +361,20 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     setIsDeleting(true);
     try {
       await backend.delete(`/gcf-users/${targetUserId}`);
+      if (userId) {
+        await logAccountChange({
+          user_id: String(targetUserId),
+          author_id: String(userId),
+          change_type: 'Deletion',
+          old_values: formStateToAuditSnapshot(initialFormData, {
+            currentUserId: userId,
+            targetId: targetUserId,
+          }),
+          new_values: null,
+          resolved: true,
+          last_modified: new Date().toISOString(),
+        });
+      }
       toast({
         title: t('accountForm.deleteSuccess'),
         status: 'success',

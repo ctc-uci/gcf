@@ -513,8 +513,8 @@ export const useProfile = () => {
     if (passwordEdited && newPassword.length > 0) {
       if (newPassword.length < 12) {
         toast({
-          title: 'Invalid password',
-          description: 'Password must be at least 12 characters.',
+          title: t('profile.passwordInvalidTitle'),
+          description: t('profile.passwordMin12Desc'),
           status: 'error',
           variant: 'subtle',
           position: 'bottom-right',
@@ -558,8 +558,8 @@ export const useProfile = () => {
       timeZoneName: 'short',
     });
     toast({
-      title: 'Password updated',
-      description: `Your password was updated at ${timeStr}`,
+      title: t('profile.passwordUpdatedTitle'),
+      description: t('profile.passwordUpdatedDesc', { time: timeStr }),
       status: 'success',
       variant: 'subtle',
       position: 'bottom-right',
