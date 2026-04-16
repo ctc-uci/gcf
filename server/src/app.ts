@@ -1,4 +1,3 @@
-import { verifyToken } from '@/middleware';
 import { accountChangeRouter } from '@/routes/accountChange';
 import { adminRouter } from '@/routes/admin';
 import { countryRouter } from '@/routes/country';
