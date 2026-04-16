@@ -402,6 +402,10 @@ export const ProgramForm = ({
     setFormState((prev) => ({ ...prev, languages: languageChanges }));
   }
 
+  function isPdfByType(file) {
+    return file.type === 'application/pdf';
+  }
+
   const handleMediaChange = (newMediaFiles) => {
     setFormState((prev) => ({
       ...prev,
@@ -617,13 +621,23 @@ export const ProgramForm = ({
 
         if (hasMediaChange) {
           for (const mediaChange of mediaChanges) {
-            await backend.post(`/mediaChange`, {
-              update_id: updateId,
-              s3_key: mediaChange.s3_key,
-              file_name: mediaChange.file_name,
-              file_type: mediaChange.file_type,
-              is_thumbnail: false,
-            });
+            if (isPdfByType(mediaChange)) {
+              await backend.post(`/mediaChange/file-change`, {
+                update_id: updateId,
+                s3_key: mediaChange.s3_key,
+                file_name: mediaChange.file_name,
+                file_type: mediaChange.file_type,
+                is_thumbnail: false,
+              });
+            } else {
+              await backend.post(`/mediaChange`, {
+                update_id: updateId,
+                s3_key: mediaChange.s3_key,
+                file_name: mediaChange.file_name,
+                file_type: mediaChange.file_type,
+                is_thumbnail: false,
+              });
+            }
           }
         }
       }
