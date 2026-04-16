@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Badge,
   Box,
   Button,
-  Center,
   Flex,
   Heading,
   HStack,
@@ -17,6 +16,8 @@ import {
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { isoCodeToFlagIconCode } from '@/utils/isoCodeToFlagIconCode';
 
+import { ProgramMediaGallery } from './ProgramMediaGallery';
+
 import 'flag-icons/css/flag-icons.min.css';
 
 import { GetCity, GetCountries, GetState } from 'react-country-state-city';
@@ -26,13 +27,6 @@ import {
   BsMusicNoteBeamed,
   BsPersonFill,
 } from 'react-icons/bs';
-import { FiPlay } from 'react-icons/fi';
-
-const mediaFileType = (m) => m?.file_type ?? m?.fileType ?? '';
-
-const isVideoMedia = (m) => mediaFileType(m).startsWith('video');
-
-const isPdfMedia = (m) => mediaFileType(m) === 'application/pdf';
 
 const ProgramInfoView = ({ program }) => {
   const { backend } = useBackendContext();
@@ -46,7 +40,6 @@ const ProgramInfoView = ({ program }) => {
   const [locationName, setLocationName] = useState('');
   const [flagCode, setFlagCode] = useState('');
   const [partnerOrg, setPartnerOrg] = useState('');
-  const galleryRef = useRef(null);
 
   const programId = program.id;
 
@@ -514,139 +507,10 @@ const ProgramInfoView = ({ program }) => {
         </Box>
       )}
 
-      {media.length > 0 && (
-        <VStack
-          align="flex-start"
-          spacing="24px"
-          w="100%"
-          py="24px"
-        >
-          <Heading
-            fontWeight="600"
-            fontSize="28px"
-            lineHeight="44px"
-            color="#000000"
-          >
-            Gallery
-          </Heading>
-          <HStack
-            ref={galleryRef}
-            spacing="16px"
-            overflowX="auto"
-            w="100%"
-            css={{
-              '&::-webkit-scrollbar': { display: 'none' },
-              scrollbarWidth: 'none',
-            }}
-          >
-            {media.map((m) =>
-              mediaUrls[m.id] ? (
-                <Box
-                  key={m.id}
-                  position="relative"
-                  w="300px"
-                  h="300px"
-                  flexShrink={0}
-                  borderRadius="12px"
-                  overflow="hidden"
-                  filter="drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))"
-                  role="group"
-                  cursor="pointer"
-                >
-                  {isVideoMedia(m) ? (
-                    <>
-                      <video
-                        src={mediaUrls[m.id]}
-                        muted
-                        playsInline
-                        loop
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block',
-                        }}
-                      />
-                      <Center
-                        position="absolute"
-                        inset={0}
-                        pointerEvents="none"
-                      >
-                        <Box
-                          bg="blackAlpha.600"
-                          borderRadius="full"
-                          p={3}
-                        >
-                          <Icon
-                            as={FiPlay}
-                            color="white"
-                            boxSize={6}
-                          />
-                        </Box>
-                      </Center>
-                    </>
-                  ) : isPdfMedia(m) ? (
-                    <iframe
-                      src={mediaUrls[m.id]}
-                      title={m.fileName || m.file_name}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        border: 'none',
-                        pointerEvents: 'none',
-                      }}
-                    />
-                  ) : (
-                    <Image
-                      src={mediaUrls[m.id]}
-                      alt={m.fileName || m.file_name}
-                      w="100%"
-                      h="100%"
-                      objectFit="cover"
-                    />
-                  )}
-                  <Flex
-                    position="absolute"
-                    top={0}
-                    left={0}
-                    w="100%"
-                    h="100%"
-                    zIndex={2}
-                    bg="blackAlpha.600"
-                    sx={{
-                      opacity: 0,
-                      '[role=group]:hover &': { opacity: 1 },
-                    }}
-                    transition="opacity 0.3s"
-                    direction="column"
-                    justify="flex-end"
-                    p="16px"
-                  >
-                    <Text
-                      color="white"
-                      fontWeight="700"
-                      fontSize="16px"
-                      lineHeight="20px"
-                    >
-                      {m.fileName || m.file_name}
-                    </Text>
-                    {m.description && (
-                      <Text
-                        color="whiteAlpha.800"
-                        fontSize="13px"
-                        lineHeight="18px"
-                        mt="4px"
-                      >
-                        {m.description}
-                      </Text>
-                    )}
-                  </Flex>
-                </Box>
-              ) : null
-            )}
-          </HStack>
-        </VStack>
-      )}
+      <ProgramMediaGallery
+        media={media}
+        mediaUrls={mediaUrls}
+      />
 
       <Flex
         w="100%"
