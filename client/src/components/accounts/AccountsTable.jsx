@@ -231,7 +231,11 @@ export const AccountsTable = ({
                     {t('accounts.colCreatedBy')}
                   </Th>
                 )}
-                <Th width="80px"></Th>
+                <Th
+                  width="80px"
+                  position="sticky"
+                  right={0}
+                />
               </Tr>
             </Thead>
             <Tbody>
@@ -309,6 +313,8 @@ export const AccountsTable = ({
                   <Td
                     p={0}
                     textAlign="right"
+                    position="sticky"
+                    right={0}
                   >
                     <Box
                       className="action-group"
