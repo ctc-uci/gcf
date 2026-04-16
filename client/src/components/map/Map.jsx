@@ -1,6 +1,14 @@
 import { React, useEffect, useRef, useState } from 'react';
 
-import { Box, Flex, Heading, HStack, Icon, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  Heading,
+  HStack,
+  Icon,
+  Skeleton,
+  Text,
+} from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import {
@@ -10,7 +18,7 @@ import {
 } from 'react-icons/fa';
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 
-import CardView from './CardView.jsx';
+import CardView, { ProgramCardSkeleton } from './CardView.jsx';
 import ProgramInfoView from './ProgramInfoView.jsx';
 
 const geoUrl = '/map-data.json';
@@ -24,6 +32,7 @@ export const Map = () => {
   /** Set synchronously on country click so the whole region highlights without waiting for the API. */
   const [selectedRegionId, setSelectedRegionId] = useState(null);
   const [programs, setPrograms] = useState([]);
+  const [programsLoading, setProgramsLoading] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const { backend } = useBackendContext();
 
@@ -93,6 +102,8 @@ export const Map = () => {
       }
       setSelectedProgram(null);
       setRegions(regionsRes.data);
+      setPrograms([]);
+      setProgramsLoading(true);
 
       try {
         const programRes = await backend.get(
@@ -102,7 +113,8 @@ export const Map = () => {
       } catch (error) {
         console.error('Error fetching programs for the region:', error);
         setPrograms([]);
-        return;
+      } finally {
+        setProgramsLoading(false);
       }
 
       try {
@@ -152,6 +164,7 @@ export const Map = () => {
           onMouseMove={handleMouseMove}
           onClick={() => {
             setPrograms([]);
+            setProgramsLoading(false);
             setRegions([]);
             setSelectedRegionId(null);
             setSelectedProgram(null);
@@ -306,6 +319,7 @@ export const Map = () => {
                 onClick={(e) => {
                   e.stopPropagation();
                   setPrograms([]);
+                  setProgramsLoading(false);
                   setRegions([]);
                   setSelectedRegionId(null);
                   setSelectedProgram(null);
@@ -314,11 +328,23 @@ export const Map = () => {
                 boxSize={6}
               />
               <Heading fontSize="2xl">
-                {`Featured Programs in ${regionName}`}
+                Featured Programs in{' '}
+                {programsLoading || !regionName ? (
+                  <Skeleton
+                    as="span"
+                    display="inline-block"
+                    height="1em"
+                    width="200px"
+                    verticalAlign="text-bottom"
+                    borderRadius="md"
+                  />
+                ) : (
+                  regionName
+                )}
               </Heading>
             </HStack>
 
-            {programs.length > 0 && (
+            {!programsLoading && programs.length > 0 && (
               <HStack gap={3}>
                 <Flex
                   as="button"
@@ -354,7 +380,26 @@ export const Map = () => {
             )}
           </Flex>
 
-          {programs.length > 0 ? (
+          {programsLoading ? (
+            <Box w="100%">
+              <HStack
+                ml="28px"
+                mb="20px"
+                pr="28px"
+                gap={7}
+                overflowX="auto"
+                pb="10px"
+                css={{
+                  '&::-webkit-scrollbar': { display: 'none' },
+                  scrollbarWidth: 'none',
+                }}
+              >
+                {[0, 1, 2].map((i) => (
+                  <ProgramCardSkeleton key={i} />
+                ))}
+              </HStack>
+            </Box>
+          ) : programs.length > 0 ? (
             <Box w="100%">
               <HStack
                 ref={scrollRef}
