@@ -69,6 +69,7 @@ function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
             programDirectors,
             regionalDirectors,
             media,
+            fileChanges,
             instrumentsMap,
             partnerOrgName,
           ] = await Promise.all([
@@ -82,6 +83,9 @@ function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
               .catch(() => ({ data: [] })),
             backend
               .get(`/program/${programId}/media`)
+              .catch(() => ({ data: [] })),
+            backend
+              .get(`/fileChanges/program/${programId}`)
               .catch(() => ({ data: [] })),
             backend
               .get(`/program/${programId}/instruments`)
@@ -99,6 +103,7 @@ function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
             programDirectors: programDirectors?.data || [],
             regionalDirectors: regionalDirectors?.data || [],
             media: media?.data || [],
+            fileChanges: fileChanges?.data || [],
             instrumentsMap: instrumentsMap?.data || [],
             partnerOrgName: partnerOrgName?.data || [],
           };

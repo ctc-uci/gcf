@@ -87,6 +87,7 @@ export const ProgramForm = ({
   const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
   const onClose = isControlled ? onCloseProp : disclosure.onClose;
   const btnRef = useRef(null);
+  const mediaUploadTargetRef = useRef('media');
   const { backend } = useBackendContext();
   const { currentUser } = useAuthContext();
 
@@ -118,6 +119,7 @@ export const ProgramForm = ({
     programDirectors: [],
     curriculumLinks: [],
     media: [],
+    fileChanges: [],
   });
   const languageOptions = useMemo(
     () =>
@@ -158,6 +160,7 @@ export const ProgramForm = ({
           programDirectors: [],
           curriculumLinks: [],
           media: [],
+          fileChanges: [],
         });
         setInitialProgramDirectorIds([]);
         setInitialInstrumentQuantities({});
@@ -179,9 +182,30 @@ export const ProgramForm = ({
           regionalDirectors: program.regionalDirectors ?? [],
           playlists: program.playlists ?? [],
           media: program.media ?? [],
+          fileChanges: program.fileChanges ?? [],
         };
       } catch (err) {
         console.error('ProgramForm: could not load program details', err);
+      }
+
+      try {
+        const mediaRes = await backend.get(`/program/${program.id}/media`);
+        if (Array.isArray(mediaRes.data)) {
+          record = { ...record, media: mediaRes.data };
+        }
+      } catch (err) {
+        console.error('ProgramForm: could not load program media', err);
+      }
+
+      try {
+        const filesRes = await backend.get(
+          `/fileChanges/program/${program.id}`
+        );
+        if (Array.isArray(filesRes.data)) {
+          record = { ...record, fileChanges: filesRes.data };
+        }
+      } catch (err) {
+        console.error('ProgramForm: could not load program file changes', err);
       }
 
       try {
@@ -340,6 +364,15 @@ export const ProgramForm = ({
               file_type: m.file_type,
             }))
           : [],
+
+        fileChanges: Array.isArray(record.fileChanges)
+          ? record.fileChanges.map((f) => ({
+              id: f.id,
+              s3_key: f.s3_key,
+              file_name: f.file_name,
+              file_type: f.file_type,
+            }))
+          : [],
       });
 
       setInitialProgramDirectorIds(
@@ -406,10 +439,22 @@ export const ProgramForm = ({
     return media.file_type === 'application/pdf';
   }
 
-  const handleMediaChange = (newMediaFiles) => {
+  const handleUploadComplete = (newFiles) => {
+    if (mediaUploadTargetRef.current === 'files') {
+      const pdfs = newFiles.filter((f) => isPdfByType(f));
+      const nonPdfs = newFiles.filter((f) => !isPdfByType(f));
+      setFormState((prev) => ({
+        ...prev,
+        fileChanges: [...(prev.fileChanges ?? []), ...pdfs],
+        ...(nonPdfs.length
+          ? { media: [...(prev.media ?? []), ...nonPdfs] }
+          : {}),
+      }));
+      return;
+    }
     setFormState((prev) => ({
       ...prev,
-      media: [...(prev.media ?? []), ...newMediaFiles],
+      media: [...(prev.media ?? []), ...newFiles],
     }));
   };
 
@@ -527,11 +572,21 @@ export const ProgramForm = ({
 
       const currentMediaIds = formState.media
         .map((m) => m.id)
-        .filter((id) => id !== undefined);
+        .filter((id) => id !== undefined && id !== null);
+      const currentFileIds = formState.fileChanges
+        .map((f) => f.id)
+        .filter((id) => id !== undefined && id !== null);
+
+      const pendingMedia = formState.media.filter((m) => !m.id);
+      const pendingFiles = formState.fileChanges.filter((f) => !f.id);
+
       if (program) {
         const programMedia = program?.media ?? [];
         const mediaToDelete = programMedia.filter(
-          (oldMedia) => !currentMediaIds.includes(oldMedia.id)
+          (oldMedia) =>
+            oldMedia.id !== null &&
+            oldMedia.id !== undefined &&
+            !currentMediaIds.includes(oldMedia.id)
         );
 
         for (const media of mediaToDelete) {
@@ -539,8 +594,21 @@ export const ProgramForm = ({
             await backend.delete(`/mediaChange/${media.id}`);
           }
         }
+
+        const programFiles = program?.fileChanges ?? [];
+        const filesToDelete = programFiles.filter(
+          (oldFile) =>
+            oldFile.id !== null &&
+            oldFile.id !== undefined &&
+            !currentFileIds.includes(oldFile.id)
+        );
+
+        for (const file of filesToDelete) {
+          if (file.id) {
+            await backend.delete(`/fileChanges/${file.id}`);
+          }
+        }
       }
-      const mediaChanges = formState.media.filter((mediaItem) => !mediaItem.id);
 
       const instrumentChanges = [];
       const instrumentIdsToPurge = [];
@@ -578,7 +646,7 @@ export const ProgramForm = ({
 
       const hasStudentChange = enrollmentDelta !== 0 || graduatedDelta !== 0;
       const hasInstrumentChange = instrumentChanges.length > 0;
-      const hasMediaChange = mediaChanges.length > 0;
+      const hasMediaChange = pendingMedia.length > 0 || pendingFiles.length > 0;
 
       const isNewProgram = !program;
 
@@ -620,23 +688,22 @@ export const ProgramForm = ({
         }
 
         if (hasMediaChange) {
-          for (const mediaChange of mediaChanges) {
-            if (isPdfByType(mediaChange)) {
-              await backend.post(`/mediaChange/file-change`, {
-                update_id: updateId,
-                s3_key: mediaChange.s3_key,
-                file_name: mediaChange.file_name,
-                file_type: mediaChange.file_type,
-              });
-            } else {
-              await backend.post(`/mediaChange`, {
-                update_id: updateId,
-                s3_key: mediaChange.s3_key,
-                file_name: mediaChange.file_name,
-                file_type: mediaChange.file_type,
-                is_thumbnail: false,
-              });
-            }
+          for (const fileChange of pendingFiles) {
+            await backend.post(`/mediaChange/file-change`, {
+              update_id: updateId,
+              s3_key: fileChange.s3_key,
+              file_name: fileChange.file_name,
+              file_type: fileChange.file_type,
+            });
+          }
+          for (const mediaChange of pendingMedia) {
+            await backend.post(`/mediaChange`, {
+              update_id: updateId,
+              s3_key: mediaChange.s3_key,
+              file_name: mediaChange.file_name,
+              file_type: mediaChange.file_type,
+              is_thumbnail: false,
+            });
           }
         }
       }
@@ -850,7 +917,10 @@ export const ProgramForm = ({
                   setFormData={setFormState}
                   programId={program?.id}
                   backend={backend}
-                  onOpenMediaModal={mediaUploadModal.onOpen}
+                  onOpenMediaModal={() => {
+                    mediaUploadTargetRef.current = 'files';
+                    mediaUploadModal.onOpen();
+                  }}
                   onSeeAllMedia={() => setActiveTab('media')}
                 />
               </>
@@ -874,7 +944,10 @@ export const ProgramForm = ({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={mediaUploadModal.onOpen}
+                  onClick={() => {
+                    mediaUploadTargetRef.current = 'media';
+                    mediaUploadModal.onOpen();
+                  }}
                 >
                   {t('common.add')}
                 </Button>
@@ -917,11 +990,10 @@ export const ProgramForm = ({
           </Center>
         )}
       </DrawerContent>
-
       <MediaUploadModal
         isOpen={mediaUploadModal.isOpen}
         onClose={mediaUploadModal.onClose}
-        onUploadComplete={handleMediaChange}
+        onUploadComplete={handleUploadComplete}
         formOrigin="program"
       />
     </Drawer>

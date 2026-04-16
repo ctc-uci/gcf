@@ -52,7 +52,7 @@ export const Media = () => {
           file.file_name?.toLowerCase().endsWith('.pdf');
 
         if (isPdf) {
-          await backend.post('/fileChange', {
+          await backend.post('/fileChanges', {
             update_id: updateId,
             s3_key: file.s3_key,
             file_name: file.file_name,

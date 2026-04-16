@@ -148,20 +148,20 @@ export function ResourcesSection({
           >
             {t('common.add')}
           </Button>
-          {(formState.media ?? []).length > 0 && (
+          {(formState.fileChanges ?? []).length > 0 && (
             <HStack
               wrap="wrap"
               spacing={3}
               mt={3}
             >
-              {(formState.media ?? []).map((item, i) => (
+              {(formState.fileChanges ?? []).map((item, i) => (
                 <MediaPreviewTag
-                  key={item.id || item.s3_key || `media-${i}`}
+                  key={item.id || item.s3_key || `file-${i}`}
                   item={item}
                   onRemove={() => {
                     setFormData((prev) => ({
                       ...prev,
-                      media: (prev.media ?? []).filter((m) => {
+                      fileChanges: (prev.fileChanges ?? []).filter((m) => {
                         if (
                           item.id !== null &&
                           item.id !== undefined &&
