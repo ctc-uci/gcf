@@ -53,7 +53,7 @@ export function MediaPreviewTag({ item, onRemove, isMedia }) {
 
   const isPdf = item.file_type === 'application/pdf';
 
-  if ((isMedia && isPdf) || (!isMedia && !isPdf)) {
+  if (!isMedia && !isPdf) {
     return null;
   }
 
@@ -123,14 +123,6 @@ export function MediaPreviewTag({ item, onRemove, isMedia }) {
               muted
               playsInline
             />
-          ) : isMedia ? (
-            <Image
-              src={previewUrl}
-              alt={item.file_name}
-              boxSize="100%"
-              objectFit="cover"
-              pointerEvents="none"
-            />
           ) : isPdf ? (
             <iframe
               src={previewUrl}
@@ -141,6 +133,14 @@ export function MediaPreviewTag({ item, onRemove, isMedia }) {
                 pointerEvents: 'none',
               }}
               title={item.file_name}
+            />
+          ) : isMedia ? (
+            <Image
+              src={previewUrl}
+              alt={item.file_name}
+              boxSize="100%"
+              objectFit="cover"
+              pointerEvents="none"
             />
           ) : null}
         </Box>

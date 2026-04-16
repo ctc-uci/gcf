@@ -2,6 +2,7 @@ import { keysToCamel } from '@/common/utils';
 import express from 'express';
 
 import { db } from '../db/db-pgp';
+import { deleteFromS3 } from '../common/s3';
 
 const instrumentChangePhotoRouter = express.Router();
 instrumentChangePhotoRouter.use(express.json());
@@ -61,6 +62,7 @@ instrumentChangePhotoRouter.delete('/:id', async (req, res) => {
             return res.status(404).send('Instrument change photo not found');
         }
 
+        await deleteFromS3(deletedInstrumentChangePhoto[0].s3_key);
         res.status(200).json(keysToCamel(deletedInstrumentChangePhoto[0]));
     }
     catch (err) {
