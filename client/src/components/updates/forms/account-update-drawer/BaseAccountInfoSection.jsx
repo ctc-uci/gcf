@@ -16,7 +16,7 @@ import {
   displaySrcForSlot,
   fetchPictureDisplayUrl,
   getRoleBadgeProps,
-} from './shared';
+} from './shared.js';
 
 const RoleDiffField = ({ oldRole, newRole, changeType, t }) => {
   const isCreation = changeType === 'Creation';
