@@ -91,12 +91,10 @@ export const MediaCard = ({
       borderRadius="xl"
       overflow="hidden"
       bg="gray.100"
+      p={4}
     >
       <Box
         h={height}
-        mt={4}
-        ml={3}
-        mr={3}
         borderRadius="xl"
         position="relative"
         overflow="hidden"
@@ -272,13 +270,14 @@ export const MediaCard = ({
         </Modal>
       )}
 
-      <HStack>
+      <HStack
+        align="flex-start"
+        mt={2}
+      >
         <Text
           color="gray.700"
           fontSize="md"
           fontWeight="semibold"
-          mt={2}
-          px={2}
           isTruncated
         >
           {file_name}
@@ -287,8 +286,7 @@ export const MediaCard = ({
         <Text
           color="gray.700"
           fontSize="md"
-          mt={2}
-          px={2}
+          flexShrink={0}
         >
           {update_date
             ? new Date(update_date.updateDate).toLocaleDateString()
@@ -300,7 +298,6 @@ export const MediaCard = ({
         fontSize="xs"
         fontWeight="medium"
         mt={1}
-        px={2}
         isTruncated
       >
         {description || t('mediaCard.noDescription')}
