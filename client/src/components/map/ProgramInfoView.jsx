@@ -4,6 +4,7 @@ import {
   Badge,
   Box,
   Button,
+  Center,
   Flex,
   Heading,
   HStack,
@@ -25,6 +26,13 @@ import {
   BsMusicNoteBeamed,
   BsPersonFill,
 } from 'react-icons/bs';
+import { FiPlay } from 'react-icons/fi';
+
+const mediaFileType = (m) => m?.file_type ?? m?.fileType ?? '';
+
+const isVideoMedia = (m) => mediaFileType(m).startsWith('video');
+
+const isPdfMedia = (m) => mediaFileType(m) === 'application/pdf';
 
 const ProgramInfoView = ({ program }) => {
   const { backend } = useBackendContext();
@@ -545,19 +553,65 @@ const ProgramInfoView = ({ program }) => {
                   role="group"
                   cursor="pointer"
                 >
-                  <Image
-                    src={mediaUrls[m.id]}
-                    alt={m.fileName || m.file_name}
-                    w="100%"
-                    h="100%"
-                    objectFit="cover"
-                  />
+                  {isVideoMedia(m) ? (
+                    <>
+                      <video
+                        src={mediaUrls[m.id]}
+                        muted
+                        playsInline
+                        loop
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block',
+                        }}
+                      />
+                      <Center
+                        position="absolute"
+                        inset={0}
+                        pointerEvents="none"
+                      >
+                        <Box
+                          bg="blackAlpha.600"
+                          borderRadius="full"
+                          p={3}
+                        >
+                          <Icon
+                            as={FiPlay}
+                            color="white"
+                            boxSize={6}
+                          />
+                        </Box>
+                      </Center>
+                    </>
+                  ) : isPdfMedia(m) ? (
+                    <iframe
+                      src={mediaUrls[m.id]}
+                      title={m.fileName || m.file_name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        border: 'none',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                  ) : (
+                    <Image
+                      src={mediaUrls[m.id]}
+                      alt={m.fileName || m.file_name}
+                      w="100%"
+                      h="100%"
+                      objectFit="cover"
+                    />
+                  )}
                   <Flex
                     position="absolute"
                     top={0}
                     left={0}
                     w="100%"
                     h="100%"
+                    zIndex={2}
                     bg="blackAlpha.600"
                     sx={{
                       opacity: 0,
