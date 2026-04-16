@@ -216,11 +216,13 @@
     "instrumentsDonated": "捐赠仪器"
   },
   "lessonVideos": {
-    "title": "课程视频",
+    "title": "课程材料",
     "empty": "没有可用的课程视频",
     "loading": "正在加载课程视频...",
     "scrollLeft": "向左滚动",
-    "scrollRight": "向右滚动"
+    "scrollRight": "向右滚动",
+    "videosTab": "视频",
+    "pdfsTab": "PDF 文件"
   },
   "videoPlayer": {
     "playlistFallback": "播放列表"
@@ -442,7 +444,8 @@
   "mediaUpload": {
     "dragDrop": "将文件拖放到此处",
     "or": "或者",
-    "browse": "浏览文件"
+    "browse": "浏览文件",
+    "acceptedTypes": "可接受的文件类型：{{fileTypes}}"
   },
   "mediaEditModal": {
     "heading": "编辑详情",
@@ -454,12 +457,16 @@
     "noDescription": "暂无描述",
     "deleteModalHeader": "您确定要删除吗？",
     "deleteModalBody": "此操作无法撤消。",
-    "deleteMedia": "删除媒体"
+    "deleteMedia": "删除媒体",
+    "expandPdf": "展开 PDF"
   },
   "mediaPreview": {
     "previewAlt": "预览",
     "loadingAlt": "加载中...",
     "titlePlaceholder": "添加标题"
+  },
+  "mediaPreviewTag": {
+    "openPreview": "打开预览"
   },
   "mediaPreviewList": {
     "uploadedFiles": "上传的文件",

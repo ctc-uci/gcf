@@ -32,9 +32,13 @@ export const MediaEditModal = ({
     setDescription(initialDescription || '');
   }, [initialTitle, initialDescription]);
 
-  const handleSave = () => {
-    onSave(title, description);
-    onClose();
+  const handleSave = async () => {
+    try {
+      await Promise.resolve(onSave(title, description));
+      onClose();
+    } catch {
+      // Parent handlers log; keep modal open so the user can retry.
+    }
   };
 
   const handleCancel = () => {

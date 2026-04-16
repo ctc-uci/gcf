@@ -216,11 +216,13 @@
     "instrumentsDonated": "Instruments donnés"
   },
   "lessonVideos": {
-    "title": "Vidéos de cours",
+    "title": "Matériel de cours",
     "empty": "Aucune vidéo de cours disponible",
     "loading": "Chargement des vidéos de cours...",
     "scrollLeft": "Faites défiler vers la gauche",
-    "scrollRight": "Faites défiler vers la droite"
+    "scrollRight": "Faites défiler vers la droite",
+    "videosTab": "Vidéos",
+    "pdfsTab": "PDFs"
   },
   "videoPlayer": {
     "playlistFallback": "Liste de lecture"
@@ -442,7 +444,8 @@
   "mediaUpload": {
     "dragDrop": "Glissez et déposez les fichiers ici",
     "or": "OU",
-    "browse": "Parcourir les fichiers"
+    "browse": "Parcourir les fichiers",
+    "acceptedTypes": "Types de fichiers acceptés : {{fileTypes}}"
   },
   "mediaEditModal": {
     "heading": "Modifier les détails",
@@ -454,12 +457,16 @@
     "noDescription": "Aucune description",
     "deleteModalHeader": "Êtes-vous sûr de vouloir supprimer?",
     "deleteModalBody": "Cette action ne peut pas être annulée.",
-    "deleteMedia": "Supprimer les médias"
+    "deleteMedia": "Supprimer les médias",
+    "expandPdf": "Agrandir le PDF"
   },
   "mediaPreview": {
     "previewAlt": "Aperçu",
     "loadingAlt": "Chargement...",
     "titlePlaceholder": "Ajouter un titre"
+  },
+  "mediaPreviewTag": {
+    "openPreview": "Ouvrir l'aperçu"
   },
   "mediaPreviewList": {
     "uploadedFiles": "Fichiers téléchargés",

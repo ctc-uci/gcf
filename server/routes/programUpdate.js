@@ -44,7 +44,8 @@ programUpdateRouter.get('/:id', async (req, res) => {
   }
 });
 
-programUpdateRouter.get('/:id/date/', async (req, res) => {
+// More specific than `/:id` so `/123/date` is not captured as id=`123/date`.
+programUpdateRouter.get('/:id/date', async (req, res) => {
   try {
     const { id } = req.params;
     const entry = await db.query(
