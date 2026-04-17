@@ -33,7 +33,7 @@ const Dashboard = () => {
       minH="100vh"
       gap={6}
       as="main"
-      p={10}
+      p={2}
       w="100%"
     >
       {!selectedPlaylist && (
