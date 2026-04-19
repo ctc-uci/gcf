@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Badge,
@@ -16,6 +16,8 @@ import {
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { formatMonthYear } from '@/utils/formatDate';
 import { isoCodeToFlagIconCode } from '@/utils/isoCodeToFlagIconCode';
+
+import { ProgramMediaGallery } from './ProgramMediaGallery';
 
 import 'flag-icons/css/flag-icons.min.css';
 
@@ -39,7 +41,6 @@ const ProgramInfoView = ({ program }) => {
   const [locationName, setLocationName] = useState('');
   const [flagCode, setFlagCode] = useState('');
   const [partnerOrg, setPartnerOrg] = useState('');
-  const galleryRef = useRef(null);
 
   const programId = program.id;
 
@@ -480,99 +481,27 @@ const ProgramInfoView = ({ program }) => {
                     Program Director
                   </Text>
                 </VStack>
+                {director.bio?.trim() && (
+                  <Text
+                    fontWeight="400"
+                    fontSize="15px"
+                    lineHeight="24px"
+                    color="#4A5565"
+                    whiteSpace="pre-wrap"
+                  >
+                    {director.bio.trim()}
+                  </Text>
+                )}
               </VStack>
             </Flex>
           ))}
         </Box>
       )}
 
-      {media.length > 0 && (
-        <VStack
-          align="flex-start"
-          spacing="24px"
-          w="100%"
-          py="24px"
-        >
-          <Heading
-            fontWeight="600"
-            fontSize="28px"
-            lineHeight="44px"
-            color="#000000"
-          >
-            Gallery
-          </Heading>
-          <HStack
-            ref={galleryRef}
-            spacing="16px"
-            overflowX="auto"
-            w="100%"
-            css={{
-              '&::-webkit-scrollbar': { display: 'none' },
-              scrollbarWidth: 'none',
-            }}
-          >
-            {media.map((m) =>
-              mediaUrls[m.id] ? (
-                <Box
-                  key={m.id}
-                  position="relative"
-                  w="300px"
-                  h="300px"
-                  flexShrink={0}
-                  borderRadius="12px"
-                  overflow="hidden"
-                  filter="drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))"
-                  role="group"
-                  cursor="pointer"
-                >
-                  <Image
-                    src={mediaUrls[m.id]}
-                    alt={m.fileName || m.file_name}
-                    w="100%"
-                    h="100%"
-                    objectFit="cover"
-                  />
-                  <Flex
-                    position="absolute"
-                    top={0}
-                    left={0}
-                    w="100%"
-                    h="100%"
-                    bg="blackAlpha.600"
-                    sx={{
-                      opacity: 0,
-                      '[role=group]:hover &': { opacity: 1 },
-                    }}
-                    transition="opacity 0.3s"
-                    direction="column"
-                    justify="flex-end"
-                    p="16px"
-                  >
-                    <Text
-                      color="white"
-                      fontWeight="700"
-                      fontSize="16px"
-                      lineHeight="20px"
-                    >
-                      {m.fileName || m.file_name}
-                    </Text>
-                    {m.description && (
-                      <Text
-                        color="whiteAlpha.800"
-                        fontSize="13px"
-                        lineHeight="18px"
-                        mt="4px"
-                      >
-                        {m.description}
-                      </Text>
-                    )}
-                  </Flex>
-                </Box>
-              ) : null
-            )}
-          </HStack>
-        </VStack>
-      )}
+      <ProgramMediaGallery
+        media={media}
+        mediaUrls={mediaUrls}
+      />
 
       <Flex
         w="100%"

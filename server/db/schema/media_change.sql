@@ -1,5 +1,5 @@
 CREATE TABLE public.media_change (
-  id bigserial NOT NULL,
+  id bigserial NOT NULL PRIMARY KEY,
   update_id bigint NOT NULL,
   s3_key character varying(1024) NOT NULL,
   file_name character varying(255) NOT NULL,

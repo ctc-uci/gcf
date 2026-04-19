@@ -42,6 +42,7 @@ export const MediaCard = ({
   id,
   onUpdate,
   onClick,
+  hideMenu = false,
 }) => {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
@@ -102,58 +103,60 @@ export const MediaCard = ({
         cursor="pointer"
         onClick={onClick}
       >
-        <Menu
-          isLazy
-          placement="top-end"
-          gutter={0}
-          offset={[0, -40]}
-        >
-          <Box onClick={(e) => e.stopPropagation()}>
-            <MenuButton
-              as={IconButton}
-              icon={<SlOptionsVertical />}
-              size="md"
-              colorScheme="none"
-              position="absolute"
-              top="4px"
-              right="0px"
-              zIndex={2}
-            />
-            <MenuList
-              minW="150px"
-              p={0}
-              m={0}
-              boxShadow="xl"
-              border="none"
-              zIndex={3}
-              position="absolute"
-              top="0"
-              right="0"
-            >
-              <MenuItem onClick={onEditModalOpen}>
-                <HStack w="full">
-                  <Text fontWeight="semibold">
-                    {t('mediaEditModal.heading')}
-                  </Text>
-                  <Spacer />
-                  <BsFillPencilFill />
-                </HStack>
-              </MenuItem>
-              <MenuItem onClick={onDeleteOpen}>
-                <HStack w="full">
-                  <Text
-                    color="red.500"
-                    fontWeight="semibold"
-                  >
-                    {t('common.delete')}
-                  </Text>
-                  <Spacer />
-                  <BsFillTrashFill />
-                </HStack>
-              </MenuItem>
-            </MenuList>
-          </Box>
-        </Menu>
+        {!hideMenu && (
+          <Menu
+            isLazy
+            placement="top-end"
+            gutter={0}
+            offset={[0, -40]}
+          >
+            <Box onClick={(e) => e.stopPropagation()}>
+              <MenuButton
+                as={IconButton}
+                icon={<SlOptionsVertical />}
+                size="md"
+                colorScheme="none"
+                position="absolute"
+                top="4px"
+                right="0px"
+                zIndex={2}
+              />
+              <MenuList
+                minW="150px"
+                p={0}
+                m={0}
+                boxShadow="xl"
+                border="none"
+                zIndex={3}
+                position="absolute"
+                top="0"
+                right="0"
+              >
+                <MenuItem onClick={onEditModalOpen}>
+                  <HStack w="full">
+                    <Text fontWeight="semibold">
+                      {t('mediaEditModal.heading')}
+                    </Text>
+                    <Spacer />
+                    <BsFillPencilFill />
+                  </HStack>
+                </MenuItem>
+                <MenuItem onClick={onDeleteOpen}>
+                  <HStack w="full">
+                    <Text
+                      color="red.500"
+                      fontWeight="semibold"
+                    >
+                      {t('common.delete')}
+                    </Text>
+                    <Spacer />
+                    <BsFillTrashFill />
+                  </HStack>
+                </MenuItem>
+              </MenuList>
+            </Box>
+          </Menu>
+        )}
         <Box
           position="absolute"
           inset={0}

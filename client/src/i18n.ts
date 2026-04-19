@@ -23,7 +23,10 @@ async function fetchTranslation(
   lng: AppLocale
 ): Promise<Record<string, unknown>> {
   const path = '/locales/' + lng + '/translation.json';
-  const res = await fetch(path);
+  // In dev, avoid stale browser cache of public JSON after editing locale files.
+  const res = await fetch(path, {
+    cache: import.meta.env.DEV ? 'no-store' : 'default',
+  });
   if (!res.ok) {
     throw new Error('Failed to load locale: ' + lng);
   }

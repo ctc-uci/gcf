@@ -14,8 +14,8 @@ import {
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useTranslation } from 'react-i18next';
 
-import LessonVideos from './lessonVideos';
 import PDF from './FileUpload';
+import LessonVideos from './LessonVideos';
 import ProgramTable from './ProgramTable';
 import StatisticsSummary from './StatisticsSummary';
 
@@ -33,7 +33,7 @@ const Dashboard = () => {
       minH="100vh"
       gap={6}
       as="main"
-      p={10}
+      p={2}
       w="100%"
     >
       {!selectedPlaylist && (

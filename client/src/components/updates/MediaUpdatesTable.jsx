@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  Avatar,
   Badge,
   Box,
   Center,
@@ -28,6 +27,7 @@ import { useTranslation } from 'react-i18next';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 import { SortArrows } from '../tables/SortArrows';
 import { ReviewMediaUpdate } from './forms/ReviewMediaUpdate';
 
@@ -226,11 +226,10 @@ export const MediaUpdatesTable = ({
                   </Td>
                   <Td>
                     <HStack spacing={2}>
-                      <Avatar
-                        size="xs"
-                        name={authorDisplayName(row) || undefined}
-                        bg="teal.500"
-                        color="white"
+                      <DirectorAvatar
+                        picture={row.picture}
+                        name={authorDisplayName(row)}
+                        boxSize="24px"
                       />
                       <Text fontSize="sm">
                         {authorDisplayName(row) || t('common.name')}

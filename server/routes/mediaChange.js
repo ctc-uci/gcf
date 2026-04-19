@@ -2,6 +2,7 @@ import { keysToCamel } from '@/common/utils';
 import express from 'express';
 
 import { db } from '../db/db-pgp';
+import { deleteFromS3 } from '../common/s3';
 
 const mediaChangeRouter = express.Router();
 mediaChangeRouter.use(express.json());
@@ -118,6 +119,7 @@ mediaChangeRouter.delete('/:updateId/deny', async (req, res) => {
       `,
       [updateId]
     );
+    await Promise.all(updated.map((row) => deleteFromS3(row.s3_key)));
     res.status(200).json(keysToCamel(updated));
   } catch (err) {
     console.error(err);
@@ -137,6 +139,7 @@ mediaChangeRouter.delete('/:id', async (req, res) => {
       return res.status(404).send('Item not found');
     }
 
+    await deleteFromS3(deletedMediaChange[0].s3_key);
     res.status(200).json(keysToCamel(deletedMediaChange[0]));
   } catch (err) {
     console.error(err);
@@ -237,6 +240,7 @@ mediaChangeRouter.get('/:userId/media-updates', async (req, res) => {
           program.name AS program_name,
           creator.first_name,
           creator.last_name,
+          creator.picture,
           creator.role,
           media_change.status
         FROM program_update

@@ -41,6 +41,7 @@ updatesPermissionsRouter.get('/media-updates/:id', async (req, res) => {
           creator.first_name,
           creator.last_name,
           creator.role,
+          creator.picture,
           program.status
       FROM program_update
       INNER JOIN media_change ON media_change.update_id = program_update.id
@@ -71,6 +72,7 @@ updatesPermissionsRouter.get('/program-updates/pd/:id', async (req, res) => {
           creator.first_name,
           creator.last_name,
           creator.role,
+          creator.picture,
           program.status,
           EXISTS (
             SELECT 1 FROM instrument_change ic
@@ -161,6 +163,7 @@ updatesPermissionsRouter.get('/program-updates/:id', async (req, res) => {
           creator.first_name,
           creator.last_name,
           creator.role,
+          creator.picture,
           program.status,
           EXISTS (
             SELECT 1 FROM instrument_change ic

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  Avatar,
   Badge,
   Box,
   Center,
@@ -29,6 +28,7 @@ import { FiStar } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './forms/ProgramUpdateForm';
 
@@ -332,15 +332,14 @@ export const ProgramUpdatesTable = ({
                     )}
                     <Td>
                       <HStack spacing={2}>
-                        <Avatar
-                          size="xs"
+                        <DirectorAvatar
+                          picture={row.picture}
                           name={
                             [row.firstName, row.lastName]
                               .filter(Boolean)
-                              .join(' ') || undefined
+                              .join(' ') || ''
                           }
-                          bg="teal.500"
-                          color="white"
+                          boxSize="24px"
                         />
                         <Text fontSize="sm">
                           {[row.firstName, row.lastName]

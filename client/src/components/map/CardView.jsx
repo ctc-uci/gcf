@@ -11,6 +11,7 @@ import {
   Heading,
   HStack,
   Icon,
+  Skeleton,
   Spacer,
   Text,
   VStack,
@@ -24,6 +25,75 @@ import 'flag-icons/css/flag-icons.min.css';
 
 import { GetCity, GetCountries, GetState } from 'react-country-state-city';
 import { FaMusic, FaRegCalendar, FaUser } from 'react-icons/fa';
+
+/** Placeholder shown until instruments, students, partner, and location data have all loaded. */
+export function ProgramCardSkeleton() {
+  return (
+    <Box
+      minW="300px"
+      w="300px"
+      h="240px"
+      borderRadius="md"
+      boxShadow="0px 4px 6px rgba(0, 0, 0, 0.2)"
+      p={4}
+    >
+      <Flex
+        mb="10px"
+        gap={2}
+      >
+        <Skeleton
+          height="22px"
+          width="100px"
+          borderRadius="6px"
+        />
+        <Skeleton
+          height="22px"
+          width="88px"
+          borderRadius="6px"
+          ml="auto"
+        />
+      </Flex>
+      <Skeleton
+        height="24px"
+        width="85%"
+        mb={2}
+        borderRadius="md"
+      />
+      <Skeleton
+        height="14px"
+        width="65%"
+        mb={4}
+        borderRadius="md"
+      />
+      <Skeleton
+        height="1px"
+        width="100%"
+        mb={4}
+      />
+      <HStack
+        justify="center"
+        gap={6}
+        pt={1}
+      >
+        <Skeleton
+          height="72px"
+          width="56px"
+          borderRadius="md"
+        />
+        <Skeleton
+          height="72px"
+          width="56px"
+          borderRadius="md"
+        />
+        <Skeleton
+          height="72px"
+          width="56px"
+          borderRadius="md"
+        />
+      </HStack>
+    </Box>
+  );
+}
 
 const CardView = ({
   programId,
@@ -40,86 +110,106 @@ const CardView = ({
   const [instruments, setInstruments] = useState(0);
   const [students, setStudents] = useState(0);
   const [partnerOrg, setPartnerOrg] = useState('');
+  const [isReady, setIsReady] = useState(false);
   const { backend } = useBackendContext();
 
   useEffect(() => {
-    const fetchInstruments = async () => {
-      try {
-        const res = await backend.get(`/program/${programId}/instruments`);
-        const total = res.data.reduce(
-          (sum, inst) => sum + Number(inst.quantity),
-          0
-        );
-        setInstruments(total);
-      } catch (error) {
-        console.error('Error fetching instruments: ', error);
-      }
-    };
-
-    const fetchStudents = async () => {
-      try {
-        const res = await backend.get(`/program/students/${programId}`);
-        const total = res.data.reduce(
-          (sum, row) =>
-            sum + Number(row.enrollmentChange) - Number(row.graduatedChange),
-          0
-        );
-        setStudents(total);
-      } catch (error) {
-        console.error('Error fetching students: ', error);
-      }
-    };
-
-    const fetchPartnerOrg = async () => {
-      try {
-        const res = await backend.get(
-          `/program/${programId}/partner-organization`
-        );
-        setPartnerOrg(res.data);
-      } catch (error) {
-        console.error('Error fetching partner organization: ', error);
-      }
-    };
-
-    if (programId) {
-      fetchInstruments();
-      fetchStudents();
-      fetchPartnerOrg();
+    if (!programId) {
+      setIsReady(false);
+      return;
     }
-  }, [programId, backend]);
 
-  useEffect(() => {
-    const fetchNames = async () => {
+    let cancelled = false;
+
+    const loadInstruments = async () => {
+      const res = await backend.get(`/program/${programId}/instruments`);
+      const total = res.data.reduce(
+        (sum, inst) => sum + Number(inst.quantity),
+        0
+      );
+      if (!cancelled) setInstruments(total);
+    };
+
+    const loadStudents = async () => {
+      const res = await backend.get(`/program/students/${programId}`);
+      const total = res.data.reduce(
+        (sum, row) =>
+          sum + Number(row.enrollmentChange) - Number(row.graduatedChange),
+        0
+      );
+      if (!cancelled) setStudents(total);
+    };
+
+    const loadPartnerOrg = async () => {
+      const res = await backend.get(
+        `/program/${programId}/partner-organization`
+      );
+      if (!cancelled) setPartnerOrg(res.data);
+    };
+
+    const loadLocationNames = async () => {
+      const fetchCountry = await backend.get(`/country/${country}`);
+      const countries = await GetCountries();
+      const foundCountry = countries.find(
+        (c) => String(c.iso3) === String(fetchCountry.data.isoCode)
+      );
+
+      if (!foundCountry) return;
+
+      if (!cancelled) {
+        setCountryName(foundCountry.name);
+        setFlagCode(isoCodeToFlagIconCode(fetchCountry.data.isoCode));
+      }
+
+      const states = await GetState(parseInt(foundCountry.id));
+      const foundState = states.find((s) => parseInt(s.id) === parseInt(state));
+
+      if (!foundState) return;
+
+      const cities = await GetCity(foundCountry.id, foundState.id);
+      const foundCity = cities.find((c) => parseInt(c.id) === parseInt(city));
+      if (foundCity && !cancelled) setCityName(foundCity.name);
+    };
+
+    const loadAll = async () => {
+      setIsReady(false);
+      setInstruments(0);
+      setStudents(0);
+      setPartnerOrg('');
+      setCountryName('');
+      setFlagCode('');
+      setCityName('');
+
       try {
-        const fetchCountry = await backend.get(`/country/${country}`);
-
-        const countries = await GetCountries();
-        const foundCountry = countries.find(
-          (c) => String(c.iso3) === String(fetchCountry.data.isoCode)
-        );
-
-        if (foundCountry) {
-          setCountryName(foundCountry.name);
-          setFlagCode(isoCodeToFlagIconCode(fetchCountry.data.isoCode));
-          const states = await GetState(parseInt(foundCountry.id));
-          const foundState = states.find(
-            (s) => parseInt(s.id) === parseInt(state)
-          );
-
-          if (foundState) {
-            const cities = await GetCity(foundCountry.id, foundState.id);
-            const foundCity = cities.find(
-              (c) => parseInt(c.id) === parseInt(city)
-            );
-            if (foundCity) setCityName(foundCity.name);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching location data: ', error);
+        await Promise.allSettled([
+          loadInstruments().catch((error) => {
+            console.error('Error fetching instruments: ', error);
+          }),
+          loadStudents().catch((error) => {
+            console.error('Error fetching students: ', error);
+          }),
+          loadPartnerOrg().catch((error) => {
+            console.error('Error fetching partner organization: ', error);
+          }),
+          loadLocationNames().catch((error) => {
+            console.error('Error fetching location data: ', error);
+          }),
+        ]);
+      } finally {
+        if (!cancelled) setIsReady(true);
       }
     };
-    fetchNames();
-  }, [city, country, state, backend]);
+
+    loadAll();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [programId, city, country, state, backend]);
+
+  if (!isReady) {
+    return <ProgramCardSkeleton />;
+  }
 
   return (
     <Card

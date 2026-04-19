@@ -82,6 +82,8 @@ export const Account = () => {
         programs: Array.isArray(item.programs) ? item.programs : [],
         email: item.email ?? '-',
         createdBy: item.createdByName || item.createdBy || '',
+        picture: item.picture || '',
+        createdByPicture: item.createdByPicture || '',
       }));
 
       setUsers(fetchedData);

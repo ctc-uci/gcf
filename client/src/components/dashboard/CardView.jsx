@@ -1,6 +1,5 @@
 import { EditIcon } from '@chakra-ui/icons';
 import {
-  Avatar,
   Box,
   Card,
   CardBody,
@@ -17,6 +16,8 @@ import {
 
 import ReactCardFlip from 'react-card-flip';
 import { useTranslation } from 'react-i18next';
+
+import { DirectorAvatar } from './ProgramForm/DirectorAvatar';
 
 const BackCardView = ({ p, onClick, t }) => {
   return (
@@ -102,19 +103,41 @@ const BackCardView = ({ p, onClick, t }) => {
               {t('expandableProgramRow.regionalDirectors')}
             </Text>
 
-            <HStack height="55px">
-              <Avatar
-                size="sm"
-                name={t('programCard.regionalDirectorPlaceholder', {
-                  defaultValue: 'Regional Director',
-                })}
-              />
-              <Text textAlign="left">
-                {t('programCard.regionalDirectorPlaceholder', {
-                  defaultValue: 'Regional Director',
-                })}
-              </Text>
-            </HStack>
+            <VStack
+              align="start"
+              spacing={1}
+              minH="55px"
+              justify="center"
+            >
+              {Array.isArray(p.regionalDirectors) &&
+              p.regionalDirectors.length > 0 ? (
+                p.regionalDirectors.map((d, idx) => (
+                  <HStack
+                    key={d.userId ?? idx}
+                    spacing={2}
+                  >
+                    <DirectorAvatar
+                      picture={d.picture}
+                      name={`${d.firstName} ${d.lastName}`}
+                      boxSize="28px"
+                    />
+                    <Text
+                      textAlign="left"
+                      fontSize="sm"
+                    >
+                      {d.firstName} {d.lastName}
+                    </Text>
+                  </HStack>
+                ))
+              ) : (
+                <Text
+                  fontSize="sm"
+                  color="gray.400"
+                >
+                  —
+                </Text>
+              )}
+            </VStack>
           </VStack>
 
           <VStack alignItems="flex-start">
@@ -127,19 +150,41 @@ const BackCardView = ({ p, onClick, t }) => {
               {t('expandableProgramRow.programDirectors')}
             </Text>
 
-            <HStack height="55px">
-              <Avatar
-                size="sm"
-                name={t('programCard.programDirectorPlaceholder', {
-                  defaultValue: 'Program Director',
-                })}
-              />
-              <Text textAlign="left">
-                {t('programCard.programDirectorPlaceholder', {
-                  defaultValue: 'Program Director',
-                })}
-              </Text>
-            </HStack>
+            <VStack
+              align="start"
+              spacing={1}
+              minH="55px"
+              justify="center"
+            >
+              {Array.isArray(p.programDirectors) &&
+              p.programDirectors.length > 0 ? (
+                p.programDirectors.map((d, idx) => (
+                  <HStack
+                    key={d.userId ?? idx}
+                    spacing={2}
+                  >
+                    <DirectorAvatar
+                      picture={d.picture}
+                      name={`${d.firstName} ${d.lastName}`}
+                      boxSize="28px"
+                    />
+                    <Text
+                      textAlign="left"
+                      fontSize="sm"
+                    >
+                      {d.firstName} {d.lastName}
+                    </Text>
+                  </HStack>
+                ))
+              ) : (
+                <Text
+                  fontSize="sm"
+                  color="gray.400"
+                >
+                  —
+                </Text>
+              )}
+            </VStack>
           </VStack>
         </HStack>
 

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  Avatar,
   Badge,
   Box,
   Button,
@@ -30,6 +29,7 @@ import { FiEdit2, FiUsers } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 import { SortArrows } from '../tables/SortArrows';
 import CardView from './CardView';
 
@@ -231,7 +231,11 @@ export const AccountsTable = ({
                     {t('accounts.colCreatedBy')}
                   </Th>
                 )}
-                <Th width="80px"></Th>
+                <Th
+                  width="80px"
+                  position="sticky"
+                  right={0}
+                />
               </Tr>
             </Thead>
             <Tbody>
@@ -246,11 +250,10 @@ export const AccountsTable = ({
                 >
                   <Td>
                     <HStack spacing={3}>
-                      <Avatar
-                        size="xs"
+                      <DirectorAvatar
+                        picture={user.picture}
                         name={`${user.firstName} ${user.lastName}`}
-                        bg="teal.500"
-                        color="white"
+                        boxSize="24px"
                       />
                       <Text fontWeight="medium">
                         {user.firstName} {user.lastName}
@@ -297,11 +300,10 @@ export const AccountsTable = ({
                   {showCreatedBy && (
                     <Td>
                       <HStack spacing={2}>
-                        <Avatar
-                          size="xs"
+                        <DirectorAvatar
+                          picture={user.createdByPicture}
                           name={user.createdBy || ''}
-                          bg="teal.500"
-                          color="white"
+                          boxSize="24px"
                         />
                         <Text>{user.createdBy || '-'}</Text>
                       </HStack>
@@ -311,6 +313,8 @@ export const AccountsTable = ({
                   <Td
                     p={0}
                     textAlign="right"
+                    position="sticky"
+                    right={0}
                   >
                     <Box
                       className="action-group"
