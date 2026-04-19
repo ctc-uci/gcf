@@ -23,6 +23,17 @@ export const ReviewProgramUpdate = ({
   isLoading,
 }) => {
   const { t } = useTranslation();
+  const formatDisplayValue = (value) => {
+    if (value === undefined || value === null || value === '') {
+      return t('common.na');
+    }
+
+    if (typeof value === 'boolean') {
+      return value ? t('common.yes') : t('common.no');
+    }
+
+    return value;
+  };
 
   return (
     <Modal
@@ -98,15 +109,11 @@ export const ReviewProgramUpdate = ({
                           textDecoration="line-through"
                           color="gray.500"
                         >
-                          {field.oldValue}
+                          {formatDisplayValue(field.oldValue)}
                         </Text>
                       )}
                     <Text color="gray.800">
-                      {field.newValue !== undefined &&
-                      field.newValue !== null &&
-                      field.newValue !== ''
-                        ? field.newValue
-                        : t('common.na')}
+                      {formatDisplayValue(field.newValue)}
                     </Text>
                   </HStack>
                 )}

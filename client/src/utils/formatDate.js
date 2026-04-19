@@ -1,3 +1,24 @@
+function parseExactDateOnly(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value).trim());
+  if (!match) return null;
+
+  const [, year, month, day] = match;
+  const expectedYear = Number(year);
+  const expectedMonth = Number(month);
+  const expectedDay = Number(day);
+  const date = new Date(expectedYear, expectedMonth - 1, expectedDay);
+
+  if (
+    date.getFullYear() !== expectedYear ||
+    date.getMonth() + 1 !== expectedMonth ||
+    date.getDate() !== expectedDay
+  ) {
+    return null;
+  }
+
+  return date;
+}
+
 /**
  * Format a date as "Mon YYYY" (e.g. "Apr 2026").
  * Returns 'N/A' for missing or invalid dates.
@@ -5,7 +26,13 @@
 export function formatMonthYear(dateString) {
   if (!dateString) return 'N/A';
 
-  const date = new Date(dateString);
+  const isDateOnlyString = /^\d{4}-\d{2}-\d{2}$/.test(
+    String(dateString).trim()
+  );
+  const exactDateOnly = parseExactDateOnly(dateString);
+  if (isDateOnlyString && !exactDateOnly) return 'N/A';
+
+  const date = exactDateOnly ?? new Date(dateString);
   if (isNaN(date.getTime())) return 'N/A';
 
   return date.toLocaleDateString('en-US', {
@@ -75,12 +102,12 @@ export function formatUpdateDisplayDate(value) {
   if (value === null || value === undefined || value === '') return '';
   const s = String(value).trim();
 
-  const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
-  if (ymd && !/\d{1,2}:\d{2}/.test(s)) {
-    const [, y, mo, d] = ymd;
-    const dt = new Date(Number(y), Number(mo) - 1, Number(d));
-    if (Number.isNaN(dt.getTime())) return s;
-    return dt.toLocaleDateString(undefined, {
+  const isDateOnlyString = /^\d{4}-\d{2}-\d{2}$/.test(s);
+  const exactDateOnly = parseExactDateOnly(s);
+  if (isDateOnlyString) {
+    if (!exactDateOnly) return s;
+
+    return exactDateOnly.toLocaleDateString(undefined, {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
