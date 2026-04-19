@@ -15,11 +15,11 @@ import {
 } from '@chakra-ui/react';
 
 import { EmptyStateBadge } from '@/components/badges/EmptyStateBadge';
+import { formatRelativeDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
 import { FiStar } from 'react-icons/fi';
 
 import { SortArrows } from '../../tables/SortArrows';
-import { formatTableDate } from '../config/updatesColumnConfig';
 
 function formatStatus(row, t) {
   const isResolved = Boolean(row.showOnTable);
@@ -271,7 +271,9 @@ export const ProgramDirectorUpdatesTable = ({
                             fontSize="sm"
                             color="gray.700"
                           >
-                            {formatTableDate(row.updatedAt || row.updateDate)}
+                            {formatRelativeDate(
+                              row.updatedAt || row.updateDate
+                            )}
                           </Text>
                         </Td>
                       </>
@@ -312,7 +314,9 @@ export const ProgramDirectorUpdatesTable = ({
                             fontSize="sm"
                             color="gray.700"
                           >
-                            {formatTableDate(row.updatedAt || row.updateDate)}
+                            {formatRelativeDate(
+                              row.updatedAt || row.updateDate
+                            )}
                           </Text>
                         </Td>
                       </>
