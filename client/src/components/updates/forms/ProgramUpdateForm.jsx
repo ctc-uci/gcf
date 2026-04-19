@@ -692,22 +692,24 @@ export const ProgramUpdateForm = ({
           w="full"
           p={4}
         >
-          <HStack spacing={3}>
-            <Button
-              variant="outline"
-              onClick={handleKeepAsUnresolved}
-              isLoading={isSaving}
-            >
-              Keep as Unresolved
-            </Button>
-            <Button
-              colorScheme="teal"
-              onClick={handleSaveAndResolveClick}
-              isDisabled={isSaving}
-            >
-              Save & Mark as Resolved
-            </Button>
-          </HStack>
+          {!selectedUpdate?.showOnTable && (
+            <HStack spacing={3}>
+              <Button
+                variant="outline"
+                onClick={handleKeepAsUnresolved}
+                isLoading={isSaving}
+              >
+                Keep as Unresolved
+              </Button>
+              <Button
+                colorScheme="teal"
+                onClick={handleSaveAndResolveClick}
+                isDisabled={isSaving}
+              >
+                Save & Mark as Resolved
+              </Button>
+            </HStack>
+          )}
         </DrawerFooter>
       </DrawerContent>
 
