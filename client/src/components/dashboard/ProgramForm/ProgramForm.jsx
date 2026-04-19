@@ -192,20 +192,6 @@ export const ProgramForm = ({
     }
   }
 
-  async function handleDelete() {
-    if (!program?.id) return;
-
-    try {
-      await backend.delete(`/program/${program.id}`);
-
-      deleteDisclosure.onClose();
-      onSave?.();
-      onClose();
-    } catch (err) {
-      console.error('Error deleting program:', err);
-    }
-  }
-
   return (
     <Drawer
       isOpen={isOpen}
