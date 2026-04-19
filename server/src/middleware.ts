@@ -31,7 +31,7 @@ export const getVerifiedToken = async (
   res: Response
 ): Promise<DecodedIdToken> => {
   const decodedToken: DecodedIdToken | undefined = res.locals.decodedToken;
-    const accessToken = getBearerToken(req);
+  const accessToken = getBearerToken(req);
 
   if (!decodedToken && !accessToken) {
     throw new Error('Missing access token');

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { DeleteIcon } from '@chakra-ui/icons';
 import {
+  Box,
   Button,
   Center,
   Drawer,
