@@ -10,19 +10,35 @@ type AuthenticatedUser = {
   role: string;
 };
 
+const getBearerToken = (req: Request): string | null => {
+  const authorizationHeader = req.headers.authorization;
+
+  if (!authorizationHeader) {
+    return null;
+  }
+
+  const [scheme, token] = authorizationHeader.split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    return null;
+  }
+
+  return token;
+};
+
 export const getVerifiedToken = async (
   req: Request,
   res: Response
 ): Promise<DecodedIdToken> => {
   const decodedToken: DecodedIdToken | undefined = res.locals.decodedToken;
-  const accessToken = req.cookies.accessToken;
+    const accessToken = getBearerToken(req);
 
   if (!decodedToken && !accessToken) {
     throw new Error('Missing access token');
   }
 
   const verifiedToken =
-    decodedToken ?? (await admin.auth().verifyIdToken(accessToken));
+    decodedToken ?? (await admin.auth().verifyIdToken(accessToken!));
 
   res.locals.decodedToken = verifiedToken;
 
