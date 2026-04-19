@@ -38,7 +38,7 @@ export function downloadMediaUpdatesAsCsv(data) {
     escapeCsvValue(row.status),
     escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
     escapeCsvValue(row.programName),
-    escapeCsvValue(formatRelativeDate(row.updatedAt || row.updateDate)),
+    escapeCsvValue(row.updatedAt || row.updateDate),
   ]);
   downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
 }
