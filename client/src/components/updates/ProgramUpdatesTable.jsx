@@ -32,6 +32,10 @@ import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './forms/ProgramUpdateForm';
 
+function getProgramUpdateStatusLabel(row, t) {
+  return row?.showOnTable ? t('common.resolved') : t('common.unresolved');
+}
+
 export function downloadProgramUpdatesAsCsv(data, t) {
   const headers = [
     t('updates.csvFlag'),
@@ -46,7 +50,7 @@ export function downloadProgramUpdatesAsCsv(data, t) {
     escapeCsvValue(row.flagged ? t('updates.csvFlagged') : ''),
     escapeCsvValue(row.updateType || row.title || ''),
     escapeCsvValue(row.note),
-    escapeCsvValue(row.status),
+    escapeCsvValue(getProgramUpdateStatusLabel(row, t)),
     escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
     escapeCsvValue(row.name),
     escapeCsvValue(formatRelativeDate(row.updatedAt || row.updateDate)),
@@ -128,10 +132,10 @@ export const ProgramUpdatesTable = ({
         (update.title || '').toLowerCase().includes(q) ||
         (update.name || '').toLowerCase().includes(q) ||
         (update.fullName || '').toLowerCase().includes(q) ||
-        (update.status || '').toLowerCase().includes(q) ||
+        getProgramUpdateStatusLabel(update, t).toLowerCase().includes(q) ||
         (formatRelativeDate(update.updatedAt) || '').toLowerCase().includes(q)
     );
-  }, [searchQuery, filteredData]);
+  }, [searchQuery, filteredData, t]);
 
   const displayDataWithDefaultSort = useMemo(() => {
     const getUpdateTime = (value) => {
@@ -232,7 +236,7 @@ export const ProgramUpdatesTable = ({
                 </Th>
                 {(showStatus || showFlagAndType) && (
                   <Th
-                    onClick={() => handleSort('status')}
+                    onClick={() => handleSort('showOnTable')}
                     cursor="pointer"
                     color="gray.500"
                     fontSize="xs"
@@ -241,7 +245,7 @@ export const ProgramUpdatesTable = ({
                   >
                     {t('updates.colStatus')}
                     <SortArrows
-                      columnKey="status"
+                      columnKey="showOnTable"
                       sortOrder={sortOrder}
                     />
                   </Th>
