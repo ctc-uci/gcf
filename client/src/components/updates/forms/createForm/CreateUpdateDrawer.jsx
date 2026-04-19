@@ -385,8 +385,8 @@ export const CreateUpdateDrawer = ({
     try {
       await backend.delete(`/program-updates/${editProgramUpdateId}`);
       toast({
-        title: 'Update deleted',
-        description: 'Your program update was deleted successfully.',
+        title: t('updates.deleteSuccessTitle'),
+        description: t('updates.deleteSuccessDesc'),
         status: 'success',
         duration: 5000,
         isClosable: true,
@@ -397,8 +397,8 @@ export const CreateUpdateDrawer = ({
     } catch (error) {
       console.error('Error deleting update:', error);
       toast({
-        title: 'Could not delete update',
-        description: 'Please try again.',
+        title: t('updates.deleteErrorTitle'),
+        description: t('updates.deleteErrorDesc'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -711,7 +711,9 @@ export const CreateUpdateDrawer = ({
               fontWeight="600"
               textAlign="center"
             >
-              {isEditMode ? 'Edit Update' : t('updates.createDrawerTitle')}
+              {isEditMode
+                ? t('updates.editUpdate')
+                : t('updates.createDrawerTitle')}
             </Text>
             <Divider mt={3} />
           </Box>
@@ -740,7 +742,9 @@ export const CreateUpdateDrawer = ({
                   fontWeight="600"
                   mb={3}
                 >
-                  {isEditMode ? 'Update type' : t('updates.createTypeQuestion')}
+                  {isEditMode
+                    ? t('updates.updateType')
+                    : t('updates.createTypeQuestion')}
                 </Heading>
                 {isEditMode ? (
                   <Text
@@ -748,8 +752,8 @@ export const CreateUpdateDrawer = ({
                     color="gray.700"
                   >
                     {updateType === 'instrument'
-                      ? 'Instrument Update'
-                      : 'Student Update'}
+                      ? t('updates.titleInstrumentUpdate')
+                      : t('updates.titleStudentUpdate')}
                   </Text>
                 ) : (
                   <HStack

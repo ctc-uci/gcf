@@ -94,12 +94,12 @@ export const ProgramUpdateForm = ({
 
   const diffChanges = [
     {
-      label: 'Program Name',
+      label: t('updates.reviewProgramNameLabel'),
       oldValue: selectedUpdate?.name || programName,
       newValue: programName,
     },
     {
-      label: 'Instruments & Quantity',
+      label: t('updates.reviewInstrumentQuantityLabel'),
       isTag: true,
       oldTags: Object.entries(originalInstruments || {}).map(
         ([name, qty]) => `${name} ${qty}`
@@ -109,22 +109,22 @@ export const ProgramUpdateForm = ({
       ),
     },
     {
-      label: 'Current Students',
+      label: t('programForm.currentStudents'),
       oldValue: originalEnrollmentNumber,
       newValue: enrollmentNumber,
     },
     {
-      label: 'Graduated Students',
+      label: t('programForm.graduatedStudentsLabel'),
       oldValue: originalGraduatedNumber,
       newValue: graduatedNumber,
     },
     {
-      label: 'Special Request (Flagged)',
-      oldValue: selectedUpdate?.flagged ? 'Yes' : 'No',
-      newValue: flagged ? 'Yes' : 'No',
+      label: t('updates.reviewSpecialRequestFlaggedLabel'),
+      oldValue: selectedUpdate?.flagged ? t('common.yes') : t('common.no'),
+      newValue: flagged ? t('common.yes') : t('common.no'),
     },
     {
-      label: 'Notes',
+      label: t('common.notes'),
       oldValue: selectedUpdate?.note,
       newValue: notes,
     },
@@ -768,7 +768,7 @@ export const ProgramUpdateForm = ({
                     mb={0}
                     mt={2}
                   >
-                    Enrollment Change
+                    {t('updates.enrollmentChangeLabel')}
                   </Text>
                   <HStack
                     spacing={3}
@@ -780,7 +780,7 @@ export const ProgramUpdateForm = ({
                         fontSize="sm"
                         mb={1}
                       >
-                        Current Students
+                        {t('programForm.currentStudents')}
                       </Text>
                       <NumberInput
                         step={1}
@@ -802,7 +802,7 @@ export const ProgramUpdateForm = ({
                         fontSize="sm"
                         mb={1}
                       >
-                        Graduated Students
+                        {t('programForm.graduatedStudentsLabel')}
                       </Text>
                       <NumberInput
                         step={1}
@@ -840,14 +840,14 @@ export const ProgramUpdateForm = ({
                 onClick={handleKeepAsUnresolved}
                 isLoading={isSaving}
               >
-                Keep as Unresolved
+                {t('common.keepUnresolved')}
               </Button>
               <Button
                 colorScheme="teal"
                 onClick={handleSaveAndResolveClick}
                 isDisabled={isSaving}
               >
-                Save & Mark as Resolved
+                {t('common.saveMarkResolved')}
               </Button>
             </HStack>
           )}

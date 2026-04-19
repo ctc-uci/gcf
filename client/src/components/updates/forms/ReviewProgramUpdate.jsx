@@ -13,6 +13,8 @@ import {
   Text,
 } from '@chakra-ui/react';
 
+import { useTranslation } from 'react-i18next';
+
 export const ReviewProgramUpdate = ({
   isOpen,
   onClose,
@@ -20,6 +22,8 @@ export const ReviewProgramUpdate = ({
   changes = [],
   isLoading,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Modal
       isOpen={isOpen}
@@ -37,7 +41,7 @@ export const ReviewProgramUpdate = ({
           fontWeight="bold"
           color="gray.800"
         >
-          Changes Saved
+          {t('common.reviewChanges')}
         </ModalHeader>
 
         <ModalBody color="gray.600">
@@ -102,7 +106,7 @@ export const ReviewProgramUpdate = ({
                       field.newValue !== null &&
                       field.newValue !== ''
                         ? field.newValue
-                        : 'None'}
+                        : t('common.na')}
                     </Text>
                   </HStack>
                 )}
@@ -122,7 +126,7 @@ export const ReviewProgramUpdate = ({
             _hover={{ bg: 'gray.200' }}
             isDisabled={isLoading}
           >
-            Continue Editing
+            {t('common.continueEditing')}
           </Button>
 
           <Button
@@ -130,7 +134,7 @@ export const ReviewProgramUpdate = ({
             onClick={onConfirm}
             isLoading={isLoading}
           >
-            Confirm Changes
+            {t('common.confirmChanges')}
           </Button>
         </ModalFooter>
       </ModalContent>
