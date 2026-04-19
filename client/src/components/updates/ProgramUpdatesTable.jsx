@@ -133,14 +133,31 @@ export const ProgramUpdatesTable = ({
     );
   }, [searchQuery, filteredData]);
 
+  const displayDataWithDefaultSort = useMemo(() => {
+    const getUpdateTime = (value) => {
+      if (!value) return 0;
+      const time = new Date(value).getTime();
+      return Number.isNaN(time) ? 0 : time;
+    };
+
+    return [...displayData].sort(
+      (a, b) =>
+        getUpdateTime(b.updatedAt || b.updateDate) -
+        getUpdateTime(a.updatedAt || a.updateDate)
+    );
+  }, [displayData]);
+
   const [sortedData, setSortedData] = useState(null);
 
   useEffect(() => {
     setSortedData(null);
-  }, [displayData]);
+  }, [displayDataWithDefaultSort]);
 
-  const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
-  const tableData = sortedData ?? displayData;
+  const { sortOrder, handleSort } = useTableSort(
+    displayDataWithDefaultSort,
+    setSortedData
+  );
+  const tableData = sortedData ?? displayDataWithDefaultSort;
 
   return (
     <>
