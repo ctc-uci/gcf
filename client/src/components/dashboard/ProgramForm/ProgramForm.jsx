@@ -315,7 +315,7 @@ export const ProgramForm = ({
               variant="outline"
               onClick={onClose}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               colorScheme="teal"
