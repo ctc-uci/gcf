@@ -382,7 +382,7 @@ export const ProgramUpdatesTable = ({
                         fontSize="sm"
                         color="gray.600"
                       >
-                        {formatRelativeDate(row.updatedAt)}
+                        {formatRelativeDate(row.updatedAt || row.updateDate)}
                       </Text>
                     </Td>
                   </Tr>
