@@ -179,12 +179,17 @@ export const Sidebar = () => {
           justifyContent="center"
           flexShrink={0}
         >
-          <Image
-            src={logo}
-            alt={t('sidebar.logoAlt')}
-            objectFit="contain"
-            draggable={false}
-          />
+          <Link
+            as={RouterLink}
+            to="/dashboard"
+          >
+            <Image
+              src={logo}
+              alt={t('sidebar.logoAlt')}
+              objectFit="contain"
+              draggable={false}
+            />
+          </Link>
         </Box>
         <Flex
           direction="column"
