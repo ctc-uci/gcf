@@ -69,8 +69,11 @@ export const ProgramUpdateForm = ({
 
   const [title, setTitle] = useState('');
   const [enrollmentNumber, setEnrollmentNumber] = useState(null);
-  const [, setGraduatedNumber] = useState(null);
-  const [, setEnrollmentChangeId] = useState(null);
+  const [originalEnrollmentNumber, setOriginalEnrollmentNumber] =
+    useState(null);
+  const [graduatedNumber, setGraduatedNumber] = useState(null);
+  const [originalGraduatedNumber, setOriginalGraduatedNumber] = useState(null);
+  const [enrollmentChangeId, setEnrollmentChangeId] = useState(null);
   const [notes, setNotes] = useState('');
   const [flagged, setFlagged] = useState(false);
   const [, setUpdateType] = useState('');
@@ -107,8 +110,13 @@ export const ProgramUpdateForm = ({
     },
     {
       label: 'Current Students',
-      oldValue: selectedUpdate?.enrollmentChange,
+      oldValue: originalEnrollmentNumber,
       newValue: enrollmentNumber,
+    },
+    {
+      label: 'Graduated Students',
+      oldValue: originalGraduatedNumber,
+      newValue: graduatedNumber,
     },
     {
       label: 'Special Request (Flagged)',
@@ -198,6 +206,37 @@ export const ProgramUpdateForm = ({
         }
         await Promise.all(instrumentPromises);
       }
+      if (!isInstrumentUpdate) {
+        const hasEnrollmentValue =
+          enrollmentNumber !== null && enrollmentNumber !== undefined;
+        const hasGraduatedValue =
+          graduatedNumber !== null && graduatedNumber !== undefined;
+        const hasEnrollmentRecord = hasEnrollmentValue || hasGraduatedValue;
+        const enrollmentChanged = enrollmentNumber !== originalEnrollmentNumber;
+        const graduatedChanged = graduatedNumber !== originalGraduatedNumber;
+
+        if (!hasEnrollmentRecord && enrollmentChangeId) {
+          await backend.delete(`/enrollmentChange/${enrollmentChangeId}`);
+        } else if (hasEnrollmentRecord && !enrollmentChangeId) {
+          await backend.post('/enrollmentChange', {
+            update_id: programUpdateId,
+            enrollment_change: enrollmentNumber ?? 0,
+            graduated_change: graduatedNumber ?? 0,
+            event_type: 'other',
+            description: notes || null,
+          });
+        } else if (
+          hasEnrollmentRecord &&
+          enrollmentChangeId &&
+          (enrollmentChanged || graduatedChanged)
+        ) {
+          await backend.put(`/enrollmentChange/${enrollmentChangeId}`, {
+            enrollment_change: enrollmentNumber ?? 0,
+            graduated_change: graduatedNumber ?? 0,
+            description: notes || null,
+          });
+        }
+      }
       if (onSuccess) onSuccess();
       confirmDisclosure.onClose();
       onClose();
@@ -214,7 +253,9 @@ export const ProgramUpdateForm = ({
       setNotes('');
       setProgramId('');
       setEnrollmentNumber(null);
+      setOriginalEnrollmentNumber(null);
       setGraduatedNumber(null);
+      setOriginalGraduatedNumber(null);
       setEnrollmentChangeId(null);
       setAddedInstruments({});
       setOriginalInstruments({});
@@ -355,8 +396,18 @@ export const ProgramUpdateForm = ({
             const enrollmentData =
               enrollmentResponse.data[enrollmentResponse.data.length - 1];
             setEnrollmentChangeId(enrollmentData.id);
-            setEnrollmentNumber(enrollmentData.enrollmentChange || null);
-            setGraduatedNumber(enrollmentData.graduatedChange || null);
+            setEnrollmentNumber(enrollmentData.enrollmentChange ?? null);
+            setOriginalEnrollmentNumber(
+              enrollmentData.enrollmentChange ?? null
+            );
+            setGraduatedNumber(enrollmentData.graduatedChange ?? null);
+            setOriginalGraduatedNumber(enrollmentData.graduatedChange ?? null);
+          } else {
+            setEnrollmentChangeId(null);
+            setEnrollmentNumber(null);
+            setOriginalEnrollmentNumber(null);
+            setGraduatedNumber(null);
+            setOriginalGraduatedNumber(null);
           }
         } catch (error) {
           console.error('Error fetching enrollment changes:', error);
@@ -425,6 +476,26 @@ export const ProgramUpdateForm = ({
     setSelectedInstrument('');
     setQuantity(0);
   };
+
+  const handleEnrollmentChange = (_valueAsString, valueAsNumber) => {
+    if (Number.isNaN(valueAsNumber)) {
+      setEnrollmentNumber(null);
+      return;
+    }
+
+    setEnrollmentNumber(valueAsNumber);
+  };
+
+  const handleGraduatedChange = (_valueAsString, valueAsNumber) => {
+    if (Number.isNaN(valueAsNumber)) {
+      setGraduatedNumber(null);
+      return;
+    }
+
+    setGraduatedNumber(valueAsNumber);
+  };
+
+  const areEditControlsDisabled = Boolean(selectedUpdate?.showOnTable);
 
   const drawerSize = isFullScreen ? 'full' : 'lg';
   return (
@@ -609,7 +680,6 @@ export const ProgramUpdateForm = ({
             {isInstrumentUpdate && (
               <Box>
                 <Heading size="md">{t('updates.editUpdate')}</Heading>
-
                 <Box>
                   <Text
                     color="teal.500"
@@ -634,9 +704,11 @@ export const ProgramUpdateForm = ({
                         <TagLabel>
                           {name} {qty}
                         </TagLabel>
-                        <TagCloseButton
-                          onClick={() => removeInstrument(name)}
-                        />
+                        {!areEditControlsDisabled && (
+                          <TagCloseButton
+                            onClick={() => removeInstrument(name)}
+                          />
+                        )}
                       </Tag>
                     ))}
                   </HStack>
@@ -645,6 +717,7 @@ export const ProgramUpdateForm = ({
                       placeholder={t('updates.selectInstrumentPh')}
                       value={selectedInstrument}
                       onChange={(e) => setSelectedInstrument(e.target.value)}
+                      isDisabled={areEditControlsDisabled}
                       size="sm"
                       maxW="200px"
                     >
@@ -663,6 +736,7 @@ export const ProgramUpdateForm = ({
                       width="80px"
                       value={quantity}
                       onChange={(v) => setQuantity(Number(v))}
+                      isDisabled={areEditControlsDisabled}
                       size="sm"
                     >
                       <NumberInputField />
@@ -675,9 +749,76 @@ export const ProgramUpdateForm = ({
                       size="sm"
                       variant="outline"
                       onClick={handleConfirmAddInstrument}
+                      isDisabled={areEditControlsDisabled}
                     >
                       {t('common.add')}
                     </Button>
+                  </HStack>
+                </Box>
+              </Box>
+            )}
+            {!isInstrumentUpdate && (
+              <Box>
+                <Heading size="md">{t('updates.editUpdate')}</Heading>
+                <Box>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={0}
+                    mt={2}
+                  >
+                    Enrollment Change
+                  </Text>
+                  <HStack
+                    spacing={3}
+                    mt={3}
+                    align="flex-start"
+                  >
+                    <Box>
+                      <Text
+                        fontSize="sm"
+                        mb={1}
+                      >
+                        Current Students
+                      </Text>
+                      <NumberInput
+                        step={1}
+                        width="120px"
+                        value={enrollmentNumber ?? ''}
+                        onChange={handleEnrollmentChange}
+                        isDisabled={areEditControlsDisabled}
+                        size="sm"
+                      >
+                        <NumberInputField />
+                        <NumberInputStepper>
+                          <NumberIncrementStepper />
+                          <NumberDecrementStepper />
+                        </NumberInputStepper>
+                      </NumberInput>
+                    </Box>
+                    <Box>
+                      <Text
+                        fontSize="sm"
+                        mb={1}
+                      >
+                        Graduated Students
+                      </Text>
+                      <NumberInput
+                        step={1}
+                        width="140px"
+                        value={graduatedNumber ?? ''}
+                        onChange={handleGraduatedChange}
+                        isDisabled={areEditControlsDisabled}
+                        size="sm"
+                      >
+                        <NumberInputField />
+                        <NumberInputStepper>
+                          <NumberIncrementStepper />
+                          <NumberDecrementStepper />
+                        </NumberInputStepper>
+                      </NumberInput>
+                    </Box>
                   </HStack>
                 </Box>
               </Box>
