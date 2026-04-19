@@ -373,7 +373,7 @@ export const ProgramUpdateForm = ({
           let resolvedAuthorName = '';
           let resolvedAuthorPicture = '';
           const fetchGcfUser = async (id) => {
-            if (id === null || id === '') return { name: '', picture: '' };
+            if (id == null || id === '') return { name: '', picture: '' };
             try {
               const userRes = await backend.get(`/gcf-users/${id}`);
               return {
