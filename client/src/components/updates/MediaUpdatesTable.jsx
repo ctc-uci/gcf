@@ -23,54 +23,13 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { formatRelativeDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { SortArrows } from '../tables/SortArrows';
 import { ReviewMediaUpdate } from './forms/ReviewMediaUpdate';
-
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-
-  let safeDateString = String(dateStr).replace(' ', 'T');
-  const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(safeDateString);
-  if (!hasTimezone) {
-    safeDateString += 'Z';
-  }
-
-  const d = new Date(safeDateString);
-  if (isNaN(d.getTime())) return dateStr;
-
-  const now = new Date();
-  const isToday =
-    d.getDate() === now.getDate() &&
-    d.getMonth() === now.getMonth() &&
-    d.getFullYear() === now.getFullYear();
-
-  const isThisYear = d.getFullYear() === now.getFullYear();
-
-  if (isToday) {
-    return d.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-  }
-
-  if (isThisYear) {
-    return d.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
-  }
-
-  return d.toLocaleDateString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: '2-digit',
-  });
-}
 
 export function downloadMediaUpdatesAsCsv(data) {
   const headers = ['Update Note', 'Status', 'Author', 'Program', 'Date'];
@@ -79,7 +38,7 @@ export function downloadMediaUpdatesAsCsv(data) {
     escapeCsvValue(row.status),
     escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
     escapeCsvValue(row.programName),
-    escapeCsvValue(formatDate(row.updatedAt || row.updateDate)),
+    escapeCsvValue(formatRelativeDate(row.updatedAt || row.updateDate)),
   ]);
   downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
 }
@@ -139,7 +98,7 @@ export const MediaUpdatesTable = ({
         (update.programName || '').toLowerCase().includes(q) ||
         author.includes(q) ||
         (update.status || '').toLowerCase().includes(q) ||
-        (formatDate(update.updatedAt || update.updateDate) || '')
+        (formatRelativeDate(update.updatedAt || update.updateDate) || '')
           .toLowerCase()
           .includes(q)
       );
@@ -291,7 +250,7 @@ export const MediaUpdatesTable = ({
                       fontSize="sm"
                       color="gray.600"
                     >
-                      {formatDate(row.updatedAt || row.updateDate)}
+                      {formatRelativeDate(row.updatedAt || row.updateDate)}
                     </Text>
                   </Td>
                 </Tr>

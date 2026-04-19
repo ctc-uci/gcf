@@ -14,6 +14,7 @@ import {
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { formatMonthYear } from '@/utils/formatDate';
 import { isoCodeToFlagIconCode } from '@/utils/isoCodeToFlagIconCode';
 
 import 'flag-icons/css/flag-icons.min.css';
@@ -42,18 +43,8 @@ const ProgramInfoView = ({ program }) => {
 
   const programId = program.id;
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'N/A';
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
   const formatDateRange = (launchDate) => {
-    const start = formatDate(launchDate);
+    const start = formatMonthYear(launchDate);
     const end = new Date().toLocaleDateString('en-US', {
       month: 'short',
       year: 'numeric',

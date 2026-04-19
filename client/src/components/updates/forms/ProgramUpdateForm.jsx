@@ -34,40 +34,11 @@ import {
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { formatUpdateDisplayDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 import { ReviewProgramUpdate } from './ReviewProgramUpdate';
-
-function formatUpdateDisplayDate(value) {
-  if (value === null || value === undefined || value === '') return '';
-  const s = String(value).trim();
-
-  const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
-  if (ymd && !/\d{1,2}:\d{2}/.test(s)) {
-    const [, y, mo, d] = ymd;
-    const dt = new Date(Number(y), Number(mo) - 1, Number(d));
-    if (Number.isNaN(dt.getTime())) return s;
-    return dt.toLocaleDateString(undefined, {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  }
-
-  const dt = new Date(s);
-  if (Number.isNaN(dt.getTime())) return s;
-
-  return dt.toLocaleString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-}
 
 export const ProgramUpdateForm = ({
   isOpen: isOpenProp,
