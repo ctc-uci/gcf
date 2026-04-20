@@ -19,6 +19,18 @@ function parseExactDateOnly(value) {
   return date;
 }
 
+const ISO_LIKE_TIMESTAMP =
+  /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?$/;
+const HAS_TIMEZONE_SUFFIX = /(?:Z|[+-]\d{2}:?\d{2})$/i;
+
+function normalizeTimestampString(value) {
+  const trimmed = String(value).trim();
+  if (!ISO_LIKE_TIMESTAMP.test(trimmed)) return trimmed;
+
+  const normalized = trimmed.replace(' ', 'T');
+  return HAS_TIMEZONE_SUFFIX.test(normalized) ? normalized : `${normalized}Z`;
+}
+
 /**
  * Format a date as "Mon YYYY" (e.g. "Apr 2026").
  * Returns 'N/A' for missing or invalid dates.
@@ -32,7 +44,7 @@ export function formatMonthYear(dateString) {
   const exactDateOnly = parseExactDateOnly(dateString);
   if (isDateOnlyString && !exactDateOnly) return 'N/A';
 
-  const date = exactDateOnly ?? new Date(dateString);
+  const date = exactDateOnly ?? new Date(normalizeTimestampString(dateString));
   if (isNaN(date.getTime())) return 'N/A';
 
   return date.toLocaleDateString('en-US', {
@@ -52,11 +64,7 @@ export function formatMonthYear(dateString) {
 export function formatRelativeDate(dateStr) {
   if (!dateStr) return '';
 
-  let safeDateString = String(dateStr).replace(' ', 'T');
-  const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(safeDateString);
-  if (!hasTimezone) {
-    safeDateString += 'Z';
-  }
+  const safeDateString = normalizeTimestampString(dateStr);
 
   const d = new Date(safeDateString);
   if (isNaN(d.getTime())) return dateStr;
@@ -115,7 +123,7 @@ export function formatUpdateDisplayDate(value) {
     });
   }
 
-  const dt = new Date(s);
+  const dt = new Date(normalizeTimestampString(s));
   if (Number.isNaN(dt.getTime())) return s;
 
   return dt.toLocaleString(undefined, {
