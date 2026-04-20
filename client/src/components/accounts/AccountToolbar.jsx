@@ -1,6 +1,7 @@
 import { HamburgerIcon } from '@chakra-ui/icons';
 import {
   Button,
+  Divider,
   Flex,
   HStack,
   Icon,
@@ -145,6 +146,11 @@ export const AccountToolbar = ({
             w="20px"
             p={0}
             onClick={() => setIsCardView(false)}
+          />
+          <Divider
+            orientation="vertical"
+            h="20px"
+            borderWidth="1px"
           />
           <IconButton
             aria-label={t('common.gridView')}

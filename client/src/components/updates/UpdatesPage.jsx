@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { DownloadIcon } from '@chakra-ui/icons';
 import {
   Box,
   Center,
@@ -16,7 +17,6 @@ import {
 
 import { EmptyStateBadge } from '@/components/badges/EmptyStateBadge';
 import { useTranslation } from 'react-i18next';
-import { FiDownload } from 'react-icons/fi';
 
 import { AccountUpdatesTable } from './AccountUpdatesTable';
 import { programSectionColumns } from './config/updatesColumnConfig';
@@ -137,7 +137,7 @@ export const UpdatesPage = () => {
           {t('updates.pageTitle')}
         </Heading>
         <IconButton
-          icon={<FiDownload />}
+          icon={<DownloadIcon />}
           variant="ghost"
           size="sm"
           aria-label={t('updates.downloadAria')}

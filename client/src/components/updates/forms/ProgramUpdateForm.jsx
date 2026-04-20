@@ -8,6 +8,7 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
+  DrawerFooter,
   DrawerOverlay,
   Flex,
   Grid,
@@ -15,7 +16,6 @@ import {
   Heading,
   HStack,
   IconButton,
-  Input,
   NumberDecrementStepper,
   NumberIncrementStepper,
   NumberInput,
@@ -27,9 +27,7 @@ import {
   TagCloseButton,
   TagLabel,
   Text,
-  Textarea,
   useDisclosure,
-  useToast,
   VStack,
 } from '@chakra-ui/react';
 
@@ -38,65 +36,50 @@ import { MediaCard } from '@/components/media/MediaCard';
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { formatUpdateDisplayDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 import { MediaViewer } from '../MediaViewer';
-
-function formatUpdateDisplayDate(value) {
-  if (value === null || value === undefined || value === '') return '';
-  const s = String(value).trim();
-  const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
-  if (ymd && !/\d{1,2}:\d{2}/.test(s)) {
-    const [, y, mo, d] = ymd;
-    const dt = new Date(Number(y), Number(mo) - 1, Number(d));
-    if (Number.isNaN(dt.getTime())) return s;
-    return dt.toLocaleDateString(undefined, {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  }
-  const dt = new Date(s);
-  if (Number.isNaN(dt.getTime())) return s;
-  return dt.toLocaleString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
+import { ReviewProgramUpdate } from './ReviewProgramUpdate';
 
 export const ProgramUpdateForm = ({
   isOpen: isOpenProp,
   onOpen: onOpenProp,
   onClose: onCloseProp,
-  onSave,
   programUpdateId = null,
   isInstrumentUpdate = null,
   selectedUpdate = null,
+  onSuccess,
 }) => {
   const { t } = useTranslation();
   const disclosure = useDisclosure();
+  const confirmDisclosure = useDisclosure();
+
   const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
   const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
   const onClose = isControlled ? onCloseProp : disclosure.onClose;
   const btnRef = useRef(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const [, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+
   const [programId, setProgramId] = useState('');
-  const [availablePrograms, setAvailablePrograms] = useState([]);
+  const [, setAvailablePrograms] = useState([]);
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
 
   const [title, setTitle] = useState('');
   const [enrollmentNumber, setEnrollmentNumber] = useState(null);
+  const [originalEnrollmentNumber, setOriginalEnrollmentNumber] =
+    useState(null);
   const [graduatedNumber, setGraduatedNumber] = useState(null);
+  const [originalGraduatedNumber, setOriginalGraduatedNumber] = useState(null);
   const [enrollmentChangeId, setEnrollmentChangeId] = useState(null);
   const [notes, setNotes] = useState('');
   const [flagged, setFlagged] = useState(false);
-  const [updateType, setUpdateType] = useState('');
+  const [, setUpdateType] = useState('');
   const [programName, setProgramName] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [authorPicture, setAuthorPicture] = useState('');
@@ -109,15 +92,168 @@ export const ProgramUpdateForm = ({
   const [existingInstruments, setExistingInstruments] = useState([]);
   const [addedInstruments, setAddedInstruments] = useState({});
   const [originalInstruments, setOriginalInstruments] = useState({});
-  const [newInstruments, setNewInstruments] = useState([]);
+  const [, setNewInstruments] = useState([]);
   const [instrumentChangeMap, setInstrumentChangeMap] = useState({});
 
   const [mediaItems, setMediaItems] = useState([]);
   const [mediaURLs, setMediaURLs] = useState([]);
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(null);
-
   const { backend } = useBackendContext();
-  const toast = useToast();
+
+  const diffChanges = [
+    {
+      label: t('updates.reviewProgramNameLabel'),
+      oldValue: selectedUpdate?.name || programName,
+      newValue: programName,
+    },
+    {
+      label: t('updates.reviewInstrumentQuantityLabel'),
+      isTag: true,
+      oldTags: Object.entries(originalInstruments || {}).map(
+        ([name, qty]) => `${name} ${qty}`
+      ),
+      newTags: Object.entries(addedInstruments || {}).map(
+        ([name, qty]) => `${name} ${qty}`
+      ),
+    },
+    {
+      label: t('programForm.currentStudents'),
+      oldValue: originalEnrollmentNumber,
+      newValue: enrollmentNumber,
+    },
+    {
+      label: t('programForm.graduatedStudentsLabel'),
+      oldValue: originalGraduatedNumber,
+      newValue: graduatedNumber,
+    },
+    {
+      label: t('updates.reviewSpecialRequestFlaggedLabel'),
+      oldValue: selectedUpdate?.flagged ? t('common.yes') : t('common.no'),
+      newValue: flagged ? t('common.yes') : t('common.no'),
+    },
+    {
+      label: t('common.notes'),
+      oldValue: selectedUpdate?.note,
+      newValue: notes,
+    },
+  ];
+
+  const handleKeepAsUnresolved = async () => {
+    setIsSaving(true);
+    try {
+      await backend.put(`/program-updates/${programUpdateId}`, {
+        show_on_table: false,
+        note: notes,
+        title,
+        programId,
+      });
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (error) {
+      console.error('Failed to update status:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveAndResolveClick = () => {
+    confirmDisclosure.onOpen();
+  };
+
+  const handleConfirmChanges = async () => {
+    setIsSaving(true);
+    try {
+      await backend.put(`/program-updates/${programUpdateId}`, {
+        show_on_table: true,
+        note: notes,
+        title,
+        programId,
+      });
+
+      if (isInstrumentUpdate) {
+        const instrumentPromises = [];
+
+        for (const [name, originalQty] of Object.entries(originalInstruments)) {
+          const newQty = addedInstruments[name];
+          const meta = instrumentChangeMap[name];
+
+          if (newQty === undefined) {
+            if (meta?.changeId) {
+              instrumentPromises.push(
+                backend.delete(`/instrument-changes/${meta.changeId}`)
+              );
+            }
+          } else if (newQty !== originalQty) {
+            if (meta?.changeId) {
+              instrumentPromises.push(
+                backend.put(`/instrument-changes/${meta.changeId}`, {
+                  amountChanged: newQty,
+                })
+              );
+            }
+          }
+        }
+
+        for (const [name, newQty] of Object.entries(addedInstruments)) {
+          if (originalInstruments[name] === undefined) {
+            const instrumentId = existingInstruments.find(
+              (i) => i.name === name
+            )?.id;
+
+            if (instrumentId) {
+              instrumentPromises.push(
+                backend.post(`/instrument-changes`, {
+                  instrumentId: instrumentId,
+                  updateId: programUpdateId,
+                  amountChanged: newQty,
+                  event_type: 'other',
+                })
+              );
+            }
+          }
+        }
+        await Promise.all(instrumentPromises);
+      }
+      if (!isInstrumentUpdate) {
+        const hasEnrollmentValue =
+          enrollmentNumber !== null && enrollmentNumber !== undefined;
+        const hasGraduatedValue =
+          graduatedNumber !== null && graduatedNumber !== undefined;
+        const hasEnrollmentRecord = hasEnrollmentValue || hasGraduatedValue;
+        const enrollmentChanged = enrollmentNumber !== originalEnrollmentNumber;
+        const graduatedChanged = graduatedNumber !== originalGraduatedNumber;
+
+        if (!hasEnrollmentRecord && enrollmentChangeId) {
+          await backend.delete(`/enrollmentChange/${enrollmentChangeId}`);
+        } else if (hasEnrollmentRecord && !enrollmentChangeId) {
+          await backend.post('/enrollmentChange', {
+            update_id: programUpdateId,
+            enrollment_change: enrollmentNumber ?? 0,
+            graduated_change: graduatedNumber ?? 0,
+            event_type: 'other',
+            description: notes || null,
+          });
+        } else if (
+          hasEnrollmentRecord &&
+          enrollmentChangeId &&
+          (enrollmentChanged || graduatedChanged)
+        ) {
+          await backend.put(`/enrollmentChange/${enrollmentChangeId}`, {
+            enrollment_change: enrollmentNumber ?? 0,
+            graduated_change: graduatedNumber ?? 0,
+            description: notes || null,
+          });
+        }
+      }
+      if (onSuccess) onSuccess();
+      confirmDisclosure.onClose();
+      onClose();
+    } catch (error) {
+      console.error('Failed to confirm changes:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (!programUpdateId) {
@@ -125,7 +261,9 @@ export const ProgramUpdateForm = ({
       setNotes('');
       setProgramId('');
       setEnrollmentNumber(null);
+      setOriginalEnrollmentNumber(null);
       setGraduatedNumber(null);
+      setOriginalGraduatedNumber(null);
       setEnrollmentChangeId(null);
       setAddedInstruments({});
       setOriginalInstruments({});
@@ -203,7 +341,7 @@ export const ProgramUpdateForm = ({
             .join(' ') || ''
         );
         setAuthorPicture(selectedUpdate.picture || '');
-        setUpdateDateTime(selectedUpdate.updateDate || '');
+        setUpdateDateTime(selectedUpdate.updatedAt || '');
       }
       try {
         const response = await backend.get(
@@ -213,7 +351,7 @@ export const ProgramUpdateForm = ({
         setTitle(data.title || '');
         setNotes(data.note || '');
         setProgramId(parseInt(data.programId, 10));
-        setUpdateDateTime(data.updateDate || '');
+        setUpdateDateTime(data.updatedAt || '');
 
         const pid = parseInt(data.programId, 10);
         const listRow =
@@ -256,7 +394,7 @@ export const ProgramUpdateForm = ({
             const primary = await fetchGcfUser(programCreatorId);
             resolvedAuthorName = primary.name;
             resolvedAuthorPicture = primary.picture;
-            if (!resolvedAuthorName && data.createdBy != null) {
+            if (!resolvedAuthorName && data.createdBy !== null) {
               const fallback = await fetchGcfUser(data.createdBy);
               resolvedAuthorName = fallback.name;
               resolvedAuthorPicture = fallback.picture;
@@ -279,8 +417,18 @@ export const ProgramUpdateForm = ({
             const enrollmentData =
               enrollmentResponse.data[enrollmentResponse.data.length - 1];
             setEnrollmentChangeId(enrollmentData.id);
-            setEnrollmentNumber(enrollmentData.enrollmentChange || null);
-            setGraduatedNumber(enrollmentData.graduatedChange || null);
+            setEnrollmentNumber(enrollmentData.enrollmentChange ?? null);
+            setOriginalEnrollmentNumber(
+              enrollmentData.enrollmentChange ?? null
+            );
+            setGraduatedNumber(enrollmentData.graduatedChange ?? null);
+            setOriginalGraduatedNumber(enrollmentData.graduatedChange ?? null);
+          } else {
+            setEnrollmentChangeId(null);
+            setEnrollmentNumber(null);
+            setOriginalEnrollmentNumber(null);
+            setGraduatedNumber(null);
+            setOriginalGraduatedNumber(null);
           }
         } catch (error) {
           console.error('Error fetching enrollment changes:', error);
@@ -381,141 +529,25 @@ export const ProgramUpdateForm = ({
     setQuantity(0);
   };
 
-  const handleSubmit = async (markResolved = false) => {
-    setIsLoading(true);
-    try {
-      const programUpdateData = {
-        title: title ? String(title).trim() : null,
-        program_id: parseInt(programId, 10) || null,
-        created_by: currentUser?.uid,
-        update_date: new Date().toISOString(),
-        note: notes ? String(notes).trim() : null,
-      };
-
-      let updatedProgramUpdateId = programUpdateId;
-
-      if (programUpdateId) {
-        await backend.put(
-          `/program-updates/${programUpdateId}`,
-          programUpdateData
-        );
-      } else {
-        const response = await backend.post(
-          '/program-updates',
-          programUpdateData
-        );
-        updatedProgramUpdateId = response.data.id;
-      }
-
-      // Handle new instruments
-      for (const iName of newInstruments) {
-        try {
-          await backend.post('/instruments', { name: iName });
-        } catch (error) {
-          console.error(`Error adding instrument ${iName}:`, error);
-        }
-      }
-
-      const instrumentsResponse = await backend.get('/instruments');
-      setExistingInstruments(instrumentsResponse.data);
-
-      // Handle deleted instruments
-      const deletedInstruments = Object.keys(originalInstruments).filter(
-        (name) => !addedInstruments[name]
-      );
-      for (const deletedName of deletedInstruments) {
-        const changeMeta = instrumentChangeMap[deletedName];
-        if (changeMeta?.changeId) {
-          await backend.delete(`/instrument-changes/${changeMeta.changeId}`);
-        }
-      }
-
-      // Handle added/updated instruments
-      if (Object.keys(addedInstruments).length > 0) {
-        for (const [name, qty] of Object.entries(addedInstruments)) {
-          const meta = instrumentChangeMap[name];
-          if (meta?.changeId) {
-            if (originalInstruments[name] !== qty) {
-              await backend.put(`/instrument-changes/${meta.changeId}`, {
-                instrumentId: meta.instrumentId,
-                updateId: updatedProgramUpdateId,
-                amountChanged: qty,
-              });
-            }
-          } else {
-            const instrument = instrumentsResponse.data.find(
-              (i) => i.name === name
-            );
-            if (instrument) {
-              await backend.post('/instrument-changes', {
-                instrumentId: instrument.id,
-                updateId: updatedProgramUpdateId,
-                amountChanged: qty,
-              });
-            }
-          }
-        }
-      }
-
-      if (isInstrumentUpdate && updatedProgramUpdateId) {
-        const { data: rowsForThisProgramUpdate = [] } = await backend.get(
-          `/instrument-changes/update/${updatedProgramUpdateId}`
-        );
-        for (const row of rowsForThisProgramUpdate) {
-          await backend.put(`/instrument-changes/${row.id}`, {
-            special_request: flagged,
-          });
-        }
-      }
-
-      // Handle enrollment
-      if (enrollmentNumber !== null) {
-        if (enrollmentChangeId) {
-          await backend.put(`/enrollmentChange/${enrollmentChangeId}`, {
-            update_id: updatedProgramUpdateId,
-            enrollment_change: enrollmentNumber,
-            graduated_change: graduatedNumber || 0,
-          });
-        } else {
-          const enrollmentResponse = await backend.post('/enrollmentChange', {
-            update_id: updatedProgramUpdateId,
-            enrollment_change: enrollmentNumber,
-            graduated_change: graduatedNumber || 0,
-          });
-          setEnrollmentChangeId(enrollmentResponse.data.id);
-        }
-      }
-
-      toast({
-        title: programUpdateId
-          ? t('updates.savedTitle')
-          : t('updates.createdTitleToast'),
-        description: programUpdateId
-          ? t('updates.savedDesc')
-          : t('updates.programUpdateCreatedDesc'),
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      });
-
-      onSave?.();
-      onClose();
-    } catch (error) {
-      console.error('Error submitting program update:', error);
-      toast({
-        title: t('updates.failedSaveTitle'),
-        description:
-          error?.response?.data?.message ??
-          error?.message ??
-          t('updates.failedSaveDesc'),
-        status: 'error',
-        duration: 7000,
-        isClosable: true,
-      });
-    } finally {
-      setIsLoading(false);
+  const handleEnrollmentChange = (_valueAsString, valueAsNumber) => {
+    if (Number.isNaN(valueAsNumber)) {
+      setEnrollmentNumber(null);
+      return;
     }
+
+    setEnrollmentNumber(valueAsNumber);
   };
+
+  const handleGraduatedChange = (_valueAsString, valueAsNumber) => {
+    if (Number.isNaN(valueAsNumber)) {
+      setGraduatedNumber(null);
+      return;
+    }
+
+    setGraduatedNumber(valueAsNumber);
+  };
+
+  const areEditControlsDisabled = Boolean(selectedUpdate?.showOnTable);
 
   const drawerSize = isFullScreen ? 'full' : 'lg';
   return (
@@ -731,7 +763,6 @@ export const ProgramUpdateForm = ({
               {isInstrumentUpdate && (
                 <Box>
                   <Heading size="md">{t('updates.editUpdate')}</Heading>
-
                   <Box>
                     <Text
                       color="teal.500"
@@ -756,9 +787,11 @@ export const ProgramUpdateForm = ({
                           <TagLabel>
                             {name} {qty}
                           </TagLabel>
-                          <TagCloseButton
-                            onClick={() => removeInstrument(name)}
-                          />
+                          {!areEditControlsDisabled && (
+                            <TagCloseButton
+                              onClick={() => removeInstrument(name)}
+                            />
+                          )}
                         </Tag>
                       ))}
                     </HStack>
@@ -767,6 +800,7 @@ export const ProgramUpdateForm = ({
                         placeholder={t('updates.selectInstrumentPh')}
                         value={selectedInstrument}
                         onChange={(e) => setSelectedInstrument(e.target.value)}
+                        isDisabled={areEditControlsDisabled}
                         size="sm"
                         maxW="200px"
                       >
@@ -785,6 +819,7 @@ export const ProgramUpdateForm = ({
                         width="80px"
                         value={quantity}
                         onChange={(v) => setQuantity(Number(v))}
+                        isDisabled={areEditControlsDisabled}
                         size="sm"
                       >
                         <NumberInputField />
@@ -797,6 +832,7 @@ export const ProgramUpdateForm = ({
                         size="sm"
                         variant="outline"
                         onClick={handleConfirmAddInstrument}
+                        isDisabled={areEditControlsDisabled}
                       >
                         {t('common.add')}
                       </Button>
@@ -804,9 +840,110 @@ export const ProgramUpdateForm = ({
                   </Box>
                 </Box>
               )}
+              {!isInstrumentUpdate && (
+                <Box>
+                  <Heading size="md">{t('updates.editUpdate')}</Heading>
+                  <Box>
+                    <Text
+                      color="teal.500"
+                      fontSize="sm"
+                      fontWeight="500"
+                      mb={0}
+                      mt={2}
+                    >
+                      {t('updates.enrollmentChangeLabel')}
+                    </Text>
+                    <HStack
+                      spacing={3}
+                      mt={3}
+                      align="flex-start"
+                    >
+                      <Box>
+                        <Text
+                          fontSize="sm"
+                          mb={1}
+                        >
+                          {t('programForm.currentStudents')}
+                        </Text>
+                        <NumberInput
+                          step={1}
+                          width="120px"
+                          value={enrollmentNumber ?? ''}
+                          onChange={handleEnrollmentChange}
+                          isDisabled={areEditControlsDisabled}
+                          size="sm"
+                        >
+                          <NumberInputField />
+                          <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                          </NumberInputStepper>
+                        </NumberInput>
+                      </Box>
+                      <Box>
+                        <Text
+                          fontSize="sm"
+                          mb={1}
+                        >
+                          {t('programForm.graduatedStudentsLabel')}
+                        </Text>
+                        <NumberInput
+                          step={1}
+                          width="140px"
+                          value={graduatedNumber ?? ''}
+                          onChange={handleGraduatedChange}
+                          isDisabled={areEditControlsDisabled}
+                          size="sm"
+                        >
+                          <NumberInputField />
+                          <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                          </NumberInputStepper>
+                        </NumberInput>
+                      </Box>
+                    </HStack>
+                  </Box>
+                </Box>
+              )}
             </VStack>
           </DrawerBody>
+
+          <DrawerFooter
+            borderTopWidth="1px"
+            borderColor="gray.200"
+            justifyContent="flex-end"
+            w="full"
+            p={4}
+          >
+            {!selectedUpdate?.showOnTable && (
+              <HStack spacing={3}>
+                <Button
+                  variant="outline"
+                  onClick={handleKeepAsUnresolved}
+                  isLoading={isSaving}
+                >
+                  {t('common.keepUnresolved')}
+                </Button>
+                <Button
+                  colorScheme="teal"
+                  onClick={handleSaveAndResolveClick}
+                  isDisabled={isSaving}
+                >
+                  {t('common.saveMarkResolved')}
+                </Button>
+              </HStack>
+            )}
+          </DrawerFooter>
         </DrawerContent>
+
+        <ReviewProgramUpdate
+          isOpen={confirmDisclosure.isOpen}
+          onClose={confirmDisclosure.onClose}
+          onConfirm={handleConfirmChanges}
+          changes={diffChanges}
+          isLoading={isSaving}
+        />
       </Drawer>
       {selectedMediaIndex !== null && (
         <MediaViewer

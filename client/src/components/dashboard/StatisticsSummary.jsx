@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { DownloadIcon } from '@chakra-ui/icons';
 import {
   Box,
   Heading,
@@ -18,7 +19,6 @@ import {
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
 import { useTranslation } from 'react-i18next';
-import { MdOutlineFileDownload } from 'react-icons/md';
 
 const StatBox = ({ labelKey, number }) => {
   const { t } = useTranslation();
@@ -195,7 +195,7 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
           <Heading size="md">{t('statistics.title')}</Heading>
           <IconButton
             aria-label={t('statistics.downloadAria')}
-            icon={<MdOutlineFileDownload />}
+            icon={<DownloadIcon />}
             onClick={downloadDataAsCsv}
             size="sm"
             variant="ghost"
