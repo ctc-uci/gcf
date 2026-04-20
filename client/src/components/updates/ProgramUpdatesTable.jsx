@@ -33,7 +33,7 @@ import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './forms/ProgramUpdateForm';
 
 function getProgramUpdateStatusLabel(row, t) {
-  return row?.showOnTable ? t('common.resolved') : t('common.unresolved');
+  return row?.resolved ? t('common.resolved') : t('common.unresolved');
 }
 
 export function downloadProgramUpdatesAsCsv(data, t) {
@@ -238,7 +238,7 @@ export const ProgramUpdatesTable = ({
                 </Th>
                 {(showStatus || showFlagAndType) && (
                   <Th
-                    onClick={() => handleSort('showOnTable')}
+                    onClick={() => handleSort('resolved')}
                     cursor="pointer"
                     color="gray.500"
                     fontSize="xs"
@@ -247,7 +247,7 @@ export const ProgramUpdatesTable = ({
                   >
                     {t('updates.colStatus')}
                     <SortArrows
-                      columnKey="showOnTable"
+                      columnKey="resolved"
                       sortOrder={sortOrder}
                     />
                   </Th>
@@ -350,7 +350,7 @@ export const ProgramUpdatesTable = ({
                     </Td>
                     {(showStatus || showFlagAndType) && (
                       <Td>
-                        <StatusBadge status={row.showOnTable} />
+                        <StatusBadge status={row.resolved} />
                       </Td>
                     )}
                     <Td>

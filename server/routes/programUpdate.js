@@ -69,14 +69,22 @@ programUpdateRouter.get('/:id/date', async (req, res) => {
 
 // Creating a program update
 programUpdateRouter.post('/', async (req, res) => {
-  const { title, program_id, created_by, update_date, note, show_on_table } =
+  const {
+    title,
+    program_id,
+    created_by,
+    update_date,
+    note,
+    show_on_table,
+    resolved,
+  } =
     req.body;
   try {
     const newEntry = await db.query(
-      `INSERT INTO program_update (title, program_id, created_by, update_date, note, show_on_table, updated_at)
-            VALUES ($1, $2, $3, $4, $5, COALESCE($6, TRUE), CURRENT_TIMESTAMP)
+      `INSERT INTO program_update (title, program_id, created_by, update_date, note, show_on_table, resolved, updated_at)
+            VALUES ($1, $2, $3, $4, $5, COALESCE($6, TRUE), COALESCE($7, FALSE), CURRENT_TIMESTAMP)
             RETURNING *`,
-      [title, program_id, created_by, update_date, note, show_on_table]
+      [title, program_id, created_by, update_date, note, show_on_table, resolved]
     );
     res.status(201).json(keysToCamel(newEntry[0]));
   } catch (err) {
@@ -89,8 +97,15 @@ programUpdateRouter.post('/', async (req, res) => {
 programUpdateRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, program_id, created_by, update_date, note, show_on_table } =
-      req.body;
+    const {
+      title,
+      program_id,
+      created_by,
+      update_date,
+      note,
+      show_on_table,
+      resolved,
+    } = req.body;
 
     const newProgramUpdate = await db.query(
       `UPDATE program_update SET
@@ -100,10 +115,20 @@ programUpdateRouter.put('/:id', async (req, res) => {
             update_date = COALESCE($4, update_date),
             note = COALESCE($5, note),
             show_on_table = COALESCE($6, show_on_table),
+            resolved = COALESCE($7, resolved),
             updated_at = CURRENT_TIMESTAMP
-            WHERE id = $7
+            WHERE id = $8
             RETURNING *`,
-      [title, program_id, created_by, update_date, note, show_on_table, id]
+      [
+        title,
+        program_id,
+        created_by,
+        update_date,
+        note,
+        show_on_table,
+        resolved,
+        id,
+      ]
     );
 
     if (newProgramUpdate.length === 0) {

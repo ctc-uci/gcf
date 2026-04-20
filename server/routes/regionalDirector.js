@@ -73,14 +73,14 @@ regionalDirectorRouter.get('/me/:id/stats', async (req, res) => {
            JOIN program_update pu ON pu.id = ec.update_id
            JOIN program p ON p.id = pu.program_id
            JOIN country c ON c.id = p.country
-           WHERE c.region_id = $1 AND pu.show_on_table = TRUE) AS total_students,
+           WHERE c.region_id = $1 AND (pu.resolved = TRUE OR pu.show_on_table IS FALSE)) AS total_students,
           
           (SELECT COALESCE(SUM(ic.amount_changed), 0) 
            FROM instrument_change ic
            JOIN program_update pu ON pu.id = ic.update_id
            JOIN program p ON p.id = pu.program_id
            JOIN country c ON c.id = p.country
-           WHERE c.region_id = $1 AND pu.show_on_table = TRUE) AS total_instruments`,
+           WHERE c.region_id = $1 AND (pu.resolved = TRUE OR pu.show_on_table IS FALSE)) AS total_instruments`,
       [regionId]
     );
     res.status(200).json(keysToCamel(stats[0]));
