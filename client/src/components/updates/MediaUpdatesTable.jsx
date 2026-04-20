@@ -22,6 +22,7 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { formatRelativeDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
@@ -37,7 +38,7 @@ export function downloadMediaUpdatesAsCsv(data) {
     escapeCsvValue(row.status),
     escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
     escapeCsvValue(row.programName),
-    escapeCsvValue(row.updateDate),
+    escapeCsvValue(row.updatedAt || row.updateDate),
   ]);
   downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
 }
@@ -46,6 +47,7 @@ const authorDisplayName = (row) =>
   [row.firstName, row.lastName].filter(Boolean).join(' ').trim() ||
   row.fullName?.trim() ||
   '';
+
 const StatusBadge = ({ status }) => {
   const { t } = useTranslation();
   const isResolved =
@@ -95,7 +97,9 @@ export const MediaUpdatesTable = ({
         (update.programName || '').toLowerCase().includes(q) ||
         author.includes(q) ||
         (update.status || '').toLowerCase().includes(q) ||
-        (update.updateDate || '').toLowerCase().includes(q)
+        (formatRelativeDate(update.updatedAt || update.updateDate) || '')
+          .toLowerCase()
+          .includes(q)
       );
     });
   }, [searchQuery, filteredData]);
@@ -244,7 +248,7 @@ export const MediaUpdatesTable = ({
                       fontSize="sm"
                       color="gray.600"
                     >
-                      {row.updateDate || ''}
+                      {formatRelativeDate(row.updatedAt || row.updateDate)}
                     </Text>
                   </Td>
                 </Tr>

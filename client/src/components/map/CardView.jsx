@@ -18,6 +18,7 @@ import {
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { formatMonthYear } from '@/utils/formatDate';
 import { isoCodeToFlagIconCode } from '@/utils/isoCodeToFlagIconCode';
 
 import 'flag-icons/css/flag-icons.min.css';
@@ -111,18 +112,6 @@ const CardView = ({
   const [partnerOrg, setPartnerOrg] = useState('');
   const [isReady, setIsReady] = useState(false);
   const { backend } = useBackendContext();
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'N/A';
-
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      year: 'numeric',
-    });
-  };
 
   useEffect(() => {
     if (!programId) {
@@ -343,7 +332,7 @@ const CardView = ({
               fontWeight="bold"
               fontSize="16px"
             >
-              {formatDate(started)}
+              {formatMonthYear(started)}
             </Text>
             <Text
               color="#6A7282"

@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Box,
   Button,
   Center,
@@ -25,13 +31,7 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 import { FaUser } from 'react-icons/fa6';
-import {
-  FiMaximize2,
-  FiMinimize2,
-  FiMusic,
-  FiTrash2,
-  FiUser,
-} from 'react-icons/fi';
+import { FiMaximize2, FiMinimize2, FiTrash2 } from 'react-icons/fi';
 import { IoMusicalNoteSharp } from 'react-icons/io5';
 
 import { MediaUploadModal } from '../../../media/MediaUploadModal';
@@ -141,14 +141,17 @@ export const CreateUpdateDrawer = ({
 }) => {
   const { t } = useTranslation();
   const btnRef = useRef(null);
+  const cancelDeleteRef = useRef(null);
   const { currentUser } = useAuthContext();
   const { backend } = useBackendContext();
   const toast = useToast();
   const mediaUploadDisclosure = useDisclosure();
+  const deleteConfirmDisclosure = useDisclosure();
 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isEditLoading, setIsEditLoading] = useState(false);
+  const [isDeletingUpdate, setIsDeletingUpdate] = useState(false);
   const [editingInstrumentChangeId, setEditingInstrumentChangeId] =
     useState(null);
   const [editingEnrollmentChangeId, setEditingEnrollmentChangeId] =
@@ -411,9 +414,33 @@ export const CreateUpdateDrawer = ({
     setUploadedMedia((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleDelete = () => {
-    resetForm();
-    onClose();
+  const confirmDeleteProgramUpdate = async () => {
+    if (!editProgramUpdateId) return;
+    setIsDeletingUpdate(true);
+    try {
+      await backend.delete(`/program-updates/${editProgramUpdateId}`);
+      toast({
+        title: t('updates.deleteSuccessTitle'),
+        description: t('updates.deleteSuccessDesc'),
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      deleteConfirmDisclosure.onClose();
+      onSave?.();
+      handleClose();
+    } catch (error) {
+      console.error('Error deleting update:', error);
+      toast({
+        title: t('updates.deleteErrorTitle'),
+        description: t('updates.deleteErrorDesc'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeletingUpdate(false);
+    }
   };
 
   const handleSave = async () => {
@@ -494,12 +521,15 @@ export const CreateUpdateDrawer = ({
       fullNote = notes;
     }
 
+    const timestamp = new Date().toISOString();
+
     const programUpdateData = {
       title:
         updateType === 'instrument' ? 'Instrument Update' : 'Student Update',
       program_id: programId,
       created_by: currentUser?.uid,
-      update_date: new Date().toISOString(),
+      update_date: timestamp,
+      updated_at: timestamp,
       note: fullNote || null,
     };
 
@@ -598,10 +628,10 @@ export const CreateUpdateDrawer = ({
         return;
       }
 
-      const response = await backend.post(
-        '/program-updates',
-        programUpdateData
-      );
+      const response = await backend.post('/program-updates', {
+        ...programUpdateData,
+        show_on_table: false,
+      });
       const newUpdateId = response.data.id;
 
       if (updateType === 'instrument' && selectedInstrument) {
@@ -734,7 +764,9 @@ export const CreateUpdateDrawer = ({
               fontWeight="600"
               textAlign="center"
             >
-              {isEditMode ? 'Edit Update' : t('updates.createDrawerTitle')}
+              {isEditMode
+                ? t('updates.editUpdate')
+                : t('updates.createDrawerTitle')}
             </Text>
             <Divider mt={3} />
           </Box>
@@ -763,7 +795,9 @@ export const CreateUpdateDrawer = ({
                   fontWeight="600"
                   mb={3}
                 >
-                  {isEditMode ? 'Update type' : t('updates.createTypeQuestion')}
+                  {isEditMode
+                    ? t('updates.updateType')
+                    : t('updates.createTypeQuestion')}
                 </Heading>
                 {isEditMode ? (
                   <Text
@@ -771,8 +805,8 @@ export const CreateUpdateDrawer = ({
                     color="gray.700"
                   >
                     {updateType === 'instrument'
-                      ? 'Instrument Update'
-                      : 'Student Update'}
+                      ? t('updates.titleInstrumentUpdate')
+                      : t('updates.titleStudentUpdate')}
                   </Text>
                 ) : (
                   <HStack
@@ -839,26 +873,24 @@ export const CreateUpdateDrawer = ({
             borderColor="gray.200"
             px={8}
             py={4}
-            justify="space-between"
+            justify={isEditMode ? 'space-between' : 'flex-end'}
             align="center"
           >
-            {!isEditMode ? (
+            {isEditMode && (
               <Button
                 variant="ghost"
                 color="red.500"
                 fontWeight="500"
-                onClick={handleDelete}
-                isDisabled={isLoading || isEditLoading}
+                onClick={deleteConfirmDisclosure.onOpen}
+                isDisabled={isLoading || isEditLoading || isDeletingUpdate}
               >
                 <Icon
                   as={FiTrash2}
                   boxSize={4}
                   mr={1}
                 />{' '}
-                {t('updates.deleteDraft')}
+                {t('common.delete')}
               </Button>
-            ) : (
-              <Box aria-hidden />
             )}
             <HStack spacing={3}>
               <Button
@@ -881,6 +913,41 @@ export const CreateUpdateDrawer = ({
           </Flex>
         </DrawerContent>
       </Drawer>
+
+      <AlertDialog
+        isOpen={deleteConfirmDisclosure.isOpen}
+        leastDestructiveRef={cancelDeleteRef}
+        onClose={deleteConfirmDisclosure.onClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader
+              fontSize="lg"
+              fontWeight="bold"
+            >
+              {t('updates.deleteUpdateTitle')}
+            </AlertDialogHeader>
+            <AlertDialogBody>{t('updates.deleteUpdateBody')}</AlertDialogBody>
+            <AlertDialogFooter>
+              <Button
+                ref={cancelDeleteRef}
+                onClick={deleteConfirmDisclosure.onClose}
+                isDisabled={isDeletingUpdate}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                colorScheme="red"
+                ml={3}
+                onClick={confirmDeleteProgramUpdate}
+                isLoading={isDeletingUpdate}
+              >
+                {t('common.delete')}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
 
       <MediaUploadModal
         isOpen={mediaUploadDisclosure.isOpen}

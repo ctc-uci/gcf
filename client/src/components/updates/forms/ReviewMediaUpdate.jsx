@@ -18,6 +18,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { formatUpdateDisplayDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
@@ -180,7 +181,9 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                   >
                     {t('common.time')}
                   </Text>
-                  <Text>{update?.updateDate ?? ''}</Text>
+                  <Text>
+                    {formatUpdateDisplayDate(update?.updatedAt) || ''}
+                  </Text>
                 </GridItem>
               </Grid>
 

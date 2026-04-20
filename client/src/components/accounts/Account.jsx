@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { DownloadIcon } from '@chakra-ui/icons';
 import {
   Box,
   Center,
@@ -14,7 +15,6 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useTranslation } from 'react-i18next';
-import { FiDownload } from 'react-icons/fi';
 
 import { AccountForm } from './AccountForm';
 import { AccountsTable, downloadAccountsAsCsv } from './AccountsTable';
@@ -135,7 +135,7 @@ export const Account = () => {
             {t('accounts.title')}
           </Heading>
           <IconButton
-            icon={<FiDownload size={20} />}
+            icon={<DownloadIcon />}
             variant="ghost"
             size="sm"
             aria-label={t('accounts.downloadAria')}

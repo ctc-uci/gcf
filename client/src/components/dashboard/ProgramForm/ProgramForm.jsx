@@ -1,15 +1,27 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { DeleteIcon } from '@chakra-ui/icons';
 import {
+  Box,
   Button,
   Center,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
+  DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   HStack,
+  Icon,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Select,
   Spinner,
   useDisclosure,
   VStack,
@@ -45,6 +57,8 @@ export const ProgramForm = ({
   const mediaUploadTargetRef = useRef('media');
   const { backend } = useBackendContext();
   const { currentUser } = useAuthContext();
+
+  const deleteDisclosure = useDisclosure();
 
   const [initialProgramDirectorIds, setInitialProgramDirectorIds] = useState(
     []
@@ -164,6 +178,20 @@ export const ProgramForm = ({
     }
   }
 
+  async function handleDelete() {
+    if (!program?.id) return;
+
+    try {
+      await backend.delete(`/program/${program.id}`);
+
+      deleteDisclosure.onClose();
+      onSave?.();
+      onClose();
+    } catch (err) {
+      console.error('Error deleting program:', err);
+    }
+  }
+
   return (
     <Drawer
       isOpen={isOpen}
@@ -176,27 +204,17 @@ export const ProgramForm = ({
       <DrawerContent
         position="relative"
         overflow="hidden"
+        display="flex"
+        flexDirection="column"
       >
         <HStack marginBottom="1em">
           <DrawerCloseButton
             left="4"
             right="auto"
           />
-          <Button
-            colorScheme="teal"
-            marginLeft="auto"
-            marginRight="2em"
-            width="5em"
-            height="2em"
-            top="2"
-            fontSize="small"
-            onClick={handleSave}
-          >
-            {' '}
-            {t('common.save')}{' '}
-          </Button>
         </HStack>
-        <DrawerBody>
+
+        <DrawerBody pb={8}>
           <VStack
             spacing={4}
             align="stretch"
@@ -239,7 +257,6 @@ export const ProgramForm = ({
                 {t('programForm.mediaTab')}
               </Button>
             </HStack>
-
             {activeTab === 'overview' && (
               <ProgramFormOverviewTab
                 formState={formState}
@@ -271,6 +288,86 @@ export const ProgramForm = ({
             )}
           </VStack>
         </DrawerBody>
+
+        <DrawerFooter
+          borderTopWidth="1px"
+          borderColor="gray.200"
+          justifyContent="space-between"
+          w="full"
+          p={4}
+        >
+          <Box>
+            {program && (
+              <Button
+                variant="ghost"
+                color="red.500"
+                leftIcon={<Icon as={DeleteIcon} />}
+                onClick={deleteDisclosure.onOpen}
+                _hover={{ bg: 'red.50' }}
+              >
+                {t('common.delete')}
+              </Button>
+            )}
+          </Box>
+
+          <HStack spacing={3}>
+            <Button
+              variant="outline"
+              onClick={onClose}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              colorScheme="teal"
+              onClick={handleSave}
+            >
+              {t('common.save')}
+            </Button>
+          </HStack>
+        </DrawerFooter>
+
+        <Modal
+          isOpen={deleteDisclosure.isOpen}
+          onClose={deleteDisclosure.onClose}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent
+            borderRadius="md"
+            p={2}
+          >
+            <ModalHeader
+              fontSize="lg"
+              fontWeight="semibold"
+            >
+              {t('programForm.deleteTitle')}
+            </ModalHeader>
+
+            <ModalBody color="gray.600">
+              {t('programForm.deleteDesc')}
+            </ModalBody>
+
+            <ModalFooter
+              justifyContent="center"
+              gap={3}
+            >
+              <Button
+                onClick={deleteDisclosure.onClose}
+                bg="gray.100"
+                _hover={{ bg: 'gray.200' }}
+              >
+                {t('common.cancel')}
+              </Button>
+
+              <Button
+                colorScheme="red"
+                onClick={handleDelete}
+              >
+                {t('programForm.deleteProgram')}
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
 
         {isLoadingProgramData && (
           <Center
