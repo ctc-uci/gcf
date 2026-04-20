@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
   AlertDialog,
   AlertDialogBody,
@@ -47,8 +46,8 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   const [regionalDirectors, setRegionalDirectors] = useState([]);
   const [countries, setCountries] = useState([]);
   const [selectedCountries, setSelectedCountries] = useState([]);
-  const [selectedDirector, setSelectedDirector] = useState('');
-  const [originalDirectorId, setOriginalDirectorId] = useState('');
+  const [selectedDirectors, setSelectedDirectors] = useState([]);
+  const [originalDirectorIds, setOriginalDirectorIds] = useState([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [drawerSize, setDrawerSize] = useState('md');
@@ -82,29 +81,27 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   useEffect(() => {
     if (region) {
       setRegionName(region.name || '');
-      const fetchRegionDirector = async () => {
+      const fetchRegionDirectors = async () => {
         try {
           const res = await backend.get(
             `/regional-directors/region/${region.id}/`
           );
-          if (res.data) {
-            const match = regionalDirectors.find(
-              (d) => d.id === res.data.userId
-            );
-            const directorId = match?.id?.toString() ?? '';
-            setSelectedDirector(directorId);
-            setOriginalDirectorId(directorId);
-          } else {
-            setSelectedDirector('');
-            setOriginalDirectorId('');
-          }
+          const data = Array.isArray(res.data) ? res.data : [];
+          const ids = data
+            .map((d) => {
+              const match = regionalDirectors.find((rd) => rd.id === d.userId);
+              return match?.id?.toString();
+            })
+            .filter(Boolean);
+          setSelectedDirectors(ids);
+          setOriginalDirectorIds(ids);
         } catch (err) {
-          console.error('Error fetching region director:', err);
-          setSelectedDirector('');
-          setOriginalDirectorId('');
+          console.error('Error fetching region directors:', err);
+          setSelectedDirectors([]);
+          setOriginalDirectorIds([]);
         }
       };
-      fetchRegionDirector();
+      fetchRegionDirectors();
 
       const fetchRegionCountries = async () => {
         try {
@@ -123,8 +120,8 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
       fetchRegionCountries();
     } else {
       setRegionName('');
-      setSelectedDirector('');
-      setOriginalDirectorId('');
+      setSelectedDirectors([]);
+      setOriginalDirectorIds([]);
       setSelectedCountries([]);
     }
   }, [countries, region, regionalDirectors, backend]);
@@ -152,18 +149,23 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
         last_modified: new Date().toISOString(),
       });
 
-      if (selectedDirector !== originalDirectorId) {
-        if (originalDirectorId) {
-          await backend.delete(
-            `/regional-directors/${originalDirectorId}/region/${region.id}`
-          );
-        }
-        if (selectedDirector) {
-          await backend.put(`/regional-directors/${selectedDirector}/region`, {
+      const addedDirectors = selectedDirectors.filter(
+        (id) => !originalDirectorIds.includes(id)
+      );
+      const removedDirectors = originalDirectorIds.filter(
+        (id) => !selectedDirectors.includes(id)
+      );
+
+      await Promise.all([
+        ...addedDirectors.map((id) =>
+          backend.put(`/regional-directors/${id}/region`, {
             region_id: region.id,
-          });
-        }
-      }
+          })
+        ),
+        ...removedDirectors.map((id) =>
+          backend.delete(`/regional-directors/${id}/region/${region.id}`)
+        ),
+      ]);
 
       const existingRes = await backend.get(`/region/${region.id}/countries`);
       const existingCountries = Array.isArray(existingRes.data)
@@ -200,11 +202,13 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
       });
       const newRegionId = newRegion.data.id;
 
-      if (selectedDirector) {
-        await backend.put(`/regional-directors/${selectedDirector}/region`, {
-          region_id: newRegionId,
-        });
-      }
+      await Promise.all(
+        selectedDirectors.map((id) =>
+          backend.put(`/regional-directors/${id}/region`, {
+            region_id: newRegionId,
+          })
+        )
+      );
 
       await Promise.all(
         selectedCountries.map((country) =>
@@ -272,66 +276,88 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
 
             <FormControl>
               <FormLabel>{t('regions.regionalDirector')}</FormLabel>
-              <Menu matchWidth>
+              <Flex
+                wrap="wrap"
+                gap={2}
+                mb={2}
+              >
+                {selectedDirectors.map((dirId) => {
+                  const director = regionalDirectors.find(
+                    (d) => d.id.toString() === dirId
+                  );
+                  if (!director) return null;
+                  return (
+                    <Tag
+                      key={dirId}
+                      variant="solid"
+                      colorScheme="teal"
+                    >
+                      <TagLabel
+                        h="30px"
+                        alignItems="center"
+                        display="flex"
+                        justifyContent="center"
+                      >
+                        <HStack spacing={2}>
+                          <DirectorAvatar
+                            picture={director.picture}
+                            name={`${director.firstName} ${director.lastName}`}
+                            boxSize="24px"
+                          />
+                          <Text>
+                            {director.firstName} {director.lastName}
+                          </Text>
+                        </HStack>
+                      </TagLabel>
+                      <TagCloseButton
+                        onClick={() =>
+                          setSelectedDirectors((prev) =>
+                            prev.filter((id) => id !== dirId)
+                          )
+                        }
+                      />
+                    </Tag>
+                  );
+                })}
+              </Flex>
+              <Menu>
                 <MenuButton
                   as={Button}
                   variant="outline"
-                  width="100%"
-                  textAlign="left"
-                  fontWeight="normal"
-                  rightIcon={<ChevronDownIcon />}
+                  size="sm"
                 >
-                  {(() => {
-                    const dir = regionalDirectors.find(
-                      (d) => String(d.id) === String(selectedDirector)
-                    );
-                    return dir ? (
-                      <HStack spacing={2}>
-                        <DirectorAvatar
-                          picture={dir.picture}
-                          name={`${dir.firstName} ${dir.lastName}`}
-                          boxSize="24px"
-                        />
-                        <Text>
-                          {dir.firstName} {dir.lastName}
-                        </Text>
-                      </HStack>
-                    ) : (
-                      <Text color="gray.400">
-                        {t('regions.directorPlaceholder')}
-                      </Text>
-                    );
-                  })()}
+                  {t('common.add')}
                 </MenuButton>
                 <MenuList
-                  maxH="260px"
+                  maxH="300px"
                   overflowY="auto"
                 >
-                  <MenuItem
-                    value=""
-                    onClick={() => setSelectedDirector('')}
-                  >
-                    <Text color="gray.400">
-                      {t('regions.directorPlaceholder')}
-                    </Text>
-                  </MenuItem>
-                  {regionalDirectors?.map((director) => (
-                    <MenuItem
-                      key={director.id}
-                      onClick={() => setSelectedDirector(String(director.id))}
-                    >
-                      <HStack spacing={2}>
-                        <DirectorAvatar
-                          picture={director.picture}
-                          name={`${director.firstName} ${director.lastName}`}
-                          boxSize="28px"
-                        />
-                        <Text>
-                          {director.firstName} {director.lastName}
-                        </Text>
-                      </HStack>
-                    </MenuItem>
-                  ))}
+                  {regionalDirectors
+                    ?.filter(
+                      (d) => !selectedDirectors.includes(d.id.toString())
+                    )
+                    .map((director) => (
+                      <MenuItem
+                        key={director.id}
+                        onClick={() =>
+                          setSelectedDirectors((prev) => [
+                            ...prev,
+                            director.id.toString(),
+                          ])
+                        }
+                      >
+                        <HStack spacing={2}>
+                          <DirectorAvatar
+                            picture={director.picture}
+                            name={`${director.firstName} ${director.lastName}`}
+                            boxSize="24px"
+                          />
+                          <Text>
+                            {director.firstName} {director.lastName}
+                          </Text>
+                        </HStack>
+                      </MenuItem>
+                    ))}
                 </MenuList>
               </Menu>
             </FormControl>
