@@ -133,9 +133,7 @@ export const ProgramUpdatesTable = ({
         (update.name || '').toLowerCase().includes(q) ||
         (update.fullName || '').toLowerCase().includes(q) ||
         getProgramUpdateStatusLabel(update, t).toLowerCase().includes(q) ||
-        (formatRelativeDate(update.updatedAt || update.updateDate) || '')
-          .toLowerCase()
-          .includes(q)
+        (formatRelativeDate(update.updatedAt || update.updateDate) || '').toLowerCase().includes(q)
     );
   }, [searchQuery, filteredData, t]);
 

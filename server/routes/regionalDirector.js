@@ -22,14 +22,16 @@ regionalDirectorRouter.get('/all', async (req, res) => {
 regionalDirectorRouter.get('/region/:region_id', async (req, res) => {
   try {
     const { region_id } = req.params;
-    const directors = await db.query(
+    const director = await db.query(
       `SELECT rd.*, u.first_name, u.last_name, u.picture
        FROM regional_director rd
        JOIN gcf_user u ON u.id = rd.user_id
-       WHERE rd.region_id = $1`,
+       WHERE rd.region_id = $1
+       LIMIT 1`,
       [region_id]
     );
-    res.status(200).json(keysToCamel(directors));
+    if (!director?.length) return res.status(200).json(null);
+    res.status(200).json(keysToCamel(director[0]));
   } catch (err) {
     console.error('Error in /region/:region_id', err);
     res.status(500).json({ error: 'Internal server error' });
