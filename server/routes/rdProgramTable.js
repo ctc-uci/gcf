@@ -50,6 +50,7 @@ async function getDataByUserId(userId) {
             FROM program_update pu
             JOIN instrument_change ic ON ic.update_id = pu.id
             WHERE pu.program_id IN (SELECT program_id FROM region_programs)
+              AND pu.show_on_table = TRUE
             GROUP BY pu.program_id
         )
         SELECT
