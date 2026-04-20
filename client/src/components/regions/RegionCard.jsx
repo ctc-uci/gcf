@@ -9,12 +9,14 @@ import {
   CardBody,
   CardHeader,
   HStack,
+  Icon,
   Text,
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 import { GrEdit } from 'react-icons/gr';
+import { MdAccountCircle } from 'react-icons/md';
 
 import { isoCodeToFlagIconCode } from '../../utils/isoCodeToFlagIconCode';
 import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
@@ -22,7 +24,7 @@ import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 export const RegionCard = ({ region, onEdit, countries }) => {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
-  const [regionalDirector, setRegionalDirector] = useState(null);
+  const [regionalDirectors, setRegionalDirectors] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,10 +32,10 @@ export const RegionCard = ({ region, onEdit, countries }) => {
         const res = await backend.get(
           `/regional-directors/region/${region.id}/`
         );
-        const regionalDirector = res.data ? res.data : null;
-        setRegionalDirector(regionalDirector);
+        const directors = Array.isArray(res.data) ? res.data : [];
+        setRegionalDirectors(directors);
       } catch (err) {
-        console.error('Error fetching regional director:', err);
+        console.error('Error fetching regional directors:', err);
       }
     };
 
@@ -65,22 +67,35 @@ export const RegionCard = ({ region, onEdit, countries }) => {
         >
           {t('regions.cardRegionalDirector')}
         </Text>
-        <HStack ml="2">
-          <DirectorAvatar
-            picture={regionalDirector?.picture}
-            name={
-              regionalDirector
-                ? `${regionalDirector.firstName} ${regionalDirector.lastName}`
-                : ''
-            }
-            boxSize="24px"
-          />
-          <Text mb="2">
-            {regionalDirector
-              ? `${regionalDirector.firstName} ${regionalDirector.lastName}`
-              : t('common.na')}
-          </Text>
-        </HStack>
+        {regionalDirectors.length === 0 ? (
+          <HStack ml="2">
+            <Icon
+              as={MdAccountCircle}
+              mb="1"
+              boxSize={5}
+              color="gray.600"
+            />
+            <Text mb="2">{t('common.na')}</Text>
+          </HStack>
+        ) : (
+          regionalDirectors.map((director) => (
+            <HStack
+              key={director.userId}
+              ml="2"
+            >
+              <DirectorAvatar
+                picture={director?.picture}
+                name={
+                  director ? `${director.firstName} ${director.lastName}` : ''
+                }
+                boxSize="24px"
+              />
+              <Text mb="2">
+                {director.firstName} {director.lastName}
+              </Text>
+            </HStack>
+          ))
+        )}
         <Text
           fontSize="xs"
           fontWeight="semibold"
@@ -133,7 +148,7 @@ export const RegionCard = ({ region, onEdit, countries }) => {
           bg: 'teal.500',
         }}
         _groupHover={{ opacity: 1 }}
-        onClick={() => onEdit(region, regionalDirector)}
+        onClick={() => onEdit(region, regionalDirectors)}
         color="teal.500"
         bg="white"
         border="2px solid"
