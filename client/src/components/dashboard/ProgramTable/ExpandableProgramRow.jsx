@@ -12,6 +12,8 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { FiEdit2 } from 'react-icons/fi';
+
 import 'flag-icons/css/flag-icons.min.css';
 
 import ISO6391 from 'iso-639-1';
@@ -34,17 +36,23 @@ export function ExpandableProgramRow({ p, onEdit }) {
         .join(', ')
     : '';
   const flagCode = isoCodeToFlagIconCode(p.isoCode);
+
   return (
     <>
       <Tr
         onClick={onToggle}
         cursor="pointer"
+        _hover={{
+          bg: 'gray.100',
+          '& .action-group': { opacity: 1, visibility: 'visible' },
+        }}
         sx={{
           '& td': {
             borderBottom: isOpen ? 'none' : '1px solid',
             borderColor: 'gray.200',
           },
         }}
+        transition="background 0.2s"
       >
         <Td>{p.title}</Td>
         <Td>
@@ -88,17 +96,49 @@ export function ExpandableProgramRow({ p, onEdit }) {
               : null}
           </VStack>
         </Td>
-        <Td>{p.totalInstruments}</Td>
+        <Td>
+          <HStack
+            justify="space-between"
+            minW="100px"
+          >
+            <Text>{p.totalInstruments}</Text>
+
+            <Box
+              className="action-group"
+              opacity={0}
+              visibility="hidden"
+              transition="all 0.2s"
+            >
+              <Button
+                size="sm"
+                variant="outline"
+                leftIcon={<FiEdit2 />}
+                colorScheme="teal"
+                bg="white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.(p);
+                }}
+              >
+                {t('common.edit')}
+              </Button>
+            </Box>
+          </HStack>
+        </Td>
       </Tr>
-      <Tr role="group">
+
+      <Tr>
         <Td
-          colSpan={6}
+          colSpan={7}
           borderBottom={isOpen ? '1px solid' : 'none'}
           borderColor="gray.200"
           p={isOpen ? undefined : 0}
         >
           <Collapse in={isOpen}>
-            <HStack align="start">
+            <HStack
+              align="start"
+              py={4}
+            >
               <Box
                 flex="1"
                 display="grid"
@@ -217,40 +257,6 @@ export function ExpandableProgramRow({ p, onEdit }) {
                 </Box>
               </Box>
             </HStack>
-          </Collapse>
-        </Td>
-        <Td
-          colSpan={1}
-          borderBottom={isOpen ? '1px solid' : 'none'}
-          borderColor="gray.200"
-          p={isOpen ? undefined : 0}
-          position="sticky"
-          right={0}
-        >
-          <Collapse in={isOpen}>
-            <Box
-              display="flex"
-              alignItems="flex-end"
-              justifyContent="flex-end"
-              h="100%"
-              pb={2}
-            >
-              <Button
-                size="xs"
-                border="1px solid"
-                bg="white"
-                opacity={0}
-                _groupHover={{ opacity: 1 }}
-                transition="opacity 0.15s"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit?.(p);
-                }}
-                leftIcon={<EditIcon />}
-              >
-                {t('expandableProgramRow.update')}
-              </Button>
-            </Box>
           </Collapse>
         </Td>
       </Tr>
