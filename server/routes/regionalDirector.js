@@ -61,20 +61,26 @@ regionalDirectorRouter.get('/me/:id/stats', async (req, res) => {
     );
     if (!director?.length)
       return res.status(404).json({ error: 'Regional director not found' });
+
     const regionId = director[0].region_id;
+
     const stats = await db.query(
       `SELECT
           (SELECT COUNT(DISTINCT p.id) FROM program p JOIN country c ON c.id = p.country WHERE c.region_id = $1) AS total_programs,
-          (SELECT COALESCE(SUM(ec.enrollment_change), 0) - COALESCE(SUM(ec.graduated_change), 0) FROM enrollment_change ec
+          
+          (SELECT COALESCE(SUM(ec.enrollment_change), 0) - COALESCE(SUM(ec.graduated_change), 0) 
+           FROM enrollment_change ec
            JOIN program_update pu ON pu.id = ec.update_id
            JOIN program p ON p.id = pu.program_id
            JOIN country c ON c.id = p.country
-           WHERE c.region_id = $1) AS total_students,
-          (SELECT COALESCE(SUM(ic.amount_changed), 0) FROM instrument_change ic
+           WHERE c.region_id = $1 AND pu.show_on_table = TRUE) AS total_students,
+          
+          (SELECT COALESCE(SUM(ic.amount_changed), 0) 
+           FROM instrument_change ic
            JOIN program_update pu ON pu.id = ic.update_id
            JOIN program p ON p.id = pu.program_id
            JOIN country c ON c.id = p.country
-           WHERE c.region_id = $1) AS total_instruments`,
+           WHERE c.region_id = $1 AND pu.show_on_table = TRUE) AS total_instruments`,
       [regionId]
     );
     res.status(200).json(keysToCamel(stats[0]));

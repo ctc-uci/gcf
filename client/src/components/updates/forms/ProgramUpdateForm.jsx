@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 import {
-  Avatar,
   Box,
   Button,
   Checkbox,
@@ -9,6 +8,7 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
+  DrawerFooter,
   DrawerOverlay,
   Flex,
   Grid,
@@ -16,85 +16,73 @@ import {
   Heading,
   HStack,
   IconButton,
-  Input,
   NumberDecrementStepper,
   NumberIncrementStepper,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
   Select,
+  SimpleGrid,
   Tag,
   TagCloseButton,
   TagLabel,
   Text,
-  Textarea,
   useDisclosure,
-  useToast,
   VStack,
 } from '@chakra-ui/react';
 
+import { DirectorAvatar } from '@/components/dashboard/ProgramForm/DirectorAvatar';
+import { MediaCard } from '@/components/media/MediaCard';
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import { formatUpdateDisplayDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
-function formatUpdateDisplayDate(value) {
-  if (value === null || value === undefined || value === '') return '';
-  const s = String(value).trim();
-  const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
-  if (ymd && !/\d{1,2}:\d{2}/.test(s)) {
-    const [, y, mo, d] = ymd;
-    const dt = new Date(Number(y), Number(mo) - 1, Number(d));
-    if (Number.isNaN(dt.getTime())) return s;
-    return dt.toLocaleDateString(undefined, {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  }
-  const dt = new Date(s);
-  if (Number.isNaN(dt.getTime())) return s;
-  return dt.toLocaleString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
+import { MediaViewer } from '../MediaViewer';
+import { ReviewProgramUpdate } from './ReviewProgramUpdate';
 
 export const ProgramUpdateForm = ({
   isOpen: isOpenProp,
   onOpen: onOpenProp,
   onClose: onCloseProp,
-  onSave,
   programUpdateId = null,
   isInstrumentUpdate = null,
   selectedUpdate = null,
+  onSuccess,
 }) => {
   const { t } = useTranslation();
   const disclosure = useDisclosure();
+  const confirmDisclosure = useDisclosure();
+
   const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
   const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
   const onClose = isControlled ? onCloseProp : disclosure.onClose;
   const btnRef = useRef(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const [, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+
   const [programId, setProgramId] = useState('');
-  const [availablePrograms, setAvailablePrograms] = useState([]);
+  const [, setAvailablePrograms] = useState([]);
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
 
   const [title, setTitle] = useState('');
   const [enrollmentNumber, setEnrollmentNumber] = useState(null);
+  const [originalEnrollmentNumber, setOriginalEnrollmentNumber] =
+    useState(null);
   const [graduatedNumber, setGraduatedNumber] = useState(null);
+  const [originalGraduatedNumber, setOriginalGraduatedNumber] = useState(null);
   const [enrollmentChangeId, setEnrollmentChangeId] = useState(null);
   const [notes, setNotes] = useState('');
   const [flagged, setFlagged] = useState(false);
-  const [updateType, setUpdateType] = useState('');
+  const [, setUpdateType] = useState('');
   const [programName, setProgramName] = useState('');
   const [authorName, setAuthorName] = useState('');
+  const [authorPicture, setAuthorPicture] = useState('');
   const [updateDateTime, setUpdateDateTime] = useState('');
 
   const [selectedInstrument, setSelectedInstrument] = useState('');
@@ -104,11 +92,168 @@ export const ProgramUpdateForm = ({
   const [existingInstruments, setExistingInstruments] = useState([]);
   const [addedInstruments, setAddedInstruments] = useState({});
   const [originalInstruments, setOriginalInstruments] = useState({});
-  const [newInstruments, setNewInstruments] = useState([]);
+  const [, setNewInstruments] = useState([]);
   const [instrumentChangeMap, setInstrumentChangeMap] = useState({});
 
+  const [mediaItems, setMediaItems] = useState([]);
+  const [mediaURLs, setMediaURLs] = useState([]);
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(null);
   const { backend } = useBackendContext();
-  const toast = useToast();
+
+  const diffChanges = [
+    {
+      label: t('updates.reviewProgramNameLabel'),
+      oldValue: selectedUpdate?.name || programName,
+      newValue: programName,
+    },
+    {
+      label: t('updates.reviewInstrumentQuantityLabel'),
+      isTag: true,
+      oldTags: Object.entries(originalInstruments || {}).map(
+        ([name, qty]) => `${name} ${qty}`
+      ),
+      newTags: Object.entries(addedInstruments || {}).map(
+        ([name, qty]) => `${name} ${qty}`
+      ),
+    },
+    {
+      label: t('programForm.currentStudents'),
+      oldValue: originalEnrollmentNumber,
+      newValue: enrollmentNumber,
+    },
+    {
+      label: t('programForm.graduatedStudentsLabel'),
+      oldValue: originalGraduatedNumber,
+      newValue: graduatedNumber,
+    },
+    {
+      label: t('updates.reviewSpecialRequestFlaggedLabel'),
+      oldValue: selectedUpdate?.flagged ? t('common.yes') : t('common.no'),
+      newValue: flagged ? t('common.yes') : t('common.no'),
+    },
+    {
+      label: t('common.notes'),
+      oldValue: selectedUpdate?.note,
+      newValue: notes,
+    },
+  ];
+
+  const handleKeepAsUnresolved = async () => {
+    setIsSaving(true);
+    try {
+      await backend.put(`/program-updates/${programUpdateId}`, {
+        show_on_table: false,
+        note: notes,
+        title,
+        programId,
+      });
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (error) {
+      console.error('Failed to update status:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveAndResolveClick = () => {
+    confirmDisclosure.onOpen();
+  };
+
+  const handleConfirmChanges = async () => {
+    setIsSaving(true);
+    try {
+      await backend.put(`/program-updates/${programUpdateId}`, {
+        show_on_table: true,
+        note: notes,
+        title,
+        programId,
+      });
+
+      if (isInstrumentUpdate) {
+        const instrumentPromises = [];
+
+        for (const [name, originalQty] of Object.entries(originalInstruments)) {
+          const newQty = addedInstruments[name];
+          const meta = instrumentChangeMap[name];
+
+          if (newQty === undefined) {
+            if (meta?.changeId) {
+              instrumentPromises.push(
+                backend.delete(`/instrument-changes/${meta.changeId}`)
+              );
+            }
+          } else if (newQty !== originalQty) {
+            if (meta?.changeId) {
+              instrumentPromises.push(
+                backend.put(`/instrument-changes/${meta.changeId}`, {
+                  amountChanged: newQty,
+                })
+              );
+            }
+          }
+        }
+
+        for (const [name, newQty] of Object.entries(addedInstruments)) {
+          if (originalInstruments[name] === undefined) {
+            const instrumentId = existingInstruments.find(
+              (i) => i.name === name
+            )?.id;
+
+            if (instrumentId) {
+              instrumentPromises.push(
+                backend.post(`/instrument-changes`, {
+                  instrumentId: instrumentId,
+                  updateId: programUpdateId,
+                  amountChanged: newQty,
+                  event_type: 'other',
+                })
+              );
+            }
+          }
+        }
+        await Promise.all(instrumentPromises);
+      }
+      if (!isInstrumentUpdate) {
+        const hasEnrollmentValue =
+          enrollmentNumber !== null && enrollmentNumber !== undefined;
+        const hasGraduatedValue =
+          graduatedNumber !== null && graduatedNumber !== undefined;
+        const hasEnrollmentRecord = hasEnrollmentValue || hasGraduatedValue;
+        const enrollmentChanged = enrollmentNumber !== originalEnrollmentNumber;
+        const graduatedChanged = graduatedNumber !== originalGraduatedNumber;
+
+        if (!hasEnrollmentRecord && enrollmentChangeId) {
+          await backend.delete(`/enrollmentChange/${enrollmentChangeId}`);
+        } else if (hasEnrollmentRecord && !enrollmentChangeId) {
+          await backend.post('/enrollmentChange', {
+            update_id: programUpdateId,
+            enrollment_change: enrollmentNumber ?? 0,
+            graduated_change: graduatedNumber ?? 0,
+            event_type: 'other',
+            description: notes || null,
+          });
+        } else if (
+          hasEnrollmentRecord &&
+          enrollmentChangeId &&
+          (enrollmentChanged || graduatedChanged)
+        ) {
+          await backend.put(`/enrollmentChange/${enrollmentChangeId}`, {
+            enrollment_change: enrollmentNumber ?? 0,
+            graduated_change: graduatedNumber ?? 0,
+            description: notes || null,
+          });
+        }
+      }
+      if (onSuccess) onSuccess();
+      confirmDisclosure.onClose();
+      onClose();
+    } catch (error) {
+      console.error('Failed to confirm changes:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (!programUpdateId) {
@@ -116,7 +261,9 @@ export const ProgramUpdateForm = ({
       setNotes('');
       setProgramId('');
       setEnrollmentNumber(null);
+      setOriginalEnrollmentNumber(null);
       setGraduatedNumber(null);
+      setOriginalGraduatedNumber(null);
       setEnrollmentChangeId(null);
       setAddedInstruments({});
       setOriginalInstruments({});
@@ -127,7 +274,11 @@ export const ProgramUpdateForm = ({
       setUpdateType('');
       setProgramName('');
       setAuthorName('');
+      setAuthorPicture('');
       setUpdateDateTime('');
+      setMediaItems([]);
+      setMediaURLs([]);
+      setSelectedMediaIndex(null);
     }
   }, [programUpdateId]);
 
@@ -189,7 +340,8 @@ export const ProgramUpdateForm = ({
             .filter(Boolean)
             .join(' ') || ''
         );
-        setUpdateDateTime(selectedUpdate.updateDate || '');
+        setAuthorPicture(selectedUpdate.picture || '');
+        setUpdateDateTime(selectedUpdate.updatedAt || '');
       }
       try {
         const response = await backend.get(
@@ -199,7 +351,7 @@ export const ProgramUpdateForm = ({
         setTitle(data.title || '');
         setNotes(data.note || '');
         setProgramId(parseInt(data.programId, 10));
-        setUpdateDateTime(data.updateDate || '');
+        setUpdateDateTime(data.updatedAt || '');
 
         const pid = parseInt(data.programId, 10);
         const listRow =
@@ -219,32 +371,40 @@ export const ProgramUpdateForm = ({
         } else {
           let resolvedProgramName = '';
           let resolvedAuthorName = '';
-          const fetchGcfName = async (id) => {
-            if (id == null || id === '') return '';
+          let resolvedAuthorPicture = '';
+          const fetchGcfUser = async (id) => {
+            if (id == null || id === '') return { name: '', picture: '' };
             try {
               const userRes = await backend.get(`/gcf-users/${id}`);
-              return (
-                [userRes.data?.firstName, userRes.data?.lastName]
-                  .filter(Boolean)
-                  .join(' ') || ''
-              );
+              return {
+                name:
+                  [userRes.data?.firstName, userRes.data?.lastName]
+                    .filter(Boolean)
+                    .join(' ') || '',
+                picture: userRes.data?.picture || '',
+              };
             } catch {
-              return '';
+              return { name: '', picture: '' };
             }
           };
           try {
             const progRes = await backend.get(`/program/${pid}`);
             resolvedProgramName = progRes.data?.name || '';
             const programCreatorId = progRes.data?.createdBy;
-            resolvedAuthorName = await fetchGcfName(programCreatorId);
-            if (!resolvedAuthorName && data.createdBy != null) {
-              resolvedAuthorName = await fetchGcfName(data.createdBy);
+            const primary = await fetchGcfUser(programCreatorId);
+            resolvedAuthorName = primary.name;
+            resolvedAuthorPicture = primary.picture;
+            if (!resolvedAuthorName && data.createdBy !== null) {
+              const fallback = await fetchGcfUser(data.createdBy);
+              resolvedAuthorName = fallback.name;
+              resolvedAuthorPicture = fallback.picture;
             }
           } catch (e) {
             console.error('Error fetching program or author:', e);
           }
           setProgramName(resolvedProgramName);
           setAuthorName(resolvedAuthorName);
+          setAuthorPicture(resolvedAuthorPicture);
         }
         setUpdateType(data.updateType || data.title || '');
         setFlagged(data.flagged || false);
@@ -257,8 +417,18 @@ export const ProgramUpdateForm = ({
             const enrollmentData =
               enrollmentResponse.data[enrollmentResponse.data.length - 1];
             setEnrollmentChangeId(enrollmentData.id);
-            setEnrollmentNumber(enrollmentData.enrollmentChange || null);
-            setGraduatedNumber(enrollmentData.graduatedChange || null);
+            setEnrollmentNumber(enrollmentData.enrollmentChange ?? null);
+            setOriginalEnrollmentNumber(
+              enrollmentData.enrollmentChange ?? null
+            );
+            setGraduatedNumber(enrollmentData.graduatedChange ?? null);
+            setOriginalGraduatedNumber(enrollmentData.graduatedChange ?? null);
+          } else {
+            setEnrollmentChangeId(null);
+            setEnrollmentNumber(null);
+            setOriginalEnrollmentNumber(null);
+            setGraduatedNumber(null);
+            setOriginalGraduatedNumber(null);
           }
         } catch (error) {
           console.error('Error fetching enrollment changes:', error);
@@ -289,6 +459,37 @@ export const ProgramUpdateForm = ({
             setAddedInstruments(instrumentsMap);
             setOriginalInstruments(JSON.parse(JSON.stringify(instrumentsMap)));
             setInstrumentChangeMap(changeMeta);
+
+            const photoResults = await Promise.allSettled(
+              Object.values(changeMeta).map(({ changeId }) =>
+                backend.get(
+                  `/instrument-change-photos/instrument-change/${changeId}`
+                )
+              )
+            );
+            const mediaData = photoResults
+              .filter((r) => r.status === 'fulfilled')
+              .flatMap((r) => r.value.data || []);
+
+            const urlResults = await Promise.allSettled(
+              mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
+            );
+            const validItems = mediaData.filter(
+              (_, i) => urlResults[i].status === 'fulfilled'
+            );
+            const validURLs = urlResults
+              .filter((r) => r.status === 'fulfilled')
+              .map((r) => r.value.data.url);
+            setMediaItems(validItems);
+            setMediaURLs(validURLs);
+          } else {
+            setAddedInstruments({});
+            setOriginalInstruments({});
+            setInstrumentChangeMap({});
+            setNewInstruments([]);
+            setMediaItems([]);
+            setMediaURLs([]);
+            setSelectedMediaIndex(null);
           }
         } catch (error) {
           console.error('Error fetching instrument changes:', error);
@@ -328,326 +529,138 @@ export const ProgramUpdateForm = ({
     setQuantity(0);
   };
 
-  const handleSubmit = async (markResolved = false) => {
-    setIsLoading(true);
-    try {
-      const programUpdateData = {
-        title: title ? String(title).trim() : null,
-        program_id: parseInt(programId, 10) || null,
-        created_by: currentUser?.uid,
-        update_date: new Date().toISOString(),
-        note: notes ? String(notes).trim() : null,
-      };
-
-      let updatedProgramUpdateId = programUpdateId;
-
-      if (programUpdateId) {
-        await backend.put(
-          `/program-updates/${programUpdateId}`,
-          programUpdateData
-        );
-      } else {
-        const response = await backend.post(
-          '/program-updates',
-          programUpdateData
-        );
-        updatedProgramUpdateId = response.data.id;
-      }
-
-      // Handle new instruments
-      for (const iName of newInstruments) {
-        try {
-          await backend.post('/instruments', { name: iName });
-        } catch (error) {
-          console.error(`Error adding instrument ${iName}:`, error);
-        }
-      }
-
-      const instrumentsResponse = await backend.get('/instruments');
-      setExistingInstruments(instrumentsResponse.data);
-
-      // Handle deleted instruments
-      const deletedInstruments = Object.keys(originalInstruments).filter(
-        (name) => !addedInstruments[name]
-      );
-      for (const deletedName of deletedInstruments) {
-        const changeMeta = instrumentChangeMap[deletedName];
-        if (changeMeta?.changeId) {
-          await backend.delete(`/instrument-changes/${changeMeta.changeId}`);
-        }
-      }
-
-      // Handle added/updated instruments
-      if (Object.keys(addedInstruments).length > 0) {
-        for (const [name, qty] of Object.entries(addedInstruments)) {
-          const meta = instrumentChangeMap[name];
-          if (meta?.changeId) {
-            if (originalInstruments[name] !== qty) {
-              await backend.put(`/instrument-changes/${meta.changeId}`, {
-                instrumentId: meta.instrumentId,
-                updateId: updatedProgramUpdateId,
-                amountChanged: qty,
-              });
-            }
-          } else {
-            const instrument = instrumentsResponse.data.find(
-              (i) => i.name === name
-            );
-            if (instrument) {
-              await backend.post('/instrument-changes', {
-                instrumentId: instrument.id,
-                updateId: updatedProgramUpdateId,
-                amountChanged: qty,
-              });
-            }
-          }
-        }
-      }
-
-      if (isInstrumentUpdate && updatedProgramUpdateId) {
-        const { data: rowsForThisProgramUpdate = [] } = await backend.get(
-          `/instrument-changes/update/${updatedProgramUpdateId}`
-        );
-        for (const row of rowsForThisProgramUpdate) {
-          await backend.put(`/instrument-changes/${row.id}`, {
-            special_request: flagged,
-          });
-        }
-      }
-
-      // Handle enrollment
-      if (enrollmentNumber !== null) {
-        if (enrollmentChangeId) {
-          await backend.put(`/enrollmentChange/${enrollmentChangeId}`, {
-            update_id: updatedProgramUpdateId,
-            enrollment_change: enrollmentNumber,
-            graduated_change: graduatedNumber || 0,
-          });
-        } else {
-          const enrollmentResponse = await backend.post('/enrollmentChange', {
-            update_id: updatedProgramUpdateId,
-            enrollment_change: enrollmentNumber,
-            graduated_change: graduatedNumber || 0,
-          });
-          setEnrollmentChangeId(enrollmentResponse.data.id);
-        }
-      }
-
-      toast({
-        title: programUpdateId
-          ? t('updates.savedTitle')
-          : t('updates.createdTitleToast'),
-        description: programUpdateId
-          ? t('updates.savedDesc')
-          : t('updates.programUpdateCreatedDesc'),
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      });
-
-      onSave?.();
-      onClose();
-    } catch (error) {
-      console.error('Error submitting program update:', error);
-      toast({
-        title: t('updates.failedSaveTitle'),
-        description:
-          error?.response?.data?.message ??
-          error?.message ??
-          t('updates.failedSaveDesc'),
-        status: 'error',
-        duration: 7000,
-        isClosable: true,
-      });
-    } finally {
-      setIsLoading(false);
+  const handleEnrollmentChange = (_valueAsString, valueAsNumber) => {
+    if (Number.isNaN(valueAsNumber)) {
+      setEnrollmentNumber(null);
+      return;
     }
+
+    setEnrollmentNumber(valueAsNumber);
   };
+
+  const handleGraduatedChange = (_valueAsString, valueAsNumber) => {
+    if (Number.isNaN(valueAsNumber)) {
+      setGraduatedNumber(null);
+      return;
+    }
+
+    setGraduatedNumber(valueAsNumber);
+  };
+
+  const areEditControlsDisabled = Boolean(selectedUpdate?.showOnTable);
 
   const drawerSize = isFullScreen ? 'full' : 'lg';
   return (
-    <Drawer
-      isOpen={isOpen}
-      placement="right"
-      onClose={onClose}
-      finalFocusRef={btnRef}
-      size={drawerSize}
-    >
-      <DrawerOverlay />
-      <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
-        <Flex
-          position="absolute"
-          top={3}
-          left={3}
-          zIndex={1}
-        >
-          <IconButton
-            icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
-            aria-label={
-              isFullScreen
-                ? t('fullscreenFlyout.minimize')
-                : t('fullscreenFlyout.expand')
-            }
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsFullScreen(!isFullScreen)}
-          />
-        </Flex>
-
-        <Box
-          pt={6}
-          pb={2}
-          px={8}
-        >
-          <Text
-            fontSize="xl"
-            fontWeight="600"
-            textAlign="center"
+    <>
+      <Drawer
+        isOpen={isOpen}
+        placement="right"
+        onClose={onClose}
+        finalFocusRef={btnRef}
+        size={drawerSize}
+      >
+        <DrawerOverlay />
+        <DrawerContent maxW={isFullScreen ? '100%' : '50%'}>
+          <Flex
+            position="absolute"
+            top={3}
+            left={3}
+            zIndex={1}
           >
-            {t('updates.programUpdateTitle')}
-          </Text>
-          <Divider mt={3} />
-        </Box>
+            <IconButton
+              icon={isFullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
+              aria-label={
+                isFullScreen
+                  ? t('fullscreenFlyout.minimize')
+                  : t('fullscreenFlyout.expand')
+              }
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsFullScreen(!isFullScreen)}
+            />
+          </Flex>
 
-        <DrawerBody
-          px={8}
-          pb={24}
-        >
-          <VStack
-            spacing={6}
-            align="stretch"
+          <Box
+            pt={6}
+            pb={2}
+            px={8}
           >
-            <Heading
-              size="md"
-              mt={4}
+            <Text
+              fontSize="xl"
+              fontWeight="600"
+              textAlign="center"
             >
-              {t('updates.updateInformation')}
-            </Heading>
+              {t('updates.programUpdateTitle')}
+            </Text>
+            <Divider mt={3} />
+          </Box>
 
-            <Grid
-              templateColumns="repeat(3, 1fr)"
-              gap={6}
+          <DrawerBody
+            px={8}
+            pb={24}
+          >
+            <VStack
+              spacing={6}
+              align="stretch"
             >
-              <GridItem>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={1}
-                >
-                  {t('updates.colAuthor')}
-                </Text>
-                <HStack spacing={3}>
-                  <Avatar
-                    size="sm"
-                    name={authorName || undefined}
-                    bg="teal.500"
-                    color="white"
-                  />
-                  <Text>{authorName || t('common.emDash')}</Text>
-                </HStack>
-              </GridItem>
-              <GridItem>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={1}
-                >
-                  {t('updates.colProgram')}
-                </Text>
-                <Text fontWeight="500">
-                  {programName || t('common.emDash')}
-                </Text>
-              </GridItem>
-              <GridItem>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={1}
-                >
-                  {t('common.time')}
-                </Text>
-                <Text>
-                  {formatUpdateDisplayDate(updateDateTime) ||
-                    t('common.emDash')}
-                </Text>
-              </GridItem>
-            </Grid>
-            {isInstrumentUpdate && (
-              <Box>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={2}
-                >
-                  {t('updates.flagLabel')}
-                </Text>
-                <Checkbox
-                  isChecked={flagged}
-                  onChange={(e) => setFlagged(e.target.checked)}
-                >
-                  {t('updates.specialRequest')}
-                </Checkbox>
-              </Box>
-            )}
-            <Grid
-              templateColumns="repeat(3, 1fr)"
-              gap={6}
-            >
-              <GridItem>
-                <Text
-                  color="teal.500"
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={1}
-                >
-                  {t('updates.updateType')}
-                </Text>
-                <Text>
-                  {isInstrumentUpdate
-                    ? t('updates.typeInstrument')
-                    : t('updates.typeStudent')}
-                </Text>
-              </GridItem>
-            </Grid>
-
-            <Box>
-              <Text
-                color="teal.500"
-                fontSize="sm"
-                fontWeight="500"
-                mb={2}
+              <Heading
+                size="md"
+                mt={4}
               >
-                {t('updates.photosVideos')}
-              </Text>
-              <Text
-                color="gray.400"
-                fontSize="sm"
+                {t('updates.updateInformation')}
+              </Heading>
+
+              <Grid
+                templateColumns="repeat(3, 1fr)"
+                gap={6}
               >
-                {t('updates.noMediaAttached')}
-              </Text>
-            </Box>
-
-            <Box>
-              <Text
-                color="teal.500"
-                fontSize="sm"
-                fontWeight="500"
-                mb={2}
-              >
-                {t('common.note')}
-              </Text>
-              <Text>{notes || ''}</Text>
-            </Box>
-
-            <Divider />
-            {isInstrumentUpdate && (
-              <Box>
-                <Heading size="md">{t('updates.editUpdate')}</Heading>
-
+                <GridItem>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={1}
+                  >
+                    {t('updates.colAuthor')}
+                  </Text>
+                  <HStack spacing={3}>
+                    <DirectorAvatar
+                      picture={authorPicture}
+                      name={authorName || ''}
+                      boxSize="32px"
+                    />
+                    <Text>{authorName || t('common.emDash')}</Text>
+                  </HStack>
+                </GridItem>
+                <GridItem>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={1}
+                  >
+                    {t('updates.colProgram')}
+                  </Text>
+                  <Text fontWeight="500">
+                    {programName || t('common.emDash')}
+                  </Text>
+                </GridItem>
+                <GridItem>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={1}
+                  >
+                    {t('common.time')}
+                  </Text>
+                  <Text>
+                    {formatUpdateDisplayDate(updateDateTime) ||
+                      t('common.emDash')}
+                  </Text>
+                </GridItem>
+              </Grid>
+              {isInstrumentUpdate && (
                 <Box>
                   <Text
                     color="teal.500"
@@ -655,74 +668,291 @@ export const ProgramUpdateForm = ({
                     fontWeight="500"
                     mb={2}
                   >
-                    {t('updates.instrumentQuantity')}
+                    {t('updates.flagLabel')}
                   </Text>
-                  <HStack
-                    wrap="wrap"
-                    spacing={2}
-                    mb={3}
+                  <Checkbox
+                    isChecked={flagged}
+                    isReadOnly
+                    pointerEvents="none"
                   >
-                    {Object.entries(addedInstruments).map(([name, qty]) => (
-                      <Tag
-                        key={name}
-                        size="lg"
-                        borderRadius="md"
-                        variant="outline"
-                      >
-                        <TagLabel>
-                          {name} {qty}
-                        </TagLabel>
-                        <TagCloseButton
-                          onClick={() => removeInstrument(name)}
-                        />
-                      </Tag>
-                    ))}
-                  </HStack>
-                  <HStack spacing={2}>
-                    <Select
-                      placeholder={t('updates.selectInstrumentPh')}
-                      value={selectedInstrument}
-                      onChange={(e) => setSelectedInstrument(e.target.value)}
-                      size="sm"
-                      maxW="200px"
-                    >
-                      {existingInstruments.map((instrument) => (
-                        <option
-                          key={instrument.id}
-                          value={instrument.name}
-                        >
-                          {instrument.name}
-                        </option>
-                      ))}
-                    </Select>
-                    <NumberInput
-                      step={1}
-                      min={0}
-                      width="80px"
-                      value={quantity}
-                      onChange={(v) => setQuantity(Number(v))}
-                      size="sm"
-                    >
-                      <NumberInputField />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleConfirmAddInstrument}
-                    >
-                      {t('common.add')}
-                    </Button>
-                  </HStack>
+                    {t('updates.specialRequest')}
+                  </Checkbox>
                 </Box>
+              )}
+              <Grid
+                templateColumns="repeat(3, 1fr)"
+                gap={6}
+              >
+                <GridItem>
+                  <Text
+                    color="teal.500"
+                    fontSize="sm"
+                    fontWeight="500"
+                    mb={1}
+                  >
+                    {t('updates.updateType')}
+                  </Text>
+                  <Text>
+                    {isInstrumentUpdate
+                      ? t('updates.typeInstrument')
+                      : t('updates.typeStudent')}
+                  </Text>
+                </GridItem>
+              </Grid>
+
+              <Box>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={2}
+                >
+                  {t('updates.photosVideos')}
+                </Text>
+                {mediaItems.length > 0 ? (
+                  <SimpleGrid
+                    columns={{ base: 2, md: 3, lg: 4 }}
+                    spacing={4}
+                  >
+                    {mediaItems.map((item, idx) => (
+                      <Box
+                        key={idx}
+                        onClick={() => setSelectedMediaIndex(idx)}
+                        cursor="pointer"
+                        borderRadius="md"
+                      >
+                        <Box
+                          position="relative"
+                          borderRadius="md"
+                          overflow="hidden"
+                          bg="gray.100"
+                        >
+                          <MediaCard
+                            file_name={item.fileName}
+                            file_type={item.fileType}
+                            imageUrl={mediaURLs[idx]}
+                            hideMenu
+                          />
+                        </Box>
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+                ) : (
+                  <Text
+                    color="gray.400"
+                    fontSize="sm"
+                  >
+                    {t('updates.noMediaAttached')}
+                  </Text>
+                )}
               </Box>
+
+              <Box>
+                <Text
+                  color="teal.500"
+                  fontSize="sm"
+                  fontWeight="500"
+                  mb={2}
+                >
+                  {t('common.note')}
+                </Text>
+                <Text>{notes || ''}</Text>
+              </Box>
+
+              <Divider />
+              {isInstrumentUpdate && (
+                <Box>
+                  <Heading size="md">{t('updates.editUpdate')}</Heading>
+                  <Box>
+                    <Text
+                      color="teal.500"
+                      fontSize="sm"
+                      fontWeight="500"
+                      mb={2}
+                    >
+                      {t('updates.instrumentQuantity')}
+                    </Text>
+                    <HStack
+                      wrap="wrap"
+                      spacing={2}
+                      mb={3}
+                    >
+                      {Object.entries(addedInstruments).map(([name, qty]) => (
+                        <Tag
+                          key={name}
+                          size="lg"
+                          borderRadius="md"
+                          variant="outline"
+                        >
+                          <TagLabel>
+                            {name} {qty}
+                          </TagLabel>
+                          {!areEditControlsDisabled && (
+                            <TagCloseButton
+                              onClick={() => removeInstrument(name)}
+                            />
+                          )}
+                        </Tag>
+                      ))}
+                    </HStack>
+                    <HStack spacing={2}>
+                      <Select
+                        placeholder={t('updates.selectInstrumentPh')}
+                        value={selectedInstrument}
+                        onChange={(e) => setSelectedInstrument(e.target.value)}
+                        isDisabled={areEditControlsDisabled}
+                        size="sm"
+                        maxW="200px"
+                      >
+                        {existingInstruments.map((instrument) => (
+                          <option
+                            key={instrument.id}
+                            value={instrument.name}
+                          >
+                            {instrument.name}
+                          </option>
+                        ))}
+                      </Select>
+                      <NumberInput
+                        step={1}
+                        min={0}
+                        width="80px"
+                        value={quantity}
+                        onChange={(v) => setQuantity(Number(v))}
+                        isDisabled={areEditControlsDisabled}
+                        size="sm"
+                      >
+                        <NumberInputField />
+                        <NumberInputStepper>
+                          <NumberIncrementStepper />
+                          <NumberDecrementStepper />
+                        </NumberInputStepper>
+                      </NumberInput>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleConfirmAddInstrument}
+                        isDisabled={areEditControlsDisabled}
+                      >
+                        {t('common.add')}
+                      </Button>
+                    </HStack>
+                  </Box>
+                </Box>
+              )}
+              {!isInstrumentUpdate && (
+                <Box>
+                  <Heading size="md">{t('updates.editUpdate')}</Heading>
+                  <Box>
+                    <Text
+                      color="teal.500"
+                      fontSize="sm"
+                      fontWeight="500"
+                      mb={0}
+                      mt={2}
+                    >
+                      {t('updates.enrollmentChangeLabel')}
+                    </Text>
+                    <HStack
+                      spacing={3}
+                      mt={3}
+                      align="flex-start"
+                    >
+                      <Box>
+                        <Text
+                          fontSize="sm"
+                          mb={1}
+                        >
+                          {t('programForm.currentStudents')}
+                        </Text>
+                        <NumberInput
+                          step={1}
+                          width="120px"
+                          value={enrollmentNumber ?? ''}
+                          onChange={handleEnrollmentChange}
+                          isDisabled={areEditControlsDisabled}
+                          size="sm"
+                        >
+                          <NumberInputField />
+                          <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                          </NumberInputStepper>
+                        </NumberInput>
+                      </Box>
+                      <Box>
+                        <Text
+                          fontSize="sm"
+                          mb={1}
+                        >
+                          {t('programForm.graduatedStudentsLabel')}
+                        </Text>
+                        <NumberInput
+                          step={1}
+                          width="140px"
+                          value={graduatedNumber ?? ''}
+                          onChange={handleGraduatedChange}
+                          isDisabled={areEditControlsDisabled}
+                          size="sm"
+                        >
+                          <NumberInputField />
+                          <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                          </NumberInputStepper>
+                        </NumberInput>
+                      </Box>
+                    </HStack>
+                  </Box>
+                </Box>
+              )}
+            </VStack>
+          </DrawerBody>
+
+          <DrawerFooter
+            borderTopWidth="1px"
+            borderColor="gray.200"
+            justifyContent="flex-end"
+            w="full"
+            p={4}
+          >
+            {!selectedUpdate?.showOnTable && (
+              <HStack spacing={3}>
+                <Button
+                  variant="outline"
+                  onClick={handleKeepAsUnresolved}
+                  isLoading={isSaving}
+                >
+                  {t('common.keepUnresolved')}
+                </Button>
+                <Button
+                  colorScheme="teal"
+                  onClick={handleSaveAndResolveClick}
+                  isDisabled={isSaving}
+                >
+                  {t('common.saveMarkResolved')}
+                </Button>
+              </HStack>
             )}
-          </VStack>
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+          </DrawerFooter>
+        </DrawerContent>
+
+        <ReviewProgramUpdate
+          isOpen={confirmDisclosure.isOpen}
+          onClose={confirmDisclosure.onClose}
+          onConfirm={handleConfirmChanges}
+          changes={diffChanges}
+          isLoading={isSaving}
+        />
+      </Drawer>
+      {selectedMediaIndex !== null && (
+        <MediaViewer
+          updates={mediaItems}
+          mediaURLs={mediaURLs}
+          selectedIndex={selectedMediaIndex}
+          onClose={() => setSelectedMediaIndex(null)}
+        />
+      )}
+    </>
   );
 };

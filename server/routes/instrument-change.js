@@ -8,15 +8,15 @@ instrumentChangeRouter.use(express.json());
 
 instrumentChangeRouter.post('/', async (req, res) => {
   try {
-    const { instrumentId, updateId, amountChanged, event_type, description } =
+    const { instrumentId, updateId, amountChanged, event_type, description, special_request } =
       req.body;
 
     const newChange = await db.query(
       `INSERT INTO instrument_change
-        (instrument_id, update_id, amount_changed, event_type, description)
-       VALUES ($1, $2, $3, $4, $5)
+        (instrument_id, update_id, amount_changed, event_type, description, special_request)
+       VALUES ($1, $2, $3, $4, $5, COALESCE($6, FALSE))
        RETURNING *;`,
-      [instrumentId, updateId, amountChanged, event_type, description ?? null]
+      [instrumentId, updateId, amountChanged, event_type, description ?? null, special_request ?? null]
     );
 
     res.status(201).json(keysToCamel(newChange[0]));
@@ -76,7 +76,7 @@ instrumentChangeRouter.get('/:id', async (req, res) => {
 instrumentChangeRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { instrumentId, updateId, amountChanged, event_type, description } =
+    const { instrumentId, updateId, amountChanged, event_type, description, special_request } =
       req.body;
 
     const updatedChange = await db.query(
@@ -85,10 +85,11 @@ instrumentChangeRouter.put('/:id', async (req, res) => {
         update_id = COALESCE($2, update_id),
         amount_changed = COALESCE($3, amount_changed),
         event_type = COALESCE($4, event_type),
-        description = COALESCE($5, description)
-       WHERE id = $6
+        description = COALESCE($5, description),
+        special_request = CASE WHEN $6::boolean IS NOT NULL THEN $6::boolean ELSE special_request END
+       WHERE id = $7
        RETURNING *;`,
-      [instrumentId, updateId, amountChanged, event_type, description, id]
+      [instrumentId, updateId, amountChanged, event_type, description, special_request ?? null, id]
     );
 
     if (updatedChange.length === 0) {

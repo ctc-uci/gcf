@@ -5,7 +5,6 @@ import {
   Box,
   Button,
   Center,
-  Container,
   Heading,
   HStack,
   Input,
@@ -54,6 +53,22 @@ export const Media = () => {
 
       const newMediaItems = [];
       for (const file of uploadedFiles) {
+        const isPdf =
+          file.file_type === 'application/pdf' ||
+          file.file_name?.toLowerCase().endsWith('.pdf');
+
+        if (isPdf) {
+          await backend.post('/fileChanges', {
+            update_id: updateId,
+            s3_key: file.s3_key,
+            file_name: file.file_name,
+            file_type: file.file_type,
+            description: file.description,
+          });
+          // Skip adding PDFs to newMediaItems so they don't appear in the media grid
+          continue;
+        }
+
         const mediaChangeResponse = await backend.post('/mediaChange', {
           update_id: updateId,
           s3_key: file.s3_key,
@@ -98,13 +113,19 @@ export const Media = () => {
             `/images/url/${encodeURIComponent(media.s3Key)}`
           );
           let update_date = null;
-          try {
-            const programUpdateDateResponse = await backend.get(
-              `/program-updates/${media.updateId}/date`
-            );
-            update_date = programUpdateDateResponse.data;
-          } catch (error) {
-            console.error('Error fetching update date:', error);
+          if (
+            media.updateId !== undefined &&
+            media.updateId !== null &&
+            String(media.updateId) !== ''
+          ) {
+            try {
+              const programUpdateDateResponse = await backend.get(
+                `/program-updates/${media.updateId}/date`
+              );
+              update_date = programUpdateDateResponse.data;
+            } catch (error) {
+              console.error('Error fetching update date:', error);
+            }
           }
           return {
             id: media.id,

@@ -12,17 +12,18 @@ import {
   Grid,
   GridItem,
   HStack,
-  Icon,
   IconButton,
   SimpleGrid,
   Text,
   VStack,
 } from '@chakra-ui/react';
 
+import { formatUpdateDisplayDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
-import { FiMaximize2, FiMinimize2, FiUser } from 'react-icons/fi';
+import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 import { useBackendContext } from '../../../contexts/hooks/useBackendContext';
+import { DirectorAvatar } from '../../dashboard/ProgramForm/DirectorAvatar';
 import { MediaCard } from '../../media/MediaCard';
 import { MediaViewer } from '../MediaViewer';
 
@@ -148,10 +149,12 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                     {t('updates.colAuthor')}
                   </Text>
                   <HStack spacing={1}>
-                    <Icon
-                      as={FiUser}
-                      boxSize={4}
-                      color="gray.400"
+                    <DirectorAvatar
+                      picture={update?.picture}
+                      name={[update?.firstName, update?.lastName]
+                        .filter(Boolean)
+                        .join(' ')}
+                      boxSize="28px"
                     />
                     <Text>
                       {update?.firstName} {update?.lastName}
@@ -178,7 +181,9 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                   >
                     {t('common.time')}
                   </Text>
-                  <Text>{update?.updateDate ?? ''}</Text>
+                  <Text>
+                    {formatUpdateDisplayDate(update?.updatedAt) || ''}
+                  </Text>
                 </GridItem>
               </Grid>
 

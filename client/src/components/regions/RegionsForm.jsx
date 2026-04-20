@@ -19,6 +19,7 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  HStack,
   Input,
   Menu,
   MenuButton,
@@ -27,6 +28,7 @@ import {
   Tag,
   TagCloseButton,
   TagLabel,
+  Text,
   useToast,
   VStack,
 } from '@chakra-ui/react';
@@ -35,6 +37,8 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { GetCountries } from 'react-country-state-city';
 import { useTranslation } from 'react-i18next';
 import { BsArrowsAngleContract, BsArrowsAngleExpand } from 'react-icons/bs';
+
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 
 const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   const { t } = useTranslation();
@@ -288,8 +292,22 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                       variant="solid"
                       colorScheme="teal"
                     >
-                      <TagLabel>
-                        {director.firstName} {director.lastName}
+                      <TagLabel
+                        h="30px"
+                        alignItems="center"
+                        display="flex"
+                        justifyContent="center"
+                      >
+                        <HStack spacing={2}>
+                          <DirectorAvatar
+                            picture={director.picture}
+                            name={`${director.firstName} ${director.lastName}`}
+                            boxSize="24px"
+                          />
+                          <Text>
+                            {director.firstName} {director.lastName}
+                          </Text>
+                        </HStack>
                       </TagLabel>
                       <TagCloseButton
                         onClick={() =>
@@ -328,7 +346,16 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                           ])
                         }
                       >
-                        {director.firstName} {director.lastName}
+                        <HStack spacing={2}>
+                          <DirectorAvatar
+                            picture={director.picture}
+                            name={`${director.firstName} ${director.lastName}`}
+                            boxSize="24px"
+                          />
+                          <Text>
+                            {director.firstName} {director.lastName}
+                          </Text>
+                        </HStack>
                       </MenuItem>
                     ))}
                 </MenuList>

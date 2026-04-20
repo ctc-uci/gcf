@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { AddIcon } from '@chakra-ui/icons';
+import { AddIcon, DownloadIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -16,7 +16,6 @@ import {
 } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
-import { FiDownload } from 'react-icons/fi';
 
 import { applyFilters } from '../../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../../contexts/hooks/TableSort';
@@ -24,7 +23,6 @@ import { programDirectorFilterColumns } from '../config/updatesColumnConfig';
 import {
   UpdatesFilterPopover,
   UpdatesSearchInput,
-  UpdatesViewModeToggle,
 } from '../config/UpdatesSharedControls';
 import {
   UPDATES_TAB_BASE_PROPS,
@@ -61,9 +59,18 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
     updateDrawerDisclosure.onClose();
   };
 
+  const sortedData = useMemo(() => {
+    if (!data) return [];
+    return [...data].sort((a, b) => {
+      const dateA = new Date(a.updatedAt || a.updateDate || 0).getTime();
+      const dateB = new Date(b.updatedAt || b.updateDate || 0).getTime();
+      return dateB - dateA;
+    });
+  }, [data]);
+
   const filteredData = useMemo(
-    () => applyFilters(activeFilters, data),
-    [activeFilters, data]
+    () => applyFilters(activeFilters, sortedData),
+    [activeFilters, sortedData]
   );
 
   const displayData = useMemo(() => {
@@ -74,7 +81,8 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
         (row.instrumentName || row.title || '').toLowerCase().includes(q) ||
         (row.note || '').toLowerCase().includes(q) ||
         (row.status || '').toLowerCase().includes(q) ||
-        (row.updateDate || '').toLowerCase().includes(q)
+        (row.updateDate || '').toLowerCase().includes(q) ||
+        (row.updatedAt || '').toLowerCase().includes(q)
     );
   }, [searchQuery, filteredData]);
 
@@ -128,7 +136,7 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           {t('updates.pageTitle')}
         </Heading>
         <IconButton
-          icon={<FiDownload />}
+          icon={<DownloadIcon />}
           variant="ghost"
           size="sm"
           aria-label={t('updates.downloadAria')}
@@ -143,7 +151,6 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
           columns={programDirectorFilterColumns}
           onFilterChange={setActiveFilters}
         />
-        <UpdatesViewModeToggle />
         <Button
           ml="auto"
           flexShrink={0}

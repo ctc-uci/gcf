@@ -19,6 +19,7 @@ import { GrEdit } from 'react-icons/gr';
 import { MdAccountCircle } from 'react-icons/md';
 
 import { isoCodeToFlagIconCode } from '../../utils/isoCodeToFlagIconCode';
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 
 export const RegionCard = ({ region, onEdit, countries }) => {
   const { t } = useTranslation();
@@ -82,11 +83,12 @@ export const RegionCard = ({ region, onEdit, countries }) => {
               key={director.userId}
               ml="2"
             >
-              <Icon
-                as={MdAccountCircle}
-                mb="1"
-                boxSize={5}
-                color="gray.600"
+              <DirectorAvatar
+                picture={director?.picture}
+                name={
+                  director ? `${director.firstName} ${director.lastName}` : ''
+                }
+                boxSize="24px"
               />
               <Text mb="2">
                 {director.firstName} {director.lastName}

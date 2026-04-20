@@ -22,6 +22,7 @@ export function MediaUploadModal({
   onClose,
   onUploadComplete,
   formOrigin,
+  accept,
 }) {
   const { t } = useTranslation();
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -87,6 +88,7 @@ export function MediaUploadModal({
                     : setSelectedFiles((prev) => [...(prev || []), ...files])
                 }
                 formOrigin={formOrigin}
+                accept={accept}
               />
             </Box>
             {selectedFiles?.length > 0 && (

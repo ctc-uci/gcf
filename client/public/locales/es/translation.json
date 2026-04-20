@@ -60,8 +60,12 @@
     "placeholderNotes": "Notas",
     "keepUnresolved": "Mantener como no resuelto",
     "saveMarkResolved": "Guardar y marcar como resuelto",
+    "markAsUnresolved": "Marcar como no resuelto",
+    "keepResolved": "Mantener resuelto",
     "oldProfile": "perfil antiguo",
     "newProfile": "Nuevo perfil",
+    "diffLabelOld": "Anterior",
+    "diffLabelNew": "Nuevo",
     "editUpdates": "Editar actualizaciones",
     "accountUpdate": "Actualización de cuenta",
     "profilePicture": "Foto de perfil",
@@ -190,6 +194,12 @@
     "invalidInfoDesc": "Por favor verifique su información de entrada.",
     "savedTitle": "Cambios de cuenta guardados",
     "savedDesc": "Las actualizaciones de su cuenta se guardaron en {{time}}.",
+    "pendingApprovalTitle": "Enviado para aprobación",
+    "pendingApprovalDesc": "Los cambios de perfil están pendientes de revisión por un administrador o director regional.",
+    "passwordInvalidTitle": "Contraseña no válida",
+    "passwordMin12Desc": "La contraseña debe tener al menos 12 caracteres.",
+    "passwordUpdatedTitle": "Contraseña actualizada",
+    "passwordUpdatedDesc": "Su contraseña se actualizó a las {{time}}.",
     "edit": "Editar"
   },
   "searchBar": {
@@ -210,11 +220,13 @@
     "instrumentsDonated": "Instrumentos donados"
   },
   "lessonVideos": {
-    "title": "Vídeos de lecciones",
+    "title": "Materiales de la lección",
     "empty": "No hay videos de lecciones disponibles",
     "loading": "Cargando vídeos de lecciones...",
     "scrollLeft": "Desplazarse hacia la izquierda",
-    "scrollRight": "Desplácese hacia la derecha"
+    "scrollRight": "Desplácese hacia la derecha",
+    "videosTab": "Vídeos",
+    "pdfsTab": "PDFs"
   },
   "videoPlayer": {
     "playlistFallback": "Lista de reproducción"
@@ -345,7 +357,10 @@
     "locationRowLabel": "Ubicación",
     "instrumentQuantityPair": "{{name}}: {{qty}}",
     "instrumentQuantityInvalid": "Introduce una cantidad de al menos 1.",
-    "instrumentQuantityAria": "Cantidad de instrumentos"
+    "instrumentQuantityAria": "Cantidad de instrumentos",
+    "deleteTitle": "¿Seguro que quieres eliminar este programa?",
+    "deleteDesc": "Esta acción no se puede deshacer.",
+    "deleteProgram": "Eliminar programa"
   },
   "locationForm": {
     "selectRegion": "Seleccionar región...",
@@ -406,6 +421,9 @@
     "deleteTitle": "¿Eliminar esta cuenta?",
     "deleteDesc": "Esta acción no se puede deshacer.",
     "deleteAccount": "Eliminar cuenta",
+    "deleteSuccess": "Cuenta eliminada",
+    "deletePartialTitle": "Cuenta eliminada del directorio",
+    "deletePartialDesc": "El usuario se eliminó de la aplicación, pero no se pudo eliminar automáticamente su cuenta de inicio de sesión. Es posible que deba eliminarla en Firebase o volver a intentarlo más tarde.",
     "fieldFirstName": "Nombre de pila",
     "fieldLastName": "Apellido",
     "fieldEmail": "Correo electrónico",
@@ -436,7 +454,8 @@
   "mediaUpload": {
     "dragDrop": "Arrastra y suelta archivos aquí",
     "or": "O",
-    "browse": "Explorar archivos"
+    "browse": "Explorar archivos",
+    "acceptedTypes": "Tipos de archivo aceptados: {{fileTypes}}"
   },
   "mediaEditModal": {
     "heading": "Editar detalles",
@@ -448,12 +467,16 @@
     "noDescription": "Sin descripción",
     "deleteModalHeader": "¿Estás seguro de que quieres eliminar?",
     "deleteModalBody": "Esta acción no se puede deshacer.",
-    "deleteMedia": "Eliminar medios"
+    "deleteMedia": "Eliminar medios",
+    "expandPdf": "Ampliar PDF"
   },
   "mediaPreview": {
     "previewAlt": "Avance",
     "loadingAlt": "Cargando...",
     "titlePlaceholder": "Agregar título"
+  },
+  "mediaPreviewTag": {
+    "openPreview": "Abrir vista previa"
   },
   "mediaPreviewList": {
     "uploadedFiles": "Archivos cargados",
@@ -523,6 +546,8 @@
     "instrumentUpdateCard": "Actualización del instrumento",
     "studentUpdateCard": "Actualización estudiantil",
     "deleteDraft": "Eliminar",
+    "deleteUpdateTitle": "¿Eliminar esta actualización?",
+    "deleteUpdateBody": "Esta acción no se puede deshacer. ¿Seguro que deseas eliminar esta actualización del programa?",
     "cannotSaveTitle": "No se puede guardar la actualización",
     "cannotSaveDesc": "Su programa no se pudo cargar. Actualiza la página y vuelve a intentarlo.",
     "createdTitle": "Nueva actualización creada",
@@ -555,10 +580,18 @@
     "photosVideos": "Fotos/vídeos",
     "noMediaAttached": "No hay medios adjuntos",
     "editUpdate": "Editar actualización",
+    "enrollmentChangeLabel": "Cambio de inscripción",
+    "reviewProgramNameLabel": "Nombre del programa",
+    "reviewInstrumentQuantityLabel": "Instrumentos y cantidad",
+    "reviewSpecialRequestFlaggedLabel": "Solicitud especial (marcada)",
     "instrumentQuantity": "Instrumento y cantidad",
     "selectInstrumentPh": "Seleccionar instrumento",
     "flagLabel": "Bandera",
     "updateType": "Tipo de actualización",
+    "deleteSuccessTitle": "Actualización eliminada",
+    "deleteSuccessDesc": "La actualización del programa se eliminó correctamente.",
+    "deleteErrorTitle": "No se pudo eliminar la actualización",
+    "deleteErrorDesc": "Inténtalo de nuevo.",
     "savedTitle": "Actualización guardada",
     "createdTitleToast": "Actualización creada",
     "savedDesc": "La actualización del programa se actualizó correctamente.",

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import {
   Box,
@@ -14,11 +14,25 @@ import { useTranslation } from 'react-i18next';
 
 import gcf_globe from '/gcf_globe.png';
 
-export function MediaPreview({ file, title, onTitleChange }) {
+export function MediaPreview({
+  file,
+  previewUrl: previewUrlProp,
+  title,
+  onTitleChange,
+}) {
   const { t } = useTranslation();
-  const previewUrl = useMemo(() => {
+  const ownUrl = useMemo(() => {
+    if (previewUrlProp) return null;
     return URL.createObjectURL(file);
-  }, [file]);
+  }, [file, previewUrlProp]);
+
+  useEffect(() => {
+    return () => {
+      if (ownUrl) URL.revokeObjectURL(ownUrl);
+    };
+  }, [ownUrl]);
+
+  const previewUrl = previewUrlProp ?? ownUrl;
 
   return (
     <VStack
