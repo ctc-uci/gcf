@@ -47,6 +47,8 @@ export const Media = () => {
         created_by: userId,
         update_date: updateDate,
         note: description || 'Media files uploaded',
+        show_on_table: false,
+        resolved: false,
       });
 
       const updateId = programUpdateResponse.data.id;
