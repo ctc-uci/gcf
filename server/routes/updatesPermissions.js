@@ -36,6 +36,7 @@ updatesPermissionsRouter.get('/media-updates/:id', async (req, res) => {
           program_update.update_date,
           program_update.note,
           program_update.show_on_table,
+          program_update.resolved,
           program_update.updated_at,
           program.name AS program_name,
           creator.first_name,
@@ -68,12 +69,13 @@ updatesPermissionsRouter.get('/program-updates/pd/:id', async (req, res) => {
           program_update.updated_at,
           program_update.note,
           program_update.show_on_table,
+          program_update.resolved,
           program.name,
           creator.first_name,
           creator.last_name,
           creator.role,
           creator.picture,
-          program.status,
+          program.status AS program_status,
           EXISTS (
             SELECT 1 FROM instrument_change ic
             WHERE ic.update_id = program_update.id
@@ -120,6 +122,7 @@ updatesPermissionsRouter.get('/program-updates/pd/:id', async (req, res) => {
       INNER JOIN program ON program_update.program_id = program.id
       LEFT JOIN gcf_user AS creator ON creator.id = program_update.created_by
       INNER JOIN program_director ON program_director.program_id = program.id AND program_director.user_id = $1
+      WHERE program_update.show_on_table = TRUE
       ORDER BY program_update.update_date DESC;`;
 
     const data = await db.query(finalQuery, [id]);
@@ -159,12 +162,13 @@ updatesPermissionsRouter.get('/program-updates/:id', async (req, res) => {
           program_update.updated_at,
           program_update.note,
           program_update.show_on_table,
+          program_update.resolved,
           program.name,
           creator.first_name,
           creator.last_name,
           creator.role,
           creator.picture,
-          program.status,
+          program.status AS program_status,
           EXISTS (
             SELECT 1 FROM instrument_change ic
             WHERE ic.update_id = program_update.id
@@ -178,6 +182,7 @@ updatesPermissionsRouter.get('/program-updates/:id', async (req, res) => {
       INNER JOIN program ON program_update.program_id = program.id
       LEFT JOIN gcf_user AS creator ON creator.id = program_update.created_by
       ${filterJoin}
+      WHERE program_update.show_on_table = TRUE
       ORDER BY program_update.update_date DESC;`;
 
     const data = await db.query(finalQuery, filterJoin ? [id] : []);
