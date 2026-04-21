@@ -33,6 +33,9 @@ import { downloadProgramUpdatesAsCsv } from '../downloadProgramUpdatesAsCsv';
 import { CreateUpdateDrawer } from '../forms/createForm/CreateUpdateDrawer';
 import { ProgramDirectorUpdatesTable } from './ProgramDirectorUpdatesTable';
 
+const getProgramDirectorStatus = (row) =>
+  row?.resolved ? 'Resolved' : 'Unresolved';
+
 export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,11 +64,16 @@ export const ProgramDirectorView = ({ data, isLoading, onSave }) => {
 
   const sortedData = useMemo(() => {
     if (!data) return [];
-    return [...data].sort((a, b) => {
-      const dateA = new Date(a.updatedAt || a.updateDate || 0).getTime();
-      const dateB = new Date(b.updatedAt || b.updateDate || 0).getTime();
-      return dateB - dateA;
-    });
+    return [...data]
+      .map((row) => ({
+        ...row,
+        status: getProgramDirectorStatus(row),
+      }))
+      .sort((a, b) => {
+        const dateA = new Date(a.updatedAt || a.updateDate || 0).getTime();
+        const dateB = new Date(b.updatedAt || b.updateDate || 0).getTime();
+        return dateB - dateA;
+      });
   }, [data]);
 
   const filteredData = useMemo(

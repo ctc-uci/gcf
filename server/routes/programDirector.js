@@ -39,9 +39,9 @@ directorRouter.get('/me/:userId/stats', async (req, res) => {
     const stats = await db.query(
       `SELECT
           (SELECT COALESCE(SUM(ec.enrollment_change), 0) - COALESCE(SUM(ec.graduated_change), 0) FROM enrollment_change ec
-           JOIN program_update pu ON pu.id = ec.update_id WHERE pu.program_id = $1 AND pu.show_on_table = TRUE) AS students,
+           JOIN program_update pu ON pu.id = ec.update_id WHERE pu.program_id = $1 AND (pu.resolved = TRUE OR pu.show_on_table IS FALSE)) AS students,
           (SELECT COALESCE(SUM(ic.amount_changed), 0) FROM instrument_change ic
-           JOIN program_update pu ON pu.id = ic.update_id WHERE pu.program_id = $1 AND pu.show_on_table = TRUE) AS instruments`,
+           JOIN program_update pu ON pu.id = ic.update_id WHERE pu.program_id = $1 AND (pu.resolved = TRUE OR pu.show_on_table IS FALSE)) AS instruments`,
       [programId]
     );
     const row = stats[0];

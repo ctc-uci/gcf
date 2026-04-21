@@ -142,7 +142,7 @@ export const ProgramUpdateForm = ({
     setIsSaving(true);
     try {
       await backend.put(`/program-updates/${programUpdateId}`, {
-        show_on_table: false,
+        resolved: false,
         note: notes,
         title,
         programId,
@@ -164,7 +164,7 @@ export const ProgramUpdateForm = ({
     setIsSaving(true);
     try {
       await backend.put(`/program-updates/${programUpdateId}`, {
-        show_on_table: true,
+        resolved: true,
         note: notes,
         title,
         programId,
@@ -547,7 +547,7 @@ export const ProgramUpdateForm = ({
     setGraduatedNumber(valueAsNumber);
   };
 
-  const areEditControlsDisabled = Boolean(selectedUpdate?.showOnTable);
+  const areEditControlsDisabled = Boolean(selectedUpdate?.resolved);
 
   const drawerSize = isFullScreen ? 'full' : 'lg';
   return (
@@ -916,7 +916,7 @@ export const ProgramUpdateForm = ({
             w="full"
             p={4}
           >
-            {!selectedUpdate?.showOnTable && (
+            {!selectedUpdate?.resolved && (
               <HStack spacing={3}>
                 <Button
                   variant="outline"

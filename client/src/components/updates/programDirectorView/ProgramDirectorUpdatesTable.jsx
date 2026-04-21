@@ -22,7 +22,7 @@ import { FiStar } from 'react-icons/fi';
 import { SortArrows } from '../../tables/SortArrows';
 
 function formatStatus(row, t) {
-  const isResolved = Boolean(row.showOnTable);
+  const isResolved = Boolean(row.resolved);
   return (
     <Badge
       bg={isResolved ? 'gray.100' : 'red.100'}

@@ -630,7 +630,8 @@ export const CreateUpdateDrawer = ({
 
       const response = await backend.post('/program-updates', {
         ...programUpdateData,
-        show_on_table: false,
+        show_on_table: true,
+        resolved: false,
       });
       const newUpdateId = response.data.id;
 
