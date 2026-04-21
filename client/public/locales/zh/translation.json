@@ -166,6 +166,7 @@
     "regionPrefix": ": {{region}}"
   },
   "sidebar": {
+    "home": "首页",
     "programs": "节目",
     "updates": "更新",
     "accounts": "账户",
