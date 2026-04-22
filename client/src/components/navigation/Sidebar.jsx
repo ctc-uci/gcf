@@ -7,7 +7,11 @@ import { useTranslation } from 'react-i18next';
 import { BsMap } from 'react-icons/bs';
 import { FaGuitar } from 'react-icons/fa';
 import { HiOutlineUser } from 'react-icons/hi';
-import { MdOutlineNotifications, MdPermMedia } from 'react-icons/md';
+import {
+  MdOutlineHome,
+  MdOutlineNotifications,
+  MdPermMedia,
+} from 'react-icons/md';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 
 import { SIDEBAR_WIDTH } from './layoutConstants';
@@ -124,10 +128,10 @@ export const Sidebar = () => {
   } else if (role === 'Program Director') {
     navItems = [
       {
-        name: t('sidebar.programs'),
+        name: t('sidebar.home'),
         icon: (
           <Icon
-            as={FaGuitar}
+            as={MdOutlineHome}
             boxSize="20px"
           />
         ),

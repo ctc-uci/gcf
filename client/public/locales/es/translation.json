@@ -166,6 +166,7 @@
     "regionPrefix": ": {{region}}"
   },
   "sidebar": {
+    "home": "Inicio",
     "programs": "Programas",
     "updates": "Actualizaciones",
     "accounts": "Cuentas",
