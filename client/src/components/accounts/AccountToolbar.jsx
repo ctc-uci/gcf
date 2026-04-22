@@ -17,7 +17,6 @@ import {
 } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
-import { BsArrowDownUp } from 'react-icons/bs';
 import { FiPlus, FiSearch } from 'react-icons/fi';
 import {
   HiOutlineAdjustmentsHorizontal,
@@ -118,16 +117,6 @@ export const AccountToolbar = ({
         spacing={6}
         align="center"
       >
-        <IconButton
-          aria-label={t('common.sort')}
-          icon={<BsArrowDownUp size={20} />}
-          variant="ghost"
-          color="gray.600"
-          w="20px"
-          h="20px"
-          minW="20px"
-          p={0}
-        />
         <HStack
           w="48px"
           h="20px"
