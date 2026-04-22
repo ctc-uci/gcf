@@ -105,8 +105,8 @@ export function ExpandableProgramRow({ p, onEdit }) {
 
             <Box
               className="action-group"
-              opacity={0}
-              visibility="hidden"
+              opacity={{ base: 1, md: 0 }}
+              visibility={{ base: 'visible', md: 'hidden' }}
               transition="all 0.2s"
             >
               <Button
