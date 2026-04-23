@@ -263,6 +263,13 @@ export function LocationLanguageSection({
             mb={2}
           >
             {t('programForm.locationRowLabel')}
+            <Box
+              as="span"
+              color="red.500"
+              ml={1}
+            >
+              *
+            </Box>
           </FormLabel>
 
           <Grid
