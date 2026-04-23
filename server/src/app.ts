@@ -39,7 +39,6 @@ app.use(
 );
 
 app.use(express.json());
-app.use(verifyToken);
 
 // app.use("/users", usersRouter);
 app.use('/admin', verifyToken, adminRouter);
