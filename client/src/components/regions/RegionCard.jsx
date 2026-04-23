@@ -15,7 +15,7 @@ import {
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
-import { GrEdit } from 'react-icons/gr';
+import { FiEdit2 } from 'react-icons/fi';
 import { MdAccountCircle } from 'react-icons/md';
 
 import { isoCodeToFlagIconCode } from '../../utils/isoCodeToFlagIconCode';
@@ -138,7 +138,7 @@ export const RegionCard = ({ region, onEdit, countries }) => {
         </Box>
       </CardBody>
       <Button
-        leftIcon={<GrEdit />}
+        leftIcon={<FiEdit2 />}
         position="absolute"
         top="8px"
         right="8px"

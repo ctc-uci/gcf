@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Box, Button, Flex, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading } from '@chakra-ui/react';
 
 import RegionsForm from '@/components/regions/RegionsForm';
 import { RegionsGrid } from '@/components/regions/RegionsGrid';
@@ -28,19 +28,23 @@ export const RegionsPage = () => {
   };
 
   return (
-    <Box>
+    <Box
+      p={8}
+      pt={0}
+    >
       <Flex
         align="center"
         justify="space-between"
         mb={4}
         mt={4}
       >
-        <Text
-          fontSize="2xl"
-          fontWeight="semibold"
+        <Heading
+          as="h1"
+          size="lg"
+          fontWeight="500"
         >
           {t('regions.pageTitle')}
-        </Text>
+        </Heading>
         <Button
           size="sm"
           color="white"

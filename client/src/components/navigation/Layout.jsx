@@ -61,6 +61,7 @@ export const Layout = () => {
           minW={0}
           minH={0}
           overflowY="auto"
+          overflowX="hidden"
         >
           <Outlet />
         </Box>
