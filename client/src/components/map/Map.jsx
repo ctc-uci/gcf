@@ -421,7 +421,11 @@ export const Map = () => {
                     cursor="pointer"
                     onClick={() => setSelectedProgram(program)}
                     transition="transform 0.2s"
-                    _hover={{ transform: 'scale(1.03)' }}
+                    border="2px solid transparent"
+                    borderRadius="md"
+                    _hover={{
+                      borderColor: 'teal.500',
+                    }}
                   >
                     <CardView
                       programId={program.id}

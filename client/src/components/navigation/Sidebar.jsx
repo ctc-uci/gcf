@@ -35,7 +35,8 @@ const AutoFitText = ({ children }) => {
     <Box
       ref={ref}
       whiteSpace="nowrap"
-      overflow="hidden"
+      overflowX="hidden"
+      overflowY="visible"
       width="100%"
     >
       {children}
