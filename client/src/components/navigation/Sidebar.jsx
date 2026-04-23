@@ -38,6 +38,7 @@ const AutoFitText = ({ children }) => {
       overflowX="hidden"
       overflowY="visible"
       width="100%"
+      pb="0.15em"
     >
       {children}
     </Box>
