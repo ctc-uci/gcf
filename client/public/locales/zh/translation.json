@@ -171,6 +171,7 @@
     "updates": "更新",
     "accounts": "账户",
     "regions": "地区",
+    "partners": "合作伙伴",
     "media": "媒体",
     "logoAlt": "标识"
   },
@@ -298,7 +299,8 @@
   "emptyState": {
     "noAccounts": "尚未创建任何帐户。单击“新帐户”即可开始。",
     "noPrograms": "尚未创建任何程序。单击“新程序”即可开始。",
-    "noUpdates": "尚未进行任何更新。"
+    "noUpdates": "尚未进行任何更新。",
+    "noPartners": "尚未添加任何合作伙伴组织。点击"+ 新建合作伙伴"开始。"
   },
   "programForm": {
     "drawerTitle": "程序",
@@ -635,5 +637,25 @@
   "fullscreenFlyout": {
     "minimize": "最小化",
     "expand": "扩张"
+  },
+  "partners": {
+    "pageTitle": "合作伙伴组织",
+    "newPartner": "+ 新建合作伙伴",
+    "editPartner": "编辑合作伙伴组织",
+    "newPartnerTitle": "新建合作伙伴组织",
+    "partnerName": "组织名称",
+    "partnerNamePlaceholder": "输入组织名称",
+    "partnerNameRequired": "组织名称为必填项。",
+    "deletePartnerTitle": "删除合作伙伴组织",
+    "deletePartnerBody": "您确定要删除此合作伙伴组织吗？",
+    "toastSaved": "合作伙伴组织已成功保存",
+    "toastErrorSave": "保存合作伙伴组织时出错",
+    "toastDeleted": "合作伙伴组织已成功删除",
+    "toastErrorDelete": "删除合作伙伴组织时出错",
+    "searchPlaceholder": "搜索合作伙伴组织...",
+    "columnName": "组织名称",
+    "fieldLabel": "合作伙伴组织",
+    "fieldPlaceholder": "输入合作伙伴组织",
+    "fieldSelected": "已选择：{{name}}"
   }
 }

@@ -4,13 +4,12 @@ import { Box, FormControl, FormLabel, Text } from '@chakra-ui/react';
 
 import { SearchInput } from '@/components/common/SearchInput';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import { useTranslation } from 'react-i18next';
 
-export function PartnerOrganizationField({
-  valueId,
-  onChangeId,
-  label = 'Partner Organization',
-}) {
+export function PartnerOrganizationField({ valueId, onChangeId, label }) {
+  const { t } = useTranslation();
   const { backend } = useBackendContext();
+  const resolvedLabel = label ?? t('partners.fieldLabel');
   const [partnerOrgs, setPartnerOrgs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -71,7 +70,7 @@ export function PartnerOrganizationField({
         fontWeight="normal"
         color="gray"
       >
-        {label}
+        {resolvedLabel}
       </FormLabel>
       <Box>
         <SearchInput
@@ -86,7 +85,7 @@ export function PartnerOrganizationField({
             handleCreateNew(name);
             setSearchQuery('');
           }}
-          placeholder="Enter Partner Organization"
+          placeholder={t('partners.fieldPlaceholder')}
         />
         {selected && (
           <Text
@@ -94,7 +93,7 @@ export function PartnerOrganizationField({
             color="gray.600"
             mt={1}
           >
-            Selected: {selected.name}
+            {t('partners.fieldSelected', { name: selected.name })}
           </Text>
         )}
       </Box>
