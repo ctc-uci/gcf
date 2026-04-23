@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -5,17 +6,23 @@ import {
   FormControl,
   Grid,
   GridItem,
+  HStack,
   IconButton,
   Image,
   Input,
   InputGroup,
   InputRightElement,
-  Select,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Spinner,
   Text,
   Textarea,
   VStack,
 } from '@chakra-ui/react';
+
+import 'flag-icons/css/flag-icons.min.css';
 
 import { APP_LOCALES } from '@/i18n';
 import { useTranslation } from 'react-i18next';
@@ -30,6 +37,13 @@ import {
 
 import { MediaUploadModal } from '../media/MediaUploadModal';
 import { ChangePasswordModal } from './ChangePasswordModal';
+
+const LOCALE_META = [
+  { code: 'en', flagCode: 'us' },
+  { code: 'es', flagCode: 'es' },
+  { code: 'fr', flagCode: 'fr' },
+  { code: 'zh', flagCode: 'cn' },
+];
 
 export const ProfileView = (props) => {
   const { t } = useTranslation();
@@ -95,9 +109,10 @@ export const ProfileView = (props) => {
   return (
     <Box
       p={10}
+      pb="0"
       position="relative"
       bg="gray.50"
-      minH="94vh"
+      minH="80vh"
       mx={-4}
       mt={0}
     >
@@ -372,21 +387,55 @@ export const ProfileView = (props) => {
               {t('profile.preferredLanguage')}
             </Text>
             {isEditing ? (
-              <Select
-                value={formData.language}
-                onChange={handleInputChange('language')}
-              >
-                {APP_LOCALES.map((code) => (
-                  <option
-                    key={code}
-                    value={code}
-                  >
-                    {localeLabel(code)}
-                  </option>
-                ))}
-              </Select>
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  variant="outline"
+                  width="100%"
+                  textAlign="left"
+                  fontWeight="normal"
+                  rightIcon={<ChevronDownIcon />}
+                >
+                  <HStack spacing={2}>
+                    <span
+                      className={`fi fi-${LOCALE_META.find((m) => m.code === formData.language)?.flagCode}`}
+                      aria-hidden="true"
+                    />
+                    <Text>{localeLabel(formData.language)}</Text>
+                  </HStack>
+                </MenuButton>
+                <MenuList>
+                  {APP_LOCALES.map((code) => {
+                    const meta = LOCALE_META.find((m) => m.code === code);
+                    return (
+                      <MenuItem
+                        key={code}
+                        onClick={() =>
+                          handleInputChange('language')({
+                            target: { value: code },
+                          })
+                        }
+                      >
+                        <HStack spacing={2}>
+                          <span
+                            className={`fi fi-${meta?.flagCode}`}
+                            aria-hidden="true"
+                          />
+                          <Text>{localeLabel(code)}</Text>
+                        </HStack>
+                      </MenuItem>
+                    );
+                  })}
+                </MenuList>
+              </Menu>
             ) : (
-              <Text>{localeLabel(gcfUser?.preferredLanguage)}</Text>
+              <HStack spacing={2}>
+                <span
+                  className={`fi fi-${LOCALE_META.find((m) => m.code === gcfUser?.preferredLanguage)?.flagCode}`}
+                  aria-hidden="true"
+                />
+                <Text>{localeLabel(gcfUser?.preferredLanguage)}</Text>
+              </HStack>
             )}
           </FormControl>
 
