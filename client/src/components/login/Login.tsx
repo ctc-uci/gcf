@@ -130,7 +130,7 @@ export const Login = () => {
           break;
         case 'auth/invalid-email':
         case 'auth/user-not-found':
-          setError('email', { message: t('validation.incorrectEmail') });
+          setError('email', { message: t('validation.invalidEmail') });
           toastLoginError(t('login.incorrectLogin'));
           break;
         case 'auth/unverified-email':
