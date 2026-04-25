@@ -9,6 +9,7 @@ import {
   Icon,
   Table,
   TableContainer,
+  Tag,
   Tbody,
   Td,
   Text,
@@ -17,6 +18,8 @@ import {
   Tr,
   useColorModeValue,
   VStack,
+  Wrap,
+  WrapItem,
 } from '@chakra-ui/react';
 
 import {
@@ -198,6 +201,8 @@ export const AccountsTable = ({
                   textTransform="uppercase"
                   fontWeight="semibold"
                   letterSpacing="wider"
+                  minW="220px"
+                  maxW="300px"
                 >
                   {t('accounts.colProgramRegion')}
                   <SortArrows
@@ -263,10 +268,27 @@ export const AccountsTable = ({
 
                   <Td>{user.email}</Td>
 
-                  <Td>
+                  <Td
+                    minW="220px"
+                    maxW="300px"
+                    whiteSpace="normal"
+                    verticalAlign="middle"
+                  >
                     {Array.isArray(user.programs) &&
                     user.programs.length > 0 ? (
-                      <Text>{user.programs.join(' + ')}</Text>
+                      <Wrap spacing={1}>
+                        {user.programs.map((program) => (
+                          <WrapItem key={program}>
+                            <Tag
+                              size="sm"
+                              borderRadius="md"
+                              fontWeight="medium"
+                            >
+                              {program}
+                            </Tag>
+                          </WrapItem>
+                        ))}
+                      </Wrap>
                     ) : (
                       <Badge
                         px={2}
