@@ -166,15 +166,23 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
     } else {
       // Update existing assignments if role hasn't changed
       if (role === 'Program Director' && programId) {
+        await db.query(`DELETE FROM program_director WHERE user_id = $1`, [
+          targetId,
+        ]);
         await db.query(
-          `UPDATE program_director SET program_id = $1 WHERE user_id = $2`,
-          [programId, targetId]
+          `INSERT INTO program_director (user_id, program_id) 
+          VALUES ($1, $2)`,
+          [targetId, programId]
         );
       }
       else if (role === 'Regional Director' && regionId) {
+        await db.query(`DELETE FROM regional_director WHERE user_id = $1`, [
+          targetId,
+        ]);
         await db.query(
-          `UPDATE regional_director SET region_id = $1 WHERE user_id = $2`,
-          [regionId, targetId]
+          `INSERT INTO regional_director (user_id, region_id) 
+          VALUES ($1, $2)`,
+          [targetId, regionId]
         );
       }
     }
