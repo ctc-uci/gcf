@@ -241,6 +241,7 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
           u.id,
           u.first_name,
           u.last_name,
+          COALESCE(array_agg(DISTINCT r.name) FILTER (WHERE r.name IS NOT NULL), '{}') AS region,
           u.role,
           u.picture,
           cb.picture AS created_by_picture,
@@ -261,6 +262,7 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
         FROM gcf_user u
         LEFT JOIN regional_director rd ON u.id = rd.user_id
         LEFT JOIN country c ON rd.region_id = c.region_id
+        LEFT JOIN region r ON rd.region_id = r.id
         LEFT JOIN program p_rd ON c.id = p_rd.country
         LEFT JOIN program_director pd ON u.id = pd.user_id
         LEFT JOIN program p_pd ON pd.program_id = p_pd.id
@@ -271,7 +273,7 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
     }
 
     // Admin: RDs and PDs with their associated programs; CANNOT view or edit other Admins
-    if (role === 'Admin') {
+    else if (role === 'Admin') {
       accounts = await db.query(
         `SELECT
           u.id,
@@ -279,6 +281,7 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
           u.last_name,
           u.role,
           u.picture,
+          COALESCE(array_agg(DISTINCT r.name) FILTER (WHERE r.name IS NOT NULL), '{}') AS region,
           cb.picture AS created_by_picture,
           MAX(TRIM(CONCAT_WS(' ', cb.first_name, cb.last_name))) AS created_by_name,
           COALESCE(
@@ -301,6 +304,7 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
         LEFT JOIN program_director pd ON u.id = pd.user_id
         LEFT JOIN program p_pd ON pd.program_id = p_pd.id
         LEFT JOIN gcf_user cb ON cb.id = u.created_by
+        LEFT JOIN region r ON rd.region_id = r.id
         WHERE u.role = 'Regional Director' OR u.role = 'Program Director'
         GROUP BY u.id, u.first_name, u.last_name, u.role, u.picture, cb.picture
         ORDER BY u.last_name ASC`
@@ -333,7 +337,6 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
         [id]
       );
     }
-
     // Fetch emails for each user in one batch (faster than N client requests)
     if (accounts?.length > 0) {
       const auth = admin.auth();
@@ -410,9 +413,15 @@ gcfUserRouter.patch('/:id/preferred-language', async (req, res) => {
 gcfUserRouter.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const gcfUser = await db.query(`SELECT ALL * FROM gcf_user WHERE id = $1`, [
-      id,
-    ]);
+    const gcfUser = await db.query(
+      `SELECT u.*, COALESCE(array_agg(DISTINCT r.name) FILTER (WHERE r.name IS NOT NULL), '{}') AS region
+       FROM gcf_user u
+       LEFT JOIN regional_director rd ON u.id = rd.user_id
+       LEFT JOIN region r ON rd.region_id = r.id
+       WHERE u.id = $1
+       GROUP BY u.id`,
+      [id]
+    );
 
     if (gcfUser.length === 0) {
       return res.status(404).send('Item not found');

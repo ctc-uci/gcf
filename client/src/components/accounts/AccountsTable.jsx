@@ -9,6 +9,7 @@ import {
   Icon,
   Table,
   TableContainer,
+  Tag,
   Tbody,
   Td,
   Text,
@@ -17,6 +18,8 @@ import {
   Tr,
   useColorModeValue,
   VStack,
+  Wrap,
+  WrapItem,
 } from '@chakra-ui/react';
 
 import {
@@ -198,6 +201,8 @@ export const AccountsTable = ({
                   textTransform="uppercase"
                   fontWeight="semibold"
                   letterSpacing="wider"
+                  minW="220px"
+                  maxW="300px"
                 >
                   {t('accounts.colProgramRegion')}
                   <SortArrows
@@ -263,10 +268,58 @@ export const AccountsTable = ({
 
                   <Td>{user.email}</Td>
 
-                  <Td>
-                    {Array.isArray(user.programs) &&
-                    user.programs.length > 0 ? (
-                      <Text>{user.programs.join(' + ')}</Text>
+                  <Td
+                    minW="220px"
+                    maxW="300px"
+                    whiteSpace="normal"
+                    verticalAlign="middle"
+                  >
+                    {user.role === 'Regional Director' ? (
+                      Array.isArray(user.region) && user.region.length > 0 ? (
+                        <Wrap spacing={1}>
+                          {user.region.map((r) => (
+                            <WrapItem key={r}>
+                              <Tag
+                                size="sm"
+                                borderRadius="md"
+                                {...getRoleBadgeProps(user.role)}
+                                fontWeight="medium"
+                              >
+                                {r}
+                              </Tag>
+                            </WrapItem>
+                          ))}
+                        </Wrap>
+                      ) : (
+                        <Badge
+                          px={2}
+                          py={0.5}
+                          borderRadius="sm"
+                          bg="gray.500"
+                          color="white"
+                          textTransform="uppercase"
+                          fontWeight="bold"
+                          fontSize="xs"
+                        >
+                          {t('common.notAssigned')}
+                        </Badge>
+                      )
+                    ) : Array.isArray(user.programs) &&
+                      user.programs.length > 0 ? (
+                      <Wrap spacing={1}>
+                        {user.programs.map((program) => (
+                          <WrapItem key={program}>
+                            <Tag
+                              size="sm"
+                              borderRadius="md"
+                              {...getRoleBadgeProps(user.role)}
+                              fontWeight="medium"
+                            >
+                              {program}
+                            </Tag>
+                          </WrapItem>
+                        ))}
+                      </Wrap>
                     ) : (
                       <Badge
                         px={2}
