@@ -102,28 +102,33 @@ export function ExpandableProgramRow({ p, onEdit }) {
             minW="100px"
           >
             <Text>{p.totalInstruments}</Text>
-
-            <Box
-              className="action-group"
-              opacity={{ base: 1, md: 0 }}
-              visibility={{ base: 'visible', md: 'hidden' }}
-              transition="all 0.2s"
-            >
-              <Button
-                size="sm"
-                variant="outline"
-                leftIcon={<FiEdit2 />}
-                colorScheme="teal"
-                bg="white"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit?.(p);
-                }}
-              >
-                {t('common.edit')}
-              </Button>
-            </Box>
           </HStack>
+        </Td>
+        <Td
+          textAlign="right"
+          position="sticky"
+          right={0}
+        >
+          <Box
+            className="action-group"
+            opacity={{ base: 1, md: 0 }}
+            visibility={{ base: 'visible', md: 'hidden' }}
+            transition="all 0.2s"
+          >
+            <Button
+              size="sm"
+              variant="outline"
+              leftIcon={<FiEdit2 />}
+              colorScheme="teal"
+              bg="white"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(p);
+              }}
+            >
+              {t('common.edit')}
+            </Button>
+          </Box>
         </Td>
       </Tr>
 

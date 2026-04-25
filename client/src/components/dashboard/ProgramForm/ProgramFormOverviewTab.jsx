@@ -105,7 +105,7 @@ export function ProgramFormOverviewTab({
             </Select>
           </FormControl>
 
-          <FormControl>
+          <FormControl isRequired>
             <FormLabel
               size="sm"
               fontWeight="normal"
@@ -122,7 +122,6 @@ export function ProgramFormOverviewTab({
           </FormControl>
         </VStack>
       </Box>
-
       <LocationLanguageSection
         formState={formState}
         setFormData={setFormState}
