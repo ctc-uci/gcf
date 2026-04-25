@@ -70,6 +70,7 @@ export const AccountUpdateDrawer = ({
     email: '',
     picture: '',
     role: '',
+    region: '',
     bio: '',
   });
 
@@ -163,6 +164,12 @@ export const AccountUpdateDrawer = ({
           email: String(userData?.email || '').trim(),
           picture: String(userData?.picture || '').trim(),
           role,
+          region:
+            role === 'Regional Director'
+              ? Array.isArray(userData?.region)
+                ? userData.region.join(', ')
+                : String(userData?.region || '').trim()
+              : '',
           bio:
             role === 'Program Director'
               ? String(userData?.bio || '').trim()
@@ -210,7 +217,7 @@ export const AccountUpdateDrawer = ({
         picture: valueOrFallback(s.picture, fallbackValues.picture),
         role,
         program: valueOrFallback(s.program, ''),
-        region: valueOrFallback(s.region, ''),
+        region: valueOrFallback(s.region, fallbackValues.region),
         bio:
           role === 'Program Director'
             ? valueOrFallback(

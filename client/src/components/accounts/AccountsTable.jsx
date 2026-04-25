@@ -274,14 +274,45 @@ export const AccountsTable = ({
                     whiteSpace="normal"
                     verticalAlign="middle"
                   >
-                    {Array.isArray(user.programs) &&
-                    user.programs.length > 0 ? (
+                    {user.role === 'Regional Director' ? (
+                      Array.isArray(user.region) && user.region.length > 0 ? (
+                        <Wrap spacing={1}>
+                          {user.region.map((r) => (
+                            <WrapItem key={r}>
+                              <Tag
+                                size="sm"
+                                borderRadius="md"
+                                {...getRoleBadgeProps(user.role)}
+                                fontWeight="medium"
+                              >
+                                {r}
+                              </Tag>
+                            </WrapItem>
+                          ))}
+                        </Wrap>
+                      ) : (
+                        <Badge
+                          px={2}
+                          py={0.5}
+                          borderRadius="sm"
+                          bg="gray.500"
+                          color="white"
+                          textTransform="uppercase"
+                          fontWeight="bold"
+                          fontSize="xs"
+                        >
+                          {t('common.notAssigned')}
+                        </Badge>
+                      )
+                    ) : Array.isArray(user.programs) &&
+                      user.programs.length > 0 ? (
                       <Wrap spacing={1}>
                         {user.programs.map((program) => (
                           <WrapItem key={program}>
                             <Tag
                               size="sm"
                               borderRadius="md"
+                              {...getRoleBadgeProps(user.role)}
                               fontWeight="medium"
                             >
                               {program}

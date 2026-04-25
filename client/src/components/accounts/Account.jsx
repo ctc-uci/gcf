@@ -73,6 +73,7 @@ export const Account = () => {
     try {
       const response = await backend.get(route);
       const rawData = response.data || [];
+      console.log(rawData);
       const fetchedData = rawData.map((item) => ({
         id: item.id,
         firstName: item.firstName,
@@ -84,6 +85,7 @@ export const Account = () => {
         createdBy: item.createdByName || item.createdBy || '',
         picture: item.picture || '',
         createdByPicture: item.createdByPicture || '',
+        region: Array.isArray(item.region) ? item.region : [],
       }));
 
       setUsers(fetchedData);
