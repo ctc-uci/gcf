@@ -171,6 +171,7 @@
     "updates": "Mises à jour",
     "accounts": "Comptes",
     "regions": "Régions",
+    "partners": "Partenaires",
     "media": "Médias",
     "logoAlt": "Logo"
   },
@@ -298,7 +299,8 @@
   "emptyState": {
     "noAccounts": "Aucun compte n'a encore été créé. Cliquez sur « Nouveau compte » pour commencer.",
     "noPrograms": "Aucun programme n'a encore été créé. Cliquez sur « Nouveau programme » pour commencer.",
-    "noUpdates": "Aucune mise à jour n'a encore été effectuée."
+    "noUpdates": "Aucune mise à jour n'a encore été effectuée.",
+    "noPartners": "Aucune organisation partenaire n'a encore été ajoutée. Cliquez sur '+ Nouveau partenaire' pour commencer."
   },
   "programForm": {
     "drawerTitle": "Programme",
@@ -635,5 +637,25 @@
   "fullscreenFlyout": {
     "minimize": "Minimiser",
     "expand": "Développer"
+  },
+  "partners": {
+    "pageTitle": "Organisations Partenaires",
+    "newPartner": "+ Nouveau Partenaire",
+    "editPartner": "Modifier l'Organisation Partenaire",
+    "newPartnerTitle": "Nouvelle Organisation Partenaire",
+    "partnerName": "Nom de l'Organisation",
+    "partnerNamePlaceholder": "Entrez le nom de l'organisation",
+    "partnerNameRequired": "Le nom de l'organisation est obligatoire.",
+    "deletePartnerTitle": "Supprimer l'Organisation Partenaire",
+    "deletePartnerBody": "Êtes-vous sûr de vouloir supprimer cette organisation partenaire ?",
+    "toastSaved": "Organisation partenaire enregistrée avec succès",
+    "toastErrorSave": "Erreur lors de l'enregistrement de l'organisation partenaire",
+    "toastDeleted": "Organisation partenaire supprimée avec succès",
+    "toastErrorDelete": "Erreur lors de la suppression de l'organisation partenaire",
+    "searchPlaceholder": "Rechercher des organisations partenaires...",
+    "columnName": "Nom de l'Organisation",
+    "fieldLabel": "Organisation Partenaire",
+    "fieldPlaceholder": "Entrez l'organisation partenaire",
+    "fieldSelected": "Sélectionné : {{name}}"
   }
 }

@@ -171,6 +171,7 @@
     "updates": "Updates",
     "accounts": "Accounts",
     "regions": "Regions",
+    "partners": "Partners",
     "media": "Media",
     "logoAlt": "Logo"
   },
@@ -298,7 +299,8 @@
   "emptyState": {
     "noAccounts": "No accounts have been created yet. Click 'New Account' to get started.",
     "noPrograms": "No programs have been created yet. Click 'New Program' to get started.",
-    "noUpdates": "No updates have been made yet."
+    "noUpdates": "No updates have been made yet.",
+    "noPartners": "No partner organizations have been added yet. Click '+ New Partner' to get started."
   },
   "programForm": {
     "drawerTitle": "Program",
@@ -638,5 +640,25 @@
   "fullscreenFlyout": {
     "minimize": "Minimize",
     "expand": "Expand"
+  },
+  "partners": {
+    "pageTitle": "Partner Organizations",
+    "newPartner": "+ New Partner",
+    "editPartner": "Edit Partner Organization",
+    "newPartnerTitle": "New Partner Organization",
+    "partnerName": "Organization Name",
+    "partnerNamePlaceholder": "Enter organization name",
+    "partnerNameRequired": "Organization name is required.",
+    "deletePartnerTitle": "Delete Partner Organization",
+    "deletePartnerBody": "Are you sure you want to delete this partner organization?",
+    "toastSaved": "Partner organization saved successfully",
+    "toastErrorSave": "Error saving partner organization",
+    "toastDeleted": "Partner organization deleted successfully",
+    "toastErrorDelete": "Error deleting partner organization",
+    "searchPlaceholder": "Search partner organizations...",
+    "columnName": "Organization Name",
+    "fieldLabel": "Partner Organization",
+    "fieldPlaceholder": "Enter partner organization",
+    "fieldSelected": "Selected: {{name}}"
   }
 }

@@ -8,6 +8,7 @@ import { BsMap } from 'react-icons/bs';
 import { FaGuitar } from 'react-icons/fa';
 import { HiOutlineUser } from 'react-icons/hi';
 import {
+  MdOutlineHandshake,
   MdOutlineHome,
   MdOutlineNotifications,
   MdPermMedia,
@@ -91,6 +92,16 @@ export const Sidebar = () => {
           />
         ),
         path: '/regions',
+      },
+      {
+        name: t('sidebar.partners'),
+        icon: (
+          <Icon
+            as={MdOutlineHandshake}
+            boxSize="20px"
+          />
+        ),
+        path: '/partners',
       },
     ];
   } else if (role === 'Regional Director') {

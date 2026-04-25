@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FiBell, FiUsers } from 'react-icons/fi';
 import { HiOutlineMusicalNote } from 'react-icons/hi2';
 import { IoHomeOutline } from 'react-icons/io5';
+import { MdOutlineHandshake } from 'react-icons/md';
 
 const BADGE_CONFIG = {
   'no-accounts': {
@@ -17,6 +18,10 @@ const BADGE_CONFIG = {
   'no-updates': {
     icon: FiBell,
     messageKey: 'emptyState.noUpdates',
+  },
+  'no-partners': {
+    icon: MdOutlineHandshake,
+    messageKey: 'emptyState.noPartners',
   },
 };
 
