@@ -15,7 +15,30 @@ const colors = {
   brand: {},
 };
 
-const theme = extendTheme({ colors });
+const theme = extendTheme({
+  colors,
+  styles: {
+    global: {
+      '*': {
+        scrollbarColor: 'rgba(0,0,0,0.18) transparent',
+      },
+      '*::-webkit-scrollbar': {
+        width: '6px',
+        height: '6px',
+      },
+      '*::-webkit-scrollbar-track': {
+        background: 'transparent',
+      },
+      '*::-webkit-scrollbar-thumb': {
+        background: 'rgba(0,0,0,0.18)',
+        borderRadius: '99px',
+      },
+      '*::-webkit-scrollbar-thumb:hover': {
+        background: 'rgba(0,0,0,0.32)',
+      },
+    },
+  },
+});
 
 const rootEl = document.getElementById('root')!;
 
