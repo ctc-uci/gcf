@@ -55,10 +55,35 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   const [regionNameError, setRegionNameError] = useState(false);
   const toast = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [assignedCountryNames, setAssignedCountryNames] = useState([]);
 
-  const filteredCountries = countries.filter((c) =>
-    c.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchAllAssignedCountries = async () => {
+      try {
+        const res = await backend.get('/country');
+        const allAssigned = Array.isArray(res.data) ? res.data : [];
+        const names = allAssigned
+          .filter((c) => !region || c.regionId !== region.id)
+          .map((c) => c.name);
+        setAssignedCountryNames(names);
+      } catch (err) {
+        console.error('Error fetching assigned countries:', err);
+      }
+    };
+    fetchAllAssignedCountries();
+  }, [backend, region]);
+
+  const filteredCountries = countries.filter((c) => {
+    const matchesSearch = c.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const notAlreadySelected = !selectedCountries.some(
+      (sc) => sc.iso3 === c.iso3
+    );
+    const notAssignedElsewhere = !assignedCountryNames.includes(c.name);
+    return matchesSearch && notAlreadySelected && notAssignedElsewhere;
+  });
 
   useEffect(() => {
     const fetchRegionalDirectors = async () => {
@@ -127,9 +152,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   }, [countries, region, regionalDirectors, backend]);
 
   const handleSelect = (country) => {
-    if (!selectedCountries.some((c) => c.iso3 === country.iso3)) {
-      setSelectedCountries((prev) => [...prev, country]);
-    }
+    setSelectedCountries((prev) => [...prev, country]);
   };
 
   const handleRemove = (iso3) => {
@@ -222,11 +245,26 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
       );
     }
   };
+
+  const resetForm = () => {
+    setRegionName('');
+    setSelectedDirectors([]);
+    setOriginalDirectorIds([]);
+    setSelectedCountries([]);
+    setRegionNameError(false);
+    setSearchTerm('');
+    setDrawerSize('md');
+    setIsSaving(false);
+  };
+
   return (
     <Drawer
       isOpen={isOpen}
       placement="right"
-      onClose={onClose}
+      onClose={() => {
+        resetForm();
+        onClose();
+      }}
       size={drawerSize}
     >
       <DrawerOverlay />
@@ -448,8 +486,11 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                 </Button>
                 <Button
                   colorScheme="teal"
-                  isDisabled={!regionName.trim()}
+                  isDisabled={!regionName.trim() || isSaving}
+                  isLoading={isSaving}
                   onClick={async () => {
+                    if (isSaving) return;
+                    setIsSaving(true);
                     try {
                       await saveRegion();
                       toast({
@@ -458,6 +499,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                         duration: 5000,
                         isClosable: true,
                       });
+                      resetForm();
                       onSave();
                     } catch (err) {
                       console.error('Error saving region:', err);
@@ -468,6 +510,8 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                         duration: 5000,
                         isClosable: true,
                       });
+                    } finally {
+                      setIsSaving(false);
                     }
                   }}
                 >
@@ -536,8 +580,11 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                   <AlertDialogBody>{t('regions.unsavedBody')}</AlertDialogBody>
                   <AlertDialogFooter>
                     <Button
-                      isDisabled={!regionName.trim()}
+                      isDisabled={!regionName.trim() || isSaving}
+                      isLoading={isSaving}
                       onClick={async () => {
+                        if (isSaving) return;
+                        setIsSaving(true);
                         try {
                           await saveRegion();
                           toast({
@@ -558,6 +605,9 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                             duration: 5000,
                             isClosable: true,
                           });
+                        } finally {
+                          setIsSaving(false);
+                          resetForm();
                         }
                       }}
                     >
@@ -566,6 +616,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                     <Button
                       colorScheme="red"
                       onClick={() => {
+                        resetForm();
                         onClose();
                         setIsCancelDialogOpen(false);
                       }}
