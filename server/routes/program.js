@@ -467,7 +467,7 @@ programRouter.get('/:id/instruments', async (req, res) => {
       JOIN program_update pu ON pu.program_id = p.id
       JOIN instrument_change ic ON ic.update_id = pu.id
       JOIN instrument i ON i.id = ic.instrument_id
-      WHERE p.id = $1 AND pu.show_on_table = TRUE
+      WHERE p.id = $1 AND (pu.show_on_table = FALSE OR pu.resolved = TRUE)
       GROUP BY i.id, i.name
       HAVING COALESCE(SUM(ic.amount_changed), 0) <> 0
       ORDER BY i.name ASC;

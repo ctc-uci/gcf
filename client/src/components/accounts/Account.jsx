@@ -73,7 +73,6 @@ export const Account = () => {
     try {
       const response = await backend.get(route);
       const rawData = response.data || [];
-      console.log(rawData);
       const fetchedData = rawData.map((item) => ({
         id: item.id,
         firstName: item.firstName,
