@@ -196,7 +196,6 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
           <IconButton
             aria-label={t('statistics.downloadAria')}
             icon={<DownloadIcon />}
-            icon={<DownloadIcon />}
             onClick={downloadDataAsCsv}
             size="sm"
             variant="ghost"
