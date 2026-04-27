@@ -8,7 +8,7 @@ import {
   ModalCloseButton,
   ModalContent,
   ModalOverlay,
-  Spinner,
+  Skeleton,
   Tag,
   TagCloseButton,
   TagLabel,
@@ -110,7 +110,7 @@ export function MediaPreviewTag({ item, onRemove, isMedia }) {
           }
         >
           {isLoading ? (
-            <Spinner size="xs" />
+            <Skeleton size="xs" />
           ) : isVideo ? (
             <video
               src={previewUrl}
