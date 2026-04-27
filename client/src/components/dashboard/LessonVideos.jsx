@@ -9,7 +9,6 @@ import {
   IconButton,
   Image,
   Skeleton,
-  Spinner,
   Text,
 } from '@chakra-ui/react';
 
@@ -143,10 +142,9 @@ function LessonVideos({
             gap={3}
             mb={4}
           >
-            <Spinner
-              size="sm"
-              color="blue.500"
-            />
+            {playlistVideos.map(() => (
+              <Skeleton size="sm" />
+            ))}
             <Text
               color="gray.600"
               fontSize="sm"

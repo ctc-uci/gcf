@@ -6,7 +6,7 @@ import {
   Heading,
   HStack,
   IconButton,
-  Spinner,
+  Skeleton,
   VStack,
 } from '@chakra-ui/react';
 
@@ -142,7 +142,7 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
       } catch (err) {
         console.error('Error fetching statistics:', err);
       } finally {
-        setIsLoading(false);
+        setTimeout(() => setIsLoading(false), 3000);
       }
     };
 
@@ -212,28 +212,23 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
             w="full"
             align="stretch"
           >
-            {displayStats.map((stat) => (
-              <StatBox
-                key={stat.labelKey}
-                labelKey={stat.labelKey}
-                number={stat.number}
-              />
-            ))}
+            {isLoading
+              ? displayStats.map((_, i) => (
+                  <Skeleton
+                    key={i}
+                    height="150px"
+                    flex={1}
+                    borderRadius="md"
+                  />
+                ))
+              : displayStats.map((stat) => (
+                  <StatBox
+                    key={stat.labelKey}
+                    labelKey={stat.labelKey}
+                    number={stat.number}
+                  />
+                ))}
           </HStack>
-          {isLoading && (
-            <Box
-              position="absolute"
-              inset={0}
-              bg="whiteAlpha.800"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              zIndex={1}
-              borderRadius="md"
-            >
-              <Spinner size="lg" />
-            </Box>
-          )}
         </Box>
       </VStack>
     </Box>

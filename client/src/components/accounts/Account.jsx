@@ -3,12 +3,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { DownloadIcon } from '@chakra-ui/icons';
 import {
   Box,
-  Center,
   Flex,
   Heading,
   HStack,
   IconButton,
-  Spinner,
+  Skeleton,
+  SkeletonCircle,
+  Stack,
 } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
@@ -166,12 +167,17 @@ export const Account = () => {
       </Flex>
 
       {isLoading ? (
-        <Center py={10}>
-          <Spinner
-            size="xl"
-            color="gray.500"
-          />
-        </Center>
+        <Stack>
+          {originalUsers.map(() => (
+            <Flex>
+              <SkeletonCircle />
+              <Skeleton
+                h="40px"
+                w="100%"
+              />
+            </Flex>
+          ))}
+        </Stack>
       ) : (
         <AccountsTable
           originalData={originalUsers}
