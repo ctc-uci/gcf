@@ -19,7 +19,6 @@ import {
   PopoverContent,
   PopoverTrigger,
   Skeleton,
-  Spinner,
   Table,
   TableContainer,
   Tag,
@@ -820,7 +819,13 @@ export function ProgramDisplay({
               justifyContent="center"
               zIndex={1}
             >
-              <Spinner size="lg" />
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton
+                  key={i}
+                  h={20}
+                  mb={2}
+                />
+              ))}
             </Box>
           )}
         </Box>
