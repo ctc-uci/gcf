@@ -4,9 +4,24 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { GetCity } from 'react-country-state-city';
+import useSWR from 'swr';
 
 import { ProgramDisplay } from './ProgramDisplay';
 import { getRouteByRole, MAP_BY_ROLE } from './programTableMappers';
+
+async function getCityNameByCode(countryCode, stateCode, cityCode) {
+  const countryId = parseInt(countryCode);
+  const stateId = parseInt(stateCode);
+  const cityId = parseInt(cityCode);
+
+  const cities = await GetCity(countryId, stateId);
+
+  if (!cities || !Array.isArray(cities)) {
+    return '';
+  }
+  const city = cities.find((c) => c.id === cityId);
+  return city ? city.name : '';
+}
 
 function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
   const { currentUser } = useAuthContext();
@@ -24,20 +39,6 @@ function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
     setSelectedProgram(program);
     setIsFormOpen(true);
   };
-
-  async function getCityNameByCode(countryCode, stateCode, cityCode) {
-    const countryId = parseInt(countryCode);
-    const stateId = parseInt(stateCode);
-    const cityId = parseInt(cityCode);
-
-    const cities = await GetCity(countryId, stateId);
-
-    if (!cities || !Array.isArray(cities)) {
-      return '';
-    }
-    const city = cities.find((c) => c.id === cityId);
-    return city ? city.name : '';
-  }
 
   const fetchData = useCallback(async () => {
     if (roleLoading) return;
