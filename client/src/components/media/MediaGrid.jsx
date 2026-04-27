@@ -13,11 +13,11 @@ export const MediaGrid = ({
   const { t } = useTranslation();
   let content;
   if (mediaItems.length === 0 && !programName) {
-    content = <Text>{t('mediaPage.noProgram')}</Text>;
+    //content = <Text>{t('mediaPage.noProgram')}</Text>;
   } else if (mediaItems.length === 0) {
-    content = (
-      <Text>{t('mediaPage.noMediaForProgram', { name: programName })}</Text>
-    );
+    //content = (
+    //<Text>{t('mediaPage.noMediaForProgram', { name: programName })}</Text>
+    //);
   } else {
     content = (
       <SimpleGrid

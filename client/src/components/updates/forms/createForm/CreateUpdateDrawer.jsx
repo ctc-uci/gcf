@@ -20,7 +20,8 @@ import {
   HStack,
   Icon,
   IconButton,
-  Spinner,
+  Skeleton,
+  SkeletonText,
   Text,
   useDisclosure,
   useToast,
@@ -777,12 +778,24 @@ export const CreateUpdateDrawer = ({
             pb={24}
           >
             {isEditLoading && (
-              <Center py={10}>
-                <Spinner
-                  size="lg"
-                  color="teal.500"
+              <Box>
+                <SkeletonText
+                  mt="4"
+                  noOfLines={4}
+                  spacing="4"
+                  skeletonHeight="5"
+                  mb="10"
                 />
-              </Center>
+                <Skeleton h="200px" />
+                <SkeletonText
+                  mt="4"
+                  noOfLines={4}
+                  spacing="4"
+                  skeletonHeight="5"
+                  mb="10"
+                />
+                <Skeleton h="50px" />
+              </Box>
             )}
             <VStack
               spacing={6}

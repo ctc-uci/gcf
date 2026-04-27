@@ -4,13 +4,14 @@ import { AddIcon, SearchIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
-  Center,
+  Grid,
+  GridItem,
   Heading,
   HStack,
   Input,
   InputGroup,
   InputLeftElement,
-  Spinner,
+  Skeleton,
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
@@ -165,20 +166,6 @@ export const Media = () => {
     );
   });
 
-  if (isLoading) {
-    return (
-      <Center h="100vh">
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="xl"
-        />
-      </Center>
-    );
-  }
-
   return (
     <Box
       minH="100vh"
@@ -248,19 +235,39 @@ export const Media = () => {
         onClose={onClose}
         onUploadComplete={onUploadCompleteHandler}
       />
-      {viewerIndex !== null && filteredMedia[viewerIndex] && (
-        <MediaViewer
-          updates={filteredMedia.map((m) => ({
-            id: m.id,
-            fileName: m.file_name,
-            fileType: m.file_type,
-            description: m.description,
-          }))}
-          mediaURLs={filteredMedia.map((m) => m.imageUrl)}
-          selectedIndex={viewerIndex}
-          onClose={() => setViewerIndex(null)}
-          onUpdate={fetchData}
-        />
+      {isLoading ? (
+        <Grid
+          templateColumns="repeat(4, 1fr)"
+          gap={7}
+          ml="50px"
+          mb={5}
+        >
+          {Array.from({ length: 8 }).map((_, i) => (
+            <GridItem key={i}>
+              <Skeleton
+                h={250}
+                w="100%"
+                borderRadius="xl"
+              />
+            </GridItem>
+          ))}
+        </Grid>
+      ) : (
+        viewerIndex !== null &&
+        filteredMedia[viewerIndex] && (
+          <MediaViewer
+            updates={filteredMedia.map((m) => ({
+              id: m.id,
+              fileName: m.file_name,
+              fileType: m.file_type,
+              description: m.description,
+            }))}
+            mediaURLs={filteredMedia.map((m) => m.imageUrl)}
+            selectedIndex={viewerIndex}
+            onClose={() => setViewerIndex(null)}
+            onUpdate={fetchData}
+          />
+        )
       )}
     </Box>
   );

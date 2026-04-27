@@ -9,7 +9,6 @@ import {
 import {
   Box,
   Button,
-  Center,
   Divider,
   HStack,
   IconButton,
@@ -19,6 +18,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Skeleton,
   Spinner,
   Table,
   TableContainer,
@@ -778,9 +778,13 @@ export function ProgramDisplay({
                           borderBottom="1px solid"
                           borderColor="gray.200"
                         >
-                          <Center py={8}>
-                            <Spinner size="lg" />
-                          </Center>
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Skeleton
+                              key={i}
+                              h={20}
+                              mb={2}
+                            />
+                          ))}
                         </Td>
                       </Tr>
                     ) : (

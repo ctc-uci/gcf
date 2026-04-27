@@ -168,8 +168,12 @@ export const Account = () => {
 
       {isLoading ? (
         <Stack>
-          {originalUsers.map(() => (
-            <Flex>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Flex
+              key={i}
+              gap={4}
+              mb={5}
+            >
               <SkeletonCircle />
               <Skeleton
                 h="40px"
