@@ -12,7 +12,6 @@ async function getDataByUserId(userId) {
             SELECT region_id
             FROM regional_director
             WHERE user_id = $1
-            LIMIT 1
         ),
         region_programs AS (
             SELECT
@@ -32,7 +31,7 @@ async function getDataByUserId(userId) {
             FROM program p
             JOIN country c ON c.id = p.country
             JOIN region r ON r.id = c.region_id
-            WHERE r.id = (SELECT region_id FROM target_region)
+            WHERE r.id IN (SELECT region_id FROM target_region)
         ),
         enrollment_totals AS (
             SELECT
@@ -41,6 +40,7 @@ async function getDataByUserId(userId) {
             FROM program_update pu
             JOIN enrollment_change ec ON ec.update_id = pu.id
             WHERE pu.program_id IN (SELECT program_id FROM region_programs)
+              AND (pu.show_on_table IS FALSE OR pu.resolved = TRUE)
             GROUP BY pu.program_id
         ),
         instrument_totals AS (
@@ -50,7 +50,7 @@ async function getDataByUserId(userId) {
             FROM program_update pu
             JOIN instrument_change ic ON ic.update_id = pu.id
             WHERE pu.program_id IN (SELECT program_id FROM region_programs)
-              AND pu.show_on_table = TRUE
+              AND (pu.show_on_table IS FALSE OR pu.resolved = TRUE)
             GROUP BY pu.program_id
         )
         SELECT
