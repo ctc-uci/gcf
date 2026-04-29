@@ -395,7 +395,7 @@ export const AccountsTable = ({
         ) : (
           <CardView
             data={tableData}
-            onSave={onSave}
+            onUpdate={onUpdate}
           />
         )}
       </TableContainer>

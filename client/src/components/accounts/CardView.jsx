@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import {
   Badge,
+  Box,
   Card,
   CardBody,
   CardFooter,
@@ -9,6 +10,7 @@ import {
   Flex,
   Grid,
   GridItem,
+  IconButton,
   Image,
   Text,
   VStack,
@@ -16,10 +18,12 @@ import {
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
+import { BsPencil } from 'react-icons/bs';
 
+import { getRoleBadgeProps } from './AccountForm/constants';
 import GcfGlobe from '/gcf_globe.png';
 
-const CardView = ({ data, onSave: _onSave }) => {
+const CardView = ({ data, onUpdate = () => {} }) => {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
 
@@ -57,11 +61,15 @@ const CardView = ({ data, onSave: _onSave }) => {
         {data.map((a) => (
           <GridItem key={a.id}>
             <Card
+              role="group"
               w="auto"
               borderRadius="12px"
               bg="#EDF2F7"
+              transition="background-color 0.2s ease"
+              _hover={{ bg: 'teal.fph50' }}
             >
               <CardHeader
+                position="relative"
                 py={3}
                 px={4}
               >
@@ -69,13 +77,36 @@ const CardView = ({ data, onSave: _onSave }) => {
                   borderRadius="6px"
                   py="6px"
                   px="12px"
-                  bg="#D6F1EF"
-                  color="gray.800"
+                  {...getRoleBadgeProps(a.role)}
                   display="inline-flex"
                   alignItems="center"
                 >
                   {a.role}
                 </Badge>
+                <Box
+                  position="absolute"
+                  top={2}
+                  right={2}
+                  opacity={0}
+                  pointerEvents="none"
+                  transition="opacity 0.2s ease"
+                  _groupHover={{ opacity: 1, pointerEvents: 'auto' }}
+                >
+                  <IconButton
+                    aria-label={t('common.edit')}
+                    icon={<BsPencil />}
+                    size="sm"
+                    variant="ghost"
+                    bg="white"
+                    color="teal.500"
+                    borderWidth="2px"
+                    borderColor="teal.500"
+                    borderRadius="full"
+                    _hover={{ bg: 'teal.500', color: 'white' }}
+                    _active={{ bg: 'teal.100', color: 'teal.500' }}
+                    onClick={() => onUpdate(a)}
+                  />
+                </Box>
               </CardHeader>
               <CardBody
                 position="relative"
