@@ -19,9 +19,10 @@ import { BsPencil } from 'react-icons/bs';
 
 import { DirectorAvatar } from './ProgramForm/DirectorAvatar';
 
-const BackCardView = ({ p, onClick, t }) => {
+const BackCardView = ({ p, onClick, t, openEditForm }) => {
   return (
     <Card
+      role="group"
       h="100%"
       br={20}
       w="100%"
@@ -32,6 +33,34 @@ const BackCardView = ({ p, onClick, t }) => {
       _hover={{ bg: 'teal.50' }}
     >
       <CardHeader position="relative">
+        <Box
+          position="absolute"
+          top={2}
+          right={2}
+          opacity={0}
+          pointerEvents="none"
+          transition="opacity 0.2s ease"
+          _groupHover={{ opacity: 1, pointerEvents: 'auto' }}
+          zIndex={1}
+        >
+          <IconButton
+            aria-label={t('programCard.editAria')}
+            icon={<BsPencil />}
+            size="sm"
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditForm(p);
+            }}
+            bg="white"
+            borderRadius="full"
+            color="teal.500"
+            borderWidth="2px"
+            borderColor="teal.500"
+            _hover={{ bg: 'teal.500', color: 'white' }}
+            _active={{ bg: 'teal.100', color: 'teal.600' }}
+          />
+        </Box>
         <Tag
           size="md"
           borderRadius="md"
@@ -459,6 +488,7 @@ const CardView = ({ data, flippedId, setFlippedId, openEditForm }) => {
             p={item}
             onClick={() => handleFlip(item.id)}
             t={t}
+            openEditForm={openEditForm}
           />
         </ReactCardFlip>
       ))}
