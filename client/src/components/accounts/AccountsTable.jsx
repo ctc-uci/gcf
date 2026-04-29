@@ -383,6 +383,8 @@ export const AccountsTable = ({
                         colorScheme="teal"
                         bg="white"
                         onClick={() => onUpdate(user)}
+                        _hover={{ bg: 'teal.500', color: 'white' }}
+                        _active={{ bg: 'teal.100', color: 'teal.600' }}
                       >
                         {t('common.edit')}
                       </Button>

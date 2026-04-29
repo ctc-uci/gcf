@@ -1,4 +1,3 @@
-import { EditIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -121,6 +120,8 @@ export function ExpandableProgramRow({ p, onEdit }) {
               leftIcon={<FiEdit2 />}
               colorScheme="teal"
               bg="white"
+              _hover={{ bg: 'teal.500', color: 'white' }}
+              _active={{ bg: 'teal.100', color: 'teal.600' }}
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit?.(p);
