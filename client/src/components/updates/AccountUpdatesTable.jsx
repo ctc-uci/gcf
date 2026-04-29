@@ -17,6 +17,7 @@ import {
   Tr,
 } from '@chakra-ui/react';
 
+import { formatRelativeDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
 import { FiUser } from 'react-icons/fi';
 
@@ -90,7 +91,9 @@ export const AccountUpdatesTable = ({
         (update.changeType || '').toLowerCase().includes(q) ||
         (update.programName || '').toLowerCase().includes(q) ||
         (update.fullName || '').toLowerCase().includes(q) ||
-        (update.lastModified || '').toLowerCase().includes(q) ||
+        (formatRelativeDate(update.lastModified) || '')
+          .toLowerCase()
+          .includes(q) ||
         `${update.authorFirstName || ''} ${update.authorLastName || ''}`
           .toLowerCase()
           .trim()
@@ -268,7 +271,7 @@ export const AccountUpdatesTable = ({
                         fontSize="sm"
                         color="gray.600"
                       >
-                        {row.lastModified || ''}
+                        {formatRelativeDate(row.lastModified)}
                       </Text>
                     </Td>
                   </Tr>
