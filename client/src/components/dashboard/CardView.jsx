@@ -1,4 +1,3 @@
-import { EditIcon } from '@chakra-ui/icons';
 import {
   Box,
   Card,
@@ -16,6 +15,7 @@ import {
 
 import ReactCardFlip from 'react-card-flip';
 import { useTranslation } from 'react-i18next';
+import { BsPencil } from 'react-icons/bs';
 
 import { DirectorAvatar } from './ProgramForm/DirectorAvatar';
 
@@ -28,6 +28,8 @@ const BackCardView = ({ p, onClick, t }) => {
       maxW="600px"
       maxH="500px"
       onClick={onClick}
+      transition="background-color 0.2s ease"
+      _hover={{ bg: 'teal.50' }}
     >
       <CardHeader position="relative">
         <Tag
@@ -283,11 +285,14 @@ const BackCardView = ({ p, onClick, t }) => {
 const FrontCardView = ({ p, openEditForm, onClick, t }) => {
   return (
     <Card
+      role="group"
       br={20}
       w="100%"
       maxW="600px"
       h="350px"
       onClick={onClick}
+      transition="background-color 0.2s ease"
+      _hover={{ bg: 'teal.50' }}
     >
       <CardHeader position="relative">
         <Tag
@@ -323,19 +328,27 @@ const FrontCardView = ({ p, openEditForm, onClick, t }) => {
           position="absolute"
           top={2}
           right={2}
+          opacity={0}
+          pointerEvents="none"
+          transition="opacity 0.2s ease"
+          _groupHover={{ opacity: 1, pointerEvents: 'auto' }}
         >
           <IconButton
             aria-label={t('programCard.editAria')}
-            icon={<EditIcon />}
+            icon={<BsPencil />}
             size="sm"
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
               openEditForm(p);
             }}
-            bg="#808080"
+            bg="white"
             borderRadius="full"
-            color="white"
+            color="teal.500"
+            borderWidth="2px"
+            borderColor="teal.500"
+            _hover={{ bg: 'teal.500', color: 'white' }}
+            _active={{ bg: 'teal.100', color: 'teal.600' }}
           />
         </Box>
       </CardHeader>
