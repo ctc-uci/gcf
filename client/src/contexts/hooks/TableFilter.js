@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 
 const str = (v) => (v ?? '').toString();
 
+const toDateStr = (v) => {
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+};
+
 const OPERATION_FUNCTIONS = {
   contains: (dataVal, filterVal) =>
     str(dataVal).toLowerCase().includes(str(filterVal).toLowerCase()),
@@ -14,14 +19,15 @@ const OPERATION_FUNCTIONS = {
   gte: (dataVal, filterVal) => Number(dataVal) >= Number(filterVal),
   lte: (dataVal, filterVal) => Number(dataVal) <= Number(filterVal),
   is: (dataVal, filterVal) =>
-    new Date(dataVal).toISOString().slice(0, 10) ===
-    new Date(filterVal).toISOString().slice(0, 10),
+    toDateStr(dataVal) !== null && toDateStr(dataVal) === toDateStr(filterVal),
   before: (dataVal, filterVal) =>
-    new Date(dataVal).toISOString().slice(0, 10) <
-    new Date(filterVal).toISOString().slice(0, 10),
+    toDateStr(dataVal) !== null &&
+    toDateStr(filterVal) !== null &&
+    toDateStr(dataVal) < toDateStr(filterVal),
   after: (dataVal, filterVal) =>
-    new Date(dataVal).toISOString().slice(0, 10) >
-    new Date(filterVal).toISOString().slice(0, 10),
+    toDateStr(dataVal) !== null &&
+    toDateStr(filterVal) !== null &&
+    toDateStr(dataVal) > toDateStr(filterVal),
   contains_item: (dataVal, filterVal) =>
     dataVal.some((item) =>
       str(item).toLowerCase().includes(str(filterVal).toLowerCase())
