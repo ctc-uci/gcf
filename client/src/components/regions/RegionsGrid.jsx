@@ -43,6 +43,7 @@ export const RegionsGrid = ({ onEditRegion, refreshTrigger }) => {
             region={region}
             onEdit={onEditRegion}
             countries={countriesByRegion[region.id] || []}
+            refreshTrigger={refreshTrigger}
           />
         ))}
       </SimpleGrid>

@@ -21,7 +21,7 @@ import { MdAccountCircle } from 'react-icons/md';
 import { isoCodeToFlagIconCode } from '../../utils/isoCodeToFlagIconCode';
 import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 
-export const RegionCard = ({ region, onEdit, countries }) => {
+export const RegionCard = ({ region, onEdit, countries, refreshTrigger }) => {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
   const [regionalDirectors, setRegionalDirectors] = useState([]);
@@ -40,7 +40,7 @@ export const RegionCard = ({ region, onEdit, countries }) => {
     };
 
     fetchData();
-  }, [region.id, backend]);
+  }, [region.id, backend, refreshTrigger]);
 
   return (
     <Card
