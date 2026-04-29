@@ -14,9 +14,14 @@ const OPERATION_FUNCTIONS = {
   gte: (dataVal, filterVal) => Number(dataVal) >= Number(filterVal),
   lte: (dataVal, filterVal) => Number(dataVal) <= Number(filterVal),
   is: (dataVal, filterVal) =>
-    new Date(dataVal).getTime() === new Date(filterVal).getTime(),
-  before: (dataVal, filterVal) => new Date(dataVal) < new Date(filterVal),
-  after: (dataVal, filterVal) => new Date(dataVal) > new Date(filterVal),
+    new Date(dataVal).toISOString().slice(0, 10) ===
+    new Date(filterVal).toISOString().slice(0, 10),
+  before: (dataVal, filterVal) =>
+    new Date(dataVal).toISOString().slice(0, 10) <
+    new Date(filterVal).toISOString().slice(0, 10),
+  after: (dataVal, filterVal) =>
+    new Date(dataVal).toISOString().slice(0, 10) >
+    new Date(filterVal).toISOString().slice(0, 10),
   contains_item: (dataVal, filterVal) =>
     dataVal.some((item) =>
       str(item).toLowerCase().includes(str(filterVal).toLowerCase())
