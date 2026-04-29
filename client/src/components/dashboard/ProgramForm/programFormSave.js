@@ -227,6 +227,8 @@ export async function saveProgramForm({
         enrollment_change: enrollmentDelta,
         graduated_change: graduatedDelta,
         event_type: 'other',
+        show_on_table: false,
+        resolved: true,
       });
     }
     if (hasInstrumentChange) {
@@ -236,6 +238,8 @@ export async function saveProgramForm({
           updateId,
           amountChanged: instrumentChange.amountChanged,
           event_type: 'other',
+          show_on_table: false,
+          resolved: true,
         });
       }
     }
