@@ -45,26 +45,35 @@ const CardView = ({ data, onUpdate = () => {} }) => {
       };
     }, [id, backend]);
 
-    return <Text fontSize="sm">{region}</Text>;
+    return (
+      <Text
+        fontSize="sm"
+        color="black"
+        noOfLines={2}
+      >
+        {region}
+      </Text>
+    );
   };
 
   return (
     <>
       <Grid
-        templateColumns={{
-          base: 'repeat(1, 1fr)',
-          md: 'repeat(2, 1fr)',
-          lg: 'repeat(4, 1fr)',
-        }}
-        gap={6}
+        templateColumns="repeat(auto-fill, minmax(300px, 1fr))"
+        gap={4}
+        px={1}
+        alignItems="start"
       >
         {data.map((a) => (
           <GridItem key={a.id}>
             <Card
               role="group"
-              w="auto"
-              borderRadius="12px"
+              w="100%"
+              maxW="600px"
+              h="350px"
+              borderRadius="20px"
               bg="#EDF2F7"
+              overflow="hidden"
               transition="background-color 0.2s ease"
               _hover={{ bg: 'teal.fph50' }}
             >
@@ -104,47 +113,60 @@ const CardView = ({ data, onUpdate = () => {} }) => {
                     borderRadius="full"
                     _hover={{ bg: 'teal.500', color: 'white' }}
                     _active={{ bg: 'teal.100', color: 'teal.500' }}
-                    onClick={() => onUpdate(a)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUpdate(a);
+                    }}
                   />
                 </Box>
               </CardHeader>
               <CardBody
                 position="relative"
-                pt={2}
+                pt={1}
                 px="24px"
-                pb="18px"
+                pb="10px"
                 display="flex"
-                alignItems="flex-start"
+                alignItems="center"
                 justifyContent="center"
+                flex="1"
+                minH="140px"
+                overflow="hidden"
               >
                 <Image
                   src={GcfGlobe}
                   objectFit="contain"
-                  objectPosition="top"
+                  objectPosition="center"
                   draggable="false"
                   alt={t('programCard.gcfGlobeAlt')}
+                  maxH="100%"
                 />
               </CardBody>
               <CardFooter
                 bg="white"
-                h="88px"
-                py="18px"
+                minH="120px"
+                py="14px"
                 px="24px"
+                alignItems="flex-start"
+                overflow="hidden"
               >
                 <VStack
                   align="stretch"
-                  spacing={3}
+                  spacing={2}
+                  w="100%"
                 >
                   <Text
                     fontSize="lg"
                     color="black"
+                    noOfLines={1}
                   >
                     {a.firstName} {a.lastName}
                   </Text>
                   <Flex
                     gap={3}
                     flexWrap="wrap"
-                    align="center"
+                    align="flex-start"
+                    maxH="52px"
+                    overflowY="auto"
                   >
                     {a.role === 'Regional Director' ? (
                       <RegionText id={a.id} />
@@ -158,6 +180,7 @@ const CardView = ({ data, onUpdate = () => {} }) => {
                           fontSize="sm"
                           fontWeight="normal"
                           color="black"
+                          noOfLines={1}
                         >
                           {p}
                         </Text>
