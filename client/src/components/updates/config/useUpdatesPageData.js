@@ -10,7 +10,7 @@ const mapUpdatesWithFullName = (items) => {
       .filter(Boolean)
       .join(' ')
       .trim();
-    const status = item.resolved ? 'Resolved' : 'Unresolved';
+    const status = item.status ?? (item.resolved ? 'Resolved' : 'Unresolved');
     return { ...item, fullName, status };
   });
 };
