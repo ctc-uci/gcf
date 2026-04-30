@@ -18,7 +18,7 @@ import {
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
-import { BsPencil } from 'react-icons/bs';
+import { FiEdit2 } from 'react-icons/fi';
 
 import { getRoleBadgeProps } from './AccountForm/constants';
 import GcfGlobe from '/gcf_globe.png';
@@ -103,7 +103,7 @@ const CardView = ({ data, onUpdate = () => {} }) => {
                 >
                   <IconButton
                     aria-label={t('common.edit')}
-                    icon={<BsPencil />}
+                    icon={<FiEdit2 />}
                     size="sm"
                     variant="ghost"
                     bg="white"

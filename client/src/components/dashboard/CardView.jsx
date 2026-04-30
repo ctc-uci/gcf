@@ -15,7 +15,7 @@ import {
 
 import ReactCardFlip from 'react-card-flip';
 import { useTranslation } from 'react-i18next';
-import { BsPencil } from 'react-icons/bs';
+import { FiEdit2 } from 'react-icons/fi';
 
 import { DirectorAvatar } from './ProgramForm/DirectorAvatar';
 
@@ -45,7 +45,7 @@ const BackCardView = ({ p, onClick, t, openEditForm }) => {
         >
           <IconButton
             aria-label={t('programCard.editAria')}
-            icon={<BsPencil />}
+            icon={<FiEdit2 />}
             size="sm"
             variant="ghost"
             onClick={(e) => {
@@ -364,7 +364,7 @@ const FrontCardView = ({ p, openEditForm, onClick, t }) => {
         >
           <IconButton
             aria-label={t('programCard.editAria')}
-            icon={<BsPencil />}
+            icon={<FiEdit2 />}
             size="sm"
             variant="ghost"
             onClick={(e) => {
