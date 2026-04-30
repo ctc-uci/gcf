@@ -11,6 +11,7 @@ import {
   Button,
   Center,
   Divider,
+  Grid,
   HStack,
   IconButton,
   Input,
@@ -351,15 +352,20 @@ export function ProgramDisplay({
         }}
       />
       <Box
-        w="75vw"
+        w="100%"
         maxW="100%"
       >
-        <HStack
+        <Grid
+          templateColumns={{ base: '1fr', md: '1fr auto 1fr' }}
+          alignItems="center"
+          gap={{ base: 4, md: 3 }}
           mb={4}
-          justifyContent="space-between"
           w="100%"
         >
-          <HStack spacing={3}>
+          <HStack
+            spacing={3}
+            minW={0}
+          >
             <Box
               fontSize="3xl"
               fontWeight="semibold"
@@ -374,10 +380,18 @@ export function ProgramDisplay({
               onClick={downloadDataAsCsv}
             />
           </HStack>
-          <HStack spacing={2}>
+
+          <HStack
+            spacing={3}
+            flexShrink={0}
+            justifyContent="center"
+            justifySelf={{ base: 'stretch', md: 'center' }}
+            flexWrap="wrap"
+          >
             <InputGroup
               size="sm"
               maxW="200px"
+              w={{ base: '100%', md: '200px' }}
             >
               <InputLeftElement pointerEvents="none">
                 <Search2Icon
@@ -395,27 +409,32 @@ export function ProgramDisplay({
               />
             </InputGroup>
 
-            <IconButton
-              aria-label="table view"
-              icon={<HamburgerIcon />}
-              size="sm"
-              variant="ghost"
-              color={isCardView ? 'gray.600' : 'teal.500'}
-              onClick={() => setIsCardView(false)}
-            />
-            <Divider
-              orientation="vertical"
-              h="20px"
-              borderWidth="1px"
-            />
-            <IconButton
-              aria-label="card view"
-              icon={<HiOutlineSquares2X2 />}
-              color={!isCardView ? 'gray.600' : 'teal.500'}
-              size="sm"
-              variant="ghost"
-              onClick={() => setIsCardView(true)}
-            />
+            <HStack
+              spacing={1}
+              alignItems="center"
+            >
+              <IconButton
+                aria-label="table view"
+                icon={<HamburgerIcon />}
+                size="sm"
+                variant="ghost"
+                color={isCardView ? 'gray.600' : 'teal.500'}
+                onClick={() => setIsCardView(false)}
+              />
+              <Divider
+                orientation="vertical"
+                h="18px"
+                borderWidth="1px"
+              />
+              <IconButton
+                aria-label="card view"
+                icon={<HiOutlineSquares2X2 />}
+                color={!isCardView ? 'gray.600' : 'teal.500'}
+                size="sm"
+                variant="ghost"
+                onClick={() => setIsCardView(true)}
+              />
+            </HStack>
 
             <Popover placement="bottom-end">
               <PopoverTrigger>
@@ -641,9 +660,18 @@ export function ProgramDisplay({
                 </Box>
               </PopoverContent>
             </Popover>
+          </HStack>
+
+          <HStack
+            spacing={3}
+            justifyContent={{ base: 'flex-start', md: 'flex-end' }}
+            minW={0}
+            flexWrap="wrap"
+          >
             <Text
               fontSize="sm"
               color="gray.500"
+              mr={{ base: 4, md: 8 }}
             >
               {t('programsTable.displayingResults', {
                 count: tableData.length,
@@ -665,7 +693,7 @@ export function ProgramDisplay({
               {t('programsTable.newProgram')}
             </Button>
           </HStack>
-        </HStack>
+        </Grid>
 
         <Box position="relative">
           {!isCardView ? (
