@@ -21,7 +21,7 @@ const mapUpdatesWithFullName = (items) => {
 export function useUpdatesPageData() {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
-  const { role } = useRoleContext();
+  const { role, loading: roleLoading } = useRoleContext();
   const { backend } = useBackendContext();
 
   const [programUpdatesData, setProgramUpdatesData] = useState([]);
@@ -49,28 +49,37 @@ export function useUpdatesPageData() {
     }
   };
 
+  const programRoute =
+    !roleLoading && userId
+      ? role === 'Program Director'
+        ? `/update-permissions/program-updates/pd/${userId}`
+        : `/update-permissions/program-updates/${userId}`
+      : null;
+
+  const mediaRoute =
+    !roleLoading && userId && role !== 'Program Director'
+      ? `/mediaChange/${userId}/media-updates`
+      : null;
+
+  const accountRoute =
+    !roleLoading && userId && role !== 'Program Director'
+      ? `/accountChange`
+      : null;
+
   const {
     data: programUpdatesFromSWR,
     isLoading: isProgramLoading,
     mutate: refetchProgramUpdates,
-  } = useSWR(
-    role === 'Program Director'
-      ? `/update-permissions/program-updates/pd/${userId}`
-      : `/update-permissions/program-updates/${userId}`,
-    fetchMediaAndPrograms
-  );
+  } = useSWR(programRoute, fetchMediaAndPrograms);
   const { data: mediaUpdatesFromSWR, isLoading: isMediaLoading } = useSWR(
-    role !== 'Program Director' ? `/mediaChange/${userId}/media-updates` : null,
+    mediaRoute,
     fetchMediaAndPrograms
   );
   const {
     data: accountUpdatesFromSWR,
     isLoading: isAccountLoading,
     mutate: refetchAccountUpdates,
-  } = useSWR(
-    role !== 'Program Director' ? `/accountChange` : null,
-    fetchAccounts
-  );
+  } = useSWR(accountRoute, fetchAccounts);
 
   const isLoading = isProgramLoading || isMediaLoading || isAccountLoading;
 

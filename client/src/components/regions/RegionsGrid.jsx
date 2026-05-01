@@ -4,6 +4,7 @@ import { Box, SimpleGrid } from '@chakra-ui/react';
 
 import { RegionCard } from '@/components/regions/RegionCard';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
+import useSWR from 'swr';
 
 export const RegionsGrid = ({ onEditRegion, refreshTrigger }) => {
   const { backend } = useBackendContext();
