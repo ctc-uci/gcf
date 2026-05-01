@@ -41,14 +41,14 @@ export const UpdatesPage = () => {
   const {
     role,
     programUpdatesData,
-    originalProgramUpdatesData,
     mediaUpdatesData,
-    setMediaUpdatesData,
-    originalMediaUpdatesData,
-    accountUpdatesData,
     originalAccountUpdatesData,
+    originalMediaUpdatesData,
+    originalProgramUpdatesData,
+    setMediaUpdatesData,
+    accountUpdatesData,
     isLoading,
-    isProgramUpdatesLoading,
+    isProgramLoading,
     refetchProgramUpdates,
     refetchAccountUpdates,
   } = useUpdatesPageData();
@@ -82,7 +82,7 @@ export const UpdatesPage = () => {
     return (
       <ProgramDirectorView
         data={programUpdatesData}
-        isLoading={isLoading || isProgramUpdatesLoading}
+        isLoading={isLoading || isProgramLoading}
         onSave={refetchProgramUpdates}
       />
     );
@@ -187,7 +187,7 @@ export const UpdatesPage = () => {
             p={0}
             pt={4}
           >
-            {programUpdatesData.length === 0 ? (
+            {programUpdatesData.length === 0 && !isLoading ? (
               <EmptyStateBadge variant="no-updates" />
             ) : (
               <Box
@@ -197,7 +197,7 @@ export const UpdatesPage = () => {
               >
                 <ProgramUpdatesTable
                   originalData={originalProgramUpdatesData}
-                  isLoading={isProgramUpdatesLoading}
+                  isLoading={isProgramLoading}
                   onSave={refetchProgramUpdates}
                   searchQuery={searchQuery}
                   showStatus
@@ -211,7 +211,7 @@ export const UpdatesPage = () => {
             p={0}
             pt={4}
           >
-            {mediaUpdatesData.length === 0 ? (
+            {mediaUpdatesData.length === 0 && !isLoading ? (
               <EmptyStateBadge variant="no-updates" />
             ) : (
               <Box
@@ -234,7 +234,7 @@ export const UpdatesPage = () => {
             p={0}
             pt={4}
           >
-            {accountUpdatesData.length === 0 ? (
+            {accountUpdatesData.length === 0 && !isLoading ? (
               <EmptyStateBadge variant="no-updates" />
             ) : (
               <Box

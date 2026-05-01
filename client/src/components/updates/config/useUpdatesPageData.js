@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
+import useSWR from 'swr';
 
 const mapUpdatesWithFullName = (items) => {
   return (items || []).map((item) => {
@@ -24,138 +25,87 @@ export function useUpdatesPageData() {
   const { backend } = useBackendContext();
 
   const [programUpdatesData, setProgramUpdatesData] = useState([]);
-  const [originalProgramUpdatesData, setOriginalProgramUpdatesData] = useState(
-    []
-  );
   const [mediaUpdatesData, setMediaUpdatesData] = useState([]);
-  const [originalMediaUpdatesData, setOriginalMediaUpdatesData] = useState([]);
   const [accountUpdatesData, setAccountUpdatesData] = useState([]);
-  const [originalAccountUpdatesData, setOriginalAccountUpdatesData] = useState(
-    []
+
+  const fetchMediaAndPrograms = async (fetchRoute) => {
+    try {
+      const response = await backend.get(fetchRoute);
+      const rows = Array.isArray(response.data) ? response.data : [];
+      const mapped = mapUpdatesWithFullName(rows);
+      return mapped;
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchAccounts = async (fetchRoute) => {
+    try {
+      const response = await backend.get(fetchRoute);
+      const rows = Array.isArray(response.data) ? response.data : [];
+      return rows;
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const {
+    data: programUpdatesFromSWR,
+    isLoading: isProgramLoading,
+    mutate: refetchProgramUpdates,
+  } = useSWR(
+    role === 'Program Director'
+      ? `/update-permissions/program-updates/pd/${userId}`
+      : `/update-permissions/program-updates/${userId}`,
+    fetchMediaAndPrograms
+  );
+  const { data: mediaUpdatesFromSWR, isLoading: isMediaLoading } = useSWR(
+    role !== 'Program Director' ? `/mediaChange/${userId}/media-updates` : null,
+    fetchMediaAndPrograms
+  );
+  const {
+    data: accountUpdatesFromSWR,
+    isLoading: isAccountLoading,
+    mutate: refetchAccountUpdates,
+  } = useSWR(
+    role !== 'Program Director' ? `/accountChange` : null,
+    fetchAccounts
   );
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isProgramUpdatesLoading, setIsProgramUpdatesLoading] = useState(false);
-
-  const fetchData = useCallback(
-    async (path) => {
-      try {
-        const response = await backend.get(`/update-permissions/${path}`);
-        return response.data;
-      } catch (error) {
-        console.error(
-          'Request failed:',
-          path,
-          error.response?.status,
-          error.message
-        );
-        return [];
-      }
-    },
-    [backend]
-  );
-
-  const fetchMediaUpdatesForUser = useCallback(async () => {
-    try {
-      const response = await backend.get(
-        `/mediaChange/${userId}/media-updates`
-      );
-      return response.data ?? [];
-    } catch (error) {
-      console.error(
-        'Request failed: mediaChange/:userId/media-updates',
-        error.response?.status,
-        error.message
-      );
-      return [];
-    }
-  }, [backend, userId]);
-
-  const refetchProgramUpdates = useCallback(async () => {
-    setIsProgramUpdatesLoading(true);
-    try {
-      const programUpdates =
-        role === 'Program Director'
-          ? await fetchData(`program-updates/pd/${userId}`)
-          : await fetchData(`program-updates/${userId}`);
-      const mappedProgram = mapUpdatesWithFullName(programUpdates);
-      setProgramUpdatesData(mappedProgram);
-      setOriginalProgramUpdatesData(mappedProgram);
-    } catch (error) {
-      console.error('Error refetching program updates:', error);
-    } finally {
-      setIsProgramUpdatesLoading(false);
-    }
-  }, [fetchData, userId, role]);
-
-  const refetchAccountUpdates = useCallback(async () => {
-    if (!backend) return;
-    try {
-      const response = await backend.get(`/accountChange`);
-      const accountUpdates = response.data ?? [];
-      setAccountUpdatesData(accountUpdates);
-      setOriginalAccountUpdatesData(accountUpdates);
-    } catch (error) {
-      console.error('Error refetching account updates:', error);
-    }
-  }, [backend]);
+  const isLoading = isProgramLoading || isMediaLoading || isAccountLoading;
 
   useEffect(() => {
-    if (!userId || !backend) {
-      setIsLoading(false);
-      return;
+    if (programUpdatesFromSWR) {
+      setProgramUpdatesData(programUpdatesFromSWR);
     }
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        if (role === 'Program Director') {
-          const programUpdates = await fetchData(
-            `program-updates/pd/${userId}`
-          );
-          const mappedProgram = mapUpdatesWithFullName(programUpdates);
-          setProgramUpdatesData(mappedProgram);
-          setOriginalProgramUpdatesData(mappedProgram);
-        } else {
-          const [mediaUpdates, programUpdates] = await Promise.all([
-            fetchMediaUpdatesForUser(),
-            fetchData(`program-updates/${userId}`),
-          ]);
-          const mappedMedia = mapUpdatesWithFullName(mediaUpdates);
-          const mappedProgram = mapUpdatesWithFullName(programUpdates);
-          setOriginalMediaUpdatesData(mappedMedia);
-          setMediaUpdatesData(mappedMedia);
-          setProgramUpdatesData(mappedProgram);
-          setOriginalProgramUpdatesData(mappedProgram);
+  }, [programUpdatesFromSWR]);
 
-          // Account updates placeholder — no backend route yet
-          const response = await backend.get(`/accountChange`);
-          const accountUpdates = response.data ?? [];
-          setAccountUpdatesData(accountUpdates);
-          setOriginalAccountUpdatesData(accountUpdates);
-        }
-      } catch (error) {
-        console.error('Fetch error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadData();
-  }, [userId, backend, fetchData, fetchMediaUpdatesForUser, role]);
+  useEffect(() => {
+    if (mediaUpdatesFromSWR) {
+      setMediaUpdatesData(mediaUpdatesFromSWR);
+    }
+  }, [mediaUpdatesFromSWR]);
+
+  useEffect(() => {
+    if (accountUpdatesFromSWR) {
+      setAccountUpdatesData(accountUpdatesFromSWR);
+    }
+  }, [accountUpdatesFromSWR]);
 
   return {
     userId,
     role,
     programUpdatesData,
     setProgramUpdatesData,
-    originalProgramUpdatesData,
     mediaUpdatesData,
     setMediaUpdatesData,
-    originalMediaUpdatesData,
     accountUpdatesData,
-    originalAccountUpdatesData,
     isLoading,
-    isProgramUpdatesLoading,
+    isProgramLoading,
     refetchProgramUpdates,
     refetchAccountUpdates,
+    originalProgramUpdatesData: programUpdatesFromSWR,
+    originalMediaUpdatesData: mediaUpdatesFromSWR,
+    originalAccountUpdatesData: accountUpdatesFromSWR,
   };
 }
