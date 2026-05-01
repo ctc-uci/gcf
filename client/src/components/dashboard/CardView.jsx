@@ -41,6 +41,7 @@ const BackCardView = ({ p, onClick, t, openEditForm }) => {
           pointerEvents="none"
           transition="opacity 0.2s ease"
           _groupHover={{ opacity: 1, pointerEvents: 'auto' }}
+          _groupFocusWithin={{ opacity: 1, pointerEvents: 'auto' }}
           zIndex={1}
         >
           <IconButton

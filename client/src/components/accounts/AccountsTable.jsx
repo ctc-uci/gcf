@@ -77,7 +77,6 @@ export const AccountsTable = ({
   searchQuery,
   activeFilters,
   isCardView,
-  onSave,
   onUpdate,
   showCreatedBy = false,
 }) => {
