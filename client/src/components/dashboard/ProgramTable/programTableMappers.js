@@ -50,16 +50,13 @@ export function mapAdminRow(row) {
     primaryLanguage: row.primaryLanguage,
 
     media: row.media,
+    fileChanges: row.fileChanges,
   };
 }
 
 export function mapRdRow(row) {
   const languages = Array.isArray(row.languages) ? row.languages : [];
 
-  const location =
-    row.programLocation && row.regionName
-      ? `${row.programLocation}, ${row.regionName}`
-      : (row.programLocation ?? row.regionName ?? '');
   return {
     id: row.programId,
     title: row.programName,
@@ -85,6 +82,7 @@ export function mapRdRow(row) {
     languages,
     primaryLanguage: row.primaryLanguage,
     media: row.media,
+    fileChanges: row.fileChanges,
   };
 }
 

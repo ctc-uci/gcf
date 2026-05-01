@@ -1,6 +1,7 @@
 import { HamburgerIcon } from '@chakra-ui/icons';
 import {
   Button,
+  Divider,
   Flex,
   HStack,
   Icon,
@@ -16,7 +17,6 @@ import {
 } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
-import { BsArrowDownUp } from 'react-icons/bs';
 import { FiPlus, FiSearch } from 'react-icons/fi';
 import {
   HiOutlineAdjustmentsHorizontal,
@@ -117,16 +117,6 @@ export const AccountToolbar = ({
         spacing={6}
         align="center"
       >
-        <IconButton
-          aria-label={t('common.sort')}
-          icon={<BsArrowDownUp size={20} />}
-          variant="ghost"
-          color="gray.600"
-          w="20px"
-          h="20px"
-          minW="20px"
-          p={0}
-        />
         <HStack
           w="48px"
           h="20px"
@@ -145,6 +135,11 @@ export const AccountToolbar = ({
             w="20px"
             p={0}
             onClick={() => setIsCardView(false)}
+          />
+          <Divider
+            orientation="vertical"
+            h="20px"
+            borderWidth="1px"
           />
           <IconButton
             aria-label={t('common.gridView')}

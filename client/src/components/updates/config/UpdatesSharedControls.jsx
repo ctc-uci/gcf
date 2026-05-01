@@ -1,5 +1,6 @@
+import { HamburgerIcon } from '@chakra-ui/icons';
 import {
-  HStack,
+  Divider,
   Icon,
   IconButton,
   Input,
@@ -11,11 +12,10 @@ import {
 } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
-import { BsGrid3X3Gap } from 'react-icons/bs';
-import { FiList, FiSearch } from 'react-icons/fi';
+import { FiSearch } from 'react-icons/fi';
 import {
-  HiArrowsUpDown,
   HiOutlineAdjustmentsHorizontal,
+  HiOutlineSquares2X2,
 } from 'react-icons/hi2';
 
 import { FilterComponent } from '../../common/FilterComponent';
@@ -79,34 +79,5 @@ export function UpdatesFilterPopover({ columns, onFilterChange }) {
         />
       </PopoverContent>
     </Popover>
-  );
-}
-/** List / grid view toggle (visual only; wire actions when needed). */
-export function UpdatesViewModeToggle() {
-  const { t } = useTranslation();
-  return (
-    <HStack
-      spacing={0}
-      border="1px solid"
-      borderColor="gray.200"
-      borderRadius="md"
-    >
-      <IconButton
-        aria-label={t('common.listViewAria')}
-        icon={<FiList />}
-        variant="ghost"
-        size="sm"
-        color="gray.500"
-        borderRadius="md"
-      />
-      <IconButton
-        aria-label={t('common.gridViewAria')}
-        icon={<BsGrid3X3Gap />}
-        variant="ghost"
-        size="sm"
-        color="gray.500"
-        borderRadius="md"
-      />
-    </HStack>
   );
 }

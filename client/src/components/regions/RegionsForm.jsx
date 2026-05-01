@@ -19,15 +19,16 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  HStack,
   Input,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
-  Select,
   Tag,
   TagCloseButton,
   TagLabel,
+  Text,
   useToast,
   VStack,
 } from '@chakra-ui/react';
@@ -37,14 +38,16 @@ import { GetCountries } from 'react-country-state-city';
 import { useTranslation } from 'react-i18next';
 import { BsArrowsAngleContract, BsArrowsAngleExpand } from 'react-icons/bs';
 
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
+
 const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
   const [regionalDirectors, setRegionalDirectors] = useState([]);
   const [countries, setCountries] = useState([]);
   const [selectedCountries, setSelectedCountries] = useState([]);
-  const [selectedDirector, setSelectedDirector] = useState('');
-  const [originalDirectorId, setOriginalDirectorId] = useState('');
+  const [selectedDirectors, setSelectedDirectors] = useState([]);
+  const [originalDirectorIds, setOriginalDirectorIds] = useState([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [drawerSize, setDrawerSize] = useState('md');
@@ -52,10 +55,35 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   const [regionNameError, setRegionNameError] = useState(false);
   const toast = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [assignedCountryNames, setAssignedCountryNames] = useState([]);
 
-  const filteredCountries = countries.filter((c) =>
-    c.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchAllAssignedCountries = async () => {
+      try {
+        const res = await backend.get('/country');
+        const allAssigned = Array.isArray(res.data) ? res.data : [];
+        const names = allAssigned
+          .filter((c) => !region || c.regionId !== region.id)
+          .map((c) => c.name);
+        setAssignedCountryNames(names);
+      } catch (err) {
+        console.error('Error fetching assigned countries:', err);
+      }
+    };
+    fetchAllAssignedCountries();
+  }, [backend, region]);
+
+  const filteredCountries = countries.filter((c) => {
+    const matchesSearch = c.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const notAlreadySelected = !selectedCountries.some(
+      (sc) => sc.iso3 === c.iso3
+    );
+    const notAssignedElsewhere = !assignedCountryNames.includes(c.name);
+    return matchesSearch && notAlreadySelected && notAssignedElsewhere;
+  });
 
   useEffect(() => {
     const fetchRegionalDirectors = async () => {
@@ -78,29 +106,27 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   useEffect(() => {
     if (region) {
       setRegionName(region.name || '');
-      const fetchRegionDirector = async () => {
+      const fetchRegionDirectors = async () => {
         try {
           const res = await backend.get(
             `/regional-directors/region/${region.id}/`
           );
-          if (res.data) {
-            const match = regionalDirectors.find(
-              (d) => d.id === res.data.userId
-            );
-            const directorId = match?.id?.toString() ?? '';
-            setSelectedDirector(directorId);
-            setOriginalDirectorId(directorId);
-          } else {
-            setSelectedDirector('');
-            setOriginalDirectorId('');
-          }
+          const data = Array.isArray(res.data) ? res.data : [];
+          const ids = data
+            .map((d) => {
+              const match = regionalDirectors.find((rd) => rd.id === d.userId);
+              return match?.id?.toString();
+            })
+            .filter(Boolean);
+          setSelectedDirectors(ids);
+          setOriginalDirectorIds(ids);
         } catch (err) {
-          console.error('Error fetching region director:', err);
-          setSelectedDirector('');
-          setOriginalDirectorId('');
+          console.error('Error fetching region directors:', err);
+          setSelectedDirectors([]);
+          setOriginalDirectorIds([]);
         }
       };
-      fetchRegionDirector();
+      fetchRegionDirectors();
 
       const fetchRegionCountries = async () => {
         try {
@@ -119,16 +145,14 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
       fetchRegionCountries();
     } else {
       setRegionName('');
-      setSelectedDirector('');
-      setOriginalDirectorId('');
+      setSelectedDirectors([]);
+      setOriginalDirectorIds([]);
       setSelectedCountries([]);
     }
   }, [countries, region, regionalDirectors, backend]);
 
   const handleSelect = (country) => {
-    if (!selectedCountries.some((c) => c.iso3 === country.iso3)) {
-      setSelectedCountries((prev) => [...prev, country]);
-    }
+    setSelectedCountries((prev) => [...prev, country]);
   };
 
   const handleRemove = (iso3) => {
@@ -148,18 +172,23 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
         last_modified: new Date().toISOString(),
       });
 
-      if (selectedDirector !== originalDirectorId) {
-        if (originalDirectorId) {
-          await backend.delete(
-            `/regional-directors/${originalDirectorId}/region/${region.id}`
-          );
-        }
-        if (selectedDirector) {
-          await backend.put(`/regional-directors/${selectedDirector}/region`, {
+      const addedDirectors = selectedDirectors.filter(
+        (id) => !originalDirectorIds.includes(id)
+      );
+      const removedDirectors = originalDirectorIds.filter(
+        (id) => !selectedDirectors.includes(id)
+      );
+
+      await Promise.all([
+        ...addedDirectors.map((id) =>
+          backend.put(`/regional-directors/${id}/region`, {
             region_id: region.id,
-          });
-        }
-      }
+          })
+        ),
+        ...removedDirectors.map((id) =>
+          backend.delete(`/regional-directors/${id}/region/${region.id}`)
+        ),
+      ]);
 
       const existingRes = await backend.get(`/region/${region.id}/countries`);
       const existingCountries = Array.isArray(existingRes.data)
@@ -196,11 +225,13 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
       });
       const newRegionId = newRegion.data.id;
 
-      if (selectedDirector) {
-        await backend.put(`/regional-directors/${selectedDirector}/region`, {
-          region_id: newRegionId,
-        });
-      }
+      await Promise.all(
+        selectedDirectors.map((id) =>
+          backend.put(`/regional-directors/${id}/region`, {
+            region_id: newRegionId,
+          })
+        )
+      );
 
       await Promise.all(
         selectedCountries.map((country) =>
@@ -214,11 +245,26 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
       );
     }
   };
+
+  const resetForm = () => {
+    setRegionName('');
+    setSelectedDirectors([]);
+    setOriginalDirectorIds([]);
+    setSelectedCountries([]);
+    setRegionNameError(false);
+    setSearchTerm('');
+    setDrawerSize('md');
+    setIsSaving(false);
+  };
+
   return (
     <Drawer
       isOpen={isOpen}
       placement="right"
-      onClose={onClose}
+      onClose={() => {
+        resetForm();
+        onClose();
+      }}
       size={drawerSize}
     >
       <DrawerOverlay />
@@ -268,20 +314,90 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
 
             <FormControl>
               <FormLabel>{t('regions.regionalDirector')}</FormLabel>
-              <Select
-                placeholder={t('regions.directorPlaceholder')}
-                value={selectedDirector}
-                onChange={(e) => setSelectedDirector(e.target.value)}
+              <Flex
+                wrap="wrap"
+                gap={2}
+                mb={2}
               >
-                {regionalDirectors?.map((director) => (
-                  <option
-                    key={director.id}
-                    value={director.id}
-                  >
-                    {director.firstName} {director.lastName}
-                  </option>
-                ))}
-              </Select>
+                {selectedDirectors.map((dirId) => {
+                  const director = regionalDirectors.find(
+                    (d) => d.id.toString() === dirId
+                  );
+                  if (!director) return null;
+                  return (
+                    <Tag
+                      key={dirId}
+                      variant="solid"
+                      colorScheme="teal"
+                    >
+                      <TagLabel
+                        h="30px"
+                        alignItems="center"
+                        display="flex"
+                        justifyContent="center"
+                      >
+                        <HStack spacing={2}>
+                          <DirectorAvatar
+                            picture={director.picture}
+                            name={`${director.firstName} ${director.lastName}`}
+                            boxSize="24px"
+                          />
+                          <Text>
+                            {director.firstName} {director.lastName}
+                          </Text>
+                        </HStack>
+                      </TagLabel>
+                      <TagCloseButton
+                        onClick={() =>
+                          setSelectedDirectors((prev) =>
+                            prev.filter((id) => id !== dirId)
+                          )
+                        }
+                      />
+                    </Tag>
+                  );
+                })}
+              </Flex>
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  variant="outline"
+                  size="sm"
+                >
+                  {t('common.add')}
+                </MenuButton>
+                <MenuList
+                  maxH="300px"
+                  overflowY="auto"
+                >
+                  {regionalDirectors
+                    ?.filter(
+                      (d) => !selectedDirectors.includes(d.id.toString())
+                    )
+                    .map((director) => (
+                      <MenuItem
+                        key={director.id}
+                        onClick={() =>
+                          setSelectedDirectors((prev) => [
+                            ...prev,
+                            director.id.toString(),
+                          ])
+                        }
+                      >
+                        <HStack spacing={2}>
+                          <DirectorAvatar
+                            picture={director.picture}
+                            name={`${director.firstName} ${director.lastName}`}
+                            boxSize="24px"
+                          />
+                          <Text>
+                            {director.firstName} {director.lastName}
+                          </Text>
+                        </HStack>
+                      </MenuItem>
+                    ))}
+                </MenuList>
+              </Menu>
             </FormControl>
 
             <FormControl>
@@ -370,8 +486,11 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                 </Button>
                 <Button
                   colorScheme="teal"
-                  isDisabled={!regionName.trim()}
+                  isDisabled={!regionName.trim() || isSaving}
+                  isLoading={isSaving}
                   onClick={async () => {
+                    if (isSaving) return;
+                    setIsSaving(true);
                     try {
                       await saveRegion();
                       toast({
@@ -380,6 +499,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                         duration: 5000,
                         isClosable: true,
                       });
+                      resetForm();
                       onSave();
                     } catch (err) {
                       console.error('Error saving region:', err);
@@ -390,6 +510,8 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                         duration: 5000,
                         isClosable: true,
                       });
+                    } finally {
+                      setIsSaving(false);
                     }
                   }}
                 >
@@ -458,8 +580,11 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                   <AlertDialogBody>{t('regions.unsavedBody')}</AlertDialogBody>
                   <AlertDialogFooter>
                     <Button
-                      isDisabled={!regionName.trim()}
+                      isDisabled={!regionName.trim() || isSaving}
+                      isLoading={isSaving}
                       onClick={async () => {
+                        if (isSaving) return;
+                        setIsSaving(true);
                         try {
                           await saveRegion();
                           toast({
@@ -480,6 +605,9 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                             duration: 5000,
                             isClosable: true,
                           });
+                        } finally {
+                          setIsSaving(false);
+                          resetForm();
                         }
                       }}
                     >
@@ -488,6 +616,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                     <Button
                       colorScheme="red"
                       onClick={() => {
+                        resetForm();
                         onClose();
                         setIsCancelDialogOpen(false);
                       }}

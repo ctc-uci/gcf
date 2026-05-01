@@ -3,6 +3,7 @@ import { randomBytes } from 'crypto';
 import { keysToCamel } from '@/common/utils';
 import express from 'express';
 
+import { deleteFromS3 } from '../common/s3';
 import { admin } from '../config/firebase';
 import { db } from '../db/db-pgp';
 
@@ -108,8 +109,8 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
     } = req.body;
 
     await admin.auth().updateUser(targetId, {
-      email: email,
-      password: password,
+      ...(email && { email }),
+      ...(password && { password }),
       displayName: `${firstName} ${lastName}`,
     });
 
@@ -117,6 +118,10 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
       `SELECT role FROM gcf_user WHERE id = $1`,
       [targetId]
     );
+
+    if (!oldRoleResponse[0]) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
     const oldRole = oldRoleResponse[0].role;
 
@@ -137,7 +142,7 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
           [targetId]
         );
       }
-      if (oldRole === 'Regional Director') {
+      else if (oldRole === 'Regional Director') {
         await db.query(
           `DELETE FROM regional_director WHERE user_id = $1 RETURNING *`,
           [targetId]
@@ -161,26 +166,34 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
     } else {
       // Update existing assignments if role hasn't changed
       if (role === 'Program Director' && programId) {
+        await db.query(`DELETE FROM program_director WHERE user_id = $1`, [
+          targetId,
+        ]);
         await db.query(
-          `UPDATE program_director SET program_id = $1 WHERE user_id = $2`,
-          [programId, targetId]
+          `INSERT INTO program_director (user_id, program_id) 
+          VALUES ($1, $2)`,
+          [targetId, programId]
         );
       }
-      if (role === 'Regional Director' && regionId) {
+      else if (role === 'Regional Director' && regionId) {
+        await db.query(`DELETE FROM regional_director WHERE user_id = $1`, [
+          targetId,
+        ]);
         await db.query(
-          `UPDATE regional_director SET region_id = $1 WHERE user_id = $2`,
-          [regionId, targetId]
+          `INSERT INTO regional_director (user_id, region_id) 
+          VALUES ($1, $2)`,
+          [targetId, regionId]
         );
       }
     }
 
-    res.status(201).json({
+    res.status(200).json({
       uid: targetId,
       user: keysToCamel(updatedGcfUser[0]),
       message: 'User updated successfully',
     });
   } catch (err) {
-    console.error('Error creating user:', err);
+    console.error('Error updating user:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -224,11 +237,15 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
     // Super Admin: view and edit all users and their associated information (including admins)
     if (role === 'Super Admin') {
       accounts = await db.query(
-        `SELECT 
+        `SELECT
           u.id,
           u.first_name,
           u.last_name,
+          COALESCE(array_agg(DISTINCT r.name) FILTER (WHERE r.name IS NOT NULL), '{}') AS region,
           u.role,
+          u.picture,
+          cb.picture AS created_by_picture,
+          MAX(TRIM(CONCAT_WS(' ', cb.first_name, cb.last_name))) AS created_by_name,
           COALESCE(
             array_cat(
               COALESCE(
@@ -245,22 +262,28 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
         FROM gcf_user u
         LEFT JOIN regional_director rd ON u.id = rd.user_id
         LEFT JOIN country c ON rd.region_id = c.region_id
+        LEFT JOIN region r ON rd.region_id = r.id
         LEFT JOIN program p_rd ON c.id = p_rd.country
         LEFT JOIN program_director pd ON u.id = pd.user_id
         LEFT JOIN program p_pd ON pd.program_id = p_pd.id
-        GROUP BY u.id, u.first_name, u.last_name, u.role
+        LEFT JOIN gcf_user cb ON cb.id = u.created_by
+        GROUP BY u.id, u.first_name, u.last_name, u.role, u.picture, cb.picture
         ORDER BY u.last_name ASC`
       );
     }
 
     // Admin: RDs and PDs with their associated programs; CANNOT view or edit other Admins
-    if (role === 'Admin') {
+    else if (role === 'Admin') {
       accounts = await db.query(
-        `SELECT 
+        `SELECT
           u.id,
           u.first_name,
           u.last_name,
           u.role,
+          u.picture,
+          COALESCE(array_agg(DISTINCT r.name) FILTER (WHERE r.name IS NOT NULL), '{}') AS region,
+          cb.picture AS created_by_picture,
+          MAX(TRIM(CONCAT_WS(' ', cb.first_name, cb.last_name))) AS created_by_name,
           COALESCE(
             array_cat(
               COALESCE(
@@ -280,19 +303,24 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
         LEFT JOIN program p_rd ON c.id = p_rd.country
         LEFT JOIN program_director pd ON u.id = pd.user_id
         LEFT JOIN program p_pd ON pd.program_id = p_pd.id
+        LEFT JOIN gcf_user cb ON cb.id = u.created_by
+        LEFT JOIN region r ON rd.region_id = r.id
         WHERE u.role = 'Regional Director' OR u.role = 'Program Director'
-        GROUP BY u.id, u.first_name, u.last_name, u.role
+        GROUP BY u.id, u.first_name, u.last_name, u.role, u.picture, cb.picture
         ORDER BY u.last_name ASC`
       );
     }
     // Regional Director: only program directors in their region with their programs
     else if (role === 'Regional Director') {
       accounts = await db.query(
-        `SELECT 
+        `SELECT
           u.id,
           u.first_name,
           u.last_name,
           u.role,
+          u.picture,
+          cb.picture AS created_by_picture,
+          MAX(TRIM(CONCAT_WS(' ', cb.first_name, cb.last_name))) AS created_by_name,
           COALESCE(
             array_agg(DISTINCT p.name) FILTER (WHERE p.id IS NOT NULL),
             '{}'
@@ -302,13 +330,13 @@ gcfUserRouter.get('/:id/accounts', async (req, res) => {
         JOIN program p ON c.id = p.country
         JOIN program_director pd ON p.id = pd.program_id
         JOIN gcf_user u ON pd.user_id = u.id
+        LEFT JOIN gcf_user cb ON cb.id = u.created_by
         WHERE rd.user_id = $1
-        GROUP BY u.id, u.first_name, u.last_name, u.role
+        GROUP BY u.id, u.first_name, u.last_name, u.role, u.picture, cb.picture
         ORDER BY u.last_name ASC`,
         [id]
       );
     }
-
     // Fetch emails for each user in one batch (faster than N client requests)
     if (accounts?.length > 0) {
       const auth = admin.auth();
@@ -385,9 +413,15 @@ gcfUserRouter.patch('/:id/preferred-language', async (req, res) => {
 gcfUserRouter.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const gcfUser = await db.query(`SELECT ALL * FROM gcf_user WHERE id = $1`, [
-      id,
-    ]);
+    const gcfUser = await db.query(
+      `SELECT u.*, COALESCE(array_agg(DISTINCT r.name) FILTER (WHERE r.name IS NOT NULL), '{}') AS region
+       FROM gcf_user u
+       LEFT JOIN regional_director rd ON u.id = rd.user_id
+       LEFT JOIN region r ON rd.region_id = r.id
+       WHERE u.id = $1
+       GROUP BY u.id`,
+      [id]
+    );
 
     if (gcfUser.length === 0) {
       return res.status(404).send('Item not found');
@@ -428,16 +462,63 @@ gcfUserRouter.put('/:id', async (req, res) => {
 gcfUserRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedGcfUser = await db.query(
-      `DELETE FROM gcf_user WHERE id = $1 RETURNING *`,
-      [id]
-    );
 
-    if (deletedGcfUser.length === 0) {
+    const deletedRow = await db.tx(async (t) => {
+      const existing = await t.oneOrNone(
+        `SELECT id FROM gcf_user WHERE id = $1`,
+        [id]
+      );
+      if (!existing) {
+        return null;
+      }
+
+      await t.none(`DELETE FROM program_director WHERE user_id = $1`, [id]);
+      await t.none(`DELETE FROM regional_director WHERE user_id = $1`, [id]);
+
+      const deletedGcfUser = await t.any(
+        `DELETE FROM gcf_user WHERE id = $1 RETURNING *`,
+        [id]
+      );
+      return deletedGcfUser[0] ?? null;
+    });
+
+    if (!deletedRow) {
       return res.status(404).send('Item not found');
     }
 
-    res.status(200).json(keysToCamel(deletedGcfUser[0]));
+    const pictureKey =
+      typeof deletedRow.picture === 'string' ? deletedRow.picture.trim() : '';
+    if (pictureKey) {
+      try {
+        await deleteFromS3(pictureKey);
+      } catch (s3Err) {
+        console.error('S3 delete profile picture:', s3Err);
+      }
+    }
+
+    let firebaseAuthDeleted = true;
+    try {
+      await admin.auth().deleteUser(id);
+    } catch (firebaseErr) {
+      if (firebaseErr.code === 'auth/user-not-found') {
+        firebaseAuthDeleted = true;
+      } else {
+        firebaseAuthDeleted = false;
+        console.error('Firebase deleteUser:', firebaseErr);
+      }
+    }
+
+    if (!firebaseAuthDeleted) {
+      return res.status(503).json({
+        error:
+          'Database user was deleted but Firebase authentication could not be removed.',
+        gcfUserDeleted: true,
+        firebaseAuthDeleted: false,
+        user: keysToCamel(deletedRow),
+      });
+    }
+
+    res.status(200).json(keysToCamel(deletedRow));
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  Avatar,
   Badge,
   Box,
   Center,
@@ -23,13 +22,19 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { formatRelativeDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
-import { FiStar, FiUser } from 'react-icons/fi';
+import { FiStar } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 import { SortArrows } from '../tables/SortArrows';
 import { ProgramUpdateForm } from './forms/ProgramUpdateForm';
+
+function getProgramUpdateStatusLabel(row, t) {
+  return row?.resolved ? t('common.resolved') : t('common.unresolved');
+}
 
 export function downloadProgramUpdatesAsCsv(data, t) {
   const headers = [
@@ -45,18 +50,17 @@ export function downloadProgramUpdatesAsCsv(data, t) {
     escapeCsvValue(row.flagged ? t('updates.csvFlagged') : ''),
     escapeCsvValue(row.updateType || row.title || ''),
     escapeCsvValue(row.note),
-    escapeCsvValue(row.status),
+    escapeCsvValue(getProgramUpdateStatusLabel(row, t)),
     escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
     escapeCsvValue(row.name),
-    escapeCsvValue(row.updateDate),
+    escapeCsvValue(formatRelativeDate(row.updatedAt || row.updateDate)),
   ]);
   downloadCsv(headers, rows, `program-updates-${getFilenameTimestamp()}.csv`);
 }
 
 const StatusBadge = ({ status }) => {
   const { t } = useTranslation();
-  const isResolved =
-    status?.toLowerCase() === 'resolved' || status?.toLowerCase() === 'active';
+  const isResolved = status;
   return (
     <Badge
       bg={isResolved ? 'gray.100' : 'red.100'}
@@ -125,24 +129,45 @@ export const ProgramUpdatesTable = ({
     return filteredData.filter(
       (update) =>
         (update.note || '').toLowerCase().includes(q) ||
+        (update.title || '').toLowerCase().includes(q) ||
         (update.name || '').toLowerCase().includes(q) ||
         (update.fullName || '').toLowerCase().includes(q) ||
-        (update.status || '').toLowerCase().includes(q) ||
-        (update.updateDate || '').toLowerCase().includes(q)
+        getProgramUpdateStatusLabel(update, t).toLowerCase().includes(q) ||
+        (formatRelativeDate(update.updatedAt || update.updateDate) || '')
+          .toLowerCase()
+          .includes(q)
     );
-  }, [searchQuery, filteredData]);
+  }, [searchQuery, filteredData, t]);
+
+  const displayDataWithDefaultSort = useMemo(() => {
+    const getUpdateTime = (value) => {
+      if (!value) return 0;
+      const time = new Date(value).getTime();
+      return Number.isNaN(time) ? 0 : time;
+    };
+
+    return [...displayData].sort(
+      (a, b) =>
+        getUpdateTime(b.updatedAt || b.updateDate) -
+        getUpdateTime(a.updatedAt || a.updateDate)
+    );
+  }, [displayData]);
 
   const [sortedData, setSortedData] = useState(null);
 
   useEffect(() => {
     setSortedData(null);
-  }, [displayData]);
+  }, [displayDataWithDefaultSort]);
 
-  const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
-  const tableData = sortedData ?? displayData;
+  const { sortOrder, handleSort } = useTableSort(
+    displayDataWithDefaultSort,
+    setSortedData
+  );
+  const tableData = sortedData ?? displayDataWithDefaultSort;
 
   return (
     <>
+      {/* TODO: create a StudentUpdateForm with edit functionality */}
       <ProgramUpdateForm
         isOpen={isFormOpen}
         onOpen={() => setIsFormOpen(true)}
@@ -150,7 +175,7 @@ export const ProgramUpdatesTable = ({
           setIsFormOpen(false);
           setSelectedUpdate(null);
         }}
-        onSave={onSave}
+        onSuccess={onSave}
         programUpdateId={selectedUpdate?.id}
         isInstrumentUpdate={selectedUpdate?.isInstrumentUpdate}
         selectedUpdate={selectedUpdate}
@@ -213,7 +238,7 @@ export const ProgramUpdatesTable = ({
                 </Th>
                 {(showStatus || showFlagAndType) && (
                   <Th
-                    onClick={() => handleSort('status')}
+                    onClick={() => handleSort('resolved')}
                     cursor="pointer"
                     color="gray.500"
                     fontSize="xs"
@@ -222,7 +247,7 @@ export const ProgramUpdatesTable = ({
                   >
                     {t('updates.colStatus')}
                     <SortArrows
-                      columnKey="status"
+                      columnKey="resolved"
                       sortOrder={sortOrder}
                     />
                   </Th>
@@ -256,7 +281,7 @@ export const ProgramUpdatesTable = ({
                   />
                 </Th>
                 <Th
-                  onClick={() => handleSort('updateDate')}
+                  onClick={() => handleSort('updatedAt')}
                   cursor="pointer"
                   color="gray.500"
                   fontSize="xs"
@@ -265,7 +290,7 @@ export const ProgramUpdatesTable = ({
                 >
                   {t('updates.colDate')}
                   <SortArrows
-                    columnKey="updateDate"
+                    columnKey="updatedAt"
                     sortOrder={sortOrder}
                   />
                 </Th>
@@ -318,25 +343,26 @@ export const ProgramUpdatesTable = ({
                         noOfLines={1}
                         maxW="400px"
                       >
-                        {row.note || t('updates.programNotePlaceholder')}
+                        {row.note ||
+                          row.title ||
+                          t('updates.programNotePlaceholder')}
                       </Text>
                     </Td>
                     {(showStatus || showFlagAndType) && (
                       <Td>
-                        <StatusBadge status={row.status} />
+                        <StatusBadge status={row.resolved} />
                       </Td>
                     )}
                     <Td>
                       <HStack spacing={2}>
-                        <Avatar
-                          size="xs"
+                        <DirectorAvatar
+                          picture={row.picture}
                           name={
                             [row.firstName, row.lastName]
                               .filter(Boolean)
-                              .join(' ') || undefined
+                              .join(' ') || ''
                           }
-                          bg="teal.500"
-                          color="white"
+                          boxSize="24px"
                         />
                         <Text fontSize="sm">
                           {[row.firstName, row.lastName]
@@ -358,7 +384,7 @@ export const ProgramUpdatesTable = ({
                         fontSize="sm"
                         color="gray.600"
                       >
-                        {row.updateDate || ''}
+                        {formatRelativeDate(row.updatedAt || row.updateDate)}
                       </Text>
                     </Td>
                   </Tr>

@@ -1,10 +1,14 @@
 import { keysToCamel } from '@/common/utils';
+import { verifyToken } from '@/middleware';
 import express from 'express';
 
 import { db } from '../db/db-pgp';
 
 const regionRouter = express.Router();
 regionRouter.use(express.json());
+regionRouter.post('*', verifyToken);
+regionRouter.put('*', verifyToken);
+regionRouter.delete('*', verifyToken);
 
 regionRouter.get('/', async (req, res) => {
   try {
@@ -51,7 +55,7 @@ regionRouter.get('/get-region-name/:id', async (req, res) => {
       return res.status(404).send('Item not found');
     }
 
-    res.status(200).json(keysToCamel(region[0]));
+    res.status(200).json(keysToCamel(region));
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal Server Error');

@@ -60,8 +60,12 @@
     "placeholderNotes": "笔记",
     "keepUnresolved": "保留为未解决",
     "saveMarkResolved": "保存并标记为已解决",
+    "markAsUnresolved": "标记为未解决",
+    "keepResolved": "保持已解决",
     "oldProfile": "旧档案",
     "newProfile": "新的个人资料",
+    "diffLabelOld": "旧",
+    "diffLabelNew": "新",
     "editUpdates": "编辑更新",
     "accountUpdate": "账户更新",
     "profilePicture": "个人资料图片",
@@ -162,6 +166,7 @@
     "regionPrefix": ": {{region}}"
   },
   "sidebar": {
+    "home": "首页",
     "programs": "节目",
     "updates": "更新",
     "accounts": "账户",
@@ -180,16 +185,22 @@
     "uploadPhoto": "上传照片",
     "bio": "简介",
     "preferredLanguage": "首选语言",
-    "langEnglish": "🇺🇸 英语",
-    "langSpanish": "🇪🇸 西班牙语",
-    "langFrench": "🇫🇷法语",
-    "langChinese": "🇨🇳 中文",
+    "langEnglish": "英语",
+    "langSpanish": "西班牙语",
+    "langFrench": "法语",
+    "langChinese": "中文",
     "changePassword": "更改密码",
     "togglePassword": "切换密码可见性",
     "invalidInfoTitle": "无效信息！",
     "invalidInfoDesc": "请检查您输入的信息。",
     "savedTitle": "帐户更改已保存",
     "savedDesc": "您帐户的更新已保存在 {{time}}。",
+    "pendingApprovalTitle": "已提交审批",
+    "pendingApprovalDesc": "您的个人资料更改正在等待管理员或区域总监审核。",
+    "passwordInvalidTitle": "密码无效",
+    "passwordMin12Desc": "密码长度至少为 12 个字符。",
+    "passwordUpdatedTitle": "密码已更新",
+    "passwordUpdatedDesc": "您的密码已于 {{time}} 更新。",
     "edit": "编辑"
   },
   "searchBar": {
@@ -210,11 +221,13 @@
     "instrumentsDonated": "捐赠仪器"
   },
   "lessonVideos": {
-    "title": "课程视频",
+    "title": "课程材料",
     "empty": "没有可用的课程视频",
     "loading": "正在加载课程视频...",
     "scrollLeft": "向左滚动",
-    "scrollRight": "向右滚动"
+    "scrollRight": "向右滚动",
+    "videosTab": "视频",
+    "pdfsTab": "PDF 文件"
   },
   "videoPlayer": {
     "playlistFallback": "播放列表"
@@ -345,7 +358,10 @@
     "locationRowLabel": "地点",
     "instrumentQuantityPair": "{{name}}: {{qty}}",
     "instrumentQuantityInvalid": "请输入至少为 1 的数量。",
-    "instrumentQuantityAria": "乐器数量"
+    "instrumentQuantityAria": "乐器数量",
+    "deleteTitle": "确定要删除此项目吗？",
+    "deleteDesc": "此操作无法撤销。",
+    "deleteProgram": "删除项目"
   },
   "locationForm": {
     "selectRegion": "选择地区...",
@@ -406,6 +422,9 @@
     "deleteTitle": "删除该帐户？",
     "deleteDesc": "此操作无法撤消。",
     "deleteAccount": "删除帐户",
+    "deleteSuccess": "帐户已删除",
+    "deletePartialTitle": "已从目录中移除帐户",
+    "deletePartialDesc": "用户已从应用中移除，但登录帐户未能自动删除。您可能需要在 Firebase 中手动删除或稍后重试。",
     "fieldFirstName": "名",
     "fieldLastName": "姓",
     "fieldEmail": "电子邮件",
@@ -423,7 +442,8 @@
   },
   "mediaPage": {
     "title": "我的媒体",
-    "new": "新的",
+    "searchPlaceholder": "搜索",
+    "uploadMedia": "上传文件",
     "uploads": "上传",
     "noProgram": "没有找到程序",
     "noMediaForProgram": "没有与 {{name}} 相关的媒体"
@@ -435,15 +455,29 @@
   "mediaUpload": {
     "dragDrop": "将文件拖放到此处",
     "or": "或者",
-    "browse": "浏览文件"
+    "browse": "浏览文件",
+    "acceptedTypes": "可接受的文件类型：{{fileTypes}}"
+  },
+  "mediaEditModal": {
+    "heading": "编辑详情",
+    "titlePlaceholder": "标题",
+    "descriptionPlaceholder": "添加描述"
   },
   "mediaCard": {
-    "loadingAlt": "加载中..."
+    "loadingAlt": "加载中...",
+    "noDescription": "暂无描述",
+    "deleteModalHeader": "您确定要删除吗？",
+    "deleteModalBody": "此操作无法撤消。",
+    "deleteMedia": "删除媒体",
+    "expandPdf": "展开 PDF"
   },
   "mediaPreview": {
     "previewAlt": "预览",
     "loadingAlt": "加载中...",
     "titlePlaceholder": "添加标题"
+  },
+  "mediaPreviewTag": {
+    "openPreview": "打开预览"
   },
   "mediaPreviewList": {
     "uploadedFiles": "上传的文件",
@@ -513,6 +547,8 @@
     "instrumentUpdateCard": "仪器更新",
     "studentUpdateCard": "学生更新",
     "deleteDraft": "删除",
+    "deleteUpdateTitle": "删除此更新？",
+    "deleteUpdateBody": "此操作无法撤销。确定要删除此项目更新吗？",
     "cannotSaveTitle": "无法保存更新",
     "cannotSaveDesc": "无法加载您的程序。刷新页面并重试。",
     "createdTitle": "已创建新更新",
@@ -545,10 +581,18 @@
     "photosVideos": "照片/视频",
     "noMediaAttached": "没有附加媒体",
     "editUpdate": "编辑更新",
+    "enrollmentChangeLabel": "入学变动",
+    "reviewProgramNameLabel": "项目名称",
+    "reviewInstrumentQuantityLabel": "乐器和数量",
+    "reviewSpecialRequestFlaggedLabel": "特殊请求（已标记）",
     "instrumentQuantity": "仪器及数量",
     "selectInstrumentPh": "选择仪器",
     "flagLabel": "旗帜",
     "updateType": "更新类型",
+    "deleteSuccessTitle": "更新已删除",
+    "deleteSuccessDesc": "项目更新已成功删除。",
+    "deleteErrorTitle": "无法删除更新",
+    "deleteErrorDesc": "请重试。",
     "savedTitle": "更新已保存",
     "createdTitleToast": "已创建更新",
     "savedDesc": "程序更新已成功更新。",

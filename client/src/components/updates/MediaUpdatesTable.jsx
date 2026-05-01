@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  Avatar,
   Badge,
   Box,
   Center,
@@ -23,11 +22,12 @@ import {
   escapeCsvValue,
   getFilenameTimestamp,
 } from '@/utils/downloadCsv';
+import { formatRelativeDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
-import { FiUser } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 import { SortArrows } from '../tables/SortArrows';
 import { ReviewMediaUpdate } from './forms/ReviewMediaUpdate';
 
@@ -38,7 +38,7 @@ export function downloadMediaUpdatesAsCsv(data) {
     escapeCsvValue(row.status),
     escapeCsvValue([row.firstName, row.lastName].filter(Boolean).join(' ')),
     escapeCsvValue(row.programName),
-    escapeCsvValue(row.updateDate),
+    escapeCsvValue(row.updatedAt || row.updateDate),
   ]);
   downloadCsv(headers, rows, `media-updates-${getFilenameTimestamp()}.csv`);
 }
@@ -47,6 +47,7 @@ const authorDisplayName = (row) =>
   [row.firstName, row.lastName].filter(Boolean).join(' ').trim() ||
   row.fullName?.trim() ||
   '';
+
 const StatusBadge = ({ status }) => {
   const { t } = useTranslation();
   const isResolved =
@@ -97,7 +98,9 @@ export const MediaUpdatesTable = ({
         (update.programName || '').toLowerCase().includes(q) ||
         author.includes(q) ||
         (update.status || '').toLowerCase().includes(q) ||
-        (update.updateDate || '').toLowerCase().includes(q)
+        (formatRelativeDate(update.updatedAt || update.updateDate) || '')
+          .toLowerCase()
+          .includes(q)
       );
     });
   }, [searchQuery, filteredData]);
@@ -223,11 +226,10 @@ export const MediaUpdatesTable = ({
                   </Td>
                   <Td>
                     <HStack spacing={2}>
-                      <Avatar
-                        size="xs"
-                        name={authorDisplayName(row) || undefined}
-                        bg="teal.500"
-                        color="white"
+                      <DirectorAvatar
+                        picture={row.picture}
+                        name={authorDisplayName(row)}
+                        boxSize="24px"
                       />
                       <Text fontSize="sm">
                         {authorDisplayName(row) || t('common.name')}
@@ -247,7 +249,7 @@ export const MediaUpdatesTable = ({
                       fontSize="sm"
                       color="gray.600"
                     >
-                      {row.updateDate || ''}
+                      {formatRelativeDate(row.updatedAt || row.updateDate)}
                     </Text>
                   </Td>
                 </Tr>

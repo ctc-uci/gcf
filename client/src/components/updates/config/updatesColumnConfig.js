@@ -13,7 +13,7 @@ export const programDirectorFilterColumns = [
   {
     key: 'status',
     type: 'select',
-    options: ['Pending', 'Reviewed', 'Approved', 'Resolved'],
+    options: ['Resolved', 'Unresolved'],
   },
   { key: 'note', type: 'text' },
 ];

@@ -8,7 +8,7 @@ directorRouter.get('/me/:userId/program', async (req, res) => {
   try {
     const { userId } = req.params;
     const director = await db.query(
-      'SELECT program_id FROM program_director WHERE user_id = $1 LIMIT 1',
+      'SELECT program_id, bio FROM program_director WHERE user_id = $1 LIMIT 1',
       [userId]
     );
     if (!director?.length)
@@ -18,7 +18,7 @@ directorRouter.get('/me/:userId/program', async (req, res) => {
     ]);
     if (!program?.length)
       return res.status(404).json({ error: 'Program not found' });
-    res.status(200).json(keysToCamel(program[0]));
+    res.status(200).json(keysToCamel({...program[0], bio: director[0].bio}));
   } catch (err) {
     console.error('Error in /me/:userId/program:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -35,12 +35,13 @@ directorRouter.get('/me/:userId/stats', async (req, res) => {
     if (!director?.length)
       return res.status(404).json({ error: 'Program director not found' });
     const programId = director[0].program_id;
+    
     const stats = await db.query(
       `SELECT
-                (SELECT COALESCE(SUM(ec.enrollment_change), 0) - COALESCE(SUM(ec.graduated_change), 0) FROM enrollment_change ec
-                 JOIN program_update pu ON pu.id = ec.update_id WHERE pu.program_id = $1) AS students,
-                (SELECT COALESCE(SUM(ic.amount_changed), 0) FROM instrument_change ic
-                 JOIN program_update pu ON pu.id = ic.update_id WHERE pu.program_id = $1) AS instruments`,
+          (SELECT COALESCE(SUM(ec.enrollment_change), 0) - COALESCE(SUM(ec.graduated_change), 0) FROM enrollment_change ec
+           JOIN program_update pu ON pu.id = ec.update_id WHERE pu.program_id = $1 AND (pu.resolved = TRUE OR pu.show_on_table IS FALSE)) AS students,
+          (SELECT COALESCE(SUM(ic.amount_changed), 0) FROM instrument_change ic
+           JOIN program_update pu ON pu.id = ic.update_id WHERE pu.program_id = $1 AND (pu.resolved = TRUE OR pu.show_on_table IS FALSE)) AS instruments`,
       [programId]
     );
     const row = stats[0];
@@ -62,8 +63,7 @@ directorRouter.get('/me/:userId/media', async (req, res) => {
       return res.status(404).json({ error: 'Program director not found' });
     const programId = director[0].program_id;
     const media = await db.query(
-      `SELECT mc.* 
-             FROM media_change mc
+      `SELECT mc.* FROM media_change mc
              JOIN program_update pu ON pu.id = mc.update_id
              WHERE pu.program_id = $1
              ORDER BY mc.id DESC`,
@@ -197,6 +197,25 @@ directorRouter.put('/:userId', async (req, res) => {
     );
 
     res.status(200).json(keysToCamel(director));
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
+
+directorRouter.patch('/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { bio } = req.body;
+
+    const director = await db.query(
+      'UPDATE program_director SET bio = $2 WHERE user_id = $1 RETURNING *',
+      [userId, bio]
+    );
+
+    if (!director?.length)
+      return res.status(404).json({ error: 'Program director not found' });
+
+    res.status(200).json(keysToCamel(director[0]));
   } catch (err) {
     res.status(400).send(err.message);
   }

@@ -60,8 +60,12 @@
     "placeholderNotes": "Remarques",
     "keepUnresolved": "Conserver comme non résolu",
     "saveMarkResolved": "Enregistrer et marquer comme résolu",
+    "markAsUnresolved": "Marquer comme non résolu",
+    "keepResolved": "Conserver résolu",
     "oldProfile": "Ancien profil",
     "newProfile": "Nouveau profil",
+    "diffLabelOld": "Ancien",
+    "diffLabelNew": "Nouveau",
     "editUpdates": "Modifier les mises à jour",
     "accountUpdate": "Mise à jour du compte",
     "profilePicture": "Photo de profil",
@@ -162,6 +166,7 @@
     "regionPrefix": ": {{region}}"
   },
   "sidebar": {
+    "home": "Accueil",
     "programs": "Programmes",
     "updates": "Mises à jour",
     "accounts": "Comptes",
@@ -180,16 +185,22 @@
     "uploadPhoto": "Télécharger une photo",
     "bio": "Biographie",
     "preferredLanguage": "Langue préférée",
-    "langEnglish": "🇺🇸 Anglais",
+    "langEnglish": "Anglais",
     "langSpanish": "Espagnol",
-    "langFrench": "🇫🇷 Français",
-    "langChinese": "🇨🇳 Chinois",
+    "langFrench": "Français",
+    "langChinese": "Chinois",
     "changePassword": "Changer le mot de passe",
     "togglePassword": "Basculer la visibilité du mot de passe",
     "invalidInfoTitle": "Informations invalides !",
     "invalidInfoDesc": "Veuillez vérifier vos informations de saisie.",
     "savedTitle": "Modifications du compte enregistrées",
     "savedDesc": "Les mises à jour de votre compte ont été enregistrées à {{time}}.",
+    "pendingApprovalTitle": "Soumis pour approbation",
+    "pendingApprovalDesc": "Vos modifications de profil sont en attente d'examen par un administrateur ou un directeur régional.",
+    "passwordInvalidTitle": "Mot de passe invalide",
+    "passwordMin12Desc": "Le mot de passe doit contenir au moins 12 caractères.",
+    "passwordUpdatedTitle": "Mot de passe mis à jour",
+    "passwordUpdatedDesc": "Votre mot de passe a été mis à jour à {{time}}.",
     "edit": "Modifier"
   },
   "searchBar": {
@@ -210,11 +221,13 @@
     "instrumentsDonated": "Instruments donnés"
   },
   "lessonVideos": {
-    "title": "Vidéos de cours",
+    "title": "Matériel de cours",
     "empty": "Aucune vidéo de cours disponible",
     "loading": "Chargement des vidéos de cours...",
     "scrollLeft": "Faites défiler vers la gauche",
-    "scrollRight": "Faites défiler vers la droite"
+    "scrollRight": "Faites défiler vers la droite",
+    "videosTab": "Vidéos",
+    "pdfsTab": "PDFs"
   },
   "videoPlayer": {
     "playlistFallback": "Liste de lecture"
@@ -345,7 +358,10 @@
     "locationRowLabel": "Lieu",
     "instrumentQuantityPair": "{{name}}: {{qty}}",
     "instrumentQuantityInvalid": "Saisissez une quantité d’au moins 1.",
-    "instrumentQuantityAria": "Quantité d’instruments"
+    "instrumentQuantityAria": "Quantité d’instruments",
+    "deleteTitle": "Voulez-vous vraiment supprimer ce programme ?",
+    "deleteDesc": "Cette action est irréversible.",
+    "deleteProgram": "Supprimer le programme"
   },
   "locationForm": {
     "selectRegion": "Sélectionnez la région...",
@@ -406,6 +422,9 @@
     "deleteTitle": "Supprimer ce compte ?",
     "deleteDesc": "Cette action ne peut pas être annulée.",
     "deleteAccount": "Supprimer le compte",
+    "deleteSuccess": "Compte supprimé",
+    "deletePartialTitle": "Compte retiré de l'annuaire",
+    "deletePartialDesc": "L'utilisateur a été retiré de l'application, mais son compte de connexion n'a pas pu être supprimé automatiquement. Supprimez-le dans Firebase ou réessayez plus tard.",
     "fieldFirstName": "Prénom",
     "fieldLastName": "Nom de famille",
     "fieldEmail": "E-mail",
@@ -423,7 +442,8 @@
   },
   "mediaPage": {
     "title": "Mes médias",
-    "new": "Nouveau",
+    "searchPlaceholder": "Rechercher",
+    "uploadMedia": "Ajouter un fichier",
     "uploads": "Téléchargements",
     "noProgram": "Aucun programme trouvé",
     "noMediaForProgram": "Aucun média associé à {{name}}"
@@ -435,15 +455,29 @@
   "mediaUpload": {
     "dragDrop": "Glissez et déposez les fichiers ici",
     "or": "OU",
-    "browse": "Parcourir les fichiers"
+    "browse": "Parcourir les fichiers",
+    "acceptedTypes": "Types de fichiers acceptés : {{fileTypes}}"
+  },
+  "mediaEditModal": {
+    "heading": "Modifier les détails",
+    "titlePlaceholder": "Titre",
+    "descriptionPlaceholder": "Ajouter une description"
   },
   "mediaCard": {
-    "loadingAlt": "Chargement..."
+    "loadingAlt": "Chargement...",
+    "noDescription": "Aucune description",
+    "deleteModalHeader": "Êtes-vous sûr de vouloir supprimer?",
+    "deleteModalBody": "Cette action ne peut pas être annulée.",
+    "deleteMedia": "Supprimer les médias",
+    "expandPdf": "Agrandir le PDF"
   },
   "mediaPreview": {
     "previewAlt": "Aperçu",
     "loadingAlt": "Chargement...",
     "titlePlaceholder": "Ajouter un titre"
+  },
+  "mediaPreviewTag": {
+    "openPreview": "Ouvrir l'aperçu"
   },
   "mediaPreviewList": {
     "uploadedFiles": "Fichiers téléchargés",
@@ -513,6 +547,8 @@
     "instrumentUpdateCard": "Mise à jour des instruments",
     "studentUpdateCard": "Mise à jour des étudiants",
     "deleteDraft": "Supprimer",
+    "deleteUpdateTitle": "Supprimer cette mise à jour ?",
+    "deleteUpdateBody": "Cette action est irréversible. Voulez-vous vraiment supprimer cette mise à jour du programme ?",
     "cannotSaveTitle": "Impossible d'enregistrer la mise à jour",
     "cannotSaveDesc": "Votre programme n'a pas pu être chargé. Actualisez la page et réessayez.",
     "createdTitle": "Nouvelle mise à jour créée",
@@ -545,10 +581,18 @@
     "photosVideos": "Photos/Vidéos",
     "noMediaAttached": "Aucun média joint",
     "editUpdate": "Modifier la mise à jour",
+    "enrollmentChangeLabel": "Changement d'inscription",
+    "reviewProgramNameLabel": "Nom du programme",
+    "reviewInstrumentQuantityLabel": "Instruments et quantité",
+    "reviewSpecialRequestFlaggedLabel": "Demande spéciale (signalée)",
     "instrumentQuantity": "Instrument et quantité",
     "selectInstrumentPh": "Sélectionner un instrument",
     "flagLabel": "Drapeau",
     "updateType": "Type de mise à jour",
+    "deleteSuccessTitle": "Mise à jour supprimée",
+    "deleteSuccessDesc": "La mise à jour du programme a bien été supprimée.",
+    "deleteErrorTitle": "Impossible de supprimer la mise à jour",
+    "deleteErrorDesc": "Veuillez réessayer.",
     "savedTitle": "Mise à jour enregistrée",
     "createdTitleToast": "Mise à jour créée",
     "savedDesc": "La mise à jour du programme a été mise à jour avec succès.",

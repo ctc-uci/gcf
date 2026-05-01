@@ -11,6 +11,7 @@ import {
   Button,
   Center,
   Divider,
+  Grid,
   HStack,
   IconButton,
   Input,
@@ -22,6 +23,9 @@ import {
   Spinner,
   Table,
   TableContainer,
+  Tag,
+  TagCloseButton,
+  TagLabel,
   Tbody,
   Td,
   Text,
@@ -66,6 +70,7 @@ export function ProgramDisplay({
   setSelectedProgram,
   onSave,
   onStatsRefresh,
+  onFilteredDataChange,
 }) {
   const { t } = useTranslation();
   const [isCardView, setIsCardView] = useState(false);
@@ -141,11 +146,51 @@ export function ProgramDisplay({
   const [_activeFilters, setActiveFilters] = useState([]);
 
   const [filterStatus, setFilterStatus] = useState('');
-  const [filterLocation, setFilterLocation] = useState('');
-  const [filterInstruments, setFilterInstruments] = useState('');
+
+  // --- Location tag state ---
+  const [filterLocationTags, setFilterLocationTags] = useState([]);
+  const [filterLocationInput, setFilterLocationInput] = useState('');
+
+  // --- Instruments tag state ---
+  const [filterInstrumentTags, setFilterInstrumentTags] = useState([]);
+  const [filterInstrumentInput, setFilterInstrumentInput] = useState('');
+
+  const handleLocationKeyDown = (e) => {
+    if (e.key === 'Enter' && filterLocationInput.trim()) {
+      e.preventDefault();
+      setFilterLocationTags((prev) => {
+        const trimmed = filterLocationInput.trim();
+        return prev.some((t) => t.toLowerCase() === trimmed.toLowerCase())
+          ? prev
+          : [...prev, trimmed];
+      });
+      setFilterLocationInput('');
+    }
+  };
+
+  const handleInstrumentKeyDown = (e) => {
+    if (e.key === 'Enter' && filterInstrumentInput.trim()) {
+      e.preventDefault();
+      setFilterInstrumentTags((prev) => [
+        ...prev,
+        filterInstrumentInput.trim(),
+      ]);
+      setFilterInstrumentInput('');
+    }
+  };
+
+  const removeLocationTag = (index) => {
+    setFilterLocationTags((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeInstrumentTag = (index) => {
+    setFilterInstrumentTags((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const filterBySearchPanel = useMemo(() => {
     let data = originalData ?? [];
+
+    // Status filter
     if (filterStatus) {
       const norm = String(filterStatus).toLowerCase();
       data = data.filter((p) => {
@@ -155,20 +200,104 @@ export function ProgramDisplay({
         return s === norm;
       });
     }
-    if (filterLocation.trim()) {
-      const q = filterLocation.trim().toLowerCase();
-      data = data.filter((p) => (p.location ?? '').toLowerCase().includes(q));
+
+    // Location tag OR filter
+    if (filterLocationTags.length > 0) {
+      data = data.filter((p) =>
+        filterLocationTags.some((tag) =>
+          (p.location ?? '').toLowerCase().includes(tag.toLowerCase())
+        )
+      );
     }
-    if (filterInstruments.trim()) {
-      const q = filterInstruments.trim().toLowerCase();
+
+    // Instrument tag OR filter
+    if (filterInstrumentTags.length > 0) {
       data = data.filter((p) => {
-        const list = Array.isArray(p.instruments) ? p.instruments : [];
-        if (!Array.isArray(list)) return false;
-        return list.some((inst) => (inst.name ?? '').toLowerCase().includes(q));
+        const list = Array.isArray(p.instrumentsMap) ? p.instrumentsMap : [];
+        return filterInstrumentTags.some((tag) =>
+          list.some((inst) =>
+            (inst.name ?? '').toLowerCase().includes(tag.toLowerCase())
+          )
+        );
       });
     }
+
+    // Advanced filters
+    if (_activeFilters.length > 0) {
+      const completeFilters = _activeFilters.filter((f) => f.value !== '');
+
+      data = data.filter((row) => {
+        if (completeFilters.length === 0) return true;
+
+        return completeFilters.reduce((acc, filter, index) => {
+          const rowValue = row[filter.column];
+
+          const matches = (() => {
+            switch (filter.operation) {
+              case 'contains':
+                return String(rowValue ?? '')
+                  .toLowerCase()
+                  .includes(String(filter.value).toLowerCase());
+              case 'does_not_contain':
+                return !String(rowValue ?? '')
+                  .toLowerCase()
+                  .includes(String(filter.value).toLowerCase());
+              case 'equals':
+                return (
+                  String(rowValue ?? '').toLowerCase() ===
+                  String(filter.value).toLowerCase()
+                );
+              case 'is_not':
+                return (
+                  String(rowValue ?? '').toLowerCase() !==
+                  String(filter.value).toLowerCase()
+                );
+              case 'gt':
+                return Number(rowValue) > Number(filter.value);
+              case 'lt':
+                return Number(rowValue) < Number(filter.value);
+              case 'gte':
+                return Number(rowValue) >= Number(filter.value);
+              case 'lte':
+                return Number(rowValue) <= Number(filter.value);
+              case 'before':
+                return new Date(rowValue) < new Date(filter.value);
+              case 'after':
+                return new Date(rowValue) > new Date(filter.value);
+              case 'is':
+                return (
+                  new Date(rowValue).toDateString() ===
+                  new Date(filter.value).toDateString()
+                );
+              case 'contains_item':
+                return Array.isArray(rowValue)
+                  ? rowValue.some((item) =>
+                      String(item?.name ?? item)
+                        .toLowerCase()
+                        .includes(String(filter.value).toLowerCase())
+                    )
+                  : false;
+              default:
+                return true;
+            }
+          })();
+
+          // First filter always applies; subsequent use AND/OR logic
+          if (index === 0) return matches;
+          if (filter.logic === 'or') return acc || matches;
+          return acc && matches;
+        }, true);
+      });
+    }
+
     return data;
-  }, [originalData, filterStatus, filterLocation, filterInstruments]);
+  }, [
+    originalData,
+    filterStatus,
+    filterLocationTags,
+    filterInstrumentTags,
+    _activeFilters,
+  ]);
 
   const displayData = useMemo(() => {
     if (!searchQuery) return filterBySearchPanel;
@@ -197,6 +326,10 @@ export function ProgramDisplay({
     setSortedData(null);
   }, [displayData]);
 
+  useEffect(() => {
+    onFilteredDataChange?.(displayData);
+  }, [displayData, onFilteredDataChange]);
+
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
   const tableData = sortedData ?? displayData;
   const [flippedId, setFlippedId] = useState(null);
@@ -219,15 +352,20 @@ export function ProgramDisplay({
         }}
       />
       <Box
-        w="75vw"
+        w="100%"
         maxW="100%"
       >
-        <HStack
+        <Grid
+          templateColumns={{ base: '1fr', md: '1fr auto 1fr' }}
+          alignItems="center"
+          gap={{ base: 4, md: 3 }}
           mb={4}
-          justifyContent="space-between"
           w="100%"
         >
-          <HStack spacing={3}>
+          <HStack
+            spacing={3}
+            minW={0}
+          >
             <Box
               fontSize="3xl"
               fontWeight="semibold"
@@ -242,10 +380,18 @@ export function ProgramDisplay({
               onClick={downloadDataAsCsv}
             />
           </HStack>
-          <HStack spacing={2}>
+
+          <HStack
+            spacing={3}
+            flexShrink={0}
+            justifyContent="center"
+            justifySelf={{ base: 'stretch', md: 'center' }}
+            flexWrap="wrap"
+          >
             <InputGroup
               size="sm"
               maxW="200px"
+              w={{ base: '100%', md: '200px' }}
             >
               <InputLeftElement pointerEvents="none">
                 <Search2Icon
@@ -263,25 +409,32 @@ export function ProgramDisplay({
               />
             </InputGroup>
 
-            <IconButton
-              aria-label="table view"
-              icon={<HamburgerIcon />}
-              size="sm"
-              variant={isCardView ? 'ghost' : 'solid'}
-              onClick={() => setIsCardView(false)}
-            />
-            <Divider
-              orientation="vertical"
-              h="20px"
-              borderWidth="1px"
-            />
-            <IconButton
-              aria-label="card view"
-              icon={<HiOutlineSquares2X2 />}
-              size="sm"
-              variant={isCardView ? 'solid' : 'ghost'}
-              onClick={() => setIsCardView(true)}
-            />
+            <HStack
+              spacing={1}
+              alignItems="center"
+            >
+              <IconButton
+                aria-label="table view"
+                icon={<HamburgerIcon />}
+                size="sm"
+                variant="ghost"
+                color={isCardView ? 'gray.600' : 'teal.500'}
+                onClick={() => setIsCardView(false)}
+              />
+              <Divider
+                orientation="vertical"
+                h="18px"
+                borderWidth="1px"
+              />
+              <IconButton
+                aria-label="card view"
+                icon={<HiOutlineSquares2X2 />}
+                color={!isCardView ? 'gray.600' : 'teal.500'}
+                size="sm"
+                variant="ghost"
+                onClick={() => setIsCardView(true)}
+              />
+            </HStack>
 
             <Popover placement="bottom-end">
               <PopoverTrigger>
@@ -373,6 +526,8 @@ export function ProgramDisplay({
                         </Box>
                       </HStack>
                     </Box>
+
+                    {/* Location tag input */}
                     <Box>
                       <Text
                         fontSize="sm"
@@ -381,21 +536,57 @@ export function ProgramDisplay({
                       >
                         {t('common.location')}
                       </Text>
-                      <InputGroup size="sm">
-                        <InputLeftElement pointerEvents="none">
-                          <Search2Icon
-                            color="gray.400"
-                            boxSize={4}
-                          />
-                        </InputLeftElement>
+                      <Box
+                        border="1px solid"
+                        borderColor="gray.200"
+                        borderRadius="md"
+                        px={2}
+                        py={1}
+                        display="flex"
+                        flexWrap="wrap"
+                        gap={1}
+                        alignItems="center"
+                        minH="32px"
+                        bg="white"
+                        _focusWithin={{
+                          borderColor: 'blue.500',
+                          boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)',
+                        }}
+                      >
+                        {filterLocationTags.map((tag, i) => (
+                          <Tag
+                            key={i}
+                            size="sm"
+                            borderRadius="full"
+                            colorScheme="blue"
+                          >
+                            <TagLabel>{tag}</TagLabel>
+                            <TagCloseButton
+                              onClick={() => removeLocationTag(i)}
+                            />
+                          </Tag>
+                        ))}
                         <Input
-                          pl={8}
-                          placeholder="Filter by location"
-                          value={filterLocation}
-                          onChange={(e) => setFilterLocation(e.target.value)}
+                          variant="unstyled"
+                          size="sm"
+                          placeholder={
+                            filterLocationTags.length === 0
+                              ? t('programDisplay.filterByLocation')
+                              : ''
+                          }
+                          value={filterLocationInput}
+                          onChange={(e) =>
+                            setFilterLocationInput(e.target.value)
+                          }
+                          onKeyDown={handleLocationKeyDown}
+                          flex={1}
+                          minW="120px"
+                          fontSize="sm"
                         />
-                      </InputGroup>
+                      </Box>
                     </Box>
+
+                    {/* Instruments tag input */}
                     <Box>
                       <Text
                         fontSize="sm"
@@ -404,20 +595,54 @@ export function ProgramDisplay({
                       >
                         {t('common.instruments')}
                       </Text>
-                      <InputGroup size="sm">
-                        <InputLeftElement pointerEvents="none">
-                          <Search2Icon
-                            color="gray.400"
-                            boxSize={4}
-                          />
-                        </InputLeftElement>
+                      <Box
+                        border="1px solid"
+                        borderColor="gray.200"
+                        borderRadius="md"
+                        px={2}
+                        py={1}
+                        display="flex"
+                        flexWrap="wrap"
+                        gap={1}
+                        alignItems="center"
+                        minH="32px"
+                        bg="white"
+                        _focusWithin={{
+                          borderColor: 'blue.500',
+                          boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)',
+                        }}
+                      >
+                        {filterInstrumentTags.map((tag, i) => (
+                          <Tag
+                            key={i}
+                            size="sm"
+                            borderRadius="full"
+                            colorScheme="blue"
+                          >
+                            <TagLabel>{tag}</TagLabel>
+                            <TagCloseButton
+                              onClick={() => removeInstrumentTag(i)}
+                            />
+                          </Tag>
+                        ))}
                         <Input
-                          pl={8}
-                          placeholder="Filter by instrument"
-                          value={filterInstruments}
-                          onChange={(e) => setFilterInstruments(e.target.value)}
+                          variant="unstyled"
+                          size="sm"
+                          placeholder={
+                            filterInstrumentTags.length === 0
+                              ? 'Filter by instrument, press Enter'
+                              : ''
+                          }
+                          value={filterInstrumentInput}
+                          onChange={(e) =>
+                            setFilterInstrumentInput(e.target.value)
+                          }
+                          onKeyDown={handleInstrumentKeyDown}
+                          flex={1}
+                          minW="120px"
+                          fontSize="sm"
                         />
-                      </InputGroup>
+                      </Box>
                     </Box>
                   </VStack>
                   <Divider mb={4} />
@@ -435,9 +660,18 @@ export function ProgramDisplay({
                 </Box>
               </PopoverContent>
             </Popover>
+          </HStack>
+
+          <HStack
+            spacing={3}
+            justifyContent={{ base: 'flex-start', md: 'flex-end' }}
+            minW={0}
+            flexWrap="wrap"
+          >
             <Text
               fontSize="sm"
               color="gray.500"
+              mr={{ base: 4, md: 8 }}
             >
               {t('programsTable.displayingResults', {
                 count: tableData.length,
@@ -459,7 +693,7 @@ export function ProgramDisplay({
               {t('programsTable.newProgram')}
             </Button>
           </HStack>
-        </HStack>
+        </Grid>
 
         <Box position="relative">
           {!isCardView ? (

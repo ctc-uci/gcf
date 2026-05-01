@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { DownloadIcon } from '@chakra-ui/icons';
 import {
   Box,
   Center,
@@ -14,7 +15,6 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useTranslation } from 'react-i18next';
-import { FiDownload } from 'react-icons/fi';
 
 import { AccountForm } from './AccountForm';
 import { AccountsTable, downloadAccountsAsCsv } from './AccountsTable';
@@ -82,6 +82,9 @@ export const Account = () => {
         programs: Array.isArray(item.programs) ? item.programs : [],
         email: item.email ?? '-',
         createdBy: item.createdByName || item.createdBy || '',
+        picture: item.picture || '',
+        createdByPicture: item.createdByPicture || '',
+        region: Array.isArray(item.region) ? item.region : [],
       }));
 
       setUsers(fetchedData);
@@ -108,6 +111,7 @@ export const Account = () => {
       w="100%"
       maxW="100%"
       minW={0}
+      overflowX="hidden"
     >
       <Flex
         mb={8}
@@ -132,7 +136,7 @@ export const Account = () => {
             {t('accounts.title')}
           </Heading>
           <IconButton
-            icon={<FiDownload size={20} />}
+            icon={<DownloadIcon />}
             variant="ghost"
             size="sm"
             aria-label={t('accounts.downloadAria')}

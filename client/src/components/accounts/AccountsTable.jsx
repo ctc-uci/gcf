@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  Avatar,
   Badge,
   Box,
   Button,
@@ -10,6 +9,7 @@ import {
   Icon,
   Table,
   TableContainer,
+  Tag,
   Tbody,
   Td,
   Text,
@@ -18,6 +18,8 @@ import {
   Tr,
   useColorModeValue,
   VStack,
+  Wrap,
+  WrapItem,
 } from '@chakra-ui/react';
 
 import {
@@ -30,6 +32,7 @@ import { FiEdit2, FiUsers } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 import { SortArrows } from '../tables/SortArrows';
 import CardView from './CardView';
 
@@ -198,6 +201,8 @@ export const AccountsTable = ({
                   textTransform="uppercase"
                   fontWeight="semibold"
                   letterSpacing="wider"
+                  minW="220px"
+                  maxW="300px"
                 >
                   {t('accounts.colProgramRegion')}
                   <SortArrows
@@ -231,7 +236,11 @@ export const AccountsTable = ({
                     {t('accounts.colCreatedBy')}
                   </Th>
                 )}
-                <Th width="80px"></Th>
+                <Th
+                  width="80px"
+                  position="sticky"
+                  right={0}
+                />
               </Tr>
             </Thead>
             <Tbody>
@@ -246,11 +255,10 @@ export const AccountsTable = ({
                 >
                   <Td>
                     <HStack spacing={3}>
-                      <Avatar
-                        size="xs"
+                      <DirectorAvatar
+                        picture={user.picture}
                         name={`${user.firstName} ${user.lastName}`}
-                        bg="teal.500"
-                        color="white"
+                        boxSize="24px"
                       />
                       <Text fontWeight="medium">
                         {user.firstName} {user.lastName}
@@ -260,10 +268,58 @@ export const AccountsTable = ({
 
                   <Td>{user.email}</Td>
 
-                  <Td>
-                    {Array.isArray(user.programs) &&
-                    user.programs.length > 0 ? (
-                      <Text>{user.programs.join(' + ')}</Text>
+                  <Td
+                    minW="220px"
+                    maxW="300px"
+                    whiteSpace="normal"
+                    verticalAlign="middle"
+                  >
+                    {user.role === 'Regional Director' ? (
+                      Array.isArray(user.region) && user.region.length > 0 ? (
+                        <Wrap spacing={1}>
+                          {user.region.map((r) => (
+                            <WrapItem key={r}>
+                              <Tag
+                                size="sm"
+                                borderRadius="md"
+                                {...getRoleBadgeProps(user.role)}
+                                fontWeight="medium"
+                              >
+                                {r}
+                              </Tag>
+                            </WrapItem>
+                          ))}
+                        </Wrap>
+                      ) : (
+                        <Badge
+                          px={2}
+                          py={0.5}
+                          borderRadius="sm"
+                          bg="gray.500"
+                          color="white"
+                          textTransform="uppercase"
+                          fontWeight="bold"
+                          fontSize="xs"
+                        >
+                          {t('common.notAssigned')}
+                        </Badge>
+                      )
+                    ) : Array.isArray(user.programs) &&
+                      user.programs.length > 0 ? (
+                      <Wrap spacing={1}>
+                        {user.programs.map((program) => (
+                          <WrapItem key={program}>
+                            <Tag
+                              size="sm"
+                              borderRadius="md"
+                              {...getRoleBadgeProps(user.role)}
+                              fontWeight="medium"
+                            >
+                              {program}
+                            </Tag>
+                          </WrapItem>
+                        ))}
+                      </Wrap>
                     ) : (
                       <Badge
                         px={2}
@@ -297,11 +353,10 @@ export const AccountsTable = ({
                   {showCreatedBy && (
                     <Td>
                       <HStack spacing={2}>
-                        <Avatar
-                          size="xs"
+                        <DirectorAvatar
+                          picture={user.createdByPicture}
                           name={user.createdBy || ''}
-                          bg="teal.500"
-                          color="white"
+                          boxSize="24px"
                         />
                         <Text>{user.createdBy || '-'}</Text>
                       </HStack>
@@ -311,6 +366,8 @@ export const AccountsTable = ({
                   <Td
                     p={0}
                     textAlign="right"
+                    position="sticky"
+                    right={0}
                   >
                     <Box
                       className="action-group"

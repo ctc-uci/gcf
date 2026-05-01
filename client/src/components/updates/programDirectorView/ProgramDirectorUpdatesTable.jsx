@@ -12,64 +12,35 @@ import {
   Th,
   Thead,
   Tr,
-  VStack,
 } from '@chakra-ui/react';
 
 import { EmptyStateBadge } from '@/components/badges/EmptyStateBadge';
+import { formatRelativeDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
 import { FiStar } from 'react-icons/fi';
 
 import { SortArrows } from '../../tables/SortArrows';
 
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr;
-  return d.toLocaleDateString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: '2-digit',
-  });
-}
-
-function formatChangeAmount(value, dash) {
-  if (value === null || value === undefined || value === '') return dash;
-  const n = Number(value);
-  if (Number.isNaN(n)) return String(value);
-  return n > 0 ? `+${n}` : String(n);
+function formatStatus(row, t) {
+  const isResolved = Boolean(row.resolved);
+  return (
+    <Badge
+      bg={isResolved ? 'gray.100' : 'red.100'}
+      color={isResolved ? 'gray.700' : 'red.700'}
+      borderRadius="md"
+      px={2}
+      py={0.5}
+      fontSize="xs"
+      fontWeight="500"
+      textTransform="capitalize"
+    >
+      {isResolved ? t('common.resolved') : t('common.unresolved')}
+    </Badge>
+  );
 }
 
 function displayInstrumentName(row, dash) {
   return row.instrumentName || row.title || dash;
-}
-
-function EnrollmentChangeDetails({ row, dash }) {
-  const hasEnrollment = row.enrollmentChange != null;
-  if (!hasEnrollment) {
-    return (
-      <Text
-        fontSize="sm"
-        color="gray.700"
-      >
-        {dash}
-      </Text>
-    );
-  }
-  return (
-    <VStack
-      align="start"
-      spacing={0.5}
-    >
-      {hasEnrollment && (
-        <Text
-          fontSize="sm"
-          color="gray.700"
-        >
-          {formatChangeAmount(row.enrollmentChange, dash)}
-        </Text>
-      )}
-    </VStack>
-  );
 }
 
 export const ProgramDirectorUpdatesTable = ({
@@ -82,7 +53,8 @@ export const ProgramDirectorUpdatesTable = ({
 }) => {
   const { t } = useTranslation();
   const dash = t('common.emDash');
-  const colSpan = variant === 'student' ? 3 : 5;
+  const colSpan = variant === 'student' ? 4 : 5;
+
   return (
     <Box
       position="relative"
@@ -97,12 +69,30 @@ export const ProgramDirectorUpdatesTable = ({
           overflowX="auto"
           maxW="100%"
         >
-          <Table variant="simple">
+          <Table
+            variant="simple"
+            sx={{ tableLayout: 'fixed', width: '100%' }}
+          >
+            {variant === 'instrument' ? (
+              <colgroup>
+                <col style={{ width: '52px' }} />
+                <col style={{ width: '180px' }} />
+                <col />
+                <col style={{ width: '112px' }} />
+                <col style={{ width: '120px' }} />
+              </colgroup>
+            ) : (
+              <colgroup>
+                <col style={{ width: '52px' }} />
+                <col />
+                <col style={{ width: '112px' }} />
+                <col style={{ width: '120px' }} />
+              </colgroup>
+            )}
             <Thead>
               {variant === 'instrument' ? (
                 <Tr>
                   <Th
-                    w="60px"
                     color="gray.500"
                     fontSize="xs"
                     textTransform="uppercase"
@@ -125,20 +115,6 @@ export const ProgramDirectorUpdatesTable = ({
                     />
                   </Th>
                   <Th
-                    onClick={() => handleSort('instrumentName')}
-                    cursor="pointer"
-                    color="gray.500"
-                    fontSize="xs"
-                    textTransform="uppercase"
-                    fontWeight="600"
-                  >
-                    {t('updates.pdColChangeAmount')}
-                    <SortArrows
-                      columnKey="instrumentChange"
-                      sortOrder={sortOrder}
-                    />
-                  </Th>
-                  <Th
                     onClick={() => handleSort('note')}
                     cursor="pointer"
                     color="gray.500"
@@ -153,6 +129,16 @@ export const ProgramDirectorUpdatesTable = ({
                     />
                   </Th>
                   <Th
+                    isNumeric
+                    color="gray.500"
+                    fontSize="xs"
+                    textTransform="uppercase"
+                    fontWeight="600"
+                  >
+                    {t('updates.colStatus')}
+                  </Th>
+                  <Th
+                    isNumeric
                     onClick={() => handleSort('updateDate')}
                     cursor="pointer"
                     color="gray.500"
@@ -170,6 +156,14 @@ export const ProgramDirectorUpdatesTable = ({
               ) : (
                 <Tr>
                   <Th
+                    color="gray.500"
+                    fontSize="xs"
+                    textTransform="uppercase"
+                    fontWeight="600"
+                  >
+                    {t('updates.colFlag')}
+                  </Th>
+                  <Th
                     onClick={() => handleSort('note')}
                     cursor="pointer"
                     color="gray.500"
@@ -184,14 +178,16 @@ export const ProgramDirectorUpdatesTable = ({
                     />
                   </Th>
                   <Th
+                    isNumeric
                     color="gray.500"
                     fontSize="xs"
                     textTransform="uppercase"
                     fontWeight="600"
                   >
-                    {t('updates.pdColChangeAmount')}
+                    {t('updates.colStatus')}
                   </Th>
                   <Th
+                    isNumeric
                     onClick={() => handleSort('updateDate')}
                     cursor="pointer"
                     color="gray.500"
@@ -249,15 +245,10 @@ export const ProgramDirectorUpdatesTable = ({
                             {displayInstrumentName(row, dash)}
                           </Badge>
                         </Td>
-                        <Td>
-                          <Text
-                            fontSize="sm"
-                            color="gray.700"
-                          >
-                            {formatChangeAmount(row.instrumentChange, dash)}
-                          </Text>
-                        </Td>
-                        <Td>
+                        <Td
+                          verticalAlign="top"
+                          sx={{ maxWidth: 0 }}
+                        >
                           <Text
                             fontSize="sm"
                             color="gray.700"
@@ -266,18 +257,41 @@ export const ProgramDirectorUpdatesTable = ({
                             {row.note || '—'}
                           </Text>
                         </Td>
-                        <Td>
+                        <Td
+                          isNumeric
+                          verticalAlign="top"
+                        >
+                          {formatStatus(row, t)}
+                        </Td>
+                        <Td
+                          isNumeric
+                          verticalAlign="top"
+                        >
                           <Text
                             fontSize="sm"
                             color="gray.700"
                           >
-                            {formatDate(row.updateDate)}
+                            {formatRelativeDate(
+                              row.updatedAt || row.updateDate
+                            )}
                           </Text>
                         </Td>
                       </>
                     ) : (
                       <>
                         <Td>
+                          <Icon
+                            as={FiStar}
+                            boxSize={4}
+                            color={row.flagged ? 'teal.500' : 'gray.300'}
+                            fill={row.flagged ? 'teal.500' : 'none'}
+                            aria-hidden
+                          />
+                        </Td>
+                        <Td
+                          verticalAlign="top"
+                          sx={{ maxWidth: 0 }}
+                        >
                           <Text
                             fontSize="sm"
                             color="gray.700"
@@ -286,18 +300,23 @@ export const ProgramDirectorUpdatesTable = ({
                             {row.note || '—'}
                           </Text>
                         </Td>
-                        <Td>
-                          <EnrollmentChangeDetails
-                            row={row}
-                            dash={dash}
-                          />
+                        <Td
+                          isNumeric
+                          verticalAlign="top"
+                        >
+                          {formatStatus(row, t)}
                         </Td>
-                        <Td>
+                        <Td
+                          isNumeric
+                          verticalAlign="top"
+                        >
                           <Text
                             fontSize="sm"
                             color="gray.700"
                           >
-                            {formatDate(row.updateDate)}
+                            {formatRelativeDate(
+                              row.updatedAt || row.updateDate
+                            )}
                           </Text>
                         </Td>
                       </>

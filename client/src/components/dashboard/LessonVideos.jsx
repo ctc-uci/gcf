@@ -1,13 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import {
   AspectRatio,
   Box,
   Flex,
-  Heading,
   HStack,
-  IconButton,
   Image,
   Skeleton,
   Spinner,
@@ -36,19 +33,6 @@ function LessonVideos({
   const [playlists, setPlaylists] = useState([]);
   const [playlistVideos, setPlaylistVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const scrollRefs = useRef({});
-
-  const SCROLL_AMOUNT = 3 * (320 + 20); // 3 videos (width + gap)
-
-  const handleNext = (instrumentName) => {
-    const el = scrollRefs.current[instrumentName];
-    if (el) el.scrollBy({ left: SCROLL_AMOUNT, behavior: 'smooth' });
-  };
-
-  const handlePrev = (instrumentName) => {
-    const el = scrollRefs.current[instrumentName];
-    if (el) el.scrollBy({ left: -SCROLL_AMOUNT, behavior: 'smooth' });
-  };
 
   useEffect(() => {
     if (!userId) {
@@ -134,13 +118,6 @@ function LessonVideos({
 
   return (
     <Box>
-      <Heading
-        size="lg"
-        fontWeight="extrabold"
-        mb={4}
-      >
-        {t('lessonVideos.title')}
-      </Heading>
       {!isLoading && playlists.length === 0 && (
         <Text color="gray.500">{t('lessonVideos.empty')}</Text>
       )}
@@ -184,7 +161,10 @@ function LessonVideos({
         playlistVideos.map((playlist, i) => (
           <Box
             key={`${playlist.instrumentName}-${i}`}
-            m={5}
+            mt={5}
+            mr={5}
+            mb={5}
+            ml={0}
           >
             <HStack
               bg="gray.100"
@@ -202,127 +182,93 @@ function LessonVideos({
               </Text>
             </HStack>
             <Box
-              position="relative"
+              overflowX="auto"
+              overflowY="hidden"
+              bg="gray.100"
               w="fit-content"
+              maxW="1040px"
+              borderBottomRadius="xl"
+              borderTopRightRadius="xl"
+              p={5}
+              sx={{ '&::-webkit-scrollbar': { height: '8px' } }}
             >
-              <IconButton
-                position="absolute"
-                left="-70px"
-                top="50%"
-                transform="translateY(-50%)"
-                zIndex={1}
-                icon={<ChevronLeftIcon boxSize={16} />}
-                variant="ghost"
-                size="lg"
-                color="gray.400"
-                onClick={() => handlePrev(playlist.instrumentName)}
-                aria-label={t('lessonVideos.scrollLeft')}
-              />
-              <Box
-                ref={(el) => {
-                  scrollRefs.current[playlist.instrumentName] = el;
-                }}
-                overflowX="auto"
-                overflowY="hidden"
-                bg="gray.100"
-                w="fit-content"
-                maxW="1040px"
-                borderBottomRadius="xl"
-                borderTopRightRadius="xl"
-                p={5}
-                sx={{ '&::-webkit-scrollbar': { height: '8px' } }}
+              <HStack
+                spacing={5}
+                w="max-content"
               >
-                <HStack
-                  spacing={5}
-                  w="max-content"
-                >
-                  {playlist.videos.map((video, index) => {
-                    const snippet = video.snippet;
-                    const thumbnail =
-                      snippet?.thumbnails?.maxres?.url ??
-                      snippet?.thumbnails?.high?.url ??
-                      snippet?.thumbnails?.medium?.url ??
-                      snippet?.thumbnails?.default?.url ??
-                      `https://img.youtube.com/vi/${snippet.resourceId.videoId}/hqdefault.jpg`;
-                    const embedUrl = getYouTubeEmbedUrl(video);
-                    if (!embedUrl) return null;
-                    return (
+                {playlist.videos.map((video, index) => {
+                  const snippet = video.snippet;
+                  const thumbnail =
+                    snippet?.thumbnails?.maxres?.url ??
+                    snippet?.thumbnails?.high?.url ??
+                    snippet?.thumbnails?.medium?.url ??
+                    snippet?.thumbnails?.default?.url ??
+                    `https://img.youtube.com/vi/${snippet.resourceId.videoId}/hqdefault.jpg`;
+                  const embedUrl = getYouTubeEmbedUrl(video);
+                  if (!embedUrl) return null;
+                  return (
+                    <Box
+                      key={`${playlist.instrumentName}-${video.snippet?.resourceId?.videoId ?? index}-${index}`}
+                      borderRadius="md"
+                      overflow="hidden"
+                      flexShrink={0}
+                      w="320px"
+                      maxW="320px"
+                      cursor="pointer"
+                      onClick={() => {
+                        setSelectedVideo(video);
+                        setSelectedPlaylist(playlist);
+                      }}
+                    >
                       <Box
-                        key={`${playlist.instrumentName}-${video.snippet?.resourceId?.videoId ?? index}-${index}`}
-                        borderRadius="md"
+                        position="relative"
+                        borderRadius="2xl"
                         overflow="hidden"
-                        flexShrink={0}
-                        w="320px"
-                        maxW="320px"
-                        cursor="pointer"
-                        onClick={() => {
-                          setSelectedVideo(video);
-                          setSelectedPlaylist(playlist);
-                        }}
                       >
-                        <Box
-                          position="relative"
-                          borderRadius="2xl"
-                          overflow="hidden"
+                        <AspectRatio
+                          ratio={16 / 9}
+                          w="100%"
                         >
-                          <AspectRatio
-                            ratio={16 / 9}
-                            w="100%"
+                          <Image src={thumbnail} />
+                        </AspectRatio>
+                        <Box
+                          position="absolute"
+                          bottom="0"
+                          left="0"
+                          w="100%"
+                          bg="blackAlpha.700"
+                          p={1.5}
+                        >
+                          <Text
+                            fontSize="xs"
+                            fontWeight="medium"
+                            color="white"
+                            noOfLines={2}
                           >
-                            <Image src={thumbnail} />
-                          </AspectRatio>
-                          <Box
-                            position="absolute"
-                            bottom="0"
-                            left="0"
-                            w="100%"
-                            bg="blackAlpha.700"
-                            p={1.5}
-                          >
-                            <Text
-                              fontSize="xs"
-                              fontWeight="medium"
-                              color="white"
-                              noOfLines={2}
-                            >
-                              {snippet.title}
-                            </Text>
-                          </Box>
-                          <Flex
-                            position="absolute"
-                            top="0"
-                            left="0"
-                            w="100%"
-                            h="100%"
-                            align="center"
-                            justify="center"
-                            bg="blackAlpha.300"
-                          >
-                            <FiPlay
-                              fill="white"
-                              color="white"
-                              size={28}
-                            />
-                          </Flex>
+                            {snippet.title}
+                          </Text>
                         </Box>
+                        <Flex
+                          position="absolute"
+                          top="0"
+                          left="0"
+                          w="100%"
+                          h="100%"
+                          align="center"
+                          justify="center"
+                          bg="blackAlpha.300"
+                        >
+                          <FiPlay
+                            fill="white"
+                            color="white"
+                            size={28}
+                          />
+                        </Flex>
                       </Box>
-                    );
-                  })}
-                </HStack>
-              </Box>
-              <IconButton
-                position="absolute"
-                right="-70px"
-                top="50%"
-                transform="translateY(-50%)"
-                zIndex={1}
-                icon={<ChevronRightIcon boxSize={16} />}
-                variant="ghost"
-                size="lg"
-                color="gray.400"
-                onClick={() => handleNext(playlist.instrumentName)}
-                aria-label={t('lessonVideos.scrollRight')}
-              />
+                    </Box>
+                  );
+                })}
+              </HStack>
             </Box>
           </Box>
         ))}

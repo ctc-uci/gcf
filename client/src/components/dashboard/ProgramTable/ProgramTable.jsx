@@ -8,7 +8,7 @@ import { GetCity } from 'react-country-state-city';
 import { ProgramDisplay } from './ProgramDisplay';
 import { getRouteByRole, MAP_BY_ROLE } from './programTableMappers';
 
-function ProgramTable({ onStatsRefresh }) {
+function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { role, loading: roleLoading } = useRoleContext();
@@ -69,6 +69,7 @@ function ProgramTable({ onStatsRefresh }) {
             programDirectors,
             regionalDirectors,
             media,
+            fileChanges,
             instrumentsMap,
             partnerOrgName,
           ] = await Promise.all([
@@ -82,6 +83,9 @@ function ProgramTable({ onStatsRefresh }) {
               .catch(() => ({ data: [] })),
             backend
               .get(`/program/${programId}/media`)
+              .catch(() => ({ data: [] })),
+            backend
+              .get(`/fileChanges/program/${programId}`)
               .catch(() => ({ data: [] })),
             backend
               .get(`/program/${programId}/instruments`)
@@ -99,6 +103,7 @@ function ProgramTable({ onStatsRefresh }) {
             programDirectors: programDirectors?.data || [],
             regionalDirectors: regionalDirectors?.data || [],
             media: media?.data || [],
+            fileChanges: fileChanges?.data || [],
             instrumentsMap: instrumentsMap?.data || [],
             partnerOrgName: partnerOrgName?.data || [],
           };
@@ -136,6 +141,7 @@ function ProgramTable({ onStatsRefresh }) {
       setSelectedProgram={setSelectedProgram}
       onSave={fetchData}
       onStatsRefresh={onStatsRefresh}
+      onFilteredDataChange={onFilteredDataChange}
     />
   );
 }

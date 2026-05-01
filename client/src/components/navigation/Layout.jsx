@@ -41,8 +41,8 @@ export const Layout = () => {
       minW={0}
       w="100%"
       maxW="100%"
-      padding={6}
-      gap={6}
+      padding={4}
+      gap={4}
       overflow="hidden"
     >
       <Sidebar />
@@ -61,6 +61,7 @@ export const Layout = () => {
           minW={0}
           minH={0}
           overflowY="auto"
+          overflowX="hidden"
         >
           <Outlet />
         </Box>

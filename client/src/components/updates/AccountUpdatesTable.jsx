@@ -1,4 +1,3 @@
-//TODO: check this again
 import { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -22,14 +21,14 @@ import { useTranslation } from 'react-i18next';
 import { FiUser } from 'react-icons/fi';
 
 import { useTableSort } from '../../contexts/hooks/TableSort';
+import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 import { SortArrows } from '../tables/SortArrows';
 import { AccountUpdateDrawer } from './forms/AccountUpdateDrawer';
 
 const StatusBadge = ({ status, adminName }) => {
   const { t } = useTranslation();
   const hasAdmin = adminName && adminName.trim();
-  const isResolved =
-    status?.toLowerCase() === 'resolved' || status?.toLowerCase() === 'active';
+  const isResolved = status;
 
   if (hasAdmin) {
     return (
@@ -74,9 +73,13 @@ export const AccountUpdatesTable = ({
   originalData = [],
   isLoading = false,
   searchQuery = '',
+  onAccountChangeUpdated,
 }) => {
   const { t } = useTranslation();
-  const sourceData = data ?? originalData ?? [];
+  const sourceData = useMemo(
+    () => data ?? originalData ?? [],
+    [data, originalData]
+  );
 
   const displayData = useMemo(() => {
     if (!searchQuery) return sourceData;
@@ -84,21 +87,62 @@ export const AccountUpdatesTable = ({
     return sourceData.filter(
       (update) =>
         (update.note || '').toLowerCase().includes(q) ||
+        (update.changeType || '').toLowerCase().includes(q) ||
         (update.programName || '').toLowerCase().includes(q) ||
         (update.fullName || '').toLowerCase().includes(q) ||
-        (update.updateDate || '').toLowerCase().includes(q)
+        (update.lastModified || '').toLowerCase().includes(q) ||
+        `${update.authorFirstName || ''} ${update.authorLastName || ''}`
+          .toLowerCase()
+          .trim()
+          .includes(q)
     );
   }, [searchQuery, sourceData]);
+
+  const displayDataWithSortKeys = useMemo(() => {
+    const withKeys = displayData.map((row) => ({
+      ...row,
+      authorSortKey: [row.authorFirstName, row.authorLastName]
+        .filter(Boolean)
+        .join(' ')
+        .trim(),
+    }));
+    const lastModifiedTime = (v) => {
+      if (v === null || v === undefined || v === '') return 0;
+      const t = new Date(v).getTime();
+      return Number.isNaN(t) ? 0 : t;
+    };
+    // Newest first by default (matches program updates API: ORDER BY update_date DESC)
+    return [...withKeys].sort(
+      (a, b) =>
+        lastModifiedTime(b.lastModified) - lastModifiedTime(a.lastModified)
+    );
+  }, [displayData]);
 
   const [sortedData, setSortedData] = useState(null);
   const [selectedUpdate, setSelectedUpdate] = useState(null);
 
   useEffect(() => {
     setSortedData(null);
-  }, [displayData]);
+  }, [displayDataWithSortKeys]);
 
-  const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
-  const tableData = sortedData ?? displayData;
+  const { sortOrder, handleSort } = useTableSort(
+    displayDataWithSortKeys,
+    setSortedData
+  );
+  const tableData = sortedData ?? displayDataWithSortKeys;
+
+  const changeTypeToText = (changeType) => {
+    switch (changeType) {
+      case 'Creation':
+        return 'created';
+      case 'Update':
+        return 'updated';
+      case 'Deletion':
+        return 'deleted';
+      default:
+        return 'changed';
+    }
+  };
 
   return (
     <Box position="relative">
@@ -110,7 +154,7 @@ export const AccountUpdatesTable = ({
           <Thead>
             <Tr>
               <Th
-                onClick={() => handleSort('note')}
+                onClick={() => handleSort('changeType')}
                 cursor="pointer"
                 color="gray.500"
                 fontSize="xs"
@@ -119,12 +163,12 @@ export const AccountUpdatesTable = ({
               >
                 {t('updates.colUpdateNote')}
                 <SortArrows
-                  columnKey="note"
+                  columnKey="changeType"
                   sortOrder={sortOrder}
                 />
               </Th>
               <Th
-                onClick={() => handleSort('status')}
+                onClick={() => handleSort('resolved')}
                 cursor="pointer"
                 color="gray.500"
                 fontSize="xs"
@@ -133,12 +177,12 @@ export const AccountUpdatesTable = ({
               >
                 {t('updates.colStatus')}
                 <SortArrows
-                  columnKey="status"
+                  columnKey="resolved"
                   sortOrder={sortOrder}
                 />
               </Th>
               <Th
-                onClick={() => handleSort('firstName')}
+                onClick={() => handleSort('authorSortKey')}
                 cursor="pointer"
                 color="gray.500"
                 fontSize="xs"
@@ -147,26 +191,13 @@ export const AccountUpdatesTable = ({
               >
                 {t('updates.colAuthor')}
                 <SortArrows
-                  columnKey="firstName"
+                  columnKey="authorSortKey"
                   sortOrder={sortOrder}
                 />
               </Th>
+
               <Th
-                onClick={() => handleSort('programName')}
-                cursor="pointer"
-                color="gray.500"
-                fontSize="xs"
-                textTransform="uppercase"
-                fontWeight="600"
-              >
-                {t('updates.colProgram')}
-                <SortArrows
-                  columnKey="programName"
-                  sortOrder={sortOrder}
-                />
-              </Th>
-              <Th
-                onClick={() => handleSort('updateDate')}
+                onClick={() => handleSort('lastModified')}
                 cursor="pointer"
                 color="gray.500"
                 fontSize="xs"
@@ -175,7 +206,7 @@ export const AccountUpdatesTable = ({
               >
                 {t('updates.colDate')}
                 <SortArrows
-                  columnKey="updateDate"
+                  columnKey="lastModified"
                   sortOrder={sortOrder}
                 />
               </Th>
@@ -191,57 +222,58 @@ export const AccountUpdatesTable = ({
                 </Td>
               </Tr>
             ) : (
-              tableData.map((row) => (
-                <Tr
-                  key={row.id}
-                  cursor="pointer"
-                  _hover={{ bg: 'gray.50' }}
-                  onClick={() => setSelectedUpdate(row)}
-                >
-                  <Td>
-                    <Text
-                      noOfLines={1}
-                      maxW="400px"
-                    >
-                      {row.note || t('updates.accountNotePlaceholder')}
-                    </Text>
-                  </Td>
-                  <Td>
-                    <StatusBadge
-                      status={row.status}
-                      adminName={row.resolvedBy}
-                    />
-                  </Td>
-                  <Td>
-                    <HStack spacing={1}>
-                      <Icon
-                        as={FiUser}
-                        boxSize={4}
-                        color="gray.400"
-                      />
-                      <Text fontSize="sm">
-                        {row.authorName || row.firstName || t('common.name')}
+              tableData.map((row) => {
+                const authorDisplay = [row.authorFirstName, row.authorLastName]
+                  .filter(Boolean)
+                  .join(' ')
+                  .trim();
+                return (
+                  <Tr
+                    key={row.id}
+                    cursor="pointer"
+                    _hover={{ bg: 'gray.50' }}
+                    onClick={() => setSelectedUpdate(row)}
+                  >
+                    <Td>
+                      <Text
+                        noOfLines={1}
+                        maxW="400px"
+                      >
+                        {/* {row.note || t('updates.accountNotePlaceholder')} */}
+                        {row.changeType
+                          ? `Account has been ${changeTypeToText(row.changeType)}.`
+                          : t('updates.accountNotePlaceholder')}
                       </Text>
-                    </HStack>
-                  </Td>
-                  <Td>
-                    <Text
-                      fontSize="sm"
-                      fontWeight="500"
-                    >
-                      {row.programName || ''}
-                    </Text>
-                  </Td>
-                  <Td>
-                    <Text
-                      fontSize="sm"
-                      color="gray.600"
-                    >
-                      {row.updateDate || ''}
-                    </Text>
-                  </Td>
-                </Tr>
-              ))
+                    </Td>
+                    <Td>
+                      <StatusBadge
+                        status={row.resolved}
+                        adminName={row.resolvedBy}
+                      />
+                    </Td>
+                    <Td>
+                      <HStack spacing={2}>
+                        <DirectorAvatar
+                          picture={row.authorPicture}
+                          name={authorDisplay}
+                          boxSize="24px"
+                        />
+                        <Text fontSize="sm">
+                          {authorDisplay || t('common.name')}
+                        </Text>
+                      </HStack>
+                    </Td>
+                    <Td>
+                      <Text
+                        fontSize="sm"
+                        color="gray.600"
+                      >
+                        {row.lastModified || ''}
+                      </Text>
+                    </Td>
+                  </Tr>
+                );
+              })
             )}
           </Tbody>
         </Table>
@@ -250,6 +282,7 @@ export const AccountUpdatesTable = ({
         <AccountUpdateDrawer
           update={selectedUpdate}
           onClose={() => setSelectedUpdate(null)}
+          onAccountChangeUpdated={onAccountChangeUpdated}
         />
       )}
     </Box>

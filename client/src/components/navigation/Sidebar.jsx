@@ -7,7 +7,11 @@ import { useTranslation } from 'react-i18next';
 import { BsMap } from 'react-icons/bs';
 import { FaGuitar } from 'react-icons/fa';
 import { HiOutlineUser } from 'react-icons/hi';
-import { MdOutlineNotifications, MdPermMedia } from 'react-icons/md';
+import {
+  MdOutlineHome,
+  MdOutlineNotifications,
+  MdPermMedia,
+} from 'react-icons/md';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 
 import { SIDEBAR_WIDTH } from './layoutConstants';
@@ -33,6 +37,7 @@ const AutoFitText = ({ children }) => {
       whiteSpace="nowrap"
       overflow="hidden"
       width="100%"
+      pb="0.15em"
     >
       {children}
     </Box>
@@ -124,10 +129,10 @@ export const Sidebar = () => {
   } else if (role === 'Program Director') {
     navItems = [
       {
-        name: t('sidebar.programs'),
+        name: t('sidebar.home'),
         icon: (
           <Icon
-            as={FaGuitar}
+            as={MdOutlineHome}
             boxSize="20px"
           />
         ),
@@ -179,12 +184,17 @@ export const Sidebar = () => {
           justifyContent="center"
           flexShrink={0}
         >
-          <Image
-            src={logo}
-            alt={t('sidebar.logoAlt')}
-            objectFit="contain"
-            draggable={false}
-          />
+          <Link
+            as={RouterLink}
+            to="/dashboard"
+          >
+            <Image
+              src={logo}
+              alt={t('sidebar.logoAlt')}
+              objectFit="contain"
+              draggable={false}
+            />
+          </Link>
         </Box>
         <Flex
           direction="column"

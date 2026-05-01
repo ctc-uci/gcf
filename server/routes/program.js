@@ -1,10 +1,15 @@
 import { keysToCamel } from '@/common/utils';
+import { verifyToken } from '@/middleware';
 import express from 'express';
 
 import { db } from '../db/db-pgp';
 
 const programRouter = express.Router();
 programRouter.use(express.json());
+
+programRouter.post('*', verifyToken);
+programRouter.put('*', verifyToken);
+programRouter.delete('*', verifyToken);
 
 function normalizeLanguages(languages, primaryLanguage) {
   const candidateCodes = Array.isArray(languages)
@@ -462,7 +467,7 @@ programRouter.get('/:id/instruments', async (req, res) => {
       JOIN program_update pu ON pu.program_id = p.id
       JOIN instrument_change ic ON ic.update_id = pu.id
       JOIN instrument i ON i.id = ic.instrument_id
-      WHERE p.id = $1
+      WHERE p.id = $1 AND (pu.show_on_table = FALSE OR pu.resolved = TRUE)
       GROUP BY i.id, i.name
       HAVING COALESCE(SUM(ic.amount_changed), 0) <> 0
       ORDER BY i.name ASC;
@@ -487,7 +492,8 @@ programRouter.get('/:id/program-directors', async (req, res) => {
         u.id AS user_id,
         u.first_name,
         u.last_name,
-        u.picture
+        u.picture,
+        pd.bio
       FROM program_director pd
       JOIN gcf_user u ON pd.user_id = u.id
       WHERE pd.program_id = $1
@@ -500,6 +506,7 @@ programRouter.get('/:id/program-directors', async (req, res) => {
       firstName: row.first_name,
       lastName: row.last_name,
       picture: row.picture,
+      bio: row.bio,
     }));
 
     res.status(200).json(directors);
@@ -515,7 +522,7 @@ programRouter.get('/:id/media', async (req, res) => {
 
     const result = await db.query(
       `
-      SELECT m.id, m.s3_key, m.file_name, m.file_type, m.is_thumbnail, m.instrument_id
+      SELECT m.id, m.s3_key, m.file_name, m.file_type, m.is_thumbnail, m.instrument_id, m.status, m.description
       FROM media_change m
       JOIN program_update pu ON m.update_id = pu.id
       WHERE program_id = $1;
@@ -530,6 +537,7 @@ programRouter.get('/:id/media', async (req, res) => {
       file_type: row.file_type,
       is_thumbnail: row.is_thumbnail,
       instrument_id: row.instrument_id,
+      description: row.description,
     }));
 
     res.status(200).json(media);

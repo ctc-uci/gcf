@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { DownloadIcon } from '@chakra-ui/icons';
 import {
   Box,
   Center,
@@ -16,7 +17,6 @@ import {
 
 import { EmptyStateBadge } from '@/components/badges/EmptyStateBadge';
 import { useTranslation } from 'react-i18next';
-import { FiDownload } from 'react-icons/fi';
 
 import { AccountUpdatesTable } from './AccountUpdatesTable';
 import { programSectionColumns } from './config/updatesColumnConfig';
@@ -50,6 +50,7 @@ export const UpdatesPage = () => {
     isLoading,
     isProgramUpdatesLoading,
     refetchProgramUpdates,
+    refetchAccountUpdates,
   } = useUpdatesPageData();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -116,8 +117,11 @@ export const UpdatesPage = () => {
       p={8}
       bg="gray.50"
       minH="100vh"
+      w="100%"
+      maxW="100%"
       mx={-4}
       mt={0}
+      overflowX="hidden"
     >
       <Flex
         align="center"
@@ -133,7 +137,7 @@ export const UpdatesPage = () => {
           {t('updates.pageTitle')}
         </Heading>
         <IconButton
-          icon={<FiDownload />}
+          icon={<DownloadIcon />}
           variant="ghost"
           size="sm"
           aria-label={t('updates.downloadAria')}
@@ -243,6 +247,7 @@ export const UpdatesPage = () => {
                   originalData={originalAccountUpdatesData}
                   isLoading={isLoading}
                   searchQuery={searchQuery}
+                  onAccountChangeUpdated={refetchAccountUpdates}
                 />
               </Box>
             )}

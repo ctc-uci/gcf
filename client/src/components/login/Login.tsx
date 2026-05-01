@@ -125,10 +125,12 @@ export const Login = () => {
       switch (errorCode) {
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
+          setError('password', { message: t('validation.incorrectPassword') });
+          toastLoginError(t('login.incorrectLogin'));
+          break;
         case 'auth/invalid-email':
         case 'auth/user-not-found':
-          setError('email', { message: t('validation.incorrectEmail') });
-          setError('password', { message: t('validation.incorrectPassword') });
+          setError('email', { message: t('validation.invalidEmail') });
           toastLoginError(t('login.incorrectLogin'));
           break;
         case 'auth/unverified-email':
