@@ -77,7 +77,6 @@ export const AccountsTable = ({
   searchQuery,
   activeFilters,
   isCardView,
-  onSave,
   onUpdate,
   showCreatedBy = false,
 }) => {
@@ -383,6 +382,8 @@ export const AccountsTable = ({
                         colorScheme="teal"
                         bg="white"
                         onClick={() => onUpdate(user)}
+                        _hover={{ bg: 'teal.500', color: 'white' }}
+                        _active={{ bg: 'teal.100', color: 'teal.600' }}
                       >
                         {t('common.edit')}
                       </Button>
@@ -395,7 +396,7 @@ export const AccountsTable = ({
         ) : (
           <CardView
             data={tableData}
-            onSave={onSave}
+            onUpdate={onUpdate}
           />
         )}
       </TableContainer>

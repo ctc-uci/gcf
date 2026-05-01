@@ -179,7 +179,6 @@ export const Account = () => {
           activeFilters={activeFilters}
           isCardView={isCardView}
           showCreatedBy={role === 'Admin' || role === 'Super Admin'}
-          onSave={() => fetchData()}
           onUpdate={(user) => {
             setSelectedUser(user);
             setIsDrawerOpen(true);
