@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { DownloadIcon } from '@chakra-ui/icons';
 import {
@@ -15,6 +15,7 @@ import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useTranslation } from 'react-i18next';
+import useSWR from 'swr';
 
 import { AccountForm } from './AccountForm';
 import { AccountsTable, downloadAccountsAsCsv } from './AccountsTable';
@@ -34,9 +35,6 @@ export const Account = () => {
   const { role } = useRoleContext();
   const userId = currentUser?.uid;
 
-  const [users, setUsers] = useState([]);
-  const [originalUsers, setOriginalUsers] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -62,43 +60,29 @@ export const Account = () => {
 
   const { backend } = useBackendContext();
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    const route = getAccountsRoute(role, userId);
-    if (!route) {
-      console.error('No valid route for accounts. Missing userId or role.');
-      setIsLoading(false);
-      return;
-    }
-    try {
-      const response = await backend.get(route);
-      const rawData = response.data || [];
-      const fetchedData = rawData.map((item) => ({
-        id: item.id,
-        firstName: item.firstName,
-        lastName: item.lastName,
-        fullName: `${item.firstName} ${item.lastName}`,
-        role: item.role,
-        programs: Array.isArray(item.programs) ? item.programs : [],
-        email: item.email ?? '-',
-        createdBy: item.createdByName || item.createdBy || '',
-        picture: item.picture || '',
-        createdByPicture: item.createdByPicture || '',
-        region: Array.isArray(item.region) ? item.region : [],
-      }));
+  const route = getAccountsRoute(role, userId);
 
-      setUsers(fetchedData);
-      setOriginalUsers(fetchedData);
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [backend, role, userId]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const {
+    data: users = [],
+    isLoading,
+    mutate,
+  } = useSWR(route, async (url) => {
+    const response = await backend.get(url);
+    const rawData = response.data || [];
+    return rawData.map((item) => ({
+      id: item.id,
+      firstName: item.firstName,
+      lastName: item.lastName,
+      fullName: `${item.firstName} ${item.lastName}`,
+      role: item.role,
+      programs: Array.isArray(item.programs) ? item.programs : [],
+      email: item.email ?? '-',
+      createdBy: item.createdByName || item.createdBy || '',
+      picture: item.picture || '',
+      createdByPicture: item.createdByPicture || '',
+      region: Array.isArray(item.region) ? item.region : [],
+    }));
+  });
 
   const [activeFilters, setActiveFilters] = useState([]);
 
@@ -174,12 +158,12 @@ export const Account = () => {
         </Center>
       ) : (
         <AccountsTable
-          originalData={originalUsers}
+          originalData={users}
           searchQuery={searchQuery}
           activeFilters={activeFilters}
           isCardView={isCardView}
           showCreatedBy={role === 'Admin' || role === 'Super Admin'}
-          onSave={() => fetchData()}
+          onSave={() => mutate()}
           onUpdate={(user) => {
             setSelectedUser(user);
             setIsDrawerOpen(true);
@@ -190,7 +174,7 @@ export const Account = () => {
         targetUser={selectedUser}
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        onSave={() => fetchData()}
+        onSave={() => mutate()}
       ></AccountForm>
     </Box>
   );
