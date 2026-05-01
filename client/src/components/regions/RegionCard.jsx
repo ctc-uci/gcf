@@ -25,8 +25,8 @@ export const RegionCard = ({ region, onEdit, countries, refreshTrigger }) => {
   const { backend } = useBackendContext();
 
   const { data, error } = useSWR(
-    `/regional-directors/region/${region.id}/`,
-    async (url) => {
+    [`/regional-directors/region/${region.id}/`, refreshTrigger],
+    async ([url]) => {
       const res = await backend.get(url);
       return Array.isArray(res.data) ? res.data : [];
     }
