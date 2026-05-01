@@ -20,7 +20,7 @@ import useSWR from 'swr';
 import { isoCodeToFlagIconCode } from '../../utils/isoCodeToFlagIconCode';
 import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 
-export const RegionCard = ({ region, onEdit, countries }) => {
+export const RegionCard = ({ region, onEdit, countries, refreshTrigger }) => {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
 

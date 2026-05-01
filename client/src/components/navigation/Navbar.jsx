@@ -31,7 +31,7 @@ export const Navbar = () => {
   const { currentUser } = useAuthContext();
   const { backend } = useBackendContext();
   const userId = currentUser?.uid;
-  const [region, setRegion] = useState('');
+  const [region, setRegion] = useState([]);
   const [project, setProject] = useState('');
   const [userName, setUserName] = useState(currentUser?.displayName ?? '');
   const [profilePictureUrl, setProfilePictureUrl] = useState(null);
@@ -85,7 +85,7 @@ export const Navbar = () => {
             'region',
             `get-region-name/${userId}`
           );
-          setRegion(regionData?.name ?? '');
+          setRegion(regionData ?? []);
           setProject('');
         } else if (role === 'Program Director') {
           const projectData = await fetchData(
@@ -93,9 +93,9 @@ export const Navbar = () => {
             `get-program-name/${userId}`
           );
           setProject(projectData?.name ?? '');
-          setRegion('');
+          setRegion([]);
         } else {
-          setRegion('');
+          setRegion([]);
           setProject('');
         }
 
@@ -167,8 +167,10 @@ export const Navbar = () => {
             : ''}
           {role === 'Program Director' ? `${project}` : ''}
 
-          {role === 'Regional Director'
-            ? t('navbar.regionPrefix', { region })
+          {role === 'Regional Director' && region.length > 0
+            ? t('navbar.regionPrefix', {
+                region: region.map((r) => r.name).join(', '),
+              })
             : ''}
         </Text>
 
