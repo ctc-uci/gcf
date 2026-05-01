@@ -6,17 +6,27 @@ import {
   Heading,
   HStack,
   Icon,
+  IconButton,
   Skeleton,
   Text,
+  VStack,
 } from '@chakra-ui/react';
 
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import {
   FaChevronLeft,
   FaChevronRight,
+  FaMinus,
+  FaPlus,
+  FaRedo,
   FaRegArrowAltCircleLeft,
 } from 'react-icons/fa';
-import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
+import {
+  ComposableMap,
+  Geographies,
+  Geography,
+  ZoomableGroup,
+} from 'react-simple-maps';
 
 import CardView, { ProgramCardSkeleton } from './CardView.jsx';
 import ProgramInfoView from './ProgramInfoView.jsx';
@@ -34,7 +44,33 @@ export const Map = () => {
   const [programs, setPrograms] = useState([]);
   const [programsLoading, setProgramsLoading] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState(null);
+  const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
   const { backend } = useBackendContext();
+
+  const MIN_ZOOM = 1;
+  const MAX_ZOOM = 8;
+
+  const handleZoomIn = () => {
+    setPosition((p) => ({
+      ...p,
+      zoom: Math.min(p.zoom * 1.5, MAX_ZOOM),
+    }));
+  };
+
+  const handleZoomOut = () => {
+    setPosition((p) => ({
+      ...p,
+      zoom: Math.max(p.zoom / 1.5, MIN_ZOOM),
+    }));
+  };
+
+  const handleZoomReset = () => {
+    setPosition({ coordinates: [0, 0], zoom: 1 });
+  };
+
+  const handleMoveEnd = (newPosition) => {
+    setPosition(newPosition);
+  };
 
   const scrollRef = useRef(null);
   const mapContainerRef = useRef(null);
@@ -171,51 +207,101 @@ export const Map = () => {
           }}
         >
           <ComposableMap style={{ height: '700px', width: '100%' }}>
-            <Geographies geography={geoUrl}>
-              {({ geographies }) =>
-                geographies.map((geo) => {
-                  const regionId = getRegionFromIso(geo.id);
-                  const isHovered = regionId && regionId === hoverRegions;
-                  const isSelectedRegion =
-                    regionId != null &&
-                    selectedRegionId != null &&
-                    regionId === selectedRegionId;
-                  return (
-                    <Geography
-                      key={geo.rsmKey}
-                      geography={geo}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCountry(geo);
-                      }}
-                      onMouseEnter={() => setHoverRegions(regionId)}
-                      onMouseLeave={() => setHoverRegions(null)}
-                      style={{
-                        default: {
-                          fill: isHovered
-                            ? '#868686'
-                            : isSelectedRegion
-                              ? '#636363'
-                              : '#B3B3B3',
-                          outline: 'none',
-                        },
-                        hover: {
-                          fill: regionId ? '#868686' : '#B3B3B3',
-                          outline: 'none',
-                          cursor: regionId ? 'pointer' : 'default',
-                        },
-                        pressed: {
-                          fill: regionId ? '#868686' : '#B3B3B3',
-                          outline: 'none',
-                          cursor: regionId ? 'pointer' : 'default',
-                        },
-                      }}
-                    />
-                  );
-                })
-              }
-            </Geographies>
+            <ZoomableGroup
+              zoom={position.zoom}
+              center={position.coordinates}
+              minZoom={MIN_ZOOM}
+              maxZoom={MAX_ZOOM}
+              onMoveEnd={handleMoveEnd}
+            >
+              <Geographies geography={geoUrl}>
+                {({ geographies }) =>
+                  geographies.map((geo) => {
+                    const regionId = getRegionFromIso(geo.id);
+                    const isHovered = regionId && regionId === hoverRegions;
+                    const isSelectedRegion =
+                      regionId != null &&
+                      selectedRegionId != null &&
+                      regionId === selectedRegionId;
+                    return (
+                      <Geography
+                        key={geo.rsmKey}
+                        geography={geo}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCountry(geo);
+                        }}
+                        onMouseEnter={() => setHoverRegions(regionId)}
+                        onMouseLeave={() => setHoverRegions(null)}
+                        style={{
+                          default: {
+                            fill: isHovered
+                              ? '#868686'
+                              : isSelectedRegion
+                                ? '#636363'
+                                : '#B3B3B3',
+                            outline: 'none',
+                          },
+                          hover: {
+                            fill: regionId ? '#868686' : '#B3B3B3',
+                            outline: 'none',
+                            cursor: regionId ? 'pointer' : 'default',
+                          },
+                          pressed: {
+                            fill: regionId ? '#868686' : '#B3B3B3',
+                            outline: 'none',
+                            cursor: regionId ? 'pointer' : 'default',
+                          },
+                        }}
+                      />
+                    );
+                  })
+                }
+              </Geographies>
+            </ZoomableGroup>
           </ComposableMap>
+
+          <VStack
+            position="absolute"
+            top="12px"
+            right="12px"
+            spacing={1}
+            zIndex={11}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <IconButton
+              aria-label="Zoom in"
+              icon={<FaPlus />}
+              size="sm"
+              bg="white"
+              color="gray.700"
+              boxShadow="md"
+              _hover={{ bg: 'gray.100' }}
+              isDisabled={position.zoom >= MAX_ZOOM}
+              onClick={handleZoomIn}
+            />
+            <IconButton
+              aria-label="Zoom out"
+              icon={<FaMinus />}
+              size="sm"
+              bg="white"
+              color="gray.700"
+              boxShadow="md"
+              _hover={{ bg: 'gray.100' }}
+              isDisabled={position.zoom <= MIN_ZOOM}
+              onClick={handleZoomOut}
+            />
+            <IconButton
+              aria-label="Reset zoom"
+              icon={<FaRedo />}
+              size="sm"
+              bg="white"
+              color="gray.700"
+              boxShadow="md"
+              _hover={{ bg: 'gray.100' }}
+              onClick={handleZoomReset}
+            />
+          </VStack>
 
           {hoverRegions && regionMap[hoverRegions] && (
             <Box

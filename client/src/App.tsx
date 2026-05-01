@@ -18,6 +18,7 @@ import {
 } from 'react-router-dom';
 
 import { Account } from './components/accounts/Account';
+import { EmbedTestPage } from './components/map/EmbedTestPage';
 import { Map } from './components/map/Map';
 import { Media } from './components/media/Media';
 import { RegionsPage } from './components/regions/RegionsPage';
@@ -37,6 +38,14 @@ const App = () => {
                 <Route
                   path="/map"
                   element={<Map />}
+                />
+                <Route
+                  path="/embed/map"
+                  element={<Map />}
+                />
+                <Route
+                  path="/embed/test-iframe"
+                  element={<EmbedTestPage />}
                 />
                 <Route
                   path="/"
