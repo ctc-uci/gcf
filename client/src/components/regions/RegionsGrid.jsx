@@ -7,7 +7,7 @@ import useSWR from 'swr';
 export const RegionsGrid = ({ onEditRegion, refreshTrigger }) => {
   const { backend } = useBackendContext();
 
-  const { data, error } = useSWR(
+  const { data } = useSWR(
     ['regions-and-countries', refreshTrigger],
     async () => {
       const [regionsRes, countriesRes] = await Promise.all([
@@ -19,12 +19,13 @@ export const RegionsGrid = ({ onEditRegion, refreshTrigger }) => {
         regions: Array.isArray(regionsRes.data) ? regionsRes.data : [],
         countriesByRegion: countriesRes.data || {},
       };
+    },
+    {
+      onError: (err) => {
+        console.error('Error fetching regions:', err);
+      },
     }
   );
-
-  if (error) {
-    console.error('Error fetching regions:', error);
-  }
 
   const regions = data?.regions || [];
   const countriesByRegion = data?.countriesByRegion || {};
