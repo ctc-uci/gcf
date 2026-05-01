@@ -187,7 +187,7 @@ export const UpdatesPage = () => {
             p={0}
             pt={4}
           >
-            {programUpdatesData.length === 0 && !isLoading ? (
+            {originalProgramUpdatesData.length === 0 && !isProgramLoading ? (
               <EmptyStateBadge variant="no-updates" />
             ) : (
               <Box
@@ -211,7 +211,7 @@ export const UpdatesPage = () => {
             p={0}
             pt={4}
           >
-            {mediaUpdatesData.length === 0 && !isLoading ? (
+            {mediaUpdatesData.length === 0 ? (
               <EmptyStateBadge variant="no-updates" />
             ) : (
               <Box
@@ -234,7 +234,7 @@ export const UpdatesPage = () => {
             p={0}
             pt={4}
           >
-            {accountUpdatesData.length === 0 && !isLoading ? (
+            {accountUpdatesData.length === 0 ? (
               <EmptyStateBadge variant="no-updates" />
             ) : (
               <Box
