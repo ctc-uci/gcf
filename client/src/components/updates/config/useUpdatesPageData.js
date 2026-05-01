@@ -113,8 +113,8 @@ export function useUpdatesPageData() {
     isProgramLoading,
     refetchProgramUpdates,
     refetchAccountUpdates,
-    originalProgramUpdatesData: programUpdatesFromSWR,
-    originalMediaUpdatesData: mediaUpdatesFromSWR,
-    originalAccountUpdatesData: accountUpdatesFromSWR,
+    originalProgramUpdatesData: programUpdatesFromSWR ?? [],
+    originalMediaUpdatesData: mediaUpdatesFromSWR ?? [],
+    originalAccountUpdatesData: accountUpdatesFromSWR ?? [],
   };
 }
