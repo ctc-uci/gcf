@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 import 'flag-icons/css/flag-icons.min.css';
 
 import {
@@ -17,6 +15,7 @@ import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import { useTranslation } from 'react-i18next';
 import { FiEdit2 } from 'react-icons/fi';
 import { MdAccountCircle } from 'react-icons/md';
+import useSWR from 'swr';
 
 import { isoCodeToFlagIconCode } from '../../utils/isoCodeToFlagIconCode';
 import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
@@ -24,23 +23,20 @@ import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 export const RegionCard = ({ region, onEdit, countries }) => {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
-  const [regionalDirectors, setRegionalDirectors] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await backend.get(
-          `/regional-directors/region/${region.id}/`
-        );
-        const directors = Array.isArray(res.data) ? res.data : [];
-        setRegionalDirectors(directors);
-      } catch (err) {
-        console.error('Error fetching regional directors:', err);
-      }
-    };
+  const { data, error } = useSWR(
+    `/regional-directors/region/${region.id}/`,
+    async (url) => {
+      const res = await backend.get(url);
+      return Array.isArray(res.data) ? res.data : [];
+    }
+  );
 
-    fetchData();
-  }, [region.id, backend]);
+  if (error) {
+    console.error('Error fetching regional directors:', error);
+  }
+
+  const regionalDirectors = data || [];
 
   return (
     <Card

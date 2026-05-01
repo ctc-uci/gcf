@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 import { Box, SimpleGrid } from '@chakra-ui/react';
 
 import { RegionCard } from '@/components/regions/RegionCard';
@@ -8,29 +6,28 @@ import useSWR from 'swr';
 
 export const RegionsGrid = ({ onEditRegion, refreshTrigger }) => {
   const { backend } = useBackendContext();
-  const [regions, setRegions] = useState([]);
-  const [countriesByRegion, setCountriesByRegion] = useState({});
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [regionsRes, countriesRes] = await Promise.all([
-          backend.get(`/region/`),
-          backend.get(`/region/countries-by-region`),
-        ]);
+  const { data, error } = useSWR(
+    ['regions-and-countries', refreshTrigger],
+    async () => {
+      const [regionsRes, countriesRes] = await Promise.all([
+        backend.get(`/region/`),
+        backend.get(`/region/countries-by-region`),
+      ]);
 
-        const regionsList = Array.isArray(regionsRes.data)
-          ? regionsRes.data
-          : [];
-        setRegions(regionsList);
-        setCountriesByRegion(countriesRes.data || {});
-      } catch (err) {
-        console.error('Error fetching regions:', err);
-      }
-    };
+      return {
+        regions: Array.isArray(regionsRes.data) ? regionsRes.data : [],
+        countriesByRegion: countriesRes.data || {},
+      };
+    }
+  );
 
-    fetchData();
-  }, [backend, refreshTrigger]);
+  if (error) {
+    console.error('Error fetching regions:', error);
+  }
+
+  const regions = data?.regions || [];
+  const countriesByRegion = data?.countriesByRegion || {};
 
   return (
     <Box>
