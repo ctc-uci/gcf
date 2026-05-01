@@ -127,11 +127,9 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
     const mapResponse = STATS_FROM_RESPONSE[role];
 
     if (!route || !mapResponse) {
-      setIsLoading(false);
+      setIsLoading(true);
       return;
     }
-
-    setStats(STAT_LABEL_KEYS_BY_ROLE[role] ?? STAT_LABEL_KEYS_BY_ROLE.Admin);
 
     const fetchData = async () => {
       setIsLoading(true);
@@ -142,15 +140,16 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
       } catch (err) {
         console.error('Error fetching statistics:', err);
       } finally {
-        setTimeout(() => setIsLoading(false), 3000);
+        setIsLoading(false);
       }
     };
 
+    setIsLoading(true);
     fetchData();
   }, [role, roleLoading, userId, backend, refreshTrigger]);
 
   const displayStats = useMemo(() => {
-    if (!filteredData) return stats; // use fetched stats when no filter active
+    if (!filteredData || filteredData.length === 0) return stats;
 
     const totalStudents = filteredData.reduce(
       (sum, p) => sum + (Number(p.students) || 0),
@@ -213,7 +212,7 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
             align="stretch"
           >
             {isLoading
-              ? displayStats.map((_, i) => (
+              ? Array.from({ length: initialStats.length }).map((_, i) => (
                   <Skeleton
                     key={i}
                     height="150px"
