@@ -206,9 +206,9 @@ export const UpdatesPage = () => {
             p={0}
             pt={4}
           >
-            {mediaUpdatesData.length === 0 ? (
-              <EmptyStateBadge variant="no-updates" />
-            ) : (
+            {isLoading ||
+            isProgramUpdatesLoading ||
+            mediaUpdatesData.length > 0 ? (
               <Box
                 bg="white"
                 borderRadius="xl"
@@ -223,15 +223,17 @@ export const UpdatesPage = () => {
                   embedded
                 />
               </Box>
+            ) : (
+              <EmptyStateBadge variant="no-updates" />
             )}
           </TabPanel>
           <TabPanel
             p={0}
             pt={4}
           >
-            {accountUpdatesData.length === 0 ? (
-              <EmptyStateBadge variant="no-updates" />
-            ) : (
+            {isLoading ||
+            isProgramUpdatesLoading ||
+            accountUpdatesData.length > 0 ? (
               <Box
                 bg="white"
                 borderRadius="xl"
@@ -245,6 +247,8 @@ export const UpdatesPage = () => {
                   onAccountChangeUpdated={refetchAccountUpdates}
                 />
               </Box>
+            ) : (
+              <EmptyStateBadge variant="no-updates" />
             )}
           </TabPanel>
         </TabPanels>

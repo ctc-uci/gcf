@@ -110,7 +110,10 @@ export function MediaPreviewTag({ item, onRemove, isMedia }) {
           }
         >
           {isLoading ? (
-            <Skeleton size="xs" />
+            <Skeleton
+              width="100%"
+              height="100%"
+            />
           ) : isVideo ? (
             <video
               src={previewUrl}

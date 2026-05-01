@@ -216,6 +216,7 @@ export const Media = () => {
               backgroundColor="teal.500"
               color="white"
               _hover={{ backgroundColor: 'teal.600' }}
+              isDisabled={isLoading || !programId}
               onClick={onOpen}
             >
               {t('mediaPage.uploadMedia')}

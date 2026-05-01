@@ -777,13 +777,16 @@ export function ProgramDisplay({
                           borderBottom="1px solid"
                           borderColor="gray.200"
                         >
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Skeleton
-                              key={i}
-                              h={20}
-                              mb={2}
-                            />
-                          ))}
+                          <VStack>
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Skeleton
+                                key={i}
+                                h={20}
+                                mb={2}
+                                w="100%"
+                              />
+                            ))}
+                          </VStack>
                         </Td>
                       </Tr>
                     ) : (

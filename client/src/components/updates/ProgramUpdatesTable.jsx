@@ -296,7 +296,7 @@ export const ProgramUpdatesTable = ({
               </Tr>
             </Thead>
             <Tbody>
-              {isLoading ? (
+              {tableData.length === 0 && isLoading ? (
                 <Tr>
                   <Td
                     colSpan={

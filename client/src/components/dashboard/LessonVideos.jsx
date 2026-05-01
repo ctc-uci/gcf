@@ -142,8 +142,12 @@ function LessonVideos({
             gap={3}
             mb={4}
           >
-            {playlistVideos.map(() => (
-              <Skeleton size="sm" />
+            {[1, 2, 3].map((i) => (
+              <Skeleton
+                key={i}
+                boxSize={4}
+                borderRadius="full"
+              />
             ))}
             <Text
               color="gray.600"
