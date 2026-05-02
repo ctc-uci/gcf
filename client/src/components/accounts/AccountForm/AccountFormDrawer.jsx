@@ -23,6 +23,7 @@ import {
   Select,
   Spacer,
   Text,
+  Textarea,
   VStack,
 } from '@chakra-ui/react';
 
@@ -437,14 +438,32 @@ export const AccountFormDrawer = ({
             )}
 
             {formData.role === 'Program Director' && (
-              <Heading
-                as="h3"
-                size="md"
-                fontWeight="semibold"
-                mt={4}
-              >
-                {t('accountForm.additionalInfo')}
-              </Heading>
+              <>
+                <Heading
+                  as="h3"
+                  size="md"
+                  fontWeight="semibold"
+                  mt={4}
+                >
+                  {t('accountForm.additionalInfo')}
+                </Heading>
+                <FormControl>
+                  <FormLabel
+                    color={LABEL_COLOR}
+                    fontSize="sm"
+                    fontWeight="medium"
+                  >
+                    {t('profile.bio')}
+                  </FormLabel>
+                  <Textarea
+                    name="bio"
+                    value={formData.bio ?? ''}
+                    onChange={onChange}
+                    rows={5}
+                    resize="vertical"
+                  />
+                </FormControl>
+              </>
             )}
 
             <Box mt={4}>

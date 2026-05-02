@@ -61,5 +61,14 @@ export function computeChangedFields(formData, initialFormData, t) {
       new: newRegion || '',
     });
   }
+  const oldBio = initialFormData.bio ?? '';
+  const newBio = formData.bio ?? '';
+  if (oldBio !== newBio) {
+    changes.push({
+      label: t('profile.bio'),
+      old: oldBio,
+      new: newBio,
+    });
+  }
   return changes;
 }

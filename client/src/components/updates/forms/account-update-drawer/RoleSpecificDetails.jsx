@@ -40,12 +40,6 @@ export const RoleSpecificDetails = ({
           changeType={changeType}
           hasChangeOverride={roleDiffers ? undefined : fields.regById}
         />
-        <DiffField
-          label={t('common.biography')}
-          oldValue={bioOldDisplay}
-          newValue={fields.newBio}
-          changeType={changeType}
-        />
       </>
     );
   }

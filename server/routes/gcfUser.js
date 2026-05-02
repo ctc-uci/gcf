@@ -9,6 +9,13 @@ import { db } from '../db/db-pgp';
 
 const gcfUserRouter = express.Router();
 gcfUserRouter.use(express.json());
+
+/** Optional PD bio: trim; empty → null for nullable DB column */
+function normalizeAdminBio(raw) {
+  if (raw === undefined || raw === null) return null;
+  const s = String(raw).trim();
+  return s === '' ? null : s;
+}
 gcfUserRouter.post('/', async (req, res) => {
   try {
     const { id, role, first_name, last_name, created_by } = req.body;
@@ -49,7 +56,9 @@ gcfUserRouter.post('/admin/create-user', async (req, res) => {
       currentUserId,
       programId,
       regionId,
+      bio,
     } = req.body;
+    const normalizedBio = normalizeAdminBio(bio);
 
     const tempPassword = randomBytes(16).toString('hex');
 
@@ -70,9 +79,9 @@ gcfUserRouter.post('/admin/create-user', async (req, res) => {
 
     if (role === 'Program Director' && programId) {
       await db.query(
-        `INSERT INTO program_director (user_id, program_id) 
-        VALUES ($1, $2)`,
-        [firebaseUid, programId]
+        `INSERT INTO program_director (user_id, program_id, bio)
+        VALUES ($1, $2, $3)`,
+        [firebaseUid, programId, normalizedBio]
       );
     }
 
@@ -106,7 +115,9 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
       targetId,
       programId,
       regionId,
+      bio,
     } = req.body;
+    const normalizedBio = normalizeAdminBio(bio);
 
     await admin.auth().updateUser(targetId, {
       ...(email && { email }),
@@ -151,9 +162,9 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
 
       if (role === 'Program Director' && programId) {
         await db.query(
-          `INSERT INTO program_director (user_id, program_id) 
-          VALUES ($1, $2)`,
-          [targetId, programId]
+          `INSERT INTO program_director (user_id, program_id, bio)
+          VALUES ($1, $2, $3)`,
+          [targetId, programId, normalizedBio]
         );
       }
       if (role === 'Regional Director' && regionId) {
@@ -170,9 +181,9 @@ gcfUserRouter.put('/admin/update-user', async (req, res) => {
           targetId,
         ]);
         await db.query(
-          `INSERT INTO program_director (user_id, program_id) 
-          VALUES ($1, $2)`,
-          [targetId, programId]
+          `INSERT INTO program_director (user_id, program_id, bio)
+          VALUES ($1, $2, $3)`,
+          [targetId, programId, normalizedBio]
         );
       }
       else if (role === 'Regional Director' && regionId) {
