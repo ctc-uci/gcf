@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Badge,
   Box,
+  Button,
   Center,
   HStack,
+  Icon,
   Spinner,
   Table,
   TableContainer,
@@ -24,6 +26,7 @@ import {
 } from '@/utils/downloadCsv';
 import { formatRelativeDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
+import { FiExternalLink } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
@@ -209,6 +212,7 @@ export const MediaUpdatesTable = ({
               tableData.map((row) => (
                 <Tr
                   key={row.id}
+                  role="group"
                   cursor="pointer"
                   _hover={{ bg: 'gray.50' }}
                   onClick={() => setSelectedUpdate(row)}
@@ -245,12 +249,44 @@ export const MediaUpdatesTable = ({
                     </Text>
                   </Td>
                   <Td>
-                    <Text
-                      fontSize="sm"
-                      color="gray.600"
+                    <HStack
+                      justify="space-between"
+                      spacing={2}
+                      w="100%"
                     >
-                      {formatRelativeDate(row.updatedAt || row.updateDate)}
-                    </Text>
+                      <Text
+                        fontSize="sm"
+                        color="gray.600"
+                      >
+                        {formatRelativeDate(row.updatedAt || row.updateDate)}
+                      </Text>
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        borderColor="teal.400"
+                        color="teal.400"
+                        leftIcon={
+                          <Icon
+                            as={FiExternalLink}
+                            boxSize={3.5}
+                          />
+                        }
+                        opacity={0}
+                        transform="translateX(4px)"
+                        transition="opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease"
+                        _groupHover={{ opacity: 1, transform: 'translateX(0)' }}
+                        _hover={{
+                          bg: 'teal.400',
+                          color: 'white',
+                          borderColor: 'teal.400',
+                        }}
+                        onClick={() => setSelectedUpdate(row)}
+                      >
+                        {t('updates.viewUpdate', {
+                          defaultValue: 'View Update',
+                        })}
+                      </Button>
+                    </HStack>
                   </Td>
                 </Tr>
               ))
