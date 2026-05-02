@@ -61,7 +61,11 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     setIsFullScreen(false);
 
     if (!targetUser) {
-      const newState = { ...INITIAL_FORM_STATE, programs: [], regions: [] };
+      const newState = {
+        ...INITIAL_FORM_STATE,
+        programs: [],
+        regions: [],
+      };
       setFormData(newState);
       setInitialFormData(newState);
     } else {
@@ -71,6 +75,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         role: targetUser.role ?? '',
         email: targetUser.email ?? '',
         password: '',
+        bio: '',
         programs: [],
         regions: [],
       };
@@ -129,7 +134,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   }, [backend, role, userId]);
 
   useEffect(() => {
-    if (!targetUserId || !targetUser) return;
+    if (!isOpen || !targetUserId || !targetUser) return;
 
     if (targetUser.role === 'Program Director') {
       const fetchUserPrograms = async () => {
@@ -138,8 +143,20 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
             `/program-directors/me/${targetUserId}/program`
           );
           const program = response.data;
-          setFormData((prev) => ({ ...prev, programs: [program] }));
-          setInitialFormData((prev) => ({ ...prev, programs: [program] }));
+          const bioText =
+            program.bio !== undefined && program.bio !== null
+              ? String(program.bio)
+              : '';
+          setFormData((prev) => ({
+            ...prev,
+            programs: [program],
+            bio: bioText,
+          }));
+          setInitialFormData((prev) => ({
+            ...prev,
+            programs: [program],
+            bio: bioText,
+          }));
         } catch (error) {
           console.error("Error fetching user's programs:", error);
         }
@@ -174,22 +191,40 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       };
       fetchUserRegion();
     }
-  }, [backend, targetUserId, targetUser, currentRegions]);
+  }, [backend, targetUserId, targetUser, currentRegions, isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [name]: value };
+      if (name === 'role' && value !== 'Program Director') {
+        next.bio = '';
+      }
+      return next;
+    });
     if (validationErrors[name]) {
-      setValidationErrors((prev) => ({ ...prev, [name]: false }));
+      setValidationErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
     }
   };
 
   const validate = () => {
     const errors = {};
-    if (!formData.first_name.trim()) errors.first_name = true;
-    if (!formData.last_name.trim()) errors.last_name = true;
-    if (!formData.email.trim()) errors.email = true;
-    if (!formData.role) errors.role = true;
+    if (!formData.first_name.trim()) {
+      errors.first_name = t('accountForm.validation.firstNameRequired');
+    }
+    if (!formData.last_name.trim()) {
+      errors.last_name = t('accountForm.validation.lastNameRequired');
+    }
+    if (!formData.email.trim()) {
+      errors.email = t('accountForm.validation.emailRequired');
+    }
+    if (!formData.role) {
+      errors.role = t('accountForm.validation.roleRequired');
+    }
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -282,6 +317,10 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       regionId:
         formData.regions.length > 0 ? Number(formData.regions[0].id) : null,
     };
+    if (formData.role === 'Program Director') {
+      const trimmed = String(formData.bio ?? '').trim();
+      userData.bio = trimmed === '' ? null : trimmed;
+    }
     const createRes = await backend.post(
       '/gcf-users/admin/create-user',
       userData
@@ -322,6 +361,11 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       regionId:
         formData.regions.length > 0 ? Number(formData.regions[0].id) : null,
     };
+
+    if (formData.role === 'Program Director') {
+      const trimmed = String(formData.bio ?? '').trim();
+      userData.bio = trimmed === '' ? null : trimmed;
+    }
 
     if (formData.password && formData.password.trim().length > 0) {
       userData.password = formData.password;
@@ -436,14 +480,6 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     : targetUser?.createdByPicture || '';
   const creatorPhotoUrl = isNewAccount ? currentUser?.photoURL || '' : '';
 
-  const errorBorderProps = (field) =>
-    validationErrors[field]
-      ? {
-          borderColor: 'red.500',
-          boxShadow: '0 0 0 1px var(--chakra-colors-red-500)',
-        }
-      : {};
-
   return (
     <>
       <AccountFormDrawer
@@ -453,7 +489,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         onToggleFullScreen={() => setIsFullScreen(!isFullScreen)}
         formData={formData}
         onChange={handleChange}
-        errorBorderProps={errorBorderProps}
+        fieldErrors={validationErrors}
         showPassword={showPassword}
         onToggleShowPassword={() => setShowPassword(!showPassword)}
         targetUserId={targetUserId}

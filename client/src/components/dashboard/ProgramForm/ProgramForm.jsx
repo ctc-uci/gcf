@@ -38,6 +38,7 @@ import { ProgramFormMediaTab } from './ProgramFormMediaTab';
 import { ProgramFormOverviewTab } from './ProgramFormOverviewTab';
 import { saveProgramForm } from './programFormSave';
 import { useProgramFormLoad } from './useProgramFormLoad';
+import { validateProgramForm } from './programFormValidation';
 
 export const ProgramForm = ({
   isOpen: isOpenProp,
@@ -104,6 +105,7 @@ export const ProgramForm = ({
 
   const [activeTab, setActiveTab] = useState('overview');
   const [isLoadingProgramData, setIsLoadingProgramData] = useState(false);
+  const [programFieldErrors, setProgramFieldErrors] = useState({});
 
   useProgramFormLoad({
     program,
@@ -120,19 +122,32 @@ export const ProgramForm = ({
   useEffect(() => {
     if (isOpen) {
       setActiveTab('overview');
+      setProgramFieldErrors({});
     }
   }, [isOpen]);
 
+  const clearProgramFieldError = (field) => {
+    setProgramFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
   function handleProgramStatusChange(status) {
     setFormState((prev) => ({ ...prev, status: status || null }));
+    clearProgramFieldError('status');
   }
 
   function handleProgramNameChange(name) {
     setFormState((prev) => ({ ...prev, programName: name }));
+    clearProgramFieldError('programName');
   }
 
   function handleProgramLaunchDateChange(date) {
     setFormState((prev) => ({ ...prev, launchDate: date }));
+    clearProgramFieldError('launchDate');
   }
 
   function handleLanguageChange(languageChanges) {
@@ -159,6 +174,15 @@ export const ProgramForm = ({
   };
 
   async function handleSave() {
+    const isNewProgram = !program?.id;
+    const errors = validateProgramForm(formState, { isNewProgram }, t);
+    if (Object.keys(errors).length > 0) {
+      setProgramFieldErrors(errors);
+      setActiveTab('overview');
+      return;
+    }
+    setProgramFieldErrors({});
+
     try {
       await saveProgramForm({
         backend,
@@ -268,6 +292,8 @@ export const ProgramForm = ({
                 onLanguageChange={handleLanguageChange}
                 programId={program?.id}
                 backend={backend}
+                fieldErrors={programFieldErrors}
+                onClearProgramFieldError={clearProgramFieldError}
                 onOpenMediaModal={() => {
                   mediaUploadTargetRef.current = 'files';
                   mediaUploadModal.onOpen();

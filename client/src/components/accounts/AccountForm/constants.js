@@ -21,6 +21,7 @@ export const INITIAL_FORM_STATE = {
   role: '',
   email: '',
   password: '',
+  bio: '',
   programs: [],
   regions: [],
 };
@@ -32,6 +33,9 @@ export const formStateToAuditSnapshot = (fd, meta = {}) => ({
   role: fd.role,
   programId: fd.programs?.length > 0 ? Number(fd.programs[0].id) : null,
   regionId: fd.regions?.length > 0 ? Number(fd.regions[0].id) : null,
+  ...(fd.role === 'Program Director'
+    ? { bio: String(fd.bio ?? '').trim() || null }
+    : {}),
   ...(meta.currentUserId !== undefined && meta.currentUserId !== null
     ? { currentUserId: meta.currentUserId }
     : {}),

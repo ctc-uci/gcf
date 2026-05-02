@@ -361,7 +361,14 @@
     "instrumentQuantityAria": "Cantidad de instrumentos",
     "deleteTitle": "¿Seguro que quieres eliminar este programa?",
     "deleteDesc": "Esta acción no se puede deshacer.",
-    "deleteProgram": "Eliminar programa"
+    "deleteProgram": "Eliminar programa",
+    "validation": {
+      "programNameRequired": "Introduzca el nombre del programa.",
+      "statusRequired": "Seleccione un estado.",
+      "launchDateRequired": "Introduzca una fecha válida.",
+      "partnerOrgRequired": "Seleccione una organización asociada.",
+      "countryRequired": "Seleccione un país."
+    }
   },
   "locationForm": {
     "selectRegion": "Seleccionar región...",
@@ -438,7 +445,13 @@
     "errorTitle": "Error",
     "errorWithMessage": "Error: {{message}}",
     "fillAllFields": "Por favor complete todos los campos del formulario.",
-    "passwordMaskStars": "********"
+    "passwordMaskStars": "********",
+    "validation": {
+      "firstNameRequired": "Introduzca su nombre.",
+      "lastNameRequired": "Introduzca su apellido.",
+      "emailRequired": "Introduzca su correo electrónico.",
+      "roleRequired": "Seleccione un rol."
+    }
   },
   "mediaPage": {
     "title": "Mis medios",

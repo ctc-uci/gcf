@@ -16,11 +16,11 @@ export async function saveProgramForm({
   const rawPartner = formState.partnerOrg;
   const hasPartnerOrg =
     rawPartner !== null && rawPartner !== undefined && rawPartner !== '';
-  const partnerOrgPayload = hasPartnerOrg
-    ? Number(rawPartner)
-    : program
-      ? null
-      : 1;
+  const partnerOrgPayload = program
+    ? hasPartnerOrg
+      ? Number(rawPartner)
+      : null
+    : Number(rawPartner);
 
   const data = {
     name: formState.programName,

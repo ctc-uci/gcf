@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { Box, FormControl, FormLabel, Text } from '@chakra-ui/react';
+import {
+  Box,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Text,
+} from '@chakra-ui/react';
 
 import { SearchInput } from '@/components/common/SearchInput';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
@@ -9,6 +15,7 @@ export function PartnerOrganizationField({
   valueId,
   onChangeId,
   label = 'Partner Organization',
+  errorMessage,
 }) {
   const { backend } = useBackendContext();
   const [partnerOrgs, setPartnerOrgs] = useState([]);
@@ -65,7 +72,10 @@ export function PartnerOrganizationField({
   }
 
   return (
-    <FormControl isRequired>
+    <FormControl
+      isRequired
+      isInvalid={Boolean(errorMessage)}
+    >
       <FormLabel
         size="sm"
         fontWeight="normal"
@@ -98,6 +108,7 @@ export function PartnerOrganizationField({
           </Text>
         )}
       </Box>
+      <FormErrorMessage>{errorMessage}</FormErrorMessage>
     </FormControl>
   );
 }
