@@ -226,9 +226,11 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                           bg="gray.100"
                         >
                           <MediaCard
+                            id = {item.id}
                             file_name={item.fileName}
                             file_type={item.fileType}
                             imageUrl={mediaURLs[idx]}
+                            hideMenu = {true}
                           />
                         </Box>
                       </Box>
