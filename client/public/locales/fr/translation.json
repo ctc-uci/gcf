@@ -361,7 +361,14 @@
     "instrumentQuantityAria": "Quantité d’instruments",
     "deleteTitle": "Voulez-vous vraiment supprimer ce programme ?",
     "deleteDesc": "Cette action est irréversible.",
-    "deleteProgram": "Supprimer le programme"
+    "deleteProgram": "Supprimer le programme",
+    "validation": {
+      "programNameRequired": "Veuillez saisir le nom du programme.",
+      "statusRequired": "Veuillez sélectionner un statut.",
+      "launchDateRequired": "Veuillez saisir une date valide.",
+      "partnerOrgRequired": "Veuillez sélectionner une organisation partenaire.",
+      "countryRequired": "Veuillez sélectionner un pays."
+    }
   },
   "locationForm": {
     "selectRegion": "Sélectionnez la région...",
@@ -438,7 +445,13 @@
     "errorTitle": "Erreur",
     "errorWithMessage": "Erreur : {{message}}",
     "fillAllFields": "Veuillez remplir tous les champs du formulaire.",
-    "passwordMaskStars": "********"
+    "passwordMaskStars": "********",
+    "validation": {
+      "firstNameRequired": "Veuillez saisir votre prénom.",
+      "lastNameRequired": "Veuillez saisir votre nom.",
+      "emailRequired": "Veuillez saisir votre adresse e-mail.",
+      "roleRequired": "Veuillez sélectionner un rôle."
+    }
   },
   "mediaPage": {
     "title": "Mes médias",

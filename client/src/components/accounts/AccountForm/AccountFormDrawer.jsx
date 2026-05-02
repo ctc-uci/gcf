@@ -9,6 +9,7 @@ import {
   DrawerOverlay,
   Flex,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   Grid,
   GridItem,
@@ -45,7 +46,7 @@ export const AccountFormDrawer = ({
   onToggleFullScreen,
   formData,
   onChange,
-  errorBorderProps,
+  fieldErrors = {},
   showPassword,
   onToggleShowPassword,
   targetUserId,
@@ -181,7 +182,7 @@ export const AccountFormDrawer = ({
               gap={4}
             >
               <GridItem>
-                <FormControl>
+                <FormControl isInvalid={Boolean(fieldErrors.first_name)}>
                   <FormLabel
                     color={LABEL_COLOR}
                     fontSize="sm"
@@ -200,12 +201,12 @@ export const AccountFormDrawer = ({
                     placeholder={t('accountForm.fieldFirstName')}
                     value={formData.first_name}
                     onChange={onChange}
-                    {...errorBorderProps('first_name')}
                   />
+                  <FormErrorMessage>{fieldErrors.first_name}</FormErrorMessage>
                 </FormControl>
               </GridItem>
               <GridItem>
-                <FormControl>
+                <FormControl isInvalid={Boolean(fieldErrors.last_name)}>
                   <FormLabel
                     color={LABEL_COLOR}
                     fontSize="sm"
@@ -224,8 +225,8 @@ export const AccountFormDrawer = ({
                     placeholder={t('accountForm.fieldLastName')}
                     value={formData.last_name}
                     onChange={onChange}
-                    {...errorBorderProps('last_name')}
                   />
+                  <FormErrorMessage>{fieldErrors.last_name}</FormErrorMessage>
                 </FormControl>
               </GridItem>
             </Grid>
@@ -235,7 +236,7 @@ export const AccountFormDrawer = ({
               gap={4}
             >
               <GridItem>
-                <FormControl>
+                <FormControl isInvalid={Boolean(fieldErrors.email)}>
                   <FormLabel
                     color={LABEL_COLOR}
                     fontSize="sm"
@@ -254,13 +255,13 @@ export const AccountFormDrawer = ({
                     placeholder={t('accountForm.emailAddressPlaceholder')}
                     value={formData.email}
                     onChange={onChange}
-                    {...errorBorderProps('email')}
                   />
+                  <FormErrorMessage>{fieldErrors.email}</FormErrorMessage>
                 </FormControl>
               </GridItem>
               {targetUserId ? (
                 <GridItem>
-                  <FormControl>
+                  <FormControl isInvalid={Boolean(fieldErrors.password)}>
                     <FormLabel
                       color={LABEL_COLOR}
                       fontSize="sm"
@@ -276,7 +277,6 @@ export const AccountFormDrawer = ({
                         placeholder={t('accountForm.passwordLeaveBlank')}
                         value={formData.password}
                         onChange={onChange}
-                        {...errorBorderProps('password')}
                       />
                       <InputRightElement>
                         <IconButton
@@ -288,6 +288,7 @@ export const AccountFormDrawer = ({
                         />
                       </InputRightElement>
                     </InputGroup>
+                    <FormErrorMessage>{fieldErrors.password}</FormErrorMessage>
                   </FormControl>
                 </GridItem>
               ) : (
@@ -312,7 +313,7 @@ export const AccountFormDrawer = ({
               {t('accountForm.roleAccess')}
             </Heading>
 
-            <FormControl>
+            <FormControl isInvalid={Boolean(fieldErrors.role)}>
               <FormLabel
                 color={LABEL_COLOR}
                 fontSize="sm"
@@ -331,7 +332,6 @@ export const AccountFormDrawer = ({
                 placeholder={t('accountForm.rolePlaceholder')}
                 value={formData.role}
                 onChange={onChange}
-                {...errorBorderProps('role')}
               >
                 {viewerRole === 'Super Admin' && (
                   <option value="Admin">{t('signup.roleAdmin')}</option>
@@ -345,6 +345,7 @@ export const AccountFormDrawer = ({
                   {t('signup.roleProgramDirector')}
                 </option>
               </Select>
+              <FormErrorMessage>{fieldErrors.role}</FormErrorMessage>
             </FormControl>
 
             {formData.role === 'Program Director' && (

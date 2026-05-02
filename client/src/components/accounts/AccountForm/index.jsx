@@ -180,16 +180,28 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (validationErrors[name]) {
-      setValidationErrors((prev) => ({ ...prev, [name]: false }));
+      setValidationErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
     }
   };
 
   const validate = () => {
     const errors = {};
-    if (!formData.first_name.trim()) errors.first_name = true;
-    if (!formData.last_name.trim()) errors.last_name = true;
-    if (!formData.email.trim()) errors.email = true;
-    if (!formData.role) errors.role = true;
+    if (!formData.first_name.trim()) {
+      errors.first_name = t('accountForm.validation.firstNameRequired');
+    }
+    if (!formData.last_name.trim()) {
+      errors.last_name = t('accountForm.validation.lastNameRequired');
+    }
+    if (!formData.email.trim()) {
+      errors.email = t('accountForm.validation.emailRequired');
+    }
+    if (!formData.role) {
+      errors.role = t('accountForm.validation.roleRequired');
+    }
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -436,14 +448,6 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     : targetUser?.createdByPicture || '';
   const creatorPhotoUrl = isNewAccount ? currentUser?.photoURL || '' : '';
 
-  const errorBorderProps = (field) =>
-    validationErrors[field]
-      ? {
-          borderColor: 'red.500',
-          boxShadow: '0 0 0 1px var(--chakra-colors-red-500)',
-        }
-      : {};
-
   return (
     <>
       <AccountFormDrawer
@@ -453,7 +457,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         onToggleFullScreen={() => setIsFullScreen(!isFullScreen)}
         formData={formData}
         onChange={handleChange}
-        errorBorderProps={errorBorderProps}
+        fieldErrors={validationErrors}
         showPassword={showPassword}
         onToggleShowPassword={() => setShowPassword(!showPassword)}
         targetUserId={targetUserId}

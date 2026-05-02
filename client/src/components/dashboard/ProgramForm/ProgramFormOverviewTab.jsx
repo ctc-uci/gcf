@@ -2,6 +2,7 @@ import {
   Box,
   Checkbox,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   Heading,
   Input,
@@ -29,6 +30,8 @@ export function ProgramFormOverviewTab({
   backend,
   onOpenMediaModal,
   onSeeAllMedia,
+  fieldErrors = {},
+  onClearProgramFieldError,
 }) {
   const { t } = useTranslation();
 
@@ -46,7 +49,10 @@ export function ProgramFormOverviewTab({
           align="stretch"
           spacing={4}
         >
-          <FormControl isRequired>
+          <FormControl
+            isRequired
+            isInvalid={Boolean(fieldErrors.programName)}
+          >
             <FormLabel
               size="sm"
               fontWeight="normal"
@@ -59,17 +65,20 @@ export function ProgramFormOverviewTab({
               value={formState.programName || ''}
               onChange={(e) => onProgramNameChange(e.target.value)}
             />
+            <FormErrorMessage>{fieldErrors.programName}</FormErrorMessage>
           </FormControl>
 
           <PartnerOrganizationField
             label={t('programForm.partnerOrgName')}
             valueId={formState.partnerOrg}
-            onChangeId={(id) =>
+            errorMessage={fieldErrors.partnerOrg}
+            onChangeId={(id) => {
               setFormState((prev) => ({
                 ...prev,
                 partnerOrg: id,
-              }))
-            }
+              }));
+              onClearProgramFieldError?.('partnerOrg');
+            }}
           />
 
           <FormControl>
@@ -87,7 +96,10 @@ export function ProgramFormOverviewTab({
             {/* TODO: Implement persistence and map behavior for showPartnerOrgOnMap (API + map layer). */}
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl
+            isRequired
+            isInvalid={Boolean(fieldErrors.status)}
+          >
             <FormLabel
               size="sm"
               fontWeight="normal"
@@ -103,9 +115,13 @@ export function ProgramFormOverviewTab({
               <option value="Active">{t('programForm.launched')}</option>
               <option value="Inactive">{t('programForm.developing')}</option>
             </Select>
+            <FormErrorMessage>{fieldErrors.status}</FormErrorMessage>
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl
+            isRequired
+            isInvalid={Boolean(fieldErrors.launchDate)}
+          >
             <FormLabel
               size="sm"
               fontWeight="normal"
@@ -119,6 +135,7 @@ export function ProgramFormOverviewTab({
               value={formState.launchDate || ''}
               onChange={(e) => onProgramLaunchDateChange(e.target.value)}
             />
+            <FormErrorMessage>{fieldErrors.launchDate}</FormErrorMessage>
           </FormControl>
         </VStack>
       </Box>
@@ -127,6 +144,8 @@ export function ProgramFormOverviewTab({
         setFormData={setFormState}
         languageOptions={languageOptions}
         onLanguagesChange={onLanguageChange}
+        fieldErrors={fieldErrors}
+        onClearProgramFieldError={onClearProgramFieldError}
       />
 
       <StudentsInstrumentsSection

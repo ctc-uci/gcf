@@ -11,6 +11,7 @@ import {
   Box,
   Button,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   Grid,
   GridItem,
@@ -57,6 +58,8 @@ export function LocationLanguageSection({
   setFormData,
   languageOptions,
   onLanguagesChange,
+  fieldErrors = {},
+  onClearProgramFieldError,
 }) {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
@@ -201,6 +204,7 @@ export function LocationLanguageSection({
       state: null,
       city: null,
     }));
+    onClearProgramFieldError?.('country');
   }
 
   function handleRegionChange(selectedRegion) {
@@ -294,21 +298,30 @@ export function LocationLanguageSection({
             </GridItem>
 
             <GridItem>
-              {formState.regionId && (
-                <Select
-                  onChange={handleCountryChange}
-                  placeholder={t('locationForm.selectCountry')}
-                  value={formState.country || ''}
-                >
-                  {countriesList.map((_country) => (
-                    <option
-                      key={_country.id}
-                      value={_country.id}
-                    >
-                      {_country.name}
-                    </option>
-                  ))}
-                </Select>
+              {formState.regionId ? (
+                <FormControl isInvalid={Boolean(fieldErrors.country)}>
+                  <Select
+                    onChange={handleCountryChange}
+                    placeholder={t('locationForm.selectCountry')}
+                    value={formState.country || ''}
+                  >
+                    {countriesList.map((_country) => (
+                      <option
+                        key={_country.id}
+                        value={_country.id}
+                      >
+                        {_country.name}
+                      </option>
+                    ))}
+                  </Select>
+                  <FormErrorMessage>{fieldErrors.country}</FormErrorMessage>
+                </FormControl>
+              ) : (
+                fieldErrors.country && (
+                  <FormControl isInvalid>
+                    <FormErrorMessage>{fieldErrors.country}</FormErrorMessage>
+                  </FormControl>
+                )
               )}
             </GridItem>
 
