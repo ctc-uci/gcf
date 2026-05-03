@@ -14,7 +14,7 @@ function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
   const { role, loading: roleLoading } = useRoleContext();
 
   const { backend } = useBackendContext();
-  const [originalPrograms, setOriginalPrograms] = useState([]);
+  const [originalPrograms, setOriginalPrograms] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProgram, setSelectedProgram] = useState(null);

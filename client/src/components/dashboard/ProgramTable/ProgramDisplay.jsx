@@ -186,7 +186,8 @@ export function ProgramDisplay({
   };
 
   const filterBySearchPanel = useMemo(() => {
-    let data = originalData ?? [];
+    if (originalData === null) return null;
+    let data = originalData;
 
     // Status filter
     if (filterStatus) {
@@ -298,6 +299,7 @@ export function ProgramDisplay({
   ]);
 
   const displayData = useMemo(() => {
+    if (filterBySearchPanel === null) return null;
     if (!searchQuery) return filterBySearchPanel;
     const query = searchQuery.toLowerCase();
     return filterBySearchPanel.filter(
@@ -329,7 +331,7 @@ export function ProgramDisplay({
   }, [displayData, onFilteredDataChange]);
 
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
-  const tableData = sortedData ?? displayData;
+  const tableData = sortedData ?? displayData ?? [];
   const [flippedId, setFlippedId] = useState(null);
 
   if (!getRouteByRole(role, userId)) return null;

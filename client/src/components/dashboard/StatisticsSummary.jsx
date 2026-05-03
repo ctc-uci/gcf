@@ -149,7 +149,7 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
   }, [role, roleLoading, userId, backend, refreshTrigger]);
 
   const displayStats = useMemo(() => {
-    if (!filteredData || filteredData.length === 0) return stats;
+    if (filteredData === null) return stats;
 
     const totalStudents = filteredData.reduce(
       (sum, p) => sum + (Number(p.students) || 0),
