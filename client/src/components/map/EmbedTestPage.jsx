@@ -13,7 +13,7 @@ export const EmbedTestPage = () => {
       >
         This page demonstrates how the GCF map component can be embedded on an
         external website via an iframe pointed at the{' '}
-        <Text
+        <Box
           as="code"
           bg="gray.100"
           px="6px"
@@ -21,7 +21,7 @@ export const EmbedTestPage = () => {
           borderRadius="sm"
         >
           /embed/map
-        </Text>{' '}
+        </Box>{' '}
         route.
       </Text>
 
