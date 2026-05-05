@@ -70,6 +70,15 @@ accountChangeRouter.use(express.json());
 accountChangeRouter.get('/', async (req, res) => {
   try {
     const { userId, resolved } = req.query;
+
+    let senderRole;
+    try {
+      const authUser = await getAuthenticatedUser(req, res);
+      senderRole = authUser?.role;
+    } catch {
+      throw new Error('UNAUTHORIZED');
+    }
+
     const conditions = [];
     const params = [];
     let i = 1;
@@ -81,6 +90,12 @@ accountChangeRouter.get('/', async (req, res) => {
     if (resolved !== undefined) {
       conditions.push(`ac.resolved = $${i++}`);
       params.push(resolved === 'true');
+    }
+    if (senderRole === 'Program Director') {
+      conditions.push(`u.role = 'Program Director'`);
+    }
+    else if (senderRole === 'Regional Director') {
+      conditions.push(`(u.role = 'Regional Director' OR u.role = 'Program Director')`);
     }
 
     const whereClause = conditions.length

@@ -3,12 +3,13 @@ import { useState } from 'react';
 import { DownloadIcon } from '@chakra-ui/icons';
 import {
   Box,
-  Center,
   Flex,
   Heading,
   HStack,
   IconButton,
-  Spinner,
+  Skeleton,
+  SkeletonCircle,
+  Stack,
 } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
@@ -150,12 +151,21 @@ export const Account = () => {
       </Flex>
 
       {isLoading ? (
-        <Center py={10}>
-          <Spinner
-            size="xl"
-            color="gray.500"
-          />
-        </Center>
+        <Stack>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Flex
+              key={i}
+              gap={4}
+              mb={5}
+            >
+              <SkeletonCircle />
+              <Skeleton
+                h="40px"
+                w="100%"
+              />
+            </Flex>
+          ))}
+        </Stack>
       ) : (
         <AccountsTable
           originalData={users}
