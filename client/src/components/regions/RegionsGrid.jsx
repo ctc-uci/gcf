@@ -8,7 +8,7 @@ export const RegionsGrid = ({ onEditRegion, refreshTrigger }) => {
   const { backend } = useBackendContext();
 
   const { data } = useSWR(
-    ['regions-and-countries', refreshTrigger],
+    ['/region/', refreshTrigger],
     async () => {
       const [regionsRes, countriesRes] = await Promise.all([
         backend.get(`/region/`),
