@@ -3,10 +3,9 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Badge,
   Box,
-  Center,
   HStack,
   Icon,
-  Spinner,
+  SkeletonText,
   Table,
   TableContainer,
   Tbody,
@@ -306,9 +305,13 @@ export const ProgramUpdatesTable = ({
                       (showFlagAndType ? 2 : 0)
                     }
                   >
-                    <Center py={8}>
-                      <Spinner size="lg" />
-                    </Center>
+                    <SkeletonText
+                      mt="4"
+                      noOfLines={20}
+                      spacing="4"
+                      skeletonHeight="10"
+                      w="100%"
+                    />
                   </Td>
                 </Tr>
               ) : (
@@ -394,17 +397,13 @@ export const ProgramUpdatesTable = ({
           </Table>
         </TableContainer>
         {isLoading && tableData.length > 0 && (
-          <Box
-            position="absolute"
-            inset={0}
-            bg="whiteAlpha.800"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            zIndex={1}
-          >
-            <Spinner size="lg" />
-          </Box>
+          <SkeletonText
+            mt="4"
+            noOfLines={20}
+            spacing="4"
+            skeletonHeight="10"
+            w="100%"
+          />
         )}
       </Box>
     </>

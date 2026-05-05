@@ -3,11 +3,9 @@ import { useState } from 'react';
 import { DownloadIcon } from '@chakra-ui/icons';
 import {
   Box,
-  Center,
   Flex,
   Heading,
   IconButton,
-  Spinner,
   Tab,
   TabList,
   TabPanel,
@@ -60,17 +58,6 @@ export const UpdatesPage = () => {
     if (tabIndex === 0) downloadProgramUpdatesAsCsv(programUpdatesData, t);
     else if (tabIndex === 1) downloadMediaUpdatesAsCsv(mediaUpdatesData, t);
   };
-
-  if (isLoading) {
-    return (
-      <Center py={10}>
-        <Spinner
-          size="xl"
-          color="gray.500"
-        />
-      </Center>
-    );
-  }
 
   if (
     !(
@@ -187,32 +174,41 @@ export const UpdatesPage = () => {
             p={0}
             pt={4}
           >
-            {programUpdatesData.length === 0 ? (
-              <EmptyStateBadge variant="no-updates" />
-            ) : (
-              <Box
-                bg="white"
-                borderRadius="xl"
-                overflow="hidden"
-              >
-                <ProgramUpdatesTable
-                  originalData={originalProgramUpdatesData}
-                  isLoading={isProgramUpdatesLoading}
-                  onSave={refetchProgramUpdates}
-                  searchQuery={searchQuery}
-                  showStatus
-                  showFlagAndType
-                />
-              </Box>
-            )}
+            <Box
+              bg="white"
+              borderRadius="xl"
+              overflow="hidden"
+            >
+              {isLoading ||
+              isProgramUpdatesLoading ||
+              programUpdatesData.length > 0 ? (
+                <Box
+                  bg="white"
+                  borderRadius="xl"
+                  overflow="hidden"
+                >
+                  <ProgramUpdatesTable
+                    originalData={originalProgramUpdatesData}
+                    isLoading={isLoading || isProgramUpdatesLoading}
+                    onSave={refetchProgramUpdates}
+                    searchQuery={searchQuery}
+                    showStatus
+                    showFlagAndType
+                    embedded
+                  />
+                </Box>
+              ) : (
+                <EmptyStateBadge variant="no-updates" />
+              )}
+            </Box>
           </TabPanel>
           <TabPanel
             p={0}
             pt={4}
           >
-            {mediaUpdatesData.length === 0 ? (
-              <EmptyStateBadge variant="no-updates" />
-            ) : (
+            {isLoading ||
+            isProgramUpdatesLoading ||
+            mediaUpdatesData.length > 0 ? (
               <Box
                 bg="white"
                 borderRadius="xl"
@@ -226,15 +222,17 @@ export const UpdatesPage = () => {
                   searchQuery={searchQuery}
                 />
               </Box>
+            ) : (
+              <EmptyStateBadge variant="no-updates" />
             )}
           </TabPanel>
           <TabPanel
             p={0}
             pt={4}
           >
-            {accountUpdatesData.length === 0 ? (
-              <EmptyStateBadge variant="no-updates" />
-            ) : (
+            {isLoading ||
+            isProgramUpdatesLoading ||
+            accountUpdatesData.length > 0 ? (
               <Box
                 bg="white"
                 borderRadius="xl"
@@ -248,6 +246,8 @@ export const UpdatesPage = () => {
                   onAccountChangeUpdated={refetchAccountUpdates}
                 />
               </Box>
+            ) : (
+              <EmptyStateBadge variant="no-updates" />
             )}
           </TabPanel>
         </TabPanels>

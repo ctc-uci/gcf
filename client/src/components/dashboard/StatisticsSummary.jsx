@@ -6,7 +6,7 @@ import {
   Heading,
   HStack,
   IconButton,
-  Spinner,
+  Skeleton,
   VStack,
 } from '@chakra-ui/react';
 
@@ -127,11 +127,9 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
     const mapResponse = STATS_FROM_RESPONSE[role];
 
     if (!route || !mapResponse) {
-      setIsLoading(false);
+      setIsLoading(true);
       return;
     }
-
-    setStats(STAT_LABEL_KEYS_BY_ROLE[role] ?? STAT_LABEL_KEYS_BY_ROLE.Admin);
 
     const fetchData = async () => {
       setIsLoading(true);
@@ -146,11 +144,12 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
       }
     };
 
+    setIsLoading(true);
     fetchData();
   }, [role, roleLoading, userId, backend, refreshTrigger]);
 
   const displayStats = useMemo(() => {
-    if (!filteredData) return stats; // use fetched stats when no filter active
+    if (filteredData === null) return stats;
 
     const totalStudents = filteredData.reduce(
       (sum, p) => sum + (Number(p.students) || 0),
@@ -212,28 +211,23 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
             w="full"
             align="stretch"
           >
-            {displayStats.map((stat) => (
-              <StatBox
-                key={stat.labelKey}
-                labelKey={stat.labelKey}
-                number={stat.number}
-              />
-            ))}
+            {isLoading
+              ? Array.from({ length: initialStats.length }).map((_, i) => (
+                  <Skeleton
+                    key={i}
+                    height="150px"
+                    flex={1}
+                    borderRadius="md"
+                  />
+                ))
+              : displayStats.map((stat) => (
+                  <StatBox
+                    key={stat.labelKey}
+                    labelKey={stat.labelKey}
+                    number={stat.number}
+                  />
+                ))}
           </HStack>
-          {isLoading && (
-            <Box
-              position="absolute"
-              inset={0}
-              bg="whiteAlpha.800"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              zIndex={1}
-              borderRadius="md"
-            >
-              <Spinner size="lg" />
-            </Box>
-          )}
         </Box>
       </VStack>
     </Box>
