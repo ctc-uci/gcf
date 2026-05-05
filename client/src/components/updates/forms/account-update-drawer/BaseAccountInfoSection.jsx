@@ -5,7 +5,8 @@ import {
   Box,
   HStack,
   Image,
-  Spinner,
+  SkeletonCircle,
+  SkeletonText,
   Text,
   VStack,
 } from '@chakra-ui/react';
@@ -181,7 +182,18 @@ const ProfileImageDiff = ({ oldKey, newKey, backend, t }) => {
     return (
       <Box>
         {label}
-        <Spinner size="md" />
+        <Box py={12}>
+          <SkeletonCircle
+            size="lg"
+            boxSize="120px"
+          />
+          <SkeletonText
+            mt="4"
+            noOfLines={5}
+            spacing="8"
+            skeletonHeight="10"
+          />
+        </Box>
       </Box>
     );
   }

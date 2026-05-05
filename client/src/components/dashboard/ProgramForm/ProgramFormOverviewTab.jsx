@@ -6,6 +6,7 @@ import {
   Heading,
   Input,
   Select,
+  Skeleton,
   VStack,
 } from '@chakra-ui/react';
 
@@ -29,125 +30,155 @@ export function ProgramFormOverviewTab({
   backend,
   onOpenMediaModal,
   onSeeAllMedia,
+  isLoadingProgramData,
 }) {
   const { t } = useTranslation();
 
   return (
     <>
       <Box>
-        <Heading
-          size="md"
-          fontWeight="semibold"
-          mb={3}
+        <Skeleton
+          isLoaded={!isLoadingProgramData}
+          fitContent
         >
-          {t('programForm.generalInformation')}
-        </Heading>
+          <Heading
+            size="md"
+            fontWeight="semibold"
+            mb={3}
+          >
+            {t('programForm.generalInformation')}
+          </Heading>
+        </Skeleton>
         <VStack
           align="stretch"
           spacing={4}
         >
           <FormControl isRequired>
-            <FormLabel
-              size="sm"
-              fontWeight="normal"
-              color="gray"
-            >
-              {t('programForm.programName')}
-            </FormLabel>
-            <Input
-              placeholder={t('programForm.enterProgramTitle')}
-              value={formState.programName || ''}
-              onChange={(e) => onProgramNameChange(e.target.value)}
-            />
+            <Skeleton isLoaded={!isLoadingProgramData}>
+              <FormLabel
+                size="sm"
+                fontWeight="normal"
+                color="gray"
+              >
+                {t('programForm.programName')}
+              </FormLabel>
+            </Skeleton>
+            <Skeleton isLoaded={!isLoadingProgramData}>
+              <Input
+                placeholder={t('programForm.enterProgramTitle')}
+                value={formState.programName || ''}
+                onChange={(e) => onProgramNameChange(e.target.value)}
+              />
+            </Skeleton>
           </FormControl>
 
-          <PartnerOrganizationField
-            label={t('programForm.partnerOrgName')}
-            valueId={formState.partnerOrg}
-            onChangeId={(id) =>
-              setFormState((prev) => ({
-                ...prev,
-                partnerOrg: id,
-              }))
-            }
-          />
+          <Skeleton isLoaded={!isLoadingProgramData}>
+            <PartnerOrganizationField
+              label={t('programForm.partnerOrgName')}
+              valueId={formState.partnerOrg}
+              onChangeId={(id) =>
+                setFormState((prev) => ({ ...prev, partnerOrg: id }))
+              }
+            />
+          </Skeleton>
 
           <FormControl>
-            <Checkbox
-              isChecked={Boolean(formState.showPartnerOrgOnMap)}
-              onChange={(e) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  showPartnerOrgOnMap: e.target.checked,
-                }))
-              }
+            <Skeleton
+              isLoaded={!isLoadingProgramData}
+              fitContent
             >
-              {t('programForm.showPartnerOnMap')}
-            </Checkbox>
-            {/* TODO: Implement persistence and map behavior for showPartnerOrgOnMap (API + map layer). */}
+              <Checkbox
+                isChecked={Boolean(formState.showPartnerOrgOnMap)}
+                onChange={(e) =>
+                  setFormState((prev) => ({
+                    ...prev,
+                    showPartnerOrgOnMap: e.target.checked,
+                  }))
+                }
+              >
+                {t('programForm.showPartnerOnMap')}
+              </Checkbox>
+            </Skeleton>
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel
-              size="sm"
-              fontWeight="normal"
-              color="gray"
-            >
-              {t('programForm.status')}
-            </FormLabel>
-            <Select
-              value={formState.status ?? ''}
-              onChange={(e) => onProgramStatusChange(e.target.value)}
-              placeholder={t('programForm.selectStatus')}
-            >
-              <option value="Active">{t('programForm.launched')}</option>
-              <option value="Inactive">{t('programForm.developing')}</option>
-            </Select>
+            <Skeleton isLoaded={!isLoadingProgramData}>
+              <FormLabel
+                size="sm"
+                fontWeight="normal"
+                color="gray"
+              >
+                {t('programForm.status')}
+              </FormLabel>
+            </Skeleton>
+            <Skeleton isLoaded={!isLoadingProgramData}>
+              <Select
+                value={formState.status ?? ''}
+                onChange={(e) => onProgramStatusChange(e.target.value)}
+                placeholder={t('programForm.selectStatus')}
+              >
+                <option value="Active">{t('programForm.launched')}</option>
+                <option value="Inactive">{t('programForm.developing')}</option>
+              </Select>
+            </Skeleton>
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel
-              size="sm"
-              fontWeight="normal"
-              color="gray"
-            >
-              {t('programForm.launchDate')}
-            </FormLabel>
-            <Input
-              type="date"
-              placeholder={t('programForm.datePlaceholder')}
-              value={formState.launchDate || ''}
-              onChange={(e) => onProgramLaunchDateChange(e.target.value)}
-            />
+            <Skeleton isLoaded={!isLoadingProgramData}>
+              <FormLabel
+                size="sm"
+                fontWeight="normal"
+                color="gray"
+              >
+                {t('programForm.launchDate')}
+              </FormLabel>
+            </Skeleton>
+            <Skeleton isLoaded={!isLoadingProgramData}>
+              <Input
+                type="date"
+                placeholder={t('programForm.datePlaceholder')}
+                value={formState.launchDate || ''}
+                onChange={(e) => onProgramLaunchDateChange(e.target.value)}
+              />
+            </Skeleton>
           </FormControl>
         </VStack>
       </Box>
-      <LocationLanguageSection
-        formState={formState}
-        setFormData={setFormState}
-        languageOptions={languageOptions}
-        onLanguagesChange={onLanguageChange}
-      />
 
-      <StudentsInstrumentsSection
-        formState={formState}
-        setFormData={setFormState}
-      />
+      <Skeleton isLoaded={!isLoadingProgramData}>
+        <LocationLanguageSection
+          formState={formState}
+          setFormData={setFormState}
+          languageOptions={languageOptions}
+          onLanguagesChange={onLanguageChange}
+        />
+      </Skeleton>
 
-      <AssignedDirectorsSection
-        regionId={formState.regionId}
-        formState={formState}
-        setFormData={setFormState}
-      />
+      <Skeleton isLoaded={!isLoadingProgramData}>
+        <StudentsInstrumentsSection
+          formState={formState}
+          setFormData={setFormState}
+        />
+      </Skeleton>
 
-      <ResourcesSection
-        formState={formState}
-        setFormData={setFormState}
-        programId={programId}
-        backend={backend}
-        onOpenMediaModal={onOpenMediaModal}
-        onSeeAllMedia={onSeeAllMedia}
-      />
+      <Skeleton isLoaded={!isLoadingProgramData}>
+        <AssignedDirectorsSection
+          regionId={formState.regionId}
+          formState={formState}
+          setFormData={setFormState}
+        />
+      </Skeleton>
+
+      <Skeleton isLoaded={!isLoadingProgramData}>
+        <ResourcesSection
+          formState={formState}
+          setFormData={setFormState}
+          programId={programId}
+          backend={backend}
+          onOpenMediaModal={onOpenMediaModal}
+          onSeeAllMedia={onSeeAllMedia}
+        />
+      </Skeleton>
     </>
   );
 }
