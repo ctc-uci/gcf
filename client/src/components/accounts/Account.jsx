@@ -32,7 +32,7 @@ const getAccountsRoute = (role, userId) => {
 export const Account = () => {
   const { t } = useTranslation();
   const { currentUser } = useAuthContext();
-  const { role } = useRoleContext();
+  const { role, loading: roleLoading } = useRoleContext();
   const userId = currentUser?.uid;
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,7 +60,7 @@ export const Account = () => {
 
   const { backend } = useBackendContext();
 
-  const route = getAccountsRoute(role, userId);
+  const route = !roleLoading ? getAccountsRoute(role, userId) : null;
 
   const {
     data: users = [],
