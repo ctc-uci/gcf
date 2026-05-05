@@ -1,3 +1,5 @@
+//TODO: remove once embed is on main website
+
 import { Box, Container, Heading, Text } from '@chakra-ui/react';
 
 export const EmbedTestPage = () => {
@@ -20,7 +22,7 @@ export const EmbedTestPage = () => {
           py="2px"
           borderRadius="sm"
         >
-          /embed/map
+          /map
         </Box>{' '}
         route.
       </Text>
@@ -34,7 +36,7 @@ export const EmbedTestPage = () => {
       >
         <Box
           as="iframe"
-          src="/embed/map"
+          src="/map"
           title="GCF Map Embed"
           width="100%"
           height="1100px"

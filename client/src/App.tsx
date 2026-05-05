@@ -40,10 +40,6 @@ const App = () => {
                   element={<Map />}
                 />
                 <Route
-                  path="/embed/map"
-                  element={<Map />}
-                />
-                <Route
                   path="/embed/test-iframe"
                   element={<EmbedTestPage />}
                 />
