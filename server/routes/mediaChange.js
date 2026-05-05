@@ -222,12 +222,14 @@ mediaChangeRouter.get('/:userId/media-updates', async (req, res) => {
     }
 
     let filterJoin = '';
+    let filterWhere = 'WHERE program_update.show_on_table = TRUE';
 
     if (role === 'Regional Director') {
       filterJoin = `
         INNER JOIN country ON program.country = country.id
         INNER JOIN region ON country.region_id = region.id
         INNER JOIN regional_director ON regional_director.region_id = region.id AND regional_director.user_id = $1`;
+        filterWhere += ` AND (creator.role = 'Regional Director' OR  creator.role = 'Program Director')`;
     }
 
     const finalQuery = `
@@ -248,6 +250,7 @@ mediaChangeRouter.get('/:userId/media-updates', async (req, res) => {
         INNER JOIN program ON program_update.program_id = program.id
         LEFT JOIN gcf_user AS creator ON creator.id = program_update.created_by
         ${filterJoin}
+        ${filterWhere}
         ORDER BY program_update.id, media_change.id
       ) sub
       ORDER BY update_date DESC;
