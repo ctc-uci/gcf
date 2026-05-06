@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
@@ -23,7 +23,11 @@ async function getCityNameByCode(countryCode, stateCode, cityCode) {
   return city ? city.name : '';
 }
 
-function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
+function ProgramTable({
+  onStatsRefresh,
+  onFilteredDataChange,
+  onLoadingChange, 
+}) {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { role, loading: roleLoading } = useRoleContext();
@@ -47,7 +51,6 @@ function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
 
     const programDetails = await Promise.all(
       rows.map(async (row) => {
-        // TODO: make this more efficient with lazy loading
         const programId = row.id ?? row.programId;
         const cityName = await getCityNameByCode(
           row.country,
@@ -113,6 +116,10 @@ function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
     mutate,
   } = useSWR(shouldFetch ? route : null, fetcher);
 
+  useEffect(() => {
+    onLoadingChange?.(isLoading);
+  }, [isLoading, onLoadingChange]);
+
   if (!route && !roleLoading) {
     return null;
   }
@@ -130,7 +137,7 @@ function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
       setIsFormOpen={setIsFormOpen}
       selectedProgram={selectedProgram}
       setSelectedProgram={setSelectedProgram}
-      onSave={() => mutate()}
+      onSave={() => mutate()} 
       onStatsRefresh={onStatsRefresh}
       onFilteredDataChange={onFilteredDataChange}
     />
