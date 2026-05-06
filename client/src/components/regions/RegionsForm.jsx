@@ -60,6 +60,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   const [assignedCountryNames, setAssignedCountryNames] = useState([]);
   const [pendingChanges, setPendingChanges] = useState([]);
   const originalValues = useRef(null);
+  const hasSnapshotted = useRef(false); // <-- new
   const reviewDisclosure = useDisclosure();
   const toast = useToast();
 
@@ -87,6 +88,17 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   useEffect(() => {
     GetCountries().then(setCountries);
   }, []);
+
+  // Reset snapshot flag when region changes so a fresh snapshot is taken on next open
+  useEffect(() => {
+    if (!region) {
+      hasSnapshotted.current = false;
+      originalValues.current = null;
+    } else {
+      // Reset flag so a new snapshot is taken for this region
+      hasSnapshotted.current = false;
+    }
+  }, [region]);
 
   useEffect(() => {
     if (region) {
@@ -118,21 +130,24 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     }
   }, [countries, region, regionalDirectors, backend]);
 
-  // Snapshot original values once directors + countries are loaded for an existing region
+  // Snapshot original values ONCE after initial load — never overwrite on subsequent edits
   useEffect(() => {
-    if (region && selectedDirectors.length >= 0 && selectedCountries.length >= 0) {
+    if (region && !hasSnapshotted.current && originalDirectorIds.length >= 0 && selectedCountries.length >= 0) {
       originalValues.current = {
         regionName: region.name || '',
-        directorIds: [...selectedDirectors],
+        directorIds: [...originalDirectorIds],
         countryNames: selectedCountries.map(c => c.name),
       };
+      hasSnapshotted.current = true;
     }
-  }, [region, originalDirectorIds, selectedCountries]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [region, originalDirectorIds, selectedCountries]);
 
   const resetForm = () => {
     setRegionName(''); setSelectedDirectors([]); setOriginalDirectorIds([]);
     setSelectedCountries([]); setRegionNameError(false); setSearchTerm('');
-    setDrawerSize('md'); setIsSaving(false); originalValues.current = null;
+    setDrawerSize('md'); setIsSaving(false);
+    originalValues.current = null;
+    hasSnapshotted.current = false; // <-- reset flag on form reset
   };
 
   const performSave = async () => {
