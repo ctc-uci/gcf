@@ -60,7 +60,9 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   const [assignedCountryNames, setAssignedCountryNames] = useState([]);
   const [pendingChanges, setPendingChanges] = useState([]);
   const originalValues = useRef(null);
-  const hasSnapshotted = useRef(false); // <-- new
+  const hasSnapshotted = useRef(false);
+  const hasLoadedDirectors = useRef(false);
+  const hasLoadedCountries = useRef(false);
   const reviewDisclosure = useDisclosure();
   const toast = useToast();
 
@@ -89,15 +91,12 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     GetCountries().then(setCountries);
   }, []);
 
-  // Reset snapshot flag when region changes so a fresh snapshot is taken on next open
+  // Reset all snapshot flags when region changes
   useEffect(() => {
-    if (!region) {
-      hasSnapshotted.current = false;
-      originalValues.current = null;
-    } else {
-      // Reset flag so a new snapshot is taken for this region
-      hasSnapshotted.current = false;
-    }
+    hasSnapshotted.current = false;
+    hasLoadedDirectors.current = false;
+    hasLoadedCountries.current = false;
+    if (!region) originalValues.current = null;
   }, [region]);
 
   useEffect(() => {
@@ -110,8 +109,14 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
           const ids = data.map(d => regionalDirectors.find(rd => rd.id === d.userId)?.id?.toString()).filter(Boolean);
           setSelectedDirectors(ids);
           setOriginalDirectorIds(ids);
+          hasLoadedDirectors.current = true;
         })
-        .catch(err => { console.error('Error fetching region directors:', err); setSelectedDirectors([]); setOriginalDirectorIds([]); });
+        .catch(err => {
+          console.error('Error fetching region directors:', err);
+          setSelectedDirectors([]);
+          setOriginalDirectorIds([]);
+          hasLoadedDirectors.current = true;
+        });
 
       backend.get(`/region/${region.id}/countries`)
         .then(res => {
@@ -119,8 +124,12 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
             .map(rc => countries.find(c => c.name === rc.name))
             .filter(Boolean);
           setSelectedCountries(mapped);
+          hasLoadedCountries.current = true;
         })
-        .catch(err => console.error('Error fetching region countries:', err));
+        .catch(err => {
+          console.error('Error fetching region countries:', err);
+          hasLoadedCountries.current = true;
+        });
     } else {
       setRegionName('');
       setSelectedDirectors([]);
@@ -130,9 +139,14 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     }
   }, [countries, region, regionalDirectors, backend]);
 
-  // Snapshot original values ONCE after initial load — never overwrite on subsequent edits
+  // Snapshot original values ONCE, but only after both API calls have actually resolved
   useEffect(() => {
-    if (region && !hasSnapshotted.current && originalDirectorIds.length >= 0 && selectedCountries.length >= 0) {
+    if (
+      region &&
+      !hasSnapshotted.current &&
+      hasLoadedDirectors.current &&
+      hasLoadedCountries.current
+    ) {
       originalValues.current = {
         regionName: region.name || '',
         directorIds: [...originalDirectorIds],
@@ -147,7 +161,9 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     setSelectedCountries([]); setRegionNameError(false); setSearchTerm('');
     setDrawerSize('md'); setIsSaving(false);
     originalValues.current = null;
-    hasSnapshotted.current = false; // <-- reset flag on form reset
+    hasSnapshotted.current = false;
+    hasLoadedDirectors.current = false;
+    hasLoadedCountries.current = false;
   };
 
   const performSave = async () => {
@@ -187,7 +203,6 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     if (!regionName.trim()) { setRegionNameError(true); return; }
     setRegionNameError(false);
 
-    // In edit mode, show review modal first
     if (region && !isConfirmed) {
       const orig = originalValues.current || {};
       const directorName = (id) => {
