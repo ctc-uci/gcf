@@ -109,7 +109,11 @@ const STATS_FROM_RESPONSE = {
   'Program Director': statsFromPdData,
 };
 
-const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
+const StatisticsSummary = ({
+  refreshTrigger = 0,
+  filteredData = null,
+  isTableLoading = false,
+}) => {
   const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
@@ -211,7 +215,7 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
             w="full"
             align="stretch"
           >
-            {isLoading
+            {isLoading || isTableLoading
               ? Array.from({ length: initialStats.length }).map((_, i) => (
                   <Skeleton
                     key={i}

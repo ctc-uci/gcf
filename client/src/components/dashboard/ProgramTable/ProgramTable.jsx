@@ -8,7 +8,11 @@ import { GetCity } from 'react-country-state-city';
 import { ProgramDisplay } from './ProgramDisplay';
 import { getRouteByRole, MAP_BY_ROLE } from './programTableMappers';
 
-function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
+function ProgramTable({
+  onStatsRefresh,
+  onFilteredDataChange,
+  onLoadingChange,
+}) {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
   const { role, loading: roleLoading } = useRoleContext();
@@ -51,6 +55,7 @@ function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
     }
 
     setIsLoading(true);
+    onLoadingChange?.(true);
     try {
       const res = await backend.get(route);
       const rows = Array.isArray(res.data) ? res.data : [];
@@ -115,8 +120,9 @@ function ProgramTable({ onStatsRefresh, onFilteredDataChange }) {
       console.error('Error fetching data:', err);
     } finally {
       setIsLoading(false);
+      onLoadingChange?.(false);
     }
-  }, [role, roleLoading, userId, backend]);
+  }, [role, roleLoading, userId, backend, onLoadingChange]);
 
   useEffect(() => {
     fetchData();
