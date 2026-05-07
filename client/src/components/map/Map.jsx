@@ -344,10 +344,10 @@ export const Map = () => {
             />
             <Box
               position="absolute"
-              top="200px"
+              top="0"
               left="0"
               w="100%"
-              h="calc(100% - 50px)"
+              h="100%"
               bg="white"
               zIndex={20}
               borderRadius="md"
@@ -387,158 +387,158 @@ export const Map = () => {
             </Box>
           </>
         )}
-      </Box>
 
-      {regions.length > 0 && !selectedProgram && (
-        <Box onClick={(e) => e.stopPropagation()}>
-          <Flex
-            mt="15px"
-            ml="25px"
-            mr="25px"
-            mb="10px"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <HStack>
-              <Icon
-                as={FaRegArrowAltCircleLeft}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPrograms([]);
-                  setProgramsLoading(false);
-                  setRegions([]);
-                  setSelectedRegionId(null);
-                  setSelectedProgram(null);
-                }}
-                cursor="pointer"
-                boxSize={6}
-              />
-              <Heading fontSize="2xl">
-                Featured Programs in{' '}
-                {programsLoading || !regionName ? (
-                  <Skeleton
-                    as="span"
-                    display="inline-block"
-                    height="1em"
-                    width="200px"
-                    verticalAlign="text-bottom"
-                    borderRadius="md"
-                  />
-                ) : (
-                  regionName
-                )}
-              </Heading>
-            </HStack>
-
-            {!programsLoading && programs.length > 0 && (
-              <HStack gap={3}>
-                <Flex
-                  as="button"
-                  onClick={() => scroll(-330)}
-                  w="40px"
-                  h="40px"
-                  borderRadius="full"
-                  bg="#319795"
-                  color="white"
-                  align="center"
-                  justify="center"
-                  _hover={{ bg: '#2C7A7B' }}
-                  transition="all 0.2s"
-                >
-                  <Icon as={FaChevronLeft} />
-                </Flex>
-                <Flex
-                  as="button"
-                  onClick={() => scroll(330)}
-                  w="40px"
-                  h="40px"
-                  borderRadius="full"
-                  bg="#319795"
-                  color="white"
-                  align="center"
-                  justify="center"
-                  _hover={{ bg: '#2C7A7B' }}
-                  transition="all 0.2s"
-                >
-                  <Icon as={FaChevronRight} />
-                </Flex>
-              </HStack>
-            )}
-          </Flex>
-
-          {programsLoading ? (
-            <Box w="100%">
-              <HStack
-                ml="28px"
-                mb="20px"
-                pr="28px"
-                gap={7}
-                overflowX="auto"
-                pb="10px"
-                css={{
-                  '&::-webkit-scrollbar': { display: 'none' },
-                  scrollbarWidth: 'none',
-                }}
-              >
-                {[0, 1, 2].map((i) => (
-                  <ProgramCardSkeleton key={i} />
-                ))}
-              </HStack>
-            </Box>
-          ) : programs.length > 0 ? (
-            <Box w="100%">
-              <HStack
-                ref={scrollRef}
-                ml="28px"
-                mb="20px"
-                pr="28px"
-                gap={7}
-                overflowX="auto"
-                pb="10px"
-                css={{
-                  '&::-webkit-scrollbar': { display: 'none' },
-                  scrollbarWidth: 'none',
-                }}
-              >
-                {programs.map((program) => (
-                  <Box
-                    key={program.id}
-                    minW="300px"
-                    cursor="pointer"
-                    onClick={() => setSelectedProgram(program)}
-                    transition="transform 0.2s"
-                    border="2px solid transparent"
-                    borderRadius="md"
-                    _hover={{
-                      borderColor: 'teal.500',
-                    }}
-                  >
-                    <CardView
-                      programId={program.id}
-                      title={program.title}
-                      city={program.city}
-                      country={program.country}
-                      state={program.state}
-                      status={program.status}
-                      started={program.launchDate}
-                    />
-                  </Box>
-                ))}
-              </HStack>
-            </Box>
-          ) : (
-            <Text
-              ml="28px"
-              mb="20px"
-              fontSize="lg"
-              color="gray.600"
-              fontStyle="italic"
+        {regions.length > 0 && (
+          <Box onClick={(e) => e.stopPropagation()}>
+            <Flex
+              mt="15px"
+              ml="25px"
+              mr="25px"
+              mb="10px"
+              justifyContent="space-between"
+              alignItems="center"
             >
-              No Programs in this Region!
-            </Text>
-          )}
-        </Box>
-      )}
+              <HStack>
+                <Icon
+                  as={FaRegArrowAltCircleLeft}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPrograms([]);
+                    setProgramsLoading(false);
+                    setRegions([]);
+                    setSelectedRegionId(null);
+                    setSelectedProgram(null);
+                  }}
+                  cursor="pointer"
+                  boxSize={6}
+                />
+                <Heading fontSize="2xl">
+                  Featured Programs in{' '}
+                  {programsLoading || !regionName ? (
+                    <Skeleton
+                      as="span"
+                      display="inline-block"
+                      height="1em"
+                      width="200px"
+                      verticalAlign="text-bottom"
+                      borderRadius="md"
+                    />
+                  ) : (
+                    regionName
+                  )}
+                </Heading>
+              </HStack>
+
+              {!programsLoading && programs.length > 0 && (
+                <HStack gap={3}>
+                  <Flex
+                    as="button"
+                    onClick={() => scroll(-330)}
+                    w="40px"
+                    h="40px"
+                    borderRadius="full"
+                    bg="#319795"
+                    color="white"
+                    align="center"
+                    justify="center"
+                    _hover={{ bg: '#2C7A7B' }}
+                    transition="all 0.2s"
+                  >
+                    <Icon as={FaChevronLeft} />
+                  </Flex>
+                  <Flex
+                    as="button"
+                    onClick={() => scroll(330)}
+                    w="40px"
+                    h="40px"
+                    borderRadius="full"
+                    bg="#319795"
+                    color="white"
+                    align="center"
+                    justify="center"
+                    _hover={{ bg: '#2C7A7B' }}
+                    transition="all 0.2s"
+                  >
+                    <Icon as={FaChevronRight} />
+                  </Flex>
+                </HStack>
+              )}
+            </Flex>
+
+            {programsLoading ? (
+              <Box w="100%">
+                <HStack
+                  ml="28px"
+                  mb="20px"
+                  pr="28px"
+                  gap={7}
+                  overflowX="auto"
+                  pb="10px"
+                  css={{
+                    '&::-webkit-scrollbar': { display: 'none' },
+                    scrollbarWidth: 'none',
+                  }}
+                >
+                  {[0, 1, 2].map((i) => (
+                    <ProgramCardSkeleton key={i} />
+                  ))}
+                </HStack>
+              </Box>
+            ) : programs.length > 0 ? (
+              <Box w="100%">
+                <HStack
+                  ref={scrollRef}
+                  ml="28px"
+                  mb="20px"
+                  pr="28px"
+                  gap={7}
+                  overflowX="auto"
+                  pb="10px"
+                  css={{
+                    '&::-webkit-scrollbar': { display: 'none' },
+                    scrollbarWidth: 'none',
+                  }}
+                >
+                  {programs.map((program) => (
+                    <Box
+                      key={program.id}
+                      minW="300px"
+                      cursor="pointer"
+                      onClick={() => setSelectedProgram(program)}
+                      transition="transform 0.2s"
+                      border="2px solid transparent"
+                      borderRadius="md"
+                      _hover={{
+                        borderColor: 'teal.500',
+                      }}
+                    >
+                      <CardView
+                        programId={program.id}
+                        title={program.title}
+                        city={program.city}
+                        country={program.country}
+                        state={program.state}
+                        status={program.status}
+                        started={program.launchDate}
+                      />
+                    </Box>
+                  ))}
+                </HStack>
+              </Box>
+            ) : (
+              <Text
+                ml="28px"
+                mb="20px"
+                fontSize="lg"
+                color="gray.600"
+                fontStyle="italic"
+              >
+                No Programs in this Region!
+              </Text>
+            )}
+          </Box>
+        )}
+      </Box>
     </>
   );
 };
