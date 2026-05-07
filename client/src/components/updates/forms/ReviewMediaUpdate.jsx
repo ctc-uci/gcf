@@ -230,7 +230,6 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                             file_name={item.fileName}
                             file_type={item.fileType}
                             imageUrl={mediaURLs[idx]}
-                            hideMenu = {true}
                           />
                         </Box>
                       </Box>
@@ -285,6 +284,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
           mediaURLs={mediaURLs}
           selectedIndex={selectedIndex}
           onClose={() => setSelectedIndex(null)}
+          onUpdate = {onUpdate}
         />
       )}
     </>
