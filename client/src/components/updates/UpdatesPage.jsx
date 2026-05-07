@@ -39,14 +39,14 @@ export const UpdatesPage = () => {
   const {
     role,
     programUpdatesData,
-    originalProgramUpdatesData,
     mediaUpdatesData,
-    setMediaUpdatesData,
-    originalMediaUpdatesData,
-    accountUpdatesData,
     originalAccountUpdatesData,
+    originalMediaUpdatesData,
+    originalProgramUpdatesData,
+    setMediaUpdatesData,
+    accountUpdatesData,
     isLoading,
-    isProgramUpdatesLoading,
+    isProgramLoading,
     refetchProgramUpdates,
     refetchAccountUpdates,
   } = useUpdatesPageData();
@@ -69,7 +69,7 @@ export const UpdatesPage = () => {
     return (
       <ProgramDirectorView
         data={programUpdatesData}
-        isLoading={isLoading || isProgramUpdatesLoading}
+        isLoading={isLoading || isProgramLoading}
         onSave={refetchProgramUpdates}
       />
     );
@@ -179,9 +179,7 @@ export const UpdatesPage = () => {
               borderRadius="xl"
               overflow="hidden"
             >
-              {isLoading ||
-              isProgramUpdatesLoading ||
-              programUpdatesData.length > 0 ? (
+              {isLoading || originalProgramUpdatesData.length > 0 ? (
                 <Box
                   bg="white"
                   borderRadius="xl"
@@ -189,7 +187,7 @@ export const UpdatesPage = () => {
                 >
                   <ProgramUpdatesTable
                     originalData={originalProgramUpdatesData}
-                    isLoading={isLoading || isProgramUpdatesLoading}
+                    isLoading={isLoading}
                     onSave={refetchProgramUpdates}
                     searchQuery={searchQuery}
                     showStatus
@@ -206,9 +204,7 @@ export const UpdatesPage = () => {
             p={0}
             pt={4}
           >
-            {isLoading ||
-            isProgramUpdatesLoading ||
-            mediaUpdatesData.length > 0 ? (
+            {isLoading || mediaUpdatesData.length > 0 ? (
               <Box
                 bg="white"
                 borderRadius="xl"
@@ -231,9 +227,7 @@ export const UpdatesPage = () => {
             p={0}
             pt={4}
           >
-            {isLoading ||
-            isProgramUpdatesLoading ||
-            accountUpdatesData.length > 0 ? (
+            {isLoading || accountUpdatesData.length > 0 ? (
               <Box
                 bg="white"
                 borderRadius="xl"
