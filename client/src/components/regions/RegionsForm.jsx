@@ -63,6 +63,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   const hasSnapshotted = useRef(false);
   const hasLoadedDirectors = useRef(false);
   const hasLoadedCountries = useRef(false);
+  const fetchedCountryNames = useRef([]);
   const reviewDisclosure = useDisclosure();
   const toast = useToast();
 
@@ -96,6 +97,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     hasSnapshotted.current = false;
     hasLoadedDirectors.current = false;
     hasLoadedCountries.current = false;
+    fetchedCountryNames.current = [];
     if (!region) originalValues.current = null;
   }, [region]);
 
@@ -124,6 +126,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
             .map(rc => countries.find(c => c.name === rc.name))
             .filter(Boolean);
           setSelectedCountries(mapped);
+          fetchedCountryNames.current = mapped.map(c => c.name);
           hasLoadedCountries.current = true;
         })
         .catch(err => {
@@ -150,7 +153,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
       originalValues.current = {
         regionName: region.name || '',
         directorIds: [...originalDirectorIds],
-        countryNames: selectedCountries.map(c => c.name),
+        countryNames: fetchedCountryNames.current,
       };
       hasSnapshotted.current = true;
     }
@@ -164,6 +167,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     hasSnapshotted.current = false;
     hasLoadedDirectors.current = false;
     hasLoadedCountries.current = false;
+    fetchedCountryNames.current = [];
   };
 
   const performSave = async () => {
