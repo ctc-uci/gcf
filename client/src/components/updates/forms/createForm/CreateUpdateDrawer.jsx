@@ -20,7 +20,8 @@ import {
   HStack,
   Icon,
   IconButton,
-  Spinner,
+  Skeleton,
+  SkeletonText,
   Text,
   useDisclosure,
   useToast,
@@ -469,9 +470,36 @@ export const CreateUpdateDrawer = ({
             <Divider mt={3} />
           </Box>
 
-          <DrawerBody px={8} pb={24}>
-            {isEditLoading && <Center py={10}><Spinner size="lg" color="teal.500" /></Center>}
-            <VStack spacing={6} align="stretch" mt={4} display={isEditLoading ? 'none' : 'flex'}>
+          <DrawerBody
+            px={8}
+            pb={24}
+          >
+            {isEditLoading && (
+              <Box>
+                <SkeletonText
+                  mt="4"
+                  noOfLines={4}
+                  spacing="4"
+                  skeletonHeight="5"
+                  mb="10"
+                />
+                <Skeleton h="200px" />
+                <SkeletonText
+                  mt="4"
+                  noOfLines={4}
+                  spacing="4"
+                  skeletonHeight="5"
+                  mb="10"
+                />
+                <Skeleton h="50px" />
+              </Box>
+            )}
+            <VStack
+              spacing={6}
+              align="stretch"
+              mt={4}
+              display={isEditLoading ? 'none' : 'flex'}
+            >
               <Box>
                 <Heading size="sm" fontWeight="600" mb={3}>
                   {isEditMode ? t('updates.updateType') : t('updates.createTypeQuestion')}

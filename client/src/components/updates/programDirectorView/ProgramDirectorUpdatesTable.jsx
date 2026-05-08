@@ -1,9 +1,8 @@
 import {
   Badge,
   Box,
-  Center,
   Icon,
-  Spinner,
+  SkeletonText,
   Table,
   TableContainer,
   Tbody,
@@ -215,9 +214,13 @@ export const ProgramDirectorUpdatesTable = ({
               {isLoading && tableData.length === 0 ? (
                 <Tr>
                   <Td colSpan={colSpan}>
-                    <Center py={8}>
-                      <Spinner size="lg" />
-                    </Center>
+                    <SkeletonText
+                      mt="4"
+                      noOfLines={20}
+                      spacing="4"
+                      skeletonHeight="10"
+                      w="100%"
+                    />
                   </Td>
                 </Tr>
               ) : (
@@ -345,7 +348,13 @@ export const ProgramDirectorUpdatesTable = ({
           justifyContent="center"
           zIndex={1}
         >
-          <Spinner size="lg" />
+          <SkeletonText
+            mt="4"
+            noOfLines={20}
+            spacing="4"
+            skeletonHeight="10"
+            w="100%"
+          />
         </Box>
       )}
     </Box>
