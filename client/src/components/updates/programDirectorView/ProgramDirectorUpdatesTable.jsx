@@ -21,6 +21,13 @@ import { FiStar } from 'react-icons/fi';
 
 import { SortArrows } from '../../tables/SortArrows';
 
+function getDisplayNote(note) {
+  if (!note) return '';
+  if (!note.startsWith('Reason: ')) return note;
+  const nl = note.indexOf('\n');
+  return nl === -1 ? note : note.slice(0, nl);
+}
+
 function formatStatus(row, t) {
   const isResolved = Boolean(row.resolved);
   return (
@@ -254,7 +261,7 @@ export const ProgramDirectorUpdatesTable = ({
                             color="gray.700"
                             noOfLines={3}
                           >
-                            {row.note || '—'}
+                            {getDisplayNote(row.note) || '—'}
                           </Text>
                         </Td>
                         <Td
@@ -297,7 +304,7 @@ export const ProgramDirectorUpdatesTable = ({
                             color="gray.700"
                             noOfLines={3}
                           >
-                            {row.note || '—'}
+                            {getDisplayNote(row.note) || '—'}
                           </Text>
                         </Td>
                         <Td
