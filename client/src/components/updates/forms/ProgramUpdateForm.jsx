@@ -951,6 +951,7 @@ export const ProgramUpdateForm = ({
           mediaURLs={mediaURLs}
           selectedIndex={selectedMediaIndex}
           onClose={() => setSelectedMediaIndex(null)}
+          onUpdate={onSuccess}
         />
       )}
     </>

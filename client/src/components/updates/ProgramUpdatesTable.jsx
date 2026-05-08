@@ -57,6 +57,13 @@ export function downloadProgramUpdatesAsCsv(data, t) {
   downloadCsv(headers, rows, `program-updates-${getFilenameTimestamp()}.csv`);
 }
 
+function getDisplayNote(note) {
+  if (!note) return '';
+  if (!note.startsWith('Reason: ')) return note;
+  const nl = note.indexOf('\n');
+  return nl === -1 ? note : note.slice(0, nl);
+}
+
 const StatusBadge = ({ status }) => {
   const { t } = useTranslation();
   const isResolved = status;
@@ -346,7 +353,7 @@ export const ProgramUpdatesTable = ({
                         noOfLines={1}
                         maxW="400px"
                       >
-                        {row.note ||
+                        {getDisplayNote(row.note) ||
                           row.title ||
                           t('updates.programNotePlaceholder')}
                       </Text>
