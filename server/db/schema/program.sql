@@ -4,7 +4,7 @@ CREATE TABLE program (
     id BIGSERIAL PRIMARY KEY,
     created_by BIGINT NOT NULL,
     name VARCHAR(70) NOT NULL,
-    date_created TIMESTAMP NOT NULL,
+    date_created TIMESTAMPTZ NOT NULL,
     country INTEGER NOT NULL,
     state INTEGER,
     city INTEGER,

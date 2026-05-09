@@ -6,7 +6,7 @@ CREATE TABLE program_update (
   update_date    DATE                           NOT NULL,
   note           TEXT,
   show_on_table  BOOLEAN NOT NULL DEFAULT TRUE
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   resolved boolean NOT NULL DEFAULT false
 );
