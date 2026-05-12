@@ -25,7 +25,7 @@ import {
 } from '@/utils/downloadCsv';
 import { formatRelativeDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
-import { FiExternalLink, FiStar } from 'react-icons/fi';
+import { FiEdit2, FiStar } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
@@ -316,10 +316,10 @@ export const ProgramUpdatesTable = ({
                 tableData.map((row) => (
                   <Tr
                     key={row.id}
-                    role="group"
-                    onClick={() => openEditForm(row)}
-                    cursor="pointer"
-                    _hover={{ bg: 'gray.50' }}
+                    _hover={{
+                      bg: 'gray.50',
+                      '& .action-group': { opacity: 1, visibility: 'visible' },
+                    }}
                   >
                     {showFlagAndType && (
                       <Td>
@@ -393,35 +393,26 @@ export const ProgramUpdatesTable = ({
                         >
                           {formatRelativeDate(row.updatedAt || row.updateDate)}
                         </Text>
-                        <Button
-                          size="xs"
-                          variant="outline"
-                          borderColor="teal.400"
-                          color="teal.400"
-                          leftIcon={
-                            <Icon
-                              as={FiExternalLink}
-                              boxSize={3.5}
-                            />
-                          }
-                          opacity={0}
-                          transform="translateX(4px)"
-                          transition="opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease"
-                          _groupHover={{
-                            opacity: 1,
-                            transform: 'translateX(0)',
-                          }}
-                          _hover={{
-                            bg: 'teal.400',
-                            color: 'white',
-                            borderColor: 'teal.400',
-                          }}
-                          onClick={() => openEditForm(row)}
+                        <Box
+                          className="action-group"
+                          opacity={{ base: 1, md: 0 }}
+                          visibility={{ base: 'visible', md: 'hidden' }}
+                          transition="all 0.2s"
                         >
-                          {t('updates.viewUpdate', {
-                            defaultValue: 'View Update',
-                          })}
-                        </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            leftIcon={<FiEdit2 />}
+                            colorScheme="teal"
+                            bg="white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditForm(row);
+                            }}
+                          >
+                            {t('common.edit')}
+                          </Button>
+                        </Box>
                       </HStack>
                     </Td>
                   </Tr>

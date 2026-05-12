@@ -19,7 +19,7 @@ import {
 } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
-import { FiExternalLink, FiUser } from 'react-icons/fi';
+import { FiEdit2, FiUser } from 'react-icons/fi';
 
 import { useTableSort } from '../../contexts/hooks/TableSort';
 import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
@@ -231,10 +231,10 @@ export const AccountUpdatesTable = ({
                 return (
                   <Tr
                     key={row.id}
-                    role="group"
-                    cursor="pointer"
-                    _hover={{ bg: 'gray.50' }}
-                    onClick={() => setSelectedUpdate(row)}
+                    _hover={{
+                      bg: 'gray.50',
+                      '& .action-group': { opacity: 1, visibility: 'visible' },
+                    }}
                   >
                     <Td>
                       <Text
@@ -277,35 +277,26 @@ export const AccountUpdatesTable = ({
                         >
                           {row.lastModified || ''}
                         </Text>
-                        <Button
-                          size="xs"
-                          variant="outline"
-                          borderColor="teal.400"
-                          color="teal.400"
-                          leftIcon={
-                            <Icon
-                              as={FiExternalLink}
-                              boxSize={3.5}
-                            />
-                          }
-                          opacity={0}
-                          transform="translateX(4px)"
-                          transition="opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease"
-                          _groupHover={{
-                            opacity: 1,
-                            transform: 'translateX(0)',
-                          }}
-                          _hover={{
-                            bg: 'teal.400',
-                            color: 'white',
-                            borderColor: 'teal.400',
-                          }}
-                          onClick={() => setSelectedUpdate(row)}
+                        <Box
+                          className="action-group"
+                          opacity={{ base: 1, md: 0 }}
+                          visibility={{ base: 'visible', md: 'hidden' }}
+                          transition="all 0.2s"
                         >
-                          {t('updates.viewUpdate', {
-                            defaultValue: 'View Update',
-                          })}
-                        </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            leftIcon={<FiEdit2 />}
+                            colorScheme="teal"
+                            bg="white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedUpdate(row);
+                            }}
+                          >
+                            {t('common.edit')}
+                          </Button>
+                        </Box>
                       </HStack>
                     </Td>
                   </Tr>
