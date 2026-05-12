@@ -15,7 +15,7 @@ const isAlphaNumeric = (value: string) => {
 };
 
 const isPhoneNumber = (value: string) => {
-  return /^\d+$/.test(value) || value.length > 15;
+  return /^\d+$/.test(value) && value.length <= 15;
 };
 
 const isISODate = (value: unknown) => {
@@ -89,6 +89,10 @@ const keysToCamel = (data: object | string[] | string) => {
   return data;
 };
 
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next)
+};
+
 export {
   isNumeric,
   isBoolean,
@@ -96,4 +100,5 @@ export {
   isAlphaNumeric,
   isPhoneNumber,
   keysToCamel,
+  asyncHandler,
 };
