@@ -7,7 +7,7 @@ import {
   Center,
   HStack,
   Icon,
-  Spinner,
+  SkeletonText,
   Table,
   TableContainer,
   Tbody,
@@ -57,6 +57,13 @@ export function downloadProgramUpdatesAsCsv(data, t) {
     escapeCsvValue(formatRelativeDate(row.updatedAt || row.updateDate)),
   ]);
   downloadCsv(headers, rows, `program-updates-${getFilenameTimestamp()}.csv`);
+}
+
+function getDisplayNote(note) {
+  if (!note) return '';
+  if (!note.startsWith('Reason: ')) return note;
+  const nl = note.indexOf('\n');
+  return nl === -1 ? note : note.slice(0, nl);
 }
 
 const StatusBadge = ({ status }) => {
@@ -307,9 +314,13 @@ export const ProgramUpdatesTable = ({
                       (showFlagAndType ? 2 : 0)
                     }
                   >
-                    <Center py={8}>
-                      <Spinner size="lg" />
-                    </Center>
+                    <SkeletonText
+                      mt="4"
+                      noOfLines={20}
+                      spacing="4"
+                      skeletonHeight="10"
+                      w="100%"
+                    />
                   </Td>
                 </Tr>
               ) : (
@@ -345,7 +356,7 @@ export const ProgramUpdatesTable = ({
                         noOfLines={1}
                         maxW="400px"
                       >
-                        {row.note ||
+                        {getDisplayNote(row.note) ||
                           row.title ||
                           t('updates.programNotePlaceholder')}
                       </Text>
@@ -422,17 +433,13 @@ export const ProgramUpdatesTable = ({
           </Table>
         </TableContainer>
         {isLoading && tableData.length > 0 && (
-          <Box
-            position="absolute"
-            inset={0}
-            bg="whiteAlpha.800"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            zIndex={1}
-          >
-            <Spinner size="lg" />
-          </Box>
+          <SkeletonText
+            mt="4"
+            noOfLines={20}
+            spacing="4"
+            skeletonHeight="10"
+            w="100%"
+          />
         )}
       </Box>
     </>

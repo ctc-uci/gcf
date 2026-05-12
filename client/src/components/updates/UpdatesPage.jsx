@@ -3,11 +3,9 @@ import { useState } from 'react';
 import { DownloadIcon } from '@chakra-ui/icons';
 import {
   Box,
-  Center,
   Flex,
   Heading,
   IconButton,
-  Spinner,
   Tab,
   TabList,
   TabPanel,
@@ -41,14 +39,14 @@ export const UpdatesPage = () => {
   const {
     role,
     programUpdatesData,
-    originalProgramUpdatesData,
     mediaUpdatesData,
-    setMediaUpdatesData,
-    originalMediaUpdatesData,
-    accountUpdatesData,
     originalAccountUpdatesData,
+    originalMediaUpdatesData,
+    originalProgramUpdatesData,
+    setMediaUpdatesData,
+    accountUpdatesData,
     isLoading,
-    isProgramUpdatesLoading,
+    isProgramLoading,
     refetchProgramUpdates,
     refetchAccountUpdates,
   } = useUpdatesPageData();
@@ -61,17 +59,6 @@ export const UpdatesPage = () => {
     else if (tabIndex === 1) downloadMediaUpdatesAsCsv(mediaUpdatesData, t);
   };
 
-  if (isLoading) {
-    return (
-      <Center py={10}>
-        <Spinner
-          size="xl"
-          color="gray.500"
-        />
-      </Center>
-    );
-  }
-
   if (
     !(
       role === 'Admin' ||
@@ -82,7 +69,7 @@ export const UpdatesPage = () => {
     return (
       <ProgramDirectorView
         data={programUpdatesData}
-        isLoading={isLoading || isProgramUpdatesLoading}
+        isLoading={isLoading || isProgramLoading}
         onSave={refetchProgramUpdates}
       />
     );
@@ -187,33 +174,37 @@ export const UpdatesPage = () => {
             p={0}
             pt={4}
           >
-            {programUpdatesData.length === 0 ? (
-              <EmptyStateBadge variant="no-updates" />
-            ) : (
-              <Box
-                bg="white"
-                borderRadius="xl"
-                overflow="hidden"
-              >
-                <ProgramUpdatesTable
-                  originalData={originalProgramUpdatesData}
-                  isLoading={isProgramUpdatesLoading}
-                  onSave={refetchProgramUpdates}
-                  searchQuery={searchQuery}
-                  showStatus
-                  showFlagAndType
-                  embedded
-                />
-              </Box>
-            )}
+            <Box
+              bg="white"
+              borderRadius="xl"
+              overflow="hidden"
+            >
+              {isLoading || originalProgramUpdatesData.length > 0 ? (
+                <Box
+                  bg="white"
+                  borderRadius="xl"
+                  overflow="hidden"
+                >
+                  <ProgramUpdatesTable
+                    originalData={originalProgramUpdatesData}
+                    isLoading={isLoading}
+                    onSave={refetchProgramUpdates}
+                    searchQuery={searchQuery}
+                    showStatus
+                    showFlagAndType
+                    embedded
+                  />
+                </Box>
+              ) : (
+                <EmptyStateBadge variant="no-updates" />
+              )}
+            </Box>
           </TabPanel>
           <TabPanel
             p={0}
             pt={4}
           >
-            {mediaUpdatesData.length === 0 ? (
-              <EmptyStateBadge variant="no-updates" />
-            ) : (
+            {isLoading || mediaUpdatesData.length > 0 ? (
               <Box
                 bg="white"
                 borderRadius="xl"
@@ -228,15 +219,15 @@ export const UpdatesPage = () => {
                   embedded
                 />
               </Box>
+            ) : (
+              <EmptyStateBadge variant="no-updates" />
             )}
           </TabPanel>
           <TabPanel
             p={0}
             pt={4}
           >
-            {accountUpdatesData.length === 0 ? (
-              <EmptyStateBadge variant="no-updates" />
-            ) : (
+            {isLoading || accountUpdatesData.length > 0 ? (
               <Box
                 bg="white"
                 borderRadius="xl"
@@ -250,6 +241,8 @@ export const UpdatesPage = () => {
                   onAccountChangeUpdated={refetchAccountUpdates}
                 />
               </Box>
+            ) : (
+              <EmptyStateBadge variant="no-updates" />
             )}
           </TabPanel>
         </TabPanels>

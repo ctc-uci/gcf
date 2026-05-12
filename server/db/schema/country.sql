@@ -2,7 +2,7 @@ CREATE TABLE public.country (
   id serial PRIMARY KEY,
   region_id integer NOT NULL,
   name character varying(70) NOT NULL,
-  last_modified timestamp without time zone NOT NULL,
+  last_modified TIMESTAMPTZ NOT NULL,
   iso_code character varying(3) NULL
 );
 

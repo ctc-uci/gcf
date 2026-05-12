@@ -7,7 +7,7 @@ import {
   Button,
   Center,
   HStack,
-  Spinner,
+  SkeletonText,
   Table,
   TableContainer,
   Tbody,
@@ -202,9 +202,13 @@ export const MediaUpdatesTable = ({
             {isLoading ? (
               <Tr>
                 <Td colSpan={5}>
-                  <Center py={8}>
-                    <Spinner size="lg" />
-                  </Center>
+                  <SkeletonText
+                    mt="4"
+                    noOfLines={20}
+                    spacing="4"
+                    skeletonHeight="10"
+                    w="100%"
+                  />
                 </Td>
               </Tr>
             ) : (

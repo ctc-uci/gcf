@@ -4,7 +4,6 @@ import { DeleteIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
-  Center,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -14,15 +13,12 @@ import {
   DrawerOverlay,
   HStack,
   Icon,
-  Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Select,
-  Spinner,
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
@@ -273,6 +269,7 @@ export const ProgramForm = ({
                   mediaUploadModal.onOpen();
                 }}
                 onSeeAllMedia={() => setActiveTab('media')}
+                isLoadingProgramData={isLoadingProgramData}
               />
             )}
 
@@ -368,22 +365,6 @@ export const ProgramForm = ({
             </ModalFooter>
           </ModalContent>
         </Modal>
-
-        {isLoadingProgramData && (
-          <Center
-            position="absolute"
-            inset={0}
-            zIndex="overlay"
-            bg="rgba(107, 114, 128, 0.72)"
-          >
-            <Spinner
-              size="xl"
-              thickness="4px"
-              color="teal.500"
-              emptyColor="gray.200"
-            />
-          </Center>
-        )}
       </DrawerContent>
       <MediaUploadModal
         isOpen={mediaUploadModal.isOpen}
