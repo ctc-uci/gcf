@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS public.account_change (
     old_values JSONB,
     new_values JSONB,
     resolved BOOLEAN NOT NULL DEFAULT FALSE,
-    last_modified TIMESTAMP NOT NULL,
+    last_modified TIMESTAMPTZ NOT NULL,
 
     CONSTRAINT fk_user_id
         FOREIGN KEY (user_id)

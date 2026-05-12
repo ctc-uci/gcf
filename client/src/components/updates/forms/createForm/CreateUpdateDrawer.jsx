@@ -36,6 +36,7 @@ import { FiMaximize2, FiMinimize2, FiTrash2 } from 'react-icons/fi';
 import { IoMusicalNoteSharp } from 'react-icons/io5';
 
 import { MediaUploadModal } from '../../../media/MediaUploadModal';
+import { ReviewProgramUpdate } from '../ReviewProgramUpdate';
 import CreateUpdateInstrument from './CreateUpdateInstrument';
 import CreateUpdateStudent from './CreateUpdateStudent';
 
@@ -45,6 +46,14 @@ const INSTRUMENT_EVENT_TO_LABEL = {
   new_donation: 'New / Donation',
   needs_repair: 'Needs repair',
   other: 'Other',
+};
+
+const WHAT_HAPPENED_TO_EVENT_TYPE = {
+  Broken: 'broken',
+  Missing: 'missing',
+  'New / Donation': 'new_donation',
+  'Needs repair': 'needs_repair',
+  Other: 'other',
 };
 
 function extraNotesFromStoredNote(note) {
@@ -57,80 +66,77 @@ function extraNotesFromStoredNote(note) {
   return rest.slice(nl + 1).trim();
 }
 
-const UpdateTypeOptionCard = ({ icon, label, isSelected, onSelect }) => {
-  return (
+const UpdateTypeOptionCard = ({ icon, label, isSelected, onSelect }) => (
+  <Box
+    flex={1}
+    display="flex"
+    flexDirection="column"
+    h="100%"
+    minH="168px"
+    border="2px solid"
+    borderColor={isSelected ? 'teal.500' : 'gray.200'}
+    borderRadius="lg"
+    overflow="hidden"
+    cursor="pointer"
+    onClick={onSelect}
+    bg="white"
+    textAlign="center"
+    transition="all 0.2s"
+  >
+    <Box
+      flex={5}
+      p={6}
+      alignItems="center"
+      justifyContent="center"
+    >
+      <Box mt={3}>
+        <Icon
+          as={icon}
+          boxSize={8}
+          color={isSelected ? 'teal.600' : 'gray.500'}
+        />
+        <Text
+          fontWeight="bold"
+          fontSize="sm"
+        >
+          {label}
+        </Text>
+      </Box>
+    </Box>
     <Box
       flex={1}
-      display="flex"
-      flexDirection="column"
-      h="100%"
-      minH="168px"
-      border="2px solid"
+      bg={isSelected ? 'teal.50' : 'gray.100'}
+      borderTop="1px solid"
       borderColor={isSelected ? 'teal.500' : 'gray.200'}
-      borderRadius="lg"
-      overflow="hidden"
-      cursor="pointer"
-      onClick={onSelect}
-      bg="white"
-      textAlign="center"
-      transition="all 0.2s"
+      minH={0}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      p={2}
     >
       <Box
-        flex={5}
-        p={6}
-        gap={0}
-        alignItems="center"
-        justifyContent="center"
-      >
-        <Box mt={3}>
-          <Icon
-            as={icon}
-            boxSize={8}
-            color={isSelected ? 'teal.600' : 'gray.500'}
-          />
-          <Text
-            fontWeight="bold"
-            fontSize="sm"
-          >
-            {label}
-          </Text>
-        </Box>
-      </Box>
-      <Box
-        flex={1}
-        bg={isSelected ? 'teal.50' : 'gray.100'}
-        borderTop="1px solid"
-        borderColor={isSelected ? 'teal.500' : 'gray.200'}
-        minH={0}
+        w="20px"
+        h="20px"
+        borderRadius="full"
+        border="2px solid"
+        borderColor={isSelected ? 'teal.500' : 'gray.300'}
+        bg={isSelected ? 'teal.500' : 'white'}
         display="flex"
         alignItems="center"
         justifyContent="center"
-        p={2}
       >
-        <Box
-          w="20px"
-          h="20px"
-          borderRadius="full"
-          border="2px solid"
-          borderColor={isSelected ? 'teal.500' : 'gray.300'}
-          bg={isSelected ? 'teal.500' : 'white'}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          {isSelected && (
-            <Box
-              w="8px"
-              h="8px"
-              borderRadius="full"
-              bg="white"
-            />
-          )}
-        </Box>
+        {isSelected && (
+          <Box
+            w="8px"
+            h="8px"
+            borderRadius="full"
+            bg="white"
+          />
+        )}
       </Box>
     </Box>
-  );
-};
+  </Box>
+);
 
 export const CreateUpdateDrawer = ({
   isOpen,
@@ -148,6 +154,7 @@ export const CreateUpdateDrawer = ({
   const toast = useToast();
   const mediaUploadDisclosure = useDisclosure();
   const deleteConfirmDisclosure = useDisclosure();
+  const reviewDisclosure = useDisclosure();
 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -157,97 +164,75 @@ export const CreateUpdateDrawer = ({
     useState(null);
   const [editingEnrollmentChangeId, setEditingEnrollmentChangeId] =
     useState(null);
+  const [pendingChanges, setPendingChanges] = useState([]);
 
   const isEditMode = (editProgramUpdateId ?? '') !== '';
 
   const [updateType, setUpdateType] = useState('instrument');
-
   const [selectedInstrument, setSelectedInstrument] = useState('');
   const [whatHappened, setWhatHappened] = useState('');
   const [instrumentCount, setInstrumentCount] = useState(0);
-
   const [studentCount, setStudentCount] = useState(0);
   const [studentWhatHappened, setStudentWhatHappened] = useState('');
   const [programEnrollmentCount, setProgramEnrollmentCount] = useState(0);
-
   const [notes, setNotes] = useState('');
   const [specialRequest, setSpecialRequest] = useState(false);
   const [uploadedMedia, setUploadedMedia] = useState([]);
   const originalMediaIds = useRef(new Set());
+  const originalValues = useRef(null);
 
   const [instruments, setInstruments] = useState([]);
   const [programId, setProgramId] = useState(null);
   const [instrumentCountsByName, setInstrumentCountsByName] = useState({});
 
   useEffect(() => {
-    const fetchInstruments = async () => {
-      try {
-        const response = await backend.get('/instruments');
-        setInstruments(response.data || []);
-      } catch (error) {
-        console.error('Error fetching instruments:', error);
-      }
-    };
-    fetchInstruments();
+    backend
+      .get('/instruments')
+      .then((r) => setInstruments(r.data || []))
+      .catch((e) => console.error('Error fetching instruments:', e));
   }, [backend]);
 
   useEffect(() => {
-    const fetchProgram = async () => {
-      if (!currentUser?.uid) return;
-      try {
-        const response = await backend.get(
-          `/program-directors/me/${currentUser.uid}/program`
-        );
-        if (response.data) {
-          setProgramId(response.data.id);
-        }
-      } catch (error) {
-        console.error('Error fetching program:', error);
-      }
-    };
-    fetchProgram();
+    if (!currentUser?.uid) return;
+    backend
+      .get(`/program-directors/me/${currentUser.uid}/program`)
+      .then((r) => {
+        if (r.data) setProgramId(r.data.id);
+      })
+      .catch((e) => console.error('Error fetching program:', e));
   }, [backend, currentUser]);
 
   useEffect(() => {
-    const fetchProgramInstrumentTotals = async () => {
-      if (!programId || !isOpen) return;
-      try {
-        const response = await backend.get(`/program/${programId}/instruments`);
-        const rows = response.data || [];
+    if (!programId || !isOpen) return;
+    backend
+      .get(`/program/${programId}/instruments`)
+      .then((r) => {
         const map = {};
-        for (const row of rows) {
-          if (row.name !== undefined && row.name !== null) {
-            map[row.name] = Number(row.quantity ?? 0);
-          }
+        for (const row of r.data || []) {
+          if (row.name != null) map[row.name] = Number(row.quantity ?? 0);
         }
         setInstrumentCountsByName(map);
-      } catch (error) {
-        console.error('Error fetching program instrument totals:', error);
+      })
+      .catch((e) => {
+        console.error('Error fetching instrument totals:', e);
         setInstrumentCountsByName({});
-      }
-    };
-    fetchProgramInstrumentTotals();
+      });
   }, [backend, programId, isOpen]);
 
-  const programInstrumentCountForSelected = useMemo(() => {
-    if (!selectedInstrument) return null;
-    return instrumentCountsByName[selectedInstrument] ?? 0;
-  }, [selectedInstrument, instrumentCountsByName]);
+  const programInstrumentCountForSelected = useMemo(
+    () =>
+      selectedInstrument
+        ? (instrumentCountsByName[selectedInstrument] ?? 0)
+        : null,
+    [selectedInstrument, instrumentCountsByName]
+  );
 
   useEffect(() => {
-    const fetchProgramStats = async () => {
-      if (!isOpen || !currentUser?.uid) return;
-      try {
-        const response = await backend.get(
-          `/program-directors/me/${currentUser.uid}/stats`
-        );
-        const n = Number(response.data?.students ?? 0);
-        setProgramEnrollmentCount(n);
-      } catch (error) {
-        console.error('Error fetching program stats:', error);
-      }
-    };
-    fetchProgramStats();
+    if (!isOpen || !currentUser?.uid) return;
+    backend
+      .get(`/program-directors/me/${currentUser.uid}/stats`)
+      .then((r) => setProgramEnrollmentCount(Number(r.data?.students ?? 0)))
+      .catch((e) => console.error('Error fetching program stats:', e));
   }, [backend, currentUser, isOpen]);
 
   useEffect(() => {
@@ -256,25 +241,19 @@ export const CreateUpdateDrawer = ({
       setEditingEnrollmentChangeId(null);
       return;
     }
-    if (!isOpen || editVariant === null || editVariant === undefined) return;
-
+    if (!isOpen || editVariant == null) return;
     let cancelled = false;
 
     const load = async () => {
-      if (editVariant === 'instrument' && !instruments?.length) {
-        return;
-      }
-
+      if (editVariant === 'instrument' && !instruments?.length) return;
       setIsEditLoading(true);
       try {
         const { data: pu } = await backend.get(
           `/program-updates/${editProgramUpdateId}`
         );
         if (cancelled) return;
-
         setProgramId(pu.programId);
         setUpdateType(editVariant);
-
         let loadedInstrumentChangeId = null;
 
         if (editVariant === 'instrument') {
@@ -282,62 +261,72 @@ export const CreateUpdateDrawer = ({
             `/instrument-changes/update/${editProgramUpdateId}`
           );
           if (cancelled) return;
-
           let change = icRows[icRows.length - 1];
           if (editInstrumentName && icRows.length && instruments?.length) {
-            const found = icRows.find((c) => {
-              const inst = instruments.find((i) => i.id === c.instrumentId);
-              return inst?.name === editInstrumentName;
-            });
+            const found = icRows.find(
+              (c) =>
+                instruments.find((i) => i.id === c.instrumentId)?.name ===
+                editInstrumentName
+            );
             if (found) change = found;
           }
-
           if (change && instruments?.length) {
             loadedInstrumentChangeId = change.id;
             const inst = instruments.find((i) => i.id === change.instrumentId);
-            setSelectedInstrument(inst?.name || '');
-            setEditingInstrumentChangeId(change.id);
+            const instrumentName = inst?.name || '';
             const label =
               INSTRUMENT_EVENT_TO_LABEL[change.eventType] || 'Other';
-            setWhatHappened(label);
             const amt = Number(change.amountChanged);
-            const isDonation = change.eventType === 'new_donation';
-            setInstrumentCount(
-              isDonation
+            const count =
+              change.eventType === 'new_donation'
                 ? Math.max(0, Number.isNaN(amt) ? 0 : amt)
-                : Math.abs(Number.isNaN(amt) ? 0 : amt)
-            );
-            setSpecialRequest(change.specialRequest === true);
-            setNotes(extraNotesFromStoredNote(pu.note || ''));
+                : Math.abs(Number.isNaN(amt) ? 0 : amt);
+            const noteVal = extraNotesFromStoredNote(pu.note || '');
+            const specialRequestVal = change.specialRequest === true;
+            setSelectedInstrument(instrumentName);
+            setEditingInstrumentChangeId(change.id);
+            setWhatHappened(label);
+            setInstrumentCount(count);
+            setSpecialRequest(specialRequestVal);
+            setNotes(noteVal);
+            originalValues.current = {
+              selectedInstrument: instrumentName,
+              whatHappened: label,
+              instrumentCount: count,
+              notes: noteVal,
+              specialRequest: specialRequestVal,
+            };
           }
         } else {
           const { data: ecRows = [] } = await backend.get(
             `/enrollmentChange/update/${editProgramUpdateId}`
           );
           if (cancelled) return;
-
           const ec = ecRows[ecRows.length - 1];
           if (ec) {
-            setEditingEnrollmentChangeId(ec.id);
             const et = ec.eventType || 'other';
+            const count =
+              et === 'graduated'
+                ? Number(ec.graduatedChange) || 0
+                : Math.abs(Number(ec.enrollmentChange) || 0);
+            const noteVal = pu.note || '';
+            setEditingEnrollmentChangeId(ec.id);
             setStudentWhatHappened(et);
-            if (et === 'graduated') {
-              setStudentCount(Number(ec.graduatedChange) || 0);
-            } else if (et === 'new_joined') {
-              setStudentCount(Number(ec.enrollmentChange) || 0);
-            } else {
-              setStudentCount(Math.abs(Number(ec.enrollmentChange) || 0));
-            }
-            setNotes(pu.note || '');
+            setStudentCount(count);
+            setNotes(noteVal);
+            originalValues.current = {
+              studentWhatHappened: et,
+              studentCount: count,
+              notes: noteVal,
+            };
           }
         }
 
-        try {
-          if (loadedInstrumentChangeId) {
+        if (loadedInstrumentChangeId) {
+          try {
             const { data: mediaData = [] } = await backend.get(
               `/instrument-change-photos/instrument-change/${loadedInstrumentChangeId}`
             );
-
             if (!cancelled && mediaData.length > 0) {
               const urlResponses = await Promise.all(
                 mediaData.map((m) => backend.get(`/images/url/${m.s3Key}`))
@@ -354,9 +343,9 @@ export const CreateUpdateDrawer = ({
                 }))
               );
             }
+          } catch (e) {
+            console.error('Error loading media for edit:', e);
           }
-        } catch (e) {
-          console.error('Error loading existing media for edit:', e);
         }
       } catch (e) {
         console.error('Error loading update for edit:', e);
@@ -386,7 +375,7 @@ export const CreateUpdateDrawer = ({
     toast,
   ]);
 
-  const resetForm = () => {
+  const handleClose = () => {
     setUpdateType('instrument');
     setSelectedInstrument('');
     setWhatHappened('');
@@ -397,22 +386,11 @@ export const CreateUpdateDrawer = ({
     setSpecialRequest(false);
     setUploadedMedia([]);
     originalMediaIds.current = new Set();
+    originalValues.current = null;
     setIsFullScreen(false);
     setEditingInstrumentChangeId(null);
     setEditingEnrollmentChangeId(null);
-  };
-
-  const handleClose = () => {
-    resetForm();
     onClose();
-  };
-
-  const handleMediaUploadComplete = (uploadedFiles) => {
-    setUploadedMedia((prev) => [...prev, ...uploadedFiles]);
-  };
-
-  const removeMedia = (index) => {
-    setUploadedMedia((prev) => prev.filter((_, i) => i !== index));
   };
 
   const confirmDeleteProgramUpdate = async () => {
@@ -444,7 +422,7 @@ export const CreateUpdateDrawer = ({
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (isConfirmed = false) => {
     if (!programId) {
       toast({
         title: t('updates.cannotSaveTitle'),
@@ -456,14 +434,12 @@ export const CreateUpdateDrawer = ({
       return;
     }
 
-    // Prevent decrementing an instrument/students if goes over the current total
     const isInstrumentDecrement =
       Boolean(selectedInstrument) &&
       updateType === 'instrument' &&
       Boolean(whatHappened) &&
       whatHappened !== 'New / Donation';
-
-    if (isInstrumentDecrement && selectedInstrument) {
+    if (isInstrumentDecrement) {
       const currentTotal =
         programInstrumentCountForSelected ??
         instrumentCountsByName[selectedInstrument] ??
@@ -474,7 +450,7 @@ export const CreateUpdateDrawer = ({
           title: 'Cannot save',
           description:
             currentTotal <= 0
-              ? `There are no ${selectedInstrument} instruments on record. You cannot remove more than you have.`
+              ? `There are no ${selectedInstrument} instruments on record.`
               : `You cannot report more (${n}) than the current total (${currentTotal}) for ${selectedInstrument}.`,
           status: 'error',
           duration: 7000,
@@ -488,7 +464,6 @@ export const CreateUpdateDrawer = ({
       updateType === 'student' &&
       Boolean(studentWhatHappened) &&
       studentWhatHappened !== 'new_joined';
-
     if (isStudentDecrement) {
       const currentTotal = Number(programEnrollmentCount) || 0;
       const n = Number(studentCount) || 0;
@@ -497,7 +472,7 @@ export const CreateUpdateDrawer = ({
           title: 'Cannot save',
           description:
             currentTotal <= 0
-              ? 'There are no students on record. You cannot remove more than you have.'
+              ? 'There are no students on record.'
               : `You cannot report more students (${n}) than the current total (${currentTotal}).`,
           status: 'error',
           duration: 7000,
@@ -507,23 +482,65 @@ export const CreateUpdateDrawer = ({
       }
     }
 
-    const whatHappenedToEventType = {
-      Broken: 'broken',
-      Missing: 'missing',
-      'New / Donation': 'new_donation',
-      'Needs repair': 'needs_repair',
-      Other: 'other',
-    };
-
-    let fullNote = notes;
-    if (updateType === 'instrument' && whatHappened) {
-      fullNote = `Reason: ${whatHappened}${notes ? `\n${notes}` : ''}`;
-    } else if (updateType === 'student') {
-      fullNote = notes;
+    // In edit mode, show the review modal first
+    if (isEditMode && !isConfirmed) {
+      const orig = originalValues.current || {};
+      const changes =
+        updateType === 'instrument'
+          ? [
+              {
+                label: t('updates.instrument'),
+                oldValue: orig.selectedInstrument,
+                newValue: selectedInstrument,
+              },
+              {
+                label: t('updates.whatHappened'),
+                oldValue: orig.whatHappened,
+                newValue: whatHappened,
+              },
+              {
+                label: t('updates.quantity'),
+                oldValue: orig.instrumentCount,
+                newValue: instrumentCount,
+              },
+              {
+                label: t('updates.specialRequest'),
+                oldValue: orig.specialRequest,
+                newValue: specialRequest,
+              },
+              {
+                label: t('updates.notes'),
+                oldValue: orig.notes,
+                newValue: notes,
+              },
+            ]
+          : [
+              {
+                label: t('updates.whatHappened'),
+                oldValue: orig.studentWhatHappened,
+                newValue: studentWhatHappened,
+              },
+              {
+                label: t('updates.studentCount'),
+                oldValue: orig.studentCount,
+                newValue: studentCount,
+              },
+              {
+                label: t('updates.notes'),
+                oldValue: orig.notes,
+                newValue: notes,
+              },
+            ];
+      setPendingChanges(changes);
+      reviewDisclosure.onOpen();
+      return;
     }
 
+    const fullNote =
+      updateType === 'instrument' && whatHappened
+        ? `Reason: ${whatHappened}${notes ? `\n${notes}` : ''}`
+        : notes;
     const timestamp = new Date().toISOString();
-
     const programUpdateData = {
       title:
         updateType === 'instrument' ? 'Instrument Update' : 'Student Update',
@@ -558,7 +575,7 @@ export const CreateUpdateDrawer = ({
                 ? instrumentCount
                 : -1 * instrumentCount;
             const instrumentEventType =
-              whatHappenedToEventType[whatHappened] ?? 'other';
+              WHAT_HAPPENED_TO_EVENT_TYPE[whatHappened] ?? 'other';
             await backend.put(
               `/instrument-changes/${editingInstrumentChangeId}`,
               {
@@ -575,10 +592,9 @@ export const CreateUpdateDrawer = ({
         }
 
         if (updateType === 'student' && editingEnrollmentChangeId) {
-          const affected = parseInt(String(studentCount), 10);
-          const count = Number.isNaN(affected) ? 0 : affected;
-          const isPositive = studentWhatHappened === 'new_joined';
-          const enrollmentDelta = isPositive ? count : -count;
+          const count = parseInt(String(studentCount), 10) || 0;
+          const enrollmentDelta =
+            studentWhatHappened === 'new_joined' ? count : -count;
           await backend.put(`/enrollmentChange/${editingEnrollmentChangeId}`, {
             update_id: editProgramUpdateId,
             enrollment_change: enrollmentDelta,
@@ -593,16 +609,14 @@ export const CreateUpdateDrawer = ({
         );
         for (const id of originalMediaIds.current) {
           if (!currentMediaIds.has(id)) {
-            if (updateType === 'instrument') {
-              await backend.delete(`/instrument-change-photos/${id}`);
-            } else {
-              await backend.delete(`/mediaChange/${id}`);
-            }
+            await backend.delete(
+              updateType === 'instrument'
+                ? `/instrument-change-photos/${id}`
+                : `/mediaChange/${id}`
+            );
           }
         }
-
         originalMediaIds.current = new Set(currentMediaIds);
-
         for (const media of uploadedMedia) {
           if (media.id) continue;
           if (updateType === 'instrument') {
@@ -623,12 +637,13 @@ export const CreateUpdateDrawer = ({
           isClosable: true,
           position: 'bottom',
         });
-
+        reviewDisclosure.onClose();
         onSave?.();
         handleClose();
         return;
       }
 
+      // Create mode
       const response = await backend.post('/program-updates', {
         ...programUpdateData,
         show_on_table: true,
@@ -647,7 +662,7 @@ export const CreateUpdateDrawer = ({
               ? instrumentCount
               : -1 * instrumentCount;
           const instrumentEventType =
-            whatHappenedToEventType[whatHappened] ?? 'other';
+            WHAT_HAPPENED_TO_EVENT_TYPE[whatHappened] ?? 'other';
           const icResponse = await backend.post('/instrument-changes', {
             instrumentId: instrument.id,
             updateId: newUpdateId,
@@ -656,12 +671,9 @@ export const CreateUpdateDrawer = ({
             description: instrumentEventType === 'other' ? notes || null : null,
             special_request: specialRequest,
           });
-
-          const newInstrumentChangeId = icResponse.data.id;
-
           for (const media of uploadedMedia) {
             await backend.post('/instrument-change-photos', {
-              instrument_change_id: newInstrumentChangeId,
+              instrument_change_id: icResponse.data.id,
               s3_key: media.s3_key,
               file_name: media.file_name,
               file_type: media.file_type,
@@ -671,10 +683,9 @@ export const CreateUpdateDrawer = ({
       }
 
       if (updateType === 'student') {
-        const affected = parseInt(String(studentCount), 10);
-        const count = Number.isNaN(affected) ? 0 : affected;
-        const isPositive = studentWhatHappened === 'new_joined';
-        const enrollmentDelta = isPositive ? count : -count;
+        const count = parseInt(String(studentCount), 10) || 0;
+        const enrollmentDelta =
+          studentWhatHappened === 'new_joined' ? count : -count;
         if (enrollmentDelta !== 0) {
           await backend.post('/enrollmentChange', {
             update_id: newUpdateId,
@@ -686,13 +697,11 @@ export const CreateUpdateDrawer = ({
         }
       }
 
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('en-US', {
+      const timeStr = new Date().toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
         timeZoneName: 'short',
       });
-
       toast({
         title: t('updates.createdTitle'),
         description: t('updates.createdDesc', { time: timeStr }),
@@ -701,7 +710,6 @@ export const CreateUpdateDrawer = ({
         isClosable: true,
         position: 'bottom',
       });
-
       onSave?.();
       handleClose();
     } catch (error) {
@@ -719,8 +727,6 @@ export const CreateUpdateDrawer = ({
     }
   };
 
-  const drawerSize = isFullScreen ? 'full' : 'lg';
-
   return (
     <>
       <Drawer
@@ -728,7 +734,7 @@ export const CreateUpdateDrawer = ({
         placement="right"
         onClose={handleClose}
         finalFocusRef={btnRef}
-        size={drawerSize}
+        size={isFullScreen ? 'full' : 'lg'}
       >
         <DrawerOverlay />
         <DrawerContent
@@ -856,7 +862,11 @@ export const CreateUpdateDrawer = ({
                   }
                   instruments={instruments}
                   uploadedMedia={uploadedMedia}
-                  removeMedia={removeMedia}
+                  removeMedia={(index) =>
+                    setUploadedMedia((prev) =>
+                      prev.filter((_, i) => i !== index)
+                    )
+                  }
                   mediaUploadDisclosure={mediaUploadDisclosure}
                   notes={notes}
                   setNotes={setNotes}
@@ -918,7 +928,7 @@ export const CreateUpdateDrawer = ({
                 bg="teal.500"
                 color="white"
                 _hover={{ bg: 'teal.600' }}
-                onClick={handleSave}
+                onClick={() => handleSave(false)}
                 isLoading={isLoading || isEditLoading}
               >
                 {t('common.save')}
@@ -927,6 +937,14 @@ export const CreateUpdateDrawer = ({
           </Flex>
         </DrawerContent>
       </Drawer>
+
+      <ReviewProgramUpdate
+        isOpen={reviewDisclosure.isOpen}
+        onClose={reviewDisclosure.onClose}
+        onConfirm={() => handleSave(true)}
+        changes={pendingChanges}
+        isLoading={isLoading}
+      />
 
       <AlertDialog
         isOpen={deleteConfirmDisclosure.isOpen}
@@ -966,7 +984,9 @@ export const CreateUpdateDrawer = ({
       <MediaUploadModal
         isOpen={mediaUploadDisclosure.isOpen}
         onClose={mediaUploadDisclosure.onClose}
-        onUploadComplete={handleMediaUploadComplete}
+        onUploadComplete={(files) =>
+          setUploadedMedia((prev) => [...prev, ...files])
+        }
         formOrigin="update"
       />
     </>

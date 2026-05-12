@@ -21,6 +21,8 @@ import { updatesPermissionsRouter } from '@/routes/updatesPermissions';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
+import type { NextFunction, Request, Response } from 'express';
+
 dotenv.config();
 import { verifyToken } from './middleware';
 
@@ -59,6 +61,12 @@ app.use('/images', verifyToken, imagesRouter);
 app.use('/playlistCache', verifyToken, playlistCacheRouter);
 app.use('/fileChanges', fileChangeRouter);
 app.use('/accountChange', accountChangeRouter);
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error(err.stack ?? err.message);
+  res.status(500).send('Internal Server Error');
+});
 
 // Listening is moved to server.ts to enable importing app in tests
 export default app;
