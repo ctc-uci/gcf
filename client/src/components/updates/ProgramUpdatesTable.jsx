@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Badge,
   Box,
+  Button,
+  Center,
   HStack,
   Icon,
   SkeletonText,
@@ -23,7 +25,7 @@ import {
 } from '@/utils/downloadCsv';
 import { formatRelativeDate } from '@/utils/formatDate';
 import { useTranslation } from 'react-i18next';
-import { FiStar } from 'react-icons/fi';
+import { FiEdit2, FiStar } from 'react-icons/fi';
 
 import { applyFilters } from '../../contexts/hooks/TableFilter';
 import { useTableSort } from '../../contexts/hooks/TableSort';
@@ -325,9 +327,10 @@ export const ProgramUpdatesTable = ({
                 tableData.map((row) => (
                   <Tr
                     key={row.id}
-                    onClick={() => openEditForm(row)}
-                    cursor="pointer"
-                    _hover={{ bg: 'gray.50' }}
+                    _hover={{
+                      bg: 'gray.50',
+                      '& .action-group': { opacity: 1, visibility: 'visible' },
+                    }}
                   >
                     {showFlagAndType && (
                       <Td>
@@ -390,12 +393,38 @@ export const ProgramUpdatesTable = ({
                       </Text>
                     </Td>
                     <Td>
-                      <Text
-                        fontSize="sm"
-                        color="gray.600"
+                      <HStack
+                        justify="space-between"
+                        spacing={2}
+                        w="100%"
                       >
-                        {formatRelativeDate(row.updatedAt || row.updateDate)}
-                      </Text>
+                        <Text
+                          fontSize="sm"
+                          color="gray.600"
+                        >
+                          {formatRelativeDate(row.updatedAt || row.updateDate)}
+                        </Text>
+                        <Box
+                          className="action-group"
+                          opacity={{ base: 1, md: 0 }}
+                          visibility={{ base: 'visible', md: 'hidden' }}
+                          transition="all 0.2s"
+                        >
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            leftIcon={<FiEdit2 />}
+                            colorScheme="teal"
+                            bg="white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditForm(row);
+                            }}
+                          >
+                            {t('common.edit')}
+                          </Button>
+                        </Box>
+                      </HStack>
                     </Td>
                   </Tr>
                 ))
