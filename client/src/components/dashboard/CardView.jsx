@@ -1,4 +1,3 @@
-import { EditIcon } from '@chakra-ui/icons';
 import {
   Box,
   Card,
@@ -16,20 +15,53 @@ import {
 
 import ReactCardFlip from 'react-card-flip';
 import { useTranslation } from 'react-i18next';
+import { FiEdit2 } from 'react-icons/fi';
 
 import { DirectorAvatar } from './ProgramForm/DirectorAvatar';
 
-const BackCardView = ({ p, onClick, t }) => {
+const BackCardView = ({ p, onClick, t, openEditForm }) => {
   return (
     <Card
+      role="group"
       h="100%"
       br={20}
       w="100%"
       maxW="600px"
       maxH="500px"
       onClick={onClick}
+      transition="background-color 0.2s ease"
+      _hover={{ bg: 'teal.50' }}
     >
       <CardHeader position="relative">
+        <Box
+          position="absolute"
+          top={2}
+          right={2}
+          opacity={0}
+          pointerEvents="none"
+          transition="opacity 0.2s ease"
+          _groupHover={{ opacity: 1, pointerEvents: 'auto' }}
+          _groupFocusWithin={{ opacity: 1, pointerEvents: 'auto' }}
+          zIndex={1}
+        >
+          <IconButton
+            aria-label={t('programCard.editAria')}
+            icon={<FiEdit2 />}
+            size="sm"
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditForm(p);
+            }}
+            bg="white"
+            borderRadius="full"
+            color="teal.500"
+            borderWidth="2px"
+            borderColor="teal.500"
+            _hover={{ bg: 'teal.500', color: 'white' }}
+            _active={{ bg: 'teal.100', color: 'teal.600' }}
+          />
+        </Box>
         <Tag
           size="md"
           borderRadius="md"
@@ -283,11 +315,14 @@ const BackCardView = ({ p, onClick, t }) => {
 const FrontCardView = ({ p, openEditForm, onClick, t }) => {
   return (
     <Card
+      role="group"
       br={20}
       w="100%"
       maxW="600px"
       h="350px"
       onClick={onClick}
+      transition="background-color 0.2s ease"
+      _hover={{ bg: 'teal.50' }}
     >
       <CardHeader position="relative">
         <Tag
@@ -323,19 +358,27 @@ const FrontCardView = ({ p, openEditForm, onClick, t }) => {
           position="absolute"
           top={2}
           right={2}
+          opacity={0}
+          pointerEvents="none"
+          transition="opacity 0.2s ease"
+          _groupHover={{ opacity: 1, pointerEvents: 'auto' }}
         >
           <IconButton
             aria-label={t('programCard.editAria')}
-            icon={<EditIcon />}
+            icon={<FiEdit2 />}
             size="sm"
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
               openEditForm(p);
             }}
-            bg="#808080"
+            bg="white"
             borderRadius="full"
-            color="white"
+            color="teal.500"
+            borderWidth="2px"
+            borderColor="teal.500"
+            _hover={{ bg: 'teal.500', color: 'white' }}
+            _active={{ bg: 'teal.100', color: 'teal.600' }}
           />
         </Box>
       </CardHeader>
@@ -446,6 +489,7 @@ const CardView = ({ data, flippedId, setFlippedId, openEditForm }) => {
             p={item}
             onClick={() => handleFlip(item.id)}
             t={t}
+            openEditForm={openEditForm}
           />
         </ReactCardFlip>
       ))}

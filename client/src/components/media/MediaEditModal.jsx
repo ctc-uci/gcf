@@ -15,6 +15,7 @@ import {
 } from '@chakra-ui/react';
 
 import { useTranslation } from 'react-i18next';
+
 import { ReviewProgramUpdate } from '../updates/forms/ReviewProgramUpdate';
 
 export const MediaEditModal = ({
@@ -59,35 +60,61 @@ export const MediaEditModal = ({
   };
 
   const changes = [
-    { label: t('mediaEditModal.titlePlaceholder'), oldValue: initialTitle, newValue: title },
-    { label: t('mediaEditModal.descriptionPlaceholder'), oldValue: initialDescription, newValue: description },
+    {
+      label: t('mediaEditModal.titlePlaceholder'),
+      oldValue: initialTitle,
+      newValue: title,
+    },
+    {
+      label: t('mediaEditModal.descriptionPlaceholder'),
+      oldValue: initialDescription,
+      newValue: description,
+    },
   ];
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={handleCancel} isCentered>
+      <Modal
+        isOpen={isOpen}
+        onClose={handleCancel}
+        isCentered
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>{t('mediaEditModal.heading')}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <VStack spacing={4} align="stretch">
+            <VStack
+              spacing={4}
+              align="stretch"
+            >
               <Input
                 placeholder={t('mediaEditModal.titlePlaceholder')}
                 value={title}
-                onChange={e => setTitle(e.target.value)}
+                onChange={(e) => setTitle(e.target.value)}
               />
               <Textarea
                 placeholder={t('mediaEditModal.descriptionPlaceholder')}
                 value={description}
-                onChange={e => setDescription(e.target.value)}
+                onChange={(e) => setDescription(e.target.value)}
                 rows={4}
               />
             </VStack>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="gray" mr={3} onClick={handleCancel}>{t('common.cancel')}</Button>
-            <Button colorScheme="teal" onClick={handleSave}>{t('common.save')}</Button>
+            <Button
+              colorScheme="gray"
+              mr={3}
+              onClick={handleCancel}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              colorScheme="teal"
+              onClick={handleSave}
+            >
+              {t('common.save')}
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

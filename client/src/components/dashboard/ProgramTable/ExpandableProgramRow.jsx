@@ -1,10 +1,10 @@
-import { EditIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
   Collapse,
   HStack,
   Link,
+  Tbody,
   Td,
   Text,
   Tr,
@@ -38,21 +38,26 @@ export function ExpandableProgramRow({ p, onEdit }) {
   const flagCode = isoCodeToFlagIconCode(p.isoCode);
 
   return (
-    <>
+    <Tbody
+      sx={{
+        '& > tr > td': {
+          transition: 'background-color 0.2s ease',
+        },
+      }}
+      _hover={{
+        '& > tr > td': { bg: 'gray.100' },
+        '& .action-group': { opacity: 1, visibility: 'visible' },
+      }}
+    >
       <Tr
         onClick={onToggle}
         cursor="pointer"
-        _hover={{
-          bg: 'gray.100',
-          '& .action-group': { opacity: 1, visibility: 'visible' },
-        }}
         sx={{
           '& td': {
             borderBottom: isOpen ? 'none' : '1px solid',
             borderColor: 'gray.200',
           },
         }}
-        transition="background 0.2s"
       >
         <Td>{p.title}</Td>
         <Td>
@@ -105,12 +110,20 @@ export function ExpandableProgramRow({ p, onEdit }) {
           </HStack>
         </Td>
         <Td
+          p={0}
+          w="0"
+          minW="0"
           textAlign="right"
           position="sticky"
           right={0}
+          overflow="visible"
         >
           <Box
             className="action-group"
+            position="absolute"
+            top="50%"
+            right={1}
+            transform="translateY(-50%)"
             opacity={{ base: 1, md: 0 }}
             visibility={{ base: 'visible', md: 'hidden' }}
             transition="all 0.2s"
@@ -121,6 +134,9 @@ export function ExpandableProgramRow({ p, onEdit }) {
               leftIcon={<FiEdit2 />}
               colorScheme="teal"
               bg="white"
+              m={0}
+              _hover={{ bg: 'teal.500', color: 'white' }}
+              _active={{ bg: 'teal.100', color: 'teal.600' }}
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit?.(p);
@@ -134,7 +150,7 @@ export function ExpandableProgramRow({ p, onEdit }) {
 
       <Tr>
         <Td
-          colSpan={7}
+          colSpan={8}
           borderBottom={isOpen ? '1px solid' : 'none'}
           borderColor="gray.200"
           p={isOpen ? undefined : 0}
@@ -265,6 +281,6 @@ export function ExpandableProgramRow({ p, onEdit }) {
           </Collapse>
         </Td>
       </Tr>
-    </>
+    </Tbody>
   );
 }

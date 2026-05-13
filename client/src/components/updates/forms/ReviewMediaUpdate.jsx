@@ -85,9 +85,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   const refetchMedia = async () => {
     if (!updateId) return;
     try {
-      const mediaChanges = await backend.get(
-        `/mediaChange/update/${updateId}`
-      );
+      const mediaChanges = await backend.get(`/mediaChange/update/${updateId}`);
       const data = mediaChanges.data;
       console.log('refetchMedia data:', data);
 

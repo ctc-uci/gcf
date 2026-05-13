@@ -26,7 +26,7 @@ async function getCityNameByCode(countryCode, stateCode, cityCode) {
 function ProgramTable({
   onStatsRefresh,
   onFilteredDataChange,
-  onLoadingChange, 
+  onLoadingChange,
 }) {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
@@ -137,7 +137,7 @@ function ProgramTable({
       setIsFormOpen={setIsFormOpen}
       selectedProgram={selectedProgram}
       setSelectedProgram={setSelectedProgram}
-      onSave={() => mutate()} 
+      onSave={() => mutate()}
       onStatsRefresh={onStatsRefresh}
       onFilteredDataChange={onFilteredDataChange}
     />
