@@ -4,7 +4,6 @@ import { DeleteIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
-  Center,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -14,15 +13,12 @@ import {
   DrawerOverlay,
   HStack,
   Icon,
-  Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Select,
-  Spinner,
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
@@ -37,7 +33,7 @@ import { isPdfByType } from './programFormHelpers';
 import { ProgramFormMediaTab } from './ProgramFormMediaTab';
 import { ProgramFormOverviewTab } from './ProgramFormOverviewTab';
 import { saveProgramForm } from './programFormSave';
-import { useProgramFormLoad } from './useProgramFormLoad';
+import { emptyFormState, useProgramFormLoad } from './useProgramFormLoad';
 
 export const ProgramForm = ({
   isOpen: isOpenProp,
@@ -120,8 +116,15 @@ export const ProgramForm = ({
   useEffect(() => {
     if (isOpen) {
       setActiveTab('overview');
+      if (!program) {
+        setFormState(emptyFormState);
+        setInitialProgramDirectorIds([]);
+        setInitialInstrumentQuantities({});
+        setInitialCurriculumLinks([]);
+        setInitialGraduated(0);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, program]);
 
   function handleProgramStatusChange(status) {
     setFormState((prev) => ({ ...prev, status: status || null }));
@@ -273,6 +276,7 @@ export const ProgramForm = ({
                   mediaUploadModal.onOpen();
                 }}
                 onSeeAllMedia={() => setActiveTab('media')}
+                isLoadingProgramData={isLoadingProgramData}
               />
             )}
 
@@ -368,22 +372,6 @@ export const ProgramForm = ({
             </ModalFooter>
           </ModalContent>
         </Modal>
-
-        {isLoadingProgramData && (
-          <Center
-            position="absolute"
-            inset={0}
-            zIndex="overlay"
-            bg="rgba(107, 114, 128, 0.72)"
-          >
-            <Spinner
-              size="xl"
-              thickness="4px"
-              color="teal.500"
-              emptyColor="gray.200"
-            />
-          </Center>
-        )}
       </DrawerContent>
       <MediaUploadModal
         isOpen={mediaUploadModal.isOpen}

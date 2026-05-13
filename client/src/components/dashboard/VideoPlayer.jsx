@@ -101,7 +101,8 @@ function VideoPlayer({
           mr={-12}
           p={5}
           borderTopLeftRadius="xl"
-          h="100vh"
+          minH={0}
+          maxH="calc(100vh - 10rem)"
           overflowY="auto"
         >
           <IconButton
@@ -110,7 +111,6 @@ function VideoPlayer({
             onClick={() => setIsOpen(false)}
           />
           <VStack
-            overflowY="auto"
             w="100%"
             spacing={3}
           >

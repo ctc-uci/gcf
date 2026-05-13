@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 import ISO6391 from 'iso-639-1';
 
-const emptyFormState = {
+export const emptyFormState = {
   status: null,
   programName: null,
   partnerOrg: null,

@@ -82,6 +82,25 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
     fetchMedia();
   }, [updateId, backend]);
 
+  const refetchMedia = async () => {
+    if (!updateId) return;
+    try {
+      const mediaChanges = await backend.get(`/mediaChange/update/${updateId}`);
+      const data = mediaChanges.data;
+      console.log('refetchMedia data:', data);
+
+      const response = await Promise.all(
+        data.map((media_change) =>
+          backend.get(`/images/url/${media_change.s3Key}`)
+        )
+      );
+      setUpdates(data);
+      setMediaURLs(response.map((r) => r.data.url));
+    } catch (err) {
+      console.error('Failed to refresh media:', err);
+    }
+  };
+
   return (
     <>
       <Drawer
@@ -226,9 +245,12 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
                           bg="gray.100"
                         >
                           <MediaCard
+                            id={item.id}
                             file_name={item.fileName}
                             file_type={item.fileType}
                             imageUrl={mediaURLs[idx]}
+                            description={item.description}
+                            onUpdate={refetchMedia}
                           />
                         </Box>
                       </Box>
@@ -283,6 +305,7 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
           mediaURLs={mediaURLs}
           selectedIndex={selectedIndex}
           onClose={() => setSelectedIndex(null)}
+          onUpdate={refetchMedia}
         />
       )}
     </>

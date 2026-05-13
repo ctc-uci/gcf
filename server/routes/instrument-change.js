@@ -1,4 +1,4 @@
-import { keysToCamel } from '@/common/utils';
+import { keysToCamel, asyncHandler } from '@/common/utils';
 import express from 'express';
 
 import { db } from '../db/db-pgp';
@@ -6,145 +6,110 @@ import { db } from '../db/db-pgp';
 const instrumentChangeRouter = express.Router();
 instrumentChangeRouter.use(express.json());
 
-instrumentChangeRouter.post('/', async (req, res) => {
-  try {
-    const { instrumentId, updateId, amountChanged, event_type, description, special_request } =
-      req.body;
+instrumentChangeRouter.post('/', asyncHandler(async (req, res) => {
+  const { instrumentId, updateId, amountChanged, event_type, description, special_request } =
+    req.body;
 
-    const newChange = await db.query(
-      `INSERT INTO instrument_change
-        (instrument_id, update_id, amount_changed, event_type, description, special_request)
-       VALUES ($1, $2, $3, $4, $5, COALESCE($6, FALSE))
-       RETURNING *;`,
-      [instrumentId, updateId, amountChanged, event_type, description ?? null, special_request ?? null]
-    );
+  const newChange = await db.query(
+    `INSERT INTO instrument_change
+      (instrument_id, update_id, amount_changed, event_type, description, special_request)
+     VALUES ($1, $2, $3, $4, $5, COALESCE($6, FALSE))
+     RETURNING *;`,
+    [instrumentId, updateId, amountChanged, event_type, description ?? null, special_request ?? null]
+  );
 
-    res.status(201).json(keysToCamel(newChange[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
+  res.status(201).json(keysToCamel(newChange[0]));
+}));
+
+instrumentChangeRouter.get('/', asyncHandler(async (req, res) => {
+  const changes = await db.query(`SELECT * FROM instrument_change;`);
+
+  res.status(200).json(keysToCamel(changes));
+}));
+
+instrumentChangeRouter.get('/update/:updateId', asyncHandler(async (req, res) => {
+  const { updateId } = req.params;
+
+  const change = await db.query(
+    `SELECT * FROM instrument_change WHERE update_id = $1;`,
+    [updateId]
+  );
+
+  res.status(200).json(change.map(keysToCamel));
+}));
+
+instrumentChangeRouter.get('/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const change = await db.query(
+    `SELECT * FROM instrument_change WHERE id = $1;`,
+    [id]
+  );
+
+  if (change.length === 0) {
+    return res.status(404).send('Instrument change not found');
   }
-});
 
-instrumentChangeRouter.get('/', async (req, res) => {
-  try {
-    const changes = await db.query(`SELECT * FROM instrument_change;`);
+  res.status(200).json(keysToCamel(change[0]));
+}));
 
-    res.status(200).json(keysToCamel(changes));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
+instrumentChangeRouter.put('/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { instrumentId, updateId, amountChanged, event_type, description, special_request } =
+    req.body;
+
+  const updatedChange = await db.query(
+    `UPDATE instrument_change SET
+      instrument_id = COALESCE($1, instrument_id),
+      update_id = COALESCE($2, update_id),
+      amount_changed = COALESCE($3, amount_changed),
+      event_type = COALESCE($4, event_type),
+      description = COALESCE($5, description),
+      special_request = CASE WHEN $6::boolean IS NOT NULL THEN $6::boolean ELSE special_request END
+     WHERE id = $7
+     RETURNING *;`,
+    [instrumentId, updateId, amountChanged, event_type, description, special_request ?? null, id]
+  );
+
+  if (updatedChange.length === 0) {
+    return res.status(404).send('Instrument change not found');
   }
-});
 
-instrumentChangeRouter.get('/update/:updateId', async (req, res) => {
-  try {
-    const { updateId } = req.params;
+  res.status(200).json(keysToCamel(updatedChange[0]));
+}));
 
-    const change = await db.query(
-      `SELECT * FROM instrument_change WHERE update_id = $1;`,
-      [updateId]
-    );
+instrumentChangeRouter.delete('/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-    res.status(200).json(change.map(keysToCamel));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
+  const deletedChange = await db.query(
+    `DELETE FROM instrument_change
+     WHERE id = $1
+     RETURNING *;`,
+    [id]
+  );
+
+  if (deletedChange.length === 0) {
+    return res.status(404).send('Instrument change not found');
   }
-});
 
-instrumentChangeRouter.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
+  res.status(200).json(keysToCamel(deletedChange[0]));
+}));
 
-    const change = await db.query(
-      `SELECT * FROM instrument_change WHERE id = $1;`,
-      [id]
-    );
+instrumentChangeRouter.delete('/update/:updateId', asyncHandler(async (req, res) => {
+  const { updateId } = req.params;
 
-    if (change.length === 0) {
-      return res.status(404).send('Instrument change not found');
-    }
+  const deletedChange = await db.query(
+    `DELETE FROM instrument_change
+     WHERE update_id = $1
+     RETURNING *;`,
+    [updateId]
+  );
 
-    res.status(200).json(keysToCamel(change[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
+  if (deletedChange.length === 0) {
+    return res.status(404).send('Instrument change not found');
   }
-});
 
-instrumentChangeRouter.put('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { instrumentId, updateId, amountChanged, event_type, description, special_request } =
-      req.body;
-
-    const updatedChange = await db.query(
-      `UPDATE instrument_change SET
-        instrument_id = COALESCE($1, instrument_id),
-        update_id = COALESCE($2, update_id),
-        amount_changed = COALESCE($3, amount_changed),
-        event_type = COALESCE($4, event_type),
-        description = COALESCE($5, description),
-        special_request = CASE WHEN $6::boolean IS NOT NULL THEN $6::boolean ELSE special_request END
-       WHERE id = $7
-       RETURNING *;`,
-      [instrumentId, updateId, amountChanged, event_type, description, special_request ?? null, id]
-    );
-
-    if (updatedChange.length === 0) {
-      return res.status(404).send('Instrument change not found');
-    }
-
-    res.status(200).json(keysToCamel(updatedChange[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-instrumentChangeRouter.delete('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const deletedChange = await db.query(
-      `DELETE FROM instrument_change
-       WHERE id = $1
-       RETURNING *;`,
-      [id]
-    );
-
-    if (deletedChange.length === 0) {
-      return res.status(404).send('Instrument change not found');
-    }
-
-    res.status(200).json(keysToCamel(deletedChange[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-instrumentChangeRouter.delete('/update/:updateId', async (req, res) => {
-  try {
-    const { updateId } = req.params;
-
-    const deletedChange = await db.query(
-      `DELETE FROM instrument_change
-       WHERE update_id = $1
-       RETURNING *;`,
-      [updateId]
-    );
-
-    if (deletedChange.length === 0) {
-      return res.status(404).send('Instrument change not found');
-    }
-
-    res.status(200).json(keysToCamel(deletedChange[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-  }
-});
+  res.status(200).json(keysToCamel(deletedChange[0]));
+}));
 
 export { instrumentChangeRouter };
