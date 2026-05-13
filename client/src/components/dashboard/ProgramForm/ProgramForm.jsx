@@ -33,7 +33,7 @@ import { isPdfByType } from './programFormHelpers';
 import { ProgramFormMediaTab } from './ProgramFormMediaTab';
 import { ProgramFormOverviewTab } from './ProgramFormOverviewTab';
 import { saveProgramForm } from './programFormSave';
-import { useProgramFormLoad } from './useProgramFormLoad';
+import { emptyFormState, useProgramFormLoad } from './useProgramFormLoad';
 
 export const ProgramForm = ({
   isOpen: isOpenProp,
@@ -116,8 +116,15 @@ export const ProgramForm = ({
   useEffect(() => {
     if (isOpen) {
       setActiveTab('overview');
+      if (!program) {
+        setFormState(emptyFormState);
+        setInitialProgramDirectorIds([]);
+        setInitialInstrumentQuantities({});
+        setInitialCurriculumLinks([]);
+        setInitialGraduated(0);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, program]);
 
   function handleProgramStatusChange(status) {
     setFormState((prev) => ({ ...prev, status: status || null }));
