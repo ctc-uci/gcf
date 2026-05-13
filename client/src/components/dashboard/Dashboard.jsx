@@ -26,6 +26,7 @@ const Dashboard = () => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [filteredPrograms, setFilteredPrograms] = useState(null);
+  const [isProgramTableLoading, setIsProgramTableLoading] = useState(true);
 
   return (
     <Flex
@@ -40,6 +41,12 @@ const Dashboard = () => {
         <StatisticsSummary
           refreshTrigger={statsRefreshTrigger}
           filteredData={filteredPrograms}
+          isTableLoading={
+            (role === 'Super Admin' ||
+              role === 'Admin' ||
+              role === 'Regional Director') &&
+            isProgramTableLoading
+          }
         />
       )}
 
@@ -54,41 +61,53 @@ const Dashboard = () => {
           <ProgramTable
             onStatsRefresh={() => setStatsRefreshTrigger((prev) => prev + 1)}
             onFilteredDataChange={setFilteredPrograms}
+            onLoadingChange={setIsProgramTableLoading}
           />
         )}
         {role === 'Program Director' && (
           <Box>
-            <Heading
-              size="lg"
-              fontWeight="extrabold"
-              mb={4}
-            >
-              {t('lessonVideos.title')}
-            </Heading>
-            <Tabs>
-              <TabList>
-                <Tab _selected={{ borderBottomColor: 'teal.500' }}>
-                  {t('lessonVideos.videosTab')}
-                </Tab>
-                <Tab _selected={{ borderBottomColor: 'teal.500' }}>
-                  {t('lessonVideos.pdfsTab')}
-                </Tab>
-              </TabList>
+            {selectedPlaylist ? (
+              <LessonVideos
+                selectedPlaylist={selectedPlaylist}
+                setSelectedPlaylist={setSelectedPlaylist}
+                selectedVideo={selectedVideo}
+                setSelectedVideo={setSelectedVideo}
+              />
+            ) : (
+              <>
+                <Heading
+                  size="lg"
+                  fontWeight="extrabold"
+                  mb={4}
+                >
+                  {t('lessonVideos.title')}
+                </Heading>
+                <Tabs>
+                  <TabList>
+                    <Tab _selected={{ borderBottomColor: 'teal.500' }}>
+                      {t('lessonVideos.videosTab')}
+                    </Tab>
+                    <Tab _selected={{ borderBottomColor: 'teal.500' }}>
+                      {t('lessonVideos.pdfsTab')}
+                    </Tab>
+                  </TabList>
 
-              <TabPanels>
-                <TabPanel>
-                  <LessonVideos
-                    selectedPlaylist={selectedPlaylist}
-                    setSelectedPlaylist={setSelectedPlaylist}
-                    selectedVideo={selectedVideo}
-                    setSelectedVideo={setSelectedVideo}
-                  />
-                </TabPanel>
-                <TabPanel>
-                  <PDF />
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
+                  <TabPanels>
+                    <TabPanel pl={0}>
+                      <LessonVideos
+                        selectedPlaylist={selectedPlaylist}
+                        setSelectedPlaylist={setSelectedPlaylist}
+                        selectedVideo={selectedVideo}
+                        setSelectedVideo={setSelectedVideo}
+                      />
+                    </TabPanel>
+                    <TabPanel>
+                      <PDF />
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
+              </>
+            )}
           </Box>
         )}
       </Box>

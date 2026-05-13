@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Button,
-  Center,
   Divider,
   Drawer,
   DrawerBody,
@@ -12,7 +11,8 @@ import {
   Flex,
   Heading,
   IconButton,
-  Spinner,
+  SkeletonCircle,
+  SkeletonText,
   Text,
   useToast,
   VStack,
@@ -379,9 +379,18 @@ export const AccountUpdateDrawer = ({
           pb={detail && !loadError && !isResolved ? 24 : 8}
         >
           {loading && (
-            <Center py={12}>
-              <Spinner size="lg" />
-            </Center>
+            <Box py={12}>
+              <SkeletonCircle
+                size="lg"
+                boxSize="120px"
+              />
+              <SkeletonText
+                mt="4"
+                noOfLines={5}
+                spacing="8"
+                skeletonHeight="10"
+              />
+            </Box>
           )}
           {loadError && !loading && (
             <Text

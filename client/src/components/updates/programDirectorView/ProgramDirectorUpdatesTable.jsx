@@ -1,9 +1,8 @@
 import {
   Badge,
   Box,
-  Center,
   Icon,
-  Spinner,
+  SkeletonText,
   Table,
   TableContainer,
   Tbody,
@@ -20,6 +19,13 @@ import { useTranslation } from 'react-i18next';
 import { FiStar } from 'react-icons/fi';
 
 import { SortArrows } from '../../tables/SortArrows';
+
+function getDisplayNote(note) {
+  if (!note) return '';
+  if (!note.startsWith('Reason: ')) return note;
+  const nl = note.indexOf('\n');
+  return nl === -1 ? note : note.slice(0, nl);
+}
 
 function formatStatus(row, t) {
   const isResolved = Boolean(row.resolved);
@@ -208,9 +214,13 @@ export const ProgramDirectorUpdatesTable = ({
               {isLoading && tableData.length === 0 ? (
                 <Tr>
                   <Td colSpan={colSpan}>
-                    <Center py={8}>
-                      <Spinner size="lg" />
-                    </Center>
+                    <SkeletonText
+                      mt="4"
+                      noOfLines={20}
+                      spacing="4"
+                      skeletonHeight="10"
+                      w="100%"
+                    />
                   </Td>
                 </Tr>
               ) : (
@@ -254,7 +264,7 @@ export const ProgramDirectorUpdatesTable = ({
                             color="gray.700"
                             noOfLines={3}
                           >
-                            {row.note || '—'}
+                            {getDisplayNote(row.note) || '—'}
                           </Text>
                         </Td>
                         <Td
@@ -297,7 +307,7 @@ export const ProgramDirectorUpdatesTable = ({
                             color="gray.700"
                             noOfLines={3}
                           >
-                            {row.note || '—'}
+                            {getDisplayNote(row.note) || '—'}
                           </Text>
                         </Td>
                         <Td
@@ -338,7 +348,13 @@ export const ProgramDirectorUpdatesTable = ({
           justifyContent="center"
           zIndex={1}
         >
-          <Spinner size="lg" />
+          <SkeletonText
+            mt="4"
+            noOfLines={20}
+            spacing="4"
+            skeletonHeight="10"
+            w="100%"
+          />
         </Box>
       )}
     </Box>

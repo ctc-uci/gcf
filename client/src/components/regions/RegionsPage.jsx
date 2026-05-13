@@ -27,6 +27,10 @@ export const RegionsPage = () => {
     setIsDrawerOpen(false);
   };
 
+  const handleClose = () => {
+    setIsDrawerOpen(false);
+  };
+
   return (
     <Box
       p={8}
@@ -69,7 +73,7 @@ export const RegionsPage = () => {
       <RegionsForm
         isOpen={isDrawerOpen}
         region={selectedRegion}
-        onClose={() => setIsDrawerOpen(false)}
+        onClose={handleClose}
         onSave={handleRefresh}
         onDelete={handleRefresh}
       />

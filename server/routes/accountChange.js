@@ -1,4 +1,4 @@
-import { keysToCamel } from '@/common/utils';
+import { keysToCamel, asyncHandler } from '@/common/utils';
 import { getAuthenticatedUser } from '@/middleware';
 import express from 'express';
 
@@ -67,106 +67,106 @@ async function applyPendingProgramDirectorProfile(t, row) {
 const accountChangeRouter = express.Router();
 accountChangeRouter.use(express.json());
 
-accountChangeRouter.get('/', async (req, res) => {
+accountChangeRouter.get('/', asyncHandler(async (req, res) => {
+  const { userId, resolved } = req.query;
+
+  let senderRole;
   try {
-    const { userId, resolved } = req.query;
-    const conditions = [];
-    const params = [];
-    let i = 1;
-
-    if (userId) {
-      conditions.push(`ac.user_id = $${i++}`);
-      params.push(userId);
-    }
-    if (resolved !== undefined) {
-      conditions.push(`ac.resolved = $${i++}`);
-      params.push(resolved === 'true');
-    }
-
-    const whereClause = conditions.length
-      ? `WHERE ${conditions.join(' AND ')}`
-      : '';
-
-    const data = await db.query(
-      `SELECT
-        ac.*,
-        u.first_name AS author_first_name,
-        u.last_name AS author_last_name,
-        u.picture AS author_picture
-      FROM account_change ac
-      LEFT JOIN gcf_user u ON ac.author_id = u.id
-      ${whereClause}
-      ORDER BY ac.last_modified DESC`,
-      params
-    );
-
-    res.status(200).json(keysToCamel(data));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
+    const authUser = await getAuthenticatedUser(req, res);
+    senderRole = authUser?.role;
+  } catch {
+    throw new Error('UNAUTHORIZED');
   }
-});
 
-accountChangeRouter.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const accountChange = await db.query(
-      `SELECT 
-        ac.*, 
-        u.first_name AS author_first_name,
-        u.last_name AS author_last_name,
-        u.picture AS author_picture
-      FROM account_change ac
-      LEFT JOIN gcf_user u ON ac.author_id = u.id
-      WHERE ac.id = $1`,
-      [id]
-    );
+  const conditions = [];
+  const params = [];
+  let i = 1;
 
-    if (accountChange.length === 0) {
-      return res.status(404).send('Item not found');
-    }
-
-    res.status(200).json(keysToCamel(accountChange[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
+  if (userId) {
+    conditions.push(`ac.user_id = $${i++}`);
+    params.push(userId);
   }
-});
+  if (resolved !== undefined) {
+    conditions.push(`ac.resolved = $${i++}`);
+    params.push(resolved === 'true');
+  }
+  if (senderRole === 'Program Director') {
+    conditions.push(`u.role = 'Program Director'`);
+  }
+  else if (senderRole === 'Regional Director') {
+    conditions.push(`(u.role = 'Regional Director' OR u.role = 'Program Director')`);
+  }
 
-accountChangeRouter.post('/', async (req, res) => {
-  try {
-    const {
+  const whereClause = conditions.length
+    ? `WHERE ${conditions.join(' AND ')}`
+    : '';
+
+  const data = await db.query(
+    `SELECT
+      ac.*,
+      u.first_name AS author_first_name,
+      u.last_name AS author_last_name,
+      u.picture AS author_picture
+    FROM account_change ac
+    LEFT JOIN gcf_user u ON ac.author_id = u.id
+    ${whereClause}
+    ORDER BY ac.last_modified DESC`,
+    params
+  );
+
+  res.status(200).json(keysToCamel(data));
+}));
+
+accountChangeRouter.get('/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const accountChange = await db.query(
+    `SELECT 
+      ac.*, 
+      u.first_name AS author_first_name,
+      u.last_name AS author_last_name,
+      u.picture AS author_picture
+    FROM account_change ac
+    LEFT JOIN gcf_user u ON ac.author_id = u.id
+    WHERE ac.id = $1`,
+    [id]
+  );
+
+  if (accountChange.length === 0) {
+    return res.status(404).send('Item not found');
+  }
+
+  res.status(200).json(keysToCamel(accountChange[0]));
+}));
+
+accountChangeRouter.post('/', asyncHandler(async (req, res) => {
+  const {
+    user_id,
+    author_id,
+    change_type,
+    old_values,
+    new_values,
+    resolved,
+    last_modified,
+  } = req.body;
+
+  const newAccountChange = await db.query(
+    `INSERT INTO account_change (user_id, author_id, change_type, old_values, new_values, resolved, last_modified)
+    VALUES ($1, $2, $3, $4::jsonb, $5::jsonb, COALESCE($6, FALSE), $7)
+    RETURNING *`,
+    [
       user_id,
       author_id,
       change_type,
-      old_values,
-      new_values,
+      old_values ? JSON.stringify(old_values) : null,
+      new_values ? JSON.stringify(new_values) : null,
       resolved,
       last_modified,
-    } = req.body;
+    ]
+  );
+  res.status(201).json(keysToCamel(newAccountChange[0]));
+}));
 
-    const newAccountChange = await db.query(
-      `INSERT INTO account_change (user_id, author_id, change_type, old_values, new_values, resolved, last_modified)
-      VALUES ($1, $2, $3, $4::jsonb, $5::jsonb, COALESCE($6, FALSE), $7)
-      RETURNING *`,
-      [
-        user_id,
-        author_id,
-        change_type,
-        old_values ? JSON.stringify(old_values) : null,
-        new_values ? JSON.stringify(new_values) : null,
-        resolved,
-        last_modified,
-      ]
-    );
-    res.status(201).json(keysToCamel(newAccountChange[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-accountChangeRouter.put('/:id', async (req, res) => {
+accountChangeRouter.put('/:id', asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -264,28 +264,22 @@ accountChangeRouter.put('/:id', async (req, res) => {
           'Only an admin or regional director can approve this profile update.'
         );
     }
-    console.error(err);
-    res.status(500).send('Internal Server Error');
+    throw err;
   }
-});
+}));
 
-accountChangeRouter.delete('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deletedAccountChange = await db.query(
-      `DELETE FROM account_change WHERE id = $1 RETURNING *`,
-      [id]
-    );
+accountChangeRouter.delete('/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const deletedAccountChange = await db.query(
+    `DELETE FROM account_change WHERE id = $1 RETURNING *`,
+    [id]
+  );
 
-    if (deletedAccountChange.length === 0) {
-      return res.status(404).send('Item not found');
-    }
-
-    res.status(200).json(keysToCamel(deletedAccountChange[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
+  if (deletedAccountChange.length === 0) {
+    return res.status(404).send('Item not found');
   }
-});
+
+  res.status(200).json(keysToCamel(deletedAccountChange[0]));
+}));
 
 export { accountChangeRouter };
