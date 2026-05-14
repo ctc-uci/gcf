@@ -799,8 +799,8 @@ export function ProgramDisplay({
                       </Th>
                     </Tr>
                   </Thead>
-                  <Tbody>
-                    {tableData.length === 0 && isLoading ? (
+                  {tableData.length === 0 && isLoading ? (
+                    <Tbody>
                       <Tr>
                         <Td
                           colSpan={7}
@@ -819,16 +819,16 @@ export function ProgramDisplay({
                           </VStack>
                         </Td>
                       </Tr>
-                    ) : (
-                      tableData.map((p) => (
-                        <ExpandableProgramRow
-                          key={p.id}
-                          p={p}
-                          onEdit={openEditForm}
-                        />
-                      ))
-                    )}
-                  </Tbody>
+                    </Tbody>
+                  ) : (
+                    tableData.map((p) => (
+                      <ExpandableProgramRow
+                        key={p.id}
+                        p={p}
+                        onEdit={openEditForm}
+                      />
+                    ))
+                  )}
                 </Table>
               </TableContainer>
             )

@@ -190,7 +190,7 @@ regionalDirectorRouter.delete('/:id/region/:region_id', asyncHandler(async (req,
 }));
 
 // Add a region association to a director
-regionalDirectorRouter.put('/:id/region', asyncHandler(async (req, res) => {
+regionalDirectorRouter.post('/:id/region', asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { region_id } = req.body;
   const newAssociation = await db.query(
@@ -222,7 +222,7 @@ regionalDirectorRouter.put('/:id/region', asyncHandler(async (req, res) => {
   res.status(200).json(keysToCamel(updatedRegionalDirector[0]));
 }));
 
-regionalDirectorRouter.put('/:id', asyncHandler(async (req, res) => {
+regionalDirectorRouter.put('/:region_id', asyncHandler(async (req, res) => {
   const { user_id } = req.params;
   const { region_id } = req.body;
   const updatedRegionalDirector = await db.query(
@@ -240,7 +240,7 @@ regionalDirectorRouter.put('/:id', asyncHandler(async (req, res) => {
   res.status(200).json(keysToCamel(updatedRegionalDirector[0]));
 }));
 
-regionalDirectorRouter.delete('/:id', asyncHandler(async (req, res) => {
+regionalDirectorRouter.delete('/:user_id', asyncHandler(async (req, res) => {
   const { user_id } = req.params;
   const deletedRegionalDirector = await db.query(
     `DELETE FROM regional_director WHERE user_id = $1 RETURNING *`,

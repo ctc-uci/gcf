@@ -94,7 +94,7 @@ directorRouter.get('/me/:userId/region', asyncHandler(async (req, res) => {
           INNER JOIN region AS r ON c.region_id = r.id
           INNER JOIN program_director AS pd ON pd.program_id = p.id
           WHERE pd.user_id = $1;`,
-    [director]
+    [userId]
   );
 
   res.status(200).json(keysToCamel(region));

@@ -41,7 +41,7 @@ const s3 = new aws.S3({
  * @param expiresIn - URL expiration time in seconds (default: 300 = 5 minutes)
  * @returns Object with uploadUrl and key (S3 object key)
  */
-const getS3UploadURL = async (
+const getS3UploadURL = (
   fileName?: string,
   contentType: string = 'image/jpeg',
   expiresIn: number = 300
