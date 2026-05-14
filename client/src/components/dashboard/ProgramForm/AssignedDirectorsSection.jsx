@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { ChevronDownIcon } from '@chakra-ui/icons';
+import { CheckIcon, ChevronDownIcon, CloseIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -8,6 +8,8 @@ import {
   FormLabel,
   Heading,
   HStack,
+  Icon,
+  IconButton,
   Menu,
   MenuButton,
   MenuItem,
@@ -72,8 +74,8 @@ export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
       cancelled = true;
     };
   }, [backend, regionId]);
+
   const programDirectors = formState.programDirectors ?? [];
-  const selected = programDirectors[0];
 
   useEffect(() => {
     async function fetchProgramDirectors() {
@@ -94,23 +96,49 @@ export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
     fetchProgramDirectors();
   }, [backend]);
 
-  const directorChoices = useMemo(() => {
-    const normalizedSelected = selected ? normalizeDirectorRow(selected) : null;
+  const selectedIdSet = useMemo(
+    () => new Set(programDirectors.map((d) => String(d.userId))),
+    [programDirectors]
+  );
+
+  const allDirectors = useMemo(() => {
     const byId = new Map(nameOptions.map((d) => [String(d.userId), d]));
-    const selectedId = normalizedSelected?.userId;
-    if (
-      selectedId !== undefined &&
-      selectedId !== null &&
-      selectedId !== '' &&
-      !byId.has(String(selectedId))
-    ) {
-      byId.set(String(selectedId), normalizedSelected);
+    for (const d of programDirectors) {
+      const norm = normalizeDirectorRow(d);
+      if (norm && !byId.has(String(norm.userId))) {
+        byId.set(String(norm.userId), norm);
+      }
     }
     return Array.from(byId.values());
-  }, [nameOptions, selected]);
+  }, [nameOptions, programDirectors]);
 
-  const selectedLabel =
-    selected && `${selected.firstName ?? ''} ${selected.lastName ?? ''}`.trim();
+  function toggleDirector(director) {
+    const row = normalizeDirectorRow(director);
+    if (!row) return;
+    const key = String(row.userId);
+    if (selectedIdSet.has(key)) {
+      setFormData((prev) => ({
+        ...prev,
+        programDirectors: (prev.programDirectors ?? []).filter(
+          (d) => String(d.userId) !== key
+        ),
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        programDirectors: [...(prev.programDirectors ?? []), row],
+      }));
+    }
+  }
+
+  function removeDirector(userId) {
+    setFormData((prev) => ({
+      ...prev,
+      programDirectors: (prev.programDirectors ?? []).filter(
+        (d) => String(d.userId) !== String(userId)
+      ),
+    }));
+  }
 
   return (
     <Box>
@@ -172,8 +200,52 @@ export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
             fontWeight="normal"
             color="gray"
           >
-            {t('programForm.programDirector')}
+            {t('programForm.programDirectors')}
           </FormLabel>
+
+          {programDirectors.length > 0 && (
+            <VStack
+              align="stretch"
+              spacing={2}
+              mb={3}
+            >
+              {programDirectors.map((director) => {
+                const label =
+                  `${director.firstName ?? ''} ${director.lastName ?? ''}`.trim() ||
+                  t('programForm.directorFallbackProgram');
+                return (
+                  <HStack
+                    key={director.userId}
+                    spacing={3}
+                    px={3}
+                    py={2}
+                    borderWidth="1px"
+                    borderColor="gray.200"
+                    borderRadius="md"
+                    justify="space-between"
+                  >
+                    <HStack spacing={2}>
+                      <DirectorAvatar
+                        picture={director.picture}
+                        name={label}
+                        boxSize="28px"
+                      />
+                      <Text fontSize="sm">{label}</Text>
+                    </HStack>
+                    <IconButton
+                      size="xs"
+                      icon={<CloseIcon boxSize="8px" />}
+                      variant="ghost"
+                      colorScheme="gray"
+                      aria-label={t('programForm.removeDirector')}
+                      onClick={() => removeDirector(director.userId)}
+                    />
+                  </HStack>
+                );
+              })}
+            </VStack>
+          )}
+
           <Menu matchWidth>
             <MenuButton
               as={Button}
@@ -183,61 +255,44 @@ export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
               fontWeight="normal"
               rightIcon={<ChevronDownIcon />}
             >
-              {selected ? (
-                <HStack spacing={2}>
-                  <DirectorAvatar
-                    picture={selected.picture}
-                    name={
-                      selectedLabel || t('programForm.directorFallbackProgram')
-                    }
-                    boxSize="24px"
-                  />
-                  <Text>
-                    {selectedLabel || t('programForm.directorFallbackProgram')}
-                  </Text>
-                </HStack>
-              ) : (
-                <Text color="gray.400">
-                  {t('programForm.selectProgramDirector')}
-                </Text>
-              )}
+              <Text color="gray.500">
+                {t('programForm.addProgramDirector')}
+              </Text>
             </MenuButton>
             <MenuList
               maxH="260px"
               overflowY="auto"
             >
-              <MenuItem
-                onClick={() =>
-                  setFormData((prev) => ({ ...prev, programDirectors: [] }))
-                }
-              >
-                <Text color="gray.400">
-                  {t('programForm.selectProgramDirector')}
-                </Text>
-              </MenuItem>
-              {directorChoices.map((director) => {
+              {allDirectors.map((director) => {
+                const isSelected = selectedIdSet.has(String(director.userId));
                 const label =
                   `${director.firstName ?? ''} ${director.lastName ?? ''}`.trim() ||
                   t('programForm.directorFallbackProgram');
                 return (
                   <MenuItem
                     key={director.userId}
-                    onClick={() => {
-                      const row = normalizeDirectorRow(director);
-                      if (row)
-                        setFormData((prev) => ({
-                          ...prev,
-                          programDirectors: [row],
-                        }));
-                    }}
+                    onClick={() => toggleDirector(director)}
                   >
-                    <HStack spacing={2}>
-                      <DirectorAvatar
-                        picture={director.picture}
-                        name={label}
-                        boxSize="28px"
-                      />
-                      <Text>{label}</Text>
+                    <HStack
+                      spacing={2}
+                      w="full"
+                      justify="space-between"
+                    >
+                      <HStack spacing={2}>
+                        <DirectorAvatar
+                          picture={director.picture}
+                          name={label}
+                          boxSize="28px"
+                        />
+                        <Text>{label}</Text>
+                      </HStack>
+                      {isSelected && (
+                        <Icon
+                          as={CheckIcon}
+                          color="teal.500"
+                          boxSize="12px"
+                        />
+                      )}
                     </HStack>
                   </MenuItem>
                 );

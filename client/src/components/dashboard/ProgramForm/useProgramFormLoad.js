@@ -129,7 +129,7 @@ export function useProgramFormLoad({
           picture: d.picture,
         })
       );
-      const programDirectorsForForm = mappedProgramDirectors.slice(0, 1);
+      const programDirectorsForForm = mappedProgramDirectors;
 
       const instrumentMap = {};
       const initialInstrumentMap = {};

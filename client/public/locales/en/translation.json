@@ -348,6 +348,8 @@
     "noRegionalDirectorsForRegion": "No regional directors listed for this program's region.",
     "programDirector": "Program Director",
     "selectProgramDirector": "Select Program Director",
+    "addProgramDirector": "Add Program Director",
+    "removeDirector": "Remove director",
     "directorFallbackRegional": "Regional Director",
     "directorFallbackProgram": "Program Director",
     "generalInformation": "General Information",

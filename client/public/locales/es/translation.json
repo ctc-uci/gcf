@@ -348,6 +348,8 @@
     "noRegionalDirectorsForRegion": "No hay directores regionales para la región de este programa.",
     "programDirector": "Director de programa",
     "selectProgramDirector": "Seleccionar director de programa",
+    "addProgramDirector": "Agregar director de programa",
+    "removeDirector": "Eliminar director",
     "directorFallbackRegional": "Director regional",
     "directorFallbackProgram": "Director de programa",
     "generalInformation": "Información general",

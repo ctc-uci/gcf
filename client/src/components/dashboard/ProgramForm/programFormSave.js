@@ -52,51 +52,38 @@ export async function saveProgramForm({
     programId = response.data.id;
   }
 
-  const selectedDirector = formState.programDirectors[0];
-  const selectedRaw = selectedDirector?.userId;
-  const selectedKey =
-    selectedRaw !== null &&
-    selectedRaw !== undefined &&
-    String(selectedRaw).trim() !== ''
-      ? String(selectedRaw).trim()
-      : '';
-  const validSelected = selectedKey !== '';
+  const selectedDirectors = formState.programDirectors ?? [];
+  const selectedIds = selectedDirectors
+    .map((d) => d?.userId)
+    .filter(
+      (id) => id !== null && id !== undefined && String(id).trim() !== ''
+    );
+  const selectedKeySet = new Set(selectedIds.map((id) => String(id).trim()));
 
   const initialIds = initialProgramDirectorIds || [];
   const initialKeySet = new Set(
-    initialIds.map((id) =>
-      id !== null && id !== undefined ? String(id).trim() : ''
-    )
+    initialIds
+      .filter((id) => id !== null && id !== undefined)
+      .map((id) => String(id).trim())
   );
 
-  if (validSelected) {
-    for (const uid of initialIds) {
-      if (String(uid).trim() === selectedKey) continue;
-      await backend.delete(
-        `/program-directors/${encodeURIComponent(String(uid))}`,
-        {
-          params: { programId },
-        }
-      );
-    }
-    if (!initialKeySet.has(selectedKey)) {
-      await backend.post(`/program-directors`, {
-        userId: selectedRaw,
-        programId,
+  for (const uid of initialIds) {
+    const key = String(uid ?? '').trim();
+    if (key && !selectedKeySet.has(key)) {
+      await backend.delete(`/program-directors/${encodeURIComponent(key)}`, {
+        params: { programId },
       });
     }
-    setInitialProgramDirectorIds([selectedRaw]);
-  } else {
-    for (const uid of initialIds) {
-      await backend.delete(
-        `/program-directors/${encodeURIComponent(String(uid))}`,
-        {
-          params: { programId },
-        }
-      );
-    }
-    setInitialProgramDirectorIds([]);
   }
+
+  for (const uid of selectedIds) {
+    const key = String(uid).trim();
+    if (key && !initialKeySet.has(key)) {
+      await backend.post(`/program-directors`, { userId: uid, programId });
+    }
+  }
+
+  setInitialProgramDirectorIds(selectedIds);
 
   const currentLinkKeys = (formState.curriculumLinks ?? []).map(
     (p) => `${p.link}\0${p.instrumentId}`

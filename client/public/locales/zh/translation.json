@@ -348,6 +348,8 @@
     "noRegionalDirectorsForRegion": "该节目所在区域暂无区域总监。",
     "programDirector": "项目总监",
     "selectProgramDirector": "选择项目总监",
+    "addProgramDirector": "添加项目总监",
+    "removeDirector": "移除总监",
     "directorFallbackRegional": "区域总监",
     "directorFallbackProgram": "项目总监",
     "generalInformation": "基本信息",
