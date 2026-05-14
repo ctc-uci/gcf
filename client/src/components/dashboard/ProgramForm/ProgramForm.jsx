@@ -20,6 +20,7 @@ import {
   ModalHeader,
   ModalOverlay,
   useDisclosure,
+  useToast,
   VStack,
 } from '@chakra-ui/react';
 
@@ -45,7 +46,7 @@ export const ProgramForm = ({
   const { t } = useTranslation();
   const disclosure = useDisclosure();
   const mediaUploadModal = useDisclosure();
-
+  const toast = useToast();
   const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
   const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
   const onClose = isControlled ? onCloseProp : disclosure.onClose;
@@ -176,8 +177,26 @@ export const ProgramForm = ({
         onSave,
         onClose,
       });
+      toast({
+        title: t('programForm.saveSuccess'),
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+        position: 'bottom-right',
+      });
     } catch (err) {
       console.error('Error saving program:', err);
+      toast({
+        title: t('programForm.saveError'),
+        description:
+          err?.response?.data?.message ??
+          err?.message ??
+          t('programForm.saveErrorDesc'),
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'bottom-right',
+      });
     }
   }
 

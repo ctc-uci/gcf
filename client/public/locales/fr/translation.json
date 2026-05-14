@@ -361,7 +361,9 @@
     "instrumentQuantityAria": "Quantité d’instruments",
     "deleteTitle": "Voulez-vous vraiment supprimer ce programme ?",
     "deleteDesc": "Cette action est irréversible.",
-    "deleteProgram": "Supprimer le programme"
+    "deleteProgram": "Supprimer le programme",
+    "saveSuccess": "Programme enregistré avec succès.",
+    "saveError": "Échec de l'enregistrement du programme."
   },
   "locationForm": {
     "selectRegion": "Sélectionnez la région...",
