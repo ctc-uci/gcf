@@ -89,16 +89,9 @@ export function ProgramDisplay({
       t('programsTable.csvCurriculumLinks'),
     ];
     const rows = (tableData || []).map((p) => {
-      const instrumentsArray =
-        (Array.isArray(p.instruments) && p.instruments) ||
-        (Array.isArray(p.instrumentTypes) && p.instrumentTypes) ||
-        null;
-
-      const instrumentsFormatted = instrumentsArray
-        ? instrumentsArray
-            .map((inst) => `${inst.name ?? ''}: ${inst.quantity ?? 0}`)
-            .join('; ')
-        : p.instruments;
+      const instrumentsFormatted = Object.entries(p.instrumentsMap)
+        .map(([id, { name, quantity }]) => `${name}: ${quantity}`)
+        .join('; ');
 
       return [
         escapeCsvValue(p.title),
