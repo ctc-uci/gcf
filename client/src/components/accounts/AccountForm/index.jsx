@@ -32,6 +32,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [currentPrograms, setCurrentPrograms] = useState(null);
   const [currentRegions, setCurrentRegions] = useState(null);
+  const [profilePictureUrl, setProfilePictureUrl] = useState('');
+  const [profilePictureKey, setProfilePictureKey] = useState('');
 
   const exitModal = useDisclosure();
   const deleteModal = useDisclosure();
@@ -59,6 +61,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     setValidationErrors({});
     setShowPassword(false);
     setIsFullScreen(false);
+    setProfilePictureUrl('');
+    setProfilePictureKey('');
 
     if (!targetUser) {
       const newState = { ...INITIAL_FORM_STATE, programs: [], regions: [] };
@@ -91,6 +95,21 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
           }
         };
         fetchEmail();
+      }
+
+      if (targetUser.picture) {
+        const fetchPictureUrl = async () => {
+          try {
+            const urlResponse = await backend.get(
+              `/images/url/${encodeURIComponent(targetUser.picture)}`
+            );
+            setProfilePictureUrl(urlResponse.data.url || '');
+            setProfilePictureKey(targetUser.picture);
+          } catch {
+            // picture unavailable — leave blank
+          }
+        };
+        fetchPictureUrl();
       }
     }
   }, [targetUser, targetUserId, backend, isOpen]);
@@ -258,6 +277,54 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       await backend.post('/accountChange', payload);
     } catch (err) {
       console.error('Failed to log account change:', err);
+    }
+  };
+
+  const handleProfilePictureUpload = async (uploadedFiles) => {
+    if (!uploadedFiles?.length) return;
+
+    const key = uploadedFiles[0].s3_key;
+
+    try {
+      const urlResponse = await backend.get(
+        `/images/url/${encodeURIComponent(key)}`
+      );
+      const nextUrl = urlResponse.data.url || '';
+      const prevKey = profilePictureKey || null;
+
+      if (targetUserId) {
+        await backend.post('/images/profile-picture', {
+          key,
+          userId: targetUserId,
+        });
+
+        await logAccountChange({
+          user_id: String(targetUserId),
+          author_id: String(userId),
+          change_type: 'Update',
+          old_values: {
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            email: formData.email,
+            picture: prevKey,
+            bio: '',
+          },
+          new_values: {
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            email: formData.email,
+            picture: key,
+            bio: '',
+          },
+          resolved: false,
+          last_modified: new Date().toISOString(),
+        });
+      }
+
+      setProfilePictureKey(key);
+      setProfilePictureUrl(nextUrl);
+    } catch (err) {
+      console.error('Error saving profile picture:', err);
     }
   };
 
@@ -469,6 +536,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         onCancel={handleCloseWithCheck}
         onSave={handleSaveClick}
         isLoading={isLoading}
+        profilePictureUrl={profilePictureUrl}
+        onProfilePictureUpload={handleProfilePictureUpload}
       />
 
       <AccountFormExitModal
