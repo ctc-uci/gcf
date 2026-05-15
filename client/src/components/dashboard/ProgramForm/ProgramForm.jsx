@@ -4,7 +4,6 @@ import { DeleteIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
-  Center,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -14,16 +13,14 @@ import {
   DrawerOverlay,
   HStack,
   Icon,
-  Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Select,
-  Spinner,
   useDisclosure,
+  useToast,
   VStack,
 } from '@chakra-ui/react';
 
@@ -37,7 +34,7 @@ import { isPdfByType } from './programFormHelpers';
 import { ProgramFormMediaTab } from './ProgramFormMediaTab';
 import { ProgramFormOverviewTab } from './ProgramFormOverviewTab';
 import { saveProgramForm } from './programFormSave';
-import { useProgramFormLoad } from './useProgramFormLoad';
+import { emptyFormState, useProgramFormLoad } from './useProgramFormLoad';
 
 export const ProgramForm = ({
   isOpen: isOpenProp,
@@ -49,7 +46,7 @@ export const ProgramForm = ({
   const { t } = useTranslation();
   const disclosure = useDisclosure();
   const mediaUploadModal = useDisclosure();
-
+  const toast = useToast();
   const isControlled = onOpenProp !== undefined && onCloseProp !== undefined;
   const isOpen = isControlled ? isOpenProp : disclosure.isOpen;
   const onClose = isControlled ? onCloseProp : disclosure.onClose;
@@ -120,8 +117,15 @@ export const ProgramForm = ({
   useEffect(() => {
     if (isOpen) {
       setActiveTab('overview');
+      if (!program) {
+        setFormState(emptyFormState);
+        setInitialProgramDirectorIds([]);
+        setInitialInstrumentQuantities({});
+        setInitialCurriculumLinks([]);
+        setInitialGraduated(0);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, program]);
 
   function handleProgramStatusChange(status) {
     setFormState((prev) => ({ ...prev, status: status || null }));
@@ -173,8 +177,26 @@ export const ProgramForm = ({
         onSave,
         onClose,
       });
+      toast({
+        title: t('programForm.saveSuccess'),
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+        position: 'bottom-right',
+      });
     } catch (err) {
       console.error('Error saving program:', err);
+      toast({
+        title: t('programForm.saveError'),
+        description:
+          err?.response?.data?.message ??
+          err?.message ??
+          t('programForm.saveErrorDesc'),
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'bottom-right',
+      });
     }
   }
 
@@ -273,6 +295,7 @@ export const ProgramForm = ({
                   mediaUploadModal.onOpen();
                 }}
                 onSeeAllMedia={() => setActiveTab('media')}
+                isLoadingProgramData={isLoadingProgramData}
               />
             )}
 
@@ -368,22 +391,6 @@ export const ProgramForm = ({
             </ModalFooter>
           </ModalContent>
         </Modal>
-
-        {isLoadingProgramData && (
-          <Center
-            position="absolute"
-            inset={0}
-            zIndex="overlay"
-            bg="rgba(107, 114, 128, 0.72)"
-          >
-            <Spinner
-              size="xl"
-              thickness="4px"
-              color="teal.500"
-              emptyColor="gray.200"
-            />
-          </Center>
-        )}
       </DrawerContent>
       <MediaUploadModal
         isOpen={mediaUploadModal.isOpen}

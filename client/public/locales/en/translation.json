@@ -361,7 +361,9 @@
     "instrumentQuantityAria": "Instrument quantity",
     "deleteTitle": "Are you sure you want to delete this program?",
     "deleteDesc": "This action cannot be undone.",
-    "deleteProgram": "Delete Program"
+    "deleteProgram": "Delete Program",
+    "saveSuccess": "Program saved successfully.",
+    "saveError": "Failed to save program."
   },
   "locationForm": {
     "selectRegion": "Select region...",

@@ -9,8 +9,8 @@ import {
 import {
   Box,
   Button,
-  Center,
   Divider,
+  Grid,
   HStack,
   IconButton,
   Input,
@@ -19,7 +19,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Spinner,
+  Skeleton,
   Table,
   TableContainer,
   Tag,
@@ -89,16 +89,9 @@ export function ProgramDisplay({
       t('programsTable.csvCurriculumLinks'),
     ];
     const rows = (tableData || []).map((p) => {
-      const instrumentsArray =
-        (Array.isArray(p.instruments) && p.instruments) ||
-        (Array.isArray(p.instrumentTypes) && p.instrumentTypes) ||
-        null;
-
-      const instrumentsFormatted = instrumentsArray
-        ? instrumentsArray
-            .map((inst) => `${inst.name ?? ''}: ${inst.quantity ?? 0}`)
-            .join('; ')
-        : p.instruments;
+      const instrumentsFormatted = Object.entries(p.instrumentsMap)
+        .map(([id, { name, quantity }]) => `${name}: ${quantity}`)
+        .join('; ');
 
       return [
         escapeCsvValue(p.title),
@@ -187,7 +180,8 @@ export function ProgramDisplay({
   };
 
   const filterBySearchPanel = useMemo(() => {
-    let data = originalData ?? [];
+    if (originalData === null) return null;
+    let data = originalData;
 
     // Status filter
     if (filterStatus) {
@@ -299,6 +293,7 @@ export function ProgramDisplay({
   ]);
 
   const displayData = useMemo(() => {
+    if (filterBySearchPanel === null) return null;
     if (!searchQuery) return filterBySearchPanel;
     const query = searchQuery.toLowerCase();
     return filterBySearchPanel.filter(
@@ -330,7 +325,7 @@ export function ProgramDisplay({
   }, [displayData, onFilteredDataChange]);
 
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
-  const tableData = sortedData ?? displayData;
+  const tableData = sortedData ?? displayData ?? [];
   const [flippedId, setFlippedId] = useState(null);
 
   if (!getRouteByRole(role, userId)) return null;
@@ -351,15 +346,20 @@ export function ProgramDisplay({
         }}
       />
       <Box
-        w="75vw"
+        w="100%"
         maxW="100%"
       >
-        <HStack
+        <Grid
+          templateColumns={{ base: '1fr', md: '1fr auto 1fr' }}
+          alignItems="center"
+          gap={{ base: 4, md: 3 }}
           mb={4}
-          justifyContent="space-between"
           w="100%"
         >
-          <HStack spacing={3}>
+          <HStack
+            spacing={3}
+            minW={0}
+          >
             <Box
               fontSize="3xl"
               fontWeight="semibold"
@@ -374,10 +374,18 @@ export function ProgramDisplay({
               onClick={downloadDataAsCsv}
             />
           </HStack>
-          <HStack spacing={2}>
+
+          <HStack
+            spacing={3}
+            flexShrink={0}
+            justifyContent="center"
+            justifySelf={{ base: 'stretch', md: 'center' }}
+            flexWrap="wrap"
+          >
             <InputGroup
               size="sm"
               maxW="200px"
+              w={{ base: '100%', md: '200px' }}
             >
               <InputLeftElement pointerEvents="none">
                 <Search2Icon
@@ -395,27 +403,32 @@ export function ProgramDisplay({
               />
             </InputGroup>
 
-            <IconButton
-              aria-label="table view"
-              icon={<HamburgerIcon />}
-              size="sm"
-              variant="ghost"
-              color={isCardView ? 'gray.600' : 'teal.500'}
-              onClick={() => setIsCardView(false)}
-            />
-            <Divider
-              orientation="vertical"
-              h="20px"
-              borderWidth="1px"
-            />
-            <IconButton
-              aria-label="card view"
-              icon={<HiOutlineSquares2X2 />}
-              color={!isCardView ? 'gray.600' : 'teal.500'}
-              size="sm"
-              variant="ghost"
-              onClick={() => setIsCardView(true)}
-            />
+            <HStack
+              spacing={1}
+              alignItems="center"
+            >
+              <IconButton
+                aria-label="table view"
+                icon={<HamburgerIcon />}
+                size="sm"
+                variant="ghost"
+                color={isCardView ? 'gray.600' : 'teal.500'}
+                onClick={() => setIsCardView(false)}
+              />
+              <Divider
+                orientation="vertical"
+                h="18px"
+                borderWidth="1px"
+              />
+              <IconButton
+                aria-label="card view"
+                icon={<HiOutlineSquares2X2 />}
+                color={!isCardView ? 'gray.600' : 'teal.500'}
+                size="sm"
+                variant="ghost"
+                onClick={() => setIsCardView(true)}
+              />
+            </HStack>
 
             <Popover placement="bottom-end">
               <PopoverTrigger>
@@ -641,9 +654,18 @@ export function ProgramDisplay({
                 </Box>
               </PopoverContent>
             </Popover>
+          </HStack>
+
+          <HStack
+            spacing={3}
+            justifyContent={{ base: 'flex-start', md: 'flex-end' }}
+            minW={0}
+            flexWrap="wrap"
+          >
             <Text
               fontSize="sm"
               color="gray.500"
+              mr={{ base: 4, md: 8 }}
             >
               {t('programsTable.displayingResults', {
                 count: tableData.length,
@@ -665,7 +687,7 @@ export function ProgramDisplay({
               {t('programsTable.newProgram')}
             </Button>
           </HStack>
-        </HStack>
+        </Grid>
 
         <Box position="relative">
           {!isCardView ? (
@@ -770,29 +792,36 @@ export function ProgramDisplay({
                       </Th>
                     </Tr>
                   </Thead>
-                  <Tbody>
-                    {tableData.length === 0 && isLoading ? (
+                  {tableData.length === 0 && isLoading ? (
+                    <Tbody>
                       <Tr>
                         <Td
                           colSpan={7}
                           borderBottom="1px solid"
                           borderColor="gray.200"
                         >
-                          <Center py={8}>
-                            <Spinner size="lg" />
-                          </Center>
+                          <VStack>
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Skeleton
+                                key={i}
+                                h={20}
+                                mb={2}
+                                w="100%"
+                              />
+                            ))}
+                          </VStack>
                         </Td>
                       </Tr>
-                    ) : (
-                      tableData.map((p) => (
-                        <ExpandableProgramRow
-                          key={p.id}
-                          p={p}
-                          onEdit={openEditForm}
-                        />
-                      ))
-                    )}
-                  </Tbody>
+                    </Tbody>
+                  ) : (
+                    tableData.map((p) => (
+                      <ExpandableProgramRow
+                        key={p.id}
+                        p={p}
+                        onEdit={openEditForm}
+                      />
+                    ))
+                  )}
                 </Table>
               </TableContainer>
             )
@@ -816,7 +845,13 @@ export function ProgramDisplay({
               justifyContent="center"
               zIndex={1}
             >
-              <Spinner size="lg" />
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton
+                  key={i}
+                  h={20}
+                  mb={2}
+                />
+              ))}
             </Box>
           )}
         </Box>

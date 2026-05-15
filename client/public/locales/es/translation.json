@@ -361,7 +361,9 @@
     "instrumentQuantityAria": "Cantidad de instrumentos",
     "deleteTitle": "¿Seguro que quieres eliminar este programa?",
     "deleteDesc": "Esta acción no se puede deshacer.",
-    "deleteProgram": "Eliminar programa"
+    "deleteProgram": "Eliminar programa",
+    "saveSuccess": "Programa guardado correctamente.",
+    "saveError": "Error al guardar el programa."
   },
   "locationForm": {
     "selectRegion": "Seleccionar región...",

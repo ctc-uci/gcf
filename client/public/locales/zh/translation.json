@@ -361,7 +361,9 @@
     "instrumentQuantityAria": "乐器数量",
     "deleteTitle": "确定要删除此项目吗？",
     "deleteDesc": "此操作无法撤销。",
-    "deleteProgram": "删除项目"
+    "deleteProgram": "删除项目",
+    "saveSuccess": "项目保存成功。",
+    "saveError": "项目保存失败。"
   },
   "locationForm": {
     "selectRegion": "选择地区...",
