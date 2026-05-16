@@ -171,6 +171,7 @@
     "updates": "Actualizaciones",
     "accounts": "Cuentas",
     "regions": "Regiones",
+    "partners": "Socios",
     "media": "Medios de comunicación",
     "logoAlt": "Logo"
   },
@@ -298,7 +299,8 @@
   "emptyState": {
     "noAccounts": "Aún no se han creado cuentas. Haga clic en 'Nueva cuenta' para comenzar.",
     "noPrograms": "Aún no se han creado programas. Haga clic en 'Nuevo programa' para comenzar.",
-    "noUpdates": "Aún no se han realizado actualizaciones."
+    "noUpdates": "Aún no se han realizado actualizaciones.",
+    "noPartners": "Aún no se han agregado organizaciones asociadas. Haga clic en '+ Nuevo socio' para comenzar."
   },
   "programForm": {
     "drawerTitle": "Programa",
@@ -637,5 +639,25 @@
   "fullscreenFlyout": {
     "minimize": "Minimizar",
     "expand": "Expandir"
+  },
+  "partners": {
+    "pageTitle": "Organizaciones Asociadas",
+    "newPartner": "+ Nuevo Socio",
+    "editPartner": "Editar Organización Asociada",
+    "newPartnerTitle": "Nueva Organización Asociada",
+    "partnerName": "Nombre de la Organización",
+    "partnerNamePlaceholder": "Ingrese el nombre de la organización",
+    "partnerNameRequired": "El nombre de la organización es obligatorio.",
+    "deletePartnerTitle": "Eliminar Organización Asociada",
+    "deletePartnerBody": "¿Está seguro de que desea eliminar esta organización asociada?",
+    "toastSaved": "Organización asociada guardada exitosamente",
+    "toastErrorSave": "Error al guardar la organización asociada",
+    "toastDeleted": "Organización asociada eliminada exitosamente",
+    "toastErrorDelete": "Error al eliminar la organización asociada",
+    "searchPlaceholder": "Buscar organizaciones asociadas...",
+    "columnName": "Nombre de la Organización",
+    "fieldLabel": "Organización Asociada",
+    "fieldPlaceholder": "Ingrese la organización asociada",
+    "fieldSelected": "Seleccionado: {{name}}"
   }
 }

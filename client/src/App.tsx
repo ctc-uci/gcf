@@ -21,6 +21,7 @@ import { Account } from './components/accounts/Account';
 import { EmbedTestPage } from './components/map/EmbedTestPage';
 import { Map } from './components/map/Map';
 import { Media } from './components/media/Media';
+import { PartnersPage } from './components/partners/PartnersPage';
 import { RegionsPage } from './components/regions/RegionsPage';
 
 const App = () => {
@@ -108,6 +109,16 @@ const App = () => {
                   <Route
                     path={'regions'}
                     element={<RegionsPage />}
+                  />
+
+                  <Route
+                    path={'partners'}
+                    element={
+                      <ProtectedRoute
+                        element={<PartnersPage />}
+                        allowedRoles={['Super Admin', 'Admin']}
+                      />
+                    }
                   />
                 </Route>
 
