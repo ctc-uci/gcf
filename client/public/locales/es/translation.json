@@ -293,7 +293,11 @@
   "instruments": {
     "searchPlaceholder": "Instrumento de búsqueda",
     "addNew": "Agregar nuevo \"{{name}}\"",
-    "selected": "Seleccionado: {{name}}"
+    "selected": "Seleccionado: {{name}}",
+    "deleteTitle": "¿Eliminar este instrumento?",
+    "deleteDesc": "\"{{name}}\" se eliminará permanentemente de la aplicación. Esta acción no se puede deshacer.",
+    "deleteInstrument": "Eliminar instrumento",
+    "deleteErrorTitle": "Error al eliminar el instrumento"
   },
   "emptyState": {
     "noAccounts": "Aún no se han creado cuentas. Haga clic en 'Nueva cuenta' para comenzar.",
