@@ -365,6 +365,11 @@
     "saveSuccess": "Program saved successfully.",
     "saveError": "Failed to save program."
   },
+  "partnerOrg": {
+    "deleteTitle": "Delete this partner organization?",
+    "deleteDesc": "\"{{name}}\" will be permanently removed from the web app. This action cannot be undone.",
+    "deleteOrg": "Delete Organization"
+  },
   "locationForm": {
     "selectRegion": "Select region...",
     "selectCountry": "Select country...",

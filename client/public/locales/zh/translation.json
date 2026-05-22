@@ -365,6 +365,11 @@
     "saveSuccess": "项目保存成功。",
     "saveError": "项目保存失败。"
   },
+  "partnerOrg": {
+    "deleteTitle": "删除此合作组织？",
+    "deleteDesc": "\"{{name}}\" 将从应用中永久删除。此操作无法撤销。",
+    "deleteOrg": "删除组织"
+  },
   "locationForm": {
     "selectRegion": "选择地区...",
     "selectCountry": "选择国家...",

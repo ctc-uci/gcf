@@ -365,6 +365,11 @@
     "saveSuccess": "Programme enregistré avec succès.",
     "saveError": "Échec de l'enregistrement du programme."
   },
+  "partnerOrg": {
+    "deleteTitle": "Supprimer cette organisation partenaire ?",
+    "deleteDesc": "\"{{name}}\" sera définitivement supprimée de l'application. Cette action est irréversible.",
+    "deleteOrg": "Supprimer l'organisation"
+  },
   "locationForm": {
     "selectRegion": "Sélectionnez la région...",
     "selectCountry": "Sélectionnez le pays...",

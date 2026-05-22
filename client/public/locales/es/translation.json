@@ -365,6 +365,11 @@
     "saveSuccess": "Programa guardado correctamente.",
     "saveError": "Error al guardar el programa."
   },
+  "partnerOrg": {
+    "deleteTitle": "¿Eliminar esta organización asociada?",
+    "deleteDesc": "\"{{name}}\" se eliminará permanentemente de la aplicación. Esta acción no se puede deshacer.",
+    "deleteOrg": "Eliminar organización"
+  },
   "locationForm": {
     "selectRegion": "Seleccionar región...",
     "selectCountry": "Seleccione país...",
