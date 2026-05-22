@@ -362,6 +362,9 @@
     "deleteTitle": "Are you sure you want to delete this program?",
     "deleteDesc": "This action cannot be undone.",
     "deleteProgram": "Delete Program",
+    "deletePartnerOrgTitle": "Remove Partner Organization?",
+    "deletePartnerOrgDesc": "This will remove the partner organization from this program.",
+    "deletePartnerOrg": "Remove",
     "saveSuccess": "Program saved successfully.",
     "saveError": "Failed to save program."
   },

@@ -362,6 +362,9 @@
     "deleteTitle": "确定要删除此项目吗？",
     "deleteDesc": "此操作无法撤销。",
     "deleteProgram": "删除项目",
+    "deletePartnerOrgTitle": "移除合作组织？",
+    "deletePartnerOrgDesc": "这将从该项目中移除合作组织。",
+    "deletePartnerOrg": "移除",
     "saveSuccess": "项目保存成功。",
     "saveError": "项目保存失败。"
   },

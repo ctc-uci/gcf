@@ -362,6 +362,9 @@
     "deleteTitle": "Voulez-vous vraiment supprimer ce programme ?",
     "deleteDesc": "Cette action est irréversible.",
     "deleteProgram": "Supprimer le programme",
+    "deletePartnerOrgTitle": "Retirer l'organisation partenaire ?",
+    "deletePartnerOrgDesc": "Cette action retirera l'organisation partenaire de ce programme.",
+    "deletePartnerOrg": "Retirer",
     "saveSuccess": "Programme enregistré avec succès.",
     "saveError": "Échec de l'enregistrement du programme."
   },

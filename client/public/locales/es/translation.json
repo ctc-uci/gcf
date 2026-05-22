@@ -362,6 +362,9 @@
     "deleteTitle": "¿Seguro que quieres eliminar este programa?",
     "deleteDesc": "Esta acción no se puede deshacer.",
     "deleteProgram": "Eliminar programa",
+    "deletePartnerOrgTitle": "¿Eliminar la organización asociada?",
+    "deletePartnerOrgDesc": "Esto eliminará la organización asociada de este programa.",
+    "deletePartnerOrg": "Eliminar",
     "saveSuccess": "Programa guardado correctamente.",
     "saveError": "Error al guardar el programa."
   },
