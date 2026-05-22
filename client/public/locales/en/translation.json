@@ -293,7 +293,11 @@
   "instruments": {
     "searchPlaceholder": "Search instrument",
     "addNew": "Add new \"{{name}}\"",
-    "selected": "Selected: {{name}}"
+    "selected": "Selected: {{name}}",
+    "deleteTitle": "Delete this instrument?",
+    "deleteDesc": "\"{{name}}\" will be permanently removed from the web app. This action cannot be undone.",
+    "deleteInstrument": "Delete Instrument",
+    "deleteErrorTitle": "Failed to delete instrument"
   },
   "emptyState": {
     "noAccounts": "No accounts have been created yet. Click 'New Account' to get started.",
