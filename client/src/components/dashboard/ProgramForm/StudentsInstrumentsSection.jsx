@@ -194,6 +194,10 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
         prev.filter((i) => i.id !== instrumentToDelete.id)
       );
       removeInstrument(String(instrumentToDelete.id));
+      if (String(selectedInstrument) === String(instrumentToDelete.id)) {
+        setSelectedInstrument('');
+        setSearchQuery('');
+      }
       deleteDisclosure.onClose();
       setInstrumentToDelete(null);
     } catch (err) {
