@@ -189,7 +189,10 @@ export function LocationLanguageSection({
 
     const isoRaw = row?.isoCode ?? row?.iso_code;
     const countryIsoCode =
-      countryId && isoRaw != null && String(isoRaw).trim() !== ''
+      countryId &&
+      isoRaw !== null &&
+      isoRaw !== undefined &&
+      String(isoRaw).trim() !== ''
         ? String(isoRaw).trim().toUpperCase()
         : null;
 

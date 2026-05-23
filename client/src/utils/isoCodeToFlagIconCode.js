@@ -1,7 +1,8 @@
 import countries from 'i18n-iso-countries';
 
 export function isoCodeToFlagIconCode(isoCode) {
-  if (isoCode == null || typeof isoCode !== 'string') return '';
+  if (isoCode === null || isoCode === undefined || typeof isoCode !== 'string')
+    return '';
   const trimmed = isoCode.trim();
   if (!trimmed) return '';
   const alpha2 = countries.toAlpha2(trimmed);

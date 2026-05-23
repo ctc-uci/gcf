@@ -90,7 +90,7 @@ export function ProgramDisplay({
     ];
     const rows = (tableData || []).map((p) => {
       const instrumentsFormatted = Object.entries(p.instrumentsMap)
-        .map(([id, { name, quantity }]) => `${name}: ${quantity}`)
+        .map(([, { name, quantity }]) => `${name}: ${quantity}`)
         .join('; ');
 
       return [

@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useMemo } from 'react';
 
 import {
   Box,
@@ -29,7 +29,6 @@ export const ForgotPassword = ({ setIsForgot }) => {
       }),
     [t]
   );
-  const [, setSubmitted] = useState(false);
   const { backend } = useContext(BackendContext);
   const [errorMessage, setErrorMessage] = useState('');
   const auth = getAuth();
@@ -50,7 +49,6 @@ export const ForgotPassword = ({ setIsForgot }) => {
     try {
       await backend.post('/gcf-users/verify-email', { email });
       await sendPasswordResetEmail(auth, email);
-      setSubmitted(true);
       toast({
         title: t('forgotPassword.emailSentTitle'),
         description: t('forgotPassword.emailSentDesc'),

@@ -11,10 +11,7 @@ import {
 
 import { useTranslation } from 'react-i18next';
 import { FiSearch } from 'react-icons/fi';
-import {
-  HiOutlineAdjustmentsHorizontal,
-  HiOutlineSquares2X2,
-} from 'react-icons/hi2';
+import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 
 import { FilterComponent } from '../../common/FilterComponent';
 

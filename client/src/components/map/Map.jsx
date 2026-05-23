@@ -1,4 +1,4 @@
-import { React, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   Box,
@@ -220,8 +220,8 @@ export const Map = () => {
                     const regionId = getRegionFromIso(geo.id);
                     const isHovered = regionId && regionId === hoverRegions;
                     const isSelectedRegion =
-                      regionId != null &&
-                      selectedRegionId != null &&
+                      regionId !== null &&
+                      selectedRegionId !== null &&
                       regionId === selectedRegionId;
                     return (
                       <Geography

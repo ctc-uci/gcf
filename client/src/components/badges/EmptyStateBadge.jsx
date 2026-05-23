@@ -3,7 +3,6 @@ import { Box, Center, Icon, Text, VStack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { FiBell, FiUsers } from 'react-icons/fi';
 import { HiOutlineMusicalNote } from 'react-icons/hi2';
-import { IoHomeOutline } from 'react-icons/io5';
 
 const BADGE_CONFIG = {
   'no-accounts': {

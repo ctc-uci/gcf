@@ -46,7 +46,7 @@ const resolvableIdFromSnap = (snap, { nameGetter, directKey, idGetter }) => {
   if (typeof direct === 'string' && direct.trim()) return null;
 
   const id = idGetter(snap);
-  return id != null && id !== '' ? String(id) : null;
+  return id !== null && id !== undefined && id !== '' ? String(id) : null;
 };
 
 export const AccountUpdateDrawer = ({
@@ -138,7 +138,12 @@ export const AccountUpdateDrawer = ({
             programIds.map(async (id) => {
               try {
                 const { data } = await backend.get(`/program/${id}`);
-                return [id, data?.name != null ? String(data.name).trim() : ''];
+                return [
+                  id,
+                  data?.name !== null && data?.name !== undefined
+                    ? String(data.name).trim()
+                    : '',
+                ];
               } catch {
                 return [id, ''];
               }
@@ -148,7 +153,12 @@ export const AccountUpdateDrawer = ({
             regionIds.map(async (id) => {
               try {
                 const { data } = await backend.get(`/region/${id}`);
-                return [id, data?.name != null ? String(data.name).trim() : ''];
+                return [
+                  id,
+                  data?.name !== null && data?.name !== undefined
+                    ? String(data.name).trim()
+                    : '',
+                ];
               } catch {
                 return [id, ''];
               }

@@ -4,7 +4,7 @@
  */
 
 export function escapeCsvValue(val) {
-  if (val == null) return '';
+  if (val === null || val === undefined) return '';
   const s = String(val);
   if (s.includes(',') || s.includes('"') || s.includes('\n')) {
     return `"${s.replace(/"/g, '""')}"`;
