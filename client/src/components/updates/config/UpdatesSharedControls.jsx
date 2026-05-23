@@ -1,6 +1,4 @@
-import { HamburgerIcon } from '@chakra-ui/icons';
 import {
-  Divider,
   Icon,
   IconButton,
   Input,

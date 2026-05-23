@@ -1,4 +1,4 @@
-import { Badge, Tab, TabList } from '@chakra-ui/react';
+import { Badge, TabList } from '@chakra-ui/react';
 
 export const UPDATES_TAB_SELECTED_PROPS = {
   color: 'black',

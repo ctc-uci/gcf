@@ -16,7 +16,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { MdOutlineSubdirectoryArrowRight } from 'react-icons/md';
 import { z } from 'zod';
 
 import { BackendContext } from '../../contexts/BackendContext';

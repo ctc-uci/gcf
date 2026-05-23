@@ -26,7 +26,7 @@ import { FaScrewdriverWrench } from 'react-icons/fa6';
 import { IoIosMusicalNotes, IoMdClose, IoMdPhotos } from 'react-icons/io';
 import { MdQuestionMark } from 'react-icons/md';
 
-import { ProgramSelector } from './ProgramSelector';
+import { ProgramSelector } from './Orphaned/ProgramSelector';
 
 export const InstrumentUpdateForm = ({
   formState,
