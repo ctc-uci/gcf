@@ -222,23 +222,7 @@ regionalDirectorRouter.put('/:id/region', asyncHandler(async (req, res) => {
   res.status(200).json(keysToCamel(updatedRegionalDirector[0]));
 }));
 
-regionalDirectorRouter.put('/:region_id', asyncHandler(async (req, res) => {
-  const { user_id } = req.params;
-  const { region_id } = req.body;
-  const updatedRegionalDirector = await db.query(
-    `UPDATE regional_director SET
-        region_id = COALESCE($1, region_id)
-        WHERE user_id = $2
-        RETURNING *;`,
-    [region_id, user_id]
-  );
 
-  if (updatedRegionalDirector.length === 0) {
-    return res.status(404).send('Item not found');
-  }
-
-  res.status(200).json(keysToCamel(updatedRegionalDirector[0]));
-}));
 
 regionalDirectorRouter.delete('/:user_id', asyncHandler(async (req, res) => {
   const { user_id } = req.params;

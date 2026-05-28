@@ -348,11 +348,11 @@ programRouter.post('/:id/playlists', asyncHandler(async (req, res) => {
     [id, instrumentId, normalizedLink, name]
   );
 
-  const [inserted] = await db.query(
+  const rows = await db.query(
     `SELECT * FROM playlist WHERE program_id = $1 AND instrument_id = $2 AND link = $3`,
     [id, instrumentId, normalizedLink]
   );
-  res.status(201).json(keysToCamel(inserted[0]));
+  res.status(201).json(keysToCamel(rows[0]));
 }));
 
 programRouter.delete('/:id/playlists', asyncHandler(async (req, res) => {

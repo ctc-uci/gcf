@@ -75,7 +75,7 @@ accountChangeRouter.get('/', asyncHandler(async (req, res) => {
     const authUser = await getAuthenticatedUser(req, res);
     senderRole = authUser?.role;
   } catch {
-    throw new Error('UNAUTHORIZED');
+    return res.status(401).send('Unauthorized');
   }
 
   const conditions = [];
