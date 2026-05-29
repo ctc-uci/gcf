@@ -57,7 +57,7 @@ app.use('/enrollmentChange', verifyToken, enrollmentChangeRouter);
 app.use('/mediaChange', verifyToken, mediaChangeRouter);
 app.use('/program', programRouter);
 app.use('/partners', verifyToken, partnerOrganizationRouter);
-app.use('/images', verifyToken, imagesRouter);
+app.use('/images', imagesRouter);
 app.use('/playlistCache', verifyToken, playlistCacheRouter);
 app.use('/fileChanges', fileChangeRouter);
 app.use('/accountChange', accountChangeRouter);

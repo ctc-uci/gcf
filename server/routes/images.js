@@ -1,5 +1,6 @@
 import express from 'express';
 import { asyncHandler } from '@/common/utils';
+import { verifyToken } from '@/middleware';
 
 import { deleteFromS3, getS3ImageURL, getS3UploadURL } from '../common/s3';
 import { db } from '../db/db-pgp';
@@ -13,7 +14,7 @@ imagesRouter.use(express.json());
  * Body: { fileName (optional), contentType (optional, defaults to "image/jpeg") }
  * Returns: { success: true, uploadUrl: string, key: string, bucket: string }
  */
-imagesRouter.post('/upload-url', asyncHandler(async (req, res) => {
+imagesRouter.post('/upload-url', verifyToken, asyncHandler(async (req, res) => {
   const { fileName, contentType = 'image/jpeg' } = req.body;
 
   const result = await getS3UploadURL(fileName, contentType);
@@ -54,7 +55,7 @@ imagesRouter.get('/url/:key', asyncHandler(async (req, res) => {
  * Params: key - S3 object key
  * Returns: { success: true, message: string }
  */
-imagesRouter.delete('/:key', asyncHandler(async (req, res) => {
+imagesRouter.delete('/:key', verifyToken, asyncHandler(async (req, res) => {
   const { key } = req.params;
   const decodedKey = decodeURIComponent(key);
 
@@ -73,7 +74,7 @@ imagesRouter.delete('/:key', asyncHandler(async (req, res) => {
  * Returns: { success: true, message: string }
  */
 
-imagesRouter.post('/profile-picture', asyncHandler(async (req, res) => {
+imagesRouter.post('/profile-picture', verifyToken, asyncHandler(async (req, res) => {
   const { key, userId } = req.body;
 
   await db.none(`UPDATE gcf_user SET picture = $1 WHERE id = $2`, [
