@@ -1,4 +1,3 @@
-import { Admin } from '@/components/admin/Admin';
 import { CatchAll } from '@/components/CatchAll';
 import Dashboard from '@/components/dashboard/Dashboard';
 import { Login } from '@/components/login/Login';
