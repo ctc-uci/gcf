@@ -293,7 +293,11 @@
   "instruments": {
     "searchPlaceholder": "Search instrument",
     "addNew": "Add new \"{{name}}\"",
-    "selected": "Selected: {{name}}"
+    "selected": "Selected: {{name}}",
+    "deleteTitle": "Delete this instrument?",
+    "deleteDesc": "\"{{name}}\" will be permanently removed from the web app. This action cannot be undone.",
+    "deleteInstrument": "Delete Instrument",
+    "deleteErrorTitle": "Failed to delete instrument"
   },
   "emptyState": {
     "noAccounts": "No accounts have been created yet. Click 'New Account' to get started.",
@@ -361,7 +365,14 @@
     "instrumentQuantityAria": "Instrument quantity",
     "deleteTitle": "Are you sure you want to delete this program?",
     "deleteDesc": "This action cannot be undone.",
-    "deleteProgram": "Delete Program"
+    "deleteProgram": "Delete Program",
+    "saveSuccess": "Program saved successfully.",
+    "saveError": "Failed to save program."
+  },
+  "partnerOrg": {
+    "deleteTitle": "Delete this partner organization?",
+    "deleteDesc": "\"{{name}}\" will be permanently removed from the web app. This action cannot be undone.",
+    "deleteOrg": "Delete Organization"
   },
   "locationForm": {
     "selectRegion": "Select region...",

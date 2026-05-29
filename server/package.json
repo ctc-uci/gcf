@@ -24,7 +24,7 @@
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "firebase-admin": "^12.4.0",
-    "mongoose": "^8.2.0",
+    "mongoose": "^8.22.1",
     "mysql": "^2.18.1",
     "node-schedule": "^2.1.1",
     "nodemailer": "^8.0.5",

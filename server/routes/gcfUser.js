@@ -340,7 +340,7 @@ gcfUserRouter.patch('/:id/preferred-language', asyncHandler(async (req, res) => 
   }
 
   const tokenUid = res.locals.decodedToken?.uid;
-  if (tokenUid !== null && tokenUid !== id) {
+  if (tokenUid !== null && tokenUid !== undefined && tokenUid !== id) {
     return res.status(403).json({
       error: "Cannot change another user's language preference",
     });

@@ -293,7 +293,11 @@
   "instruments": {
     "searchPlaceholder": "Instrument de recherche",
     "addNew": "Ajouter un nouveau \"{{name}}\"",
-    "selected": "Sélectionné : {{name}}"
+    "selected": "Sélectionné : {{name}}",
+    "deleteTitle": "Supprimer cet instrument ?",
+    "deleteDesc": "\"{{name}}\" sera définitivement supprimé de l'application. Cette action est irréversible.",
+    "deleteInstrument": "Supprimer l'instrument",
+    "deleteErrorTitle": "Échec de la suppression de l'instrument"
   },
   "emptyState": {
     "noAccounts": "Aucun compte n'a encore été créé. Cliquez sur « Nouveau compte » pour commencer.",
@@ -361,7 +365,14 @@
     "instrumentQuantityAria": "Quantité d’instruments",
     "deleteTitle": "Voulez-vous vraiment supprimer ce programme ?",
     "deleteDesc": "Cette action est irréversible.",
-    "deleteProgram": "Supprimer le programme"
+    "deleteProgram": "Supprimer le programme",
+    "saveSuccess": "Programme enregistré avec succès.",
+    "saveError": "Échec de l'enregistrement du programme."
+  },
+  "partnerOrg": {
+    "deleteTitle": "Supprimer cette organisation partenaire ?",
+    "deleteDesc": "\"{{name}}\" sera définitivement supprimée de l'application. Cette action est irréversible.",
+    "deleteOrg": "Supprimer l'organisation"
   },
   "locationForm": {
     "selectRegion": "Sélectionnez la région...",

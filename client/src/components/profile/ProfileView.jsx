@@ -496,6 +496,7 @@ export const ProfileView = (props) => {
         onClose={onClose}
         onUploadComplete={handleProfilePictureUpload}
         formOrigin="profile"
+        accept={{ 'image/*': [] }}
       />
 
       <ChangePasswordModal

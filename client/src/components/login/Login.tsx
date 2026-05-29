@@ -34,6 +34,8 @@ import { ForgotPassword } from './ForgotPassword';
 import { LoginLanguageSelect } from './LoginLanguageSelect';
 import GcfGlobe from '/gcf_globe.png';
 
+const MotionBox = motion(Box);
+
 type SigninFormValues = {
   email: string;
   password: string;
@@ -193,7 +195,7 @@ export const Login = () => {
             alignItems="center"
           >
             <AnimatePresence mode="wait">
-              <motion.div
+              <MotionBox
                 key={textIndex}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -211,7 +213,7 @@ export const Login = () => {
                 >
                   {welcomeTexts[textIndex]}
                 </Heading>
-              </motion.div>
+              </MotionBox>
             </AnimatePresence>
           </Box>
           <Image

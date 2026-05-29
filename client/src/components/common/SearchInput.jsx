@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
 
+import { DeleteIcon } from '@chakra-ui/icons';
 import {
   Box,
   HStack,
+  IconButton,
   Input,
   List,
   ListItem,
@@ -18,11 +20,13 @@ export function SearchInput({
   onChange,
   onSelectExisting,
   onCreateNew,
+  onDeleteItem,
   placeholder: placeholderProp,
 }) {
   const { t } = useTranslation();
   const placeholder = placeholderProp ?? t('instruments.searchPlaceholder');
   const [isOpen, setIsOpen] = useState(false);
+  const [hoveredId, setHoveredId] = useState(null);
   const containerRef = useRef(null);
 
   useOutsideClick({
@@ -100,8 +104,32 @@ export function SearchInput({
                 cursor="pointer"
                 _hover={{ bg: 'gray.100' }}
                 onClick={() => handleSelectExisting(item)}
+                onMouseEnter={
+                  onDeleteItem ? () => setHoveredId(item.id) : undefined
+                }
+                onMouseLeave={
+                  onDeleteItem ? () => setHoveredId(null) : undefined
+                }
               >
-                {item.name}
+                {onDeleteItem ? (
+                  <HStack justify="space-between">
+                    <Text flex={1}>{item.name}</Text>
+                    <IconButton
+                      size="xs"
+                      variant="ghost"
+                      colorScheme="red"
+                      icon={<DeleteIcon />}
+                      aria-label={`Delete ${item.name}`}
+                      visibility={hoveredId === item.id ? 'visible' : 'hidden'}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteItem(item);
+                      }}
+                    />
+                  </HStack>
+                ) : (
+                  item.name
+                )}
               </ListItem>
             ))}
             {canAddNew && (

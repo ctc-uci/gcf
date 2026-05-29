@@ -50,20 +50,9 @@ export function AssignedDirectorsSection({ regionId, formState, setFormData }) {
         const res = await backend.get(
           `/regional-directors/region/${Number(regionId)}`
         );
-        if (cancelled) return;
-        const data = res.data;
-        if (data === null || data === undefined) {
-          setRegional([]);
-          return;
+        if (!cancelled) {
+          setRegional(res.data.map(normalizeDirectorRow).filter(Boolean));
         }
-        setRegional([
-          {
-            userId: data.userId ?? data.user_id,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            picture: data.picture,
-          },
-        ]);
       } catch {
         if (!cancelled) setRegional([]);
       }

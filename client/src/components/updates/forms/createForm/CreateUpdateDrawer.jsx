@@ -9,7 +9,6 @@ import {
   AlertDialogOverlay,
   Box,
   Button,
-  Center,
   Divider,
   Drawer,
   DrawerBody,
@@ -209,7 +208,9 @@ export const CreateUpdateDrawer = ({
       .then((r) => {
         const map = {};
         for (const row of r.data || []) {
-          if (row.name != null) map[row.name] = Number(row.quantity ?? 0);
+          if (row.name !== null && row.name !== undefined) {
+            map[row.name] = Number(row.quantity ?? 0);
+          }
         }
         setInstrumentCountsByName(map);
       })
@@ -241,7 +242,7 @@ export const CreateUpdateDrawer = ({
       setEditingEnrollmentChangeId(null);
       return;
     }
-    if (!isOpen || editVariant == null) return;
+    if (!isOpen || editVariant === null || editVariant === undefined) return;
     let cancelled = false;
 
     const load = async () => {
