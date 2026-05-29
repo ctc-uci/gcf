@@ -18,7 +18,7 @@ import { useRoleContext } from '@/contexts/hooks/useRoleContext';
 import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
 
-import { AccountForm } from './AccountForm';
+import { AccountForm } from './AccountForm/index';
 import { AccountsTable, downloadAccountsAsCsv } from './AccountsTable';
 import { AccountToolbar } from './AccountToolbar';
 

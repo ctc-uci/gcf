@@ -236,7 +236,13 @@ gcfUserRouter.get('/:id/accounts', asyncHandler(async (req, res) => {
       LEFT JOIN program p_pd ON pd.program_id = p_pd.id
       LEFT JOIN gcf_user cb ON cb.id = u.created_by
       GROUP BY u.id, u.first_name, u.last_name, u.role, u.picture, cb.picture
-      ORDER BY u.last_name ASC`
+      ORDER BY CASE u.role
+        WHEN 'Super Admin' THEN 1
+        WHEN 'Admin' THEN 2
+        WHEN 'Regional Director' THEN 3
+        WHEN 'Program Director' THEN 4
+        ELSE 5
+      END ASC, u.last_name ASC`
     );
   }
 
@@ -274,7 +280,11 @@ gcfUserRouter.get('/:id/accounts', asyncHandler(async (req, res) => {
       LEFT JOIN region r ON rd.region_id = r.id
       WHERE u.role = 'Regional Director' OR u.role = 'Program Director'
       GROUP BY u.id, u.first_name, u.last_name, u.role, u.picture, cb.picture
-      ORDER BY u.last_name ASC`
+      ORDER BY CASE u.role
+        WHEN 'Regional Director' THEN 1
+        WHEN 'Program Director' THEN 2
+        ELSE 3
+      END ASC, u.last_name ASC`
     );
   }
   else if (role === 'Regional Director') {
