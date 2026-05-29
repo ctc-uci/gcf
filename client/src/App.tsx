@@ -56,15 +56,6 @@ const App = () => {
                       />
                     }
                   />
-                  <Route
-                    path="admin"
-                    element={
-                      <ProtectedRoute
-                        element={<Admin />}
-                        allowedRoles={['Admin']}
-                      />
-                    }
-                  />
 
                   <Route
                     path="profile"
