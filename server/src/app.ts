@@ -60,8 +60,8 @@ app.use('/program', programRouter);
 app.use('/partners', verifyToken, partnerOrganizationRouter);
 app.use('/images', imagesRouter);
 app.use('/playlistCache', verifyToken, playlistCacheRouter);
-app.use('/fileChanges', fileChangeRouter);
-app.use('/accountChange', accountChangeRouter);
+app.use('/fileChanges', verifyToken, fileChangeRouter);
+app.use('/accountChange', verifyToken, accountChangeRouter);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

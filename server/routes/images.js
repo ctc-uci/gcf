@@ -1,6 +1,6 @@
 import express from 'express';
 import { asyncHandler } from '@/common/utils';
-import { verifyToken } from '@/middleware';
+import { verifyToken, getAuthenticatedUser } from '@/middleware';
 
 import { deleteFromS3, getS3ImageURL, getS3UploadURL } from '../common/s3';
 import { db } from '../db/db-pgp';
@@ -75,7 +75,12 @@ imagesRouter.delete('/:key', verifyToken, asyncHandler(async (req, res) => {
  */
 
 imagesRouter.post('/profile-picture', verifyToken, asyncHandler(async (req, res) => {
-  const { key, userId } = req.body;
+  const { key, userId: bodyUserId } = req.body;
+
+  const authUser = await getAuthenticatedUser(req, res);
+  const isPD = authUser.role === 'Program Director';
+
+  const userId = !isPD && bodyUserId ? bodyUserId : authUser.id;
 
   await db.none(`UPDATE gcf_user SET picture = $1 WHERE id = $2`, [
     key,
