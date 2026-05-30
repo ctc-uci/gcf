@@ -23,13 +23,12 @@
     "lib": ["es2022"],
 
     /* Aliases */
-    "baseUrl": ".",
     "paths": {
-      "@/db/*": ["db/*"],
-      "@/common/*": ["common/*"],
-      "@/config/*": ["config/*"],
-      "@/routes/*": ["routes/*"],
-      "@/*": ["src/*"]
+      "@/db/*": ["./db/*"],
+      "@/common/*": ["./common/*"],
+      "@/config/*": ["./config/*"],
+      "@/routes/*": ["./routes/*"],
+      "@/*": ["./src/*"]
     }
   }
 }

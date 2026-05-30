@@ -27,9 +27,8 @@
     "noUncheckedIndexedAccess": true,
 
     /* Path Aliasing */
-    "baseUrl": "./src",
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"]
