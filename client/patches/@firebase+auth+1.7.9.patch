@@ -1,0 +1,34 @@
+diff --git a/node_modules/@firebase/auth/dist/esm2017/index-68602d24.js b/node_modules/@firebase/auth/dist/esm2017/index-68602d24.js
+index 35b861a..e4f37d3 100644
+--- a/node_modules/@firebase/auth/dist/esm2017/index-68602d24.js
++++ b/node_modules/@firebase/auth/dist/esm2017/index-68602d24.js
+@@ -9882,9 +9882,12 @@ const EID_FROM_APIHOST = new Map([
+ function getIframeUrl(auth) {
+     const config = auth.config;
+     _assert(config.authDomain, auth, "auth-domain-config-required" /* AuthErrorCode.MISSING_AUTH_DOMAIN */);
++    const isLocalhost =
++      config.authDomain?.split(':')[0] === 'localhost' ||
++      config.authDomain?.split(':')[0] === '127.0.0.1';
+     const url = config.emulator
+         ? _emulatorUrl(config, EMULATED_IFRAME_PATH)
+-        : `https://${auth.config.authDomain}/${IFRAME_PATH}`;
++        : (isLocalhost ? 'http' : 'https') + `://${auth.config.authDomain}/${IFRAME_PATH}`;
+     const params = {
+         apiKey: config.apiKey,
+         appName: auth.name,
+@@ -10101,7 +10104,14 @@ async function _getRedirectUrl(auth, provider, authType, redirectUrl, eventId, a
+ }
+ function getHandlerBase({ config }) {
+     if (!config.emulator) {
+-        return `https://${config.authDomain}/${WIDGET_PATH}`;
++      const isLocalhost =
++        config.authDomain?.split(':')[0] === 'localhost' ||
++        config.authDomain?.split(':')[0] === '127.0.0.1';
++
++      return (
++        (isLocalhost ? 'http' : 'https') +
++        `://${config.authDomain}/${WIDGET_PATH}`
++      );
+     }
+     return _emulatorUrl(config, EMULATOR_WIDGET_PATH);
+ }
