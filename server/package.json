@@ -18,17 +18,18 @@
     "*.js": "yarn run eslint"
   },
   "dependencies": {
-    "aws-sdk": "^2.1568.0",
-    "cookie-parser": "^1.4.6",
+    "@aws-sdk/client-s3": "^3.1057.0",
+    "@aws-sdk/s3-request-presigner": "^3.1057.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
-    "express": "^4.17.1",
-    "firebase-admin": "^12.4.0",
+    "express": "^4.22.2",
+    "firebase-admin": "^13.10.0",
     "mongoose": "^8.22.1",
     "mysql": "^2.18.1",
     "node-schedule": "^2.1.1",
     "nodemailer": "^8.0.5",
-    "nodemon": "^2.0.14",
+    "nodemon": "^3.1.14",
     "pg-promise": "^11.5.4"
   },
   "devDependencies": {

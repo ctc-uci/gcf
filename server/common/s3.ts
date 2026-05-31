@@ -2,7 +2,13 @@
 
 import crypto from 'crypto';
 
-import aws from 'aws-sdk';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import dotenv from 'dotenv';
 
 // Load environment variables if not already loaded
@@ -27,11 +33,16 @@ const bucketName =
     : process.env.PROD_S3_BUCKET_NAME;
 
 // Initialize S3 instance
-const s3 = new aws.S3({
+const s3 = new S3Client({
   region,
-  accessKeyId,
-  secretAccessKey,
-  signatureVersion: 'v4',
+  credentials: {
+    accessKeyId: accessKeyId!,
+    secretAccessKey: secretAccessKey!,
+  },
+  // SDK v3.729+ enables checksum validation by default, which adds
+  // x-amz-checksum-mode to presigned GET URLs and causes 403 in browsers.
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+  responseChecksumValidation: 'WHEN_REQUIRED',
 });
 
 /**
@@ -41,7 +52,7 @@ const s3 = new aws.S3({
  * @param expiresIn - URL expiration time in seconds (default: 300 = 5 minutes)
  * @returns Object with uploadUrl and key (S3 object key)
  */
-const getS3UploadURL = (
+const getS3UploadURL = async (
   fileName?: string,
   contentType: string = 'image/jpeg',
   expiresIn: number = 300
@@ -49,16 +60,15 @@ const getS3UploadURL = (
   // Generate a unique name for image if not provided
   const imageName = fileName || `${crypto.randomBytes(16).toString('hex')}.jpg`;
 
-  // Set up S3 params
-  const params = {
-    Bucket: bucketName,
-    Key: imageName,
-    ContentType: contentType,
-    Expires: expiresIn,
-  };
-
-  // Get a presigned URL for PUT operation
-  const uploadURL = s3.getSignedUrl('putObject', params);
+  const uploadURL = await getSignedUrl(
+    s3,
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: imageName,
+      ContentType: contentType,
+    }),
+    { expiresIn }
+  );
 
   return {
     uploadUrl: uploadURL,
@@ -73,14 +83,18 @@ const getS3UploadURL = (
  * @param expiresIn - URL expiration time in seconds (default: 3600 = 1 hour)
  * @returns Presigned URL string
  */
-const getS3ImageURL = (key: string, expiresIn: number = 3600): string => {
-  const params = {
-    Bucket: bucketName,
-    Key: key,
-    Expires: expiresIn,
-  };
-
-  return s3.getSignedUrl('getObject', params);
+const getS3ImageURL = async (
+  key: string,
+  expiresIn: number = 3600
+): Promise<string> => {
+  return getSignedUrl(
+    s3,
+    new GetObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+    }),
+    { expiresIn }
+  );
 };
 
 /**
@@ -95,14 +109,14 @@ const uploadToS3 = async (
   key: string,
   contentType: string = 'image/jpeg'
 ) => {
-  const params = {
-    Bucket: bucketName,
-    Key: key,
-    Body: buffer,
-    ContentType: contentType,
-  };
-
-  return s3.upload(params).promise();
+  return s3.send(
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+    })
+  );
 };
 
 /**
@@ -111,12 +125,12 @@ const uploadToS3 = async (
  * @returns S3 delete result
  */
 const deleteFromS3 = async (key: string) => {
-  const params = {
-    Bucket: bucketName,
-    Key: key,
-  };
-
-  return s3.deleteObject(params).promise();
+  return s3.send(
+    new DeleteObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+    })
+  );
 };
 
 export { s3, getS3UploadURL, getS3ImageURL, uploadToS3, deleteFromS3 };

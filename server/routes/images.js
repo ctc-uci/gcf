@@ -40,7 +40,7 @@ imagesRouter.get('/url/:key', asyncHandler(async (req, res) => {
 
   // Decode the key in case it's URL encoded
   const decodedKey = decodeURIComponent(key);
-  const url = getS3ImageURL(decodedKey, expiresIn);
+  const url = await getS3ImageURL(decodedKey, expiresIn);
 
   res.status(200).json({
     success: true,
