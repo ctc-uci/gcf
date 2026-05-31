@@ -1,0 +1,21 @@
+client/railpack.json
+  s_216127492caef8::t_5ec44d1f149bc7 8
+client/patches/@firebase+auth+1.7.9.patch
+  s_216127492caef8::t_ca3f46468aeff2 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "cea5bc6b50ea7b47e646cb4ad1d9296043eff745",
+  "prompts": {},
+  "sessions": {
+    "s_216127492caef8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "06b03b62-78c3-4bd2-8c81-ff8089e8b809",
+        "model": "composer-2.5"
+      },
+      "human_author": "Brendan Lieu <brendanlieu05@gmail.com>"
+    }
+  }
+}
