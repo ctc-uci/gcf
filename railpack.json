@@ -5,14 +5,14 @@
       "commands": [
         "corepack enable",
         "corepack prepare yarn@1.22.22 --activate",
-        "cd .. && YARN_PRODUCTION=false yarn install --frozen-lockfile"
+        "YARN_PRODUCTION=false yarn install --frozen-lockfile"
       ]
     },
     "build": {
-      "commands": ["cd .. && yarn workspace npo-client-template build"]
+      "commands": ["yarn workspace npo-client-template build"]
     }
   },
   "deploy": {
-    "startCommand": "yarn preview:railway"
+    "startCommand": "yarn workspace npo-client-template preview:railway"
   }
 }
