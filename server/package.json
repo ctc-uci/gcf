@@ -27,7 +27,7 @@
     "mongoose": "^8.22.1",
     "mysql": "^2.18.1",
     "node-schedule": "^2.1.1",
-    "nodemailer": "^8.0.5",
+    "nodemailer": "^9.0.1",
     "nodemon": "^2.0.14",
     "pg-promise": "^11.5.4"
   },
