@@ -37,8 +37,10 @@ export default $config({
     const emailPassword = new sst.Secret('EmailPassword', '');
     const youtubeApiKey = new sst.Secret('YoutubeApiKey', '');
 
-    // Defaults to "*" for the first deploy; locked down to the CloudFront URL after.
-    const corsAllowedOrigins = new sst.Secret('CorsAllowedOrigins', '*');
+    const corsAllowedOrigins = new sst.Secret(
+      'CorsAllowedOrigins',
+      'https://d1z8iubl552nqx.cloudfront.net'
+    );
 
     // ── Uploads bucket ───────────────────────────────────────
     const mediaBucket = new sst.aws.Bucket('MediaBucket');
