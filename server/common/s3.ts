@@ -5,33 +5,24 @@ import crypto from 'crypto';
 import aws from 'aws-sdk';
 import dotenv from 'dotenv';
 
-// Load environment variables if not already loaded
 dotenv.config();
 
-const region =
-  process.env.NODE_ENV === 'development'
-    ? process.env.DEV_S3_REGION
-    : process.env.PROD_S3_REGION;
-const accessKeyId =
-  process.env.NODE_ENV === 'development'
-    ? process.env.DEV_S3_ACCESS_KEY_ID
-    : process.env.PROD_S3_ACCESS_KEY_ID;
-const secretAccessKey =
-  process.env.NODE_ENV === 'development'
-    ? process.env.DEV_S3_SECRET_ACCESS_KEY
-    : process.env.PROD_S3_SECRET_ACCESS_KEY;
+const isDev = process.env.NODE_ENV === 'development';
 
-const bucketName =
-  process.env.NODE_ENV === 'development'
-    ? process.env.DEV_S3_BUCKET_NAME
-    : process.env.PROD_S3_BUCKET_NAME;
+const region = isDev ? process.env.DEV_S3_REGION : process.env.PROD_S3_REGION;
+const bucketName = isDev
+  ? process.env.DEV_S3_BUCKET_NAME
+  : process.env.PROD_S3_BUCKET_NAME;
 
-// Initialize S3 instance
 const s3 = new aws.S3({
   region,
-  accessKeyId,
-  secretAccessKey,
   signatureVersion: 'v4',
+  ...(isDev
+    ? {
+        accessKeyId: process.env.DEV_S3_ACCESS_KEY_ID,
+        secretAccessKey: process.env.DEV_S3_SECRET_ACCESS_KEY,
+      }
+    : {}),
 });
 
 /**
