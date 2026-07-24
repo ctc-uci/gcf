@@ -37,10 +37,8 @@ export default $config({
     const emailPassword = new sst.Secret('EmailPassword', '');
     const youtubeApiKey = new sst.Secret('YoutubeApiKey', '');
 
-    const corsAllowedOrigins = new sst.Secret(
-      'CorsAllowedOrigins',
-      'https://d1z8iubl552nqx.cloudfront.net'
-    );
+    // Placeholder defaults to wildcard, replace later with actual cloudfront url
+    const corsAllowedOrigins = new sst.Secret('CorsAllowedOrigins', '*');
 
     // ── Uploads bucket ───────────────────────────────────────
     const mediaBucket = new sst.aws.Bucket('MediaBucket');
