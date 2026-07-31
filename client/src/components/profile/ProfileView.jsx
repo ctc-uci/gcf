@@ -16,7 +16,8 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-  Spinner,
+  SkeletonCircle,
+  SkeletonText,
   Text,
   Textarea,
   VStack,
@@ -82,14 +83,27 @@ export const ProfileView = (props) => {
 
   if (loading) {
     return (
-      <Box
+      <Flex
         h="100vh"
-        display="flex"
         alignItems="center"
         justifyContent="center"
       >
-        <Spinner size="xl" />
-      </Box>
+        <VStack
+          spacing={4}
+          w="60%"
+        >
+          <SkeletonCircle
+            size="200px"
+            mb={10}
+          />
+          <SkeletonText
+            w="100%"
+            noOfLines={4}
+            spacing="4"
+            skeletonHeight="20"
+          />
+        </VStack>
+      </Flex>
     );
   }
 
@@ -482,6 +496,7 @@ export const ProfileView = (props) => {
         onClose={onClose}
         onUploadComplete={handleProfilePictureUpload}
         formOrigin="profile"
+        accept={{ 'image/*': [] }}
       />
 
       <ChangePasswordModal

@@ -1,5 +1,5 @@
 import { verifyRole } from '@/middleware';
-import { keysToCamel } from '@/common/utils';
+import { keysToCamel, asyncHandler } from '@/common/utils';
 import express from 'express';
 
 import { db } from '../db/db-pgp';
@@ -9,61 +9,51 @@ adminRouter.use(express.json());
 adminRouter.use(verifyRole(['Admin', 'Super Admin']));
 
 // GET /admin/programs - returns all programs with student/instrument counts
-adminRouter.get('/programs', async (req, res) => {
-  try {
-    const data = await db.query(
-      `SELECT
-        p.*,
-        c.name AS country_name,
-        c.iso_code AS iso_code,
-        r.name AS region_name,
-        COALESCE(ec.total_enrollment, 0) AS students,
-        COALESCE(ic.total_instruments, 0) AS instruments
-      FROM program p
-      LEFT JOIN country c ON c.id = p.country
-      LEFT JOIN region r ON r.id = c.region_id
-      LEFT JOIN (
-        SELECT pu.program_id, SUM(ec.enrollment_change) - SUM(ec.graduated_change) AS total_enrollment
-        FROM enrollment_change ec
-        JOIN program_update pu ON pu.id = ec.update_id
-        WHERE pu.resolved = TRUE OR pu.show_on_table IS FALSE
-        GROUP BY pu.program_id
-      ) ec ON ec.program_id = p.id
-      LEFT JOIN (
-        SELECT u.program_id, SUM(ic.amount_changed) AS total_instruments
-        FROM instrument_change ic
-        JOIN program_update u ON u.id = ic.update_id
-        WHERE u.resolved = TRUE OR u.show_on_table IS FALSE
-        GROUP BY u.program_id
-      ) ic ON ic.program_id = p.id;`
-    );
-    res.json(keysToCamel(data));
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+adminRouter.get('/programs', asyncHandler(async (req, res) => {
+  const data = await db.query(
+    `SELECT
+      p.*,
+      c.name AS country_name,
+      c.iso_code AS iso_code,
+      r.name AS region_name,
+      COALESCE(ec.total_enrollment, 0) AS students,
+      COALESCE(ic.total_instruments, 0) AS instruments
+    FROM program p
+    LEFT JOIN country c ON c.id = p.country
+    LEFT JOIN region r ON r.id = c.region_id
+    LEFT JOIN (
+      SELECT pu.program_id, SUM(ec.enrollment_change) - SUM(ec.graduated_change) AS total_enrollment
+      FROM enrollment_change ec
+      JOIN program_update pu ON pu.id = ec.update_id
+      WHERE pu.resolved = TRUE OR pu.show_on_table IS FALSE
+      GROUP BY pu.program_id
+    ) ec ON ec.program_id = p.id
+    LEFT JOIN (
+      SELECT u.program_id, SUM(ic.amount_changed) AS total_instruments
+      FROM instrument_change ic
+      JOIN program_update u ON u.id = ic.update_id
+      WHERE u.resolved = TRUE OR u.show_on_table IS FALSE
+      GROUP BY u.program_id
+    ) ic ON ic.program_id = p.id;`
+  );
+  res.json(keysToCamel(data));
+}));
 
 // GET /admin/stats - returns aggregated statistics
-adminRouter.get('/stats', async (req, res) => {
-  try {
-    const stats = await db.query(
-      `SELECT
-        (SELECT COUNT(*) FROM program) AS total_programs,
-        (SELECT COALESCE(SUM(ec.enrollment_change), 0) - COALESCE(SUM(ec.graduated_change), 0)
-         FROM enrollment_change ec
-         JOIN program_update pu ON pu.id = ec.update_id
-         WHERE pu.resolved = TRUE OR pu.show_on_table IS FALSE) AS total_students,
-        (SELECT COALESCE(SUM(ic.amount_changed), 0) 
-         FROM instrument_change ic
-         JOIN program_update pu ON pu.id = ic.update_id
-         WHERE pu.resolved = TRUE OR pu.show_on_table IS FALSE) AS total_instruments`
-    );
-    res.json(keysToCamel(stats[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+adminRouter.get('/stats', asyncHandler(async (req, res) => {
+  const stats = await db.query(
+    `SELECT
+      (SELECT COUNT(*) FROM program) AS total_programs,
+      (SELECT COALESCE(SUM(ec.enrollment_change), 0) - COALESCE(SUM(ec.graduated_change), 0)
+       FROM enrollment_change ec
+       JOIN program_update pu ON pu.id = ec.update_id
+       WHERE pu.resolved = TRUE OR pu.show_on_table IS FALSE) AS total_students,
+      (SELECT COALESCE(SUM(ic.amount_changed), 0) 
+       FROM instrument_change ic
+       JOIN program_update pu ON pu.id = ic.update_id
+       WHERE pu.resolved = TRUE OR pu.show_on_table IS FALSE) AS total_instruments`
+  );
+  res.json(keysToCamel(stats[0]));
+}));
 
 export { adminRouter };

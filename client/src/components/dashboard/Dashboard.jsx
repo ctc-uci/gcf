@@ -26,6 +26,7 @@ const Dashboard = () => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [filteredPrograms, setFilteredPrograms] = useState(null);
+  const [isProgramTableLoading, setIsProgramTableLoading] = useState(true);
 
   return (
     <Flex
@@ -40,6 +41,12 @@ const Dashboard = () => {
         <StatisticsSummary
           refreshTrigger={statsRefreshTrigger}
           filteredData={filteredPrograms}
+          isTableLoading={
+            (role === 'Super Admin' ||
+              role === 'Admin' ||
+              role === 'Regional Director') &&
+            isProgramTableLoading
+          }
         />
       )}
 
@@ -54,6 +61,7 @@ const Dashboard = () => {
           <ProgramTable
             onStatsRefresh={() => setStatsRefreshTrigger((prev) => prev + 1)}
             onFilteredDataChange={setFilteredPrograms}
+            onLoadingChange={setIsProgramTableLoading}
           />
         )}
         {role === 'Program Director' && (

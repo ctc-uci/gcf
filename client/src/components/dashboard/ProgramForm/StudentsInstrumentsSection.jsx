@@ -8,6 +8,12 @@ import {
   Heading,
   HStack,
   Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   NumberDecrementStepper,
   NumberIncrementStepper,
   NumberInput,
@@ -16,6 +22,7 @@ import {
   Tag,
   TagCloseButton,
   TagLabel,
+  useDisclosure,
   useToast,
   VStack,
 } from '@chakra-ui/react';
@@ -36,6 +43,8 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
   const [newInstrumentName, setNewInstrumentName] = useState('');
   /** Plain string so the field can be cleared while typing; validated on Add only. */
   const [quantityInput, setQuantityInput] = useState('1');
+  const [instrumentToDelete, setInstrumentToDelete] = useState(null);
+  const deleteDisclosure = useDisclosure();
 
   useEffect(() => {
     if (selectedInstrument && !Number.isNaN(Number(selectedInstrument))) {
@@ -172,182 +181,266 @@ export function StudentsInstrumentsSection({ formState, setFormData }) {
     });
   }
 
+  function handleDeleteClick(instrument) {
+    setInstrumentToDelete(instrument);
+    deleteDisclosure.onOpen();
+  }
+
+  async function handleConfirmDelete() {
+    if (!instrumentToDelete) return;
+    try {
+      await backend.delete(`/instruments/${instrumentToDelete.id}`);
+      setInstruments((prev) =>
+        prev.filter((i) => i.id !== instrumentToDelete.id)
+      );
+      removeInstrument(String(instrumentToDelete.id));
+      if (String(selectedInstrument) === String(instrumentToDelete.id)) {
+        setSelectedInstrument('');
+        setSearchQuery('');
+      }
+      deleteDisclosure.onClose();
+      setInstrumentToDelete(null);
+    } catch (err) {
+      console.error('Error deleting instrument:', err);
+      toast({
+        title: t('instruments.deleteErrorTitle'),
+        description: err?.response?.data?.message ?? err?.message,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+    }
+  }
+
   return (
-    <Box>
-      <Heading
-        size="md"
-        fontWeight="semibold"
-        mb={3}
-      >
-        {t('programForm.studentsAndInstruments')}
-      </Heading>
-      <VStack
-        align="stretch"
-        spacing={3}
-      >
-        <FormControl>
-          <FormLabel
-            fontWeight="normal"
-            color="gray"
-          >
-            {t('programForm.currentStudents')}
-          </FormLabel>
-          <NumberInput
-            width="100%"
-            min={0}
-            value={formState.students}
-            onChange={(value) => {
-              const n = parseInt(value, 10);
-              setFormData((prev) => ({
-                ...prev,
-                students: Number.isNaN(n) ? 0 : n,
-              }));
-            }}
-          >
-            <NumberInputField />
-            <NumberInputStepper>
-              <NumberIncrementStepper />
-              <NumberDecrementStepper />
-            </NumberInputStepper>
-          </NumberInput>
-        </FormControl>
-
-        <FormControl>
-          <FormLabel
-            fontWeight="normal"
-            color="gray"
-          >
-            {t('programForm.graduatedStudentsLabel')}
-          </FormLabel>
-          <NumberInput
-            width="100%"
-            min={0}
-            value={formState.graduatedStudents}
-            onChange={(value) => {
-              const n = parseInt(value, 10);
-              setFormData((prev) => ({
-                ...prev,
-                graduatedStudents: Number.isNaN(n) ? 0 : n,
-              }));
-            }}
-          >
-            <NumberInputField />
-            <NumberInputStepper>
-              <NumberIncrementStepper />
-              <NumberDecrementStepper />
-            </NumberInputStepper>
-          </NumberInput>
-        </FormControl>
-
-        <FormControl>
-          <FormLabel
-            fontWeight="normal"
-            color="gray"
-          >
-            {t('programForm.instrumentAndQuantity')}
-          </FormLabel>
-          {!isAddingInstrument && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedInstrument('');
-                setNewInstrumentName('');
-                setQuantityInput('1');
-                setIsAddingInstrument(true);
+    <>
+      <Box>
+        <Heading
+          size="md"
+          fontWeight="semibold"
+          mb={3}
+        >
+          {t('programForm.studentsAndInstruments')}
+        </Heading>
+        <VStack
+          align="stretch"
+          spacing={3}
+        >
+          <FormControl>
+            <FormLabel
+              fontWeight="normal"
+              color="gray"
+            >
+              {t('programForm.currentStudents')}
+            </FormLabel>
+            <NumberInput
+              width="100%"
+              min={0}
+              value={formState.students}
+              onChange={(value) => {
+                const n = parseInt(value, 10);
+                setFormData((prev) => ({
+                  ...prev,
+                  students: Number.isNaN(n) ? 0 : n,
+                }));
               }}
             >
-              {t('common.add')}
-            </Button>
-          )}
-          {isAddingInstrument && (
-            <Box
-              ref={instrumentAddRef}
-              mt={1}
-            >
-              <HStack
-                align="flex-end"
-                spacing={3}
-                flexWrap="wrap"
-              >
-                <Box
-                  flex="1"
-                  minW="12rem"
-                  maxW="16rem"
-                >
-                  <SearchInput
-                    items={instruments}
-                    value={searchQuery}
-                    onChange={(val) => setSearchQuery(val)}
-                    onSelectExisting={(instrument) => {
-                      setSelectedInstrument(String(instrument.id));
-                      setNewInstrumentName('');
-                      setSearchQuery('');
-                    }}
-                    onCreateNew={(name) => {
-                      setSelectedInstrument('');
-                      setNewInstrumentName(name.trim());
-                      setSearchQuery('');
-                    }}
-                  />
-                </Box>
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  value={quantityInput}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (v === '' || /^\d+$/.test(v)) {
-                      setQuantityInput(v);
-                    }
-                  }}
-                  width="5.5rem"
-                  aria-label={t('programForm.instrumentQuantityAria')}
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={async () => {
-                    const added = await handleAddInstrumentAndQuantity();
-                    if (added) setIsAddingInstrument(false);
-                  }}
-                >
-                  {t('common.add')}
-                </Button>
-              </HStack>
-            </Box>
-          )}
-        </FormControl>
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+          </FormControl>
 
-        {Object.keys(formState.instruments || {}).length > 0 && (
-          <HStack
-            width="100%"
-            flexWrap="wrap"
-            spacing={2}
-          >
-            {Object.entries(formState.instruments).map(
-              ([instrumentId, data]) => (
-                <Tag
-                  key={instrumentId}
-                  size="lg"
-                  bg="gray.200"
-                >
-                  <TagLabel>
-                    {t('programForm.instrumentQuantityPair', {
-                      name: data.name,
-                      qty: data.quantity,
-                    })}
-                  </TagLabel>
-                  <TagCloseButton
-                    onClick={() => removeInstrument(instrumentId)}
-                  />
-                </Tag>
-              )
+          <FormControl>
+            <FormLabel
+              fontWeight="normal"
+              color="gray"
+            >
+              {t('programForm.graduatedStudentsLabel')}
+            </FormLabel>
+            <NumberInput
+              width="100%"
+              min={0}
+              value={formState.graduatedStudents}
+              onChange={(value) => {
+                const n = parseInt(value, 10);
+                setFormData((prev) => ({
+                  ...prev,
+                  graduatedStudents: Number.isNaN(n) ? 0 : n,
+                }));
+              }}
+            >
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+          </FormControl>
+
+          <FormControl>
+            <FormLabel
+              fontWeight="normal"
+              color="gray"
+            >
+              {t('programForm.instrumentAndQuantity')}
+            </FormLabel>
+            {!isAddingInstrument && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedInstrument('');
+                  setNewInstrumentName('');
+                  setQuantityInput('1');
+                  setIsAddingInstrument(true);
+                }}
+              >
+                {t('common.add')}
+              </Button>
             )}
-          </HStack>
-        )}
-      </VStack>
-    </Box>
+            {isAddingInstrument && (
+              <Box
+                ref={instrumentAddRef}
+                mt={1}
+              >
+                <HStack
+                  align="flex-end"
+                  spacing={3}
+                  flexWrap="wrap"
+                >
+                  <Box
+                    flex="1"
+                    minW="12rem"
+                    maxW="16rem"
+                  >
+                    <SearchInput
+                      items={instruments}
+                      value={searchQuery}
+                      onChange={(val) => setSearchQuery(val)}
+                      onSelectExisting={(instrument) => {
+                        setSelectedInstrument(String(instrument.id));
+                        setNewInstrumentName('');
+                        setSearchQuery('');
+                      }}
+                      onCreateNew={(name) => {
+                        setSelectedInstrument('');
+                        setNewInstrumentName(name.trim());
+                        setSearchQuery('');
+                      }}
+                      onDeleteItem={handleDeleteClick}
+                    />
+                  </Box>
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    value={quantityInput}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === '' || /^\d+$/.test(v)) {
+                        setQuantityInput(v);
+                      }
+                    }}
+                    width="5.5rem"
+                    aria-label={t('programForm.instrumentQuantityAria')}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                      const added = await handleAddInstrumentAndQuantity();
+                      if (added) setIsAddingInstrument(false);
+                    }}
+                  >
+                    {t('common.add')}
+                  </Button>
+                </HStack>
+              </Box>
+            )}
+          </FormControl>
+
+          {Object.keys(formState.instruments || {}).length > 0 && (
+            <HStack
+              width="100%"
+              flexWrap="wrap"
+              spacing={2}
+            >
+              {Object.entries(formState.instruments).map(
+                ([instrumentId, data]) => (
+                  <Tag
+                    key={instrumentId}
+                    size="lg"
+                    bg="gray.200"
+                  >
+                    <TagLabel>
+                      {t('programForm.instrumentQuantityPair', {
+                        name: data.name,
+                        qty: data.quantity,
+                      })}
+                    </TagLabel>
+                    <TagCloseButton
+                      onClick={() => removeInstrument(instrumentId)}
+                    />
+                  </Tag>
+                )
+              )}
+            </HStack>
+          )}
+        </VStack>
+      </Box>
+
+      <Modal
+        isOpen={deleteDisclosure.isOpen}
+        onClose={() => {
+          deleteDisclosure.onClose();
+          setInstrumentToDelete(null);
+        }}
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent
+          borderRadius="md"
+          p={2}
+        >
+          <ModalHeader
+            fontSize="lg"
+            fontWeight="semibold"
+          >
+            {t('instruments.deleteTitle')}
+          </ModalHeader>
+
+          <ModalBody color="gray.600">
+            {t('instruments.deleteDesc', {
+              name: instrumentToDelete?.name ?? '',
+            })}
+          </ModalBody>
+
+          <ModalFooter
+            justifyContent="center"
+            gap={3}
+          >
+            <Button
+              onClick={() => {
+                deleteDisclosure.onClose();
+                setInstrumentToDelete(null);
+              }}
+              bg="gray.100"
+              _hover={{ bg: 'gray.200' }}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              colorScheme="red"
+              onClick={handleConfirmDelete}
+            >
+              {t('instruments.deleteInstrument')}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   );
 }

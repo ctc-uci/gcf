@@ -1,4 +1,4 @@
-import { keysToCamel } from '@/common/utils';
+import { keysToCamel, asyncHandler } from '@/common/utils';
 import express from 'express';
 
 import { db } from '../db/db-pgp';
@@ -6,133 +6,103 @@ import { db } from '../db/db-pgp';
 const enrollmentChangeRouter = express.Router();
 enrollmentChangeRouter.use(express.json());
 
-enrollmentChangeRouter.get('/', async (req, res) => {
-  try {
-    const data = await db.query(`SELECT * FROM enrollment_change`);
-    res.status(200).json(keysToCamel(data));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
+enrollmentChangeRouter.get('/', asyncHandler(async (req, res) => {
+  const data = await db.query(`SELECT * FROM enrollment_change`);
+  res.status(200).json(keysToCamel(data));
+}));
+
+enrollmentChangeRouter.get('/update/:updateId', asyncHandler(async (req, res) => {
+  const { updateId } = req.params;
+  const enrollmentChange = await db.query(
+    `SELECT ALL * FROM enrollment_change WHERE update_id = $1`,
+    [updateId]
+  );
+
+  res.status(200).json(keysToCamel(enrollmentChange));
+}));
+
+enrollmentChangeRouter.get('/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const enrollmentChange = await db.query(
+    `SELECT ALL * FROM enrollment_change WHERE id = $1`,
+    [id]
+  );
+
+  if (enrollmentChange.length === 0) {
+    return res.status(404).send('Item not found');
   }
-});
 
-enrollmentChangeRouter.get('/update/:updateId', async (req, res) => {
-  try {
-    const { updateId } = req.params;
-    const enrollmentChange = await db.query(
-      `SELECT ALL * FROM enrollment_change WHERE update_id = $1`,
-      [updateId]
-    );
+  res.status(200).json(keysToCamel(enrollmentChange));
+}));
 
-    res.status(200).json(keysToCamel(enrollmentChange));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-  }
-});
+enrollmentChangeRouter.post('/', asyncHandler(async (req, res) => {
+  const {
+    update_id,
+    enrollment_change,
+    graduated_change,
+    event_type,
+    description,
+  } = req.body;
+  const newEnrollmentChange = await db.query(
+    `INSERT INTO enrollment_change (update_id, enrollment_change, graduated_change, event_type, description) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [
+      update_id,
+      enrollment_change,
+      graduated_change,
+      event_type,
+      description ?? null,
+    ]
+  );
+  res.status(201).json(keysToCamel(newEnrollmentChange[0]));
+}));
 
-enrollmentChangeRouter.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const enrollmentChange = await db.query(
-      `SELECT ALL * FROM enrollment_change WHERE id = $1`,
-      [id]
-    );
-
-    if (enrollmentChange.length === 0) {
-      return res.status(404).send('Item not found');
-    }
-
-    res.status(200).json(keysToCamel(enrollmentChange));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-enrollmentChangeRouter.post('/', async (req, res) => {
-  try {
-    const {
+enrollmentChangeRouter.put('/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const {
+    update_id,
+    enrollment_change,
+    graduated_change,
+    event_type,
+    description,
+  } = req.body;
+  const updatedEnrollmentChange = await db.query(
+    `UPDATE enrollment_change SET
+      update_id = COALESCE($1, update_id),
+      enrollment_change = COALESCE($2, enrollment_change),
+      graduated_change = COALESCE($3, graduated_change),
+      event_type = COALESCE($4, event_type),
+      description = COALESCE($5, description)
+      WHERE id = $6
+      RETURNING *;`,
+    [
       update_id,
       enrollment_change,
       graduated_change,
       event_type,
       description,
-    } = req.body;
-    const newEnrollmentChange = await db.query(
-      `INSERT INTO enrollment_change (update_id, enrollment_change, graduated_change, event_type, description) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [
-        update_id,
-        enrollment_change,
-        graduated_change,
-        event_type,
-        description ?? null,
-      ]
-    );
-    res.status(201).json(keysToCamel(newEnrollmentChange[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
+      id,
+    ]
+  );
+
+  if (updatedEnrollmentChange.length === 0) {
+    return res.status(404).send('Item not found');
   }
-});
 
-enrollmentChangeRouter.put('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const {
-      update_id,
-      enrollment_change,
-      graduated_change,
-      event_type,
-      description,
-    } = req.body;
-    const updatedEnrollmentChange = await db.query(
-      `UPDATE enrollment_change SET
-        update_id = COALESCE($1, update_id),
-        enrollment_change = COALESCE($2, enrollment_change),
-        graduated_change = COALESCE($3, graduated_change),
-        event_type = COALESCE($4, event_type),
-        description = COALESCE($5, description)
-        WHERE id = $6
-        RETURNING *;`,
-      [
-        update_id,
-        enrollment_change,
-        graduated_change,
-        event_type,
-        description,
-        id,
-      ]
-    );
+  res.status(200).json(keysToCamel(updatedEnrollmentChange[0]));
+}));
 
-    if (updatedEnrollmentChange.length === 0) {
-      return res.status(404).send('Item not found');
-    }
+enrollmentChangeRouter.delete('/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const deletedEnrollmentChange = await db.query(
+    `DELETE FROM enrollment_change WHERE id = $1 RETURNING *`,
+    [id]
+  );
 
-    res.status(200).json(keysToCamel(updatedEnrollmentChange[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
+  if (deletedEnrollmentChange.length === 0) {
+    return res.status(404).send('Item not found');
   }
-});
 
-enrollmentChangeRouter.delete('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deletedEnrollmentChange = await db.query(
-      `DELETE FROM enrollment_change WHERE id = $1 RETURNING *`,
-      [id]
-    );
-
-    if (deletedEnrollmentChange.length === 0) {
-      return res.status(404).send('Item not found');
-    }
-
-    res.status(200).json(keysToCamel(deletedEnrollmentChange[0]));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-  }
-});
+  res.status(200).json(keysToCamel(deletedEnrollmentChange[0]));
+}));
 
 export { enrollmentChangeRouter };

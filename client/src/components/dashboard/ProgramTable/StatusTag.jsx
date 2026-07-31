@@ -13,7 +13,7 @@ export function StatusTag({ status }) {
       : normalized === 'developing' || normalized === 'inactive'
         ? 'inactive'
         : null;
-  const style = mapKey != null ? STATUS_TAG_STYLES[mapKey] : null;
+  const style = mapKey !== null ? STATUS_TAG_STYLES[mapKey] : null;
   const label =
     mapKey === 'active'
       ? t('programStatus.launched')

@@ -36,7 +36,8 @@ export const normalizeAccountSnapshot = (snap) => {
   };
 };
 
-export const isBlank = (v) => v == null || String(v).trim() === '';
+export const isBlank = (v) =>
+  v === null || v === undefined || String(v).trim() === '';
 
 export const valueOrFallback = (primary, fallback) =>
   isBlank(primary) ? (fallback ?? '') : primary;
@@ -53,7 +54,7 @@ export const pickStr = (snap, camelKey, snakeKey) => {
     snakeKey !== undefined
       ? firstNonBlank(snap[camelKey], snap[snakeKey])
       : snap[camelKey];
-  if (v == null) return '';
+  if (v === null || v === undefined) return '';
   return String(v).trim();
 };
 
@@ -61,14 +62,14 @@ export const programName = (snap) => {
   const list = snap?.programs ?? snap?.Programs;
   if (!Array.isArray(list) || list.length === 0) return '';
   const p = list[0];
-  return p?.name != null ? String(p.name).trim() : '';
+  return p?.name !== null && p?.name !== undefined ? String(p.name).trim() : '';
 };
 
 export const regionName = (snap) => {
   const list = snap?.regions ?? snap?.Regions;
   if (!Array.isArray(list) || list.length === 0) return '';
   const r = list[0];
-  return r?.name != null ? String(r.name).trim() : '';
+  return r?.name !== null && r?.name !== undefined ? String(r.name).trim() : '';
 };
 
 export const resolveProgramDisplay = (snap, idToName) => {
@@ -77,7 +78,7 @@ export const resolveProgramDisplay = (snap, idToName) => {
   const direct = snap?.program;
   if (typeof direct === 'string' && direct.trim()) return direct.trim();
   const id = snap?.programId ?? snap?.program_id ?? snap?.programs?.[0]?.id;
-  if (id == null || id === '') return '';
+  if (id === null || id === undefined || id === '') return '';
   const mapped = idToName[String(id)];
   return mapped && mapped.trim() ? mapped : String(id);
 };
@@ -88,7 +89,7 @@ export const resolveRegionDisplay = (snap, idToName) => {
   const direct = snap?.region;
   if (typeof direct === 'string' && direct.trim()) return direct.trim();
   const id = snap?.regionId ?? snap?.region_id ?? snap?.regions?.[0]?.id;
-  if (id == null || id === '') return '';
+  if (id === null || id === undefined || id === '') return '';
   const mapped = idToName[String(id)];
   return mapped && mapped.trim() ? mapped : String(id);
 };
@@ -96,13 +97,13 @@ export const resolveRegionDisplay = (snap, idToName) => {
 export const programIdKey = (snap) => {
   if (!snap || typeof snap !== 'object') return '';
   const id = snap.programId ?? snap.program_id ?? snap.programs?.[0]?.id;
-  return id == null || id === '' ? '' : String(id);
+  return id === null || id === undefined || id === '' ? '' : String(id);
 };
 
 export const regionIdKey = (snap) => {
   if (!snap || typeof snap !== 'object') return '';
   const id = snap.regionId ?? snap.region_id ?? snap.regions?.[0]?.id;
-  return id == null || id === '' ? '' : String(id);
+  return id === null || id === undefined || id === '' ? '' : String(id);
 };
 
 export const isDirectImageUrl = (s) =>
@@ -117,7 +118,10 @@ export const fetchPictureDisplayUrl = async (backend, keyOrUrl) => {
       `/images/url/${encodeURIComponent(raw)}`
     );
     if (data?.success === false) return null;
-    const url = data?.url != null ? String(data.url).trim() : '';
+    const url =
+      data?.url !== null && data?.url !== undefined
+        ? String(data.url).trim()
+        : '';
     return url || null;
   } catch (err) {
     console.error('Error fetching profile image URL:', err);

@@ -6,7 +6,7 @@ import {
   Heading,
   HStack,
   IconButton,
-  Spinner,
+  Skeleton,
   VStack,
 } from '@chakra-ui/react';
 
@@ -53,6 +53,7 @@ const StatBox = ({ labelKey, number }) => {
 
 const getRouteByRole = (role, userId) => {
   const routes = {
+    'Super Admin': '/admin/stats',
     Admin: '/admin/stats',
     'Regional Director': `/regional-directors/me/${userId}/stats`,
     'Program Director': `/program-directors/me/${userId}/stats`,
@@ -61,6 +62,11 @@ const getRouteByRole = (role, userId) => {
 };
 
 const STAT_LABEL_KEYS_BY_ROLE = {
+  'Super Admin': [
+    { labelKey: 'statistics.programs', number: 0 },
+    { labelKey: 'statistics.students', number: 0 },
+    { labelKey: 'statistics.instruments', number: 0 },
+  ],
   Admin: [
     { labelKey: 'statistics.programs', number: 0 },
     { labelKey: 'statistics.students', number: 0 },
@@ -104,12 +110,17 @@ function statsFromPdData(data) {
 }
 
 const STATS_FROM_RESPONSE = {
+  'Super Admin': statsFromAdminData,
   Admin: statsFromAdminData,
   'Regional Director': statsFromRdData,
   'Program Director': statsFromPdData,
 };
 
-const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
+const StatisticsSummary = ({
+  refreshTrigger = 0,
+  filteredData = null,
+  isTableLoading = false,
+}) => {
   const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
@@ -127,11 +138,9 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
     const mapResponse = STATS_FROM_RESPONSE[role];
 
     if (!route || !mapResponse) {
-      setIsLoading(false);
+      setIsLoading(true);
       return;
     }
-
-    setStats(STAT_LABEL_KEYS_BY_ROLE[role] ?? STAT_LABEL_KEYS_BY_ROLE.Admin);
 
     const fetchData = async () => {
       setIsLoading(true);
@@ -146,11 +155,12 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
       }
     };
 
+    setIsLoading(true);
     fetchData();
   }, [role, roleLoading, userId, backend, refreshTrigger]);
 
   const displayStats = useMemo(() => {
-    if (!filteredData) return stats; // use fetched stats when no filter active
+    if (filteredData === null) return stats;
 
     const totalStudents = filteredData.reduce(
       (sum, p) => sum + (Number(p.students) || 0),
@@ -212,28 +222,23 @@ const StatisticsSummary = ({ refreshTrigger = 0, filteredData = null }) => {
             w="full"
             align="stretch"
           >
-            {displayStats.map((stat) => (
-              <StatBox
-                key={stat.labelKey}
-                labelKey={stat.labelKey}
-                number={stat.number}
-              />
-            ))}
+            {isLoading || isTableLoading
+              ? Array.from({ length: initialStats.length }).map((_, i) => (
+                  <Skeleton
+                    key={i}
+                    height="150px"
+                    flex={1}
+                    borderRadius="md"
+                  />
+                ))
+              : displayStats.map((stat) => (
+                  <StatBox
+                    key={stat.labelKey}
+                    labelKey={stat.labelKey}
+                    number={stat.number}
+                  />
+                ))}
           </HStack>
-          {isLoading && (
-            <Box
-              position="absolute"
-              inset={0}
-              bg="whiteAlpha.800"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              zIndex={1}
-              borderRadius="md"
-            >
-              <Spinner size="lg" />
-            </Box>
-          )}
         </Box>
       </VStack>
     </Box>

@@ -3,6 +3,7 @@ import { accountChangeRouter } from '@/routes/accountChange';
 import { adminRouter } from '@/routes/admin';
 import { countryRouter } from '@/routes/country';
 import { enrollmentChangeRouter } from '@/routes/enrollmentChange';
+import { fileChangeRouter } from '@/routes/fileChange';
 import { gcfUserRouter } from '@/routes/gcfUser';
 import { imagesRouter } from '@/routes/images';
 import { instrumentRouter } from '@/routes/instrument';
@@ -18,10 +19,10 @@ import { rdProgramTableRouter } from '@/routes/rdProgramTable';
 import { regionRouter } from '@/routes/region';
 import { regionalDirectorRouter } from '@/routes/regionalDirector';
 import { updatesPermissionsRouter } from '@/routes/updatesPermissions';
-import { fileChangeRouter } from '@/routes/fileChange';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 dotenv.config();
 
@@ -57,10 +58,16 @@ app.use('/enrollmentChange', verifyToken, enrollmentChangeRouter);
 app.use('/mediaChange', verifyToken, mediaChangeRouter);
 app.use('/program', programRouter);
 app.use('/partners', verifyToken, partnerOrganizationRouter);
-app.use('/images', verifyToken, imagesRouter);
+app.use('/images', imagesRouter);
 app.use('/playlistCache', verifyToken, playlistCacheRouter);
-app.use('/fileChanges', fileChangeRouter);
-app.use('/accountChange', accountChangeRouter);
+app.use('/fileChanges', verifyToken, fileChangeRouter);
+app.use('/accountChange', verifyToken, accountChangeRouter);
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error(err.stack ?? err.message);
+  res.status(500).send('Internal Server Error');
+});
 
 // Listening is moved to server.ts to enable importing app in tests
 export default app;

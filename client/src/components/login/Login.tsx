@@ -13,6 +13,7 @@ import {
   IconButton,
   Image,
   Input,
+  Spinner,
   Stack,
   useToast,
 } from '@chakra-ui/react';
@@ -32,6 +33,8 @@ import { CreatePassword } from './CreatePassword';
 import { ForgotPassword } from './ForgotPassword';
 import { LoginLanguageSelect } from './LoginLanguageSelect';
 import GcfGlobe from '/gcf_globe.png';
+
+const MotionBox = motion(Box);
 
 type SigninFormValues = {
   email: string;
@@ -58,7 +61,7 @@ export const Login = () => {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode');
   const [textIndex, setTextIndex] = useState(0);
-
+  const [isLoading, setIsLoading] = useState(false);
   const { login, handleRedirectResult } = useAuthContext();
   const { backend } = useBackendContext();
 
@@ -95,6 +98,7 @@ export const Login = () => {
   );
 
   const handleLogin = async (data: SigninFormValues) => {
+    setIsLoading(true);
     try {
       const cred = await login({
         email: data.email,
@@ -150,6 +154,8 @@ export const Login = () => {
             err instanceof Error ? err.message : t('signup.errorTitle')
           );
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -189,7 +195,7 @@ export const Login = () => {
             alignItems="center"
           >
             <AnimatePresence mode="wait">
-              <motion.div
+              <MotionBox
                 key={textIndex}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -207,7 +213,7 @@ export const Login = () => {
                 >
                   {welcomeTexts[textIndex]}
                 </Heading>
-              </motion.div>
+              </MotionBox>
             </AnimatePresence>
           </Box>
           <Image
@@ -331,14 +337,14 @@ export const Login = () => {
                   <Button
                     type="submit"
                     size="lg"
-                    isDisabled={Object.keys(errors).length > 0}
+                    isDisabled={Object.keys(errors).length > 0 || isLoading}
                     bg="black"
                     color="white"
                     borderRadius="md"
                     w="100%"
                     _hover={{ bg: 'gray.800' }}
                   >
-                    {t('common.login')}
+                    {isLoading ? <Spinner /> : t('common.login')}
                   </Button>
                   <Box textAlign="right">
                     <Button

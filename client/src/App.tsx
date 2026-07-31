@@ -1,4 +1,3 @@
-import { Admin } from '@/components/admin/Admin';
 import { CatchAll } from '@/components/CatchAll';
 import Dashboard from '@/components/dashboard/Dashboard';
 import { Login } from '@/components/login/Login';
@@ -18,6 +17,7 @@ import {
 } from 'react-router-dom';
 
 import { Account } from './components/accounts/Account';
+import { EmbedTestPage } from './components/map/EmbedTestPage';
 import { Map } from './components/map/Map';
 import { Media } from './components/media/Media';
 import { RegionsPage } from './components/regions/RegionsPage';
@@ -39,6 +39,10 @@ const App = () => {
                   element={<Map />}
                 />
                 <Route
+                  path="/embed/test-iframe"
+                  element={<EmbedTestPage />}
+                />
+                <Route
                   path="/"
                   element={<ProtectedRoute element={<Layout />} />}
                 >
@@ -48,15 +52,6 @@ const App = () => {
                       <Navigate
                         to="/dashboard"
                         replace
-                      />
-                    }
-                  />
-                  <Route
-                    path="admin"
-                    element={
-                      <ProtectedRoute
-                        element={<Admin />}
-                        allowedRoles={['Admin']}
                       />
                     }
                   />

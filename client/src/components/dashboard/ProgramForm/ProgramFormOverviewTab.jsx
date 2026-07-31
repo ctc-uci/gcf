@@ -7,6 +7,7 @@ import {
   Heading,
   Input,
   Select,
+  Skeleton,
   VStack,
 } from '@chakra-ui/react';
 
@@ -32,19 +33,25 @@ export function ProgramFormOverviewTab({
   onSeeAllMedia,
   fieldErrors = {},
   onClearProgramFieldError,
+  isLoadingProgramData,
 }) {
   const { t } = useTranslation();
 
   return (
     <>
       <Box>
-        <Heading
-          size="md"
-          fontWeight="semibold"
-          mb={3}
+        <Skeleton
+          isLoaded={!isLoadingProgramData}
+          fitContent
         >
-          {t('programForm.generalInformation')}
-        </Heading>
+          <Heading
+            size="md"
+            fontWeight="semibold"
+            mb={3}
+          >
+            {t('programForm.generalInformation')}
+          </Heading>
+        </Skeleton>
         <VStack
           align="stretch"
           spacing={4}
@@ -53,68 +60,82 @@ export function ProgramFormOverviewTab({
             isRequired
             isInvalid={Boolean(fieldErrors.programName)}
           >
-            <FormLabel
-              size="sm"
-              fontWeight="normal"
-              color="gray"
-            >
-              {t('programForm.programName')}
-            </FormLabel>
-            <Input
-              placeholder={t('programForm.enterProgramTitle')}
-              value={formState.programName || ''}
-              onChange={(e) => onProgramNameChange(e.target.value)}
-            />
+            <Skeleton isLoaded={!isLoadingProgramData}>
+              <FormLabel
+                size="sm"
+                fontWeight="normal"
+                color="gray"
+              >
+                {t('programForm.programName')}
+              </FormLabel>
+            </Skeleton>
+            <Skeleton isLoaded={!isLoadingProgramData}>
+              <Input
+                placeholder={t('programForm.enterProgramTitle')}
+                value={formState.programName || ''}
+                onChange={(e) => onProgramNameChange(e.target.value)}
+              />
+            </Skeleton>
             <FormErrorMessage>{fieldErrors.programName}</FormErrorMessage>
           </FormControl>
 
-          <PartnerOrganizationField
-            label={t('programForm.partnerOrgName')}
-            valueId={formState.partnerOrg}
-            errorMessage={fieldErrors.partnerOrg}
-            onChangeId={(id) => {
-              setFormState((prev) => ({
-                ...prev,
-                partnerOrg: id,
-              }));
-              onClearProgramFieldError?.('partnerOrg');
-            }}
-          />
-
-          <FormControl>
-            <Checkbox
-              isChecked={Boolean(formState.showPartnerOrgOnMap)}
-              onChange={(e) =>
+          <Skeleton isLoaded={!isLoadingProgramData}>
+            <PartnerOrganizationField
+              label={t('programForm.partnerOrgName')}
+              valueId={formState.partnerOrg}
+              errorMessage={fieldErrors.partnerOrg}
+              onChangeId={(id) => {
                 setFormState((prev) => ({
                   ...prev,
-                  showPartnerOrgOnMap: e.target.checked,
-                }))
-              }
+                  partnerOrg: id,
+                }));
+                onClearProgramFieldError?.('partnerOrg');
+              }}
+            />
+          </Skeleton>
+
+          <FormControl>
+            <Skeleton
+              isLoaded={!isLoadingProgramData}
+              fitContent
             >
-              {t('programForm.showPartnerOnMap')}
-            </Checkbox>
-            {/* TODO: Implement persistence and map behavior for showPartnerOrgOnMap (API + map layer). */}
+              <Checkbox
+                isChecked={Boolean(formState.showPartnerOrgOnMap)}
+                onChange={(e) =>
+                  setFormState((prev) => ({
+                    ...prev,
+                    showPartnerOrgOnMap: e.target.checked,
+                  }))
+                }
+              >
+                {t('programForm.showPartnerOnMap')}
+              </Checkbox>
+            </Skeleton>
           </FormControl>
 
           <FormControl
             isRequired
             isInvalid={Boolean(fieldErrors.status)}
           >
-            <FormLabel
-              size="sm"
-              fontWeight="normal"
-              color="gray"
-            >
-              {t('programForm.status')}
-            </FormLabel>
-            <Select
-              value={formState.status ?? ''}
-              onChange={(e) => onProgramStatusChange(e.target.value)}
-              placeholder={t('programForm.selectStatus')}
-            >
-              <option value="Active">{t('programForm.launched')}</option>
-              <option value="Inactive">{t('programForm.developing')}</option>
-            </Select>
+            <Skeleton isLoaded={!isLoadingProgramData}>
+              <FormLabel
+                size="sm"
+                fontWeight="normal"
+                color="gray"
+              >
+                {t('programForm.status')}
+              </FormLabel>
+            </Skeleton>
+            <Skeleton isLoaded={!isLoadingProgramData}>
+              <Select
+                value={formState.status ?? ''}
+                onChange={(e) => onProgramStatusChange(e.target.value)}
+                placeholder={t('programForm.selectStatus')}
+              >
+                <option value="Active">{t('programForm.launched')}</option>
+                <option value="Inactive">{t('programForm.developing')}</option>
+              </Select>
+            </Skeleton>
             <FormErrorMessage>{fieldErrors.status}</FormErrorMessage>
           </FormControl>
 
@@ -122,51 +143,64 @@ export function ProgramFormOverviewTab({
             isRequired
             isInvalid={Boolean(fieldErrors.launchDate)}
           >
-            <FormLabel
-              size="sm"
-              fontWeight="normal"
-              color="gray"
-            >
-              {t('programForm.launchDate')}
-            </FormLabel>
-            <Input
-              type="date"
-              placeholder={t('programForm.datePlaceholder')}
-              value={formState.launchDate || ''}
-              onChange={(e) => onProgramLaunchDateChange(e.target.value)}
-            />
+            <Skeleton isLoaded={!isLoadingProgramData}>
+              <FormLabel
+                size="sm"
+                fontWeight="normal"
+                color="gray"
+              >
+                {t('programForm.launchDate')}
+              </FormLabel>
+            </Skeleton>
+            <Skeleton isLoaded={!isLoadingProgramData}>
+              <Input
+                type="date"
+                placeholder={t('programForm.datePlaceholder')}
+                value={formState.launchDate || ''}
+                onChange={(e) => onProgramLaunchDateChange(e.target.value)}
+              />
+            </Skeleton>
             <FormErrorMessage>{fieldErrors.launchDate}</FormErrorMessage>
           </FormControl>
         </VStack>
       </Box>
-      <LocationLanguageSection
-        formState={formState}
-        setFormData={setFormState}
-        languageOptions={languageOptions}
-        onLanguagesChange={onLanguageChange}
-        fieldErrors={fieldErrors}
-        onClearProgramFieldError={onClearProgramFieldError}
-      />
 
-      <StudentsInstrumentsSection
-        formState={formState}
-        setFormData={setFormState}
-      />
+      <Skeleton isLoaded={!isLoadingProgramData}>
+        <LocationLanguageSection
+          formState={formState}
+          setFormData={setFormState}
+          languageOptions={languageOptions}
+          onLanguagesChange={onLanguageChange}
+          fieldErrors={fieldErrors}
+          onClearProgramFieldError={onClearProgramFieldError}
+        />
+      </Skeleton>
 
-      <AssignedDirectorsSection
-        regionId={formState.regionId}
-        formState={formState}
-        setFormData={setFormState}
-      />
+      <Skeleton isLoaded={!isLoadingProgramData}>
+        <StudentsInstrumentsSection
+          formState={formState}
+          setFormData={setFormState}
+        />
+      </Skeleton>
 
-      <ResourcesSection
-        formState={formState}
-        setFormData={setFormState}
-        programId={programId}
-        backend={backend}
-        onOpenMediaModal={onOpenMediaModal}
-        onSeeAllMedia={onSeeAllMedia}
-      />
+      <Skeleton isLoaded={!isLoadingProgramData}>
+        <AssignedDirectorsSection
+          regionId={formState.regionId}
+          formState={formState}
+          setFormData={setFormState}
+        />
+      </Skeleton>
+
+      <Skeleton isLoaded={!isLoadingProgramData}>
+        <ResourcesSection
+          formState={formState}
+          setFormData={setFormState}
+          programId={programId}
+          backend={backend}
+          onOpenMediaModal={onOpenMediaModal}
+          onSeeAllMedia={onSeeAllMedia}
+        />
+      </Skeleton>
     </>
   );
 }

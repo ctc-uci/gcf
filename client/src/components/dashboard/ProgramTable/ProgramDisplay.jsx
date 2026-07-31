@@ -9,7 +9,6 @@ import {
 import {
   Box,
   Button,
-  Center,
   Divider,
   Grid,
   HStack,
@@ -20,7 +19,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Spinner,
+  Skeleton,
   Table,
   TableContainer,
   Tag,
@@ -90,16 +89,9 @@ export function ProgramDisplay({
       t('programsTable.csvCurriculumLinks'),
     ];
     const rows = (tableData || []).map((p) => {
-      const instrumentsArray =
-        (Array.isArray(p.instruments) && p.instruments) ||
-        (Array.isArray(p.instrumentTypes) && p.instrumentTypes) ||
-        null;
-
-      const instrumentsFormatted = instrumentsArray
-        ? instrumentsArray
-            .map((inst) => `${inst.name ?? ''}: ${inst.quantity ?? 0}`)
-            .join('; ')
-        : p.instruments;
+      const instrumentsFormatted = Object.entries(p.instrumentsMap)
+        .map(([, { name, quantity }]) => `${name}: ${quantity}`)
+        .join('; ');
 
       return [
         escapeCsvValue(p.title),
@@ -188,7 +180,8 @@ export function ProgramDisplay({
   };
 
   const filterBySearchPanel = useMemo(() => {
-    let data = originalData ?? [];
+    if (originalData === null) return null;
+    let data = originalData;
 
     // Status filter
     if (filterStatus) {
@@ -300,6 +293,7 @@ export function ProgramDisplay({
   ]);
 
   const displayData = useMemo(() => {
+    if (filterBySearchPanel === null) return null;
     if (!searchQuery) return filterBySearchPanel;
     const query = searchQuery.toLowerCase();
     return filterBySearchPanel.filter(
@@ -331,7 +325,7 @@ export function ProgramDisplay({
   }, [displayData, onFilteredDataChange]);
 
   const { sortOrder, handleSort } = useTableSort(displayData, setSortedData);
-  const tableData = sortedData ?? displayData;
+  const tableData = sortedData ?? displayData ?? [];
   const [flippedId, setFlippedId] = useState(null);
 
   if (!getRouteByRole(role, userId)) return null;
@@ -798,29 +792,36 @@ export function ProgramDisplay({
                       </Th>
                     </Tr>
                   </Thead>
-                  <Tbody>
-                    {tableData.length === 0 && isLoading ? (
+                  {tableData.length === 0 && isLoading ? (
+                    <Tbody>
                       <Tr>
                         <Td
                           colSpan={7}
                           borderBottom="1px solid"
                           borderColor="gray.200"
                         >
-                          <Center py={8}>
-                            <Spinner size="lg" />
-                          </Center>
+                          <VStack>
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Skeleton
+                                key={i}
+                                h={20}
+                                mb={2}
+                                w="100%"
+                              />
+                            ))}
+                          </VStack>
                         </Td>
                       </Tr>
-                    ) : (
-                      tableData.map((p) => (
-                        <ExpandableProgramRow
-                          key={p.id}
-                          p={p}
-                          onEdit={openEditForm}
-                        />
-                      ))
-                    )}
-                  </Tbody>
+                    </Tbody>
+                  ) : (
+                    tableData.map((p) => (
+                      <ExpandableProgramRow
+                        key={p.id}
+                        p={p}
+                        onEdit={openEditForm}
+                      />
+                    ))
+                  )}
                 </Table>
               </TableContainer>
             )
@@ -844,7 +845,13 @@ export function ProgramDisplay({
               justifyContent="center"
               zIndex={1}
             >
-              <Spinner size="lg" />
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton
+                  key={i}
+                  h={20}
+                  mb={2}
+                />
+              ))}
             </Box>
           )}
         </Box>

@@ -82,9 +82,14 @@ export const ProgramMediaGallery = ({ media, mediaUrls }) => {
           spacing="16px"
           overflowX="auto"
           w="100%"
+          pb="8px"
           css={{
-            '&::-webkit-scrollbar': { display: 'none' },
-            scrollbarWidth: 'none',
+            '&::-webkit-scrollbar': { height: '6px' },
+            '&::-webkit-scrollbar-track': { background: 'transparent' },
+            '&::-webkit-scrollbar-thumb': {
+              background: '#CBD5E0',
+              borderRadius: '3px',
+            },
           }}
         >
           {media.map((m) =>

@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useMemo } from 'react';
 
 import {
   Box,
@@ -16,7 +16,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { MdOutlineSubdirectoryArrowRight } from 'react-icons/md';
 import { z } from 'zod';
 
 import { BackendContext } from '../../contexts/BackendContext';
@@ -30,7 +29,6 @@ export const ForgotPassword = ({ setIsForgot }) => {
       }),
     [t]
   );
-  const [, setSubmitted] = useState(false);
   const { backend } = useContext(BackendContext);
   const [errorMessage, setErrorMessage] = useState('');
   const auth = getAuth();
@@ -51,7 +49,6 @@ export const ForgotPassword = ({ setIsForgot }) => {
     try {
       await backend.post('/gcf-users/verify-email', { email });
       await sendPasswordResetEmail(auth, email);
-      setSubmitted(true);
       toast({
         title: t('forgotPassword.emailSentTitle'),
         description: t('forgotPassword.emailSentDesc'),

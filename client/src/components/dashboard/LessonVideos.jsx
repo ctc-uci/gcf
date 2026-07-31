@@ -7,7 +7,6 @@ import {
   HStack,
   Image,
   Skeleton,
-  Spinner,
   Text,
 } from '@chakra-ui/react';
 
@@ -128,10 +127,13 @@ function LessonVideos({
             gap={3}
             mb={4}
           >
-            <Spinner
-              size="sm"
-              color="blue.500"
-            />
+            {[1, 2, 3].map((i) => (
+              <Skeleton
+                key={i}
+                boxSize={4}
+                borderRadius="full"
+              />
+            ))}
             <Text
               color="gray.600"
               fontSize="sm"
