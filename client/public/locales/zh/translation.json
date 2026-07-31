@@ -363,7 +363,14 @@
     "deleteDesc": "此操作无法撤销。",
     "deleteProgram": "删除项目",
     "saveSuccess": "项目保存成功。",
-    "saveError": "项目保存失败。"
+    "saveError": "项目保存失败。",
+    "validation": {
+      "programNameRequired": "请输入项目名称。",
+      "statusRequired": "请选择状态。",
+      "launchDateRequired": "请输入有效日期。",
+      "partnerOrgRequired": "请选择合作机构。",
+      "countryRequired": "请选择国家。"
+    }
   },
   "partnerOrg": {
     "deleteTitle": "删除此合作组织？",
@@ -445,7 +452,13 @@
     "errorTitle": "错误",
     "errorWithMessage": "错误：{{message}}",
     "fillAllFields": "请填写表格上的所有字段。",
-    "passwordMaskStars": "********"
+    "passwordMaskStars": "********",
+    "validation": {
+      "firstNameRequired": "请输入您的名字。",
+      "lastNameRequired": "请输入您的姓氏。",
+      "emailRequired": "请输入您的电子邮箱。",
+      "roleRequired": "请选择角色。"
+    }
   },
   "mediaPage": {
     "title": "我的媒体",

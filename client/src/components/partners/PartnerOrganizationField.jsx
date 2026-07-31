@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   Modal,
   ModalBody,
@@ -23,6 +24,7 @@ export function PartnerOrganizationField({
   valueId,
   onChangeId,
   label = 'Partner Organization',
+  errorMessage,
 }) {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
@@ -103,7 +105,10 @@ export function PartnerOrganizationField({
 
   return (
     <>
-      <FormControl isRequired>
+      <FormControl
+        isRequired
+        isInvalid={Boolean(errorMessage)}
+      >
         <FormLabel
           size="sm"
           fontWeight="normal"
@@ -137,6 +142,7 @@ export function PartnerOrganizationField({
             </Text>
           )}
         </Box>
+        <FormErrorMessage>{errorMessage}</FormErrorMessage>
       </FormControl>
 
       <Modal

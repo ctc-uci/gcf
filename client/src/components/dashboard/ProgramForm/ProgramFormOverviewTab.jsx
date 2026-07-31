@@ -2,6 +2,7 @@ import {
   Box,
   Checkbox,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   Heading,
   Input,
@@ -30,6 +31,8 @@ export function ProgramFormOverviewTab({
   backend,
   onOpenMediaModal,
   onSeeAllMedia,
+  fieldErrors = {},
+  onClearProgramFieldError,
   isLoadingProgramData,
 }) {
   const { t } = useTranslation();
@@ -53,7 +56,10 @@ export function ProgramFormOverviewTab({
           align="stretch"
           spacing={4}
         >
-          <FormControl isRequired>
+          <FormControl
+            isRequired
+            isInvalid={Boolean(fieldErrors.programName)}
+          >
             <Skeleton isLoaded={!isLoadingProgramData}>
               <FormLabel
                 size="sm"
@@ -70,15 +76,21 @@ export function ProgramFormOverviewTab({
                 onChange={(e) => onProgramNameChange(e.target.value)}
               />
             </Skeleton>
+            <FormErrorMessage>{fieldErrors.programName}</FormErrorMessage>
           </FormControl>
 
           <Skeleton isLoaded={!isLoadingProgramData}>
             <PartnerOrganizationField
               label={t('programForm.partnerOrgName')}
               valueId={formState.partnerOrg}
-              onChangeId={(id) =>
-                setFormState((prev) => ({ ...prev, partnerOrg: id }))
-              }
+              errorMessage={fieldErrors.partnerOrg}
+              onChangeId={(id) => {
+                setFormState((prev) => ({
+                  ...prev,
+                  partnerOrg: id,
+                }));
+                onClearProgramFieldError?.('partnerOrg');
+              }}
             />
           </Skeleton>
 
@@ -101,7 +113,10 @@ export function ProgramFormOverviewTab({
             </Skeleton>
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl
+            isRequired
+            isInvalid={Boolean(fieldErrors.status)}
+          >
             <Skeleton isLoaded={!isLoadingProgramData}>
               <FormLabel
                 size="sm"
@@ -121,9 +136,13 @@ export function ProgramFormOverviewTab({
                 <option value="Inactive">{t('programForm.developing')}</option>
               </Select>
             </Skeleton>
+            <FormErrorMessage>{fieldErrors.status}</FormErrorMessage>
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl
+            isRequired
+            isInvalid={Boolean(fieldErrors.launchDate)}
+          >
             <Skeleton isLoaded={!isLoadingProgramData}>
               <FormLabel
                 size="sm"
@@ -141,6 +160,7 @@ export function ProgramFormOverviewTab({
                 onChange={(e) => onProgramLaunchDateChange(e.target.value)}
               />
             </Skeleton>
+            <FormErrorMessage>{fieldErrors.launchDate}</FormErrorMessage>
           </FormControl>
         </VStack>
       </Box>
@@ -151,6 +171,8 @@ export function ProgramFormOverviewTab({
           setFormData={setFormState}
           languageOptions={languageOptions}
           onLanguagesChange={onLanguageChange}
+          fieldErrors={fieldErrors}
+          onClearProgramFieldError={onClearProgramFieldError}
         />
       </Skeleton>
 

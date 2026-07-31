@@ -367,7 +367,14 @@
     "deleteDesc": "This action cannot be undone.",
     "deleteProgram": "Delete Program",
     "saveSuccess": "Program saved successfully.",
-    "saveError": "Failed to save program."
+    "saveError": "Failed to save program.",
+    "validation": {
+      "programNameRequired": "Please enter a program name.",
+      "statusRequired": "Please select a status.",
+      "launchDateRequired": "Please enter a valid date.",
+      "partnerOrgRequired": "Please select a partner organization.",
+      "countryRequired": "Please select a country."
+    }
   },
   "partnerOrg": {
     "deleteTitle": "Delete this partner organization?",
@@ -449,7 +456,13 @@
     "errorTitle": "Error",
     "errorWithMessage": "Error: {{message}}",
     "fillAllFields": "Please fill in all fields on the form.",
-    "passwordMaskStars": "********"
+    "passwordMaskStars": "********",
+    "validation": {
+      "firstNameRequired": "Please enter your first name.",
+      "lastNameRequired": "Please enter your last name.",
+      "emailRequired": "Please enter your email address.",
+      "roleRequired": "Please select a role."
+    }
   },
   "mediaPage": {
     "title": "My Media",

@@ -367,7 +367,14 @@
     "deleteDesc": "Esta acción no se puede deshacer.",
     "deleteProgram": "Eliminar programa",
     "saveSuccess": "Programa guardado correctamente.",
-    "saveError": "Error al guardar el programa."
+    "saveError": "Error al guardar el programa.",
+    "validation": {
+      "programNameRequired": "Introduzca el nombre del programa.",
+      "statusRequired": "Seleccione un estado.",
+      "launchDateRequired": "Introduzca una fecha válida.",
+      "partnerOrgRequired": "Seleccione una organización asociada.",
+      "countryRequired": "Seleccione un país."
+    }
   },
   "partnerOrg": {
     "deleteTitle": "¿Eliminar esta organización asociada?",
@@ -449,7 +456,13 @@
     "errorTitle": "Error",
     "errorWithMessage": "Error: {{message}}",
     "fillAllFields": "Por favor complete todos los campos del formulario.",
-    "passwordMaskStars": "********"
+    "passwordMaskStars": "********",
+    "validation": {
+      "firstNameRequired": "Introduzca su nombre.",
+      "lastNameRequired": "Introduzca su apellido.",
+      "emailRequired": "Introduzca su correo electrónico.",
+      "roleRequired": "Seleccione un rol."
+    }
   },
   "mediaPage": {
     "title": "Mis medios",

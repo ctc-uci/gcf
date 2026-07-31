@@ -10,6 +10,25 @@ import { db } from '../db/db-pgp';
 const gcfUserRouter = express.Router();
 gcfUserRouter.use(express.json());
 
+/** Optional PD bio: trim; empty → null for nullable DB column */
+function normalizeAdminBio(raw) {
+  if (raw === undefined || raw === null) return null;
+  const s = String(raw).trim();
+  return s === '' ? null : s;
+}
+
+/** When `bio` is omitted from the body, keep existing program_director.bio */
+async function resolvePdBioForAdminUpdate(reqBody, targetUserId) {
+  if (Object.prototype.hasOwnProperty.call(reqBody, 'bio')) {
+    return normalizeAdminBio(reqBody.bio);
+  }
+  const rows = await db.query(
+    `SELECT bio FROM program_director WHERE user_id = $1 LIMIT 1`,
+    [targetUserId]
+  );
+  return rows[0]?.bio ?? null;
+}
+
 gcfUserRouter.post('/', asyncHandler(async (req, res) => {
   const { id, role, first_name, last_name, created_by } = req.body;
 
@@ -39,7 +58,9 @@ gcfUserRouter.post('/admin/create-user', asyncHandler(async (req, res) => {
     currentUserId,
     programId,
     regionId,
+    bio,
   } = req.body;
+  const normalizedBio = normalizeAdminBio(bio);
 
   const tempPassword = randomBytes(16).toString('hex');
 
@@ -60,9 +81,9 @@ gcfUserRouter.post('/admin/create-user', asyncHandler(async (req, res) => {
 
   if (role === 'Program Director' && programId) {
     await db.query(
-      `INSERT INTO program_director (user_id, program_id) 
-      VALUES ($1, $2)`,
-      [firebaseUid, programId]
+      `INSERT INTO program_director (user_id, program_id, bio)
+      VALUES ($1, $2, $3)`,
+      [firebaseUid, programId, normalizedBio]
     );
   }
 
@@ -92,6 +113,7 @@ gcfUserRouter.put('/admin/update-user', asyncHandler(async (req, res) => {
     programId,
     regionId,
   } = req.body;
+  const pdBioForInsert = await resolvePdBioForAdminUpdate(req.body, targetId);
 
   await admin.auth().updateUser(targetId, {
     ...(email && { email }),
@@ -136,9 +158,9 @@ gcfUserRouter.put('/admin/update-user', asyncHandler(async (req, res) => {
 
     if (role === 'Program Director' && programId) {
       await db.query(
-        `INSERT INTO program_director (user_id, program_id) 
-        VALUES ($1, $2)`,
-        [targetId, programId]
+        `INSERT INTO program_director (user_id, program_id, bio)
+        VALUES ($1, $2, $3)`,
+        [targetId, programId, pdBioForInsert]
       );
     }
     if (role === 'Regional Director' && regionId) {
@@ -149,14 +171,15 @@ gcfUserRouter.put('/admin/update-user', asyncHandler(async (req, res) => {
       );
     }
   } else {
+    // Update existing assignments if role hasn't changed
     if (role === 'Program Director' && programId) {
       await db.query(`DELETE FROM program_director WHERE user_id = $1`, [
         targetId,
       ]);
       await db.query(
-        `INSERT INTO program_director (user_id, program_id) 
-        VALUES ($1, $2)`,
-        [targetId, programId]
+        `INSERT INTO program_director (user_id, program_id, bio)
+        VALUES ($1, $2, $3)`,
+        [targetId, programId, pdBioForInsert]
       );
     }
     else if (role === 'Regional Director' && regionId) {
@@ -203,6 +226,7 @@ gcfUserRouter.get('/:id/accounts', asyncHandler(async (req, res) => {
 
   let accounts;
 
+  // Super Admin: view and edit all users and their associated information (including admins)
   if (role === 'Super Admin') {
     accounts = await db.query(
       `SELECT
@@ -246,6 +270,7 @@ gcfUserRouter.get('/:id/accounts', asyncHandler(async (req, res) => {
     );
   }
 
+  // Admin: RDs and PDs with their associated programs; CANNOT view or edit other Admins
   else if (role === 'Admin') {
     accounts = await db.query(
       `SELECT
@@ -287,6 +312,7 @@ gcfUserRouter.get('/:id/accounts', asyncHandler(async (req, res) => {
       END ASC, u.last_name ASC`
     );
   }
+  // Regional Director: only program directors in their region with their programs
   else if (role === 'Regional Director') {
     accounts = await db.query(
       `SELECT
@@ -313,11 +339,11 @@ gcfUserRouter.get('/:id/accounts', asyncHandler(async (req, res) => {
       [id]
     );
   }
-
+  // Fetch emails for each user in one batch (faster than N client requests)
   if (accounts?.length > 0) {
     const auth = admin.auth();
     const identifiers = accounts.map((row) => ({ uid: row.id }));
-    const batchSize = 100;
+    const batchSize = 100; // Firebase getUsers limit
     const emailByUid = {};
     for (let i = 0; i < identifiers.length; i += batchSize) {
       const chunk = identifiers.slice(i, i + batchSize);
@@ -340,6 +366,7 @@ const ALLOWED_PREFERRED_LANGUAGES = new Set(['en', 'es', 'fr', 'zh']);
 function normalizePreferredLanguage(raw) {
   if (raw === null) return '';
   const s = String(raw).trim().toLowerCase();
+  // custom filtering here if needed
   return s;
 }
 
