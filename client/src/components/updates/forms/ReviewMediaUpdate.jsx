@@ -36,6 +36,9 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
   const [updates, setUpdates] = useState([]);
   const [mediaURLs, setMediaURLs] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(null);
+  const isResolved = ['resolved', 'approved', 'active'].includes(
+    update?.status?.toLowerCase()
+  );
   const handleKeepUnresolved = () => {
     onClose();
   };
@@ -268,35 +271,37 @@ export const ReviewMediaUpdate = ({ update, onClose, onUpdate }) => {
             </VStack>
           </DrawerBody>
 
-          <Flex
-            position="absolute"
-            bottom={0}
-            left={0}
-            right={0}
-            bg="white"
-            borderTop="1px solid"
-            borderColor="gray.200"
-            px={8}
-            py={4}
-            justify="flex-end"
-            gap={3}
-          >
-            <Button
-              variant="outline"
-              onClick={handleKeepUnresolved}
+          {!isResolved && (
+            <Flex
+              position="absolute"
+              bottom={0}
+              left={0}
+              right={0}
+              bg="white"
+              borderTop="1px solid"
+              borderColor="gray.200"
+              px={8}
+              py={4}
+              justify="flex-end"
+              gap={3}
             >
-              {t('common.keepUnresolved')}
-            </Button>
-            <Button
-              bg="teal.500"
-              color="white"
-              _hover={{ bg: 'teal.600' }}
-              onClick={handleMarkResolved}
-              isLoading={isLoading}
-            >
-              {t('common.saveMarkResolved')}
-            </Button>
-          </Flex>
+              <Button
+                variant="outline"
+                onClick={handleKeepUnresolved}
+              >
+                {t('common.keepUnresolved')}
+              </Button>
+              <Button
+                bg="teal.500"
+                color="white"
+                _hover={{ bg: 'teal.600' }}
+                onClick={handleMarkResolved}
+                isLoading={isLoading}
+              >
+                {t('common.saveMarkResolved')}
+              </Button>
+            </Flex>
+          )}
         </DrawerContent>
       </Drawer>
       {selectedIndex !== null && (
