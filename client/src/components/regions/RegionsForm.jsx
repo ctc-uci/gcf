@@ -288,9 +288,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
           oldTags: (orig.directorIds || [])
             .filter((id) => !selectedDirectors.includes(id))
             .map(directorName),
-          newTags: selectedDirectors
-            .filter((id) => !(orig.directorIds || []).includes(id))
-            .map(directorName),
+          newTags: selectedDirectors.map(directorName),
         },
         {
           label: t('regions.assignedCountries'),
@@ -298,9 +296,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
           oldTags: (orig.countryNames || []).filter(
             (n) => !selectedCountries.map((c) => c.name).includes(n)
           ),
-          newTags: selectedCountries
-            .map((c) => c.name)
-            .filter((n) => !(orig.countryNames || []).includes(n)),
+          newTags: selectedCountries.map((c) => c.name),
         },
       ]);
       reviewDisclosure.onOpen();
