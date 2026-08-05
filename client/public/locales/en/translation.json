@@ -47,6 +47,7 @@
     "exitWithoutSaving": "Exit Without Saving",
     "confirmChanges": "Confirm Changes",
     "reviewChanges": "Review changes",
+    "noChangesTo": "No changes made to {{field}}",
     "uploading": "Uploading...",
     "loading": "Loading...",
     "optional": "Optional for documentation",

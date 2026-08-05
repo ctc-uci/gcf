@@ -47,6 +47,7 @@
     "exitWithoutSaving": "退出而不保存",
     "confirmChanges": "确认更改",
     "reviewChanges": "审查变更",
+    "noChangesTo": "{{field}}未做任何更改",
     "uploading": "正在上传...",
     "loading": "加载中...",
     "optional": "文档可选",

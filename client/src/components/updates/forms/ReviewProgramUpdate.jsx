@@ -73,30 +73,39 @@ export const ReviewProgramUpdate = ({
                 </Text>
 
                 {field.isTag ? (
-                  <HStack
-                    wrap="wrap"
-                    spacing={2}
-                  >
-                    {field.oldTags?.map((tag, i) => (
-                      <Tag
-                        key={`old-${i}`}
-                        size="md"
-                        colorScheme="red"
-                        textDecoration="line-through"
-                      >
-                        {tag}
-                      </Tag>
-                    ))}
-                    {field.newTags?.map((tag, i) => (
-                      <Tag
-                        key={`new-${i}`}
-                        size="md"
-                        colorScheme="blue"
-                      >
-                        {tag}
-                      </Tag>
-                    ))}
-                  </HStack>
+                  !field.oldTags?.length && !field.newTags?.length ? (
+                    <Text
+                      color="gray.500"
+                      fontStyle="italic"
+                    >
+                      {t('common.noChangesTo', { field: field.label })}
+                    </Text>
+                  ) : (
+                    <HStack
+                      wrap="wrap"
+                      spacing={2}
+                    >
+                      {field.oldTags?.map((tag, i) => (
+                        <Tag
+                          key={`old-${i}`}
+                          size="md"
+                          colorScheme="red"
+                          textDecoration="line-through"
+                        >
+                          {tag}
+                        </Tag>
+                      ))}
+                      {field.newTags?.map((tag, i) => (
+                        <Tag
+                          key={`new-${i}`}
+                          size="md"
+                          colorScheme="blue"
+                        >
+                          {tag}
+                        </Tag>
+                      ))}
+                    </HStack>
+                  )
                 ) : (
                   <HStack
                     spacing={2}
