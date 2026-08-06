@@ -418,8 +418,6 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     if (formData.password && formData.password.trim().length > 0) {
       userData.password = formData.password;
     }
-    await backend.put('/gcf-users/admin/update-user', userData);
-
     const pictureChanged = profilePictureKey !== initialProfilePictureKey;
     if (pictureChanged) {
       await backend.post('/images/profile-picture', {
@@ -427,6 +425,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         userId: targetUserId,
       });
     }
+
+    await backend.put('/gcf-users/admin/update-user', userData);
 
     if (userId) {
       await logAccountChange({
