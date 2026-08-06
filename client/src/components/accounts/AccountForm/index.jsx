@@ -69,6 +69,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   useEffect(() => {
     if (!isOpen) return;
 
+    pictureRequestIdRef.current += 1;
     setValidationErrors({});
     setShowPassword(false);
     setIsFullScreen(false);
@@ -335,7 +336,20 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     if (!uploadedFiles?.length) return;
 
     const key = uploadedFiles[0].s3_key;
+    const previousStagedKey =
+      profilePictureKey && profilePictureKey !== initialProfilePictureKey
+        ? profilePictureKey
+        : null;
+
     setProfilePictureKey(key);
+
+    if (previousStagedKey) {
+      backend
+        .delete(`/images/${encodeURIComponent(previousStagedKey)}`)
+        .catch((err) => {
+          console.error('Error deleting replaced profile picture upload:', err);
+        });
+    }
 
     const requestId = ++pictureRequestIdRef.current;
     try {
@@ -579,6 +593,19 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         isOpen={exitModal.isOpen}
         onClose={exitModal.onClose}
         onExitWithoutSaving={() => {
+          if (
+            profilePictureKey &&
+            profilePictureKey !== initialProfilePictureKey
+          ) {
+            backend
+              .delete(`/images/${encodeURIComponent(profilePictureKey)}`)
+              .catch((err) => {
+                console.error(
+                  'Error deleting unsaved profile picture upload:',
+                  err
+                );
+              });
+          }
           exitModal.onClose();
           onClose();
         }}
