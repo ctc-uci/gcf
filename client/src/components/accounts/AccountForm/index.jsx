@@ -34,6 +34,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const [currentRegions, setCurrentRegions] = useState(null);
   const [profilePictureUrl, setProfilePictureUrl] = useState('');
   const [profilePictureKey, setProfilePictureKey] = useState('');
+  const [initialProfilePictureKey, setInitialProfilePictureKey] = useState('');
 
   const exitModal = useDisclosure();
   const deleteModal = useDisclosure();
@@ -46,12 +47,21 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   });
 
   const isDirty = useMemo(() => {
-    return JSON.stringify(formData) !== JSON.stringify(initialFormData);
-  }, [formData, initialFormData]);
+    return (
+      JSON.stringify(formData) !== JSON.stringify(initialFormData) ||
+      profilePictureKey !== initialProfilePictureKey
+    );
+  }, [formData, initialFormData, profilePictureKey, initialProfilePictureKey]);
 
   const changedFields = useMemo(
-    () => computeChangedFields(formData, initialFormData, t),
-    [formData, initialFormData, t]
+    () =>
+      computeChangedFields(
+        formData,
+        initialFormData,
+        t,
+        profilePictureKey !== initialProfilePictureKey
+      ),
+    [formData, initialFormData, t, profilePictureKey, initialProfilePictureKey]
   );
 
   // Reset form when drawer opens
@@ -63,6 +73,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     setIsFullScreen(false);
     setProfilePictureUrl('');
     setProfilePictureKey('');
+    setInitialProfilePictureKey('');
 
     if (!targetUser) {
       const newState = {
@@ -110,6 +121,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
             );
             setProfilePictureUrl(urlResponse.data.url || '');
             setProfilePictureKey(targetUser.picture);
+            setInitialProfilePictureKey(targetUser.picture);
           } catch {
             // picture unavailable — leave blank
           }
@@ -324,42 +336,11 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       const urlResponse = await backend.get(
         `/images/url/${encodeURIComponent(key)}`
       );
-      const nextUrl = urlResponse.data.url || '';
-      const prevKey = profilePictureKey || null;
-
-      if (targetUserId) {
-        await backend.post('/images/profile-picture', {
-          key,
-          userId: targetUserId,
-        });
-
-        await logAccountChange({
-          user_id: String(targetUserId),
-          author_id: String(userId),
-          change_type: 'Update',
-          old_values: {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            email: formData.email,
-            picture: prevKey,
-            bio: '',
-          },
-          new_values: {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            email: formData.email,
-            picture: key,
-            bio: '',
-          },
-          resolved: false,
-          last_modified: new Date().toISOString(),
-        });
-      }
 
       setProfilePictureKey(key);
-      setProfilePictureUrl(nextUrl);
+      setProfilePictureUrl(urlResponse.data.url || '');
     } catch (err) {
-      console.error('Error saving profile picture:', err);
+      console.error('Error loading profile picture preview:', err);
     }
   };
 
@@ -439,6 +420,14 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     }
     await backend.put('/gcf-users/admin/update-user', userData);
 
+    const pictureChanged = profilePictureKey !== initialProfilePictureKey;
+    if (pictureChanged) {
+      await backend.post('/images/profile-picture', {
+        key: profilePictureKey || null,
+        userId: targetUserId,
+      });
+    }
+
     if (userId) {
       await logAccountChange({
         user_id: String(targetUserId),
@@ -447,10 +436,14 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         old_values: formStateToAuditSnapshot(initialFormData, {
           currentUserId: userId,
           targetId: targetUserId,
+          ...(pictureChanged
+            ? { picture: initialProfilePictureKey || null }
+            : {}),
         }),
         new_values: formStateToAuditSnapshot(formData, {
           currentUserId: userId,
           targetId: targetUserId,
+          ...(pictureChanged ? { picture: profilePictureKey || null } : {}),
         }),
         resolved: true,
         last_modified: new Date().toISOString(),
