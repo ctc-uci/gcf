@@ -331,13 +331,13 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     if (!uploadedFiles?.length) return;
 
     const key = uploadedFiles[0].s3_key;
+    setProfilePictureKey(key);
 
     try {
       const urlResponse = await backend.get(
         `/images/url/${encodeURIComponent(key)}`
       );
 
-      setProfilePictureKey(key);
       setProfilePictureUrl(urlResponse.data.url || '');
     } catch (err) {
       console.error('Error loading profile picture preview:', err);
