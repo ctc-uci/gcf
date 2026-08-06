@@ -1,6 +1,18 @@
-export function computeChangedFields(formData, initialFormData, t) {
+export function computeChangedFields(
+  formData,
+  initialFormData,
+  t,
+  pictureChanged = false
+) {
   const mask = t('accountForm.passwordMaskStars');
   const changes = [];
+  if (pictureChanged) {
+    changes.push({
+      label: t('accountForm.fieldProfilePicture'),
+      old: '',
+      new: t('accountForm.fieldProfilePictureUpdated'),
+    });
+  }
   if (formData.first_name !== initialFormData.first_name) {
     changes.push({
       label: t('accountForm.fieldFirstName'),

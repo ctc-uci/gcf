@@ -451,6 +451,8 @@
     "fieldRole": "Role",
     "fieldProgram": "Program",
     "fieldRegion": "Region",
+    "fieldProfilePicture": "Profile Picture",
+    "fieldProfilePictureUpdated": "Updated",
     "saveSuccess": "User saved successfully!",
     "emailExistsTitle": "Email already exists",
     "emailExistsDesc": "This email is already registered. Please use a different email address.",

@@ -447,6 +447,8 @@
     "fieldRole": "角色",
     "fieldProgram": "程序",
     "fieldRegion": "地区",
+    "fieldProfilePicture": "头像",
+    "fieldProfilePictureUpdated": "已更新",
     "saveSuccess": "用户保存成功！",
     "emailExistsTitle": "电子邮件已存在",
     "emailExistsDesc": "此邮箱号已被注册。请使用不同的电子邮件地址。",
