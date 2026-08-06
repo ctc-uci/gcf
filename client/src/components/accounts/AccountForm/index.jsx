@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useDisclosure, useToast } from '@chakra-ui/react';
 
@@ -35,6 +35,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const [profilePictureUrl, setProfilePictureUrl] = useState('');
   const [profilePictureKey, setProfilePictureKey] = useState('');
   const [initialProfilePictureKey, setInitialProfilePictureKey] = useState('');
+  const pictureRequestIdRef = useRef(0);
 
   const exitModal = useDisclosure();
   const deleteModal = useDisclosure();
@@ -114,14 +115,17 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       }
 
       if (targetUser.picture) {
+        setProfilePictureKey(targetUser.picture);
+        setInitialProfilePictureKey(targetUser.picture);
+
+        const requestId = ++pictureRequestIdRef.current;
         const fetchPictureUrl = async () => {
           try {
             const urlResponse = await backend.get(
               `/images/url/${encodeURIComponent(targetUser.picture)}`
             );
+            if (pictureRequestIdRef.current !== requestId) return;
             setProfilePictureUrl(urlResponse.data.url || '');
-            setProfilePictureKey(targetUser.picture);
-            setInitialProfilePictureKey(targetUser.picture);
           } catch {
             // picture unavailable — leave blank
           }
@@ -333,11 +337,13 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     const key = uploadedFiles[0].s3_key;
     setProfilePictureKey(key);
 
+    const requestId = ++pictureRequestIdRef.current;
     try {
       const urlResponse = await backend.get(
         `/images/url/${encodeURIComponent(key)}`
       );
 
+      if (pictureRequestIdRef.current !== requestId) return;
       setProfilePictureUrl(urlResponse.data.url || '');
     } catch (err) {
       console.error('Error loading profile picture preview:', err);
