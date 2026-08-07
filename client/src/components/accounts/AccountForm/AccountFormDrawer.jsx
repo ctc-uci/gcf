@@ -367,7 +367,7 @@ export const AccountFormDrawer = ({
               </FormControl>
 
               {formData.role === 'Program Director' && (
-                <FormControl>
+                <FormControl isInvalid={Boolean(fieldErrors.programs)}>
                   <FormLabel
                     color={LABEL_COLOR}
                     fontSize="sm"
@@ -407,11 +407,12 @@ export const AccountFormDrawer = ({
                       </option>
                     ))}
                   </Select>
+                  <FormErrorMessage>{fieldErrors.programs}</FormErrorMessage>
                 </FormControl>
               )}
 
               {formData.role === 'Regional Director' && (
-                <FormControl>
+                <FormControl isInvalid={Boolean(fieldErrors.regions)}>
                   <FormLabel
                     color={LABEL_COLOR}
                     fontSize="sm"
@@ -451,6 +452,7 @@ export const AccountFormDrawer = ({
                       </option>
                     ))}
                   </Select>
+                  <FormErrorMessage>{fieldErrors.regions}</FormErrorMessage>
                 </FormControl>
               )}
 

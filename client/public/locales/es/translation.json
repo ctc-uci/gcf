@@ -460,9 +460,16 @@
     "passwordMaskStars": "********",
     "validation": {
       "firstNameRequired": "Introduzca su nombre.",
+      "firstNameTooLong": "El nombre debe tener {{max}} caracteres o menos.",
       "lastNameRequired": "Introduzca su apellido.",
+      "lastNameTooLong": "El apellido debe tener {{max}} caracteres o menos.",
       "emailRequired": "Introduzca su correo electrónico.",
-      "roleRequired": "Seleccione un rol."
+      "emailInvalid": "Introduzca una dirección de correo electrónico válida.",
+      "emailTooLong": "El correo electrónico debe tener {{max}} caracteres o menos.",
+      "roleRequired": "Seleccione un rol.",
+      "programRequired": "Seleccione un programa.",
+      "regionRequired": "Seleccione una región.",
+      "passwordTooShort": "La contraseña debe tener al menos 6 caracteres."
     }
   },
   "mediaPage": {

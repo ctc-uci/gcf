@@ -17,6 +17,10 @@ import {
 import { computeChangedFields } from './changedFields';
 import { formStateToAuditSnapshot, INITIAL_FORM_STATE } from './constants';
 
+const NAME_MAX_LENGTH = 70;
+const EMAIL_MAX_LENGTH = 254;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const { t } = useTranslation();
   const { currentUser } = useAuthContext();
@@ -230,22 +234,116 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     }
   };
 
+  useEffect(() => {
+    setValidationErrors((prev) => {
+      let changed = false;
+      const next = { ...prev };
+
+      if (
+        formData.role === 'Program Director' &&
+        formData.programs.length > 0
+      ) {
+        if (next.programs) {
+          delete next.programs;
+          changed = true;
+        }
+      }
+
+      if (
+        formData.role === 'Regional Director' &&
+        formData.regions.length > 0
+      ) {
+        if (next.regions) {
+          delete next.regions;
+          changed = true;
+        }
+      }
+
+      if (
+        next.password &&
+        (!formData.password ||
+          formData.password.trim().length === 0 ||
+          formData.password.trim().length >= 6)
+      ) {
+        delete next.password;
+        changed = true;
+      }
+
+      return changed ? next : prev;
+    });
+  }, [formData.role, formData.programs, formData.regions, formData.password]);
+
   const validate = () => {
     const errors = {};
-    if (!formData.first_name.trim()) {
+    const firstName = String(formData.first_name ?? '').trim();
+    const lastName = String(formData.last_name ?? '').trim();
+    const email = String(formData.email ?? '').trim();
+
+    if (!firstName) {
       errors.first_name = t('accountForm.validation.firstNameRequired');
+    } else if (firstName.length > NAME_MAX_LENGTH) {
+      errors.first_name = t('accountForm.validation.firstNameTooLong', {
+        max: NAME_MAX_LENGTH,
+      });
     }
-    if (!formData.last_name.trim()) {
+
+    if (!lastName) {
       errors.last_name = t('accountForm.validation.lastNameRequired');
+    } else if (lastName.length > NAME_MAX_LENGTH) {
+      errors.last_name = t('accountForm.validation.lastNameTooLong', {
+        max: NAME_MAX_LENGTH,
+      });
     }
-    if (!formData.email.trim()) {
+
+    if (!email) {
       errors.email = t('accountForm.validation.emailRequired');
+    } else if (email.length > EMAIL_MAX_LENGTH) {
+      errors.email = t('accountForm.validation.emailTooLong', {
+        max: EMAIL_MAX_LENGTH,
+      });
+    } else if (!EMAIL_PATTERN.test(email)) {
+      errors.email = t('accountForm.validation.emailInvalid');
     }
+
     if (!formData.role) {
       errors.role = t('accountForm.validation.roleRequired');
     }
+
+    if (
+      formData.role === 'Program Director' &&
+      formData.programs.length === 0
+    ) {
+      errors.programs = t('accountForm.validation.programRequired');
+    }
+
+    if (
+      formData.role === 'Regional Director' &&
+      formData.regions.length === 0
+    ) {
+      errors.regions = t('accountForm.validation.regionRequired');
+    }
+
+    if (
+      targetUserId &&
+      formData.password &&
+      formData.password.trim().length > 0 &&
+      formData.password.trim().length < 6
+    ) {
+      errors.password = t('accountForm.validation.passwordTooShort');
+    }
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
+  };
+
+  const applyServerValidationErrors = (error) => {
+    const fieldErrors = error?.response?.data?.errors;
+    if (!fieldErrors || typeof fieldErrors !== 'object') {
+      return false;
+    }
+
+    setValidationErrors((prev) => ({ ...prev, ...fieldErrors }));
+    return true;
   };
 
   const handleSaveClick = () => {
@@ -278,6 +376,14 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       onClose();
     } catch (error) {
       console.error('Error saving user: ', error);
+
+      if (
+        error.response?.status === 400 &&
+        applyServerValidationErrors(error)
+      ) {
+        return;
+      }
+
       const errorMessage = error.response?.data?.error || error.message;
 
       if (

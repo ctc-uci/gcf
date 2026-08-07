@@ -456,9 +456,16 @@
     "passwordMaskStars": "********",
     "validation": {
       "firstNameRequired": "请输入您的名字。",
+      "firstNameTooLong": "名字必须为 {{max}} 个字符或更少。",
       "lastNameRequired": "请输入您的姓氏。",
+      "lastNameTooLong": "姓氏必须为 {{max}} 个字符或更少。",
       "emailRequired": "请输入您的电子邮箱。",
-      "roleRequired": "请选择角色。"
+      "emailInvalid": "请输入有效的电子邮箱地址。",
+      "emailTooLong": "电子邮箱必须为 {{max}} 个字符或更少。",
+      "roleRequired": "请选择角色。",
+      "programRequired": "请选择一个项目。",
+      "regionRequired": "请选择一个地区。",
+      "passwordTooShort": "密码至少需要 6 个字符。"
     }
   },
   "mediaPage": {

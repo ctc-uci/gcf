@@ -10,6 +10,87 @@ import { db } from '../db/db-pgp';
 const gcfUserRouter = express.Router();
 gcfUserRouter.use(express.json());
 
+const NAME_MAX_LENGTH = 70;
+const EMAIL_MAX_LENGTH = 254;
+const ALLOWED_ROLES = new Set([
+  'Regional Director',
+  'Program Director',
+  'Admin',
+  'Super Admin',
+]);
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const toOptionalPositiveInt = (value) => {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) return null;
+  return parsed;
+};
+
+const validateAdminAccountPayload = (body, { isUpdate = false } = {}) => {
+  const errors = {};
+
+  const firstName = typeof body.firstName === 'string' ? body.firstName.trim() : '';
+  const lastName = typeof body.lastName === 'string' ? body.lastName.trim() : '';
+  const email = typeof body.email === 'string' ? body.email.trim() : '';
+  const role = typeof body.role === 'string' ? body.role : '';
+  const password = typeof body.password === 'string' ? body.password : '';
+  const programId = toOptionalPositiveInt(body.programId);
+  const regionId = toOptionalPositiveInt(body.regionId);
+
+  if (!firstName) {
+    errors.first_name = 'First name is required.';
+  } else if (firstName.length > NAME_MAX_LENGTH) {
+    errors.first_name = `First name must be ${NAME_MAX_LENGTH} characters or fewer.`;
+  }
+
+  if (!lastName) {
+    errors.last_name = 'Last name is required.';
+  } else if (lastName.length > NAME_MAX_LENGTH) {
+    errors.last_name = `Last name must be ${NAME_MAX_LENGTH} characters or fewer.`;
+  }
+
+  if (!email) {
+    errors.email = 'Email is required.';
+  } else if (email.length > EMAIL_MAX_LENGTH) {
+    errors.email = `Email must be ${EMAIL_MAX_LENGTH} characters or fewer.`;
+  } else if (!EMAIL_PATTERN.test(email)) {
+    errors.email = 'Please enter a valid email address.';
+  }
+
+  if (!role) {
+    errors.role = 'Role is required.';
+  } else if (!ALLOWED_ROLES.has(role)) {
+    errors.role = 'Invalid role selected.';
+  }
+
+  if (role === 'Program Director' && !programId) {
+    errors.programs = 'Please select a program.';
+  }
+
+  if (role === 'Regional Director' && !regionId) {
+    errors.regions = 'Please select a region.';
+  }
+
+  if (isUpdate && password && password.trim().length > 0 && password.trim().length < 6) {
+    errors.password = 'Password must be at least 6 characters.';
+  }
+
+  return {
+    errors,
+    sanitized: {
+      firstName,
+      lastName,
+      email,
+      role,
+      programId,
+      regionId,
+      password: password?.trim?.() ?? '',
+    },
+  };
+};
+
 /** Optional PD bio: trim; empty → null for nullable DB column */
 function normalizeAdminBio(raw) {
   if (raw === undefined || raw === null) return null;
@@ -50,16 +131,26 @@ gcfUserRouter.get('/admin/get-user/:targetUserId', asyncHandler(async (req, res)
 }));
 
 gcfUserRouter.post('/admin/create-user', asyncHandler(async (req, res) => {
+  const { errors, sanitized } = validateAdminAccountPayload(req.body, {
+    isUpdate: false,
+  });
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({
+      message: 'Validation failed',
+      errors,
+    });
+  }
+
   const {
     email,
     firstName,
     lastName,
     role,
-    currentUserId,
     programId,
     regionId,
-    bio,
-  } = req.body;
+  } = sanitized;
+  const { currentUserId, bio } = req.body;
   const normalizedBio = normalizeAdminBio(bio);
 
   const tempPassword = randomBytes(16).toString('hex');
@@ -103,16 +194,33 @@ gcfUserRouter.post('/admin/create-user', asyncHandler(async (req, res) => {
 }));
 
 gcfUserRouter.put('/admin/update-user', asyncHandler(async (req, res) => {
+  if (!req.body.targetId || typeof req.body.targetId !== 'string') {
+    return res.status(400).json({
+      error: 'Invalid target user id.',
+    });
+  }
+
+  const { errors, sanitized } = validateAdminAccountPayload(req.body, {
+    isUpdate: true,
+  });
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({
+      message: 'Validation failed',
+      errors,
+    });
+  }
+
   const {
     email,
     password,
     firstName,
     lastName,
     role,
-    targetId,
     programId,
     regionId,
-  } = req.body;
+  } = sanitized;
+  const { targetId } = req.body;
   const pdBioForInsert = await resolvePdBioForAdminUpdate(req.body, targetId);
 
   await admin.auth().updateUser(targetId, {
