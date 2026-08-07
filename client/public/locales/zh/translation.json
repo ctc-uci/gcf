@@ -517,6 +517,7 @@
     "regionName": "地区名称",
     "regionNamePlaceholder": "输入地区名称",
     "regionNameRequired": "地区名称为必填项。",
+    "regionNameTooLong": "地区名称必须为 {{max}} 个字符或更少。",
     "regionalDirector": "区域总监",
     "directorPlaceholder": "选择导演",
     "assignedCountries": "指定国家",

@@ -4,6 +4,37 @@ import express from 'express';
 
 import { db } from '../db/db-pgp';
 
+const REGION_NAME_MAX_LENGTH = 70;
+
+const validateRegionName = (name) => {
+  if (typeof name !== 'string') {
+    return {
+      isValid: false,
+      message: 'Region name is required.',
+    };
+  }
+
+  const trimmedName = name.trim();
+  if (!trimmedName) {
+    return {
+      isValid: false,
+      message: 'Region name is required.',
+    };
+  }
+
+  if (trimmedName.length > REGION_NAME_MAX_LENGTH) {
+    return {
+      isValid: false,
+      message: `Region name must be ${REGION_NAME_MAX_LENGTH} characters or fewer.`,
+    };
+  }
+
+  return {
+    isValid: true,
+    trimmedName,
+  };
+};
+
 const regionRouter = express.Router();
 regionRouter.use(express.json());
 regionRouter.post('*', verifyToken);
@@ -73,11 +104,22 @@ regionRouter.get('/:id', asyncHandler(async (req, res) => {
 
 regionRouter.post('/', asyncHandler(async (req, res) => {
   const { name, last_modified } = req.body;
+  const validation = validateRegionName(name);
+
+  if (!validation.isValid) {
+    return res.status(400).json({
+      message: 'Validation failed',
+      errors: {
+        name: validation.message,
+      },
+    });
+  }
+
   const newRegion = await db.query(
     `INSERT INTO region (name, last_modified) 
     VALUES ($1, $2) 
     RETURNING *`,
-    [name, last_modified]
+    [validation.trimmedName, last_modified]
   );
   res.status(201).json(keysToCamel(newRegion[0]));
 }));
@@ -85,13 +127,24 @@ regionRouter.post('/', asyncHandler(async (req, res) => {
 regionRouter.put('/:id', asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name, last_modified } = req.body;
+  const validation = validateRegionName(name);
+
+  if (!validation.isValid) {
+    return res.status(400).json({
+      message: 'Validation failed',
+      errors: {
+        name: validation.message,
+      },
+    });
+  }
+
   const updatedRegion = await db.query(
     `UPDATE region SET
       name = COALESCE($1, name),
       last_modified = COALESCE($2, last_modified)
       WHERE id = $3
       RETURNING *;`,
-    [name, last_modified, id]
+    [validation.trimmedName, last_modified, id]
   );
 
   if (updatedRegion.length === 0) {

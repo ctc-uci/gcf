@@ -521,6 +521,7 @@
     "regionName": "Nombre de la región",
     "regionNamePlaceholder": "Introduzca el nombre de la región",
     "regionNameRequired": "El nombre de la región es obligatorio.",
+    "regionNameTooLong": "El nombre de la región debe tener {{max}} caracteres o menos.",
     "regionalDirector": "Director regional",
     "directorPlaceholder": "Seleccione un director",
     "assignedCountries": "Países asignados",

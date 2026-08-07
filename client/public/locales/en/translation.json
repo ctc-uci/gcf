@@ -521,6 +521,7 @@
     "regionName": "Region Name",
     "regionNamePlaceholder": "Enter region name",
     "regionNameRequired": "Region name is required.",
+    "regionNameTooLong": "Region name must be {{max}} characters or fewer.",
     "regionalDirector": "Regional Director",
     "directorPlaceholder": "Select a director",
     "assignedCountries": "Assigned Countries",

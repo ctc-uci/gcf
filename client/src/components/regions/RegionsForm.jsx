@@ -42,6 +42,8 @@ import { BsArrowsAngleContract, BsArrowsAngleExpand } from 'react-icons/bs';
 import { DirectorAvatar } from '../dashboard/ProgramForm/DirectorAvatar';
 import { ReviewProgramUpdate } from '../updates/forms/ReviewProgramUpdate';
 
+const REGION_NAME_MAX_LENGTH = 70;
+
 const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
@@ -54,7 +56,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [drawerSize, setDrawerSize] = useState('md');
   const [regionName, setRegionName] = useState('');
-  const [regionNameError, setRegionNameError] = useState(false);
+  const [regionNameError, setRegionNameError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [assignedCountryNames, setAssignedCountryNames] = useState([]);
@@ -179,7 +181,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     setSelectedDirectors([]);
     setOriginalDirectorIds([]);
     setSelectedCountries([]);
-    setRegionNameError(false);
+    setRegionNameError('');
     setSearchTerm('');
     setDrawerSize('md');
     setIsSaving(false);
@@ -190,10 +192,73 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
     fetchedCountryNames.current = [];
   };
 
-  const performSave = async () => {
+  const validateRegionName = (value) => {
+    const trimmedValue = value.trim();
+
+    if (!trimmedValue) {
+      return t('regions.regionNameRequired');
+    }
+
+    if (trimmedValue.length > REGION_NAME_MAX_LENGTH) {
+      return t('regions.regionNameTooLong', { max: REGION_NAME_MAX_LENGTH });
+    }
+
+    return '';
+  };
+
+  const prepareRegionNameForSave = () => {
+    const validationMessage = validateRegionName(regionName);
+    if (validationMessage) {
+      setRegionNameError(validationMessage);
+      return null;
+    }
+
+    const trimmedValue = regionName.trim();
+    setRegionNameError('');
+    if (trimmedValue !== regionName) {
+      setRegionName(trimmedValue);
+    }
+    return trimmedValue;
+  };
+
+  const getRegionNameErrorFromResponse = (err) => {
+    const fieldError = err?.response?.data?.errors?.name;
+    if (typeof fieldError === 'string' && fieldError.trim()) {
+      return fieldError;
+    }
+
+    if (Array.isArray(fieldError) && fieldError.length > 0) {
+      const firstError = fieldError[0];
+      if (typeof firstError === 'string' && firstError.trim()) {
+        return firstError;
+      }
+    }
+
+    return '';
+  };
+
+  const handleRegionSaveError = (err) => {
+    const regionFieldError = getRegionNameErrorFromResponse(err);
+    if (regionFieldError) {
+      setRegionNameError(regionFieldError);
+      return { hasInlineError: true };
+    }
+
+    toast({
+      title: t('regions.toastErrorSave'),
+      description: err.response?.data?.message || err.message,
+      status: 'error',
+      duration: 5000,
+      isClosable: true,
+    });
+
+    return { hasInlineError: false };
+  };
+
+  const performSave = async (regionNameValue) => {
     if (region) {
       await backend.put(`/region/${region.id}`, {
-        name: regionName,
+        name: regionNameValue,
         last_modified: new Date().toISOString(),
       });
 
@@ -239,7 +304,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
       ]);
     } else {
       const newRegion = await backend.post('/region', {
-        name: regionName,
+        name: regionNameValue,
         last_modified: new Date().toISOString(),
       });
       const newRegionId = newRegion.data.id;
@@ -264,11 +329,10 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
   };
 
   const handleSave = async (isConfirmed = false) => {
-    if (!regionName.trim()) {
-      setRegionNameError(true);
+    const normalizedRegionName = prepareRegionNameForSave();
+    if (!normalizedRegionName) {
       return;
     }
-    setRegionNameError(false);
 
     if (region && !isConfirmed) {
       const orig = originalValues.current || {};
@@ -280,7 +344,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
         {
           label: t('regions.regionName'),
           oldValue: orig.regionName,
-          newValue: regionName,
+          newValue: normalizedRegionName,
         },
         {
           label: t('regions.regionalDirector'),
@@ -305,7 +369,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
 
     setIsSaving(true);
     try {
-      await performSave();
+      await performSave(normalizedRegionName);
       toast({
         title: t('regions.toastSaved'),
         status: 'success',
@@ -317,13 +381,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
       onSave();
     } catch (err) {
       console.error('Error saving region:', err);
-      toast({
-        title: t('regions.toastErrorSave'),
-        description: err.response?.data?.message || err.message,
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
+      handleRegionSaveError(err);
     } finally {
       setIsSaving(false);
     }
@@ -366,7 +424,7 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
           <VStack spacing={4}>
             <FormControl
               isRequired
-              isInvalid={regionNameError}
+              isInvalid={Boolean(regionNameError)}
             >
               <FormLabel>{t('regions.regionName')}</FormLabel>
               <Input
@@ -375,13 +433,11 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                 value={regionName}
                 onChange={(e) => {
                   setRegionName(e.target.value);
-                  setRegionNameError(false);
+                  if (regionNameError) setRegionNameError('');
                 }}
               />
               {regionNameError && (
-                <FormErrorMessage>
-                  {t('regions.regionNameRequired')}
-                </FormErrorMessage>
+                <FormErrorMessage>{regionNameError}</FormErrorMessage>
               )}
             </FormControl>
 
@@ -637,10 +693,16 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                       isDisabled={!regionName.trim() || isSaving}
                       isLoading={isSaving}
                       onClick={async () => {
+                        const normalizedRegionName = prepareRegionNameForSave();
+                        if (!normalizedRegionName) {
+                          setIsCancelDialogOpen(false);
+                          return;
+                        }
+
                         if (isSaving) return;
                         setIsSaving(true);
                         try {
-                          await performSave();
+                          await performSave(normalizedRegionName);
                           toast({
                             title: t('regions.toastSaved'),
                             status: 'success',
@@ -649,19 +711,16 @@ const RegionsForm = ({ isOpen, region, onClose, onSave, onDelete }) => {
                           });
                           onSave();
                           setIsCancelDialogOpen(false);
+                          resetForm();
+                          onClose();
                         } catch (err) {
                           console.error('Error saving region:', err);
-                          toast({
-                            title: t('regions.toastErrorSave'),
-                            description:
-                              err.response?.data?.message || err.message,
-                            status: 'error',
-                            duration: 5000,
-                            isClosable: true,
-                          });
+                          const { hasInlineError } = handleRegionSaveError(err);
+                          if (hasInlineError) {
+                            setIsCancelDialogOpen(false);
+                          }
                         } finally {
                           setIsSaving(false);
-                          resetForm();
                         }
                       }}
                     >
