@@ -11,6 +11,116 @@ programRouter.post('*', verifyToken);
 programRouter.put('*', verifyToken);
 programRouter.delete('*', verifyToken);
 
+const PROGRAM_NAME_MAX_LENGTH = 70;
+const PROGRAM_TITLE_MAX_LENGTH = 140;
+const PROGRAM_STATUS_VALUES = new Set(['Active', 'Inactive']);
+const YMD_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+function isValidYmd(dateString) {
+  if (!dateString || !YMD_PATTERN.test(String(dateString))) return false;
+  const [y, m, d] = String(dateString).split('-').map(Number);
+  const utc = Date.UTC(y, m - 1, d);
+  const check = new Date(utc);
+  return (
+    check.getUTCFullYear() === y &&
+    check.getUTCMonth() === m - 1 &&
+    check.getUTCDate() === d
+  );
+}
+
+function toOptionalNumber(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return null;
+  return parsed;
+}
+
+function validateProgramPayload(payload, { isUpdate = false } = {}) {
+  const errors = {};
+
+  const createdBy =
+    typeof payload.createdBy === 'string' ? payload.createdBy.trim() : '';
+  const name = typeof payload.name === 'string' ? payload.name.trim() : '';
+  const title = typeof payload.title === 'string' ? payload.title.trim() : '';
+  const status =
+    typeof payload.status === 'string' ? payload.status.trim() : payload.status;
+  const launchDate =
+    typeof payload.launchDate === 'string'
+      ? payload.launchDate.trim()
+      : payload.launchDate;
+
+  const country = toOptionalNumber(payload.country);
+  const partnerOrg = toOptionalNumber(payload.partnerOrg);
+  const state = toOptionalNumber(payload.state);
+  const city = toOptionalNumber(payload.city);
+
+  if (!isUpdate && !createdBy) {
+    errors.createdBy = 'Invalid creator id.';
+  }
+
+  if (!isUpdate || payload.name !== undefined) {
+    if (!name) {
+      errors.programName = 'Program name is required.';
+    } else if (name.length > PROGRAM_NAME_MAX_LENGTH) {
+      errors.programName = `Program name must be ${PROGRAM_NAME_MAX_LENGTH} characters or fewer.`;
+    }
+  }
+
+  if (!isUpdate || payload.title !== undefined) {
+    if (!title) {
+      errors.programName = errors.programName || 'Program title is required.';
+    } else if (title.length > PROGRAM_TITLE_MAX_LENGTH) {
+      errors.programName = `Program title must be ${PROGRAM_TITLE_MAX_LENGTH} characters or fewer.`;
+    }
+  }
+
+  if (!isUpdate || payload.status !== undefined) {
+    if (!status || !PROGRAM_STATUS_VALUES.has(status)) {
+      errors.status = 'Please select a valid status.';
+    }
+  }
+
+  if (!isUpdate || payload.launchDate !== undefined) {
+    if (!launchDate || !isValidYmd(launchDate)) {
+      errors.launchDate = 'Please enter a valid launch date.';
+    }
+  }
+
+  if (!isUpdate || payload.country !== undefined) {
+    if (country === null) {
+      errors.country = 'Please select a country.';
+    }
+  }
+
+  if (!isUpdate) {
+    if (partnerOrg === null) {
+      errors.partnerOrg = 'Please select a partner organization.';
+    }
+  } else if (
+    payload.partnerOrg !== undefined &&
+    payload.partnerOrg !== null &&
+    payload.partnerOrg !== '' &&
+    partnerOrg === null
+  ) {
+    errors.partnerOrg = 'Please select a valid partner organization.';
+  }
+
+  return {
+    errors,
+    sanitized: {
+      createdBy,
+      name,
+      title,
+      status,
+      launchDate,
+      country,
+      partnerOrg,
+      state,
+      city,
+    },
+  };
+}
+
 function normalizeLanguages(languages, primaryLanguage) {
   const candidateCodes = Array.isArray(languages)
     ? languages
@@ -155,6 +265,17 @@ programRouter.get('/get-program-name/:id', asyncHandler(async (req, res) => {
 }));
 
 programRouter.post('/', asyncHandler(async (req, res) => {
+  const { errors, sanitized } = validateProgramPayload(req.body, {
+    isUpdate: false,
+  });
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({
+      message: 'Validation failed',
+      errors,
+    });
+  }
+
   const {
     createdBy,
     name,
@@ -162,12 +283,15 @@ programRouter.post('/', asyncHandler(async (req, res) => {
     state,
     city,
     title,
-    description,
-    languages,
-    primaryLanguage,
     partnerOrg,
     status,
     launchDate,
+  } = sanitized;
+
+  const {
+    description,
+    languages,
+    primaryLanguage,
   } = req.body;
   const normalizedLanguages = normalizeLanguages(languages, primaryLanguage);
 
@@ -212,18 +336,32 @@ programRouter.post('/', asyncHandler(async (req, res) => {
 
 programRouter.put('/:id', asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const { errors, sanitized } = validateProgramPayload(req.body, {
+    isUpdate: true,
+  });
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({
+      message: 'Validation failed',
+      errors,
+    });
+  }
+
   const {
     name,
     country,
     state,
     city,
     title,
-    description,
-    languages,
-    primaryLanguage,
     partnerOrg,
     status,
     launchDate,
+  } = sanitized;
+
+  const {
+    description,
+    languages,
+    primaryLanguage,
   } = req.body;
   const normalizedLanguages = normalizeLanguages(languages, primaryLanguage);
 

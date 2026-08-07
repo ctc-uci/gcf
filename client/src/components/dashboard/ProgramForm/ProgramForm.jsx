@@ -139,6 +139,17 @@ export const ProgramForm = ({
     });
   };
 
+  const applyServerValidationErrors = (error) => {
+    const fieldErrors = error?.response?.data?.errors;
+    if (!fieldErrors || typeof fieldErrors !== 'object') {
+      return false;
+    }
+
+    setProgramFieldErrors((prev) => ({ ...prev, ...fieldErrors }));
+    setActiveTab('overview');
+    return true;
+  };
+
   function handleProgramStatusChange(status) {
     setFormState((prev) => ({ ...prev, status: status || null }));
     clearProgramFieldError('status');
@@ -210,6 +221,11 @@ export const ProgramForm = ({
       });
     } catch (err) {
       console.error('Error saving program:', err);
+
+      if (err?.response?.status === 400 && applyServerValidationErrors(err)) {
+        return;
+      }
+
       toast({
         title: t('programForm.saveError'),
         description:
