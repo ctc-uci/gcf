@@ -289,6 +289,7 @@ export function LocationLanguageSection({
                   onChange={(e) => {
                     handleRegionChange(e.target.value);
                     onClearProgramFieldError?.('regionId');
+                    onClearProgramFieldError?.('country');
                   }}
                   placeholder={t('locationForm.selectRegion')}
                   value={formState.regionId || ''}
