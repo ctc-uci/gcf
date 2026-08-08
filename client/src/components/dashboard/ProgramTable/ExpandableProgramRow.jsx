@@ -40,26 +40,26 @@ export function ExpandableProgramRow({ p, onEdit }) {
     : '';
   const flagCode = isoCodeToFlagIconCode(p.isoCode);
 
-  const getScrollContainer = (node) => {
-    let current = node?.parentElement ?? null;
-
-    while (current) {
-      const style = window.getComputedStyle(current);
-      const overflowY = style.overflowY;
-      const canScrollY = overflowY === 'auto' || overflowY === 'scroll';
-      if (canScrollY && current.scrollHeight > current.clientHeight) {
-        return current;
-      }
-      current = current.parentElement;
-    }
-
-    return null;
-  };
-
   useEffect(() => {
     if (!isOpen) {
       return;
     }
+
+    const getScrollContainer = (node) => {
+      let current = node?.parentElement ?? null;
+
+      while (current) {
+        const style = window.getComputedStyle(current);
+        const overflowY = style.overflowY;
+        const canScrollY = overflowY === 'auto' || overflowY === 'scroll';
+        if (canScrollY && current.scrollHeight > current.clientHeight) {
+          return current;
+        }
+        current = current.parentElement;
+      }
+
+      return null;
+    };
 
     const ensureExpandedContentVisible = () => {
       const expandedNode = expandedContentRef.current;
