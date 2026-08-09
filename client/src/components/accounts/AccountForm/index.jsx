@@ -343,7 +343,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
 
     setProfilePictureKey(key);
 
-    if (previousStagedKey) {
+    if (previousStagedKey && previousStagedKey !== key) {
       backend
         .delete(`/images/${encodeURIComponent(previousStagedKey)}`)
         .catch((err) => {
