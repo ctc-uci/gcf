@@ -444,6 +444,7 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         key: profilePictureKey || null,
         userId: targetUserId,
       });
+      setInitialProfilePictureKey(profilePictureKey);
     }
 
     await backend.put('/gcf-users/admin/update-user', userData);
