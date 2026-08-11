@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "yarn tsx concurrently.ts",
     "start": "yarn tsx concurrently.ts",
+    "deploy": "sst deploy",
     "prepare": "husky",
     "test": "node test-runner.js",
     "test:server": "yarn workspace server test",
@@ -29,7 +30,8 @@
     "prettier": "^3.8.1",
     "tsx": "^4.21.0",
     "typescript-eslint": "^8.1.0",
-    "vite": "^8.0.14"
+    "vite": "^8.0.14",
+    "sst": "ion"
   },
   "workspaces": {
     "packages": [

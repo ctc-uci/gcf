@@ -122,7 +122,7 @@ export function LocationLanguageSection({
             `/program-directors/me/${userId}/region`
           );
           setRegionList([response.data]);
-        } else if (role === 'Admin') {
+        } else if (role === 'Admin' || role === 'Super Admin') {
           const response = await backend.get('/region');
           setRegionList(response.data);
         } else {
