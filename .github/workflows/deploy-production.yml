@@ -46,4 +46,6 @@ jobs:
 
       - name: Deploy with SST
         id: deploy
-        run: yarn sst deploy --stage production
+        run: |
+          yarn sst deploy --stage production
+          echo "site_url=$(jq -r '.site' .sst/outputs.json)" >> "$GITHUB_OUTPUT"
