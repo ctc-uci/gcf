@@ -18,7 +18,9 @@ jobs:
   deploy:
     name: sst deploy --stage production
     runs-on: ubuntu-latest
-    environment: production
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.site_url }}
 
     steps:
       - name: Checkout
@@ -43,4 +45,5 @@ jobs:
           aws-region: us-west-1
 
       - name: Deploy with SST
+        id: deploy
         run: yarn sst deploy --stage production
