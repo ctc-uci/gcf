@@ -8,7 +8,12 @@ export default $config({
       removal: input?.stage === 'production' ? 'retain' : 'remove',
       protect: ['production'].includes(input?.stage),
       home: 'aws',
-      providers: { aws: { region: 'us-west-1', profile: 'gcf' } },
+      providers: {
+        aws: {
+          region: 'us-west-1',
+          profile: process.env.CI ? undefined : 'gcf',
+        },
+      },
     };
   },
 
