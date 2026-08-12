@@ -370,6 +370,7 @@
       "statusRequired": "请选择状态。",
       "launchDateRequired": "请输入有效日期。",
       "partnerOrgRequired": "请选择合作机构。",
+      "regionRequired": "请选择地区。",
       "countryRequired": "请选择国家。"
     }
   },

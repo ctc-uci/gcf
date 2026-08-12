@@ -27,11 +27,7 @@ export function validateProgramForm(formState, { isNewProgram }, t) {
   }
 
   const status = formState.status;
-  if (
-    status === null ||
-    status === undefined ||
-    String(status).trim() === ''
-  ) {
+  if (status === null || status === undefined || String(status).trim() === '') {
     errors.status = t('programForm.validation.statusRequired');
   }
 
@@ -58,14 +54,24 @@ export function validateProgramForm(formState, { isNewProgram }, t) {
     }
   }
 
-  const countryRaw = formState.country;
-  const hasCountry =
-    countryRaw !== null &&
-    countryRaw !== undefined &&
-    countryRaw !== '' &&
-    !Number.isNaN(Number(countryRaw));
-  if (!hasCountry) {
-    errors.country = t('programForm.validation.countryRequired');
+  const regionRaw = formState.regionId;
+  const hasRegion =
+    regionRaw !== null &&
+    regionRaw !== undefined &&
+    regionRaw !== '' &&
+    !Number.isNaN(Number(regionRaw));
+  if (!hasRegion) {
+    errors.regionId = t('programForm.validation.regionRequired');
+  } else {
+    const countryRaw = formState.country;
+    const hasCountry =
+      countryRaw !== null &&
+      countryRaw !== undefined &&
+      countryRaw !== '' &&
+      !Number.isNaN(Number(countryRaw));
+    if (!hasCountry) {
+      errors.country = t('programForm.validation.countryRequired');
+    }
   }
 
   return errors;

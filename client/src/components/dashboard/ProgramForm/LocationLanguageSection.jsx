@@ -284,20 +284,27 @@ export function LocationLanguageSection({
             gap={6}
           >
             <GridItem>
-              <Select
-                onChange={(e) => handleRegionChange(e.target.value)}
-                placeholder={t('locationForm.selectRegion')}
-                value={formState.regionId || ''}
-              >
-                {regionList.map((_region) => (
-                  <option
-                    key={_region.id}
-                    value={_region.id}
-                  >
-                    {_region.name}
-                  </option>
-                ))}
-              </Select>
+              <FormControl isInvalid={Boolean(fieldErrors.regionId)}>
+                <Select
+                  onChange={(e) => {
+                    handleRegionChange(e.target.value);
+                    onClearProgramFieldError?.('regionId');
+                    onClearProgramFieldError?.('country');
+                  }}
+                  placeholder={t('locationForm.selectRegion')}
+                  value={formState.regionId || ''}
+                >
+                  {regionList.map((_region) => (
+                    <option
+                      key={_region.id}
+                      value={_region.id}
+                    >
+                      {_region.name}
+                    </option>
+                  ))}
+                </Select>
+                <FormErrorMessage>{fieldErrors.regionId}</FormErrorMessage>
+              </FormControl>
             </GridItem>
 
             <GridItem>
