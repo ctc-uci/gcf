@@ -179,6 +179,7 @@ export const ProfileView = (props) => {
               bottom={2}
               right={2}
               onClick={onOpen}
+              isDisabled={isSaving}
               _hover={{ bg: 'gray.100' }}
             />
           )}

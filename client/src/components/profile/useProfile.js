@@ -36,6 +36,7 @@ export const useProfile = () => {
 
   const profileEditBaselineRef = useRef(null);
   const editSessionRef = useRef(0);
+  const isSavingRef = useRef(false);
   const [pendingPictureKey, setPendingPictureKey] = useState(null);
   const [pendingPicturePreviewUrl, setPendingPicturePreviewUrl] =
     useState(null);
@@ -188,6 +189,17 @@ export const useProfile = () => {
     if (!uploadedFiles?.length) return;
 
     const key = uploadedFiles[0].s3_key;
+
+    if (isSavingRef.current) {
+      backend.delete(`/images/${encodeURIComponent(key)}`).catch((err) => {
+        console.error(
+          'Error deleting profile picture uploaded during save:',
+          err
+        );
+      });
+      return;
+    }
+
     const sessionId = editSessionRef.current;
     const previousStagedKey =
       pendingPictureKey && pendingPictureKey !== (gcfUser?.pictureKey || null)
@@ -276,6 +288,7 @@ export const useProfile = () => {
 
   const saveProfileEdits = async () => {
     editSessionRef.current += 1;
+    isSavingRef.current = true;
     setIsSaving(true);
     try {
       if (role === 'Program Director') {
@@ -503,6 +516,7 @@ export const useProfile = () => {
         position: 'bottom-right',
       });
     } finally {
+      isSavingRef.current = false;
       setIsSaving(false);
     }
   };
