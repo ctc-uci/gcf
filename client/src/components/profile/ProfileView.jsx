@@ -55,6 +55,7 @@ export const ProfileView = (props) => {
     role,
     roleSpecificData,
     isEditing,
+    isSaving,
     formData,
     showPassword,
     setShowPassword,
@@ -476,6 +477,7 @@ export const ProfileView = (props) => {
             leftIcon={<FiX />}
             variant="outline"
             onClick={handleCancel}
+            isDisabled={isSaving}
           >
             {t('common.cancel')}
           </Button>
@@ -485,6 +487,7 @@ export const ProfileView = (props) => {
             color="white"
             _hover={{ bg: 'teal.600' }}
             onClick={handleSave}
+            isLoading={isSaving}
           >
             {t('common.save')}
           </Button>
