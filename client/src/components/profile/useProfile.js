@@ -35,6 +35,7 @@ export const useProfile = () => {
   const [newPassword, setNewPassword] = useState('');
 
   const profileEditBaselineRef = useRef(null);
+  const editSessionRef = useRef(0);
   const [pendingPictureKey, setPendingPictureKey] = useState(null);
   const [pendingPicturePreviewUrl, setPendingPicturePreviewUrl] =
     useState(null);
@@ -187,6 +188,7 @@ export const useProfile = () => {
     if (!uploadedFiles?.length) return;
 
     const key = uploadedFiles[0].s3_key;
+    const sessionId = editSessionRef.current;
     const previousStagedKey =
       pendingPictureKey && pendingPictureKey !== (gcfUser?.pictureKey || null)
         ? pendingPictureKey
@@ -196,6 +198,13 @@ export const useProfile = () => {
       const urlResponse = await backend.get(
         `/images/url/${encodeURIComponent(key)}`
       );
+
+      if (sessionId !== editSessionRef.current) {
+        backend.delete(`/images/${encodeURIComponent(key)}`).catch((err) => {
+          console.error('Error deleting stale profile picture upload:', err);
+        });
+        return;
+      }
 
       setPendingPictureKey(key);
       setPendingPicturePreviewUrl(urlResponse.data.url);
@@ -216,6 +225,7 @@ export const useProfile = () => {
   };
 
   const handleEdit = () => {
+    editSessionRef.current += 1;
     const prefLang =
       gcfUser.preferredLanguage &&
       isAppLocale(String(gcfUser.preferredLanguage))
@@ -241,6 +251,7 @@ export const useProfile = () => {
   };
 
   const handleCancel = () => {
+    editSessionRef.current += 1;
     if (
       pendingPictureKey &&
       pendingPictureKey !== (gcfUser?.pictureKey || null)
@@ -264,6 +275,7 @@ export const useProfile = () => {
   };
 
   const saveProfileEdits = async () => {
+    editSessionRef.current += 1;
     setIsSaving(true);
     try {
       if (role === 'Program Director') {
