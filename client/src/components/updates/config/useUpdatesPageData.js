@@ -11,7 +11,8 @@ const mapUpdatesWithFullName = (items) => {
       .filter(Boolean)
       .join(' ')
       .trim();
-    return { ...item, fullName };
+    const status = item.status ?? (item.resolved ? 'Resolved' : 'Unresolved');
+    return { ...item, fullName, status };
   });
 };
 

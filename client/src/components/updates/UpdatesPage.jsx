@@ -17,7 +17,10 @@ import { EmptyStateBadge } from '@/components/badges/EmptyStateBadge';
 import { useTranslation } from 'react-i18next';
 
 import { AccountUpdatesTable } from './AccountUpdatesTable';
-import { programSectionColumns } from './config/updatesColumnConfig';
+import {
+  mediaSectionColumns,
+  programSectionColumns,
+} from './config/updatesColumnConfig';
 import {
   UpdatesFilterPopover,
   UpdatesSearchInput,
@@ -53,6 +56,15 @@ export const UpdatesPage = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [tabIndex, setTabIndex] = useState(0);
+  const [activeFilters, setActiveFilters] = useState([]);
+
+  const handleTabChange = (index) => {
+    setTabIndex(index);
+    setActiveFilters([]);
+  };
+
+  const filterColumns =
+    tabIndex === 1 ? mediaSectionColumns : programSectionColumns;
 
   const handleDownload = () => {
     if (tabIndex === 0) downloadProgramUpdatesAsCsv(programUpdatesData, t);
@@ -93,8 +105,8 @@ export const UpdatesPage = () => {
         onChange={setSearchQuery}
       />
       <UpdatesFilterPopover
-        columns={programSectionColumns}
-        onFilterChange={() => {}}
+        columns={filterColumns}
+        onFilterChange={setActiveFilters}
       />
     </Flex>
   );
@@ -134,7 +146,7 @@ export const UpdatesPage = () => {
       </Flex>
       <Tabs
         index={tabIndex}
-        onChange={setTabIndex}
+        onChange={handleTabChange}
         variant="unstyled"
       >
         <Flex
@@ -190,6 +202,7 @@ export const UpdatesPage = () => {
                     isLoading={isLoading}
                     onSave={refetchProgramUpdates}
                     searchQuery={searchQuery}
+                    activeFilters={activeFilters}
                     showStatus
                     showFlagAndType
                     embedded
@@ -216,6 +229,7 @@ export const UpdatesPage = () => {
                   originalData={originalMediaUpdatesData}
                   isLoading={isLoading}
                   searchQuery={searchQuery}
+                  activeFilters={activeFilters}
                   embedded
                 />
               </Box>
