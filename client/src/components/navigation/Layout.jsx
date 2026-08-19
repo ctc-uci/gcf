@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { Box, Flex } from '@chakra-ui/react';
 
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useBackendContext } from '@/contexts/hooks/useBackendContext';
 import i18n, { isAppLocale } from '@/i18n';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 
 import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
@@ -13,6 +13,8 @@ import { Sidebar } from './Sidebar';
 export const Layout = () => {
   const { currentUser } = useAuthContext();
   const { backend } = useBackendContext();
+  const location = useLocation();
+  const mainRef = useRef(null);
 
   useEffect(() => {
     if (!currentUser?.uid) return;
@@ -33,6 +35,12 @@ export const Layout = () => {
       cancelled = true;
     };
   }, [currentUser?.uid, backend]);
+
+  useEffect(() => {
+    const mainElement = mainRef.current;
+    if (!mainElement) return;
+    mainElement.scrollTop = 0;
+  }, [location.pathname]);
 
   return (
     <Flex
@@ -56,6 +64,7 @@ export const Layout = () => {
         <Navbar />
         <Box
           as="main"
+          ref={mainRef}
           mt={6}
           flex="1"
           minW={0}
