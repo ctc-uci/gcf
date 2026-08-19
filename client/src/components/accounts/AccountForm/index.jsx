@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useDisclosure, useToast } from '@chakra-ui/react';
 
@@ -34,6 +34,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   const [currentRegions, setCurrentRegions] = useState(null);
   const [profilePictureUrl, setProfilePictureUrl] = useState('');
   const [profilePictureKey, setProfilePictureKey] = useState('');
+  const [initialProfilePictureKey, setInitialProfilePictureKey] = useState('');
+  const pictureRequestIdRef = useRef(0);
 
   const exitModal = useDisclosure();
   const deleteModal = useDisclosure();
@@ -46,23 +48,34 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   });
 
   const isDirty = useMemo(() => {
-    return JSON.stringify(formData) !== JSON.stringify(initialFormData);
-  }, [formData, initialFormData]);
+    return (
+      JSON.stringify(formData) !== JSON.stringify(initialFormData) ||
+      profilePictureKey !== initialProfilePictureKey
+    );
+  }, [formData, initialFormData, profilePictureKey, initialProfilePictureKey]);
 
   const changedFields = useMemo(
-    () => computeChangedFields(formData, initialFormData, t),
-    [formData, initialFormData, t]
+    () =>
+      computeChangedFields(
+        formData,
+        initialFormData,
+        t,
+        profilePictureKey !== initialProfilePictureKey
+      ),
+    [formData, initialFormData, t, profilePictureKey, initialProfilePictureKey]
   );
 
   // Reset form when drawer opens
   useEffect(() => {
     if (!isOpen) return;
 
+    pictureRequestIdRef.current += 1;
     setValidationErrors({});
     setShowPassword(false);
     setIsFullScreen(false);
     setProfilePictureUrl('');
     setProfilePictureKey('');
+    setInitialProfilePictureKey('');
 
     if (!targetUser) {
       const newState = {
@@ -103,13 +116,17 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
       }
 
       if (targetUser.picture) {
+        setProfilePictureKey(targetUser.picture);
+        setInitialProfilePictureKey(targetUser.picture);
+
+        const requestId = ++pictureRequestIdRef.current;
         const fetchPictureUrl = async () => {
           try {
             const urlResponse = await backend.get(
               `/images/url/${encodeURIComponent(targetUser.picture)}`
             );
+            if (pictureRequestIdRef.current !== requestId) return;
             setProfilePictureUrl(urlResponse.data.url || '');
-            setProfilePictureKey(targetUser.picture);
           } catch {
             // picture unavailable — leave blank
           }
@@ -319,47 +336,31 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     if (!uploadedFiles?.length) return;
 
     const key = uploadedFiles[0].s3_key;
+    const previousStagedKey =
+      profilePictureKey && profilePictureKey !== initialProfilePictureKey
+        ? profilePictureKey
+        : null;
 
+    setProfilePictureKey(key);
+
+    if (previousStagedKey && previousStagedKey !== key) {
+      backend
+        .delete(`/images/${encodeURIComponent(previousStagedKey)}`)
+        .catch((err) => {
+          console.error('Error deleting replaced profile picture upload:', err);
+        });
+    }
+
+    const requestId = ++pictureRequestIdRef.current;
     try {
       const urlResponse = await backend.get(
         `/images/url/${encodeURIComponent(key)}`
       );
-      const nextUrl = urlResponse.data.url || '';
-      const prevKey = profilePictureKey || null;
 
-      if (targetUserId) {
-        await backend.post('/images/profile-picture', {
-          key,
-          userId: targetUserId,
-        });
-
-        await logAccountChange({
-          user_id: String(targetUserId),
-          author_id: String(userId),
-          change_type: 'Update',
-          old_values: {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            email: formData.email,
-            picture: prevKey,
-            bio: '',
-          },
-          new_values: {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            email: formData.email,
-            picture: key,
-            bio: '',
-          },
-          resolved: false,
-          last_modified: new Date().toISOString(),
-        });
-      }
-
-      setProfilePictureKey(key);
-      setProfilePictureUrl(nextUrl);
+      if (pictureRequestIdRef.current !== requestId) return;
+      setProfilePictureUrl(urlResponse.data.url || '');
     } catch (err) {
-      console.error('Error saving profile picture:', err);
+      console.error('Error loading profile picture preview:', err);
     }
   };
 
@@ -437,6 +438,15 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
     if (formData.password && formData.password.trim().length > 0) {
       userData.password = formData.password;
     }
+    const pictureChanged = profilePictureKey !== initialProfilePictureKey;
+    if (pictureChanged) {
+      await backend.post('/images/profile-picture', {
+        key: profilePictureKey || null,
+        userId: targetUserId,
+      });
+      setInitialProfilePictureKey(profilePictureKey);
+    }
+
     await backend.put('/gcf-users/admin/update-user', userData);
 
     if (userId) {
@@ -447,10 +457,14 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         old_values: formStateToAuditSnapshot(initialFormData, {
           currentUserId: userId,
           targetId: targetUserId,
+          ...(pictureChanged
+            ? { picture: initialProfilePictureKey || null }
+            : {}),
         }),
         new_values: formStateToAuditSnapshot(formData, {
           currentUserId: userId,
           targetId: targetUserId,
+          ...(pictureChanged ? { picture: profilePictureKey || null } : {}),
         }),
         resolved: true,
         last_modified: new Date().toISOString(),
@@ -580,6 +594,19 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
         isOpen={exitModal.isOpen}
         onClose={exitModal.onClose}
         onExitWithoutSaving={() => {
+          if (
+            profilePictureKey &&
+            profilePictureKey !== initialProfilePictureKey
+          ) {
+            backend
+              .delete(`/images/${encodeURIComponent(profilePictureKey)}`)
+              .catch((err) => {
+                console.error(
+                  'Error deleting unsaved profile picture upload:',
+                  err
+                );
+              });
+          }
           exitModal.onClose();
           onClose();
         }}

@@ -452,6 +452,8 @@
     "fieldRole": "Rôle",
     "fieldProgram": "Programme",
     "fieldRegion": "Région",
+    "fieldProfilePicture": "Photo de profil",
+    "fieldProfilePictureUpdated": "Mise à jour",
     "saveSuccess": "L'utilisateur a été enregistré avec succès !",
     "emailExistsTitle": "L'e-mail existe déjà",
     "emailExistsDesc": "Cet e-mail est déjà enregistré. Veuillez utiliser une autre adresse e-mail.",
