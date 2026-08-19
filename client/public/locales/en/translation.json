@@ -374,6 +374,7 @@
       "statusRequired": "Please select a status.",
       "launchDateRequired": "Please enter a valid date.",
       "partnerOrgRequired": "Please select a partner organization.",
+      "regionRequired": "Please select a region.",
       "countryRequired": "Please select a country."
     }
   },
