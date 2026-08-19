@@ -26,6 +26,7 @@ import GcfGlobe from '/gcf_globe.png';
 const AccountCardImage = ({ picture, alt }) => {
   const { backend } = useBackendContext();
   const [src, setSrc] = useState(GcfGlobe);
+  const [failedSrc, setFailedSrc] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,11 +64,12 @@ const AccountCardImage = ({ picture, alt }) => {
   return (
     <Image
       src={src}
-      objectFit="cover"
+      objectFit={src === GcfGlobe || failedSrc === src ? 'contain' : 'cover'}
       objectPosition="center"
       draggable="false"
       alt={alt}
       fallbackSrc={GcfGlobe}
+      onError={() => setFailedSrc(src)}
       maxH="100%"
       w="100%"
       h="100%"
