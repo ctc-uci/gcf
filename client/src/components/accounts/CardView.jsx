@@ -63,7 +63,7 @@ const AccountCardImage = ({ picture, alt }) => {
   return (
     <Image
       src={src}
-      objectFit="cover"
+      objectFit={src === GcfGlobe ? 'contain' : 'cover'}
       objectPosition="center"
       draggable="false"
       alt={alt}
