@@ -23,7 +23,7 @@ import { FiEdit2 } from 'react-icons/fi';
 import { getRoleBadgeProps } from './AccountForm/constants';
 import GcfGlobe from '/gcf_globe.png';
 
-const AccountCardImage = ({ picture, alt }) => {
+const AccountCardImage = ({ picture, defaultAlt, profileAlt }) => {
   const { backend } = useBackendContext();
   const [src, setSrc] = useState(GcfGlobe);
   const [failedSrc, setFailedSrc] = useState(null);
@@ -67,7 +67,7 @@ const AccountCardImage = ({ picture, alt }) => {
       objectFit={src === GcfGlobe || failedSrc === src ? 'contain' : 'cover'}
       objectPosition="center"
       draggable="false"
-      alt={alt}
+      alt={src === GcfGlobe || failedSrc === src ? defaultAlt : profileAlt}
       fallbackSrc={GcfGlobe}
       onError={() => setFailedSrc(src)}
       maxH="100%"
@@ -189,7 +189,8 @@ const CardView = ({ data, onUpdate = () => {} }) => {
               >
                 <AccountCardImage
                   picture={a.picture}
-                  alt={t('programCard.gcfGlobeAlt')}
+                  defaultAlt={t('programCard.gcfGlobeAlt')}
+                  profileAlt={t('programCard.profilePictureAlt')}
                 />
               </CardBody>
               <CardFooter

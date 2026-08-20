@@ -210,6 +210,7 @@
   "programCard": {
     "editAria": "编辑",
     "gcfGlobeAlt": "全球气候基金",
+    "profilePictureAlt": "账户头像",
     "studentsCount": "{{count}} 学生"
   },
   "statistics": {
