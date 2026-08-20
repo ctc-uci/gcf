@@ -21,6 +21,9 @@ dist-ssr
 ## CDK output.
 cdk.out/
 
+## SST output. https://sst.dev
+.sst/
+
 ## Logs.
 logs
 *.log

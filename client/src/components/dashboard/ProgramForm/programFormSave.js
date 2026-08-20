@@ -217,7 +217,6 @@ export async function saveProgramForm({
       note: isNewProgram ? 'Program Created' : 'Program update',
       show_on_table: isNewProgram,
       resolved: true,
-      show_on_table: false,
     });
 
     const updateId = updateResponse.data.id;

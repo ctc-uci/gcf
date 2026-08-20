@@ -374,6 +374,7 @@
       "statusRequired": "Seleccione un estado.",
       "launchDateRequired": "Introduzca una fecha válida.",
       "partnerOrgRequired": "Seleccione una organización asociada.",
+      "regionRequired": "Seleccione una región.",
       "countryRequired": "Seleccione un país."
     }
   },

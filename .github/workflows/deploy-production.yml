@@ -1,0 +1,51 @@
+name: Deploy Production (SST)
+
+# Runs after a PR is merged into main (i.e. a push to main).
+on:
+  push:
+    branches:
+      - main
+
+# Avoid two deploys racing/clobbering the same SST stage state.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: sst deploy --stage production
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.site_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          # Pinned instead of using .nvmrc (Node 18): lint-staged >=16 requires
+          # Node >=20.17, and this also matches the nodejs20.x Lambda runtime below.
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-1
+
+      - name: Deploy with SST
+        id: deploy
+        run: |
+          yarn sst deploy --stage production
+          echo "site_url=$(jq -r '.site' .sst/outputs.json)" >> "$GITHUB_OUTPUT"
