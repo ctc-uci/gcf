@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 import {
   Box,
@@ -40,8 +40,13 @@ export function ExpandableProgramRow({ p, onEdit }) {
     : '';
   const flagCode = isoCodeToFlagIconCode(p.isoCode);
 
-  useEffect(() => {
+  const handleAnimationComplete = useCallback(() => {
     if (!isOpen) {
+      return;
+    }
+
+    const expandedNode = expandedContentRef.current;
+    if (!expandedNode) {
       return;
     }
 
@@ -61,48 +66,35 @@ export function ExpandableProgramRow({ p, onEdit }) {
       return null;
     };
 
-    const ensureExpandedContentVisible = () => {
-      const expandedNode = expandedContentRef.current;
-      if (!expandedNode) {
-        return;
-      }
+    const scrollContainer = getScrollContainer(expandedNode);
+    const bottomGap = 24;
 
-      const scrollContainer = getScrollContainer(expandedNode);
-      const bottomGap = 24;
-
-      if (scrollContainer) {
-        const containerRect = scrollContainer.getBoundingClientRect();
-        const rowRect = expandedNode.getBoundingClientRect();
-        const overflowBottom =
-          rowRect.bottom - (containerRect.bottom - bottomGap);
-
-        if (overflowBottom > 0) {
-          scrollContainer.scrollBy({
-            top: overflowBottom,
-            behavior: 'smooth',
-          });
-        }
-
-        return;
-      }
-
-      const rect = expandedNode.getBoundingClientRect();
-      const viewportBottom = window.innerHeight;
-      const overflowBottom = rect.bottom - (viewportBottom - bottomGap);
+    if (scrollContainer) {
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const rowRect = expandedNode.getBoundingClientRect();
+      const overflowBottom =
+        rowRect.bottom - (containerRect.bottom - bottomGap);
 
       if (overflowBottom > 0) {
-        window.scrollBy({
+        scrollContainer.scrollBy({
           top: overflowBottom,
           behavior: 'smooth',
         });
       }
-    };
 
-    const timeoutId = window.setTimeout(ensureExpandedContentVisible, 240);
+      return;
+    }
 
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
+    const rect = expandedNode.getBoundingClientRect();
+    const viewportBottom = window.innerHeight;
+    const overflowBottom = rect.bottom - (viewportBottom - bottomGap);
+
+    if (overflowBottom > 0) {
+      window.scrollBy({
+        top: overflowBottom,
+        behavior: 'smooth',
+      });
+    }
   }, [isOpen]);
 
   return (
@@ -223,7 +215,10 @@ export function ExpandableProgramRow({ p, onEdit }) {
           borderColor="gray.200"
           p={isOpen ? undefined : 0}
         >
-          <Collapse in={isOpen}>
+          <Collapse
+            in={isOpen}
+            onAnimationComplete={handleAnimationComplete}
+          >
             <HStack
               ref={expandedContentRef}
               align="start"
