@@ -210,6 +210,7 @@
   "programCard": {
     "editAria": "modifier",
     "gcfGlobeAlt": "Globe GCF",
+    "profilePictureAlt": "Photo de profil du compte",
     "studentsCount": "{{count}} Étudiants"
   },
   "statistics": {

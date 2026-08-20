@@ -23,6 +23,61 @@ import { FiEdit2 } from 'react-icons/fi';
 import { getRoleBadgeProps } from './AccountForm/constants';
 import GcfGlobe from '/gcf_globe.png';
 
+const AccountCardImage = ({ picture, defaultAlt, profileAlt }) => {
+  const { backend } = useBackendContext();
+  const [src, setSrc] = useState(GcfGlobe);
+  const [failedSrc, setFailedSrc] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function resolve() {
+      if (!picture || String(picture).trim() === '') {
+        if (!cancelled) setSrc(GcfGlobe);
+        return;
+      }
+
+      try {
+        const urlResponse = await backend.get(
+          `/images/url/${encodeURIComponent(picture)}`
+        );
+        const resolvedUrl = urlResponse.data?.url;
+
+        if (!cancelled) {
+          setSrc(
+            resolvedUrl && String(resolvedUrl).trim() !== ''
+              ? resolvedUrl
+              : GcfGlobe
+          );
+        }
+      } catch {
+        if (!cancelled) setSrc(GcfGlobe);
+      }
+    }
+
+    resolve();
+    return () => {
+      cancelled = true;
+    };
+  }, [picture, backend]);
+
+  return (
+    <Image
+      src={src}
+      objectFit={src === GcfGlobe || failedSrc === src ? 'contain' : 'cover'}
+      objectPosition="center"
+      draggable="false"
+      alt={src === GcfGlobe || failedSrc === src ? defaultAlt : profileAlt}
+      fallbackSrc={GcfGlobe}
+      onError={() => setFailedSrc(src)}
+      maxH="100%"
+      w="100%"
+      h="100%"
+      borderRadius="lg"
+    />
+  );
+};
+
 const CardView = ({ data, onUpdate = () => {} }) => {
   const { t } = useTranslation();
   const { backend } = useBackendContext();
@@ -132,13 +187,10 @@ const CardView = ({ data, onUpdate = () => {} }) => {
                 minH="140px"
                 overflow="hidden"
               >
-                <Image
-                  src={GcfGlobe}
-                  objectFit="contain"
-                  objectPosition="center"
-                  draggable="false"
-                  alt={t('programCard.gcfGlobeAlt')}
-                  maxH="100%"
+                <AccountCardImage
+                  picture={a.picture}
+                  defaultAlt={t('programCard.gcfGlobeAlt')}
+                  profileAlt={t('programCard.profilePictureAlt')}
                 />
               </CardBody>
               <CardFooter
