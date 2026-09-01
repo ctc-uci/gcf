@@ -87,6 +87,11 @@ export const Account = () => {
 
   const [activeFilters, setActiveFilters] = useState([]);
 
+  const currentAccount = users.find((user) => user.id === userId);
+  const currentUserName = currentAccount
+    ? `${currentAccount.firstName} ${currentAccount.lastName}`.trim()
+    : '';
+
   return (
     <Box
       p={8}
@@ -182,6 +187,7 @@ export const Account = () => {
       )}
       <AccountForm
         targetUser={selectedUser}
+        currentUserName={currentUserName}
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onSave={() => mutate()}
