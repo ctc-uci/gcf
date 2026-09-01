@@ -17,7 +17,13 @@ import {
 import { computeChangedFields } from './changedFields';
 import { formStateToAuditSnapshot, INITIAL_FORM_STATE } from './constants';
 
-export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
+export const AccountForm = ({
+  targetUser,
+  currentUserName,
+  isOpen,
+  onClose,
+  onSave,
+}) => {
   const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const { backend } = useBackendContext();
@@ -539,7 +545,8 @@ export const AccountForm = ({ targetUser, isOpen, onClose, onSave }) => {
   // user it is the current admin (the creator that will be stored on save).
   const isNewAccount = !targetUserId;
   const createdByName = isNewAccount
-    ? currentUser?.displayName ||
+    ? currentUserName ||
+      currentUser?.displayName ||
       `${currentUser?.email?.split('@')[0] || t('common.unknownUser')}`
     : targetUser?.createdBy?.trim() || t('common.emDash');
   const createdByPicture = isNewAccount
