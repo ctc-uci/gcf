@@ -1,3 +1,5 @@
+import { useCallback, useRef } from 'react';
+
 import {
   Box,
   Button,
@@ -28,6 +30,7 @@ import { StatusTag } from './StatusTag';
 export function ExpandableProgramRow({ p, onEdit }) {
   const { t } = useTranslation();
   const { isOpen, onToggle } = useDisclosure();
+  const expandedContentRef = useRef(null);
   const languageCodes = Array.isArray(p.languages) ? p.languages : [];
 
   const languageLabel = languageCodes.length
@@ -36,6 +39,63 @@ export function ExpandableProgramRow({ p, onEdit }) {
         .join(', ')
     : '';
   const flagCode = isoCodeToFlagIconCode(p.isoCode);
+
+  const handleAnimationComplete = useCallback(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const expandedNode = expandedContentRef.current;
+    if (!expandedNode) {
+      return;
+    }
+
+    const getScrollContainer = (node) => {
+      let current = node?.parentElement ?? null;
+
+      while (current) {
+        const style = window.getComputedStyle(current);
+        const overflowY = style.overflowY;
+        const canScrollY = overflowY === 'auto' || overflowY === 'scroll';
+        if (canScrollY && current.scrollHeight > current.clientHeight) {
+          return current;
+        }
+        current = current.parentElement;
+      }
+
+      return null;
+    };
+
+    const scrollContainer = getScrollContainer(expandedNode);
+    const bottomGap = 24;
+
+    if (scrollContainer) {
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const rowRect = expandedNode.getBoundingClientRect();
+      const overflowBottom =
+        rowRect.bottom - (containerRect.bottom - bottomGap);
+
+      if (overflowBottom > 0) {
+        scrollContainer.scrollBy({
+          top: overflowBottom,
+          behavior: 'smooth',
+        });
+      }
+
+      return;
+    }
+
+    const rect = expandedNode.getBoundingClientRect();
+    const viewportBottom = window.innerHeight;
+    const overflowBottom = rect.bottom - (viewportBottom - bottomGap);
+
+    if (overflowBottom > 0) {
+      window.scrollBy({
+        top: overflowBottom,
+        behavior: 'smooth',
+      });
+    }
+  }, [isOpen]);
 
   return (
     <Tbody
@@ -155,8 +215,12 @@ export function ExpandableProgramRow({ p, onEdit }) {
           borderColor="gray.200"
           p={isOpen ? undefined : 0}
         >
-          <Collapse in={isOpen}>
+          <Collapse
+            in={isOpen}
+            onAnimationComplete={handleAnimationComplete}
+          >
             <HStack
+              ref={expandedContentRef}
               align="start"
               py={4}
             >
