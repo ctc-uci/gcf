@@ -544,6 +544,7 @@ export const AccountFormDrawer = ({
               <Button
                 variant="outline"
                 onClick={onCancel}
+                isDisabled={isLoading}
               >
                 {t('common.cancel')}
               </Button>

@@ -36,6 +36,7 @@ export const formStateToAuditSnapshot = (fd, meta = {}) => ({
   ...(fd.role === 'Program Director'
     ? { bio: String(fd.bio ?? '').trim() || null }
     : {}),
+  ...(meta.picture !== undefined ? { picture: meta.picture } : {}),
   ...(meta.currentUserId !== undefined && meta.currentUserId !== null
     ? { currentUserId: meta.currentUserId }
     : {}),

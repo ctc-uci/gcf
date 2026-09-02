@@ -29,11 +29,14 @@ export const useProfile = () => {
   const [roleSpecificData, setRoleSpecificData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [passwordEdited, setPasswordEdited] = useState(false);
   const [newPassword, setNewPassword] = useState('');
 
   const profileEditBaselineRef = useRef(null);
+  const editSessionRef = useRef(0);
+  const isSavingRef = useRef(false);
   const [pendingPictureKey, setPendingPictureKey] = useState(null);
   const [pendingPicturePreviewUrl, setPendingPicturePreviewUrl] =
     useState(null);
@@ -187,64 +190,54 @@ export const useProfile = () => {
 
     const key = uploadedFiles[0].s3_key;
 
+    if (isSavingRef.current) {
+      backend.delete(`/images/${encodeURIComponent(key)}`).catch((err) => {
+        console.error(
+          'Error deleting profile picture uploaded during save:',
+          err
+        );
+      });
+      return;
+    }
+
+    const sessionId = editSessionRef.current;
+    const previousStagedKey =
+      pendingPictureKey && pendingPictureKey !== (gcfUser?.pictureKey || null)
+        ? pendingPictureKey
+        : null;
+
     try {
       const urlResponse = await backend.get(
         `/images/url/${encodeURIComponent(key)}`
       );
 
-      if (role === 'Program Director') {
-        setPendingPictureKey(key);
-        setPendingPicturePreviewUrl(urlResponse.data.url);
+      if (sessionId !== editSessionRef.current) {
+        backend.delete(`/images/${encodeURIComponent(key)}`).catch((err) => {
+          console.error('Error deleting stale profile picture upload:', err);
+        });
         return;
       }
 
-      await backend.post('/images/profile-picture', {
-        key: key,
-        userId: currentUser.uid,
-      });
+      setPendingPictureKey(key);
+      setPendingPicturePreviewUrl(urlResponse.data.url);
 
-      const prevPictureKey = gcfUser?.pictureKey || null;
-      const nextPictureKey = key;
-
-      if (prevPictureKey !== nextPictureKey) {
-        try {
-          await backend.post('/accountChange', {
-            user_id: currentUser.uid,
-            author_id: currentUser.uid,
-            change_type: 'Update',
-            old_values: {
-              first_name: gcfUser?.firstName || '',
-              last_name: gcfUser?.lastName || '',
-              email: currentUser?.email || '',
-              picture: prevPictureKey,
-              bio: '',
-            },
-            new_values: {
-              first_name: gcfUser?.firstName || '',
-              last_name: gcfUser?.lastName || '',
-              email: currentUser?.email || '',
-              picture: nextPictureKey,
-              bio: '',
-            },
-            resolved: false,
-            last_modified: new Date().toISOString(),
+      if (previousStagedKey && previousStagedKey !== key) {
+        backend
+          .delete(`/images/${encodeURIComponent(previousStagedKey)}`)
+          .catch((err) => {
+            console.error(
+              'Error deleting replaced profile picture upload:',
+              err
+            );
           });
-        } catch (changeErr) {
-          console.error('Error logging account change:', changeErr);
-        }
       }
-
-      setGcfUser((prev) => ({
-        ...prev,
-        pictureKey: nextPictureKey,
-        picture: urlResponse.data.url,
-      }));
     } catch (err) {
       console.error('Error saving profile picture:', err);
     }
   };
 
   const handleEdit = () => {
+    editSessionRef.current += 1;
     const prefLang =
       gcfUser.preferredLanguage &&
       isAppLocale(String(gcfUser.preferredLanguage))
@@ -270,6 +263,20 @@ export const useProfile = () => {
   };
 
   const handleCancel = () => {
+    editSessionRef.current += 1;
+    if (
+      pendingPictureKey &&
+      pendingPictureKey !== (gcfUser?.pictureKey || null)
+    ) {
+      backend
+        .delete(`/images/${encodeURIComponent(pendingPictureKey)}`)
+        .catch((err) => {
+          console.error(
+            'Error deleting discarded profile picture upload:',
+            err
+          );
+        });
+    }
     setIsEditing(false);
     setShowPassword(false);
     setNewPassword('');
@@ -280,6 +287,9 @@ export const useProfile = () => {
   };
 
   const saveProfileEdits = async () => {
+    editSessionRef.current += 1;
+    isSavingRef.current = true;
+    setIsSaving(true);
     try {
       if (role === 'Program Director') {
         const prefLang =
@@ -408,18 +418,22 @@ export const useProfile = () => {
         return;
       }
 
+      const prevPictureKey = gcfUser?.pictureKey || null;
+      const nextPictureKey = pendingPictureKey ?? prevPictureKey;
+      const pictureChanged = nextPictureKey !== prevPictureKey;
+
       const oldValues = {
         first_name: gcfUser?.firstName || '',
         last_name: gcfUser?.lastName || '',
         email: currentUser?.email || '',
-        picture: gcfUser?.pictureKey || null,
+        picture: prevPictureKey,
         bio: '',
       };
       const newValues = {
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: currentUser?.email || '',
-        picture: gcfUser?.pictureKey || null,
+        picture: nextPictureKey,
         bio: '',
       };
 
@@ -427,6 +441,13 @@ export const useProfile = () => {
         first_name: formData.firstName,
         last_name: formData.lastName,
       });
+
+      if (pictureChanged) {
+        await backend.post('/images/profile-picture', {
+          key: nextPictureKey,
+          userId: currentUser.uid,
+        });
+      }
 
       if (JSON.stringify(oldValues) !== JSON.stringify(newValues)) {
         try {
@@ -454,7 +475,12 @@ export const useProfile = () => {
         preferredLanguage: formData.language,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        ...(pictureChanged
+          ? { pictureKey: nextPictureKey, picture: pendingPicturePreviewUrl }
+          : {}),
       }));
+      setPendingPictureKey(null);
+      setPendingPicturePreviewUrl(null);
       window.dispatchEvent(new Event('profile-updated'));
 
       const now = new Date();
@@ -489,6 +515,9 @@ export const useProfile = () => {
         variant: 'subtle',
         position: 'bottom-right',
       });
+    } finally {
+      isSavingRef.current = false;
+      setIsSaving(false);
     }
   };
 
@@ -532,12 +561,11 @@ export const useProfile = () => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
-  const profilePicture =
-    pendingPicturePreviewUrl && role === 'Program Director'
-      ? pendingPicturePreviewUrl
-      : gcfUser?.picture && gcfUser.picture.trim() !== ''
-        ? gcfUser.picture
-        : DEFAULT_PROFILE_IMAGE;
+  const profilePicture = pendingPicturePreviewUrl
+    ? pendingPicturePreviewUrl
+    : gcfUser?.picture && gcfUser.picture.trim() !== ''
+      ? gcfUser.picture
+      : DEFAULT_PROFILE_IMAGE;
 
   const pdPending = role === 'Program Director' && !!pendingAccountChange;
   const ov = pendingAccountChange?.oldValues || {};
@@ -573,6 +601,7 @@ export const useProfile = () => {
     role,
     roleSpecificData,
     isEditing,
+    isSaving,
     formData,
     showPassword,
     setShowPassword,
