@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react';
 import {
   Box,
   Button,
-  Link as ChakraLink,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -161,20 +160,6 @@ export const CreatePassword = () => {
             <MdOutlineSubdirectoryArrowRight style={{ marginRight: '8px' }} />{' '}
             {t('common.submit')}
           </Button>
-
-          <Box
-            textAlign="right"
-            mt={2}
-          >
-            <ChakraLink
-              color="blue.600"
-              textDecoration="underline"
-              fontSize="sm"
-              onClick={() => navigate('/login?mode=forgotPassword')}
-            >
-              {t('createPassword.forgotLink')}
-            </ChakraLink>
-          </Box>
         </Stack>
       </form>
     </Box>

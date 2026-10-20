@@ -75,11 +75,6 @@ export const Login = () => {
     mode: 'onBlur',
   });
 
-  // Support deep links like /login?mode=forgotPassword (used by CreatePassword)
-  useEffect(() => {
-    if (mode === 'forgotPassword') setIsForgot(true);
-  }, [mode]);
-
   // Welcome text cycling animation
   useEffect(() => {
     if (welcomeTexts.length === 0) return;
