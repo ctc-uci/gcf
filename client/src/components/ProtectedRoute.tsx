@@ -1,6 +1,6 @@
 import { useAuthContext } from '@/contexts/hooks/useAuthContext';
 import { useRoleContext } from '@/contexts/hooks/useRoleContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 interface ProtectedRouteProps {
   element: JSX.Element;
@@ -14,6 +14,21 @@ export const ProtectedRoute = ({
 }: ProtectedRouteProps) => {
   const { currentUser } = useAuthContext();
   const { role } = useRoleContext();
+
+  const location = useLocation();
+
+  // Firebase email action links (e.g. password reset) may land on any path,
+  // such as "/?mode=resetPassword&oobCode=...". Forward them to the login page
+  // with the query string intact instead of dropping it in a redirect.
+  const params = new URLSearchParams(location.search);
+  if (params.get('mode') === 'resetPassword' && params.get('oobCode')) {
+    return (
+      <Navigate
+        to={{ pathname: '/login', search: location.search }}
+        replace
+      />
+    );
+  }
 
   const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
   const isValidRole = getIsValidRole(roles, role);
