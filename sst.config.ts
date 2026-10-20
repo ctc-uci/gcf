@@ -87,6 +87,14 @@ export default $config({
     const site = new sst.aws.StaticSite('Client', {
       path: 'client',
       build: { command: 'yarn build', output: 'dist' },
+      // Custom domain: DNS is hosted externally (GoDaddy), so SST can't manage
+      // records or validate the cert. The ACM cert (us-east-1) was validated
+      // manually via a CNAME on GoDaddy.
+      domain: {
+        name: 'app.globalcreationfoundation.org',
+        dns: false,
+        cert: 'arn:aws:acm:us-east-1:223133988692:certificate/b7cb5fd5-39ea-4155-84a5-351db5ffc26e',
+      },
       environment: {
         VITE_BACKEND_HOSTNAME: api.url,
         VITE_FIREBASE_APIKEY: firebaseApiKey.value,

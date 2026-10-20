@@ -75,6 +75,11 @@ export const Login = () => {
     mode: 'onBlur',
   });
 
+  // Support deep links like /login?mode=forgotPassword (used by CreatePassword)
+  useEffect(() => {
+    if (mode === 'forgotPassword') setIsForgot(true);
+  }, [mode]);
+
   // Welcome text cycling animation
   useEffect(() => {
     if (welcomeTexts.length === 0) return;
@@ -167,8 +172,8 @@ export const Login = () => {
     <Grid
       position="relative"
       templateColumns="repeat(2, 1fr)"
-      h="100vh"
-      overflow="hidden"
+      minH="100dvh"
+      overflow="auto"
     >
       <Box
         position="absolute"

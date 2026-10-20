@@ -31,10 +31,18 @@ const CLIENT_HOSTNAME =
     ? `${process.env.DEV_CLIENT_HOSTNAME}:${process.env.DEV_CLIENT_PORT}`
     : process.env.PROD_CLIENT_HOSTNAME;
 
+// Allow several origins via a comma-separated list, e.g.
+// "https://app.example.org,https://dxxxx.cloudfront.net". A single value
+// (or "*") behaves exactly as before.
+const ALLOWED_ORIGINS = (CLIENT_HOSTNAME ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 export const app = express();
 app.use(
   cors({
-    origin: CLIENT_HOSTNAME,
+    origin: ALLOWED_ORIGINS.length > 1 ? ALLOWED_ORIGINS : CLIENT_HOSTNAME,
     allowedHeaders: ['Authorization', 'Content-Type'],
   })
 );

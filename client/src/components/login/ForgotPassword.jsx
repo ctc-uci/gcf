@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import {
   Box,
@@ -18,8 +18,6 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { BackendContext } from '../../contexts/BackendContext';
-
 export const ForgotPassword = ({ setIsForgot }) => {
   const { t } = useTranslation();
   const forgotSchema = useMemo(
@@ -29,7 +27,6 @@ export const ForgotPassword = ({ setIsForgot }) => {
       }),
     [t]
   );
-  const { backend } = useContext(BackendContext);
   const [errorMessage, setErrorMessage] = useState('');
   const auth = getAuth();
   const toast = useToast();
@@ -44,26 +41,43 @@ export const ForgotPassword = ({ setIsForgot }) => {
     defaultValues: { email: '' },
   });
 
-  const verifyEmail = async (email) => {
+  const showSentToast = () =>
+    toast({
+      title: t('forgotPassword.emailSentTitle'),
+      description: t('forgotPassword.emailSentDesc'),
+      status: 'success',
+      duration: 5000,
+      isClosable: true,
+      position: 'bottom-right',
+    });
+
+  // The user is logged out here, so we can't call the (token-protected)
+  // backend. Firebase sends the reset email directly. We deliberately show the
+  // same success message whether or not the account exists so this page can't
+  // be used to discover which emails are registered.
+  const sendResetEmail = async (email) => {
     setErrorMessage('');
     try {
-      await backend.post('/gcf-users/verify-email', { email });
       await sendPasswordResetEmail(auth, email);
-      toast({
-        title: t('forgotPassword.emailSentTitle'),
-        description: t('forgotPassword.emailSentDesc'),
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-        position: 'bottom-right',
-      });
-
+      showSentToast();
       setIsForgot(false);
-    } catch {
-      setErrorMessage(t('forgotPassword.invalidEmail'));
+    } catch (err) {
+      const code = err?.code;
+
+      if (code === 'auth/user-not-found') {
+        showSentToast();
+        setIsForgot(false);
+        return;
+      }
+
+      if (code === 'auth/invalid-email') {
+        setErrorMessage(t('forgotPassword.invalidEmail'));
+        return;
+      }
+
       toast({
-        title: t('forgotPassword.emailNotFoundTitle'),
-        description: t('forgotPassword.emailNotFoundDesc'),
+        title: t('signup.errorTitle'),
+        description: err?.message,
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -73,7 +87,7 @@ export const ForgotPassword = ({ setIsForgot }) => {
   };
 
   const onSubmit = ({ email }) => {
-    verifyEmail(email);
+    sendResetEmail(email);
   };
 
   return (
