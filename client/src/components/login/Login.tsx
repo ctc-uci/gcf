@@ -13,6 +13,8 @@ import {
   IconButton,
   Image,
   Input,
+  InputGroup,
+  InputRightElement,
   Spinner,
   Stack,
   useToast,
@@ -26,6 +28,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { FaArrowLeft } from 'react-icons/fa6';
+import { LuEye, LuEyeClosed } from 'react-icons/lu';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
@@ -56,6 +59,7 @@ export const Login = () => {
     [t]
   );
   const [isForgot, setIsForgot] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
   const [searchParams] = useSearchParams();
@@ -318,17 +322,35 @@ export const Login = () => {
                     <FormLabel fontWeight="bold">
                       {t('common.password')}
                     </FormLabel>
-                    <Input
-                      placeholder={t('login.passwordPlaceholder')}
-                      type="password"
-                      size="lg"
-                      {...register('password')}
-                      name="password"
-                      isRequired
-                      autoComplete="current-password"
-                      borderRadius="md"
-                      bg="gray.50"
-                    />
+                    <InputGroup>
+                      <Input
+                        placeholder={t('login.passwordPlaceholder')}
+                        type={isPasswordVisible ? 'text' : 'password'}
+                        size="lg"
+                        {...register('password')}
+                        name="password"
+                        isRequired
+                        autoComplete="current-password"
+                        borderRadius="md"
+                        bg="gray.50"
+                        pr="3rem"
+                      />
+                      <InputRightElement h="100%">
+                        <IconButton
+                          type="button"
+                          aria-label={
+                            isPasswordVisible
+                              ? 'Hide password'
+                              : 'Show password'
+                          }
+                          icon={isPasswordVisible ? <LuEye /> : <LuEyeClosed />}
+                          variant="ghost"
+                          onClick={() =>
+                            setIsPasswordVisible((visible) => !visible)
+                          }
+                        />
+                      </InputRightElement>
+                    </InputGroup>
                     <FormErrorMessage>
                       {errors.password?.message?.toString()}
                     </FormErrorMessage>
